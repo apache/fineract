@@ -19,7 +19,6 @@
 package org.apache.fineract.batch.command.internal;
 
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -29,7 +28,7 @@ import org.springframework.stereotype.Component;
  * Provides a default CommandStrategy by implementing
  * {@link org.apache.fineract.batch.command.CommandStrategy} in case there is no
  * appropriate command strategy with requested 'method' and 'resoureUrl'.
- * 
+ *
  * @author Rishabh Shukla
  */
 @Component

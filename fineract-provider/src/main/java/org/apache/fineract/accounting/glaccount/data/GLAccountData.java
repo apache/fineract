@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.accounting.glaccount.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
@@ -29,11 +29,11 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable object representing a General Ledger Account
- * 
+ *
  * Note: no getter/setters required as google-gson will produce json from fields
  * of object.
  */
-public class GLAccountData {
+public class GLAccountData implements Serializable {
 
     private final Long id;
     private final String name;

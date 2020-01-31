@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
+import com.google.gson.JsonElement;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -27,15 +28,13 @@ import org.apache.fineract.portfolio.shareaccounts.serialization.ShareAccountDat
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.JsonElement;
-
 @Service(value = "SHAREACCOUNT_COMMANDSERVICE")
 public class ShareAccountCommandsServiceImpl implements AccountsCommandsService {
 
     private final FromJsonHelper fromApiJsonHelper;
-    
+
     private final ShareAccountDataSerializer shareAccountDataSerializer ;
-    
+
     @Autowired
     public ShareAccountCommandsServiceImpl(final FromJsonHelper fromApiJsonHelper,
             final ShareAccountDataSerializer shareAccountDataSerializer) {
@@ -59,12 +58,12 @@ public class ShareAccountCommandsServiceImpl implements AccountsCommandsService 
         }else if(ShareAccountApiConstants.REJECT_ADDITIONSHARES_COMMAND.equals(command)) {
             return rejectAdditionalShares(accountId, jsonCommand) ;
         }
-        
+
         return CommandProcessingResult.empty();
     }
 
     public Object approveShareAccount(Long accountId, JsonCommand jsonCommand) {
-    	return null ;
+        return null ;
     }
 
     public Object rejectShareAccount(Long accountId, JsonCommand jsonCommand) {

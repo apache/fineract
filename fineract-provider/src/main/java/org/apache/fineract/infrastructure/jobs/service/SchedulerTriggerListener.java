@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import java.util.Random;
-
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
@@ -37,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class SchedulerTriggerListener implements TriggerListener {
 
     private final static Logger logger = LoggerFactory.getLogger(SchedulerTriggerListener.class);
-    
+
     private final String name = "Global trigger Listner";
 
     private final SchedularWritePlatformService schedularService;

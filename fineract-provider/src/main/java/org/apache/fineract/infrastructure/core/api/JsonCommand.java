@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -25,7 +28,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -38,13 +40,9 @@ import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 /**
  * Immutable representation of a command.
- * 
+ *
  * Wraps the provided JSON with convenience functions for extracting parameter
  * values and checking for changes against an existing value.
  */
@@ -121,16 +119,16 @@ public final class JsonCommand {
         this.creditBureauId=creditBureauId;
         this.organisationCreditBureauId=organisationCreditBureauId;
     }
-    
+
     public static JsonCommand fromJsonElement(final Long resourceId, final JsonElement parsedCommand) {
         return new JsonCommand(resourceId, parsedCommand);
     }
-    
+
     public JsonCommand(final Long resourceId, final JsonElement parsedCommand) {
         this.parsedCommand = parsedCommand;
         this.resourceId = resourceId;
         this.commandId = null;
-        this.jsonCommand = null;        
+        this.jsonCommand = null;
         this.fromApiJsonHelper = null;
         this.entityName = null;
         this.subresourceId = null;
@@ -144,11 +142,11 @@ public final class JsonCommand {
         this.creditBureauId=null;
         this.organisationCreditBureauId=null;
     }
-    
+
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }
-    
+
     public Long getCreditBureauId() {
         return this.creditBureauId;
     }
@@ -167,7 +165,7 @@ public final class JsonCommand {
         }
         return null;
     }
-    
+
     public String jsonFragment(final String paramName) {
         String jsonFragment = null;
         if (this.parsedCommand.getAsJsonObject().has(paramName)) {
@@ -232,7 +230,7 @@ public final class JsonCommand {
 
         return differenceExists;
     }
-    
+
     private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
         boolean differenceExists = false;
 
@@ -343,7 +341,7 @@ public final class JsonCommand {
         }
         return isChangeInLocalDateParameterNamed(parameterName, localDate);
     }
-    
+
     public boolean isChangeInTimeParameterNamed(final String parameterName, final Date existingValue,final String timeFormat) {
         LocalDateTime time = null;
         if (existingValue != null) {
@@ -361,7 +359,7 @@ public final class JsonCommand {
         }
         return isChanged;
     }
-    
+
     public boolean isChangeInLocalDateParameterNamed(final String parameterName, final LocalDate existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {

@@ -21,7 +21,6 @@ package org.apache.fineract.organisation.provisioning.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
@@ -78,7 +77,7 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
         String createdBy = null;
         return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
     }
-    
+
     public static ProvisioningCriteriaData toTemplate(final ProvisioningCriteriaData data, final Collection<ProvisioningCriteriaDefinitionData> definitions,
             final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts) {
         return new ProvisioningCriteriaData(data, loanProducts, glAccounts);

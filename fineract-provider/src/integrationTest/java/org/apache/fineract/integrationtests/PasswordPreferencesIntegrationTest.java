@@ -20,20 +20,18 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.PasswordPreferencesHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.PasswordPreferencesHelper;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.Before;
+import org.junit.Test;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class PasswordPreferencesIntegrationTest {
@@ -65,11 +63,11 @@ public class PasswordPreferencesIntegrationTest {
         System.out.println("---------------------------------PASSWORD PREFERENCE VALIDATED SUCCESSFULLY-----------------------------------------");
 
     }
-    
+
     @Test
     public void updateWithInvalidPolicyId() {
         String invalidValidationPolicyId = "2000";
-        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId, 
+        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId,
                 CommonConstants.RESPONSE_ERROR);
         assertEquals("Password Validation Policy with identifier 2000 does not exist", "error.msg.password.validation.policy.id.invalid",
                 error.get(0).get("userMessageGlobalisationCode"));

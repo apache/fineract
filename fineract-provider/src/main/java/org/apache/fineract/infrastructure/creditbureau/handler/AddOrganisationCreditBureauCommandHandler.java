@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "ORGANISATIONCREDITBUREAU", action = "CREATE")
 public class AddOrganisationCreditBureauCommandHandler implements NewCommandSourceHandler {
 
-	private final OrganisationCreditBureauWritePlatflormService writePlatformService;
+    private final OrganisationCreditBureauWritePlatflormService writePlatformService;
 
-	@Autowired
-	public AddOrganisationCreditBureauCommandHandler(final OrganisationCreditBureauWritePlatflormService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public AddOrganisationCreditBureauCommandHandler(final OrganisationCreditBureauWritePlatflormService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand command) {
 
-		return this.writePlatformService.addOrganisationCreditBureau(command.getOrganisationCreditBureauId(), command);
-	}
+        return this.writePlatformService.addOrganisationCreditBureau(command.getOrganisationCreditBureauId(), command);
+    }
 }

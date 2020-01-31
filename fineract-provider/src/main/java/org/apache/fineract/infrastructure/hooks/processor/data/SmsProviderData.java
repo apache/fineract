@@ -25,88 +25,87 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsP
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsProviderTokenIdName;
 
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 
 public class SmsProviderData {
 
-	private String url;
-	private String phoneNo;
-	private String smsProvider;
-	private String smsProviderAccountId;
-	private String smsProviderToken;
-	
-	private String tenantId;
-	private String mifosToken;
-	private String endpoint;
-	
-	public SmsProviderData(final Set<HookConfiguration> config) {
-		
-		for (final HookConfiguration conf : config) {
-			final String fieldName = conf.getFieldName();
-			if (fieldName.equals(payloadURLName)) {
-				this.url = conf.getFieldValue();
-			}
-			if (fieldName.equals(smsProviderName)) {
-				this.smsProvider = conf.getFieldValue();
-			}
-			if (fieldName.equals(smsProviderAccountIdName)) {
-				this.smsProviderAccountId = conf.getFieldValue();
-			}
-			if (fieldName.equals(smsProviderTokenIdName)) {
-				this.smsProviderToken = conf.getFieldValue();
-			}
-			if (fieldName.equals(phoneNumberName)) {
-				this.phoneNo = conf.getFieldValue();
-			}
-		}
-	}
+    private String url;
+    private String phoneNo;
+    private String smsProvider;
+    private String smsProviderAccountId;
+    private String smsProviderToken;
 
-	public String getUrl() {
-		return url;
-	}
-	
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    private String tenantId;
+    private String mifosToken;
+    private String endpoint;
 
-	public String getPhoneNumber() {
-		return phoneNo;
-	}
+    public SmsProviderData(final Set<HookConfiguration> config) {
 
-	public String getSmsProvider() {
-		return smsProvider;
-	}
+        for (final HookConfiguration conf : config) {
+            final String fieldName = conf.getFieldName();
+            if (fieldName.equals(payloadURLName)) {
+                this.url = conf.getFieldValue();
+            }
+            if (fieldName.equals(smsProviderName)) {
+                this.smsProvider = conf.getFieldValue();
+            }
+            if (fieldName.equals(smsProviderAccountIdName)) {
+                this.smsProviderAccountId = conf.getFieldValue();
+            }
+            if (fieldName.equals(smsProviderTokenIdName)) {
+                this.smsProviderToken = conf.getFieldValue();
+            }
+            if (fieldName.equals(phoneNumberName)) {
+                this.phoneNo = conf.getFieldValue();
+            }
+        }
+    }
 
-	public String getSmsProviderAccountId() {
-		return smsProviderAccountId;
-	}
+    public String getUrl() {
+        return url;
+    }
 
-	public String getSmsProviderTokenId() {
-		return smsProviderToken;
-	}
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-	public String getTenantId() {
-		return tenantId;
-	}
+    public String getPhoneNumber() {
+        return phoneNo;
+    }
 
-	public void setTenantId(String tenantId) {
-		this.tenantId = tenantId;
-	}
+    public String getSmsProvider() {
+        return smsProvider;
+    }
 
-	public String getMifosToken() {
-		return mifosToken;
-	}
+    public String getSmsProviderAccountId() {
+        return smsProviderAccountId;
+    }
 
-	public void setMifosToken(String mifosToken) {
-		this.mifosToken = mifosToken;
-	}
+    public String getSmsProviderTokenId() {
+        return smsProviderToken;
+    }
 
-	public String getEndpoint() {
-		return endpoint;
-	}
+    public String getTenantId() {
+        return tenantId;
+    }
 
-	public void setEndpoint(String endpoint) {
-		this.endpoint = endpoint;
-	}
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getMifosToken() {
+        return mifosToken;
+    }
+
+    public void setMifosToken(String mifosToken) {
+        this.mifosToken = mifosToken;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
 }

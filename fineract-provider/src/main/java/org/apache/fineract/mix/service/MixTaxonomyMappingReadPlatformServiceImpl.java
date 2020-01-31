@@ -20,7 +20,6 @@ package org.apache.fineract.mix.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.springframework.beans.factory.annotation.Autowired;

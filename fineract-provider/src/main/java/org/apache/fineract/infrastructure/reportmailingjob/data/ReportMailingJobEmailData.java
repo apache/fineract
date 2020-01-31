@@ -20,15 +20,15 @@ package org.apache.fineract.infrastructure.reportmailingjob.data;
 
 import java.io.File;
 
-/** 
- * Immutable data object representing report mailing job email data. 
+/**
+ * Immutable data object representing report mailing job email data.
  **/
 public class ReportMailingJobEmailData {
     private final String to;
     private final String text;
     private final String subject;
     private final File attachment;
-    
+
     public ReportMailingJobEmailData(final String to, final String text, final String subject, final File attachment) {
         this.to = to;
         this.text = text;

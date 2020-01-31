@@ -45,9 +45,9 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult reActivateClient(Long entityId, JsonCommand command);
 
-	CommandProcessingResult undoRejection(Long entityId, JsonCommand command);
-	
-	CommandProcessingResult undoWithdrawal(Long entityId, JsonCommand command);
+    CommandProcessingResult undoRejection(Long entityId, JsonCommand command);
+
+    CommandProcessingResult undoWithdrawal(Long entityId, JsonCommand command);
 
 
 }

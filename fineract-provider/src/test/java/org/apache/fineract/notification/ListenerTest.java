@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.notification;
 
+import javax.jms.JMSException;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListenerTest {

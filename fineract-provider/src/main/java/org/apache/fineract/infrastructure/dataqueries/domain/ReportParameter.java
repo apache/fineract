@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.dataqueries.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity

@@ -26,12 +26,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -462,19 +461,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     private BigDecimal adjustPrepayInstallmentCharge(Loan loan, final LocalDate onDate) {
         BigDecimal chargeAmount = BigDecimal.ZERO;
-		/*for(LoanCharge loanCharge: loan.charges()){
-        	if(loanCharge.isInstalmentFee() && loanCharge.getCharge().getChargeCalculation()==ChargeCalculationType.FLAT.getValue()){        		
-        		for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
-        			if(onDate.isBefore(installment.getDueDate())){
-        				LoanInstallmentCharge loanInstallmentCharge =  loanCharge.getInstallmentLoanCharge(installment.getInstallmentNumber());
-        				if(loanInstallmentCharge != null){
-        					chargeAmount = chargeAmount.add(loanInstallmentCharge.getAmountOutstanding());
-        				}
-        				
-        				break;
-        			}
-				}
-        	}
+        /*for(LoanCharge loanCharge: loan.charges()){
+            if(loanCharge.isInstalmentFee() && loanCharge.getCharge().getChargeCalculation()==ChargeCalculationType.FLAT.getValue()){
+                for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
+                    if(onDate.isBefore(installment.getDueDate())){
+                        LoanInstallmentCharge loanInstallmentCharge =  loanCharge.getInstallmentLoanCharge(installment.getInstallmentNumber());
+                        if(loanInstallmentCharge != null){
+                            chargeAmount = chargeAmount.add(loanInstallmentCharge.getAmountOutstanding());
+                        }
+
+                        break;
+                    }
+                }
+            }
         }*/
         return chargeAmount;
     }
@@ -2258,14 +2257,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
 
-	public String retrieveAccountNumberByAccountId(Long accountId) {
-		try {
-			final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
-			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
-		} catch (final EmptyResultDataAccessException e) {
-			throw new LoanNotFoundException(accountId);
-		}
-	}
+    public String retrieveAccountNumberByAccountId(Long accountId) {
+        try {
+            final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new LoanNotFoundException(accountId);
+        }
+    }
 
 
     @Override

@@ -22,10 +22,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataServiceImpl;
-import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
@@ -34,7 +32,6 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAcce
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
-import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityAccessConfigurationException;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityMappingConfigurationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -55,7 +52,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     @Autowired
     public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-    		final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
+            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
@@ -63,7 +60,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.fineract.infrastructure.entityaccess.service.
      * FineractEntityAccessReadService#getSQLQueryWithListOfIDsForEntityAccess
      * (Long,
@@ -72,37 +69,37 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
      * FineractEntityAccessType,
      * org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType,
      * boolean)
-     * 
+     *
      * This method returns the list of entity IDs as a comma separated list Or
      * null if there is no entity restrictions or if there
      */
     @Override
     public String getSQLQueryInClause_WithListOfIDsForEntityAccess( FineractEntityType firstEntityType,
-    		           final Long relId, final Long fromEntityId, boolean includeAllOffices) {
-    		        Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId, 
-    		        		includeAllOffices);
+                       final Long relId, final Long fromEntityId, boolean includeAllOffices) {
+                    Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId,
+                            includeAllOffices);
         String returnIdListStr = null;
         StringBuffer accessListCSVStrBuf = null;
         if ((accesslist != null) && (accesslist.size() > 0)) {
-        	for(FineractEntityToEntityMappingData accessData: accesslist){
-        		            	if (accessData == null) {  
-        		                	throw new FineractEntityMappingConfigurationException();
-        		                 }
-        		              
-        		            	if(accessListCSVStrBuf == null){
-        		            		accessListCSVStrBuf = new StringBuffer() ;
-        		            	}else{
-        		            		accessListCSVStrBuf.append(",");
-        		            	}
-        		            	accessListCSVStrBuf.append(accessData.getToId());
-        		            	if(accessData.getToId() == 0){
-        		            		accessListCSVStrBuf =null; 
-        		            		break;
-        		            	}
+            for(FineractEntityToEntityMappingData accessData: accesslist){
+                                if (accessData == null) {
+                                    throw new FineractEntityMappingConfigurationException();
+                                 }
+
+                                if(accessListCSVStrBuf == null){
+                                    accessListCSVStrBuf = new StringBuffer() ;
+                                }else{
+                                    accessListCSVStrBuf.append(",");
+                                }
+                                accessListCSVStrBuf.append(accessData.getToId());
+                                if(accessData.getToId() == 0){
+                                    accessListCSVStrBuf =null;
+                                    break;
+                                }
                 }
 
         } else {
-           
+
             accessListCSVStrBuf = new StringBuffer();
             accessListCSVStrBuf.append("false"); // Append false so that no rows
                                                  // will be returned
@@ -116,7 +113,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     @Override
     public Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType,
-    		    		final Long relId, final Long fromEntityId,boolean includeAllSubOffices) {
+                        final Long relId, final Long fromEntityId,boolean includeAllSubOffices) {
         final AppUser currentUser = this.context.authenticatedUser();
 
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -127,7 +124,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             hierarchySearchString = hierarchy + "%";
         }
         String sql = getSQLForRetriveEntityAccessFor();
-        
+
         Collection<FineractEntityToEntityMappingData> entityAccessData = null;
         GetOneEntityMapper mapper = new GetOneEntityMapper();
 
@@ -135,18 +132,18 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             sql += " where firstentity.hierarchy like ? order by firstEntity.hierarchy";
             entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { fromEntityId, fromEntityId, hierarchySearchString });
         } else {
-        	entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { relId, fromEntityId});
+            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { relId, fromEntityId});
         }
 
         return entityAccessData;
     }
 
     private String getSQLForRetriveEntityAccessFor() {
-    	StringBuffer str = new StringBuffer("select  eem.rel_id as relId,eem.from_id as fromId, ");
-    	        str.append("eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate ");
-    	        str.append("from  m_entity_to_entity_mapping eem ");
-    	        str.append("where eem.rel_id = ? ");
-    	        str.append("and eem.from_id = ? ");
+        StringBuffer str = new StringBuffer("select  eem.rel_id as relId,eem.from_id as fromId, ");
+                str.append("eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate ");
+                str.append("from  m_entity_to_entity_mapping eem ");
+                str.append("where eem.rel_id = ? ");
+                str.append("and eem.from_id = ? ");
         logger.debug(str.toString());
         return str.toString();
     }
@@ -196,7 +193,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
         FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-        						.findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+                                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
         Long relId = fineractEntityRelation.getId();
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
     }
@@ -206,7 +203,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
         FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-        		      .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS.toStr());
+                      .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS.toStr());
         Long relId = fineractEntityRelation.getId();
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
@@ -217,7 +214,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
         FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-        						.findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.toStr());
+                                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.toStr());
         Long relId = fineractEntityRelation.getId();
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);

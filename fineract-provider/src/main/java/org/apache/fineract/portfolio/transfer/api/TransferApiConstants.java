@@ -20,24 +20,24 @@ package org.apache.fineract.portfolio.transfer.api;
 
 public class TransferApiConstants {
 
-	// general
-	public static final String localeParamName = "locale";
-	public static final String dateFormatParamName = "dateFormat";
+    // general
+    public static final String localeParamName = "locale";
+    public static final String dateFormatParamName = "dateFormat";
 
-	// request parameters
-	public static final String idParamName = "id";
-	public static final String destinationGroupIdParamName = "destinationGroupId";
-	public static final String clients = "clients";
-	public static final String inheritDestinationGroupLoanOfficer = "inheritDestinationGroupLoanOfficer";
-	public static final String newStaffIdParamName = "staffId";
-	public static final String transferActiveLoans = "transferActiveLoans";
-	public static final String destinationOfficeIdParamName = "destinationOfficeId";
-	public static final String note = "note";
-	public static final String transferDate = "transferDate";
-	public static final String transferClientLoanException = "error.msg.caanot.transfer.client.as.loan.transaction.present.on.or.after.transfer.date";
-	public static final String transferClientLoanExceptionMessage = "error msg caanot transfer client as loan transaction present on or after transfer date";
-	public static final String transferClientSavingsException = "error.msg.caanot.transfer.client.as.savings.transaction.present.on.or.after.transfer.date";
-	public static final String transferClientSavingsExceptionMessage = "error msg caanot transfer client as savings transaction present on or after transfer date";
-	public static final String transferClientToSameOfficeException = "error.msg.cannot.transfer.clinet.as.selected.office.and.current.office.are.same";
-	public static final String transferClientToSameOfficeExceptionMessage = "error.msg.cannot.transfer.clinet.as.selected.office.and.current.office.are.same";
+    // request parameters
+    public static final String idParamName = "id";
+    public static final String destinationGroupIdParamName = "destinationGroupId";
+    public static final String clients = "clients";
+    public static final String inheritDestinationGroupLoanOfficer = "inheritDestinationGroupLoanOfficer";
+    public static final String newStaffIdParamName = "staffId";
+    public static final String transferActiveLoans = "transferActiveLoans";
+    public static final String destinationOfficeIdParamName = "destinationOfficeId";
+    public static final String note = "note";
+    public static final String transferDate = "transferDate";
+    public static final String transferClientLoanException = "error.msg.caanot.transfer.client.as.loan.transaction.present.on.or.after.transfer.date";
+    public static final String transferClientLoanExceptionMessage = "error msg caanot transfer client as loan transaction present on or after transfer date";
+    public static final String transferClientSavingsException = "error.msg.caanot.transfer.client.as.savings.transaction.present.on.or.after.transfer.date";
+    public static final String transferClientSavingsExceptionMessage = "error msg caanot transfer client as savings transaction present on or after transfer date";
+    public static final String transferClientToSameOfficeException = "error.msg.cannot.transfer.clinet.as.selected.office.and.current.office.are.same";
+    public static final String transferClientToSameOfficeExceptionMessage = "error.msg.cannot.transfer.clinet.as.selected.office.and.current.office.are.same";
 }

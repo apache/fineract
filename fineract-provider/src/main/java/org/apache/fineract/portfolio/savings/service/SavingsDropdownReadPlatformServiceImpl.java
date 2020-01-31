@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.savings.service;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;

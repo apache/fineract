@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.tax.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-
 import org.joda.time.LocalDate;
 
-public class TaxComponentHistoryData {
+public class TaxComponentHistoryData implements Serializable {
 
     @SuppressWarnings("unused")
     private final BigDecimal percentage;

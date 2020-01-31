@@ -20,9 +20,8 @@ package org.apache.fineract.template.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.template.domain.TemplateMapper;
-
 import java.util.List;
+import org.apache.fineract.template.domain.TemplateMapper;
 
 /**
  * Created by sanyam on 21/8/17.

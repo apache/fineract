@@ -39,7 +39,6 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -58,18 +57,22 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.namePara
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
+import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -85,11 +88,6 @@ import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public class DepositProductDataValidator {
@@ -335,7 +333,7 @@ public class DepositProductDataValidator {
             validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
             validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element);
         }
-        
+
         validateTaxWithHoldingParams(baseDataValidator, element, true);
     }
 
@@ -783,7 +781,7 @@ public class DepositProductDataValidator {
             }
         }
     }
-    
+
     private void validateTaxWithHoldingParams(final DataValidatorBuilder baseDataValidator, final JsonElement element,
             final boolean isCreate) {
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {

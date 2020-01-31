@@ -20,6 +20,13 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.gson.JsonObject;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -30,7 +37,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -52,14 +58,6 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.gson.JsonObject;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 /**
  * Client Loan Integration Test for checking Loan Application Repayments
@@ -5080,24 +5078,25 @@ public class ClientLoanIntegrationTest {
     }
 
     public Integer getDayOfWeek(Calendar date) {
-        Integer dayOfWeek = null;
+        int dayOfWeek = 0;
         if (null != date) {
             dayOfWeek = date.get(Calendar.DAY_OF_WEEK) - 1;
-            if (dayOfWeek.compareTo(0) == 0) {
+            if (dayOfWeek == 0) {
                 dayOfWeek = 7;
             }
         }
-        return dayOfWeek;
+        return Integer.valueOf(dayOfWeek);
     }
 
     public Integer getDayOfMonth(Calendar date) {
-        Integer dayOfMonth = null;
+        int dayOfMonth = 0;
         if (null != date) {
             dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-            if (dayOfMonth.compareTo(28) > 0) {
+            if (dayOfMonth > 28) {
                 dayOfMonth = 28;
             }
         }
-        return dayOfMonth;
+
+        return Integer.valueOf(dayOfMonth);
     }
 }

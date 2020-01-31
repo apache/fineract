@@ -18,21 +18,27 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
-import org.apache.fineract.infrastructure.campaigns.email.data.ScheduledEmailEnumerations;
-import org.apache.fineract.infrastructure.campaigns.email.exception.EmailBusinessRuleNotFound;
-import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignTimeLine;
+import org.apache.fineract.infrastructure.campaigns.email.data.ScheduledEmailEnumerations;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignStatus;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignStatusEnumerations;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignType;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailBusinessRuleNotFound;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -40,10 +46,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 
 @Service
 public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPlatformService {
@@ -130,8 +132,11 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final boolean coreReport = rs.getBoolean("coreReport");
             final boolean useReport = rs.getBoolean("useReport");
 
-            final ReportData stretchyReport = new ReportData(reportId, reportName, reportType, reportSubType, reportCategory,
+            /*
+            final ReportData stretchyReport = new ReportData(reportId, reportName, reportType, reportSubType,
+                    reportCategory,
                     reportDescription, reportSql, coreReport, useReport, null);
+             */
 
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
             final EnumOptionData status = EmailCampaignStatusEnumerations.status(statusId);

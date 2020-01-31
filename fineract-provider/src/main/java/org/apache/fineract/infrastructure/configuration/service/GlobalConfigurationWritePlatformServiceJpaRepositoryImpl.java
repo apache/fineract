@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.configuration.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationDataValidator;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
@@ -67,7 +66,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
             this.globalConfigurationDataValidator.validateForUpdate(command);
 
             final GlobalConfigurationProperty configItemForUpdate = this.repository.findOneWithNotFoundDetection(configId);
-            
+
             final Map<String, Object> changes = configItemForUpdate.update(command);
 
             if (!changes.isEmpty()) {

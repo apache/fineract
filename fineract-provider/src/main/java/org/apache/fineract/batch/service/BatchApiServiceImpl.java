@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.batch.service;
 
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.command.CommandContext;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
@@ -44,15 +43,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.gson.Gson;
-
 /**
  * Implementation for {@link BatchApiService} to iterate through all the
  * incoming requests and obtain the appropriate CommandStrategy from
  * CommandStrategyProvider.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse
  * @see org.apache.fineract.batch.command.CommandStrategyProvider
@@ -67,7 +64,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     /**
      * Constructs a 'BatchApiServiceImpl' with an argument of
      * {@link org.apache.fineract.batch.command.CommandStrategyProvider} type.
-     * 
+     *
      * @param strategyProvider
      * @param resolutionHelper
      * @param transactionTemplate
@@ -84,7 +81,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      * Returns the response list by getting a proper
      * {@link org.apache.fineract.batch.command.CommandStrategy}. execute() method
      * of acquired commandStrategy is then provided with the separate Request.
-     * 
+     *
      * @param requestList
      * @param uriInfo
      * @return List<BatchResponse>
@@ -95,8 +92,8 @@ public class BatchApiServiceImpl implements BatchApiService {
 
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
         if(batchRequestNodes.isEmpty()) {
-        	 final BatchResponse response = new BatchResponse();
-        	 ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
+             final BatchResponse response = new BatchResponse();
+             ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
              response.setStatusCode(500);
              response.setBody(ex.getMessage());
              responseList.add(response) ;
@@ -222,7 +219,7 @@ public class BatchApiServiceImpl implements BatchApiService {
 
             return errResponseList;
         }catch (final NonTransientDataAccessException ex) {
-        	 ErrorInfo e = ErrorHandler.handler(ex);
+             ErrorInfo e = ErrorHandler.handler(ex);
              BatchResponse errResponse = new BatchResponse();
              errResponse.setStatusCode(e.getStatusCode());
 

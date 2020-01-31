@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -141,18 +140,18 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         AppUserData retUser = AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
                 user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, null, selectedUserRoles, linkedStaff,
                 user.getPasswordNeverExpires(), user.isSelfServiceUser());
-        
+
         if(retUser.isSelfServiceUser()){
-        	Set<ClientData> clients = new HashSet<>();
-        	for(AppUserClientMapping clientMap : user.getAppUserClientMappings()){
-        		Client client = clientMap.getClient();
-        		clients.add(ClientData.lookup(client.getId(), client.getDisplayName(), 
-        				client.getOffice().getId(), client.getOffice().getName()));
-        	}
-        	retUser.setClients(clients);
+            Set<ClientData> clients = new HashSet<>();
+            for(AppUserClientMapping clientMap : user.getAppUserClientMappings()){
+                Client client = clientMap.getClient();
+                clients.add(ClientData.lookup(client.getId(), client.getDisplayName(),
+                        client.getOffice().getId(), client.getOffice().getName()));
+            }
+            retUser.setClients(clients);
         }
-        
-        return retUser; 
+
+        return retUser;
     }
 
     private static final class AppUserMapper implements RowMapper<AppUserData> {

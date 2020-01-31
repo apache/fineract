@@ -25,9 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -334,8 +332,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
     private void updateSchheduleWithPaidDetail(Map<Long, List<LoanSchedulePeriodData>> scheduleDate, List<Map<String, Object>> loanSummary) {
         for (Map<String, Object> transactionMap : loanSummary) {
-        	String longValue = transactionMap.get("loanId").toString() ; //From JDBC Template API, we are getting BigInteger but in other call, we are getting Long
-        	Long loanId = Long.parseLong(longValue) ;
+            String longValue = transactionMap.get("loanId").toString() ; //From JDBC Template API, we are getting BigInteger but in other call, we are getting Long
+            Long loanId = Long.parseLong(longValue) ;
             BigDecimal principalAmtPaid = (BigDecimal) transactionMap.get("principalAmtPaid");
             BigDecimal principalAmtWrittenoff = (BigDecimal) transactionMap.get("principalAmtWrittenoff");
             BigDecimal interestAmtPaid = (BigDecimal) transactionMap.get("interestAmtPaid");

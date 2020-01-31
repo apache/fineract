@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -33,7 +32,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -48,7 +46,6 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
-import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,13 +62,13 @@ public class FixedDepositAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-	private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-	private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
-					DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName,
-					DepositsApiConstants.amountParamName, DepositsApiConstants.dateParamName,
-					DepositsApiConstants.paymentDetailDataParamName, DepositsApiConstants.runningBalanceParamName,
-					DepositsApiConstants.reversedParamName));
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
+                    DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName,
+                    DepositsApiConstants.amountParamName, DepositsApiConstants.dateParamName,
+                    DepositsApiConstants.paymentDetailDataParamName, DepositsApiConstants.runningBalanceParamName,
+                    DepositsApiConstants.reversedParamName));
 
     @Autowired
     public FixedDepositAccountTransactionsApiResource(final PlatformSecurityContext context,
@@ -129,8 +126,8 @@ public class FixedDepositAccountTransactionsApiResource {
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-		return this.toApiJsonSerializer.serialize(settings, transactionData,
-				FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData,
+                FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

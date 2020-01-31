@@ -21,7 +21,7 @@ package org.apache.fineract.notification.service;
 import org.apache.fineract.notification.domain.TopicSubscriber;
 
 public interface TopicSubscriberWritePlatformService {
-	
-	Long create(TopicSubscriber topicSubscriber);
+
+    Long create(TopicSubscriber topicSubscriber);
 
 }

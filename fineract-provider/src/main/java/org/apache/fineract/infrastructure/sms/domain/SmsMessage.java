@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.sms.domain;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -29,7 +28,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -84,8 +82,8 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
 
     @Column(name = "delivered_on_date", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date deliveredOnDate; 
-    
+    private Date deliveredOnDate;
+
     @Column(name = "is_notification", nullable = true)
     private boolean isNotification;
 
@@ -188,13 +186,13 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
         this.deliveredOnDate = deliveredOnDate;
     }
 
-	public boolean isNotification() {
-		return this.isNotification;
-	}
+    public boolean isNotification() {
+        return this.isNotification;
+    }
 
-	public void setNotification(boolean isNotification) {
-		this.isNotification = isNotification;
-	}
-    
-    
+    public void setNotification(boolean isNotification) {
+        this.isNotification = isNotification;
+    }
+
+
 }

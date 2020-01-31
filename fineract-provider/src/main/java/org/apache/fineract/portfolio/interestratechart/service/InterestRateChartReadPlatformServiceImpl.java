@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -99,7 +98,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
         sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
         sql.append("END");
-        
+
         return this.jdbcTemplate.query(sql.toString(), this.chartExtractor, new Object[] { productId });
     }
 

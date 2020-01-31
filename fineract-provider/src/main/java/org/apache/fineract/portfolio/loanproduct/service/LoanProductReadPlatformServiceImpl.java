@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -309,7 +308,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final int amortizationTypeId = JdbcSupport.getInteger(rs, "amortizationMethod");
             final EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeId);
             final boolean isEqualAmortization = rs.getBoolean("isEqualAmortization");
-            
+
             final Integer interestRateFrequencyTypeId = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeId);
 
@@ -415,7 +414,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
                         restFrequencyNthDayEnum, restFrequencyWeekDayEnum, restFrequencyOnDay, compoundingFrequencyType,
                         compoundingInterval, compoundingFrequencyNthDayEnum, compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay,
-                        isArrearsBasedOnOriginalSchedule, isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, 
+                        isArrearsBasedOnOriginalSchedule, isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy,
                         allowCompoundingOnEod);
             }
 
@@ -447,7 +446,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal principalThresholdForLastInstallment = rs.getBigDecimal("principalThresholdForLastInstallment");
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = rs.getBoolean("accountMovesOutOfNPAOnlyOnArrearsCompletion");
             final boolean syncExpectedWithDisbursementDate = rs.getBoolean("syncExpectedWithDisbursementDate");
-            
+
             final boolean canUseForTopup = rs.getBoolean("canUseForTopup");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
@@ -621,7 +620,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
     }
-    
+
     @Override
     public LoanProductData retrieveLoanProductFloatingDetails(final Long loanProductId) {
 
@@ -635,14 +634,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             throw new LoanProductNotFoundException(loanProductId);
         }
     }
-    
-    
+
+
     private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
 
         public LoanProductFloatingRateMapper() {}
 
         public String schema() {
-            return "lp.id as id,  lp.name as name," 
+            return "lp.id as id,  lp.name as name,"
                     + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
                     + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
                     + "lfr.interest_rate_differential as interestRateDifferential, "

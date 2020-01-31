@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.charge.serialization;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -43,9 +44,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public final class ChargeDefinitionCommandFromApiJsonDeserializer {
@@ -183,12 +181,12 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType)
                         .isOneOfTheseValues(ChargeTimeType.validShareValues());
             }
-            
+
             if (chargeCalculationType != null) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForShares());
             }
-            
+
             if(chargeTimeType != null && chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
                 if(chargeCalculationType != null) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
@@ -300,13 +298,13 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed("feeInterval", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).integerGreaterThanZero();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
             final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 5);
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("chargePaymentMode", element)) {
             final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
             baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
@@ -361,7 +359,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
             .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
         }
-        
+
         if (chargeTimeType.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                     .isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());

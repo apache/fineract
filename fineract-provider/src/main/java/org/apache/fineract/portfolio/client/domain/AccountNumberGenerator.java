@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
@@ -47,7 +46,7 @@ public class AccountNumberGenerator {
     private final static String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
     private final static String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
     private final static String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName" ;
-    
+
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, client.getId().toString());
@@ -76,12 +75,12 @@ public class AccountNumberGenerator {
     }
 
     public String generate(ShareAccount shareaccount, AccountNumberFormat accountNumberFormat) {
-    	Map<String, String> propertyMap = new HashMap<>();
-    	propertyMap.put(ID, shareaccount.getId().toString());
-    	propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
-    	return generateAccountNumber(propertyMap, accountNumberFormat) ;
+        Map<String, String> propertyMap = new HashMap<>();
+        propertyMap.put(ID, shareaccount.getId().toString());
+        propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
+        return generateAccountNumber(propertyMap, accountNumberFormat) ;
     }
-    
+
     private String generateAccountNumber(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat) {
         String accountNumber = StringUtils.leftPad(propertyMap.get(ID), AccountNumberGenerator.maxLength, '0');
         if (accountNumberFormat != null && accountNumberFormat.getPrefixEnum() != null) {
@@ -119,18 +118,18 @@ public class AccountNumberGenerator {
         }
         return accountNumber;
     }
-    
+
     public String generateGroupAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {
-    	Map<String, String> propertyMap = new HashMap<>();
+        Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, group.getId().toString());
-        propertyMap.put(OFFICE_NAME, group.getOffice().getName());        
+        propertyMap.put(OFFICE_NAME, group.getOffice().getName());
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
-    
+
     public String generateCenterAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {
-    	Map<String, String> propertyMap = new HashMap<>();
+        Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, group.getId().toString());
-        propertyMap.put(OFFICE_NAME, group.getOffice().getName());        
+        propertyMap.put(OFFICE_NAME, group.getOffice().getName());
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 

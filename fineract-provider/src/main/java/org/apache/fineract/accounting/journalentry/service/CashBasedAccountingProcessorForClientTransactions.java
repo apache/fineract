@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -55,7 +54,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
     /**
      * Create a single debit to fund source and multiple credits for the income
      * account mapped with each charge this payment pays off
-     * 
+     *
      * In case the loan transaction is a reversal, all debits are turned into
      * credits and vice versa
      */

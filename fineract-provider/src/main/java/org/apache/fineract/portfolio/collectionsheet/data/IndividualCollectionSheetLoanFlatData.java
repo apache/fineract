@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -133,7 +132,7 @@ public class IndividualCollectionSheetLoanFlatData {
     public IndividualClientData getClientData() {
         return IndividualClientData.instance(this.clientId, this.clientName);
     }
-    
+
     public BigDecimal getFeeDue() {
         return this.feeDue;
     }

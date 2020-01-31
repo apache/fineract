@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.campaigns.sms.domain;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -32,11 +31,11 @@ public interface SmsCampaignRepository extends JpaRepository<SmsCampaign, Long>,
 
     Collection<SmsCampaign> findByCampaignTypeAndTriggerTypeAndStatus(final Integer campaignType, final Integer triggerType,
             final Integer status);
-    
+
     Collection<SmsCampaign> findByTriggerTypeAndStatus(final Integer triggerType, final Integer status);
 
     Collection<SmsCampaign> findByTriggerType(final Integer triggerType) ;
-    
+
     @Query("SELECT campaign FROM SmsCampaign campaign WHERE campaign.paramValue LIKE :reportPattern AND campaign.triggerType=:triggerType AND campaign.status=300")
     List<SmsCampaign> findActiveSmsCampaigns(@Param("reportPattern") final String reportPattern, @Param("triggerType") final Integer triggerType) ;
 }

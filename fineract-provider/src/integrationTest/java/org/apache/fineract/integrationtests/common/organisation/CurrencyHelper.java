@@ -18,22 +18,20 @@
  */
 package org.apache.fineract.integrationtests.common.organisation;
 
+import static com.jayway.restassured.RestAssured.given;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.integrationtests.common.Utils;
 import org.springframework.util.Assert;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
-import static com.jayway.restassured.RestAssured.given;
 
 public class CurrencyHelper {
 

@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -33,13 +32,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_tellers", uniqueConstraints = {
@@ -82,30 +80,30 @@ public class Teller extends AbstractPersistableCustom<Long> {
     public Teller() {
         super();
     }
-    
-    private Teller (final Office staffOffice, final String name, final String description, final LocalDate startDate, 
-    		final LocalDate endDate, final TellerStatus status) {
-    	
-    	this.name = StringUtils.defaultIfEmpty(name, null);
-    	this.description = StringUtils.defaultIfEmpty(description, null);
-    	if (startDate != null) {
-    		this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
-    	}
-    	if (endDate != null) {
-    		this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
-    	}
-    	if (status != null) {
-    		this.status = status.getValue();
-    	}
-    	this.office = staffOffice;
-    	
-    	/*
+
+    private Teller (final Office staffOffice, final String name, final String description, final LocalDate startDate,
+            final LocalDate endDate, final TellerStatus status) {
+
+        this.name = StringUtils.defaultIfEmpty(name, null);
+        this.description = StringUtils.defaultIfEmpty(description, null);
+        if (startDate != null) {
+            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
+        }
+        if (endDate != null) {
+            this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
+        }
+        if (status != null) {
+            this.status = status.getValue();
+        }
+        this.office = staffOffice;
+
+        /*
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
             this.name = null;
         }
-        
+
         if (StringUtils.isNotBlank(description)) {
             this.description = description.trim();
         } else {
@@ -114,7 +112,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
 
     }
 
-    
+
     public static Teller fromJson(final Office tellerOffice, final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed("name");
         final String description = command.stringValueOfParameterNamed("description");
@@ -125,14 +123,14 @@ public class Teller extends AbstractPersistableCustom<Long> {
 
         return new Teller (tellerOffice, name, description, startDate, endDate, status);
     }
-    
+
     public Map<String, Object> update(Office tellerOffice, final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
-        
+
         final String officeIdParamName = "officeId";
         if (command.isChangeInLongParameterNamed(officeIdParamName, this.officeId())) {
             final long newValue = command.longValueOfParameterNamed(officeIdParamName);
@@ -146,7 +144,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
             actualChanges.put(nameParamName, newValue);
             this.name = newValue;
         }
-        
+
         final String descriptionParamName = "description";
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
@@ -175,7 +173,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
             final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
             this.endDate = newValue.toDate();
         }
-        
+
         final String statusParamName = "status";
         if (command.isChangeInIntegerParameterNamed(statusParamName, getStatus())) {
             final Integer valueAsInput = command.integerValueOfParameterNamed(statusParamName);
@@ -183,7 +181,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
             final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
             final TellerStatus status = TellerStatus.fromInt(newValue);
             if (status != TellerStatus.INVALID) {
-            	this.status = status.getValue(); 
+                this.status = status.getValue();
             }
         }
 
@@ -235,7 +233,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
     public Date getStartDate() {
         return startDate;
     }
-    
+
     public LocalDate getStartLocalDate() {
         LocalDate startLocalDate = null;
         if (this.startDate != null) {
@@ -251,7 +249,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
     public Date getEndDate() {
         return endDate;
     }
-    
+
     public LocalDate getEndLocalDate() {
         LocalDate endLocalDate = null;
         if (this.endDate != null) {
@@ -271,7 +269,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
     public void setStatus(Integer status) {
         this.status = status;
     }
-    
+
     public Long officeId() {
         return this.office.getId();
     }
@@ -284,8 +282,8 @@ public class Teller extends AbstractPersistableCustom<Long> {
         this.cashiers = cashiers;
     }
 
-	public void initializeLazyCollections() {
-		this.office.getId();
-		this.cashiers.size();
-	}
+    public void initializeLazyCollections() {
+        this.office.getId();
+        this.cashiers.size();
+    }
 }

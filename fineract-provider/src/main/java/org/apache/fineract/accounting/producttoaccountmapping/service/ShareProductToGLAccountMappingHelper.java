@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
+import com.google.gson.JsonElement;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SHARES;
 import org.apache.fineract.accounting.common.AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS;
+import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
@@ -35,8 +35,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
 
 @Component
 public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMappingHelper {
@@ -157,7 +155,7 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
     /**
      * Examines and updates each account mapping for given loan product with
      * changes passed in from the Json element
-     * 
+     *
      * @param sharesProductId
      * @param changes
      * @param element

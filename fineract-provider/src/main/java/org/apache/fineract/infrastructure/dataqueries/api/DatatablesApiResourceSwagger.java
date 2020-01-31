@@ -20,11 +20,9 @@ package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import java.util.List;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
-
-import java.util.List;
 
 /**
  * Created by sanyam on 31/7/17.

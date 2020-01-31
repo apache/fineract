@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.infrastructure.survey.service;
 
-import org.apache.fineract.infrastructure.survey.data.LikelihoodData;
-
 import java.util.List;
+import org.apache.fineract.infrastructure.survey.data.LikelihoodData;
 
 /**
  * Created by Cieyou on 3/12/14.

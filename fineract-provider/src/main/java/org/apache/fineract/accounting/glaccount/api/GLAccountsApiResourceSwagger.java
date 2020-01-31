@@ -20,12 +20,11 @@ package org.apache.fineract.accounting.glaccount.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by sanyam on 24/7/17.

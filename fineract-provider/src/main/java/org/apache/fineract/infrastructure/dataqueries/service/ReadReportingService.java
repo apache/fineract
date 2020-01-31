@@ -22,9 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.ws.rs.core.StreamingOutput;
-
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
@@ -47,12 +45,12 @@ public interface ReadReportingService {
     ReportData retrieveReport(final Long id);
 
     Collection<String> getAllowedReportTypes();
-    
+
   //needed for smsCampaign and emailCampaign jobs where securityContext is null
     GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> extractedQueryParams);
 
     String  sqlToRunForSmsEmailCampaign(String name, String type, Map<String, String> queryParams);
 
-	ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
+    ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
             Map<String, String> queryParams, Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
 }

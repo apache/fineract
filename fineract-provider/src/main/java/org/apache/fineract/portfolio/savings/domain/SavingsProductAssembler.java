@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
@@ -31,6 +33,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interest
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
@@ -43,16 +46,14 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalA
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -69,9 +70,6 @@ import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 @Component
 public class SavingsProductAssembler {
@@ -177,7 +175,7 @@ public class SavingsProductAssembler {
 
         boolean withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
         final TaxGroup taxGroup = assembleTaxGroup(command);
-        
+
         final Boolean isDormancyTrackingActive = command.booleanObjectValueOfParameterNamed(isDormancyTrackingActiveParamName);
         final Long daysToInactive = command.longValueOfParameterNamed(daysToInactiveParamName);
         final Long daysToDormancy = command.longValueOfParameterNamed(daysToDormancyParamName);

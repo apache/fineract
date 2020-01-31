@@ -20,10 +20,8 @@ package org.apache.fineract.organisation.office.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.organisation.office.data.OfficeData;
-import org.joda.time.LocalDate;
-
 import java.util.Collection;
+import org.joda.time.LocalDate;
 
 /**
  * Created by sanyam on 14/8/17.

@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
@@ -65,7 +64,6 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
-import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -591,7 +589,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
             selectFieldsSqlBuilder.append("sa.withhold_tax as withHoldTax,");
             selectFieldsSqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
-            
+
 
             this.selectFieldsSql = selectFieldsSqlBuilder.toString();
 
@@ -735,7 +733,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
             final BigDecimal totalWithholdTax = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithholdTax");
             final BigDecimal totalOverdraftInterestDerived = null;
-            
+
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
             final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
             final String taxGroupName = rs.getString("taxGroupName");
@@ -1104,7 +1102,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectTablesSqlBuilder.append("left join m_deposit_product_term_and_preclosure dptp on sa.id = dptp.savings_product_id ");
             selectTablesSqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
             selectTablesSqlBuilder.append("left join m_tax_group tg on tg.id = sa.tax_group_id  ");
-            
+
 
             this.selectTablesSql = selectTablesSqlBuilder.toString();
         }
@@ -1187,7 +1185,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final SavingsAccountStatusEnumData status = null;
             final SavingsAccountSummaryData summary = null;
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
-            
+
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
             final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
             final String taxGroupName = rs.getString("taxGroupName");

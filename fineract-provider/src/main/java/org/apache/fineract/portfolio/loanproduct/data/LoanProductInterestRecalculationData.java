@@ -22,12 +22,13 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.preCloseInterestCalculationStrategy;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
 
+import java.io.Serializable;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 
-public class LoanProductInterestRecalculationData {
+public class LoanProductInterestRecalculationData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Long id;

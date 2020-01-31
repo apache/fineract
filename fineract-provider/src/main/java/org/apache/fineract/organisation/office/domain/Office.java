@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,7 +34,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -207,9 +205,9 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
     }
 
     public Office getParent() {
-    	return this.parent;
+        return this.parent;
     }
-    
+
     public boolean hasParentOf(final Office office) {
         boolean isParent = false;
         if (this.parent != null) {
@@ -243,7 +241,7 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
 
         return match;
     }
-    
+
     public void loadLazyCollections() {
         this.children.size() ;
     }

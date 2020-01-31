@@ -18,12 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.accounting;
 
+import com.google.gson.Gson;
 import java.util.Calendar;
 import java.util.HashMap;
-
 import org.apache.fineract.integrationtests.common.Utils;
-
-import com.google.gson.Gson;
 
 public class GLAccountBuilder {
 
@@ -38,73 +36,69 @@ public class GLAccountBuilder {
     private static final String MANUAL_ENTRIES_ALLOW = "true";
     private static final String MANUAL_ENTRIES_NOT_ALLOW = "false";
 
-    private static String name = Utils.randomStringGenerator("ACCOUNT_NAME_", 5);
+    private static final String DESCRIPTION = "DEFAULT_DESCRIPTION";
 
-    private static String GLCode = "";
-    private static String accountType = "";
-    private static String accountUsage = ACCOUNT_USAGE_DETAIL;
-    private static String manualEntriesAllowed = MANUAL_ENTRIES_ALLOW;
-    private static String description = "DEFAULT_DESCRIPTION";
+    private String name = Utils.randomStringGenerator("ACCOUNT_NAME_", 5);
+
+    private String glCode = "";
+    private String accountType = "";
+    private String accountUsage = ACCOUNT_USAGE_DETAIL;
+    private String manualEntriesAllowed = MANUAL_ENTRIES_ALLOW;
 
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("name", GLAccountBuilder.name);
-        map.put("glCode", GLAccountBuilder.GLCode);
-        map.put("manualEntriesAllowed", GLAccountBuilder.manualEntriesAllowed);
-        map.put("type", GLAccountBuilder.accountType);
-        map.put("usage", GLAccountBuilder.accountUsage);
-        map.put("description", GLAccountBuilder.description);
+        map.put("name", name);
+        map.put("glCode", glCode);
+        map.put("manualEntriesAllowed", manualEntriesAllowed);
+        map.put("type", accountType);
+        map.put("usage", accountUsage);
+        map.put("description", DESCRIPTION);
         return new Gson().toJson(map);
     }
 
     public GLAccountBuilder withAccountTypeAsAsset() {
-        GLAccountBuilder.accountType = ASSET_ACCOUNT;
-        GLAccountBuilder.GLCode = Utils.randomStringGenerator("ASSET_", 2);
-        GLAccountBuilder.GLCode += Calendar.getInstance().getTimeInMillis() + ""; // Added
-        // unique
-        // timestamp
-        // for
-        // avoiding
-        // random
-        // collisions
+        accountType = ASSET_ACCOUNT;
+        glCode = Utils.randomStringGenerator("ASSET_", 2);
+        // Add unique timestamp to avoid random collisions
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsLiability() {
-        GLAccountBuilder.accountType = LIABILITY_ACCOUNT;
-        GLAccountBuilder.GLCode = Utils.randomStringGenerator("LIABILITY_", 2);
-        GLAccountBuilder.GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        accountType = LIABILITY_ACCOUNT;
+        glCode = Utils.randomStringGenerator("LIABILITY_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsAsEquity() {
-        GLAccountBuilder.accountType = EQUITY_ACCOUNT;
-        GLAccountBuilder.GLCode = Utils.randomStringGenerator("EQUITY_", 2);
-        GLAccountBuilder.GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        accountType = EQUITY_ACCOUNT;
+        glCode = Utils.randomStringGenerator("EQUITY_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsIncome() {
-        GLAccountBuilder.accountType = INCOME_ACCOUNT;
-        GLAccountBuilder.GLCode = Utils.randomStringGenerator("INCOME_", 2);
-        GLAccountBuilder.GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        accountType = INCOME_ACCOUNT;
+        glCode = Utils.randomStringGenerator("INCOME_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsExpense() {
-        GLAccountBuilder.accountType = EXPENSE_ACCOUNT;
-        GLAccountBuilder.GLCode = Utils.randomStringGenerator("EXPENSE_", 2);
-        GLAccountBuilder.GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        accountType = EXPENSE_ACCOUNT;
+        glCode = Utils.randomStringGenerator("EXPENSE_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountUsageAsHeader() {
-        GLAccountBuilder.accountUsage = ACCOUNT_USAGE_HEADER;
+        accountUsage = ACCOUNT_USAGE_HEADER;
         return this;
     }
 
     public GLAccountBuilder withMaualEntriesNotAllowed() {
-        GLAccountBuilder.manualEntriesAllowed = MANUAL_ENTRIES_NOT_ALLOW;
+        manualEntriesAllowed = MANUAL_ENTRIES_NOT_ALLOW;
         return this;
     }
 }

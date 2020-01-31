@@ -32,17 +32,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = PocketApiConstants.pocketEntityName, action = PocketApiConstants.delinkAccountsActionName)
 public class DelinkAccountsFromPocketCommandHandler implements NewCommandSourceHandler {
-	private final PocketWritePlatformService pocketWritePlatformService;
+    private final PocketWritePlatformService pocketWritePlatformService;
 
-	@Autowired
-	public DelinkAccountsFromPocketCommandHandler(final PocketWritePlatformService pocketWritePlatformService) {
-		this.pocketWritePlatformService = pocketWritePlatformService;
-	}
+    @Autowired
+    public DelinkAccountsFromPocketCommandHandler(final PocketWritePlatformService pocketWritePlatformService) {
+        this.pocketWritePlatformService = pocketWritePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
-		return this.pocketWritePlatformService.delinkAccounts(command);
-	}
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.pocketWritePlatformService.delinkAccounts(command);
+    }
 
 }

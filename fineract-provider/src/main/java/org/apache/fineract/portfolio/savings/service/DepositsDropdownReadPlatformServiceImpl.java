@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
 import org.springframework.stereotype.Service;
@@ -37,12 +36,12 @@ public class DepositsDropdownReadPlatformServiceImpl implements DepositsDropdown
      * retrieveDepositTermTypeOptions() { return
      * SavingsEnumerations.recurringDepositFrequencyType
      * (SavingsPeriodFrequencyType.values()); }
-     * 
+     *
      * @Override public Collection<EnumOptionData>
      * retrieveDepositPeriodFrequencyOptions() { return
      * SavingsEnumerations.depositPeriodFrequency
      * (SavingsPeriodFrequencyType.values()); }
-     * 
+     *
      * @Override public Collection<EnumOptionData>
      * retrieveInMultiplesOfDepositTermTypeOptions() { return
      * SavingsEnumerations

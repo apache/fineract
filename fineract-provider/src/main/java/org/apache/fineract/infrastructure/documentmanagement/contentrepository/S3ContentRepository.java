@@ -18,21 +18,6 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-
-import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
-import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
-import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
-import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
-import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
-import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SDKGlobalConfiguration;
@@ -46,6 +31,19 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.lowagie.text.pdf.codec.Base64;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
+import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
+import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
+import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
+import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class S3ContentRepository implements ContentRepository {
 
@@ -56,7 +54,7 @@ public class S3ContentRepository implements ContentRepository {
 
     public S3ContentRepository(final String bucketName, final String secretKey, final String accessKey) {
         this.s3BucketName = bucketName;
-        //On some AWS regions by default V4 signature is enabled. Setting this property. 
+        //On some AWS regions by default V4 signature is enabled. Setting this property.
         System.setProperty(SDKGlobalConfiguration.ENABLE_S3_SIGV4_SYSTEM_PROPERTY, "true");
         this.s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
     }
@@ -138,12 +136,12 @@ public class S3ContentRepository implements ContentRepository {
 
     @Override
     public ImageData fetchImage(final ImageData imageData) {
-    	try {
-    		final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, imageData.location()));
-            imageData.updateContent(s3object.getObjectContent());	
-    	}catch(AmazonS3Exception e) {
-    		logger.error(e.getMessage());
-    	}
+        try {
+            final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, imageData.location()));
+            imageData.updateContent(s3object.getObjectContent());
+        }catch(AmazonS3Exception e) {
+            logger.error(e.getMessage());
+        }
         return imageData;
     }
 

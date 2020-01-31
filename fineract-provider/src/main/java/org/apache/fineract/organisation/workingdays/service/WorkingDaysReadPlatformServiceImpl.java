@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -79,7 +78,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
 
     @Override
     public WorkingDaysData retrieve() {
-    	//Check whether template is enabled or not?
+        //Check whether template is enabled or not?
         try {
             final WorkingDaysMapper rm = new WorkingDaysMapper();
             final String sql = " select " + rm.schema();
@@ -96,9 +95,9 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
         Collection<EnumOptionData> repaymentRescheduleOptions = repaymentRescheduleTypeOptions();
         return new WorkingDaysData(null, null, null, repaymentRescheduleOptions, null, null);
     }
-    
+
     private Collection<EnumOptionData> repaymentRescheduleTypeOptions() {
-    	 return Arrays.asList(
+         return Arrays.asList(
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.SAME_DAY),
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY),
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY),

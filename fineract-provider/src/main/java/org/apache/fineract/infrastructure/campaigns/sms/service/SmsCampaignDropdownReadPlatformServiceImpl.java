@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignEnumerations;
@@ -49,7 +48,7 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
     private final RestTemplate restTemplate;
 
     private final SmsConfigUtils smsConfigUtils ;
-    
+
     @Autowired
     public SmsCampaignDropdownReadPlatformServiceImpl(final SmsConfigUtils smsConfigUtils) {
         this.restTemplate = new RestTemplate();

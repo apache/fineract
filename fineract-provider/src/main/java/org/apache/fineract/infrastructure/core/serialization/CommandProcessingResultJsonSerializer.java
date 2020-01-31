@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.serialization;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaLocalDateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
@@ -26,15 +28,12 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 /**
  * <p>
- * A google gson implementation of 
+ * A google gson implementation of
  * contract.
  * </p>
- * 
+ *
  * <p>
  * It serializes all fields of any Java {@link Object} passed to it.
  * </p>

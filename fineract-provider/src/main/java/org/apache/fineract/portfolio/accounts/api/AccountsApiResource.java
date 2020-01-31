@@ -18,7 +18,18 @@
  */
 package org.apache.fineract.portfolio.accounts.api;
 
-import io.swagger.annotations.*;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -31,9 +42,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -47,7 +55,6 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
-import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
 import org.apache.fineract.portfolio.products.exception.ResourceNotFoundException;
@@ -57,13 +64,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-
 
 @Path("/accounts/{type}")
 @Component
 @Scope("singleton")
-@Api(value = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Share Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
+})
 public class AccountsApiResource {
 
     private final ApplicationContext applicationContext ;
@@ -73,7 +81,7 @@ public class AccountsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-    
+
     @Autowired
     public AccountsApiResource(final ApplicationContext applicationContext,
             final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -85,12 +93,12 @@ public class AccountsApiResource {
         this.applicationContext = applicationContext ;
         this.apiRequestParameterHelper = apiRequestParameterHelper ;
         this.toApiJsonSerializer = toApiJsonSerializer ;
-        this.platformSecurityContext = platformSecurityContext ; 
+        this.platformSecurityContext = platformSecurityContext ;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService ;
         this.bulkImportWorkbookService=bulkImportWorkbookService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
     }
-    
+
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -106,12 +114,12 @@ public class AccountsApiResource {
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
             final AccountData accountData = service.retrieveTemplate(clientId, productId);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }
     }
-    
+
     @GET
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -125,12 +133,12 @@ public class AccountsApiResource {
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
             AccountData data = service.retrieveOne(accountId, settings.isTemplate()) ;
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }
     }
-    
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -142,12 +150,12 @@ public class AccountsApiResource {
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
             Page<AccountData> data = service.retrieveAll(offset, limit) ;
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -161,7 +169,7 @@ public class AccountsApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @POST
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -177,7 +185,7 @@ public class AccountsApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @PUT
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })

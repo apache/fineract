@@ -31,8 +31,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @ActiveProfiles("basicauth")
 public abstract class AbstractSpringBootWithMariaDB4jIntegrationTest {
 
-	// do NOT put any helper methods here!
-	// it's much better to use composition instead of inheritance
-	// so write a test util ("fixture") and use it as a field in your test
+    // do NOT put any helper methods here!
+    // it's much better to use composition instead of inheritance
+    // so write a test util ("fixture") and use it as a field in your test
 
 }

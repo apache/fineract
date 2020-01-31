@@ -18,11 +18,9 @@
  */
 package org.apache.fineract.integrationtests.loanaccount.guarantor;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.google.gson.Gson;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class GuarantorTestBuilder {
 
@@ -79,7 +77,7 @@ public class GuarantorTestBuilder {
         this.guarantorTypeId = GUARANTOR_TYPE_CUSTOMER;
         return this;
     }
-    
+
     public GuarantorTestBuilder externalCustomer() {
         this.guarantorTypeId = GUARANTOR_TYPE_EXTERNAL;
         return this;

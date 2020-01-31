@@ -30,12 +30,12 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "UNDOWITHDRAWAL")
 public class UndoWithdrawalCommandHandler implements NewCommandSourceHandler {
 
-	 private final ClientWritePlatformService clientWritePlatformService;
+     private final ClientWritePlatformService clientWritePlatformService;
 
-	    @Autowired
-	    public UndoWithdrawalCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
-	        this.clientWritePlatformService = clientWritePlatformService;
-	    }
+        @Autowired
+        public UndoWithdrawalCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
+            this.clientWritePlatformService = clientWritePlatformService;
+        }
 
     @Transactional
     @Override

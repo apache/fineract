@@ -18,21 +18,17 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
-import javax.servlet.Filter;
+import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import javax.servlet.Servlet;
-
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
-
 /**
- * This Configuration replaces what formerly was in web.xml. Beans are loaded only when "oauth" Profile is enabled. 
- * 
+ * This Configuration replaces what formerly was in web.xml. Beans are loaded only when "oauth" Profile is enabled.
+ *
  * @see <a
  *      href="http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-convert-an-existing-application-to-spring-boot">#howto-convert-an-existing-application-to-spring-boot</a>
  */

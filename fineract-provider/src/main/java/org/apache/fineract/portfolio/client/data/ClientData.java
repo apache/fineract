@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.portfolio.client.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -40,7 +40,7 @@ import org.joda.time.LocalDate;
  * Immutable data object representing client data.
  */
 @SuppressWarnings("unused")
-final public class ClientData implements Comparable<ClientData> {
+final public class ClientData implements Comparable<ClientData>, Serializable {
 
     private final Long id;
     private final String accountNo;
@@ -58,7 +58,7 @@ final public class ClientData implements Comparable<ClientData> {
     private final String fullname;
     private final String displayName;
     private final String mobileNo;
-	private final String emailAddress;
+    private final String emailAddress;
     private final LocalDate dateOfBirth;
     private final CodeValueData gender;
     private final CodeValueData clientType;
@@ -100,13 +100,13 @@ final public class ClientData implements Comparable<ClientData> {
     private final ClientFamilyMembersData familyMemberOptions;
 
     private final ClientNonPersonData clientNonPersonDetails;
-    
+
     private final Collection<AddressData> address;
 
-	private final Boolean isAddressEnabled;
+    private final Boolean isAddressEnabled;
 
-    
-	private final List<DatatableData> datatables;
+
+    private final List<DatatableData> datatables;
 
     //import fields
     private transient Integer rowIndex;
@@ -123,8 +123,8 @@ final public class ClientData implements Comparable<ClientData> {
             String externalId,LocalDate dateOfBirth,String mobileNo,ClientNonPersonData clientNonPersonDetails,
             Collection<AddressData> address,String locale,String dateFormat){
         return  new ClientData(legalFormId,rowIndex,fullname, null, null, null, submittedOnDate,activationDate,active, externalId,
-        		officeId, staffId,mobileNo,dateOfBirth,clientTypeId, null,clientClassificationId,null,
-        		address,clientNonPersonDetails, locale,dateFormat);
+                officeId, staffId,mobileNo,dateOfBirth,clientTypeId, null,clientClassificationId,null,
+                address,clientNonPersonDetails, locale,dateFormat);
     }
 
     public static ClientData importClientPersonInstance(Long legalFormId,Integer rowIndex,String firstName,String lastName,String middleName,
@@ -137,7 +137,7 @@ final public class ClientData implements Comparable<ClientData> {
     }
 
     public static ClientData emptyInstance(Long clientId) {
-    		return lookup(clientId, null, null, null);
+            return lookup(clientId, null, null, null);
     }
 
     private ClientData(Long legalFormId,Integer rowIndex, String fullname, String firstname,String lastname,String middlename,
@@ -240,7 +240,7 @@ final public class ClientData implements Comparable<ClientData> {
         final String displayName = null;
         final String externalId = null;
         final String mobileNo = null;
-		final String emailAddress = null;
+        final String emailAddress = null;
         final LocalDate dateOfBirth = null;
         final CodeValueData gender = null;
         final Long imageId = null;
@@ -255,7 +255,7 @@ final public class ClientData implements Comparable<ClientData> {
         final CodeValueData clientType = null;
         final CodeValueData clientClassification = null;
         final EnumOptionData legalForm = null;
-		final Boolean isStaff = false;
+        final Boolean isStaff = false;
         final ClientNonPersonData clientNonPersonDetails = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, joinedDate, imageId, staffId,
@@ -307,7 +307,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.savingAccountOptions, clientData.clientType, clientData.clientClassification, clientData.clientTypeOptions,
                 clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions, clientData.clientNonPersonMainBusinessLineOptions,
                 clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,clientData.familyMemberOptions, clientData.legalForm,clientData.address,
-				clientData.isAddressEnabled, null, clientData.isStaff);
+                clientData.isAddressEnabled, null, clientData.isStaff);
 
     }
 
@@ -318,7 +318,7 @@ final public class ClientData implements Comparable<ClientData> {
         final String transferToOfficeName = null;
         final String externalId = null;
         final String mobileNo = null;
-		final String emailAddress = null;
+        final String emailAddress = null;
         final LocalDate dateOfBirth = null;
         final CodeValueData gender = null;
         final LocalDate activationDate = null;
@@ -347,7 +347,7 @@ final public class ClientData implements Comparable<ClientData> {
         final EnumOptionData status = null;
         final CodeValueData subStatus = null;
         final EnumOptionData legalForm = null;
-		final Boolean isStaff = false;
+        final Boolean isStaff = false;
         final ClientNonPersonData clientNonPerson = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate, imageId, staffId,
@@ -369,7 +369,7 @@ final public class ClientData implements Comparable<ClientData> {
         final String fullname = null;
         final String externalId = null;
         final String mobileNo = null;
-		final String emailAddress = null;
+        final String emailAddress = null;
         final LocalDate dateOfBirth = null;
         final CodeValueData gender = null;
         final LocalDate activationDate = null;
@@ -396,7 +396,7 @@ final public class ClientData implements Comparable<ClientData> {
         final List<EnumOptionData> clientLegalFormOptions = null;
         final ClientFamilyMembersData familyMemberOptions=null;
         final EnumOptionData legalForm = null;
-		final Boolean isStaff = false;
+        final Boolean isStaff = false;
         final ClientNonPersonData clientNonPerson = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate, imageId, staffId,
@@ -408,9 +408,9 @@ final public class ClientData implements Comparable<ClientData> {
     }
 
     public static ClientData instance(final Long id, final String displayName){
-    	 final Long officeId = null;
-    	 final String officeName = null;
-    	 return lookup(id, displayName, officeId, officeName);
+         final Long officeId = null;
+         final String officeName = null;
+         return lookup(id, displayName, officeId, officeName);
     }
 
     public static ClientData instance(final String accountNo, final EnumOptionData status, final CodeValueData subStatus,
@@ -477,7 +477,7 @@ final public class ClientData implements Comparable<ClientData> {
         this.displayName = StringUtils.defaultIfEmpty(displayName, null);
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.mobileNo = StringUtils.defaultIfEmpty(mobileNo, null);
-		this.emailAddress = StringUtils.defaultIfEmpty(emailAddress, null);
+        this.emailAddress = StringUtils.defaultIfEmpty(emailAddress, null);
         this.activationDate = activationDate;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
@@ -516,11 +516,11 @@ final public class ClientData implements Comparable<ClientData> {
         this.savingsAccountId = savingsAccountId;
         this.savingAccountOptions = savingAccountOptions;
         this.legalForm = legalForm;
-		this.isStaff = isStaff;
+        this.isStaff = isStaff;
         this.clientNonPersonDetails = clientNonPerson;
 
-      	this.address = address;
-		this.isAddressEnabled = isAddressEnabled;
+          this.address = address;
+        this.isAddressEnabled = isAddressEnabled;
         this.datatables = datatables;
 
     }
@@ -534,7 +534,7 @@ final public class ClientData implements Comparable<ClientData> {
     }
 
     public String accountNo() {
-    	return this.accountNo;
+        return this.accountNo;
     }
 
     public Long officeId() {
@@ -564,7 +564,7 @@ final public class ClientData implements Comparable<ClientData> {
                 .append(this.id, obj.id) //
                 .append(this.displayName, obj.displayName) //
                 .append(this.mobileNo, obj.mobileNo) //
-				.append(this.emailAddress, obj.emailAddress) //
+                .append(this.emailAddress, obj.emailAddress) //
                 .toComparison();
     }
 
@@ -578,7 +578,7 @@ final public class ClientData implements Comparable<ClientData> {
                 .append(this.id, rhs.id) //
                 .append(this.displayName, rhs.displayName) //
                 .append(this.mobileNo, rhs.mobileNo) //
-				.append(this.emailAddress, rhs.emailAddress) //
+                .append(this.emailAddress, rhs.emailAddress) //
                 .isEquals();
     }
 
@@ -607,6 +607,6 @@ final public class ClientData implements Comparable<ClientData> {
     }
 
     public Boolean getIsAddressEnabled() {
-		return this.isAddressEnabled;
-	}
+        return this.isAddressEnabled;
+    }
 }

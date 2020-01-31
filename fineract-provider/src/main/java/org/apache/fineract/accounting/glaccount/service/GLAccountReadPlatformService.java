@@ -19,7 +19,6 @@
 package org.apache.fineract.accounting.glaccount.service;
 
 import java.util.List;
-
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;

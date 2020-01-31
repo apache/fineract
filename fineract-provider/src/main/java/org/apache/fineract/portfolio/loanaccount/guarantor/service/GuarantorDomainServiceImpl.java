@@ -25,9 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -75,7 +73,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final Map<Long, Long> releaseLoanIds = new HashMap<>(2);
     private final SavingsAccountAssembler savingsAccountAssembler;
-    
+
 
     @Autowired
     public GuarantorDomainServiceImpl(final GuarantorRepository guarantorRepository,
@@ -293,7 +291,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     /**
      * Method reverses all blocked fund(both hold and release) transactions.
      * example: reverses all transactions on undo approval of loan account.
-     * 
+     *
      */
     private void reverseAllFundTransaction(final Loan loan) {
 
@@ -318,7 +316,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     /**
      * Method holds all guarantor's guarantee amount for a loan account.
      * example: hold funds on approval of loan account.
-     * 
+     *
      */
     private void holdGuarantorFunds(final Loan loan) {
         if (loan.loanProduct().isHoldGuaranteeFundsEnabled()) {
@@ -380,7 +378,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      * and then self guarantee) for a loan account in the portion of guarantee
      * percentage on a paid principal. example: releases funds on repayments of
      * loan account.
-     * 
+     *
      */
     private void releaseGuarantorFunds(final LoanTransaction loanTransaction) {
         final Loan loan = loanTransaction.getLoan();
@@ -433,7 +431,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     /**
      * Method releases all guarantor's guarantee amount. example: releases funds
      * on write-off of a loan account.
-     * 
+     *
      */
     private void releaseAllGuarantors(final LoanTransaction loanTransaction) {
         Loan loan = loanTransaction.getLoan();

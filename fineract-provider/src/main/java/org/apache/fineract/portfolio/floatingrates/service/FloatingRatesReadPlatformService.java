@@ -19,22 +19,21 @@
 package org.apache.fineract.portfolio.floatingrates.service;
 
 import java.util.List;
-
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 
 public interface FloatingRatesReadPlatformService {
 
-	List<FloatingRateData> retrieveAll();
+    List<FloatingRateData> retrieveAll();
 
-	List<FloatingRateData> retrieveLookupActive();
+    List<FloatingRateData> retrieveLookupActive();
 
-	FloatingRateData retrieveOne(Long floatingRateId);
+    FloatingRateData retrieveOne(Long floatingRateId);
 
-	List<FloatingRateData> retrieveAllActive();
+    List<FloatingRateData> retrieveAllActive();
 
-	FloatingRateData retrieveBaseLendingRate();
+    FloatingRateData retrieveBaseLendingRate();
 
-	List<InterestRatePeriodData> retrieveInterestRatePeriods(Long productId);
+    List<InterestRatePeriodData> retrieveInterestRatePeriods(Long productId);
 
 }

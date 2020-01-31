@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.useradministration.service;
 
-import org.apache.fineract.useradministration.data.RoleData;
-
 import java.util.Collection;
+import org.apache.fineract.useradministration.data.RoleData;
 
 public interface RoleReadPlatformService {
 

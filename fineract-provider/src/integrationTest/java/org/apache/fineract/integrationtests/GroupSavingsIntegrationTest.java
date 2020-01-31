@@ -20,6 +20,11 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,7 +33,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -41,12 +45,6 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 /**
  * Group Savings Integration Test for checking Savings Application.
@@ -500,10 +498,10 @@ public class GroupSavingsIntegrationTest {
         BigDecimal totalWaiveAmount = BigDecimal.valueOf(Double.valueOf((Float) savingsChargeForWaive.get("amount")));
         totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
         assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
-        
+
         final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsWeeklyFeeJSON());
         Assert.assertNotNull(weeklyFeeId);
-        
+
         this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(3, charges.size());
@@ -530,9 +528,9 @@ public class GroupSavingsIntegrationTest {
                 .plusWeeks((Integer) paidCharge.get("feeInterval"));
         assertEquals(expectedNextDueDate, nextDueDate);
         cal = Calendar.getInstance();
-        
+
         this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null, sdf.format(cal.getTime()));
-        
+
     }
 
     public static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

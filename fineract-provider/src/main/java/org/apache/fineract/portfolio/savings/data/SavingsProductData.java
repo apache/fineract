@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object represent a savings product.
  */
-public class SavingsProductData {
+public class SavingsProductData implements Serializable {
 
     private final Long id;
     private final String name;
@@ -87,10 +87,10 @@ public class SavingsProductData {
     private final Collection<ChargeData> chargeOptions;
     private final Collection<ChargeData> penaltyOptions;
     private final Collection<TaxGroupData> taxGroupOptions;
-	private final Boolean isDormancyTrackingActive;
-	private final Long daysToInactive;
-	private final Long daysToDormancy;
-	private final Long daysToEscheat;
+    private final Boolean isDormancyTrackingActive;
+    private final Long daysToInactive;
+    private final Long daysToDormancy;
+    private final Long daysToEscheat;
 
     public static SavingsProductData template(final CurrencyData currency, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
@@ -157,14 +157,14 @@ public class SavingsProductData {
                 product.feeToIncomeAccountMappings, product.penaltyToIncomeAccountMappings, product.allowOverdraft, product.overdraftLimit,
                 product.minRequiredBalance, product.enforceMinRequiredBalance, product.minBalanceForInterestCalculation,
                 product.nominalAnnualInterestRateOverdraft, product.minOverdraftForInterestCalculation, product.withHoldTax,
-                product.taxGroup, product.taxGroupOptions, product.isDormancyTrackingActive, product.daysToInactive, 
+                product.taxGroup, product.taxGroupOptions, product.isDormancyTrackingActive, product.daysToInactive,
                 product.daysToDormancy, product.daysToEscheat);
     }
 
     /**
      * Returns a {@link SavingsProductData} that contains and exist
      * {@link SavingsProductData} data with further template data for dropdowns.
-     * 
+     *
      * @param taxGroupOptions
      *            TODO
      */
@@ -191,7 +191,7 @@ public class SavingsProductData {
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings, existingProduct.allowOverdraft,
                 existingProduct.overdraftLimit, existingProduct.minRequiredBalance, existingProduct.enforceMinRequiredBalance,
                 existingProduct.minBalanceForInterestCalculation, existingProduct.nominalAnnualInterestRateOverdraft,
-                existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, 
+                existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions,
                 existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive, existingProduct.daysToDormancy, existingProduct.daysToEscheat);
     }
 
@@ -228,7 +228,7 @@ public class SavingsProductData {
                 existingProduct.minRequiredBalance, existingProduct.enforceMinRequiredBalance,
                 existingProduct.minBalanceForInterestCalculation, existingProduct.nominalAnnualInterestRateOverdraft,
                 existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup,
-                existingProduct.taxGroupOptions, existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive, 
+                existingProduct.taxGroupOptions, existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive,
                 existingProduct.daysToDormancy, existingProduct.daysToEscheat);
     }
 
@@ -240,7 +240,7 @@ public class SavingsProductData {
             final EnumOptionData accountingType, final boolean allowOverdraft, final BigDecimal overdraftLimit,
             final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
             final BigDecimal minBalanceForInterestCalculation, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup, 
+            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
             final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat) {
 
         final Map<String, Object> accountingMappings = null;
@@ -355,7 +355,7 @@ public class SavingsProductData {
             final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
             final BigDecimal minBalanceForInterestCalculation, final BigDecimal nominalAnnualInterestRateOverdraft,
             final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
-            final Collection<TaxGroupData> taxGroupOptions, final Boolean isDormancyTrackingActive, final Long daysToInactive, 
+            final Collection<TaxGroupData> taxGroupOptions, final Boolean isDormancyTrackingActive, final Long daysToInactive,
             final Long daysToDormancy, final Long daysToEscheat) {
         this.id = id;
         this.name = name;
@@ -438,13 +438,13 @@ public class SavingsProductData {
         return this.name;
     }
 
-	public String getDepositAccountType() {
-		return depositAccountType;
-	}
+    public String getDepositAccountType() {
+        return depositAccountType;
+    }
 
-	public void setDepositAccountType(String depositAccountType) {
-		this.depositAccountType = depositAccountType;
-	}
+    public void setDepositAccountType(String depositAccountType) {
+        this.depositAccountType = depositAccountType;
+    }
 
     public BigDecimal getNominalAnnualInterestRate() {
         return nominalAnnualInterestRate;

@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.util.StringUtils;
 
@@ -106,7 +105,7 @@ public enum CalendarFrequencyType {
     /**
      * To convert from period frequency type tp calendar frequency type. This
      * method requires code refactoring.
-     * 
+     *
      * @param periodFrequencyType periodFrequencyType
      * @return CalendarFrequencyType
      */
@@ -128,7 +127,7 @@ public enum CalendarFrequencyType {
     /**
      * To convert from period frequency type tp calendar frequency type. This
      * method requires code refactoring.
-     * 
+     *
      * @param frequencyType
      * @return
      */

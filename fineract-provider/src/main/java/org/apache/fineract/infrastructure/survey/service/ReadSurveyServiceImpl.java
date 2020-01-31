@@ -20,9 +20,7 @@ package org.apache.fineract.infrastructure.survey.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -97,7 +95,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     @Override
     public SurveyDataTableData retrieveSurvey(String surveyName) {
-    	SQLInjectionValidator.validateSQLInput(surveyName);
+        SQLInjectionValidator.validateSQLInput(surveyName);
         final String sql = "select cf.enabled, application_table_name, registered_table_name" + " from x_registered_table "
                 + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
                 + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
@@ -128,7 +126,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     public List<ClientScoresOverview> retrieveClientSurveyScoreOverview(String surveyName, Long clientId) {
 
         final String sql = "SELECT  tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM ? tz"
-                + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = ? AND enabled = ? " 
+                + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = ? AND enabled = ? "
                 + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                 + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
                 + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ? ";

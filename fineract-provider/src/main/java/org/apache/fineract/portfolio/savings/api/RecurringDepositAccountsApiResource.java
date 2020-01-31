@@ -19,13 +19,22 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import com.google.gson.JsonElement;
-import io.swagger.annotations.*;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -40,9 +49,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -80,7 +86,10 @@ import org.springframework.util.CollectionUtils;
 @Path("/recurringdepositaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "Recurring Deposit Account", description = "Recurring Deposit accounts are instances of a praticular recurring deposit product created. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Recurring Deposit Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Recurring Deposit Account", description = "Recurring Deposit accounts are instances of a praticular recurring deposit product created. An application process around the creation of accounts is also supported.")
+})
 public class RecurringDepositAccountsApiResource {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;

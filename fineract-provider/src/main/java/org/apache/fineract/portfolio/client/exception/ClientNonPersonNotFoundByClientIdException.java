@@ -24,8 +24,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  * A {@link RuntimeException} thrown when clientNonPerson resources are not found.
  */
 public class ClientNonPersonNotFoundByClientIdException extends AbstractPlatformResourceNotFoundException {
-	
-	public ClientNonPersonNotFoundByClientIdException(final Long id) {
+
+    public ClientNonPersonNotFoundByClientIdException(final Long id) {
         super("error.msg.clientnonperson.id.invalid", "ClientNonPerson with client identifier " + id + " does not exist", id);
     }
 }

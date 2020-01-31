@@ -25,10 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -227,12 +224,12 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         sqlBuilder.append(mapper.getSchema());
         sqlBuilder.append(" order by entry.created_date");
         if(limit != null ) {
-            sqlBuilder.append(" limit ").append(limit);    
+            sqlBuilder.append(" limit ").append(limit);
         }
         if(offset != null) {
-            sqlBuilder.append(" offset ").append(offset);    
+            sqlBuilder.append(" offset ").append(offset);
         }
-        
+
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         Object[] whereClauseItemsitems = new Object[] {};
         return this.provisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
@@ -289,9 +286,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                 .append("where history2.journal_entry_created='1')");
 
         @Override
-        @SuppressWarnings("unused")
         public ProvisioningEntryData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Map<String, Object> map = new HashMap<>();
             Long id = rs.getLong("id");
             Date createdDate = rs.getDate("created_date");
             Long createdBy = null;

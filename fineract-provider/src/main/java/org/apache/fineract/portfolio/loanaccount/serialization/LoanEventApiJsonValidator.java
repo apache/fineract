@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.serialization;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -44,9 +45,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public final class LoanEventApiJsonValidator {
 
@@ -55,8 +53,8 @@ public final class LoanEventApiJsonValidator {
 
 
     @Autowired
-    public LoanEventApiJsonValidator(final FromJsonHelper fromApiJsonHelper, 
-    		 final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer) {
+    public LoanEventApiJsonValidator(final FromJsonHelper fromApiJsonHelper,
+             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
@@ -77,7 +75,7 @@ public final class LoanEventApiJsonValidator {
                     "dateFormat", LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
         } else {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale",
-                    "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate", 
+                    "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate",
                     LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
         }
 
@@ -109,7 +107,7 @@ public final class LoanEventApiJsonValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance, 
+    public void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance,
             Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
         if (null != calendarInstance) {
             final Calendar calendar = calendarInstance.getCalendar();
@@ -248,7 +246,7 @@ public final class LoanEventApiJsonValidator {
         baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists("dueDate", element)) {
-        	final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed("dueDate", element);
+            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed("dueDate", element);
             baseDataValidator.reset().parameter("dueDate").value(dueDate).notBlank();
         }
 
@@ -388,7 +386,7 @@ public final class LoanEventApiJsonValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("locale", "dateFormat", LoanApiConstants.disbursementDataParameterName,
-                LoanApiConstants.approvedLoanAmountParameterName, LoanApiConstants.updatedDisbursementDateParameterName, LoanApiConstants.updatedDisbursementPrincipalParameterName, 
+                LoanApiConstants.approvedLoanAmountParameterName, LoanApiConstants.updatedDisbursementDateParameterName, LoanApiConstants.updatedDisbursementPrincipalParameterName,
                 LoanApiConstants.disbursementDateParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -401,25 +399,25 @@ public final class LoanEventApiJsonValidator {
         final LocalDate actualDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
                 LoanApiConstants.disbursementDateParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName).value(actualDisbursementDate).notNull();
-        
+
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
-        final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.updatedDisbursementPrincipalParameterName, 
-        		element,locale);
+        final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.updatedDisbursementPrincipalParameterName,
+                element,locale);
         baseDataValidator.reset().parameter(LoanApiConstants.disbursementPrincipalParameterName).value(principal).notNull();
 
-        final BigDecimal approvedPrincipal = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.approvedLoanAmountParameterName, 
-        		element,locale);
+        final BigDecimal approvedPrincipal = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.approvedLoanAmountParameterName,
+                element,locale);
         if (loanDisbursementDetails.actualDisbursementDate() != null) {
             baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
                     .failWithCode(LoanApiConstants.ALREADY_DISBURSED);
         }
 
-        
+
         fromApiJsonDeserializer.validateLoanMultiDisbursementdate(element, baseDataValidator, actualDisbursementDate, approvedPrincipal);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
+
     public void validateNewRefundTransaction(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }

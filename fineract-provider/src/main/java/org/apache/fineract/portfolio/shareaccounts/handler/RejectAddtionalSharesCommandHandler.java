@@ -33,7 +33,7 @@ public class RejectAddtionalSharesCommandHandler implements NewCommandSourceHand
 
 
     private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
-    
+
     @Autowired
     public RejectAddtionalSharesCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
         this.shareAccountWritePlatformService = shareAccountWritePlatformService ;

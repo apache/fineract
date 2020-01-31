@@ -30,7 +30,7 @@ public enum NoteType {
     GROUP(600, "noteType.group", "groups"),
     SHARE_ACCOUNT(700, "noteType.shares", "accounts/share"),
     SAVINGS_TRANSACTION(800, "noteType.savings.transaction", "savingsTransactions");
-    
+
     private Integer value;
     private String code;
     private String apiUrl;

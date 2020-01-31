@@ -43,7 +43,7 @@ public class AprCalculator {
             break;
             case WHOLE_TERM:
                         final BigDecimal ratePerPeriod = interestRatePerPeriod.divide(BigDecimal.valueOf(numberOfRepayments*repaymentEvery), 8, RoundingMode.HALF_UP);
-                         
+
                          switch (repaymentPeriodFrequencyType) {
                              case DAYS:
                                  defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(365));
@@ -57,12 +57,12 @@ public class AprCalculator {
                              case YEARS:
                                  defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(1));
                              break;
-                         }                    
+                         }
              break;
             case INVALID:
             break;
         }
-    
+
             return defaultAnnualNominalInterestRate;
         }
 

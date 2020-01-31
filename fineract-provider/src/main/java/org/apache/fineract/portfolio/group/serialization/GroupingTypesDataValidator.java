@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.group.serialization;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -40,10 +42,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public final class GroupingTypesDataValidator {
 
@@ -51,37 +49,37 @@ public final class GroupingTypesDataValidator {
     private final GroupRepositoryWrapper groupRepositoryWrapper;
 
     private static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-					GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
-					GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.officeIdParamName,
-					GroupingTypesApiConstants.staffIdParamName, GroupingTypesApiConstants.activeParamName,
-					GroupingTypesApiConstants.activationDateParamName, GroupingTypesApiConstants.groupMembersParamName,
-					GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
+            Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
+                    GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
+                    GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.officeIdParamName,
+                    GroupingTypesApiConstants.staffIdParamName, GroupingTypesApiConstants.activeParamName,
+                    GroupingTypesApiConstants.activationDateParamName, GroupingTypesApiConstants.groupMembersParamName,
+                    GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
 
     private static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-			GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
-			GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.centerIdParamName,
-			GroupingTypesApiConstants.officeIdParamName, GroupingTypesApiConstants.staffIdParamName,
-			GroupingTypesApiConstants.activeParamName, GroupingTypesApiConstants.activationDateParamName,
-			GroupingTypesApiConstants.clientMembersParamName, GroupingTypesApiConstants.collectionMeetingCalendar,
-			GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
+            GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
+            GroupingTypesApiConstants.idParamName, GroupingTypesApiConstants.nameParamName,
+            GroupingTypesApiConstants.externalIdParamName, GroupingTypesApiConstants.centerIdParamName,
+            GroupingTypesApiConstants.officeIdParamName, GroupingTypesApiConstants.staffIdParamName,
+            GroupingTypesApiConstants.activeParamName, GroupingTypesApiConstants.activationDateParamName,
+            GroupingTypesApiConstants.clientMembersParamName, GroupingTypesApiConstants.collectionMeetingCalendar,
+            GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables));
 
 
     private static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-					GroupingTypesApiConstants.activationDateParamName));
+            Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
+                    GroupingTypesApiConstants.activationDateParamName));
 
     private static final Set<String> GROUP_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
-			GroupingTypesApiConstants.closureDateParamName, GroupingTypesApiConstants.closureReasonIdParamName));
+            GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
+            GroupingTypesApiConstants.closureDateParamName, GroupingTypesApiConstants.closureReasonIdParamName));
 
     @Autowired
-	public GroupingTypesDataValidator(final FromJsonHelper fromApiJsonHelper,
-			final GroupRepositoryWrapper groupRepositoryWrapper) {
-		this.fromApiJsonHelper = fromApiJsonHelper;
-		this.groupRepositoryWrapper = groupRepositoryWrapper;
-	}
+    public GroupingTypesDataValidator(final FromJsonHelper fromApiJsonHelper,
+            final GroupRepositoryWrapper groupRepositoryWrapper) {
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.groupRepositoryWrapper = groupRepositoryWrapper;
+    }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -322,18 +320,18 @@ public final class GroupingTypesDataValidator {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.staffIdParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.staffIdParamName).value(staffId).integerGreaterThanZero();
         }
-        
+
         LocalDate submittedOnDate = this.groupRepositoryWrapper.retrieveSubmittedOndate(centerId);
 
-		final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
-				element);
-		if ((active != null && active)
-				|| (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
-			final LocalDate joinedDate = this.fromApiJsonHelper
-					.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
-			baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
-					.notNull().validateDateAfter(submittedOnDate);
-		}
+        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
+                element);
+        if ((active != null && active)
+                || (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
+            final LocalDate joinedDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
+                    .notNull().validateDateAfter(submittedOnDate);
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -371,24 +369,24 @@ public final class GroupingTypesDataValidator {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.staffIdParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.staffIdParamName).value(staffId).integerGreaterThanZero();
         }
-        
+
         LocalDate submittedOnDate = this.groupRepositoryWrapper.retrieveSubmittedOndate(groupId);
-        
+
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
             submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
                     GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
-		final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
-				element);
-		if ((active != null && active) || (this.fromApiJsonHelper
-				.parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
-			final LocalDate joinedDate = this.fromApiJsonHelper
-					.extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
-			baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
-					.notNull().validateDateAfter(submittedOnDate);
-		}
+        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
+                element);
+        if ((active != null && active) || (this.fromApiJsonHelper
+                .parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
+            final LocalDate joinedDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
+                    .notNull().validateDateAfter(submittedOnDate);
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

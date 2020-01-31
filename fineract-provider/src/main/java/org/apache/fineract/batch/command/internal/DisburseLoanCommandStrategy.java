@@ -19,7 +19,6 @@
 package org.apache.fineract.batch.command.internal;
 
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -37,9 +36,9 @@ import org.springframework.stereotype.Component;
  * back the response. This class will also catch any errors raised by
  * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and map
  * those errors to appropriate status codes in BatchResponse.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.command.CommandStrategy
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse
@@ -62,18 +61,18 @@ public class DisburseLoanCommandStrategy implements CommandStrategy {
 
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
-        
+
         final String[] pathParameters = request.getRelativeUrl().split("/");
         Long loanId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
 
         // Try-catch blocks to map exceptions to appropriate status codes
         try {
 
-            // Calls 'disburse' function from 'LoansApiResource' to disburse a loan          
+            // Calls 'disburse' function from 'LoansApiResource' to disburse a loan
             responseBody = loansApiResource.stateTransitions(loanId, "disburse", request.getBody());
 
             response.setStatusCode(200);
-            
+
             // Sets the body of the response after the successful disbursal of the loan
             response.setBody(responseBody);
 

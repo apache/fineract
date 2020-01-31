@@ -30,7 +30,7 @@ import java.math.MathContext;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -39,12 +39,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -57,7 +53,7 @@ import org.joda.time.MonthDay;
 
 /**
  * @author dv6
- * 
+ *
  */
 @Entity
 @Table(name = "m_savings_account_charge")
@@ -227,7 +223,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
         populateDerivedFields(transactionAmount, chargeAmount);
 
         if (this.isWithdrawalFee()
-        		|| this.isSavingsNoActivity()) {
+                || this.isSavingsNoActivity()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
 
@@ -451,14 +447,14 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
             final MonthDay monthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(feeOnMonthDayParamName);
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (this.feeOnDay != dayOfMonthValue) {
+            if (!this.feeOnDay.equals(dayOfMonthValue)) {
                 actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
                 actualChanges.put(localeParamName, localeAsInput);
                 this.feeOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (this.feeOnMonth != monthOfYear) {
+            if (!this.feeOnMonth.equals(monthOfYear)) {
                 actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
                 actualChanges.put(localeParamName, localeAsInput);
                 this.feeOnMonth = monthOfYear;
@@ -658,9 +654,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
     public boolean isSavingsActivation() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsActivation();
     }
-    
+
     public boolean isSavingsNoActivity(){
-    	return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
+        return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
     }
 
     public boolean isSavingsClosure() {
@@ -693,17 +689,35 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        final SavingsAccountCharge rhs = (SavingsAccountCharge) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(getId(), rhs.getId()) //
-                .append(this.charge.getId(), rhs.charge.getId()) //
-                .append(this.amount, rhs.amount) //
-                .append(getDueLocalDate(), rhs.getDueLocalDate()) //
-                .isEquals();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SavingsAccountCharge)) return false;
+        SavingsAccountCharge that = (SavingsAccountCharge) o;
+        return Objects.equals(penaltyCharge, that.penaltyCharge) &&
+               Objects.equals(paid, that.paid) &&
+               Objects.equals(waived, that.waived) &&
+               Objects.equals(status, that.status) &&
+               Objects.equals(savingsAccount, that.savingsAccount) &&
+               Objects.equals(charge, that.charge) &&
+               Objects.equals(chargeTime, that.chargeTime) &&
+               Objects.equals(dueDate, that.dueDate) &&
+               Objects.equals(feeOnMonth, that.feeOnMonth) &&
+               Objects.equals(feeOnDay, that.feeOnDay) &&
+               Objects.equals(feeInterval, that.feeInterval) &&
+               Objects.equals(chargeCalculation, that.chargeCalculation) &&
+               Objects.equals(percentage, that.percentage) &&
+               Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) &&
+               Objects.equals(amount, that.amount) &&
+               Objects.equals(amountPaid, that.amountPaid) &&
+               Objects.equals(amountWaived, that.amountWaived) &&
+               Objects.equals(amountWrittenOff, that.amountWrittenOff) &&
+               Objects.equals(amountOutstanding, that.amountOutstanding) &&
+               Objects.equals(inactivationDate, that.inactivationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(savingsAccount, charge, chargeTime, dueDate, feeOnMonth, feeOnDay, feeInterval, chargeCalculation, percentage, amountPercentageAppliedTo, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penaltyCharge, paid, waived, status, inactivationDate);
     }
 
     public BigDecimal calculateWithdralFeeAmount(@NotNull BigDecimal transactionAmount) {
@@ -846,7 +860,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
      * savings account with account balance of 1000, still these charges can be
      * collected as these charges are initiated by system and it can bring down
      * the balance below the enforced minimum balance).
-     * 
+     *
      */
     public boolean canOverriteSavingAccountRules() {
         return !(this.isSavingsActivation() || this.isWithdrawalFee());

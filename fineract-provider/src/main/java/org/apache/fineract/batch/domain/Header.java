@@ -22,9 +22,9 @@ package org.apache.fineract.batch.domain;
  * Provides an object to handle HTTP headers as name and value pairs for Batch
  * API. It is used in {@link BatchRequest} and {@link BatchResponse} to store
  * the information regarding the headers in incoming and outgoing JSON Strings.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see BatchRequest
  * @see BatchResponse
  */
@@ -35,7 +35,7 @@ public class Header {
 
     /**
      * Constructs a 'Header' with the name and value of HTTP headers.
-     * 
+     *
      * @param name
      *            of the HTTP header.
      * @param value
@@ -55,7 +55,7 @@ public class Header {
 
     /**
      * Returns the 'name' data field of the object of this class.
-     * 
+     *
      * @return name data field of this class
      */
     public String getName() {
@@ -64,7 +64,7 @@ public class Header {
 
     /**
      * Sets 'name' data field of this class.
-     * 
+     *
      * @param name
      */
     public void setName(String name) {
@@ -73,7 +73,7 @@ public class Header {
 
     /**
      * Returns the 'value' data field of the object of this class.
-     * 
+     *
      * @return value data field of this class
      */
     public String getValue() {
@@ -82,7 +82,7 @@ public class Header {
 
     /**
      * Sets 'value' data field of this class.
-     * 
+     *
      * @param value
      */
     public void setValue(String value) {

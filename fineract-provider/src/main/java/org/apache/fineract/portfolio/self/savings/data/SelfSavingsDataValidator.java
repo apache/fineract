@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.self.savings.data;
 
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -39,92 +38,90 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-
 @Component
 public class SelfSavingsDataValidator {
-	
-	private final FromJsonHelper fromApiJsonHelper;
 
-	@Autowired
-	public SelfSavingsDataValidator(final FromJsonHelper fromApiJsonHelper) {
-		this.fromApiJsonHelper = fromApiJsonHelper;
-	}
+    private final FromJsonHelper fromApiJsonHelper;
 
-	private static final Set<String> allowedAssociationParameters = new HashSet<>(
-			Arrays.asList(SavingsApiConstants.transactions,
-					SavingsApiConstants.charges));
+    @Autowired
+    public SelfSavingsDataValidator(final FromJsonHelper fromApiJsonHelper) {
+        this.fromApiJsonHelper = fromApiJsonHelper;
+    }
 
-	public void validateRetrieveSavings(final UriInfo uriInfo) {
-		List<String> unsupportedParams = new ArrayList<>();
+    private static final Set<String> allowedAssociationParameters = new HashSet<>(
+            Arrays.asList(SavingsApiConstants.transactions,
+                    SavingsApiConstants.charges));
 
-		validateTemplate(uriInfo, unsupportedParams);
+    public void validateRetrieveSavings(final UriInfo uriInfo) {
+        List<String> unsupportedParams = new ArrayList<>();
 
-		Set<String> associationParameters = ApiParameterHelper
-				.extractAssociationsForResponseIfProvided(uriInfo
-						.getQueryParameters());
-		if (!associationParameters.isEmpty()) {
-			associationParameters.removeAll(allowedAssociationParameters);
-			if (!associationParameters.isEmpty()) {
-				unsupportedParams.addAll(associationParameters);
-			}
-		}
+        validateTemplate(uriInfo, unsupportedParams);
 
-		if (uriInfo.getQueryParameters().getFirst("exclude") != null) {
-			unsupportedParams.add("exclude");
-		}
+        Set<String> associationParameters = ApiParameterHelper
+                .extractAssociationsForResponseIfProvided(uriInfo
+                        .getQueryParameters());
+        if (!associationParameters.isEmpty()) {
+            associationParameters.removeAll(allowedAssociationParameters);
+            if (!associationParameters.isEmpty()) {
+                unsupportedParams.addAll(associationParameters);
+            }
+        }
 
-		throwExceptionIfReqd(unsupportedParams);
-	}
+        if (uriInfo.getQueryParameters().getFirst("exclude") != null) {
+            unsupportedParams.add("exclude");
+        }
 
-	public void validateRetrieveSavingsTransaction(final UriInfo uriInfo) {
-		List<String> unsupportedParams = new ArrayList<>();
+        throwExceptionIfReqd(unsupportedParams);
+    }
 
-		validateTemplate(uriInfo, unsupportedParams);
+    public void validateRetrieveSavingsTransaction(final UriInfo uriInfo) {
+        List<String> unsupportedParams = new ArrayList<>();
 
-		throwExceptionIfReqd(unsupportedParams);
-	}
+        validateTemplate(uriInfo, unsupportedParams);
 
-	private void throwExceptionIfReqd(final List<String> unsupportedParams) {
-		if (unsupportedParams.size() > 0) {
-			throw new UnsupportedParameterException(unsupportedParams);
-		}
-	}
+        throwExceptionIfReqd(unsupportedParams);
+    }
 
-	private void validateTemplate(final UriInfo uriInfo,
-			List<String> unsupportedParams) {
-		final boolean templateRequest = ApiParameterHelper.template(uriInfo
-				.getQueryParameters());
-		if (templateRequest) {
-			unsupportedParams.add("template");
-		}
-	}
-	
-	public HashMap<String, Object> validateSavingsApplication(final String json) {
-		if (StringUtils.isBlank(json)) {
-			throw new InvalidJsonException();
-		}
+    private void throwExceptionIfReqd(final List<String> unsupportedParams) {
+        if (unsupportedParams.size() > 0) {
+            throw new UnsupportedParameterException(unsupportedParams);
+        }
+    }
 
-		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-				.resource(SelfSavingsAccountConstants.savingsAccountResource);
+    private void validateTemplate(final UriInfo uriInfo,
+            List<String> unsupportedParams) {
+        final boolean templateRequest = ApiParameterHelper.template(uriInfo
+                .getQueryParameters());
+        if (templateRequest) {
+            unsupportedParams.add("template");
+        }
+    }
 
-		final JsonElement element = this.fromApiJsonHelper.parse(json);
+    public HashMap<String, Object> validateSavingsApplication(final String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
-		final Long clientId = this.fromApiJsonHelper.extractLongNamed(SelfSavingsAccountConstants.clientIdParameterName,
-				element);
-		baseDataValidator.reset().parameter(SelfSavingsAccountConstants.clientIdParameterName).value(clientId).notNull()
-				.longGreaterThanZero();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SelfSavingsAccountConstants.savingsAccountResource);
 
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException(dataValidationErrors);
-		}
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-		HashMap<String, Object> parameterMap = new HashMap<>();
-		parameterMap.put(SelfSavingsAccountConstants.clientIdParameterName, clientId);
+        final Long clientId = this.fromApiJsonHelper.extractLongNamed(SelfSavingsAccountConstants.clientIdParameterName,
+                element);
+        baseDataValidator.reset().parameter(SelfSavingsAccountConstants.clientIdParameterName).value(clientId).notNull()
+                .longGreaterThanZero();
 
-		return parameterMap;
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
-	}
+        HashMap<String, Object> parameterMap = new HashMap<>();
+        parameterMap.put(SelfSavingsAccountConstants.clientIdParameterName, clientId);
+
+        return parameterMap;
+
+    }
 
 }

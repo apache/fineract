@@ -18,14 +18,18 @@
  */
 package org.apache.fineract.spm.api;
 
-import io.swagger.annotations.*;
-
+import com.google.gson.Gson;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -34,7 +38,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.SurveyData;
@@ -46,12 +49,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
-
 @Path("/surveys")
 @Component
 @Scope("singleton")
-@Api(value = "SPM - Serveys", description = "")
+@Api(tags = {"Spm-Surveys"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Spm-Surveys", description = "")
+})
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -142,9 +146,9 @@ public class SpmApiResource {
         }else{
             throw new UnrecognizedQueryParamException("command", command);
         }
-        
+
     }
-    
+
     private String getResponse(Long id) {
         Gson gson = new Gson();
         HashMap<String, Object> response = new HashMap<>();

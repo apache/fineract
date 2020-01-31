@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.interestratechart.incentive;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.portfolio.common.domain.ConditionType;
 
 public abstract class AttributeIncentiveCalculation {

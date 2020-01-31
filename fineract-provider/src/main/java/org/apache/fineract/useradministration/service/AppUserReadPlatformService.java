@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.useradministration.service;
 
-import org.apache.fineract.useradministration.data.AppUserData;
-
 import java.util.Collection;
+import org.apache.fineract.useradministration.data.AppUserData;
 
 public interface AppUserReadPlatformService {
 
@@ -31,6 +30,6 @@ public interface AppUserReadPlatformService {
     AppUserData retrieveNewUserDetails();
 
     AppUserData retrieveUser(Long userId);
-    
+
     boolean isUsernameExist(String username);
 }

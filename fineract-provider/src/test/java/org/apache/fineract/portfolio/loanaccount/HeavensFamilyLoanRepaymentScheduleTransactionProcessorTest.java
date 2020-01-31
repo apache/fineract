@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount;
 import java.lang.reflect.Field;
 import java.math.RoundingMode;
 import java.util.List;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -58,7 +57,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     /**
      * Scenario 1: Single transaction which is less than the interest component
      * of the first installment.
-     * 
+     *
      * Expectation: - First installment shows interest completed equal to that
      * of transactions, zero principal completed. (payment order interest,
      * principal) - transaction has interest portion equal to transaction

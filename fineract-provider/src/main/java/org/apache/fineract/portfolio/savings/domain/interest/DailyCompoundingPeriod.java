@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -97,8 +96,8 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
         return interestEarned;
     }
 
-	@Override
-	public LocalDateInterval getPeriodInterval() {
-		return this.periodInterval;
-	}
+    @Override
+    public LocalDateInterval getPeriodInterval() {
+        return this.periodInterval;
+    }
 }

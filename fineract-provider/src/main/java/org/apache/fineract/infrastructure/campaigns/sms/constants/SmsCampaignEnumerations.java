@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.campaigns.sms.constants;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -29,7 +28,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public class SmsCampaignEnumerations {
 
-    
+
     public static EnumOptionData smscampaignTriggerType(final SmsCampaignTriggerType type) {
         EnumOptionData optionData = new EnumOptionData(SmsCampaignTriggerType.INVALID.getValue().longValue(),
                 SmsCampaignTriggerType.INVALID.getCode(), "Invalid");
@@ -86,11 +85,11 @@ public class SmsCampaignEnumerations {
     public static List<EnumOptionData> calendarPeriodFrequencyTypes(final PeriodFrequencyType[] periodFrequencyTypes) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final PeriodFrequencyType periodFrequencyType : periodFrequencyTypes) {
-        	if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
-        		final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
+            if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
+                final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
                         periodFrequencyType.toString());
-                optionDatas.add(optionData);	
-        	}
+                optionDatas.add(optionData);
+            }
         }
         return optionDatas;
     }

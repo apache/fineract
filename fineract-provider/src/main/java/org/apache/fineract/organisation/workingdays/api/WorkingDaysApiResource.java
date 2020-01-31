@@ -18,6 +18,15 @@
  */
 package org.apache.fineract.organisation.workingdays.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -26,8 +35,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
-import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -45,7 +52,10 @@ import org.springframework.stereotype.Component;
 @Path("/workingdays")
 @Component
 @Scope("singleton")
-@Api(value = "Working days", description = "The days of the week that are workdays.\n" + "\n" + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations.\n" + "\n" + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
+@Api(tags = {"Working days"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Working days", description = "The days of the week that are workdays.\n" + "\n" + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations\n" + "\n" + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
+})
 public class WorkingDaysApiResource {
 
     private final DefaultToApiJsonSerializer<WorkingDaysData> toApiJsonSerializer;

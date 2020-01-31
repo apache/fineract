@@ -19,16 +19,15 @@
 package org.apache.fineract.batch.command;
 
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 
 /**
  * An interface for various Command Strategies. It contains a single function
  * which returns appropriate response from a particular command strategy.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy
  */
 public interface CommandStrategy {
@@ -38,7 +37,7 @@ public interface CommandStrategy {
      * {@link org.apache.fineract.batch.domain.BatchResponse}. This takes
      * {@link org.apache.fineract.batch.domain.BatchRequest} as it's single
      * argument and provides appropriate response.
-     * 
+     *
      * @param batchRequest
      * @param uriInfo
      * @return BatchResponse

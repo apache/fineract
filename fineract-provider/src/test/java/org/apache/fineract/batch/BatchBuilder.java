@@ -20,9 +20,7 @@ package org.apache.fineract.batch;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.service.BatchApiService;
@@ -33,7 +31,7 @@ import org.mockito.Mockito;
 /**
  * Runs a unit test for BatchApiResource by mocking the BatchRequest and
  * BatchApiService objects.
- * 
+ *
  * @author Rishabh Shukla
  */
 public class BatchBuilder {

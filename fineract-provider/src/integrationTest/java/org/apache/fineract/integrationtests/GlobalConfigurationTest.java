@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -28,12 +32,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class GlobalConfigurationTest {
@@ -144,85 +142,85 @@ public class GlobalConfigurationTest {
             Assert.assertEquals("Verifying Is Cache Enabled Global Config after Updation", cacheTypeId, changes.get("cacheType"));
         }
     }
-    
+
     @Test
-	public void testGlobalConfigForcePasswordResetDays() {
+    public void testGlobalConfigForcePasswordResetDays() {
 
-		// Retrieving All Global Configuration details
-		final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
-				.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
-		Assert.assertNotNull(globalConfig);
+        // Retrieving All Global Configuration details
+        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
+                .getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(globalConfig);
 
-		String configName = "force-password-reset-days";
-		String newValue = "0";
-		String newBooleanValue = "true";
+        String configName = "force-password-reset-days";
+        String newValue = "0";
+        String newBooleanValue = "true";
 
-		for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
-			if (globalConfig.get(configIndex).get("name").equals(configName)) {
-				Integer configId = (Integer) globalConfig.get(configIndex).get(
-						"id");
-				Assert.assertNotNull(configId);
+        for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
+            if (globalConfig.get(configIndex).get("name").equals(configName)) {
+                Integer configId = (Integer) globalConfig.get(configIndex).get(
+                        "id");
+                Assert.assertNotNull(configId);
 
-				/*
-				 * Update force-password-reset-days with value as 0 and Enable
-				 * as true - failure case
-				 */
-				ArrayList error = (ArrayList) this.globalConfigurationHelper
-						.updatePasswordResetDaysForGlobalConfiguration(
-								this.requestSpec, this.httpStatusForidden,
-								configId, newValue, newBooleanValue,
-								CommonConstants.RESPONSE_ERROR);
-				HashMap hash = (HashMap) error.get(0);
+                /*
+                 * Update force-password-reset-days with value as 0 and Enable
+                 * as true - failure case
+                 */
+                ArrayList error = (ArrayList) this.globalConfigurationHelper
+                        .updatePasswordResetDaysForGlobalConfiguration(
+                                this.requestSpec, this.httpStatusForidden,
+                                configId, newValue, newBooleanValue,
+                                CommonConstants.RESPONSE_ERROR);
+                HashMap hash = (HashMap) error.get(0);
 
-				Assert.assertEquals(
-						"Force Password Reset days value must be greater than zero.",
-						"error.msg.password.reset.days.value.must.be.greater.than.zero",
-						hash.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                Assert.assertEquals(
+                        "Force Password Reset days value must be greater than zero.",
+                        "error.msg.password.reset.days.value.must.be.greater.than.zero",
+                        hash.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-				/*
-				 * Update force-password-reset-days with value as 50 and Enable
-				 * as true - success case
-				 */
-				final HashMap updateSuccess = (HashMap) this.globalConfigurationHelper
-						.updatePasswordResetDaysForGlobalConfiguration(
-								this.requestSpec, this.responseSpec, configId,
-								"50", newBooleanValue, "changes");
-				Assert.assertNotNull(updateSuccess);
+                /*
+                 * Update force-password-reset-days with value as 50 and Enable
+                 * as true - success case
+                 */
+                final HashMap updateSuccess = (HashMap) this.globalConfigurationHelper
+                        .updatePasswordResetDaysForGlobalConfiguration(
+                                this.requestSpec, this.responseSpec, configId,
+                                "50", newBooleanValue, "changes");
+                Assert.assertNotNull(updateSuccess);
 
-				/* Update with value as 0 and Enable as false - success case */
-				final HashMap updateSuccess1 = (HashMap) this.globalConfigurationHelper
-						.updatePasswordResetDaysForGlobalConfiguration(
-								this.requestSpec, this.responseSpec, configId,
-								newValue, "false", "changes");
-				Assert.assertNotNull(updateSuccess1);
+                /* Update with value as 0 and Enable as false - success case */
+                final HashMap updateSuccess1 = (HashMap) this.globalConfigurationHelper
+                        .updatePasswordResetDaysForGlobalConfiguration(
+                                this.requestSpec, this.responseSpec, configId,
+                                newValue, "false", "changes");
+                Assert.assertNotNull(updateSuccess1);
 
-				/* Update without sending value and Enable as true - failure case*/
-				ArrayList failure = (ArrayList) this.globalConfigurationHelper
-						.updatePasswordResetDaysForGlobalConfiguration(
-								this.requestSpec, this.httpStatusForidden, configId,
-								null, newBooleanValue, CommonConstants.RESPONSE_ERROR);
-				HashMap failureHash = (HashMap) failure.get(0);
-				Assert.assertEquals(
-						"Force Password Reset days value must be greater than zero.",
-						"error.msg.password.reset.days.value.must.be.greater.than.zero",
-						failureHash.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                /* Update without sending value and Enable as true - failure case*/
+                ArrayList failure = (ArrayList) this.globalConfigurationHelper
+                        .updatePasswordResetDaysForGlobalConfiguration(
+                                this.requestSpec, this.httpStatusForidden, configId,
+                                null, newBooleanValue, CommonConstants.RESPONSE_ERROR);
+                HashMap failureHash = (HashMap) failure.get(0);
+                Assert.assertEquals(
+                        "Force Password Reset days value must be greater than zero.",
+                        "error.msg.password.reset.days.value.must.be.greater.than.zero",
+                        failureHash.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-				break;
-			}
-		}
-		/* Update other global configuration property */
-		String otherConfigName = "maker-checker";
-		for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
-			if (globalConfig.get(configIndex).get("name")
-					.equals(otherConfigName)) {
-				String configId = (globalConfig.get(configIndex).get("id"))
-						.toString();
-				Integer updateConfigId = this.globalConfigurationHelper
-						.updateValueForGlobalConfiguration(this.requestSpec,
-								this.responseSpec, configId, newValue);
-				Assert.assertNotNull(updateConfigId);
-				break;
-			}
-		}
-	}
+                break;
+            }
+        }
+        /* Update other global configuration property */
+        String otherConfigName = "maker-checker";
+        for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
+            if (globalConfig.get(configIndex).get("name")
+                    .equals(otherConfigName)) {
+                String configId = (globalConfig.get(configIndex).get("id"))
+                        .toString();
+                Integer updateConfigId = this.globalConfigurationHelper
+                        .updateValueForGlobalConfiguration(this.requestSpec,
+                                this.responseSpec, configId, newValue);
+                Assert.assertNotNull(updateConfigId);
+                break;
+            }
+        }
+    }
 }

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 @Service
 @CommandType(entity = "JOURNALENTRY", action = "DEFINEOPENINGBALANCE")
 public class DefineOpeningBalanceCommandHandler implements NewCommandSourceHandler {
-    
+
     private final JournalEntryWritePlatformService writePlatformService;
 
     @Autowired

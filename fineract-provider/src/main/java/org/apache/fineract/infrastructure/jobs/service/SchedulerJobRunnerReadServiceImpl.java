@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -48,7 +47,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     @Autowired
     public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }
@@ -115,18 +114,18 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     private boolean isJobExist(final Long jobId) {
-    	boolean isJobPresent = false;
-    	try{
+        boolean isJobPresent = false;
+        try{
             final String sql = "select count(*) from job job where job.id= ?";
             final int count = this.jdbcTemplate.queryForObject(sql, Integer.class, new Object[] { jobId });
             if (count == 1) {
                 isJobPresent = true;
             }
             return isJobPresent;
-    	}catch(EmptyResultDataAccessException e){
-    		return isJobPresent;
-    	}
-        
+        }catch(EmptyResultDataAccessException e){
+            return isJobPresent;
+        }
+
     }
 
     private static final class JobDetailMapper implements RowMapper<JobDetailData> {

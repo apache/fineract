@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -52,8 +51,8 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
 
     @Autowired
     public NotificationReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final PlatformSecurityContext context,
-    		final ColumnValidator columnValidator) {
+            final PlatformSecurityContext context,
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.context = context;
         this.columnValidator = columnValidator;

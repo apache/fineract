@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.account.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -381,7 +380,7 @@ public class StandingInstructionData {
         return this.toClient;
     }
 
-    
+
     public Long getId() {
         return this.id;
     }

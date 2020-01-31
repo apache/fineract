@@ -19,11 +19,10 @@
 package org.apache.fineract.notification.domain;
 
 import java.util.List;
-
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface TopicSubscriberRepository extends JpaRepository<TopicSubscriber, Long>, JpaSpecificationExecutor<TopicSubscriber> {
-	List<TopicSubscriber> findBySubscriber(AppUser subscriber);
+    List<TopicSubscriber> findBySubscriber(AppUser subscriber);
 }

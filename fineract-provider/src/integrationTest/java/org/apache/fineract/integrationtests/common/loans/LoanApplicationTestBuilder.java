@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.google.gson.Gson;
 
 public class LoanApplicationTestBuilder {
 
@@ -303,7 +302,7 @@ public class LoanApplicationTestBuilder {
      * disbursement with the group meetings (it seems that if we do use this
      * parameter we should also use calendarID to sync repayment with group
      * meetings)
-     * 
+     *
      * @return
      */
     public LoanApplicationTestBuilder withSyncDisbursementWithMeetin() {

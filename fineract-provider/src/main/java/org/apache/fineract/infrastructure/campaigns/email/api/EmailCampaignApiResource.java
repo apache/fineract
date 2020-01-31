@@ -19,34 +19,39 @@
 package org.apache.fineract.infrastructure.campaigns.email.api;
 
 import com.google.gson.JsonElement;
+import java.util.Collection;
+import java.util.HashSet;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
+import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
+import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignReadPlatformService;
+import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
-import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignReadPlatformService;
-import org.apache.fineract.infrastructure.campaigns.email.service.EmailCampaignWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * Created with IntelliJ IDEA.

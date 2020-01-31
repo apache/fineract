@@ -20,20 +20,22 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
 import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -42,31 +44,23 @@ import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
 import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
 import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
 import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.Months;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
 public class FixedDepositTest {
@@ -244,7 +238,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsPrematureClosed(fixedDepositAccountStatusHashMap);
 
-     
+
         /***
          * Verify journal entry transactions for preclosure transaction
          */
@@ -257,8 +251,8 @@ public class FixedDepositTest {
                 JournalEntry.TransactionType.DEBIT));
 
     }
-    
-    
+
+
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeWithdrawal_WITH_HOLD_TAX() {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
@@ -391,11 +385,11 @@ public class FixedDepositTest {
         HashMap accountDetails = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float maturityAmount = Float.valueOf(accountDetails.get("maturityAmount").toString());
-        
+
         HashMap summary = (HashMap) accountDetails.get("summary");
         Assert.assertNotNull(summary.get("totalWithholdTax"));
         Float withHoldTax = (Float) summary.get("totalWithholdTax");
-        
+
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, CLOSED_ON_DATE, new JournalEntry(maturityAmount,
                 JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE, new JournalEntry(maturityAmount,
@@ -404,8 +398,8 @@ public class FixedDepositTest {
                 JournalEntry.TransactionType.CREDIT));
 
     }
-    
-    
+
+
     @Test
     public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
@@ -514,20 +508,20 @@ public class FixedDepositTest {
         /***
          * FD account verify whether account is matured
          */
-        
+
         SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec, responseSpec);
         String JobName = "Update Deposit Accounts Maturity details";
         schedulerJobHelper.executeJob(JobName);
-        
+
         HashMap accountDetails = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
-        
+
         HashMap summary = (HashMap) accountDetails.get("summary");
         Assert.assertNotNull(summary.get("totalWithholdTax"));
         Float withHoldTax = (Float) summary.get("totalWithholdTax");
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccountForTax, CLOSED_ON_DATE, new JournalEntry(withHoldTax,
                 JournalEntry.TransactionType.CREDIT));
-        
+
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -535,7 +529,7 @@ public class FixedDepositTest {
 
     }
 
-    
+
     @Test
     public void testFixedDepositAccountWithPeriodInterestRateChart() {
         final String chartToUse = "period";
@@ -544,7 +538,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithPeriodInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "period";
@@ -553,7 +547,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithPeriodInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "period";
@@ -562,7 +556,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithAmountInterestRateChart() {
         final String chartToUse = "amount";
@@ -571,7 +565,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithAmountInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "amount";
@@ -580,7 +574,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(5.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithAmountInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "amount";
@@ -598,7 +592,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithPeriodAndAmountInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "period_amount";
@@ -607,7 +601,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithPeriodAndAmountInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "period_amount";
@@ -616,7 +610,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(9.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithAmountAndPeriodInterestRateChart() {
         final String chartToUse = "amount_period";
@@ -625,7 +619,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(8.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithAmountAndPeriodInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "amount_period";
@@ -634,7 +628,7 @@ public class FixedDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testFixedDepositAccountWithAmountAndPeriodInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "amount_period";
@@ -2422,7 +2416,7 @@ public class FixedDepositTest {
         return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
     }
 
-    
+
     private Integer createFixedDepositProductWithWithHoldTax(final String validFrom, final String validTo, final String taxGroupId,
             final String accountingRule, Account... accounts) {
         System.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
@@ -2437,7 +2431,7 @@ public class FixedDepositTest {
                 .build(validFrom, validTo);
         return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
     }
-    
+
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             final String chartToBePicked, Account... accounts) {
         System.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
@@ -2561,7 +2555,7 @@ public class FixedDepositTest {
         Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
     }
-    
+
     private Integer createTaxGroup(final String percentage, final Account liabilityAccountForTax){
         final Integer liabilityAccountId = liabilityAccountForTax.getAccountID();
         final Integer taxComponentId = TaxComponentHelper.createTaxComponent(this.requestSpec, this.responseSpec, percentage, liabilityAccountId);

@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.reportmailingjob.helper;
 
 import java.net.InetAddress;
-
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -39,25 +38,25 @@ public class IPv4Helper {
         if (ipAddress == null || ipAddress.isEmpty()) {
             throw new IllegalArgumentException("ip address cannot be null or empty");
         }
-        
+
         String[] octets = ipAddress.split(java.util.regex.Pattern.quote("."));
-        
+
         if (octets.length != 4) {
             throw new IllegalArgumentException("invalid ip address");
         }
-        
+
         long ip = 0;
-        
+
         for (int i = 3; i >= 0; i--) {
             long octet = Long.parseLong(octets[3 - i]);
-            
+
             if (octet > 255 || octet < 0) {
                 throw new IllegalArgumentException("invalid ip address");
             }
-            
+
             ip |= octet << (i * 8);
         }
-        
+
         return ip;
     }
 
@@ -73,9 +72,9 @@ public class IPv4Helper {
         if (ip > 4294967295l || ip < 0) {
             throw new IllegalArgumentException("invalid ip");
         }
-        
+
         StringBuilder ipAddress = new StringBuilder();
-        
+
         for (int i = 3; i >= 0; i--) {
             int shift = i * 8;
             ipAddress.append((ip & (0xff << shift)) >> shift);
@@ -83,13 +82,13 @@ public class IPv4Helper {
                 ipAddress.append(".");
             }
         }
-        
+
         return ipAddress.toString();
     }
-    
-    /** 
+
+    /**
      * check if an IP Address is within a given range of IP Addresses
-     * 
+     *
      * @param ipAddress -- the IP Address to be checked
      * @param startOfRange -- the first IP address in the range
      * @param endOfRange -- the last IP address in the range
@@ -99,42 +98,42 @@ public class IPv4Helper {
         final long ipAddressToLong = ipAddressToLong(ipAddress);
         final long startOfRangeToLong = ipAddressToLong(startOfRange);
         final long endOfRangeToLong = ipAddressToLong(endOfRange);
-        
+
         long diff = ipAddressToLong - startOfRangeToLong;
-        
+
         return (diff >= 0 && (diff <= (endOfRangeToLong - startOfRangeToLong)));
     }
-    
-    /** 
+
+    /**
      * check if the java application is running on a local machine
-     * 
+     *
      * @return true if the application is running on a local machine else false
      **/
     public static boolean applicationIsRunningOnLocalMachine() {
         boolean isRunningOnLocalMachine = false;
-        
+
         try {
             final InetAddress localHost = InetAddress.getLocalHost();
-            
+
             if (localHost != null) {
                 final String hostAddress = localHost.getHostAddress();
                 final String startOfIpAddressRange = "127.0.0.0";
                 final String endOfIpAddressRange = "127.255.255.255";
-                
+
                 if (StringUtils.isNotEmpty(hostAddress)) {
                     isRunningOnLocalMachine = ipAddressIsInRange(hostAddress, startOfIpAddressRange, endOfIpAddressRange);
                 }
             }
         }
-        
+
         catch (Exception exception) { }
-                
+
         return isRunningOnLocalMachine;
     }
-    
-    /** 
+
+    /**
      * check if the java application is not running on a local machine
-     * 
+     *
      * @return true if the application is not running on a local machine else false
      **/
     public static boolean applicationIsNotRunningOnLocalMachine() {

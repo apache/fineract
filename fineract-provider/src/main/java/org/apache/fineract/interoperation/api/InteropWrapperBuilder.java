@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.interoperation.api;
 
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.interoperation.domain.InteropIdentifierType;
-import org.apache.fineract.interoperation.domain.InteropTransferActionType;
-
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_IDENTIFIER;
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_QUOTE;
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_REQUEST;
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_TRANSFER;
 import static org.apache.fineract.interoperation.util.InteropUtil.ROOT_PATH;
+
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.interoperation.domain.InteropTransferActionType;
 
 public class InteropWrapperBuilder {
 

@@ -61,13 +61,16 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productI
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -87,11 +90,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public class DepositAccountDataValidator {
@@ -165,7 +163,7 @@ public class DepositAccountDataValidator {
         validateRecurringDetailForSubmit(element, baseDataValidator);
         validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -662,7 +660,7 @@ public class DepositAccountDataValidator {
                     "Linked Savings account with id:" + linkedSavingsAccount.getId() + " is not in active state", "linkAccountId",
                     linkedSavingsAccount.getId());
             dataValidationErrors.add(error);
-        } else if (savingsAccount.clientId() != linkedSavingsAccount.clientId()) {
+        } else if (!savingsAccount.clientId().equals(linkedSavingsAccount.clientId())) {
             final ApiParameterError error = ApiParameterError.parameterError(
                     "validation.msg.deposit.linked.savings.account.not.belongs.to.same.client", "Linked Savings account with id:"
                             + linkedSavingsAccount.getId() + " is not belongs to the same client", "linkAccountId",
@@ -719,7 +717,7 @@ public class DepositAccountDataValidator {
             }
         }
     }
-    
+
     private void validateWithHoldTax(final JsonElement element, final DataValidatorBuilder baseDataValidator){
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);

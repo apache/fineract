@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
@@ -147,7 +146,7 @@ public class RecurringDepositProductData extends DepositProductData {
      * Returns a {@link RecurringDepositProductData} that contains and exist
      * {@link RecurringDepositProductData} data with further template data for
      * dropdowns.
-     * 
+     *
      * @param taxGroupOptions
      *            TODO
      */

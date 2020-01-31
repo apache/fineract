@@ -18,7 +18,22 @@
  */
 package org.apache.fineract.spm.api;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.util.Collections;
+import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.LookupTableData;
 import org.apache.fineract.spm.domain.LookupTable;
@@ -33,16 +48,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 @Path("/surveys/{surveyId}/lookuptables")
 @Component
 @Scope("singleton")
-@Api(value = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.")
+@Api(tags = {"SPM API - LookUp Table"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.")
+})
 public class LookupTableApiResource {
 
     private final PlatformSecurityContext securityContext;

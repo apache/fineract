@@ -32,14 +32,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -298,7 +296,7 @@ public class FixedDepositAccount extends SavingsAccount {
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
         List<LocalDate> postedAsOnTransactionDates= getManualPostingDates();
-        
+
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
                 accountSubmittedOrActivationDate(), maturityDate, postingPeriodType, financialYearBeginningMonth,
                 postedAsOnTransactionDates);
@@ -826,10 +824,10 @@ public class FixedDepositAccount extends SavingsAccount {
     public BigDecimal minBalanceForInterestCalculation() {
         return null;
     }
-    
+
     @Override
     public void loadLazyCollections() {
-    	super.loadLazyCollections();
-    	this.chart.getId() ;
+        super.loadLazyCollections();
+        this.chart.getId() ;
     }
 }

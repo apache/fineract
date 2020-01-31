@@ -22,7 +22,6 @@ import java.math.MathContext;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.joda.time.LocalDate;
@@ -37,12 +36,12 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
             @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,
             @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
             @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
-    
+
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,
                 outstandingBalance, periodStartDate, periodEndDate);
         Money interestForThisInstallment = result.interest();
-        
+
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
                 periodNumber, mc, interestForThisInstallment);
 

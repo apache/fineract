@@ -21,9 +21,7 @@ package org.apache.fineract.infrastructure.security.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
@@ -112,7 +110,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
                     schemaPassword, autoUpdateEnabled, initialSize, validationInterval, removeAbandoned, removeAbandonedTimeout,
                     logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle, suspectTimeout, timeBetweenEvictionRunsMillis,
                     minEvictableIdleTimeMillis, maxRetriesOnDeadlock, maxIntervalBetweenRetries, testOnBorrow);
-            
+
         }
 
         private int bindValueInMinMaxRange(final int value, int min, int max) {

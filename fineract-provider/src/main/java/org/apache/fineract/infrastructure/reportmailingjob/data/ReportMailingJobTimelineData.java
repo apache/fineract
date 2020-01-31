@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.reportmailingjob.data;
 
 import org.joda.time.LocalDate;
 
-/** 
+/**
  * Immutable data object represent the timeline events of a report mailing job (creation)
  **/
 @SuppressWarnings("unused")
@@ -33,7 +33,7 @@ public class ReportMailingJobTimelineData {
     private final String updatedByUsername;
     private final String updatedByFirstname;
     private final String updatedByLastname;
-    
+
     /**
      * @param createdOnDate
      * @param createdByUsername

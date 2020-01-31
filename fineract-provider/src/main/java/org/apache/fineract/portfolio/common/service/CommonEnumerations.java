@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.common.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.ConditionType;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
@@ -28,7 +27,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public class CommonEnumerations {
-    
+
     public static final String DAYS_IN_MONTH_TYPE = "daysInMonthType";
     public static final String DAYS_IN_YEAR_TYPE = "daysInYearType";
 

@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
@@ -196,11 +195,11 @@ public class SavingsEnumerations {
             case AMOUNT_HOLD:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_HOLD.getValue().longValue(),
                         SavingsAccountTransactionType.AMOUNT_HOLD.getCode(), "Amount on hold");
-                break;    
+                break;
             case AMOUNT_RELEASE:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue().longValue(),
                         SavingsAccountTransactionType.AMOUNT_RELEASE.getCode(), "Release Amount");
-                break; 
+                break;
         }
         return optionData;
     }
@@ -307,20 +306,20 @@ public class SavingsEnumerations {
         final boolean blockDebit = type.isSubStatusDebitBlocked();
 
         SavingsAccountSubStatusEnumData optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.NONE.getValue().longValue(),
-        		SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat, block, blockCredit, blockDebit);
 
         switch (type) {
             case INACTIVE:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.INACTIVE.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                        SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case DORMANT:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.DORMANT.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                        SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case ESCHEAT:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.ESCHEAT.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                        SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case BLOCK:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.BLOCK.getValue().longValue(),

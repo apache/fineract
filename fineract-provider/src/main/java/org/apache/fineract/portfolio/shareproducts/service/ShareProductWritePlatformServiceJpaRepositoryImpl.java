@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.portfolio.shareproducts.service;
 
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -31,9 +30,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
@@ -46,8 +45,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonElement;
 
 @Service
 public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareProductWritePlatformService {
@@ -93,9 +90,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
 
     }
@@ -124,9 +121,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -203,14 +200,14 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                 "Unknown data integrity issue with resource.");
     }
 
-    
+
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
         if (realCause.getMessage().contains("'name'")) {
             final String name = command.stringValueOfParameterNamed(ShareProductApiConstants.name_paramname);
             throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name", "Share Product with name `" + name
                     + "` already exists", "name", name);
-        } 
+        }
 
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

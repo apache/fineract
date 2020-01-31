@@ -51,6 +51,9 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submitte
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +61,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -99,10 +101,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 @Service
 public class DepositAccountAssembler {
@@ -170,7 +168,7 @@ public class DepositAccountAssembler {
         }
 
         if (product == null) { throw new SavingsProductNotFoundException(productId); }
-        
+
 
         Client client = null;
         Group group = null;
@@ -292,7 +290,7 @@ public class DepositAccountAssembler {
         if (productChart != null) {
             accountChart = DepositAccountInterestRateChart.from(productChart);
         }
-        
+
         boolean withHoldTax = product.withHoldTax();
         if (command.parameterExists(withHoldTaxParamName)) {
             withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);

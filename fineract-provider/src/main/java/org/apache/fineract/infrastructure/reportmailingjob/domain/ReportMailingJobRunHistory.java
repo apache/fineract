@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,7 +26,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.joda.time.DateTime;
 
@@ -39,58 +37,58 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom<Long> 
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
     private ReportMailingJob reportMailingJob;
-    
+
     @Column(name = "start_datetime", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDateTime;
-    
+
     @Column(name = "end_datetime", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDateTime;
-    
+
     @Column(name = "status", nullable = false)
     private String status;
-    
+
     @Column(name = "error_message", nullable = false)
     private String errorMessage;
-    
+
     @Column(name = "error_log", nullable = false)
     private String errorLog;
-    
-    /** 
-     * ReportMailingJobRunHistory protected constructor 
+
+    /**
+     * ReportMailingJobRunHistory protected constructor
      **/
     protected ReportMailingJobRunHistory() { }
 
-    /** 
+    /**
      * ReportMailingJobRunHistory private constructor
      **/
     private ReportMailingJobRunHistory(final ReportMailingJob reportMailingJob, final DateTime startDateTime, final DateTime endDateTime, final String status,
             final String errorMessage, final String errorLog) {
         this.reportMailingJob = reportMailingJob;
         this.startDateTime = null;
-        
+
         if (startDateTime != null) {
             this.startDateTime = startDateTime.toDate();
         }
-        
+
         this.endDateTime = null;
-        
+
         if (endDateTime != null) {
             this.endDateTime = endDateTime.toDate();
         }
-        
+
         this.status = status;
         this.errorMessage = errorMessage;
         this.errorLog = errorLog;
-    } 
-    
-    /** 
+    }
+
+    /**
      * Creates an instance of the ReportMailingJobRunHistory class
-     * 
+     *
      * @return ReportMailingJobRunHistory object
      **/
-    public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final DateTime startDateTime, final DateTime endDateTime, 
+    public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final DateTime startDateTime, final DateTime endDateTime,
             final String status, final String errorMessage, final String errorLog) {
         return new ReportMailingJobRunHistory(reportMailingJob, startDateTime, endDateTime, status, errorMessage, errorLog);
     }

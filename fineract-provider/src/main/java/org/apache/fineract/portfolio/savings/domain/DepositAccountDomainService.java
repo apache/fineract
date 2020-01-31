@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -37,7 +36,7 @@ public interface DepositAccountDomainService {
 
     SavingsAccountTransaction handleRDDeposit(RecurringDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isRegularTransaction);
-    
+
     SavingsAccountTransaction handleSavingDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isRegularTransaction);
 

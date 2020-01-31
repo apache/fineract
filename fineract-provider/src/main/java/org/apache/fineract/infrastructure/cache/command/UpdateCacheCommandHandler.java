@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.cache.command;
 
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -42,8 +42,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.gson.reflect.TypeToken;
 
 @Service
 @CommandType(entity = "CACHE", action = "UPDATE")

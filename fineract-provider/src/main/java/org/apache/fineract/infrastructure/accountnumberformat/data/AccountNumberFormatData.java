@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.accountnumberformat.data;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class AccountNumberFormatData implements Serializable {

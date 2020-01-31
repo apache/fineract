@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.ENTITY_TYPE_FOR_IMAGES;
@@ -103,7 +102,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
             final ImageData result = contentRepository.fetchImage(imageData);
 
-          //Once we read content EofSensorInputStream, the wrappedStream object is becoming null. So further image source is becoming null 
+          //Once we read content EofSensorInputStream, the wrappedStream object is becoming null. So further image source is becoming null
             //For Amazon S3. If file is not present, already S3ContentRepository would have thrown this exception.
             if (!result.available()) { throw new ImageNotFoundException(entityType, entityId); }
 

@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -98,7 +97,7 @@ public final class LoanApplicationTerms {
      * Integer representing the number of 'repayment frequencies' or
      * installments where 'grace' should apply to the payment of interest in a
      * loans repayment period (installment).
-     * 
+     *
      * <b>Note:</b> Interest is still calculated taking into account the full
      * loan term, the interest is simply offset to a later period.
      */
@@ -108,7 +107,7 @@ public final class LoanApplicationTerms {
      * Integer representing the number of 'repayment frequencies' or
      * installments where 'grace' should apply to the charging of interest in a
      * loans repayment period (installment).
-     * 
+     *
      * <b>Note:</b> The loan is <i>interest-free</i> for the period of time
      * indicated.
      */
@@ -116,7 +115,7 @@ public final class LoanApplicationTerms {
 
     /**
      * Legacy method of support 'grace' on the charging of interest on a loan.
-     * 
+     *
      * <p>
      * For the typical structured loan, its reasonable to use an integer to
      * indicate the number of 'repayment frequency' periods the 'grace' should
@@ -194,25 +193,25 @@ public final class LoanApplicationTerms {
     private final boolean isSkipRepaymentOnFirstDayOfMonth;
 
     private final HolidayDetailDTO holidayDetailDTO;
-    
+
     private final Set<Integer> periodNumbersApplicableForPrincipalGrace = new HashSet<>();
-    
+
     private final Set<Integer> periodNumbersApplicableForInterestGrace = new HashSet<>();
-    
-    
-    // used for FLAT loans when interest rate changed 
+
+
+    // used for FLAT loans when interest rate changed
     private Integer excludePeriodsForCalculation = 0;
     private Money totalPrincipalAccountedForInterestCalcualtion;
-    
-    
-    //used for FLAT loans generation on modifying terms 
+
+
+    //used for FLAT loans generation on modifying terms
     private Money totalPrincipalAccounted;
     private Money totalInterestAccounted;
     private int periodsCompleted = 0;
     private int extraPeriods = 0;
     private boolean isEqualAmortization;
-    
-    
+
+
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -571,7 +570,7 @@ public final class LoanApplicationTerms {
     /**
      * Calculates the total interest to be charged on loan taking into account
      * grace settings.
-     * 
+     *
      */
     public Money calculateTotalInterestCharged(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
@@ -899,9 +898,9 @@ public final class LoanApplicationTerms {
         final int totalRepaymentsWithCapitalPayment = calculateNumberOfRepaymentsWithPrincipalPayment();
         Money principalPerPeriod = null;
         if (getFixedEmiAmount() == null) {
-        	principalPerPeriod = this.principal.minus(totalPrincipalAccounted).dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(
+            principalPerPeriod = this.principal.minus(totalPrincipalAccounted).dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(
                     this.adjustPrincipalForFlatLoans);
-        	if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
+            if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
                 principalPerPeriod = principalPerPeriod.zero();
             }
             if (!isPrincipalGraceApplicableForThisPeriod(periodNumber) && currentPeriodFixedPrincipalAmount != null) {
@@ -911,10 +910,10 @@ public final class LoanApplicationTerms {
 
             }
         }else{
-        	principalPerPeriod =  Money.of(this.getCurrency(), getFixedEmiAmount()).minus(interestForThisInstallment);
-        	return principalPerPeriod;
+            principalPerPeriod =  Money.of(this.getCurrency(), getFixedEmiAmount()).minus(interestForThisInstallment);
+            return principalPerPeriod;
         }
-        
+
         return principalPerPeriod;
     }
 
@@ -960,9 +959,9 @@ public final class LoanApplicationTerms {
 
             final Money totalInterestFree = interestPerGracePeriod.multipliedBy(getInterestChargingGrace());
             final Money realTotalInterestForLoan = totalInterestForLoanTerm.minus(totalInterestFree);
-            
-            
-            
+
+
+
             Integer interestPaymentDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
                     this.excludePeriodsForCalculation);
             interestForInstallment = realTotalInterestForLoan
@@ -982,7 +981,7 @@ public final class LoanApplicationTerms {
                     interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc.getRoundingMode());
                 }
             }
-            
+
 
         }
 
@@ -1120,7 +1119,7 @@ public final class LoanApplicationTerms {
 //        numPeriods = numPeriods - this.periodsCompleted;
         return numPeriods;
     }
-    
+
     private Integer calculateNumberOfRemainingInterestPaymentPeriods(final Integer totalNumberOfRepaymentPeriods, int periodsElapsed) {
         int principalFeePeriods = 0;
         for (Integer intNumber : this.periodNumbersApplicableForInterestGrace) {
@@ -1133,11 +1132,11 @@ public final class LoanApplicationTerms {
          * if grace period available then need to be subtracted
          */
         if(this.interestChargingGrace != null){
-        	periodsRemaining = periodsRemaining - this.interestChargingGrace;
+            periodsRemaining = periodsRemaining - this.interestChargingGrace;
         }
         return periodsRemaining;
     }
-    
+
     private Integer calculateLastInterestGracePeriod(int periodNumber){
         int lastGracePeriod = 0;
         for (Integer grace : this.periodNumbersApplicableForInterestGrace) {
@@ -1683,7 +1682,7 @@ public final class LoanApplicationTerms {
         }
         return disbursedAmount;
     }
-    
+
     public void updatePeriodNumberApplicableForPrincipalOrInterestGrace(final Integer periodsApplicationForGrace) {
         int applicablePeriodNumber = periodsApplicationForGrace;
         int graceOnPrincipal = defaultToZeroIfNull(this.principalGrace);
@@ -1701,30 +1700,30 @@ public final class LoanApplicationTerms {
             graceOnInterest--;
         }
     }
-    
+
     /**
      * set the value to zero if the provided value is null
-     * 
+     *
      * @return integer value equal/greater than 0
      **/
     private Integer defaultToZeroIfNull(Integer value) {
 
         return (value != null) ? value : 0;
     }
-    
+
     public void updateExcludePeriodsForCalculation(Integer excludePeriodsForCalculation){
         this.excludePeriodsForCalculation = excludePeriodsForCalculation;
         this.extraPeriods = 0;
     }
-    
+
     public Integer getActualNoOfRepaymnets() {
         return this.actualNumberOfRepayments;
     }
-    
+
     public Money getTotalInterestDue() {
         return this.totalInterestDue;
     }
-    
+
     private void updateRecurringMoratoriumOnPrincipalPeriods(Integer periodNumber) {
         Boolean isPrincipalGraceApplicableForThisPeriod = false;
         Integer numberOfRepayments = this.actualNumberOfRepayments;
@@ -1742,20 +1741,20 @@ public final class LoanApplicationTerms {
 
     }
 
-    
+
     public void setTotalPrincipalAccounted(Money totalPrincipalAccounted) {
         this.totalPrincipalAccountedForInterestCalcualtion = totalPrincipalAccounted;
     }
-    
-    
-    //Used for FLAT loans to calculate principal and interest per installment  
+
+
+    //Used for FLAT loans to calculate principal and interest per installment
     public void updateAccountedTillPeriod(int periodNumber,  Money totalPrincipalAccounted,Money totalInterestAccounted, int extendPeriods){
         this.periodsCompleted = periodNumber;
         this.totalPrincipalAccounted = totalPrincipalAccounted;
         this.totalInterestAccounted = totalInterestAccounted;
         this.extraPeriods = this.extraPeriods + extendPeriods;
     }
-    
+
     public void updateTotalInterestAccounted(Money totalInterestAccounted){
         this.totalInterestAccounted = totalInterestAccounted;
     }

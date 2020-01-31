@@ -21,18 +21,18 @@ package org.apache.fineract.infrastructure.gcm.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 public class DeviceRegistrationNotFoundException extends
-		AbstractPlatformResourceNotFoundException {
+        AbstractPlatformResourceNotFoundException {
 
-	public DeviceRegistrationNotFoundException(final Long id) {
-		super("error.msg.device.registration.id.invalid",
-				"Device registration with identifier " + id + " does not exist",
-				id);
-	}
+    public DeviceRegistrationNotFoundException(final Long id) {
+        super("error.msg.device.registration.id.invalid",
+                "Device registration with identifier " + id + " does not exist",
+                id);
+    }
 
-	public DeviceRegistrationNotFoundException(final Long clientId, String value) {
-		super("error.msg.device.registration." + value + ".invalid",
-				"Device registration with " + value + " identifier " + clientId
-						+ " does not exist", clientId);
-	}
+    public DeviceRegistrationNotFoundException(final Long clientId, String value) {
+        super("error.msg.device.registration." + value + ".invalid",
+                "Device registration with " + value + " identifier " + clientId
+                        + " does not exist", clientId);
+    }
 
 }

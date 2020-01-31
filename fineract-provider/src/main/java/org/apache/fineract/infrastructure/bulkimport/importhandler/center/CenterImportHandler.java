@@ -20,6 +20,10 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.center;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -33,19 +37,17 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOp
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.GroupIdSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.exception.*;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 @Service
 public class CenterImportHandler implements ImportHandler {
@@ -147,7 +149,7 @@ public class CenterImportHandler implements ImportHandler {
 
     private boolean containsGroupId(List<GroupGeneralData> groupMembers,Long groupId){
         for (GroupGeneralData group: groupMembers) {
-            if (group.getId()==groupId){
+            if (group.getId().equals(groupId)){
                 return true;
             }
         }

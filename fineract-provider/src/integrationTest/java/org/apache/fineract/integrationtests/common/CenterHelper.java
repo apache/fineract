@@ -18,18 +18,15 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.ArrayList;
-
 import static org.junit.Assert.assertEquals;
-
-import java.util.HashMap;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class CenterHelper {
@@ -43,7 +40,7 @@ public class CenterHelper {
         final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING CENTER AT " + id + "-------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, "");
-		final String jsonData = new Gson().toJson(get);
+        final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
     }
 
@@ -97,7 +94,7 @@ public class CenterHelper {
             hm.put("dateFormat", "dd MMM yyyy");
             hm.put("activationDate", activationDate);
         }
-        
+
         System.out.println("------------------------CREATING CENTER-------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL, new Gson().toJson(hm), "resourceId");
     }
@@ -183,7 +180,7 @@ public class CenterHelper {
     }
 
     public static String getTestCenterWithStaffAsJSON(final boolean active, final String activationDate, final Integer staffId) {
-       
+
         Integer id = null;
         Integer statusid = null;
         String statuscode = null;
@@ -201,7 +198,7 @@ public class CenterHelper {
     }
 
     public static String getTestCenterAsJSON(final boolean active, final String activationDate) {
-      
+
         Integer id = null;
         Integer statusid = null;
         String statuscode = null;
@@ -217,7 +214,7 @@ public class CenterHelper {
 
         return CenterDomain.jsonRequestToCreateCenter(id, statusid, statuscode, statusvalue, active, activationDate,submittedDate,name,
                 externalId, staffId, officeID, officeName, hierarchy, groupMembers);
-        
+
     }
 
     public static String assignStaffAsJSON(final Long staffId) {

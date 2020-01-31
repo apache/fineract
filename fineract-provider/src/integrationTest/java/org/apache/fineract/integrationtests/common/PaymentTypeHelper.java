@@ -20,12 +20,11 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class PaymentTypeHelper {
@@ -64,7 +63,7 @@ public class PaymentTypeHelper {
             final Integer paymentTypeId) {
         final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------GET PAYMENT TYPE---------------------------------------------");
-        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, ""); 
+        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "");
         final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());
 

@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
-import org.joda.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
-
-import java.util.List;
+import org.joda.time.LocalDate;
 
 /**
  * Immutable data object representing a SMS message.
@@ -35,126 +34,126 @@ public class EmailData {
     private final Long staffId;
     private final EnumOptionData status;
     private final String emailAddress;
-	private final String emailSubject;
+    private final String emailSubject;
     private final String emailMessage;
-	private final EnumOptionData emailAttachmentFileFormat;
-	private final ReportData stretchyReport;
-	private final String stretchyReportParamMap;
-	private final List<EnumOptionData> emailAttachmentFileFormatOptions;
-	private final List<EnumOptionData> stretchyReportParamDateOptions;
+    private final EnumOptionData emailAttachmentFileFormat;
+    private final ReportData stretchyReport;
+    private final String stretchyReportParamMap;
+    private final List<EnumOptionData> emailAttachmentFileFormatOptions;
+    private final List<EnumOptionData> stretchyReportParamDateOptions;
     private final String campaignName;
-	private final LocalDate sentDate;
-	private final String errorMessage;
+    private final LocalDate sentDate;
+    private final String errorMessage;
 
 
-	public static EmailData instance(final Long id,final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
-								     final String emailAddress, final String emailSubject,
-									 final String message, final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport,
-									 final String stretchyReportParamMap, final List<EnumOptionData> emailAttachmentFileFormatOptions,
-									 final List<EnumOptionData> stretchyReportParamDateOptions, final String campaignName, final LocalDate sentDate,final String errorMessage) {
+    public static EmailData instance(final Long id,final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
+                                     final String emailAddress, final String emailSubject,
+                                     final String message, final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport,
+                                     final String stretchyReportParamMap, final List<EnumOptionData> emailAttachmentFileFormatOptions,
+                                     final List<EnumOptionData> stretchyReportParamDateOptions, final String campaignName, final LocalDate sentDate,final String errorMessage) {
         return new EmailData(id, groupId, clientId, staffId, status, emailAddress, emailSubject, message,
-				emailAttachmentFileFormat,stretchyReport,stretchyReportParamMap,emailAttachmentFileFormatOptions,
-				stretchyReportParamDateOptions,campaignName,sentDate,errorMessage);
+                emailAttachmentFileFormat,stretchyReport,stretchyReportParamMap,emailAttachmentFileFormatOptions,
+                stretchyReportParamDateOptions,campaignName,sentDate,errorMessage);
     }
 
     private EmailData(final Long id,final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status, final String emailAddress, final String emailSubject, final String message,
-					  final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
-					  final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
-					  final String campaignName,final LocalDate sentDate,final String errorMessage) {
+                      final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport, final String stretchyReportParamMap,
+                      final List<EnumOptionData> emailAttachmentFileFormatOptions, final List<EnumOptionData> stretchyReportParamDateOptions,
+                      final String campaignName,final LocalDate sentDate,final String errorMessage) {
         this.id = id;
         this.groupId = groupId;
         this.clientId = clientId;
         this.staffId = staffId;
         this.status = status;
         this.emailAddress = emailAddress;
-		this.emailSubject = emailSubject;
+        this.emailSubject = emailSubject;
         this.emailMessage = message;
-		this.emailAttachmentFileFormat = emailAttachmentFileFormat;
-		this.stretchyReport = stretchyReport;
-		this.stretchyReportParamMap = stretchyReportParamMap;
-		this.emailAttachmentFileFormatOptions = emailAttachmentFileFormatOptions;
-		this.stretchyReportParamDateOptions = stretchyReportParamDateOptions;
+        this.emailAttachmentFileFormat = emailAttachmentFileFormat;
+        this.stretchyReport = stretchyReport;
+        this.stretchyReportParamMap = stretchyReportParamMap;
+        this.emailAttachmentFileFormatOptions = emailAttachmentFileFormatOptions;
+        this.stretchyReportParamDateOptions = stretchyReportParamDateOptions;
         this.campaignName = campaignName;
-		this.sentDate = sentDate;
-		this.errorMessage = errorMessage;
+        this.sentDate = sentDate;
+        this.errorMessage = errorMessage;
     }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the groupId
-	 */
-	public Long getGroupId() {
-		return groupId;
-	}
+    /**
+     * @return the groupId
+     */
+    public Long getGroupId() {
+        return groupId;
+    }
 
-	/**
-	 * @return the clientId
-	 */
-	public Long getClientId() {
-		return clientId;
-	}
+    /**
+     * @return the clientId
+     */
+    public Long getClientId() {
+        return clientId;
+    }
 
-	/**
-	 * @return the staffId
-	 */
-	public Long getStaffId() {
-		return staffId;
-	}
+    /**
+     * @return the staffId
+     */
+    public Long getStaffId() {
+        return staffId;
+    }
 
-	/**
-	 * @return the status
-	 */
-	public EnumOptionData getStatus() {
-		return status;
-	}
+    /**
+     * @return the status
+     */
+    public EnumOptionData getStatus() {
+        return status;
+    }
 
-	public String getErrorMessage() {return this.errorMessage;}
+    public String getErrorMessage() {return this.errorMessage;}
 
-	/**
-	 * @return the emailAddress
-	 */
-	public String getEmailAddress() {
-		return emailAddress;
-	}
+    /**
+     * @return the emailAddress
+     */
+    public String getEmailAddress() {
+        return emailAddress;
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return emailMessage;
-	}
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        return emailMessage;
+    }
 
-	public String getCampaignName() {return this.campaignName;}
+    public String getCampaignName() {return this.campaignName;}
 
-	public LocalDate getSentDate() { return this.sentDate; }
+    public LocalDate getSentDate() { return this.sentDate; }
 
-	public String getEmailSubject() {
-		return emailSubject;
-	}
+    public String getEmailSubject() {
+        return emailSubject;
+    }
 
-	public EnumOptionData getEmailAttachmentFileFormat() {
-		return emailAttachmentFileFormat;
-	}
+    public EnumOptionData getEmailAttachmentFileFormat() {
+        return emailAttachmentFileFormat;
+    }
 
-	public ReportData getStretchyReport() {
-		return stretchyReport;
-	}
+    public ReportData getStretchyReport() {
+        return stretchyReport;
+    }
 
-	public String getStretchyReportParamMap() {
-		return stretchyReportParamMap;
-	}
+    public String getStretchyReportParamMap() {
+        return stretchyReportParamMap;
+    }
 
-	public List<EnumOptionData> getEmailAttachmentFileFormatOptions() {
-		return emailAttachmentFileFormatOptions;
-	}
+    public List<EnumOptionData> getEmailAttachmentFileFormatOptions() {
+        return emailAttachmentFileFormatOptions;
+    }
 
-	public List<EnumOptionData> getStretchyReportParamDateOptions() {
-		return stretchyReportParamDateOptions;
-	}
+    public List<EnumOptionData> getStretchyReportParamDateOptions() {
+        return stretchyReportParamDateOptions;
+    }
 }

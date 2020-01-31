@@ -28,6 +28,10 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.productIdParamName;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -48,25 +51,20 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public class InterestRateChartDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestRateChartSlabDataValidator chartSlabDataValidator;
-	private static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
-			nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName, chartSlabs,
-			isPrimaryGroupingByAmountParamName));
+    private static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
+            nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName, chartSlabs,
+            isPrimaryGroupingByAmountParamName));
 
-	private static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
-			idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
-			InterestRateChartApiConstants.deleteParamName, isPrimaryGroupingByAmountParamName));
+    private static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
+            idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
+            InterestRateChartApiConstants.deleteParamName, isPrimaryGroupingByAmountParamName));
 
     @Autowired
     public InterestRateChartDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -110,7 +108,7 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
-        
+
         Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
         if (isPrimaryGroupingByAmount == null) {
             isPrimaryGroupingByAmount = false;
@@ -168,7 +166,7 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
-        
+
         Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
         if (isPrimaryGroupingByAmount == null) {
             isPrimaryGroupingByAmount = false;

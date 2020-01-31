@@ -10,6 +10,11 @@ to start contributing to this project in the online web-based IDE GitPod.io righ
 (You may initially have to press F1 to Find Command and run "Java: Start Language Server".)
 It's of course also possible to contribute with a "traditional" loca ldevelopment environment (see below).
 
+Community
+=========
+
+If you are interested in contributing to this project, but perhaps don't quite know how and where to get started, please [join our developer mailing list](http://fineract.apache.org/#contribute), listen into our conversations, chime into threads, and just send us a friendly "Hello!" introduction email; we're a friendly bunch, and look forward to hearing from you.
+
 
 Requirements
 ============
@@ -102,6 +107,14 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 and the `mysqlserver` environment variable is now no longer supported.)_
 
 
+Checkstyle
+============
+
+This project enforces [its code conventions](fineract-provider/config/checkstyle/checkstyle.xml) using Checkstyle.
+We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
+File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
+
+
 Version
 ============
 
@@ -128,13 +141,13 @@ complies with the [Apache Software Foundation third-party license policy](https:
 Apache Fineract Platform API
 ============
 
-The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.openmf.org/api-docs/apiLive.htm "API Documentation").
+The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.mifos.io/api-docs/apiLive.htm "API Documentation").
 
 
 Online Demos
 ============
 
-* [Community App](https://demo.openmf.org "Reference Client App")
+* [Community App](https://demo.mifos.io "Reference Client App")
 > For this demo, a demo account is also provided for users to experience the functionality of this Community App. Users can use "mifos" for USERNAME and "password" for PASSWORD(without quotation marks).
 
 

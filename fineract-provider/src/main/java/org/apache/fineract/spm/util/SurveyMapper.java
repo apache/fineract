@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.spm.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.fineract.spm.data.ComponentData;
 import org.apache.fineract.spm.data.QuestionData;
 import org.apache.fineract.spm.data.ResponseData;
@@ -26,9 +28,6 @@ import org.apache.fineract.spm.domain.Component;
 import org.apache.fineract.spm.domain.Question;
 import org.apache.fineract.spm.domain.Response;
 import org.apache.fineract.spm.domain.Survey;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SurveyMapper {
 
@@ -45,7 +44,7 @@ public class SurveyMapper {
         return surveyData;
     }
 
-    public static Survey map(final SurveyData surveyData, Survey survey) {        
+    public static Survey map(final SurveyData surveyData, Survey survey) {
         survey.setComponents(SurveyMapper.mapComponentDatas(surveyData.getComponentDatas(), survey));
         survey.setQuestions(SurveyMapper.mapQuestionDatas(surveyData.getQuestionDatas(), survey));
         survey.setKey(surveyData.getKey());

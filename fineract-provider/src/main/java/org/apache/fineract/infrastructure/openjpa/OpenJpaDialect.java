@@ -22,14 +22,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.logging.LogFactory;
 import org.apache.openjpa.persistence.FetchPlan;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.jdbc.IsolationLevel;
 import org.apache.openjpa.persistence.jdbc.JDBCFetchPlan;
-
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -48,114 +46,114 @@ import org.springframework.transaction.TransactionException;
  */
 public class OpenJpaDialect extends DefaultJpaDialect {
 
-	@Override
-	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
-			throws PersistenceException, SQLException, TransactionException {
+    @Override
+    public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
+            throws PersistenceException, SQLException, TransactionException {
 
-		OpenJPAEntityManager openJpaEntityManager = getOpenJPAEntityManager(entityManager);
+        OpenJPAEntityManager openJpaEntityManager = getOpenJPAEntityManager(entityManager);
 
-		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			// Pass custom isolation level on to OpenJPA's JDBCFetchPlan configuration
-			FetchPlan fetchPlan = openJpaEntityManager.getFetchPlan();
-			if (fetchPlan instanceof JDBCFetchPlan) {
-				IsolationLevel isolation = IsolationLevel.fromConnectionConstant(definition.getIsolationLevel());
-				((JDBCFetchPlan) fetchPlan).setIsolation(isolation);
-			}
-		}
+        if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+            // Pass custom isolation level on to OpenJPA's JDBCFetchPlan configuration
+            FetchPlan fetchPlan = openJpaEntityManager.getFetchPlan();
+            if (fetchPlan instanceof JDBCFetchPlan) {
+                IsolationLevel isolation = IsolationLevel.fromConnectionConstant(definition.getIsolationLevel());
+                ((JDBCFetchPlan) fetchPlan).setIsolation(isolation);
+            }
+        }
 
-		entityManager.getTransaction().begin();
+        entityManager.getTransaction().begin();
 
-		if (!definition.isReadOnly()) {
-			// Like with EclipseLink, make sure to start the logic transaction early so that other
-			// participants using the connection (such as JdbcTemplate) run in a transaction.
-			openJpaEntityManager.beginStore();
-		}
+        if (!definition.isReadOnly()) {
+            // Like with EclipseLink, make sure to start the logic transaction early so that other
+            // participants using the connection (such as JdbcTemplate) run in a transaction.
+            openJpaEntityManager.beginStore();
+        }
 
-		// Custom implementation for OpenJPA savepoint handling
-		return new OpenJpaTransactionData(openJpaEntityManager);
-	}
+        // Custom implementation for OpenJPA savepoint handling
+        return new OpenJpaTransactionData(openJpaEntityManager);
+    }
 
-	@Override
-	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
-			throws PersistenceException, SQLException {
+    @Override
+    public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
+            throws PersistenceException, SQLException {
 
-		return new OpenJpaConnectionHandle(getOpenJPAEntityManager(entityManager));
-	}
+        return new OpenJpaConnectionHandle(getOpenJPAEntityManager(entityManager));
+    }
 
-	/**
-	 * Return the OpenJPA-specific variant of {@code EntityManager}.
-	 * @param em the generic {@code EntityManager} instance
-	 * @return the OpenJPA-specific variant of {@code EntityManager}
-	 */
-	protected OpenJPAEntityManager getOpenJPAEntityManager(EntityManager em) {
-		return OpenJPAPersistence.cast(em);
-	}
-
-
-	/**
-	 * Transaction data Object exposed from {@code beginTransaction},
-	 * implementing the {@link SavepointManager} interface.
-	 */
-	private static class OpenJpaTransactionData implements SavepointManager {
-
-		private final OpenJPAEntityManager entityManager;
-
-		private int savepointCounter = 0;
-
-		public OpenJpaTransactionData(OpenJPAEntityManager entityManager) {
-			this.entityManager = entityManager;
-		}
-
-		@Override
-		public Object createSavepoint() throws TransactionException {
-			this.savepointCounter++;
-			String savepointName = ConnectionHolder.SAVEPOINT_NAME_PREFIX + this.savepointCounter;
-			this.entityManager.setSavepoint(savepointName);
-			return savepointName;
-		}
-
-		@Override
-		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
-			this.entityManager.rollbackToSavepoint((String) savepoint);
-		}
-
-		@Override
-		public void releaseSavepoint(Object savepoint) throws TransactionException {
-			try {
-				this.entityManager.releaseSavepoint((String) savepoint);
-			}
-			catch (Throwable ex) {
-				LogFactory.getLog(OpenJpaTransactionData.class).debug(
-						"Could not explicitly release OpenJPA savepoint", ex);
-			}
-		}
-	}
+    /**
+     * Return the OpenJPA-specific variant of {@code EntityManager}.
+     * @param em the generic {@code EntityManager} instance
+     * @return the OpenJPA-specific variant of {@code EntityManager}
+     */
+    protected OpenJPAEntityManager getOpenJPAEntityManager(EntityManager em) {
+        return OpenJPAPersistence.cast(em);
+    }
 
 
-	/**
-	 * {@link ConnectionHandle} implementation that fetches a new OpenJPA-provided
-	 * Connection for every {@code getConnection} call and closes the Connection on
-	 * {@code releaseConnection}. This is necessary because OpenJPA requires the
-	 * fetched Connection to be closed before continuing EntityManager work.
-	 * @see org.apache.openjpa.persistence.OpenJPAEntityManager#getConnection()
-	 */
-	private static class OpenJpaConnectionHandle implements ConnectionHandle {
+    /**
+     * Transaction data Object exposed from {@code beginTransaction},
+     * implementing the {@link SavepointManager} interface.
+     */
+    private static class OpenJpaTransactionData implements SavepointManager {
 
-		private final OpenJPAEntityManager entityManager;
+        private final OpenJPAEntityManager entityManager;
 
-		public OpenJpaConnectionHandle(OpenJPAEntityManager entityManager) {
-			this.entityManager = entityManager;
-		}
+        private int savepointCounter = 0;
 
-		@Override
-		public Connection getConnection() {
-			return (Connection) this.entityManager.getConnection();
-		}
+        public OpenJpaTransactionData(OpenJPAEntityManager entityManager) {
+            this.entityManager = entityManager;
+        }
 
-		@Override
-		public void releaseConnection(Connection con) {
-			JdbcUtils.closeConnection(con);
-		}
-	}
+        @Override
+        public Object createSavepoint() throws TransactionException {
+            this.savepointCounter++;
+            String savepointName = ConnectionHolder.SAVEPOINT_NAME_PREFIX + this.savepointCounter;
+            this.entityManager.setSavepoint(savepointName);
+            return savepointName;
+        }
+
+        @Override
+        public void rollbackToSavepoint(Object savepoint) throws TransactionException {
+            this.entityManager.rollbackToSavepoint((String) savepoint);
+        }
+
+        @Override
+        public void releaseSavepoint(Object savepoint) throws TransactionException {
+            try {
+                this.entityManager.releaseSavepoint((String) savepoint);
+            }
+            catch (Throwable ex) {
+                LogFactory.getLog(OpenJpaTransactionData.class).debug(
+                        "Could not explicitly release OpenJPA savepoint", ex);
+            }
+        }
+    }
+
+
+    /**
+     * {@link ConnectionHandle} implementation that fetches a new OpenJPA-provided
+     * Connection for every {@code getConnection} call and closes the Connection on
+     * {@code releaseConnection}. This is necessary because OpenJPA requires the
+     * fetched Connection to be closed before continuing EntityManager work.
+     * @see org.apache.openjpa.persistence.OpenJPAEntityManager#getConnection()
+     */
+    private static class OpenJpaConnectionHandle implements ConnectionHandle {
+
+        private final OpenJPAEntityManager entityManager;
+
+        public OpenJpaConnectionHandle(OpenJPAEntityManager entityManager) {
+            this.entityManager = entityManager;
+        }
+
+        @Override
+        public Connection getConnection() {
+            return (Connection) this.entityManager.getConnection();
+        }
+
+        @Override
+        public void releaseConnection(Connection con) {
+            JdbcUtils.closeConnection(con);
+        }
+    }
 
 }

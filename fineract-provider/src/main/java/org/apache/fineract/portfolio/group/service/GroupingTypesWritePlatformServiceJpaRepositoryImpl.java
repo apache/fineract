@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
-import java.util.*;
-
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
@@ -46,17 +50,31 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.exception.InvalidOfficeException;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
-import org.apache.fineract.portfolio.group.domain.*;
-import org.apache.fineract.portfolio.group.exception.*;
+import org.apache.fineract.portfolio.group.domain.Group;
+import org.apache.fineract.portfolio.group.domain.GroupLevel;
+import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
+import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
+import org.apache.fineract.portfolio.group.domain.GroupTypes;
+import org.apache.fineract.portfolio.group.exception.GroupAccountExistsException;
+import org.apache.fineract.portfolio.group.exception.GroupHasNoStaffException;
+import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
+import org.apache.fineract.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
+import org.apache.fineract.portfolio.group.exception.InvalidGroupLevelException;
+import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransitionException;
 import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -74,8 +92,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 
 @Service
 public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements GroupingTypesWritePlatformService {
@@ -109,7 +125,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final LoanRepositoryWrapper loanRepositoryWrapper, 
+            final LoanRepositoryWrapper loanRepositoryWrapper,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService) {
@@ -239,28 +255,28 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 
     private void generateAccountNumberIfRequired(Group newGroup){
-    	if (newGroup.isAccountNumberRequiresAutoGeneration()) {
-        	EntityAccountType entityAccountType = null;
-        	AccountNumberFormat accountNumberFormat = null;
-        	if(newGroup.isCenter()){
-            	entityAccountType = EntityAccountType.CENTER;
-            	accountNumberFormat = this.accountNumberFormatRepository
+        if (newGroup.isAccountNumberRequiresAutoGeneration()) {
+            EntityAccountType entityAccountType = null;
+            AccountNumberFormat accountNumberFormat = null;
+            if(newGroup.isCenter()){
+                entityAccountType = EntityAccountType.CENTER;
+                accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-        	}else {
-            	entityAccountType = EntityAccountType.GROUP;
-            	accountNumberFormat = this.accountNumberFormatRepository
+            }else {
+                entityAccountType = EntityAccountType.GROUP;
+                accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
-        	}
-            
+            }
+
         }
     }
     @Transactional
@@ -332,7 +348,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, GroupTypes.GROUP);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 
@@ -470,9 +486,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 

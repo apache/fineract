@@ -16,16 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package org.apache.fineract.accounting.glaccount.domain;
 
 
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_trial_balance")
@@ -66,7 +69,6 @@ public class TrialBalance extends AbstractPersistableCustom<Long> {
     }
 
     protected TrialBalance() {
-
     }
 
     public Long getOfficeId() {
@@ -96,13 +98,17 @@ public class TrialBalance extends AbstractPersistableCustom<Long> {
     @Override
     public boolean equals(Object obj) {
         if (!obj.getClass().equals(getClass())) return false;
-        TrialBalance trialBalance = (TrialBalance) obj;
-        return trialBalance.getOfficeId().equals(this.getOfficeId())
-                && trialBalance.getGlAccountId().equals(this.getGlAccountId())
-                && trialBalance.getEntryDate().equals(this.getEntryDate())
-                && trialBalance.getTransactionDate().equals(this.getTransactionDate());
+        TrialBalance other = (TrialBalance) obj;
+        return Objects.equals(other.officeId, officeId)
+            && Objects.equals(other.glAccountId, glAccountId)
+            && Objects.equals(other.amount, amount)
+            && Objects.equals(other.entryDate, entryDate)
+            && Objects.equals(other.transactionDate, transactionDate)
+            && Objects.equals(other.closingBalance, closingBalance);
     }
 
-
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(officeId, glAccountId, amount, entryDate, transactionDate, closingBalance);
+    }
 }

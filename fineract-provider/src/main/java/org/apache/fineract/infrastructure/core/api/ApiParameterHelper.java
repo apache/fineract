@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,9 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.ws.rs.core.MultivaluedMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
@@ -171,7 +168,7 @@ public class ApiParameterHelper {
         SQLInjectionValidator.validateSQLInput(str);
         return singleQuote + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1) + singleQuote;
     }
-    
+
 
     public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
 

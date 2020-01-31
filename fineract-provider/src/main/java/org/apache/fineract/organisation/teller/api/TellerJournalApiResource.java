@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.organisation.teller.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.Collection;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import io.swagger.annotations.Api;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.teller.data.TellerData;
@@ -41,7 +41,10 @@ import org.springframework.stereotype.Component;
 @Path("cashiersjournal")
 @Component
 @Scope("singleton")
-@Api(value = "cashiersjournal", description = "")
+@Api(tags = {"Cashier Journals"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Cashier Journals", description = "")
+})
 public class TellerJournalApiResource {
 
     private final PlatformSecurityContext securityContext;

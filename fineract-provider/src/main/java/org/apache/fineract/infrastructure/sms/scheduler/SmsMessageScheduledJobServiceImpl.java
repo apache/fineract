@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.sms.scheduler;
 
+import com.google.gson.Gson;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,9 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import javax.annotation.PostConstruct;
-
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignConstants;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
@@ -61,8 +60,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
-
 /**
  * Scheduled job services that send SMS messages and get delivery reports for
  * the sent SMS messages
@@ -78,8 +75,8 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     private ExecutorService triggeredExecutorService ;
     private final SmsConfigUtils smsConfigUtils ;
     private final NotificationSenderService notificationSenderService;
-    
-    
+
+
     /**
      * SmsMessageScheduledJobServiceImpl constructor
      **/
@@ -109,7 +106,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         Integer page = 0;
         int totalRecords = 0;
         do {
-            PageRequest pageRequest = new PageRequest(0, pageLimit);
+            PageRequest pageRequest = PageRequest.of(0, pageLimit);
             org.springframework.data.domain.Page<SmsMessage> pendingMessages = this.smsMessageRepository.findByStatusType(
                     SmsMessageStatusType.PENDING.getValue(), pageRequest);
             List<SmsMessage> toSaveMessages = new ArrayList<>() ;
@@ -123,10 +120,10 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     while (pendingMessageIterator.hasNext()) {
                         SmsMessage smsData = pendingMessageIterator.next();
                         if(smsData.isNotification()){
-                        	smsData.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
-                        	toSendNotificationMessages.add(smsData);
+                            smsData.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+                            toSendNotificationMessages.add(smsData);
                         }else{
-                        	SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(smsData.getId(),
+                            SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(smsData.getId(),
                                     tenantIdentifier, null, null, smsData.getMobileNo(), smsData.getMessage(), smsData.getSmsCampaign()
                                             .getProviderId());
                             apiQueueResourceDatas.add(apiQueueResourceData);
@@ -135,12 +132,12 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                         }
                     }
                     if(toSaveMessages.size()>0){
-                    	this.smsMessageRepository.saveAll(toSaveMessages);
+                        this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
                         this.genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
-                    }                    
+                    }
                     if(!toSendNotificationMessages.isEmpty()){
-                    	this.notificationSenderService.sendNotification(toSendNotificationMessages);
+                        this.notificationSenderService.sendNotification(toSendNotificationMessages);
                     }
 //                    new MyThread(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas).start();
                 }
@@ -176,7 +173,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     }
 
     private void connectAndSendToIntermediateServer(Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
-    	Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms", SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas)) ;
+        Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms", SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas)) ;
         URI uri = (URI)hostConfig.get("uri") ;
         HttpEntity<?> entity = (HttpEntity<?>)hostConfig.get("entity") ;
         ResponseEntity<String> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity,
@@ -184,7 +181,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         if (responseOne != null) {
 //            String smsResponse = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.ACCEPTED)) {
-            	logger.debug(responseOne.getStatusCode().name());
+                logger.debug(responseOne.getStatusCode().name());
                 throw new ConnectionFailureException(SmsCampaignConstants.SMS);
             }
         }
@@ -271,7 +268,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
                 if (smsMessageInternalIds.getPageItems().size() > 0) {
                     // make request
-                	Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms/report", new Gson().toJson(smsMessageInternalIds.getPageItems())) ;
+                    Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms/report", new Gson().toJson(smsMessageInternalIds.getPageItems())) ;
                     URI uri = (URI)hostConfig.get("uri") ;
                     HttpEntity<?> entity = (HttpEntity<?>)hostConfig.get("entity") ;
                     ResponseEntity<Collection<SmsMessageDeliveryReportData>> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity,

@@ -21,40 +21,40 @@ package org.apache.fineract.notification.data;
 import org.joda.time.LocalDate;
 
 public class TopicSubscriberData {
-	
-	private final Long id;
-	private final Long topicId;
-	private final Long userId;
-	private final LocalDate subscriptionDate;
-	
-	public TopicSubscriberData(Long id, Long topicId, Long userId, LocalDate subscriptionDate) {
-		this.id = id;
-		this.topicId = topicId;
-		this.userId = userId;
-		this.subscriptionDate = subscriptionDate;
-	}
 
-	public TopicSubscriberData(Long id, Long topicId, Long userId) {
-		this.id = id;
-		this.topicId = topicId;
-		this.userId = userId;
-		this.subscriptionDate = new LocalDate();
-	}
+    private final Long id;
+    private final Long topicId;
+    private final Long userId;
+    private final LocalDate subscriptionDate;
 
-	public Long getId() {
-		return this.id;
-	}
+    public TopicSubscriberData(Long id, Long topicId, Long userId, LocalDate subscriptionDate) {
+        this.id = id;
+        this.topicId = topicId;
+        this.userId = userId;
+        this.subscriptionDate = subscriptionDate;
+    }
 
-	public Long getTopicId() {
-		return this.topicId;
-	}
+    public TopicSubscriberData(Long id, Long topicId, Long userId) {
+        this.id = id;
+        this.topicId = topicId;
+        this.userId = userId;
+        this.subscriptionDate = new LocalDate();
+    }
 
-	public Long getUserId() {
-		return this.userId;
-	}
+    public Long getId() {
+        return this.id;
+    }
 
-	public LocalDate getSubscriptionDate() {
-		return this.subscriptionDate;
-	}
-	
+    public Long getTopicId() {
+        return this.topicId;
+    }
+
+    public Long getUserId() {
+        return this.userId;
+    }
+
+    public LocalDate getSubscriptionDate() {
+        return this.subscriptionDate;
+    }
+
 }

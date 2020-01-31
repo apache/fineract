@@ -21,7 +21,6 @@ package org.apache.fineract.organisation.staff.domain;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -31,7 +30,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -61,7 +59,7 @@ public class Staff extends AbstractPersistableCustom<Long> {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
-	@Column(name = "email_address", length = 50, unique = true)
+    @Column(name = "email_address", length = 50, unique = true)
     private String emailAddress;
 
     @ManyToOne
@@ -249,7 +247,7 @@ public class Staff extends AbstractPersistableCustom<Long> {
         return getId().equals(staff.getId());
     }
 
-	public String emailAddress() {
+    public String emailAddress() {
         return emailAddress;
     }
 

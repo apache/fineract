@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -39,12 +43,6 @@ import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 public class AccountNumberPreferencesTest {
 
@@ -86,7 +84,7 @@ public class AccountNumberPreferencesTest {
     private Integer groupID;
     private Integer centerId;
     private String groupAccountNo;
-    
+
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -154,8 +152,7 @@ public class AccountNumberPreferencesTest {
             System.out.println("Successfully deleted account number preference (ID: " + delResponse.get("resourceId") + ")");
         }
         /* Deletion of invalid account preference ID should fail */
-        System.out
-                .println("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE WITH INVALID ID------------------------------------------");
+        System.out.println("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE WITH INVALID ID------------------------------------------");
 
         HashMap<String, Object> deletionError = this.accountNumberPreferencesHelper.deleteAccountNumberPreference(10,
                 this.responseNotFoundError, "");
@@ -191,17 +188,17 @@ public class AccountNumberPreferencesTest {
         this.savingsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createSavingsAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Savings (ID: " + this.savingsAccountNumberPreferenceId);
-        
+
         this.groupsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createGroupsAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Groups (ID: " + this.groupsAccountNumberPreferenceId);
-        
+
         this.centerAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createCenterAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Center (ID: " + this.centerAccountNumberPreferenceId);
 
         this.accountNumberPreferencesHelper.verifyCreationOfAccountNumberPreferences(this.clientAccountNumberPreferenceId,
-                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId, 
+                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId,
                 this.centerAccountNumberPreferenceId, this.responseSpec, this.requestSpec);
 
         this.createAccountNumberPreferenceInvalidData("1000", "1001");
@@ -211,8 +208,7 @@ public class AccountNumberPreferencesTest {
 
     private void createAccountNumberPreferenceDuplicateData(final String accountType, final String prefixType) {
         /* Creating account Preference with duplicate data should fail */
-        System.out
-                .println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH DUPLICATE DATA------------------------------------------");
+        System.out.println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH DUPLICATE DATA------------------------------------------");
 
         HashMap<String, Object> creationError = this.accountNumberPreferencesHelper.createAccountNumberPreferenceWithInvalidData(
                 this.responseForbiddenError, accountType, prefixType, "");
@@ -225,8 +221,7 @@ public class AccountNumberPreferencesTest {
     private void createAccountNumberPreferenceInvalidData(final String accountType, final String prefixType) {
 
         /* Creating account Preference with invalid data should fail */
-        System.out
-                .println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
+        System.out.println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
 
         HashMap<String, Object> creationError = this.accountNumberPreferencesHelper.createAccountNumberPreferenceWithInvalidData(
                 this.responseValidationError, accountType, prefixType, "");
@@ -253,8 +248,7 @@ public class AccountNumberPreferencesTest {
                 this.responseSpec, this.requestSpec);
 
         /* Update invalid account preference id should fail */
-        System.out
-                .println("---------------------------------UPDATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
+        System.out.println("---------------------------------UPDATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
 
         /* Invalid Account Type */
         HashMap<String, Object> updationError = this.accountNumberPreferencesHelper.updateAccountNumberPreference(9999, "101",
@@ -278,7 +272,7 @@ public class AccountNumberPreferencesTest {
             this.createAndValidateClientWithoutAccountPreference();
         }
     }
-    
+
     private void createAndValidateGroup(Boolean isAccountPreferenceSetUp) {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
@@ -286,25 +280,25 @@ public class AccountNumberPreferencesTest {
 
         this.groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
         GroupHelper.verifyGroupActivatedOnServer(this.requestSpec, this.responseSpec, groupID, true);
-        
+
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + this.groupID + "?" + Utils.TENANT_IDENTIFIER;
         this.groupAccountNo = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "accountNo");
-        
+
         if (isAccountPreferenceSetUp) {
-        	String groupsPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
+            String groupsPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
                     this.groupsAccountNumberPreferenceId, "prefixType.value");
-        	
+
             if (groupsPrefixName.equals(this.officeName)) {
-            	
+
                 final String groupOfficeName = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "officeName");
-                
+
                 this.validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, groupOfficeName);
             }
         } else {
             validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, null);
         }
     }
-    
+
     private void createAndValidateCenter(Boolean isAccountPreferenceSetUp) {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
@@ -314,21 +308,21 @@ public class AccountNumberPreferencesTest {
         CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
         Assert.assertNotNull(center);
         Assert.assertTrue(center.getName().equals(name));
-        
+
         if (isAccountPreferenceSetUp) {
-        	String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
+            String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
                     this.centerAccountNumberPreferenceId, "prefixType.value");
             final String CENTER_URL = "/fineract-provider/api/v1/centers/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
-        	
+
             if (centerPrefixName.equals(this.officeName)) {
-                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");  
+                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");
                 this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), centerOfficeName);
             }
-        } else {	
+        } else {
             validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), null);
         }
     }
-    
+
 
     private void createAndValidateClientWithoutAccountPreference() {
         this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -375,7 +369,7 @@ public class AccountNumberPreferencesTest {
 
     private void validateAccountNumberLengthAndStartsWithPrefix(final String accountNumber, String prefix) {
         if (prefix != null) {
-        		prefix = prefix.substring(0, Math.min(prefix.length(), 10));
+            prefix = prefix.substring(0, Math.min(prefix.length(), 10));
             Assert.assertEquals(accountNumber.length(), prefix.length() + 9);
             Assert.assertTrue(accountNumber.startsWith(prefix));
         } else {

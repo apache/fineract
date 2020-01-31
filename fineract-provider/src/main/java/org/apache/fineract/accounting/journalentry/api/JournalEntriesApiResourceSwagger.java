@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.journalentry.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.joda.time.LocalDate;
 
 /**
  * Created by sanyam on 25/7/17.

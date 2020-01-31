@@ -18,29 +18,27 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * 
+ *
  * IntegrationTest for ClientCharges.
- * 
+ *
  */
 /**
  * @author lenovo
- * 
+ *
  */
 public class ClientChargesTest {
 
@@ -71,7 +69,7 @@ public class ClientChargesTest {
          * create a charge for loan and try to associate to client created in
          * the above lines.it will be an invalid scenario the reason is client
          * is not allowed to have only client charge.
-         * 
+         *
          */
         final Integer loanChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON());
@@ -159,7 +157,7 @@ public class ClientChargesTest {
 
     /**
      * It checks whether the client charge transaction is reversed or not.
-     * 
+     *
      * @param clientId
      * @param transactionId
      */
@@ -172,7 +170,7 @@ public class ClientChargesTest {
     /**
      * Check whether the outStandingAmount is equal to expected Amount or not
      * after paying or after waiving off the client charge.
-     * 
+     *
      * @param outStandingAmount
      * @param expectedAmount
      */

@@ -31,7 +31,7 @@ public enum ClientStatus {
     CLOSED(600, "clientStatusType.closed"),
     REJECTED(700,"clientStatusType.rejected"),
     WITHDRAWN(800,"clientStatusType.withdraw");
-    
+
 
     private final Integer value;
     private final String code;
@@ -56,12 +56,12 @@ public enum ClientStatus {
                 enumeration = ClientStatus.CLOSED;
             break;
             case 700:
-            	enumeration = ClientStatus.REJECTED;
+                enumeration = ClientStatus.REJECTED;
             break;
             case 800:
-            	enumeration = ClientStatus.WITHDRAWN;
+                enumeration = ClientStatus.WITHDRAWN;
             break;
-           
+
         }
         return enumeration;
     }
@@ -90,15 +90,15 @@ public enum ClientStatus {
     public boolean isActive() {
         return this.value.equals(ClientStatus.ACTIVE.getValue());
     }
-  
+
     public boolean isClosed() {
         return this.value.equals(ClientStatus.CLOSED.getValue());
     }
     public boolean isRejected(){
-    	return this.value.equals(ClientStatus.REJECTED.getValue());
+        return this.value.equals(ClientStatus.REJECTED.getValue());
     }
     public boolean isWithdrawn(){
-    	return this.value.equals(ClientStatus.WITHDRAWN.getValue());
+        return this.value.equals(ClientStatus.WITHDRAWN.getValue());
     }
     public boolean isTransferInProgress() {
         return this.value.equals(ClientStatus.TRANSFER_IN_PROGRESS.getValue());

@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Page<E> {
+public class Page<E> implements Serializable {
 
     private final int totalFilteredRecords;
     private final List<E> pageItems;

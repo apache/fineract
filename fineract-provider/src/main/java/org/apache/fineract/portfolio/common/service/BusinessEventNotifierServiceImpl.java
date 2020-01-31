@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #notifyBusinessEventToBeExecuted
@@ -55,7 +54,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #notifyBusinessEventWasExecuted
@@ -75,7 +74,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #addBusinessEventPreListners
@@ -90,7 +89,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #addBusinessEventPostListners

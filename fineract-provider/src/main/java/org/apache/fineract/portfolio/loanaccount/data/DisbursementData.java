@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.joda.time.LocalDate;
 
 /**
@@ -118,7 +116,7 @@ public class DisbursementData implements Comparable<DisbursementData> {
         return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
     }
 
-    
+
     public BigDecimal getWaivedChargeAmount() {
         if(this.waivedChargeAmount == null){
             return BigDecimal.ZERO;

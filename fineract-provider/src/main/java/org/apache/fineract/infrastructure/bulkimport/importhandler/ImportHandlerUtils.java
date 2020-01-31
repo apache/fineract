@@ -18,22 +18,24 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.*;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 public class ImportHandlerUtils {
 
@@ -126,7 +128,7 @@ public class ImportHandlerUtils {
 
     public static String trimEmptyDecimalPortion(String result) {
         if(result != null && result.endsWith(".0"))
-            return	result.split("\\.")[0];
+            return    result.split("\\.")[0];
         else
             return result;
     }

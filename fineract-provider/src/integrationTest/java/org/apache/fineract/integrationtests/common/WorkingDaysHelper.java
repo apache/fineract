@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.HashMap;
-import java.util.Random;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import java.util.Random;
 
 public class WorkingDaysHelper {
 
@@ -48,7 +47,7 @@ public class WorkingDaysHelper {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
         map.put("locale", "en");
-        map.put("repaymentRescheduleType", randomInt(1, 4));
+        map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
         map.put("extendTermForDailyRepayments", false);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
@@ -58,15 +57,10 @@ public class WorkingDaysHelper {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH");
         map.put("locale", "en");
-        map.put("repaymentRescheduleType", randomInt(1, 4));
+        map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
         map.put("extendTermForDailyRepayments", false);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
-    }
-
-    public static int randomInt(int low, int high) {
-        int i = new Random().nextInt(high) + low;
-        return i;
     }
 
     public static int workingDaysId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {

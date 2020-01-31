@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.charge.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
@@ -35,21 +34,21 @@ public interface ChargeReadPlatformService {
 
     /**
      * Returns all charges that can be applied to Cients
-     * 
+     *
      * @return
      */
     Collection<ChargeData> retrieveAllChargesApplicableToClients();
 
     /**
      * Returns all Fees (excluding penalties) applicable for loans
-     * 
+     *
      * @return
      */
     Collection<ChargeData> retrieveLoanApplicableFees();
 
     /**
      * Returns all charges applicable for a given loan account
-     * 
+     *
      * @param excludeChargeTimes
      *            Excludes Given List of Charge Types from the response
      * @return
@@ -59,7 +58,7 @@ public interface ChargeReadPlatformService {
     /**
      * Returns all charges applicable for a given loan product (filter based on
      * Currency of Selected Loan Product)
-     * 
+     *
      * @param excludeChargeTimes
      *            Excludes Given List of Charge Types from the response
      * @return
@@ -68,14 +67,14 @@ public interface ChargeReadPlatformService {
 
     /**
      * Returns all Penalties applicable for loans
-     * 
+     *
      * @return
      */
     Collection<ChargeData> retrieveLoanApplicablePenalties();
 
     /**
      * Returns all Charges associated with a given Loan Product
-     * 
+     *
      * @param loanProductId
      * @return
      */
@@ -83,7 +82,7 @@ public interface ChargeReadPlatformService {
 
     /**
      * Returns all charges applicable for a given loan product
-     * 
+     *
      * @param loanProductId
      * @param chargeTime
      *            Filters based on the type of the charge to be returned
@@ -93,7 +92,7 @@ public interface ChargeReadPlatformService {
 
     /**
      * Returns all charges applicable for savings
-     * 
+     *
      * @param feeChargesOnly
      * @return
      */
@@ -101,14 +100,14 @@ public interface ChargeReadPlatformService {
 
     /**
      * Returns all penalties applicable for savings
-     * 
+     *
      * @return
      */
     Collection<ChargeData> retrieveSavingsApplicablePenalties();
 
     /**
      * Returns all charges applicable for a given savings product
-     * 
+     *
      * @param savingsProductId
      * @return
      */
@@ -116,9 +115,9 @@ public interface ChargeReadPlatformService {
 
     /** Retrieve savings account charges **/
     Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
-  
+
     /**
-     * Returns charge definitions which are applicable for shares 
+     * Returns charge definitions which are applicable for shares
      */
     Collection<ChargeData> retrieveSharesApplicableCharges();
 

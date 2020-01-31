@@ -19,11 +19,9 @@
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
 import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity

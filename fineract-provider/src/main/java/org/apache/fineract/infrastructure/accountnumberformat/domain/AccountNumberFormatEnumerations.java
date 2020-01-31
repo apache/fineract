@@ -20,26 +20,33 @@ package org.apache.fineract.infrastructure.accountnumberformat.domain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class AccountNumberFormatEnumerations {
 
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts = new HashSet<>(Arrays.asList(
-            AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.CLIENT_TYPE));
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForLoanAccounts = new HashSet<>(Arrays.asList(
-            AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.LOAN_PRODUCT_SHORT_NAME));
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForSavingsAccounts = new HashSet<>(Arrays.asList(
-            AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.SAVINGS_PRODUCT_SHORT_NAME));
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForCenters = new HashSet<>(Arrays.asList(
-    		AccountNumberPrefixType.OFFICE_NAME));
-    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForGroups = new HashSet<>(Arrays.asList(
-    		AccountNumberPrefixType.OFFICE_NAME));
+    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME,
+                    AccountNumberPrefixType.CLIENT_TYPE)));
+
+    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForLoanAccounts =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME,
+                    AccountNumberPrefixType.LOAN_PRODUCT_SHORT_NAME)));
+
+    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForSavingsAccounts =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(AccountNumberPrefixType.OFFICE_NAME,
+                    AccountNumberPrefixType.SAVINGS_PRODUCT_SHORT_NAME)));
+
+    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForCenters =
+            Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
+
+    public final static Set<AccountNumberPrefixType> accountNumberPrefixesForGroups =
+            Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
 
     public enum AccountNumberPrefixType {
         OFFICE_NAME(1, "accountNumberPrefixType.officeName"), CLIENT_TYPE(101, "accountNumberPrefixType.clientType"), LOAN_PRODUCT_SHORT_NAME(
@@ -49,7 +56,7 @@ public class AccountNumberFormatEnumerations {
         private final Integer value;
         private final String code;
 
-        private AccountNumberPrefixType(final Integer value, final String code) {
+        AccountNumberPrefixType(final Integer value, final String code) {
             this.value = value;
             this.code = code;
         }

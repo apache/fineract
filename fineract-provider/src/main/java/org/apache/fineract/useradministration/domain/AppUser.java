@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,11 +39,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
@@ -118,14 +116,14 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     private boolean passwordNeverExpires;
 
     @Column(name = "is_self_service_user", nullable = false)
-	private boolean isSelfServiceUser;
-    
+    private boolean isSelfServiceUser;
+
     @OneToMany(cascade = CascadeType.ALL,  orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "appuser_id", referencedColumnName= "id", nullable = false)
     private Set<AppUserClientMapping> appUserClientMappings = new HashSet<>();
 
-	public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles, 
-			final Collection<Client> clients, final JsonCommand command) {
+    public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
+            final Collection<Client> clients, final JsonCommand command) {
 
         final String username = command.stringValueOfParameterNamed("username");
         String password = command.stringValueOfParameterNamed("password");
@@ -155,11 +153,11 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         final String email = command.stringValueOfParameterNamed("email");
         final String firstname = command.stringValueOfParameterNamed("firstname");
         final String lastname = command.stringValueOfParameterNamed("lastname");
-        
+
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
         return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire,
-        		isSelfServiceUser, clients);
+                isSelfServiceUser, clients);
     }
 
     protected AppUser() {
@@ -169,7 +167,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
-            final String lastname, final Staff staff, final boolean passwordNeverExpire, 
+            final String lastname, final Staff staff, final boolean passwordNeverExpire,
             final boolean isSelfServiceUser, final Collection<Client> clients) {
         this.office = office;
         this.email = email.trim();
@@ -221,7 +219,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     }
 
     public Map<String, Object> update(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder,
-    		final Collection<Client> clients) {
+            final Collection<Client> clients) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
@@ -301,29 +299,29 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
                 this.passwordNeverExpires = newValue;
             }
         }
-        
+
         if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
-        	if (command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)){
+            if (command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)){
                 final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
                 actualChanges.put(AppUserConstants.IS_SELF_SERVICE_USER, newValue);
                 this.isSelfServiceUser = newValue;
-        	}
+            }
         }
-        
+
         if(this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)){
-        		actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
-        		Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients); 
-        		if(this.appUserClientMappings == null){
-        			this.appUserClientMappings = new HashSet<>();
-        		}else{
-            		this.appUserClientMappings.retainAll(newClients);
-        		}
-        		this.appUserClientMappings.addAll(newClients);
+                actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
+                Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients);
+                if(this.appUserClientMappings == null){
+                    this.appUserClientMappings = new HashSet<>();
+                }else{
+                    this.appUserClientMappings.retainAll(newClients);
+                }
+                this.appUserClientMappings.addAll(newClients);
         }else if(!this.isSelfServiceUser && actualChanges.containsKey(AppUserConstants.IS_SELF_SERVICE_USER)){
-        	actualChanges.put(AppUserConstants.CLIENTS, new ArrayList<>());
-        	if(this.appUserClientMappings != null){
-        		this.appUserClientMappings.clear();
-        	}
+            actualChanges.put(AppUserConstants.CLIENTS, new ArrayList<>());
+            if(this.appUserClientMappings != null){
+                this.appUserClientMappings.clear();
+            }
         }
 
         return actualChanges;
@@ -342,7 +340,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     /**
      * Delete is a <i>soft delete</i>. Updates flag so it wont appear in
      * query/report results.
-     * 
+     *
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {
@@ -646,23 +644,23 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         return !isEnabled();
     }
 
-	public boolean isSelfServiceUser() {
-		return this.isSelfServiceUser;
-	}
-	
-    public Set<AppUserClientMapping> getAppUserClientMappings() {
-		return this.appUserClientMappings;
-	}
+    public boolean isSelfServiceUser() {
+        return this.isSelfServiceUser;
+    }
 
-	private Set<AppUserClientMapping> createAppUserClientMappings(Collection<Client> clients) {
-		Set<AppUserClientMapping> newAppUserClientMappings = null;
-		if(clients != null && clients.size() > 0){
-			newAppUserClientMappings = new HashSet<>();
-			for(Client client : clients){
-				newAppUserClientMappings.add(new AppUserClientMapping(client));
-			}
-		}
-		return newAppUserClientMappings;
-	}
+    public Set<AppUserClientMapping> getAppUserClientMappings() {
+        return this.appUserClientMappings;
+    }
+
+    private Set<AppUserClientMapping> createAppUserClientMappings(Collection<Client> clients) {
+        Set<AppUserClientMapping> newAppUserClientMappings = null;
+        if(clients != null && clients.size() > 0){
+            newAppUserClientMappings = new HashSet<>();
+            for(Client client : clients){
+                newAppUserClientMappings.add(new AppUserClientMapping(client));
+            }
+        }
+        return newAppUserClientMappings;
+    }
 
 }

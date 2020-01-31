@@ -18,9 +18,17 @@
  */
 package org.apache.fineract.portfolio.search.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.Collection;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -31,7 +39,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -49,6 +56,10 @@ import org.springframework.stereotype.Component;
 @Path("/search")
 @Component
 @Scope("singleton")
+@Api(tags = {"Search API"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Search API", description = "Search API allows to search scoped resources clients, loans and groups on specified fields.")
+})
 public class SearchApiResource {
 
     private final Set<String> searchResponseParameters = SEARCH_RESPONSE_PARAMETERS.getAllValues();
@@ -74,6 +85,8 @@ public class SearchApiResource {
     @Path("/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrive Adhoc Search query template", httpMethod = "GET", notes = "Mandatory Fields\n" + "\n" + "search?query=000000001\n")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.GetSearchResponse.class)})
     public String retrieveAdHocSearchQueryTemplate(@Context final UriInfo uriInfo) {
 
         final AdHocSearchQueryData templateData = this.searchReadPlatformService.retrieveAdHocQueryTemplate();
@@ -85,9 +98,11 @@ public class SearchApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String searchData(@Context final UriInfo uriInfo, @QueryParam("query") final String query,
-            @QueryParam("resource") final String resource ,@DefaultValue("false") @QueryParam("exactMatch")  Boolean exactMatch) {
-    	
+    @ApiOperation(value = "Search Resources", notes = "Example Requests:\n" + "\n" + "search?query=000000001\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups&exactMatch=true")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.GetSearchResponse.class)})
+    public String searchData(@Context final UriInfo uriInfo, @QueryParam("query")  @ApiParam(value = "query")final String query,
+            @QueryParam("resource")  @ApiParam(value = "resource") final String resource ,@DefaultValue("false") @QueryParam("exactMatch")  @ApiParam(value = "exactMatch")  Boolean exactMatch) {
+
         final SearchConditions searchConditions = new SearchConditions(query, resource,exactMatch);
 
         final Collection<SearchData> searchResults = this.searchReadPlatformService.retriveMatchingData(searchConditions);
@@ -100,6 +115,13 @@ public class SearchApiResource {
     @Path("/advance")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Adhoc query search", notes = "AdHocQuery search has more search options, it is a POST request, it uses request body to send search parameters\n" + "\n" + "\n" + "Mandatory fields:" + "entities" + "\n" + "\n" + "Optional fields:" + "loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate, \n" +
+            "includeOutStandingAmountPercentage, outStandingAmountPercentageCondition, \n" +
+            "minOutStandingAmountPercentage and maxOutStandingAmountPercentage OR outStandingAmountPercentage, \n" +
+            "includeOutstandingAmount, outstandingAmountCondition, \n" +
+            "minOutstandingAmount and maxOutstandingAmount OR outstandingAmount" )
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SearchApiResourceSwagger.PostAdhocQuerySearchRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.PostAdhocQuerySearchResponse.class)})
     public String advancedSearch(@Context final UriInfo uriInfo, final String json) {
 
         final AdHocQuerySearchConditions searchConditions = this.fromApiJsonDeserializer.retrieveSearchConditions(json);

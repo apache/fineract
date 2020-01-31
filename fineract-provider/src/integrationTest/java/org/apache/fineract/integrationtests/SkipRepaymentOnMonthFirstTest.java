@@ -20,10 +20,15 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
+import junit.framework.Assert;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -36,141 +41,133 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
-import junit.framework.Assert;
-
 @SuppressWarnings({ "static-access", "rawtypes", "unchecked", "deprecation" })
 public class SkipRepaymentOnMonthFirstTest {
 
-	private ResponseSpecification responseSpec;
-	private RequestSpecification requestSpec;
-	private GlobalConfigurationHelper globalConfigurationHelper;
-	private LoanTransactionHelper loanTransactionHelper;
-	private CalendarHelper calendarHelper;
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
+    private GlobalConfigurationHelper globalConfigurationHelper;
+    private LoanTransactionHelper loanTransactionHelper;
+    private CalendarHelper calendarHelper;
 
-	@Before
-	public void setup() {
-		Utils.initializeRESTAssured();
-		this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-		this.requestSpec.header("Authorization",
-				"Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-		this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-	}
+    @Before
+    public void setup() {
+        Utils.initializeRESTAssured();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    }
 
-	@After
-	public void tearDown() {
-		GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-		GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-	}
+    @After
+    public void tearDown() {
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+    }
 
-	@Test
-	public void testSkippingRepaymentOnFirstDayOfMonth() {
-		this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
+    @Test
+    public void testSkippingRepaymentOnFirstDayOfMonth() {
+        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
-		// Retrieving All Global Configuration details
-		final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
-				.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
-		Assert.assertNotNull(globalConfig);
+        // Retrieving All Global Configuration details
+        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
+                .getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(globalConfig);
 
-		String configName = "skip-repayment-on-first-day-of-month";
-		boolean newBooleanValue = true;
+        String configName = "skip-repayment-on-first-day-of-month";
+        boolean newBooleanValue = true;
 
-		for (Integer configIndex = 0; configIndex < (globalConfig.size()); configIndex++) {
-			if (globalConfig.get(configIndex).get("name").equals(configName)) {
-				String configId = (globalConfig.get(configIndex).get("id")).toString();
-				Integer updateConfigId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(
-						this.requestSpec, this.responseSpec, configId.toString(), newBooleanValue);
-				Assert.assertNotNull(updateConfigId);
-				break;
-			}
-		}
+        for (Integer configIndex = 0; configIndex < (globalConfig.size()); configIndex++) {
+            if (globalConfig.get(configIndex).get("name").equals(configName)) {
+                String configId = (globalConfig.get(configIndex).get("id")).toString();
+                Integer updateConfigId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(
+                        this.requestSpec, this.responseSpec, configId.toString(), newBooleanValue);
+                Assert.assertNotNull(updateConfigId);
+                break;
+            }
+        }
 
-	}
+    }
 
-	@Test
-	public void checkRepaymentSkipOnFirstDayOfMonth() {
-		this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+    @Test
+    public void checkRepaymentSkipOnFirstDayOfMonth() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-		final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-		Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-		groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(),
-				clientID.toString());
-		final String startDate = "15 September 2011";
-		final String frequency = "3"; // Monthly
-		final String interval = "1"; //Every One Moth
-		Integer calendarID = calendarHelper.createMeetingForGroup(requestSpec, responseSpec, groupID, startDate, frequency,
-				interval, null);
-		System.out.println("caladerId --------------------" + calendarID);
-		final Integer loanProductID = createLoanProduct();
-		final Integer loanID = applyForLoanApplication(groupID, loanProductID, calendarID, clientID);
-		System.out.println("loanID----" + loanID);
-		final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-				this.responseSpec, loanID);
-		verifyLoanRepaymentSchedule(loanSchedule);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(),
+                clientID.toString());
+        final String startDate = "15 September 2011";
+        final String frequency = "3"; // Monthly
+        final String interval = "1"; //Every One Moth
+        Integer calendarID = calendarHelper.createMeetingForGroup(requestSpec, responseSpec, groupID, startDate, frequency,
+                interval, null);
+        System.out.println("caladerId --------------------" + calendarID);
+        final Integer loanProductID = createLoanProduct();
+        final Integer loanID = applyForLoanApplication(groupID, loanProductID, calendarID, clientID);
+        System.out.println("loanID----" + loanID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
+                this.responseSpec, loanID);
+        verifyLoanRepaymentSchedule(loanSchedule);
 
-	}
+    }
 
-	private Integer createLoanProduct() {
-		System.out.println(
-				"------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-		final String loanProductJSON = new LoanProductTestBuilder() //
-				.withPrincipal("12,000.00") //
-				.withNumberOfRepayments("4") //
-				.withRepaymentAfterEvery("1") //
-				.withRepaymentTypeAsMonth() //
-				.withinterestRatePerPeriod("1") //
-				.withInterestRateFrequencyTypeAsMonths() //
-				.withAmortizationTypeAsEqualInstallments() //
-				.withInterestTypeAsDecliningBalance() //
-				.build(null);
-		return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-	}
+    private Integer createLoanProduct() {
+        System.out.println(
+                "------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("12,000.00") //
+                .withNumberOfRepayments("4") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("1") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .build(null);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
 
-	private Integer applyForLoanApplication(final Integer groupID, final Integer loanProductID, Integer calendarID,
-			Integer clientID) {
-		System.out.println(
-				"--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-		final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-				.withPrincipal("12,000.00") //
-				.withLoanTermFrequency("4") //
-				.withLoanTermFrequencyAsMonths() //
-				.withNumberOfRepayments("4") //
-				.withRepaymentEveryAfter("1") //
-				.withRepaymentFrequencyTypeAsMonths() //
-				.withInterestRatePerPeriod("2") //
-				.withAmortizationTypeAsEqualInstallments() //
-				.withInterestTypeAsDecliningBalance() //
-				.withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-				.withExpectedDisbursementDate("01 October 2011") //
-				.withCalendarID(calendarID.toString()) //
-				.withSubmittedOnDate("01 October 2011") //
-				.withLoanType("jlg").build(clientID.toString(), groupID.toString(), loanProductID.toString(), null);
-		System.out.println(loanApplicationJSON);
-		return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-	}
+    private Integer applyForLoanApplication(final Integer groupID, final Integer loanProductID, Integer calendarID,
+            Integer clientID) {
+        System.out.println(
+                "--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+                .withPrincipal("12,000.00") //
+                .withLoanTermFrequency("4") //
+                .withLoanTermFrequencyAsMonths() //
+                .withNumberOfRepayments("4") //
+                .withRepaymentEveryAfter("1") //
+                .withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("2") //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
+                .withExpectedDisbursementDate("01 October 2011") //
+                .withCalendarID(calendarID.toString()) //
+                .withSubmittedOnDate("01 October 2011") //
+                .withLoanType("jlg").build(clientID.toString(), groupID.toString(), loanProductID.toString(), null);
+        System.out.println(loanApplicationJSON);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
 
-	private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
-		System.out.println("--------------------VERIFYING THE REPAYMENT DATE--------------------------");
-		assertEquals("Checking for Repayment Date for 1st Month", new ArrayList<>(Arrays.asList(2011, 10, 15)),
-				loanSchedule.get(1).get("dueDate"));
-		System.out.println("Repayment Date for 1st Month--" + loanSchedule.get(1).get("dueDate"));
-		
-		assertEquals("Checking for Repayment Date for 2nd Month", new ArrayList<>(Arrays.asList(2011, 11, 15)),
-				loanSchedule.get(2).get("dueDate"));
-		System.out.println("Repayment Date for 2nd Month--" + loanSchedule.get(2).get("dueDate"));
-		
-		assertEquals("Checking for  Repayment Date for 3rd Month", new ArrayList<>(Arrays.asList(2011, 12, 15)),
-				loanSchedule.get(3).get("dueDate"));
-		System.out.println("Repayment Date for 3rd Month--" + loanSchedule.get(3).get("dueDate"));
-		
-		assertEquals("Checking for  Repayment Date for 4th Month", new ArrayList<>(Arrays.asList(2012, 1, 15)),
-				loanSchedule.get(4).get("dueDate"));
-		System.out.println("Repayment Date for 4th Month--" + loanSchedule.get(4).get("dueDate"));
-	}
+    private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
+        System.out.println("--------------------VERIFYING THE REPAYMENT DATE--------------------------");
+        assertEquals("Checking for Repayment Date for 1st Month", new ArrayList<>(Arrays.asList(2011, 10, 15)),
+                loanSchedule.get(1).get("dueDate"));
+        System.out.println("Repayment Date for 1st Month--" + loanSchedule.get(1).get("dueDate"));
+
+        assertEquals("Checking for Repayment Date for 2nd Month", new ArrayList<>(Arrays.asList(2011, 11, 15)),
+                loanSchedule.get(2).get("dueDate"));
+        System.out.println("Repayment Date for 2nd Month--" + loanSchedule.get(2).get("dueDate"));
+
+        assertEquals("Checking for  Repayment Date for 3rd Month", new ArrayList<>(Arrays.asList(2011, 12, 15)),
+                loanSchedule.get(3).get("dueDate"));
+        System.out.println("Repayment Date for 3rd Month--" + loanSchedule.get(3).get("dueDate"));
+
+        assertEquals("Checking for  Repayment Date for 4th Month", new ArrayList<>(Arrays.asList(2012, 1, 15)),
+                loanSchedule.get(4).get("dueDate"));
+        System.out.println("Repayment Date for 4th Month--" + loanSchedule.get(4).get("dueDate"));
+    }
 
 }

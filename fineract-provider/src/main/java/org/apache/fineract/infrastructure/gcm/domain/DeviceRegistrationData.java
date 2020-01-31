@@ -19,29 +19,28 @@
 package org.apache.fineract.infrastructure.gcm.domain;
 
 import java.util.Date;
-
 import org.apache.fineract.portfolio.client.data.ClientData;
 
 public class DeviceRegistrationData {
 
-	public Long id;
-	public ClientData clientData;
-	public String registrationId;
-	public Date updatedOnDate;
+    public Long id;
+    public ClientData clientData;
+    public String registrationId;
+    public Date updatedOnDate;
 
-	private DeviceRegistrationData(final Long id, final ClientData clientData,
-			final String registrationId, final Date updatedOnDate) {
-		this.id = id;
-		this.clientData = clientData;
-		this.registrationId = registrationId;
-		this.updatedOnDate = updatedOnDate;
-	}
+    private DeviceRegistrationData(final Long id, final ClientData clientData,
+            final String registrationId, final Date updatedOnDate) {
+        this.id = id;
+        this.clientData = clientData;
+        this.registrationId = registrationId;
+        this.updatedOnDate = updatedOnDate;
+    }
 
-	public static DeviceRegistrationData instance(final Long id,
-			final ClientData clientData, final String registrationId,
-			final Date updatedOnDate) {
-		return new DeviceRegistrationData(id, clientData, registrationId,
-				updatedOnDate);
-	}
+    public static DeviceRegistrationData instance(final Long id,
+            final ClientData clientData, final String registrationId,
+            final Date updatedOnDate) {
+        return new DeviceRegistrationData(id, clientData, registrationId,
+                updatedOnDate);
+    }
 
 }

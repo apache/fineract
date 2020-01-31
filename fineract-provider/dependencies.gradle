@@ -44,7 +44,7 @@ dependencies {
             'com.squareup.retrofit:retrofit'
     )
     implementation(
-            // 'ch.vorburger.mariaDB4j:mariaDB4j'
+            //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',

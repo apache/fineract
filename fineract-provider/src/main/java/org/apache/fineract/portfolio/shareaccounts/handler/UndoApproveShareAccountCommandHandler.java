@@ -33,7 +33,7 @@ public class UndoApproveShareAccountCommandHandler implements NewCommandSourceHa
 
 
     private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
-    
+
     @Autowired
     public UndoApproveShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
         this.shareAccountWritePlatformService = shareAccountWritePlatformService ;

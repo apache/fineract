@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -110,7 +109,7 @@ public class ContentRepositoryUtils {
 
     /**
      * Validates that passed in Mime type maps to known image mime types
-     * 
+     *
      * @param mimeType
      */
     public static void validateImageMimeType(final String mimeType) {
@@ -120,7 +119,7 @@ public class ContentRepositoryUtils {
 
     /**
      * Extracts Image from a Data URL
-     * 
+     *
      * @param dataURL mimeType
      */
     public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
@@ -168,7 +167,7 @@ public class ContentRepositoryUtils {
 
     /**
      * Generate a random String
-     * 
+     *
      * @return
      */
     public static String generateRandomString() {
@@ -183,7 +182,7 @@ public class ContentRepositoryUtils {
 
     /**
      * Generate a random number between 5 to 16
-     * 
+     *
      * @return
      */
     public static int generateRandomNumber() {

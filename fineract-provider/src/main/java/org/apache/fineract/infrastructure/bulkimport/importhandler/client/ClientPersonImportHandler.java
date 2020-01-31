@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.client;
 
+import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -42,8 +42,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.GsonBuilder;
 
 @Service
 public class ClientPersonImportHandler implements ImportHandler {
@@ -163,10 +161,10 @@ public class ClientPersonImportHandler implements ImportHandler {
              addressList = new ArrayList<AddressData>(Arrays.asList(addressDataObj));
         }
         return ClientData.importClientPersonInstance(legalFormId,row.getRowNum(),firstName,lastName,middleName,submittedOn,activationDate,active,externalId,
-				officeId, staffId, mobileNo, dob, clientTypeId, genderId, clientClassicationId, isStaff,
-				addressList, locale, dateFormat);
+                officeId, staffId, mobileNo, dob, clientTypeId, genderId, clientClassicationId, isStaff,
+                addressList, locale, dateFormat);
 
-	}
+    }
 
     public Count importEntity(String dateFormat) {
         Sheet clientSheet=workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);

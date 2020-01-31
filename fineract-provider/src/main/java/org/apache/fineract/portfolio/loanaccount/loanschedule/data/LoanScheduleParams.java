@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -74,7 +73,7 @@ public class LoanScheduleParams {
     private Money unCompoundedAmount;
     private Money compoundedInLastInstallment;
 
-    
+
     public Money getCompoundedInLastInstallment() {
         return this.compoundedInLastInstallment;
     }

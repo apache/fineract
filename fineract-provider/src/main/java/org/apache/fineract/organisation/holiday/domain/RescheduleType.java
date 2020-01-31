@@ -47,12 +47,12 @@ public enum RescheduleType {
     public boolean isRescheduleToSpecificDate(){
             return this.value.equals(RescheduleType.RESCHEDULETOSPECIFICDATE.getValue());
     }
-    
+
     public boolean isResheduleToNextRepaymentDate(){
             return this.value.equals(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE.getValue());
     }
 
-    
+
     public Integer getValue() {
             return this.value;
     }
@@ -60,5 +60,5 @@ public enum RescheduleType {
     public String getCode() {
             return this.code;
     }
-    
+
 }

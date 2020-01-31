@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
@@ -147,7 +146,7 @@ public class DepositProductData {
     /**
      * Returns a {@link DepositProductData} that contains and exist
      * {@link DepositProductData} data with further template data for dropdowns.
-     * 
+     *
      * @param taxGroupOptions
      *            TODO
      */

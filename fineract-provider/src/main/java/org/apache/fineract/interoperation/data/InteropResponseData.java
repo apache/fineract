@@ -18,23 +18,21 @@
  */
 package org.apache.fineract.interoperation.data;
 
+import java.beans.Transient;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.interoperation.domain.InteropActionState;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import javax.validation.constraints.NotNull;
-import java.beans.Transient;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
-
 public class InteropResponseData extends CommandProcessingResult {
 
     public static final String ISO_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
 //    public static final SimpleDateFormat ISO_DATE_TIME_FORMATTER = new SimpleDateFormat(ISO_DATE_TIME_PATTERN); // TODO: not synchronized
-    public static DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormat.forPattern(ISO_DATE_TIME_PATTERN);
+    public static final DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormat.forPattern(ISO_DATE_TIME_PATTERN);
 
     @NotNull
     private final String transactionCode;

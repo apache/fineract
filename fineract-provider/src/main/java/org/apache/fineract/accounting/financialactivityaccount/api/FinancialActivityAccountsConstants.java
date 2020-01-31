@@ -23,13 +23,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FinancialActivityAccountsConstants {
-	private static final String idParamName = "id";
-	private static final String factivityDataParamName = "financialActivityData";
-	private static final String glAccountDataParamName = "glAccountData";
-	private static final String glAccountOptionsParamName = "glAccountOptions";
-	private static final String financialActivityOptionsParamName = "financialActivityOptions";
+    private static final String idParamName = "id";
+    private static final String factivityDataParamName = "financialActivityData";
+    private static final String glAccountDataParamName = "glAccountData";
+    private static final String glAccountOptionsParamName = "glAccountOptions";
+    private static final String financialActivityOptionsParamName = "financialActivityOptions";
     public static final String resourceNameForPermission = "FINANCIALACTIVITYACCOUNT";
-	protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(idParamName, factivityDataParamName, glAccountDataParamName, glAccountOptionsParamName,
-					financialActivityOptionsParamName));
+    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(idParamName, factivityDataParamName, glAccountDataParamName, glAccountOptionsParamName,
+                    financialActivityOptionsParamName));
 }

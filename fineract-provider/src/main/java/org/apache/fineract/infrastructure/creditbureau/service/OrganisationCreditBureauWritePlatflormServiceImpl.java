@@ -33,61 +33,61 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrganisationCreditBureauWritePlatflormServiceImpl
-		implements OrganisationCreditBureauWritePlatflormService {
+        implements OrganisationCreditBureauWritePlatflormService {
 
-	private final PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
 
-	private final OrganisationCreditBureauRepository organisationCreditBureauRepository;
+    private final OrganisationCreditBureauRepository organisationCreditBureauRepository;
 
-	private final CreditBureauRepository creditBureauRepository;
+    private final CreditBureauRepository creditBureauRepository;
 
-	private final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-	@Autowired
-	public OrganisationCreditBureauWritePlatflormServiceImpl(final PlatformSecurityContext context,
-			final OrganisationCreditBureauRepository organisationCreditBureauRepository, final CreditBureauRepository creditBureauRepository,
-			final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-		this.context = context;
-		this.organisationCreditBureauRepository = organisationCreditBureauRepository;
-		this.creditBureauRepository = creditBureauRepository;
-		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+    @Autowired
+    public OrganisationCreditBureauWritePlatflormServiceImpl(final PlatformSecurityContext context,
+            final OrganisationCreditBureauRepository organisationCreditBureauRepository, final CreditBureauRepository creditBureauRepository,
+            final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+        this.context = context;
+        this.organisationCreditBureauRepository = organisationCreditBureauRepository;
+        this.creditBureauRepository = creditBureauRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 
-	}
+    }
 
-	@Override
-	public CommandProcessingResult addOrganisationCreditBureau(Long creditBureauId, JsonCommand command) {
-		this.context.authenticatedUser();
-		this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureauId);
+    @Override
+    public CommandProcessingResult addOrganisationCreditBureau(Long creditBureauId, JsonCommand command) {
+        this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureauId);
 
-		final CreditBureau creditBureau = this.creditBureauRepository.getOne(creditBureauId);
+        final CreditBureau creditBureau = this.creditBureauRepository.getOne(creditBureauId);
 
-		final OrganisationCreditBureau organisationCreditBureau = OrganisationCreditBureau.fromJson(command, creditBureau);
+        final OrganisationCreditBureau organisationCreditBureau = OrganisationCreditBureau.fromJson(command, creditBureau);
 
-		this.organisationCreditBureauRepository.save(organisationCreditBureau);
+        this.organisationCreditBureauRepository.save(organisationCreditBureau);
 
-		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(organisationCreditBureau.getId())
-				.build();
-	}
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(organisationCreditBureau.getId())
+                .build();
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult updateCreditBureau(JsonCommand command) {
-		 this.context.authenticatedUser();
-		this.fromApiJsonDeserializer.validateForUpdate(command.json());
+    @Transactional
+    @Override
+    public CommandProcessingResult updateCreditBureau(JsonCommand command) {
+         this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-		final long creditbureauID = command.longValueOfParameterNamed("creditBureauId");
-		
-		final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
+        final long creditbureauID = command.longValueOfParameterNamed("creditBureauId");
 
-		final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getOne(creditbureauID);
+        final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
 
-		orgcb.setIsActive(is_active);
+        final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getOne(creditbureauID);
 
-		organisationCreditBureauRepository.saveAndFlush(orgcb);
+        orgcb.setIsActive(is_active);
 
-		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(orgcb.getId())
-				.build();
+        organisationCreditBureauRepository.saveAndFlush(orgcb);
 
-	}
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(orgcb.getId())
+                .build();
+
+    }
 
 }

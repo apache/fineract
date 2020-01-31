@@ -18,17 +18,21 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
@@ -48,13 +52,16 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.stereotype.Component;
 
 /*
- * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled. 
+ * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled.
  */
 @Path("/userdetails")
 @Component
 @Profile("oauth")
 @Scope("singleton")
-@Api(value = "Fetch authenticated user details", description = "")
+@Api(tags = {"Fetch authenticated user details"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Fetch authenticated user details", description = "")
+})
 public class UserDetailsApiResource {
 
     private final ResourceServerTokenServices tokenServices;

@@ -22,14 +22,36 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.gson.Gson;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
+import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignRepository;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRepository;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageStatusType;
+import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailAttachmentFileFormat;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToBeDeletedException;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToEditException;
+import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -40,24 +62,18 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
-import org.apache.fineract.infrastructure.dataqueries.domain.*;
+import org.apache.fineract.infrastructure.dataqueries.domain.Report;
+import org.apache.fineract.infrastructure.dataqueries.domain.ReportParameterUsage;
+import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepository;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
-import org.apache.fineract.infrastructure.reportmailingjob.helper.IPv4Helper;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
-import org.apache.fineract.infrastructure.campaigns.email.domain.*;
-import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToBeDeletedException;
-import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToEditException;
-import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.reportmailingjob.helper.IPv4Helper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -66,17 +82,19 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import java.io.*;
-import java.util.*;
 
 @Service
 public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampaignWritePlatformService {
@@ -699,7 +717,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     /**
      * This generates the the report and converts it to a file by passing the
      * parameters below
-     * 
+     *
      * @param emailCampaign
      * @param emailAttachmentFileFormat
      * @param reportParams
@@ -744,7 +762,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     /**
      * This matches the the actual values to the key in the report stretchy
      * parameters map
-     * 
+     *
      * @param stretchyParams
      * @param client
      * @return

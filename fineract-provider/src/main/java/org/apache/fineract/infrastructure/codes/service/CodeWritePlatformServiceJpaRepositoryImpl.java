@@ -19,9 +19,7 @@
 package org.apache.fineract.infrastructure.codes.service;
 
 import java.util.Map;
-
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.Code;
 import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
@@ -76,9 +74,9 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleCodeDataIntegrityIssues(command, throwable, ee);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleCodeDataIntegrityIssues(command, throwable, ee);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -108,9 +106,9 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleCodeDataIntegrityIssues(command, throwable, ee);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleCodeDataIntegrityIssues(command, throwable, ee);
+            return CommandProcessingResult.empty();
         }
     }
 

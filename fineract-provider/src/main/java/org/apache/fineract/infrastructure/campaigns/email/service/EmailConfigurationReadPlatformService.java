@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import java.util.Collection;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 
-import java.util.Collection;
-
 public interface EmailConfigurationReadPlatformService {
-	
-	Collection<EmailConfigurationData> retrieveAll();
 
-	EmailConfigurationData retrieveOne(String name);
+    Collection<EmailConfigurationData> retrieveAll();
+
+    EmailConfigurationData retrieveOne(String name);
 }

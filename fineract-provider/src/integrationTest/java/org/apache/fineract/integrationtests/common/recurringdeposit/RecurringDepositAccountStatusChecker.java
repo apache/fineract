@@ -20,13 +20,11 @@ package org.apache.fineract.integrationtests.common.recurringdeposit;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.Assert;
 
 @SuppressWarnings("rawtypes")
 public class RecurringDepositAccountStatusChecker {
@@ -89,7 +87,7 @@ public class RecurringDepositAccountStatusChecker {
                 getStatus(recurringDepositStatusHashMap, "prematureClosed"));
         System.out.println(recurringDepositStatusHashMap);
     }
-    
+
     public static void verifyRecurringDepositAccountIsMatured(HashMap recurringDepositStatusHashMap) {
         System.out.println("--------------------- VERIFYING RECURRING DEPOSIT APPLICATION IS MATURED ---------------------");
         assertTrue("ERROR IN MATURITY JOB OF THE RECURRING DEPOSIT ACCOUNT", getStatus(recurringDepositStatusHashMap, "matured"));

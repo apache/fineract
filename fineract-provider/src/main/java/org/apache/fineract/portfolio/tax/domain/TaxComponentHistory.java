@@ -20,13 +20,11 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -60,7 +58,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
             final LocalDate endDate) {
         return new TaxComponentHistory(percentage, startDate, endDate);
     }
-    
+
     public LocalDate startDate(){
         LocalDate startDate = null;
         if(this.startDate != null){
@@ -68,7 +66,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
         }
         return startDate;
     }
-    
+
     public LocalDate endDate(){
         LocalDate endDate = null;
         if(this.endDate != null){
@@ -76,7 +74,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
         }
         return endDate;
     }
-    
+
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
         if(this.endDate == null){
             return target != null && target.isAfter(startDate());
@@ -84,7 +82,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
         return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
     }
 
-    
+
     public BigDecimal getPercentage() {
         return this.percentage;
     }

@@ -35,9 +35,9 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
     private final Long expenseAccount;
     private final String expenseCode;
     private final String expenseName ;
-    
+
     public ProvisioningCriteriaDefinitionData(Long id, Long categoryId, String categoryName, Long minAge, Long maxAge,
-            BigDecimal provisioningPercentage, Long liabilityAccount, final String liabilityCode, String liabilityName, Long expenseAccount, 
+            BigDecimal provisioningPercentage, Long liabilityAccount, final String liabilityCode, String liabilityName, Long expenseAccount,
             final String expenseCode, final String expenseName) {
         this.id = id;
         this.categoryId = categoryId;

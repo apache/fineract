@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReCreateProvisioningEntryRequestCommandHandler  implements NewCommandSourceHandler {
 
     private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService ;
-    
+
     @Autowired
     public ReCreateProvisioningEntryRequestCommandHandler(
             final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService) {

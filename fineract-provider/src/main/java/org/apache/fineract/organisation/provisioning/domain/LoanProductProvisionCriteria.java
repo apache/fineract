@@ -23,7 +23,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
@@ -34,15 +33,15 @@ public class LoanProductProvisionCriteria extends AbstractPersistableCustom<Long
     @ManyToOne(optional = false)
     @JoinColumn(name = "criteria_id", referencedColumnName = "id", nullable = false)
     private ProvisioningCriteria criteria;
-    
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
     private LoanProduct loanProduct;
-    
+
     protected LoanProductProvisionCriteria() {
-        
+
     }
-    
+
     public LoanProductProvisionCriteria(ProvisioningCriteria criteria, LoanProduct loanProduct) {
         this.criteria = criteria ;
         this.loanProduct = loanProduct ;

@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.mix.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -30,8 +32,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
-import io.swagger.annotations.Api;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -49,7 +49,10 @@ import org.springframework.stereotype.Component;
 @Path("/mixmapping")
 @Component
 @Scope("singleton")
-@Api(value = "Mix Mapping")
+@Api(tags = {"Mix Mapping "})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Mix Mapping", description = "")
+})
 public class MixTaxonomyMappingApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("identifier", "config"));

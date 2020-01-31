@@ -18,11 +18,17 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -46,7 +52,11 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
-import org.apache.fineract.infrastructure.entityaccess.domain.*;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
 import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -54,8 +64,13 @@ import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
-import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
+import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -76,7 +91,18 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.*;
+import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
@@ -89,11 +115,15 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCo
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
-import org.apache.fineract.portfolio.loanproduct.domain.*;
-import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.serialization.LoanProductDataValidator;
+import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -107,9 +137,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -170,7 +197,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanReadPlatformService loanReadPlatformService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
-            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService, 
+            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService,
             final CalendarReadPlatformService calendarReadPlatformService, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
             final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, final LoanProductReadPlatformService loanProductReadPlatformService) {
@@ -235,10 +262,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         }
                         final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
                         if(groupId != null){
-                        	Group group= this.groupRepository.findOneWithNotFoundDetection(groupId);
+                         Group group= this.groupRepository.findOneWithNotFoundDetection(groupId);
                             officeSpecificLoanProductValidation( productId,group.getOffice().getId());
                         }
-            
+
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -262,7 +289,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
 
-	     checkForProductMixRestrictions(newLoanApplication);
+      checkForProductMixRestrictions(newLoanApplication);
 
             validateSubmittedOnDate(newLoanApplication);
 
@@ -417,9 +444,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+         Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+          return CommandProcessingResult.empty();
         }
     }
 
@@ -556,7 +583,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
             default:
             break;
         }
-         
+
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
                 calendarFrequencyType, frequency, updatedRepeatsOnDay, recalculationFrequencyNthDay);
         final CalendarInstance calendarInstance = CalendarInstance.from(calendar, loan.loanInterestRecalculationDetails().getId(),
@@ -986,18 +1013,18 @@ public void checkForProductMixRestrictions(final Loan loan) {
                     }
                 }
             }
-            
+
             if ((command.longValueOfParameterNamed(productIdParamName) != null)
-            							|| (command.longValueOfParameterNamed(clientIdParamName) != null) || (command.longValueOfParameterNamed(groupIdParamName) != null)) { 
-            						Long OfficeId = null;
-            						if(existingLoanApplication.getClient() != null){
-            							OfficeId = existingLoanApplication.getClient().getOffice().getId();
-            						}
-            						else if(existingLoanApplication.getGroup() != null){
-            							OfficeId = existingLoanApplication.getGroup().getOffice().getId();
-            						}
-            						officeSpecificLoanProductValidation( existingLoanApplication.getLoanProduct().getId(),OfficeId);
-            							}
+                   || (command.longValueOfParameterNamed(clientIdParamName) != null) || (command.longValueOfParameterNamed(groupIdParamName) != null)) {
+                  Long OfficeId = null;
+                  if(existingLoanApplication.getClient() != null){
+                   OfficeId = existingLoanApplication.getClient().getOffice().getId();
+                  }
+                  else if(existingLoanApplication.getGroup() != null){
+                   OfficeId = existingLoanApplication.getGroup().getOffice().getId();
+                  }
+                  officeSpecificLoanProductValidation( existingLoanApplication.getLoanProduct().getId(),OfficeId);
+                   }
 
             // updating loan interest recalculation details throwing null
             // pointer exception after saveAndFlush
@@ -1026,7 +1053,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
         }catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+          return CommandProcessingResult.empty();
         }
     }
 
@@ -1035,13 +1062,13 @@ public void checkForProductMixRestrictions(final Loan loan) {
      * is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-    	
-        if (realCause.getMessage().contains("loan_account_no_UNIQUE") || realCause.getCause().getMessage().contains("loan_account_no_UNIQUE")) {
+
+        if (realCause.getMessage().contains("loan_account_no_UNIQUE") || (realCause.getCause() != null && realCause.getCause().getMessage().contains("loan_account_no_UNIQUE"))) {
 
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.accountNo", "Loan with accountNo `" + accountNo
                     + "` already exists", "accountNo", accountNo);
-        } else if (realCause.getMessage().contains("loan_externalid_UNIQUE") || realCause.getCause().getMessage().contains("loan_externalid_UNIQUE")) {
+        } else if (realCause.getMessage().contains("loan_externalid_UNIQUE") || (realCause.getCause() != null && realCause.getCause().getMessage().contains("loan_externalid_UNIQUE"))) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.externalId", "Loan with externalId `" + externalId
                     + "` already exists", "externalId", externalId);
@@ -1068,11 +1095,11 @@ public void checkForProductMixRestrictions(final Loan loan) {
         this.noteRepository.deleteInBatch(relatedNotes);
 
         final AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
-				AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
-		if (accountAssociations != null) {
-			this.accountAssociationsRepository.delete(accountAssociations);
-		}
-		
+    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+  if (accountAssociations != null) {
+   this.accountAssociationsRepository.delete(accountAssociations);
+  }
+
         this.loanRepositoryWrapper.delete(loanId);
 
         return new CommandProcessingResultBuilder() //
@@ -1402,19 +1429,19 @@ public void checkForProductMixRestrictions(final Loan loan) {
     }
 
     private void officeSpecificLoanProductValidation(final Long productId, final Long officeId) {
-    			final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
-    					.findOneByNameWithNotFoundDetection(
-    							FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
-    			if (restrictToUserOfficeProperty.isEnabled()) {
-    				FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-    						                               .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
-    				FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation, productId,
-    						officeId);
-    				if (officeToLoanProductMappingList == null) {
-    					throw new NotOfficeSpecificProductException(productId, officeId);
-    				}
-    
-    			}
-    		}
-    
+       final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
+         .findOneByNameWithNotFoundDetection(
+           FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+       if (restrictToUserOfficeProperty.isEnabled()) {
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+                                         .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+        FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation, productId,
+          officeId);
+        if (officeToLoanProductMappingList == null) {
+         throw new NotOfficeSpecificProductException(productId, officeId);
+        }
+
+       }
+      }
+
 }

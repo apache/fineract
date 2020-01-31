@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.configuration.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.campaigns.sms.data.MessageGatewayConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
@@ -35,7 +34,7 @@ public interface ExternalServicesPropertiesReadPlatformService {
     MessageGatewayConfigurationData getSMSGateway();
 
     Collection<ExternalServicesPropertiesData> retrieveOne(String serviceName);
-    
+
     NotificationConfigurationData getNotificationConfiguration();
 
 }

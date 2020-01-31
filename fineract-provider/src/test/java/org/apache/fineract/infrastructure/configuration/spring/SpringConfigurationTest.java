@@ -49,7 +49,7 @@ public class SpringConfigurationTest {
      * to, as the SpringJUnit4ClassRunner with this @ContextConfiguration will
      * automatically fail if e.g. there is any invalid Spring XML, an invalid
      * bean definition somewhere or anything like that.
-     * 
+     *
      * @see https://www.google.ch/search?q=Aal+izz+well
      */
     @Test

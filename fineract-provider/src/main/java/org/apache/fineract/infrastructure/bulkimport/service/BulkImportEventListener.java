@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;

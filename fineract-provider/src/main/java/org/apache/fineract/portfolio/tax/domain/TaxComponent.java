@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,7 +37,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
@@ -199,22 +197,22 @@ public class TaxComponent extends AbstractAuditableCustom<AppUser, Long> {
         return dates;
     }
 
-    
+
     public Integer getDebitAccountType() {
         return this.debitAccountType;
     }
 
-    
+
     public GLAccount getDebitAcount() {
         return this.debitAcount;
     }
 
-    
+
     public Integer getCreditAccountType() {
         return this.creditAccountType;
     }
 
-    
+
     public GLAccount getCreditAcount() {
         return this.creditAcount;
     }

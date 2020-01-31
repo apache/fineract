@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
@@ -68,7 +67,7 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
     }
 
     private BigDecimal calculateUsingAverageDailyBalanceMethod(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction, 
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
             final BigDecimal minOverdraftForInterestCalculation) {
 
         BigDecimal cumulativeBalance = BigDecimal.ZERO;
@@ -111,7 +110,7 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
 
     private BigDecimal calculateUsingDailyBalanceMethod(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
             final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction, 
+            final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
             final BigDecimal minOverdraftForInterestCalculation) {
 
         BigDecimal interestEarned = BigDecimal.ZERO;
@@ -178,8 +177,8 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
         this.endOfDayBalances = endOfDayBalances;
     }
 
-	@Override
-	public LocalDateInterval getPeriodInterval() {
-		return this.periodInterval;
-	}
+    @Override
+    public LocalDateInterval getPeriodInterval() {
+        return this.periodInterval;
+    }
 }

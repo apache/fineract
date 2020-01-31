@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -31,7 +31,7 @@ import org.joda.time.LocalDate;
  * Immutable data object representing a savings account.
  */
 @SuppressWarnings("unused")
-public class AccountTransferData {
+public class AccountTransferData implements Serializable {
 
     private final Long id;
     private final Boolean reversed;

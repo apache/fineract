@@ -18,20 +18,19 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import com.google.gson.JsonObject;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.interoperation.util.MathUtil;
-
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.util.Arrays;
-
 import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_LOCALE;
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_AMOUNT;
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_CURRENCY;
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_LOCALE;
+
+import com.google.gson.JsonObject;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.interoperation.util.MathUtil;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 
 public class MoneyData {
 

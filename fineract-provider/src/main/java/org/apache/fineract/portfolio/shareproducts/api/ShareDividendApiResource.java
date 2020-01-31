@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.shareproducts.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -28,7 +31,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -50,6 +52,10 @@ import org.springframework.stereotype.Component;
 @Path("/shareproduct/{productId}/dividend")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Dividend"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Self Dividend", description = "")
+})
 public class ShareDividendApiResource {
 
     private final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer;

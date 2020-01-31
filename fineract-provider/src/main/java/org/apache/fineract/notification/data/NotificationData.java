@@ -41,7 +41,7 @@ public class NotificationData implements Serializable {
     }
 
     public NotificationData(String objectType, Long objectId, String action, Long actorId, String content, boolean isSystemGenerated,
-    		boolean isRead, String tenantIdentifier, Long officeId, List<Long> userIds) {
+            boolean isRead, String tenantIdentifier, Long officeId, List<Long> userIds) {
         this.objectType = objectType;
         this.objectId = objectId;
         this.action = action;
@@ -125,14 +125,14 @@ public class NotificationData implements Serializable {
     public void setContent(String content) {
         this.content = content;
     }
-    
-	public boolean isRead() {
-		return this.isRead;
-	}
 
-	public void setRead(boolean isRead) {
-		this.isRead = isRead;
-	}
+    public boolean isRead() {
+        return this.isRead;
+    }
+
+    public void setRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 
     public boolean isSystemGenerated() {
         return isSystemGenerated;

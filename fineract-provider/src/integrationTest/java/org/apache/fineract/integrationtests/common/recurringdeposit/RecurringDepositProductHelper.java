@@ -18,18 +18,15 @@
  */
 package org.apache.fineract.integrationtests.common.recurringdeposit;
 
+import com.google.gson.Gson;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class RecurringDepositProductHelper {
@@ -190,7 +187,7 @@ public class RecurringDepositProductHelper {
         this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
         return this;
     }
-    
+
     public RecurringDepositProductHelper withWithHoldTax(final String taxGroupId) {
         if (taxGroupId != null) {
             this.withHoldTax = true;

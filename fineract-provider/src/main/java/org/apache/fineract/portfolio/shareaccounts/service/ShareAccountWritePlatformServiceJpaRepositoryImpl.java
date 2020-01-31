@@ -26,9 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -42,11 +40,11 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -71,7 +69,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     private final ShareAccountRepositoryWrapper shareAccountRepository;
 
     private final ShareProductRepositoryWrapper shareProductRepository ;
-    
+
     private final AccountNumberGenerator accountNumberGenerator;
 
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
@@ -81,10 +79,10 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     private final NoteRepository noteRepository;
 
     private final BusinessEventNotifierService businessEventNotifierService;
-    
+
     @Autowired
     public ShareAccountWritePlatformServiceJpaRepositoryImpl(final ShareAccountDataSerializer accountDataSerializer,
-            final ShareAccountRepositoryWrapper shareAccountRepository, 
+            final ShareAccountRepositoryWrapper shareAccountRepository,
             final ShareProductRepositoryWrapper shareProductRepository,
             final AccountNumberGenerator accountNumberGenerator,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
@@ -121,9 +119,9 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -168,9 +166,9 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 }
                 transactionDto.put("amount", amount);
             }else {
-                transactionDto.put("amount", transaction.amount());    
+                transactionDto.put("amount", transaction.amount());
             }
-            
+
             transactionDto.put("chargeAmount", transaction.chargeAmount());
             transactionDto.put("paymentTypeId", null); // FIXME::make it cash
                                                        // payment
@@ -219,9 +217,9 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -273,7 +271,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
             Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
             Long totalSubsribedShares = new Long(0) ;
-            
+
             for (ShareAccountTransaction transaction : transactions) {
                 if (transaction.isActive() && transaction.isPurchasTransaction()) {
                     journalTransactions.add(transaction);
@@ -283,7 +281,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             ShareProduct shareProduct = account.getShareProduct() ;
             shareProduct.addSubscribedShares(totalSubsribedShares);
             this.shareProductRepository.save(shareProduct);
-            
+
             this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SHARE_ACCOUNT_APPROVE,
@@ -321,7 +319,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     journalTransactions.add(transaction);
                 }
             }
-            
+
             this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -348,7 +346,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     this.noteRepository.save(note);
                 }
             }
-            
+
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions() ;
             ArrayList<Long> journalEntryTransactions = new ArrayList<>() ;
             for(ShareAccountTransaction transaction: transactions) {
@@ -469,13 +467,13 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 ShareAccountTransaction transaction = (ShareAccountTransaction) changes
                         .get(ShareAccountApiConstants.requestedshares_paramname);
              // after saving, entity will have different object. So need to retrieve the entity object
-                transaction = account.getShareAccountTransaction(transaction); 
+                transaction = account.getShareAccountTransaction(transaction);
                 Long redeemShares = transaction.getTotalShares() ;
                 ShareProduct shareProduct = account.getShareProduct() ;
-                //remove the redeem shares from total subscribed shares 
-                shareProduct.removeSubscribedShares(redeemShares); 
+                //remove the redeem shares from total subscribed shares
+                shareProduct.removeSubscribedShares(redeemShares);
                 this.shareProductRepository.save(shareProduct);
-                
+
                 Set<ShareAccountTransaction> transactions = new HashSet<>();
                 transactions.add(transaction);
                 this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));

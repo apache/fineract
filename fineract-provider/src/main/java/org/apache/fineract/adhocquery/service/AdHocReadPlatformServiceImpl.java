@@ -21,7 +21,6 @@ package org.apache.fineract.adhocquery.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -98,16 +97,16 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
         public String schema() {
             return " r.id as id, r.name as name, r.query as query, r.table_name as tableName,r.table_fields as tableField ,r.IsActive as isActive ,r.email as email ,"
                     + " r.report_run_frequency_code, r.report_run_every, r.last_run, "
-            		+ " r.created_date as createdDate, r.createdby_id as createdById,cb.username as createdBy,r.lastmodifiedby_id as updatedById ,r.lastmodified_date as updatedOn "
+                    + " r.created_date as createdDate, r.createdby_id as createdById,cb.username as createdBy,r.lastmodifiedby_id as updatedById ,r.lastmodified_date as updatedOn "
                     + " from m_adhoc r left join m_appuser cb on cb.id=r.createdby_id left join m_appuser mb on mb.id=r.lastmodifiedby_id";
-            		        
+
         }
     }
 
-	@Override
-	public AdHocData retrieveNewAdHocDetails() {
-		 return AdHocData.template();
-	}
+    @Override
+    public AdHocData retrieveNewAdHocDetails() {
+         return AdHocData.template();
+    }
 
-   
+
 }

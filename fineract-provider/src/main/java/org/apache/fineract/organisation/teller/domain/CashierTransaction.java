@@ -19,55 +19,61 @@
 package org.apache.fineract.organisation.teller.domain;
 
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.organisation.office.domain.Office;
-import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-import javax.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_cashier_transactions")
 public class CashierTransaction extends AbstractPersistableCustom<Long> {
 
-	@Transient
+    @Transient
     private Office office;
-	
-	@Transient
+
+    @Transient
     private Teller teller;
-	
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cashier_id", nullable = false)
     private Cashier cashier;
-    
+
     @Column(name = "txn_type", nullable = false)
     private Integer txnType;
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "txn_date", nullable = false)
     private Date txnDate;
 
     @Column(name = "txn_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal txnAmount;
-    
+
     @Column(name = "txn_note", nullable = true)
     private String txnNote;
-    
+
     @Column(name = "entity_type", nullable = true)
     private String entityType;
-    
+
     @Column(name = "entity_id", nullable = true)
     private Long entityId;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
-    
+
     @Column(name = "currency_code", nullable = true)
     private String currencyCode;
 
@@ -77,10 +83,10 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     public CashierTransaction() {
         super();
     }
-    
+
     public static CashierTransaction fromJson(
-    		final Cashier cashier,
-    		final JsonCommand command) {
+            final Cashier cashier,
+            final JsonCommand command) {
         final Integer txnType = command.integerValueOfParameterNamed("txnType");
         final BigDecimal txnAmount = command.bigDecimalValueOfParameterNamed("txnAmount");
         final LocalDate txnDate = command.localDateValueOfParameterNamed("txnDate");
@@ -90,33 +96,33 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
 
         // TODO: get client/loan/savings details
-        return new CashierTransaction (cashier, txnType, txnAmount, txnDate, 
-        		entityType, entityId, txnNote, currencyCode);
-        
+        return new CashierTransaction (cashier, txnType, txnAmount, txnDate,
+                entityType, entityId, txnNote, currencyCode);
+
     }
-    
-    public CashierTransaction (Cashier cashier, Integer txnType, BigDecimal txnAmount, 
-    		LocalDate txnDate, String entityType, Long entityId, String txnNote, String currencyCode) {
-    	this.cashier = cashier;
-    	this.txnType = txnType;
-    	if (txnDate != null) {
-    		this.txnDate = txnDate.toDate();
-    	}
-    	this.txnAmount = txnAmount;
-    	this.entityType = entityType;
-    	this.entityId = entityId;
-    	this.txnNote = txnNote;
-    	this.createdDate = new Date(); 
-    	this.currencyCode = currencyCode;
+
+    public CashierTransaction (Cashier cashier, Integer txnType, BigDecimal txnAmount,
+            LocalDate txnDate, String entityType, Long entityId, String txnNote, String currencyCode) {
+        this.cashier = cashier;
+        this.txnType = txnType;
+        if (txnDate != null) {
+            this.txnDate = txnDate.toDate();
+        }
+        this.txnAmount = txnAmount;
+        this.entityType = entityType;
+        this.entityId = entityId;
+        this.txnNote = txnNote;
+        this.createdDate = new Date();
+        this.currencyCode = currencyCode;
     }
-    
+
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();        
-      
+        final String localeAsInput = command.locale();
+
         final String txnTypeParamName = "txnType";
         if (command.isChangeInIntegerParameterNamed(txnTypeParamName, this.txnType)) {
             final Integer newValue = command.integerValueOfParameterNamed(txnTypeParamName);
@@ -134,28 +140,28 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
             final LocalDate newValue = command.localDateValueOfParameterNamed(txnDateParamName);
             this.txnDate = newValue.toDate();
         }
-        
+
         final String txnAmountParamName = "txnAmount";
         if (command.isChangeInBigDecimalParameterNamed(txnAmountParamName, this.txnAmount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(txnAmountParamName);
             actualChanges.put(txnAmountParamName, newValue);
             this.txnAmount = newValue;
         }
-        
+
         final String txnNoteParamName = "txnNote";
         if (command.isChangeInStringParameterNamed(txnNoteParamName, this.txnNote)) {
             final String newValue = command.stringValueOfParameterNamed(txnNoteParamName);
             actualChanges.put(txnNoteParamName, newValue);
             this.txnNote = newValue;
         }
-        
+
         final String currencyCodeParamName = "currencyCode";
         if (command.isChangeInStringParameterNamed(currencyCodeParamName, this.currencyCode)) {
             final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
             actualChanges.put(currencyCodeParamName, newValue);
             this.currencyCode = newValue;
         }
-                
+
         return actualChanges;
     }
 
@@ -227,7 +233,7 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     public Date getTxnDate() {
         return txnDate;
     }
-    
+
     public LocalDate getTxnLocalDate() {
         LocalDate txnLocalDate = null;
         if (this.txnDate != null) {
@@ -264,7 +270,7 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     public String getTxnNote() {
         return txnNote;
     }
-    
+
     public BigDecimal getTxnAmount() {
         return txnAmount;
     }
@@ -272,11 +278,11 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     public void setTxnNote (String txnNote) {
         this.txnNote = txnNote;
     }
-    
+
     public String getCurrencyCode() {
         return this.currencyCode;
     }
-    
+
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
     }

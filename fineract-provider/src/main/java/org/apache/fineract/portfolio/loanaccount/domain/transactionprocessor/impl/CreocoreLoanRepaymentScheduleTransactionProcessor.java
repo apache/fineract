@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl;
 
 import java.util.List;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -31,14 +30,14 @@ import org.joda.time.LocalDate;
 
 /**
  * Creocore style {@link LoanRepaymentScheduleTransactionProcessor}.
- * 
+ *
  * For standard transactions, pays off components in order of interest, then
  * principal.
- * 
+ *
  * If a transaction results in an advance payment or over-payment for a given
  * installment, the over paid amount is pay off on the principal component of
  * subsequent installments.
- * 
+ *
  * If the entire principal of an installment is paid in advance then the
  * interest component is waived.
  */

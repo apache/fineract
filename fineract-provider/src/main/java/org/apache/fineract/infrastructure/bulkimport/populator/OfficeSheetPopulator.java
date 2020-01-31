@@ -18,14 +18,13 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
 
@@ -70,13 +69,13 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
   public List<OfficeData> getOffices() {
     return offices;
   }
-  
+
   public List<String> getOfficeNames() {
-		 List<String> officeNames=new ArrayList<>();
-		 for (OfficeData office : offices) {
-			 officeNames.add(office.name());
-		}
-		 return officeNames;
+         List<String> officeNames=new ArrayList<>();
+         for (OfficeData office : offices) {
+             officeNames.add(office.name());
+        }
+         return officeNames;
   }
-  
+
 }

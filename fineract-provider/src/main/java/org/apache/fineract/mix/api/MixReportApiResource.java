@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.mix.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.sql.Date;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import io.swagger.annotations.Api;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.service.XBRLBuilder;
 import org.apache.fineract.mix.service.XBRLResultService;
@@ -37,7 +37,10 @@ import org.springframework.stereotype.Component;
 @Path("/mixreport")
 @Component
 @Scope("singleton")
-@Api(value = "Mix Report", description = "")
+@Api(tags = {"Mix Report"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Mix Report", description = "")
+})
 public class MixReportApiResource {
 
     private final XBRLResultService xbrlResultService;

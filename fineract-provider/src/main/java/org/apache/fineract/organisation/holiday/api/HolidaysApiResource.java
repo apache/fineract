@@ -21,9 +21,17 @@ package org.apache.fineract.organisation.holiday.api;
 import static org.apache.fineract.organisation.holiday.api.HolidayApiConstants.HOLIDAY_RESOURCE_NAME;
 import static org.apache.fineract.organisation.holiday.api.HolidayApiConstants.HOLIDAY_RESPONSE_DATA_PARAMETERS;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.Collection;
 import java.util.Date;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -36,8 +44,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
-import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.api.DateParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -58,7 +64,10 @@ import org.springframework.stereotype.Component;
 @Path("/holidays")
 @Component
 @Scope("singleton")
-@Api(value = "Holidays", description = "Some MFI's span large regions where different branch offices might observe different holidays. They need the ability to define holidays for specific branch offices and be able to set the repayment rule to follow during those holidays.\n" + "\n" + "The reschedule of repayments to repaymentsRescheduledTo date during defined holidays is turned on/off by enabling/disabling reschedule-repayments-on-holidays in Global configurations.\n" + "\n" + "Allow Repayment transactions on a defined holidays is turned on/off by enabling/disabling allow-transactions-on-holiday in Global configurations.")
+@Api(tags = {"Holidays"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Holidays", description = "Some MFI's span large regions where different branch offices might observe different holidays. They need the ability to define holidays for specific branch offices and be able to set the repayment rule to follow during those holidays.\n" + "\n" + "The reschedule of repayments to repaymentsRescheduledTo date during defined holidays is turned on/off by enabling/disabling reschedule-repayments-on-holidays in Global configurations.\n" + "\n" + "Allow Repayment transactions on a defined holidays is turned on/off by enabling/disabling allow-transactions-on-holiday in Global configurations.")
+})
 public class HolidaysApiResource {
 
     private final DefaultToApiJsonSerializer<HolidayData> toApiJsonSerializer;
@@ -197,7 +206,7 @@ public class HolidaysApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, holidays, HOLIDAY_RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @GET
     @Path("/template")
     @Consumes({MediaType.APPLICATION_JSON})

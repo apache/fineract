@@ -21,9 +21,8 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 
 @Entity
 @Table(name = "ref_loan_transaction_processing_strategy")
@@ -37,7 +36,7 @@ public class LoanTransactionProcessingStrategy extends AbstractPersistableCustom
 
     @Column(name = "sort_order")
     private Integer sortOrder ; //Don't change this name as this property name is used as sort order while retrieving this objects
-   
+
     protected LoanTransactionProcessingStrategy() {
         //
     }

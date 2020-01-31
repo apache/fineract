@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.portfolio.interestratechart;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class InterestRateChartApiConstants {
 
     public static final String INTERESTRATE_CHART_RESOURCE_NAME = "interestchart";

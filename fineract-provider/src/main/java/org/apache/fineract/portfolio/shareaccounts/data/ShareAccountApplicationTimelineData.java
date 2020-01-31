@@ -18,21 +18,22 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
+import java.io.Serializable;
 import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
-public class ShareAccountApplicationTimelineData {
+public class ShareAccountApplicationTimelineData implements Serializable {
 
-	private final LocalDate submittedOnDate;
+    private final LocalDate submittedOnDate;
     private final String submittedByUsername;
     private final String submittedByFirstname;
     private final String submittedByLastname;
-    
+
     private final LocalDate rejectedDate;
     private final String rejectedByUsername;
     private final String rejectedByFirstname;
     private final String rejectedByLastname;
-    
+
     private final LocalDate approvedDate;
     private final String approvedByUsername;
     private final String approvedByFirstname;
@@ -42,7 +43,7 @@ public class ShareAccountApplicationTimelineData {
     private final String activatedByUsername;
     private final String activatedByFirstname;
     private final String activatedByLastname;
-    
+
     private final LocalDate closedDate;
     private final String closedByUsername;
     private final String closedByFirstname;
@@ -72,8 +73,8 @@ public class ShareAccountApplicationTimelineData {
         final String closedByLastname = null;
 
         return new ShareAccountApplicationTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, approvedOnDate, approvedByUsername, 
-                approvedByFirstname, approvedByLastname, activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname, 
+                rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, approvedOnDate, approvedByUsername,
+                approvedByFirstname, approvedByLastname, activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname,
                 closedOnDate, closedByUsername, closedByFirstname, closedByLastname);
     }
 

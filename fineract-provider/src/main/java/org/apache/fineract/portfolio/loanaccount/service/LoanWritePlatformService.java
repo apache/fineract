@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.Collection;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;

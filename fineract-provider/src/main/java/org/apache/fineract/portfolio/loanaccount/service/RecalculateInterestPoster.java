@@ -18,25 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepository;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import java.util.Collection;
+import java.util.Random;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.*;
 
 
 @Component
@@ -125,7 +116,7 @@ public class RecalculateInterestPoster implements Runnable {
                         if (e.getCause() != null) {
                             realCause = e.getCause();
                         }
-                        logger.error("Interest recalculation for loans failed for account:"	+ loanId + " with message " + realCause.getMessage(), e);
+                        logger.error("Interest recalculation for loans failed for account:"    + loanId + " with message " + realCause.getMessage(), e);
                         sb.append("Interest recalculation for loans failed for account:").append(loanId).append(" with message ")
                                 .append(realCause.getMessage());
                         numberOfRetries = maxNumberOfRetries + 1;

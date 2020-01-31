@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.account.api;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 
@@ -40,6 +39,6 @@ public class AccountTransfersApiConstants {
      * {@link AccountTransferData}. Where possible, we try to get response
      * parameters to match those of request parameters.
      */
-	protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(AccountDetailConstants.idParamName, transferDescriptionParamName, currencyParamName));
+    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountDetailConstants.idParamName, transferDescriptionParamName, currencyParamName));
 }

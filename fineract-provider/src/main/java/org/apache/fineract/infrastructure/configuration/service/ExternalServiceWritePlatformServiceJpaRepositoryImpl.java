@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesData;
 import org.apache.fineract.infrastructure.configuration.domain.ExternalServicesProperties;
 import org.apache.fineract.infrastructure.configuration.domain.ExternalServicesPropertiesRepository;

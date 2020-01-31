@@ -18,7 +18,29 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -40,19 +62,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 @Path("/recurringdepositaccounts/{recurringDepositAccountId}/transactions")
 @Component
 @Scope("singleton")
-@Api(value = "Recurring Deposit Account Transactions", description = "Transactions possible on a recurring deposit account.")
+@Api(tags = {"Recurring Deposit Account Transactions"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Recurring Deposit Account Transactions", description = "Transactions possible on a recurring deposit account.")
+})
 public class RecurringDepositAccountTransactionsApiResource {
 
     private final PlatformSecurityContext context;
@@ -148,8 +164,8 @@ public class RecurringDepositAccountTransactionsApiResource {
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-		return this.toApiJsonSerializer.serialize(settings, transactionData,
-				FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData,
+                FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

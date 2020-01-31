@@ -18,12 +18,6 @@
  */
 package org.apache.fineract.portfolio.collectionsheet;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
-
 public class CollectionSheetConstants {
 
     public static final String COLLECTIONSHEET_RESOURCE_NAME = "collectionsheet";
@@ -40,7 +34,7 @@ public class CollectionSheetConstants {
     public static final String calendarIdParamName = "calendarId";
     public static final String officeIdParamName = "officeId";
     public static final String staffIdParamName = "staffId";
-    public static final String isTransactionDateOnNonMeetingDateParamName = "isTransactionDateOnNonMeetingDate"; 
+    public static final String isTransactionDateOnNonMeetingDateParamName = "isTransactionDateOnNonMeetingDate";
 
     // attendance parameters
     public static final String clientsAttendanceParamName = "clientsAttendance";

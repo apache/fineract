@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -136,10 +135,10 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             throw new HolidayNotFoundException(holidayId);
         }
     }
-    
+
     @Override
     public List<EnumOptionData> retrieveRepaymentScheduleUpdationTyeOptions(){
-        
+
         final List<EnumOptionData> repSchUpdationTypeOptions = Arrays.asList(
                 HolidayEnumerations.rescheduleType(RescheduleType.RESCHEDULETOSPECIFICDATE),
                 HolidayEnumerations.rescheduleType(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE));

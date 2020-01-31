@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.joda.time.LocalDate;
 
@@ -119,7 +118,7 @@ public class LoanSummaryData {
     public BigDecimal getTotalOutstanding() {
         return this.totalOutstanding;
     }
-    
+
     public BigDecimal getTotalPaidFeeCharges() {
         return feeChargesPaid ;
     }

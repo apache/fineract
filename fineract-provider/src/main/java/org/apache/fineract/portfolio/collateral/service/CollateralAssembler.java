@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.portfolio.collateral.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -31,10 +33,6 @@ import org.apache.fineract.portfolio.collateral.domain.LoanCollateralRepository;
 import org.apache.fineract.portfolio.collateral.exception.CollateralNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 @Service
 public class CollateralAssembler {

@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -127,7 +126,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final Long staffId = null;
         final String staffName = null;
         final Collection<ClientData> clientOptions = null;
-        
+
         return GroupGeneralData.template(defaultOfficeId, centerId, accountNo, centerName, staffId, staffName, centerOptions, officeOptions,
                 staffOptions, clientOptions, availableRoles);
     }
@@ -163,7 +162,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-            		searchParameters.getSortOrder());
+                    searchParameters.getSortOrder());
         }
 
         if (parameters.isLimited()) {
@@ -175,7 +174,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-        		paramList.toArray(), this.allGroupTypesDataMapper);
+                paramList.toArray(), this.allGroupTypesDataMapper);
     }
 
     @Override
@@ -241,7 +240,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final String name = searchCriteria.getName();
         if (name != null) {
-        	paramList.add("%" + name + "%");
+            paramList.add("%" + name + "%");
             extraCriteria.append(" and g.display_name like ? ");
         }
 

@@ -20,13 +20,12 @@ package org.apache.fineract.infrastructure.hooks.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import org.apache.fineract.infrastructure.hooks.data.Event;
 import org.apache.fineract.infrastructure.hooks.data.Field;
 import org.apache.fineract.infrastructure.hooks.data.Grouping;
 import org.apache.fineract.infrastructure.hooks.data.HookTemplateData;
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Created by sanyam on 11/8/17.

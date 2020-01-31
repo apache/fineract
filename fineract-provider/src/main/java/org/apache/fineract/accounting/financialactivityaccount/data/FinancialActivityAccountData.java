@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.financialactivityaccount.data;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
 public class FinancialActivityAccountData {

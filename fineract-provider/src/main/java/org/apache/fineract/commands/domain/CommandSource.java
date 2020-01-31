@@ -19,7 +19,6 @@
 package org.apache.fineract.commands.domain;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,12 +26,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_portfolio_command_source")
@@ -92,13 +90,13 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
 
     @Column(name = "product_id")
     private Long productId;
-    
+
     @Column(name = "transaction_id", length = 100)
     private String transactionId;
-    
+
     @Column(name="creditbureau_id")
     private Long creditBureauId;
-    
+
     @Column(name="organisation_creditbureau_id")
     private Long organisationCreditBureauId;
 
@@ -126,21 +124,21 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
         return this.creditBureauId;
     }
 
-    
+
     public void setCreditBureauId(Long creditBureauId) {
         this.creditBureauId = creditBureauId;
     }
 
-    
+
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }
 
-    
+
     public void setOrganisationCreditBureauId(Long OrganisationCreditBureauId) {
         this.organisationCreditBureauId = OrganisationCreditBureauId;
     }
-    
+
     public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
         this.checker = checker;
         this.checkedOnDate = checkedOnDate.toDate();

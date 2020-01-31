@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.adhocquery.service;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -35,9 +36,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public final class AdHocDataValidator {
@@ -72,10 +70,10 @@ public final class AdHocDataValidator {
 
         final String description = this.fromApiJsonHelper.extractStringNamed("query", element);
         baseDataValidator.reset().parameter("query").value(description).notBlank().notExceedingLengthOf(2000);
-        
+
         final String tableName = this.fromApiJsonHelper.extractStringNamed("tableName", element);
         baseDataValidator.reset().parameter("tableName").value(tableName).notBlank().notExceedingLengthOf(100);
-        
+
         final String tableFields = this.fromApiJsonHelper.extractStringNamed("tableFields", element);
         baseDataValidator.reset().parameter("tableFields").value(tableFields).notBlank().notExceedingLengthOf(1000);
 
@@ -141,7 +139,7 @@ public final class AdHocDataValidator {
             final Integer isActive = this.fromApiJsonHelper.extractIntegerNamed("isActive", element, Locale.getDefault());
             baseDataValidator.reset().parameter("isActive").value(isActive).notNull().inMinMaxRange(1, 2);
         }*/
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

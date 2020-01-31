@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.organisation.teller.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.io.Serializable;
 import java.util.Date;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * {@code TellerTransactionData} represents an immutable data object for a transction.

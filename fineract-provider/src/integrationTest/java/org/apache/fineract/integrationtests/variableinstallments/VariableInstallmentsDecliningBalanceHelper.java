@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.variableinstallments;
 
+import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,12 +27,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-
-import com.google.gson.Gson;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VariableInstallmentsDecliningBalanceHelper {
@@ -51,7 +49,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withAccounting(accountingRule, accounts).build(null);
        return loanProductJSON ;
     }
-    
+
     public static String createLoanProductWithVaribleConfig(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
@@ -69,7 +67,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withAccounting(accountingRule, accounts).build(null);
         return loanProductJSON ;
     }
-    
+
     public static String createLoanProductWithVaribleConfigwithEqualPrincipal(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
@@ -87,7 +85,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withAccounting(accountingRule, accounts).build(null);
         return loanProductJSON ;
     }
-    
+
     public static String applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
@@ -107,7 +105,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return loanApplicationJSON ;
     }
-    
+
     public static String applyForLoanApplicationWithEqualPrincipal(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
@@ -127,7 +125,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return loanApplicationJSON ;
     }
-    
+
     public static String createDeleteVariations(ArrayList<Map> deletedInstallments) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -180,7 +178,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     private static ArrayList createNewInstallments(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -189,7 +187,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     private static ArrayList createModifyMap(Map firstSchedule) {
         ArrayList toReturn = new ArrayList<>();
         ArrayList dueDate = (ArrayList) firstSchedule.get("dueDate");
@@ -199,7 +197,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     public static String createAllVariations() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -212,7 +210,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     public static String createAllVariationsWithEqualPrincipal() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -225,7 +223,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     private static ArrayList createNewInstallmentsWithPrincipal(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -234,7 +232,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     private static ArrayList createModifyMapWithPrinciapl(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -250,7 +248,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     private static ArrayList createModifyMap(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -259,7 +257,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     public static String createModifiyDateVariations(String[] date, String[] newdate, String[] principal) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -270,7 +268,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     private static ArrayList createDateModifyMap(String[] date, String[] newdate, String[] installments) {
         ArrayList toReturn = new ArrayList<>();
         for(int i = 0 ; i < date.length; i++) {
@@ -280,7 +278,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
             if(i < installments.length) {
                 tosend.put("installmentAmount", installments[i]) ;
             }
-            toReturn.add(tosend);    
+            toReturn.add(tosend);
         }
         return toReturn;
     }

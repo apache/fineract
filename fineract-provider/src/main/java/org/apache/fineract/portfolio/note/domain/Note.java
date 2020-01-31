@@ -20,13 +20,11 @@ package org.apache.fineract.portfolio.note.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -72,12 +70,12 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @ManyToOne
     @JoinColumn(name = "savings_account_transaction_id", nullable = true)
     private SavingsAccountTransaction savingsTransaction;
-    
+
     @ManyToOne
     @JoinColumn(name = "share_account_id", nullable = true)
     private ShareAccount shareAccount;
-    
-    
+
+
     public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
         final String note = command.stringValueOfParameterNamed("note");
         return new Note(client, note);
@@ -104,7 +102,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
             final String note) {
         return new Note(savingsAccount, savingsTransaction, note);
     }
-    
+
     private Note(final SavingsAccount savingsAccount, final SavingsAccountTransaction savingsTransaction, final String note) {
         this.savingsAccount = savingsAccount;
         this.savingsTransaction = savingsTransaction;
@@ -112,11 +110,11 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.note = note;
         this.noteTypeId = NoteType.SAVINGS_TRANSACTION.getValue();
     }
-    
+
     public static Note shareNote(final ShareAccount account, final String note) {
         return new Note(account, note);
     }
-    
+
     public Note(final Client client, final String note) {
         this.client = client;
         this.note = note;
@@ -167,7 +165,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.note = note;
         this.noteTypeId = NoteType.SHARE_ACCOUNT.getValue();
     }
-    
+
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 

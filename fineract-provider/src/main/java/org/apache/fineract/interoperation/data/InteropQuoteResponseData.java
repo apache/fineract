@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.fineract.interoperation.domain.InteropActionState;
-import org.joda.time.LocalDateTime;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.interoperation.domain.InteropActionState;
+import org.joda.time.LocalDateTime;
 
 public class InteropQuoteResponseData extends InteropResponseData {
 
@@ -34,7 +33,7 @@ public class InteropQuoteResponseData extends InteropResponseData {
 
     private MoneyData fspCommission;
 
-    
+
     private InteropQuoteResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
                                      @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration,
                                      List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee, MoneyData fspCommission) {

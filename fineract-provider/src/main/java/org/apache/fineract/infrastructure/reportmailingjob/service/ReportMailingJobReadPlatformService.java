@@ -19,29 +19,28 @@
 package org.apache.fineract.infrastructure.reportmailingjob.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobData;
 
 public interface ReportMailingJobReadPlatformService {
-    /** 
-     * Retrieve all report mailing jobs that have the isDeleted property set to 0  
+    /**
+     * Retrieve all report mailing jobs that have the isDeleted property set to 0
      **/
     Page<ReportMailingJobData> retrieveAllReportMailingJobs(SearchParameters searchParameters);
-    
-    /** 
-     * Retrieve a report mailing job that has the isDeleted property set to 0 
+
+    /**
+     * Retrieve a report mailing job that has the isDeleted property set to 0
      **/
     ReportMailingJobData retrieveReportMailingJob(Long reportMailingJobId);
-    
-    /** 
-     * Retrieve the report mailing job enumeration/dropdown options 
+
+    /**
+     * Retrieve the report mailing job enumeration/dropdown options
      **/
     ReportMailingJobData retrieveReportMailingJobEnumOptions();
 
-    /** 
-     * Retrieve all active report mailing jobs that have their isDeleted property set to 0 
+    /**
+     * Retrieve all active report mailing jobs that have their isDeleted property set to 0
      **/
     Collection<ReportMailingJobData> retrieveAllActiveReportMailingJobs();
 }

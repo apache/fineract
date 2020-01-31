@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -37,114 +36,114 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ShareAccountChargeReadPlatformServiceImpl implements
-		ShareAccountChargeReadPlatformService {
+        ShareAccountChargeReadPlatformService {
 
-	private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-	@Autowired
-	public ShareAccountChargeReadPlatformServiceImpl(
-			final RoutingDataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+    @Autowired
+    public ShareAccountChargeReadPlatformServiceImpl(
+            final RoutingDataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
-	@Override
-	public Collection<ShareAccountChargeData> retrieveAccountCharges(
-			Long accountId, String status) {
-		final ShareAccountChargeMapper rm = new ShareAccountChargeMapper();
-		final StringBuilder sqlBuilder = new StringBuilder();
-		sqlBuilder.append("select ").append(rm.schema())
-				.append(" where sc.account_id=? ");
-		if (status.equalsIgnoreCase("active")) {
-			sqlBuilder.append(" and sc.is_active = 1 ");
-		} else if (status.equalsIgnoreCase("inactive")) {
-			sqlBuilder.append(" and sc.is_active = 0 ");
-		}
-		sqlBuilder.append(" order by sc.charge_time_enum ASC");
+    @Override
+    public Collection<ShareAccountChargeData> retrieveAccountCharges(
+            Long accountId, String status) {
+        final ShareAccountChargeMapper rm = new ShareAccountChargeMapper();
+        final StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select ").append(rm.schema())
+                .append(" where sc.account_id=? ");
+        if (status.equalsIgnoreCase("active")) {
+            sqlBuilder.append(" and sc.is_active = 1 ");
+        } else if (status.equalsIgnoreCase("inactive")) {
+            sqlBuilder.append(" and sc.is_active = 0 ");
+        }
+        sqlBuilder.append(" order by sc.charge_time_enum ASC");
 
-		return this.jdbcTemplate.query(sqlBuilder.toString(), rm,
-				new Object[] { accountId });
-	}
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm,
+                new Object[] { accountId });
+    }
 
-	private final static class ShareAccountChargeMapper implements
-			RowMapper<ShareAccountChargeData> {
+    private final static class ShareAccountChargeMapper implements
+            RowMapper<ShareAccountChargeData> {
 
-		private final String schema;
+        private final String schema;
 
-		public ShareAccountChargeMapper() {
-			StringBuffer buff = new StringBuffer()
-					.append("sc.id as id, c.id as chargeId, sc.account_id as accountId, c.name as name, ")
-					.append("sc.amount as amountDue, sc.amount_paid_derived as amountPaid, ")
-					.append("sc.amount_waived_derived as amountWaived, sc.amount_writtenoff_derived as amountWrittenOff, ")
-					.append("sc.amount_outstanding_derived as amountOutstanding, sc.calculation_percentage as percentageOf, ")
-					.append("sc.calculation_on_amount as amountPercentageAppliedTo, sc.charge_time_enum as chargeTime, ")
-					.append("sc.charge_calculation_enum as chargeCalculation, c.is_active as isActive, ")
-					.append("c.currency_code as currencyCode, oc.name as currencyName, ")
-					.append("oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, ")
-					.append("sc.charge_amount_or_percentage, ")
-					.append("oc.internationalized_name_code as currencyNameCode from m_charge c ")
-					.append("join m_organisation_currency oc on c.currency_code = oc.code ")
-					.append("join m_share_account_charge sc on sc.charge_id = c.id ");
+        public ShareAccountChargeMapper() {
+            StringBuffer buff = new StringBuffer()
+                    .append("sc.id as id, c.id as chargeId, sc.account_id as accountId, c.name as name, ")
+                    .append("sc.amount as amountDue, sc.amount_paid_derived as amountPaid, ")
+                    .append("sc.amount_waived_derived as amountWaived, sc.amount_writtenoff_derived as amountWrittenOff, ")
+                    .append("sc.amount_outstanding_derived as amountOutstanding, sc.calculation_percentage as percentageOf, ")
+                    .append("sc.calculation_on_amount as amountPercentageAppliedTo, sc.charge_time_enum as chargeTime, ")
+                    .append("sc.charge_calculation_enum as chargeCalculation, c.is_active as isActive, ")
+                    .append("c.currency_code as currencyCode, oc.name as currencyName, ")
+                    .append("oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, ")
+                    .append("sc.charge_amount_or_percentage, ")
+                    .append("oc.internationalized_name_code as currencyNameCode from m_charge c ")
+                    .append("join m_organisation_currency oc on c.currency_code = oc.code ")
+                    .append("join m_share_account_charge sc on sc.charge_id = c.id ");
 
-			schema = buff.toString();
-		}
+            schema = buff.toString();
+        }
 
-		@Override
-		public ShareAccountChargeData mapRow(ResultSet rs, int rowNum)
-				throws SQLException {
-			final Long id = rs.getLong("id");
-			final Long chargeId = rs.getLong("chargeId");
-			final Long accountId = rs.getLong("accountId");
-			final String name = rs.getString("name");
-			final BigDecimal amount = rs.getBigDecimal("amountDue");
-			final BigDecimal amountPaid = JdbcSupport
-					.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
-			final BigDecimal amountWaived = JdbcSupport
-					.getBigDecimalDefaultToZeroIfNull(rs, "amountWaived");
-			final BigDecimal amountWrittenOff = JdbcSupport
-					.getBigDecimalDefaultToZeroIfNull(rs, "amountWrittenOff");
-			final BigDecimal amountOutstanding = rs
-					.getBigDecimal("amountOutstanding");
+        @Override
+        public ShareAccountChargeData mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            final Long id = rs.getLong("id");
+            final Long chargeId = rs.getLong("chargeId");
+            final Long accountId = rs.getLong("accountId");
+            final String name = rs.getString("name");
+            final BigDecimal amount = rs.getBigDecimal("amountDue");
+            final BigDecimal amountPaid = JdbcSupport
+                    .getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
+            final BigDecimal amountWaived = JdbcSupport
+                    .getBigDecimalDefaultToZeroIfNull(rs, "amountWaived");
+            final BigDecimal amountWrittenOff = JdbcSupport
+                    .getBigDecimalDefaultToZeroIfNull(rs, "amountWrittenOff");
+            final BigDecimal amountOutstanding = rs
+                    .getBigDecimal("amountOutstanding");
 
-			final BigDecimal percentageOf = JdbcSupport
-					.getBigDecimalDefaultToZeroIfNull(rs, "percentageOf");
-			final BigDecimal amountPercentageAppliedTo = JdbcSupport
-					.getBigDecimalDefaultToZeroIfNull(rs,
-							"amountPercentageAppliedTo");
+            final BigDecimal percentageOf = JdbcSupport
+                    .getBigDecimalDefaultToZeroIfNull(rs, "percentageOf");
+            final BigDecimal amountPercentageAppliedTo = JdbcSupport
+                    .getBigDecimalDefaultToZeroIfNull(rs,
+                            "amountPercentageAppliedTo");
 
-			final String currencyCode = rs.getString("currencyCode");
-			final String currencyName = rs.getString("currencyName");
-			final String currencyNameCode = rs.getString("currencyNameCode");
-			final String currencyDisplaySymbol = rs
-					.getString("currencyDisplaySymbol");
-			final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs,
-					"currencyDecimalPlaces");
-			final Integer inMultiplesOf = JdbcSupport.getInteger(rs,
-					"inMultiplesOf");
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs
+                    .getString("currencyDisplaySymbol");
+            final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs,
+                    "currencyDecimalPlaces");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs,
+                    "inMultiplesOf");
 
-			final CurrencyData currency = new CurrencyData(currencyCode,
-					currencyName, currencyDecimalPlaces, inMultiplesOf,
-					currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode,
+                    currencyName, currencyDecimalPlaces, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
-			final int chargeTime = rs.getInt("chargeTime");
-			final EnumOptionData chargeTimeType = ChargeEnumerations
-					.chargeTimeType(chargeTime);
+            final int chargeTime = rs.getInt("chargeTime");
+            final EnumOptionData chargeTimeType = ChargeEnumerations
+                    .chargeTimeType(chargeTime);
 
-			final int chargeCalculation = rs.getInt("chargeCalculation");
-			final EnumOptionData chargeCalculationType = ChargeEnumerations
-					.chargeCalculationType(chargeCalculation);
-			final Boolean isActive = rs.getBoolean("isActive");
-			final BigDecimal chargeamountorpercentage = rs.getBigDecimal("charge_amount_or_percentage") ;
-			
-			final Collection<ChargeData> chargeOptions = null;
-			return new ShareAccountChargeData(id, chargeId, accountId, name,
-					currency, amount, amountPaid, amountWaived,
-					amountWrittenOff, amountOutstanding, chargeTimeType,
-					chargeCalculationType, percentageOf,
-					amountPercentageAppliedTo, chargeOptions, isActive, chargeamountorpercentage);
-		}
+            final int chargeCalculation = rs.getInt("chargeCalculation");
+            final EnumOptionData chargeCalculationType = ChargeEnumerations
+                    .chargeCalculationType(chargeCalculation);
+            final Boolean isActive = rs.getBoolean("isActive");
+            final BigDecimal chargeamountorpercentage = rs.getBigDecimal("charge_amount_or_percentage") ;
 
-		public String schema() {
-			return this.schema;
-		}
-	}
+            final Collection<ChargeData> chargeOptions = null;
+            return new ShareAccountChargeData(id, chargeId, accountId, name,
+                    currency, amount, amountPaid, amountWaived,
+                    amountWrittenOff, amountOutstanding, chargeTimeType,
+                    chargeCalculationType, percentageOf,
+                    amountPercentageAppliedTo, chargeOptions, isActive, chargeamountorpercentage);
+        }
+
+        public String schema() {
+            return this.schema;
+        }
+    }
 }

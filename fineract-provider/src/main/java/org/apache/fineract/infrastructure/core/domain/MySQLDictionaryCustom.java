@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.domain;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import org.apache.openjpa.jdbc.sql.BooleanRepresentationFactory;
 import org.apache.openjpa.jdbc.sql.MySQLDictionary;
 
@@ -34,7 +33,7 @@ public class MySQLDictionaryCustom extends MySQLDictionary {
             this.allowsAliasInBulkClause = true ;
             this.useWildCardForCount = true ;
         }
-        
+
         @Override
         public void connectedConfiguration(Connection conn) throws SQLException {
                 super.connectedConfiguration(conn);

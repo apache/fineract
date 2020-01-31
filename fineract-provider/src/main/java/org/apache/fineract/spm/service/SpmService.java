@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.spm.service;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.PersistenceException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -32,12 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import javax.persistence.PersistenceException;
 
 @Service
 public class SpmService {
@@ -61,7 +59,7 @@ public class SpmService {
 
         return this.surveyRepository.fetchActiveSurveys(new Date());
     }
-    
+
     public List<Survey> fetchAllSurveys() {
         this.securityContext.authenticatedUser();
 
@@ -86,7 +84,7 @@ public class SpmService {
         // set valid to for 100 years
         Calendar cal = Calendar.getInstance() ;
         cal.setTime(validFrom.toDate());
-        cal.add(Calendar.YEAR, 100); 
+        cal.add(Calendar.YEAR, 100);
         survey.setValidFrom(validFrom.toDate());
         survey.setValidTo(cal.getTime());
         try {
@@ -102,7 +100,7 @@ public class SpmService {
         }
         return survey ;
     }
-    
+
     public Survey updateSurvey(final Survey survey) {
         try {
             this.surveyValidator.validate(survey);
@@ -128,7 +126,7 @@ public class SpmService {
 
         this.surveyRepository.save(survey);
     }
-    
+
     public void activateSurvey(final Long id) {
         this.securityContext.authenticatedUser();
 
@@ -142,12 +140,12 @@ public class SpmService {
 
         this.surveyRepository.save(survey);
     }
-    
-    
+
+
     public static DateTime getStartOfToday() {
         return DateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
     }
-    
+
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {
 
         if (realCause.getMessage().contains("m_survey_scorecards")) { throw new PlatformDataIntegrityException(

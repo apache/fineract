@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -35,7 +35,7 @@ import org.joda.time.LocalDate;
  * Immutable data object representing a general group (so may or may not have a
  * parent).
  */
-public class GroupGeneralData {
+public class GroupGeneralData implements Serializable {
 
     private final Long id;
     private final String accountNo;
@@ -291,9 +291,9 @@ public class GroupGeneralData {
     public Long getId() {
         return this.id;
     }
-    
+
     public String getAccountNo(){
-    	return this.accountNo;
+        return this.accountNo;
     }
 
     public String getName() {
@@ -362,5 +362,50 @@ public class GroupGeneralData {
 
     public void setDatatables(final List<DatatableData> datatables) {
             this.datatables = datatables;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GroupGeneralData)) return false;
+        GroupGeneralData that = (GroupGeneralData) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(accountNo, that.accountNo) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(externalId, that.externalId) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(active, that.active) &&
+                Objects.equals(activationDate, that.activationDate) &&
+                Objects.equals(officeId, that.officeId) &&
+                Objects.equals(officeName, that.officeName) &&
+                Objects.equals(centerId, that.centerId) &&
+                Objects.equals(centerName, that.centerName) &&
+                Objects.equals(staffId, that.staffId) &&
+                Objects.equals(staffName, that.staffName) &&
+                Objects.equals(hierarchy, that.hierarchy) &&
+                Objects.equals(groupLevel, that.groupLevel) &&
+                Objects.equals(clientMembers, that.clientMembers) &&
+                Objects.equals(activeClientMembers, that.activeClientMembers) &&
+                Objects.equals(groupRoles, that.groupRoles) &&
+                Objects.equals(calendarsData, that.calendarsData) &&
+                Objects.equals(collectionMeetingCalendar, that.collectionMeetingCalendar) &&
+                Objects.equals(centerOptions, that.centerOptions) &&
+                Objects.equals(officeOptions, that.officeOptions) &&
+                Objects.equals(staffOptions, that.staffOptions) &&
+                Objects.equals(clientOptions, that.clientOptions) &&
+                Objects.equals(availableRoles, that.availableRoles) &&
+                Objects.equals(selectedRole, that.selectedRole) &&
+                Objects.equals(closureReasons, that.closureReasons) &&
+                Objects.equals(timeline, that.timeline) &&
+                Objects.equals(datatables, that.datatables) &&
+                Objects.equals(rowIndex, that.rowIndex) &&
+                Objects.equals(dateFormat, that.dateFormat) &&
+                Objects.equals(locale, that.locale) &&
+                Objects.equals(submittedOnDate, that.submittedOnDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, accountNo, name, externalId, status, active, activationDate, officeId, officeName, centerId, centerName, staffId, staffName, hierarchy, groupLevel, clientMembers, activeClientMembers, groupRoles, calendarsData, collectionMeetingCalendar, centerOptions, officeOptions, staffOptions, clientOptions, availableRoles, selectedRole, closureReasons, timeline, datatables, rowIndex, dateFormat, locale, submittedOnDate);
     }
 }

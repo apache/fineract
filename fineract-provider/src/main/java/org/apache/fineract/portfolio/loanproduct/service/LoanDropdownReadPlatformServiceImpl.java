@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanproduct.service;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.amortizationType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingDayOfWeekType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingNthDayType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationFrequencyType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
@@ -31,14 +33,11 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyNthDayType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
-import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingNthDayType;
-import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingDayOfWeekType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
@@ -140,7 +139,7 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
 
         final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
-        Sort sort = new Sort("sortOrder");
+        Sort sort = Sort.by("sortOrder");
         final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll(sort);
         for (final LoanTransactionProcessingStrategy strategy : strategies) {
             strategyOptions.add(strategy.toData());

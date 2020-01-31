@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.self.savings.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.time.LocalDate;
 
 /**

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.util.Optional;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,6 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.Optional;
 
 public class AuditorAwareImpl implements AuditorAware<AppUser> {
 

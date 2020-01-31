@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.journalentry.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,7 +28,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -220,7 +218,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         return this.entityType;
     }
 
-    
+
     public Long getShareTransactionId() {
         return this.shareTransactionId;
     }

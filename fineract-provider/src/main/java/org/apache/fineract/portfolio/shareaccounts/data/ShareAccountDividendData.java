@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @SuppressWarnings("unused")
-public class ShareAccountDividendData {
+public class ShareAccountDividendData implements Serializable {
 
     private final Long id;
     private final Date postedDate ;
@@ -51,7 +51,7 @@ public class ShareAccountDividendData {
         this.savingsTransactionId = savingsTransactionId;
         this.postedDate = null ;
     }
-    
+
     public ShareAccountDividendData(final Long id, final Date postedDate, final ShareAccountData accountData, final BigDecimal amount,
             final EnumOptionData status, final Long savingsTransactionId) {
         this.id = id;

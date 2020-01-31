@@ -18,31 +18,29 @@
  */
 package org.apache.fineract.integrationtests.common.shares;
 
+import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 
-import com.google.gson.Gson;
-
 
 public class ShareProductHelper {
 
-    
+
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "4";
     private static final String IN_MULTIPLES_OF = "0";
     private static final String USD = "USD";
-    
+
     private String productName = Utils.randomNameGenerator("SHARE_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
     private String description = Utils.randomNameGenerator("", 20);
@@ -57,14 +55,14 @@ public class ShareProductHelper {
     private String lockinPeriodFrequency = "1";
     private String lockinPeriodFrequencyType = "0";
     private String accountingRule = NONE;
-    
+
     String minimumActivePeriodForDividends = "1";
     String minimumactiveperiodFrequencyType = "0";
-    
+
     private List<Map<String, String>> charges = null ;
     private List<Map<String, String>> marketPrices = null ;
-    
-    
+
+
     public String build() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", this.productName);
@@ -86,25 +84,25 @@ public class ShareProductHelper {
         map.put("minimumactiveperiodFrequencyType", this.minimumactiveperiodFrequencyType) ;
         map.put("lockinPeriodFrequency", this.lockinPeriodFrequency) ;
         map.put("lockinPeriodFrequencyType", this.lockinPeriodFrequencyType) ;
-        
+
         if(charges != null) {
             map.put("chargesSelected", charges) ;
         }
-        
+
         if(marketPrices != null) {
             map.put("marketPricePeriods", marketPrices) ;
         }
-        
+
         String shareProductCreateJson = new Gson().toJson(map);
         System.out.println(shareProductCreateJson);
         return shareProductCreateJson;
     }
-    
+
     public ShareProductHelper withCashBasedAccounting() {
         this.accountingRule = CASH_BASED ;
         return this ;
     }
-    
+
     public ShareProductHelper withMarketPrice() {
         this.marketPrices = new ArrayList<>() ;
         LocalDate currentDate = DateUtils.getLocalDateOfTenant() ;
@@ -119,7 +117,7 @@ public class ShareProductHelper {
         }
         return this ;
     }
-    
+
     public ShareProductHelper withCharges(final ArrayList<Long> charges) {
         if(charges != null && !charges.isEmpty()) {
             this.charges = new ArrayList<>() ;
@@ -138,62 +136,62 @@ public class ShareProductHelper {
         Assert.assertEquals(this.productName, productName);
         String shortName = (String)shareProductData.get("shortName") ;
         Assert.assertEquals(this.shortName, shortName);
-        
+
         String description = (String)shareProductData.get("description") ;
         Assert.assertEquals(this.description, description);
-        
+
         Map<String, String> currency = (Map<String,String>)shareProductData.get("currency") ;
         String currencyCode = currency.get("code") ;
         Assert.assertEquals(this.currencyCode, currencyCode);
-        
+
         String digitsAfterDecimal = String.valueOf(currency.get("decimalPlaces")) ;
         Assert.assertEquals(DIGITS_AFTER_DECIMAL, digitsAfterDecimal);
-        
+
         String inMultiplesOf = String.valueOf(currency.get("inMultiplesOf")) ;
         Assert.assertEquals(IN_MULTIPLES_OF, inMultiplesOf);
-        
+
         String totalShares = String.valueOf(shareProductData.get("totalShares")) ;
         Assert.assertEquals(this.totalShares, totalShares);
-        
+
         String sharesIssued = String.valueOf(shareProductData.get("totalSharesIssued")) ;
         Assert.assertEquals(this.sharesIssued, sharesIssued);
-        
+
         String unitPrice = String.valueOf(shareProductData.get("unitPrice")) ;
         Assert.assertEquals(this.unitPrice, unitPrice);
-        
+
         String minimumShares = String.valueOf(shareProductData.get("minimumShares")) ;
         Assert.assertEquals(this.minimumShares, minimumShares);
-        
+
         String nominalShares = String.valueOf(shareProductData.get("nominalShares")) ;
         Assert.assertEquals(this.nominalShares, nominalShares);
-        
+
         String maximumShares = String.valueOf(shareProductData.get("maximumShares")) ;
         Assert.assertEquals(this.maximumShares, maximumShares);
-        
+
         String allowDividendCalculationForInactiveClients = String.valueOf(shareProductData.get("allowDividendCalculationForInactiveClients")) ;
         Assert.assertEquals(this.allowDividendCalculationForInactiveClients, allowDividendCalculationForInactiveClients);
-        
+
         Map<String, Object> accountingRuleMap = (Map<String, Object>) shareProductData.get("accountingRule") ;
         String accountingRule = String.valueOf(accountingRuleMap.get("id")) ;
         Assert.assertEquals(this.accountingRule, accountingRule);
-        
+
         String minimumActivePeriodForDividends = String.valueOf(shareProductData.get("minimumActivePeriod")) ;
         Assert.assertEquals(this.minimumActivePeriodForDividends, minimumActivePeriodForDividends);
-        
+
         Map<String, Object> minimumActivePeriodType = (Map<String, Object>) shareProductData.get("minimumActivePeriodForDividendsTypeEnum") ;
         String minimumactiveperiodFrequencyType = String.valueOf(minimumActivePeriodType.get("id")) ;
         Assert.assertEquals(this.minimumactiveperiodFrequencyType, minimumactiveperiodFrequencyType);
-        
+
         String lockinPeriodFrequency = String.valueOf(shareProductData.get("lockinPeriod")) ;
         Assert.assertEquals(this.lockinPeriodFrequency, lockinPeriodFrequency);
-        
+
         Map<String, Object> lockinPeriodType = (Map<String, Object>) shareProductData.get("lockPeriodTypeEnum") ;
         String lockinPeriodFrequencyType = String.valueOf(lockinPeriodType.get("id")) ;
         Assert.assertEquals(this.lockinPeriodFrequencyType, lockinPeriodFrequencyType);
-        
-        ArrayList<Map<String, String>> charges = (ArrayList<Map<String, String>>)shareProductData.get("chargesSelected") ;
-        
-        ArrayList<Map<String, String>> marketPrices = (ArrayList<Map<String, String>>)shareProductData.get("marketPricePeriods") ;
-        
+
+        //ArrayList<Map<String, String>> charges = (ArrayList<Map<String, String>>)shareProductData.get("chargesSelected") ;
+
+       // ArrayList<Map<String, String>> marketPrices = (ArrayList<Map<String, String>>)shareProductData.get("marketPricePeriods") ;
+
     }
 }

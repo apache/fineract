@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.variableinstallments;
 
+import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,12 +27,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-
-import com.google.gson.Gson;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VariableInstallmentsFlatHelper {
@@ -44,7 +42,7 @@ public class VariableInstallmentsFlatHelper {
                 .withRepaymentAfterEvery("1") //
                 .withRepaymentTypeAsMonth() //
                 .withinterestRatePerPeriod("1") //
-                .withAmortizationTypeAsEqualPrincipalPayment() 
+                .withAmortizationTypeAsEqualPrincipalPayment()
                 .withInterestTypeAsFlat() //
                 .withTranches(multiDisburseLoan) //
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)//
@@ -52,9 +50,9 @@ public class VariableInstallmentsFlatHelper {
                 .withAccounting(accountingRule, accounts).build(null);
         return loanProductJSON ;
     }
-    
-   
-    
+
+
+
     public static String applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
@@ -74,7 +72,7 @@ public class VariableInstallmentsFlatHelper {
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return loanApplicationJSON ;
     }
-    
+
     public static String createDeleteVariations(ArrayList<Map> deletedInstallments) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -127,7 +125,7 @@ public class VariableInstallmentsFlatHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     private static ArrayList createNewInstallments(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -136,7 +134,7 @@ public class VariableInstallmentsFlatHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     public static String createModifiyDateVariations(String[] date, String[] newdate, String[] principal) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -147,7 +145,7 @@ public class VariableInstallmentsFlatHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     private static ArrayList createDateModifyMap(String[] date, String[] newdate, String[] principal) {
         ArrayList toReturn = new ArrayList<>();
         for(int i = 0 ; i < date.length; i++) {
@@ -157,12 +155,12 @@ public class VariableInstallmentsFlatHelper {
             if(i < principal.length) {
                 tosend.put("principal", principal[i]) ;
             }
-            toReturn.add(tosend);    
+            toReturn.add(tosend);
         }
         return toReturn;
     }
-    
-    
+
+
     private static ArrayList createModifyMap(Map firstSchedule) {
         ArrayList toReturn = new ArrayList<>();
         ArrayList dueDate = (ArrayList) firstSchedule.get("dueDate");
@@ -172,7 +170,7 @@ public class VariableInstallmentsFlatHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     public static String createAllVariations() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
@@ -185,7 +183,7 @@ public class VariableInstallmentsFlatHelper {
         String json = new Gson().toJson(toReturn);
         return json;
     }
-    
+
     private static ArrayList createDeletedMap(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -193,7 +191,7 @@ public class VariableInstallmentsFlatHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     private static ArrayList createModifyMap(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -202,7 +200,7 @@ public class VariableInstallmentsFlatHelper {
         toReturn.add(tosend);
         return toReturn;
     }
-    
+
     public static String formatDate(ArrayList list) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, (int) list.get(0));

@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -34,7 +34,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing groups.
  */
-public class CenterData {
+public class CenterData implements Serializable {
 
     private final Long id;
     private String accountNo;
@@ -242,9 +242,9 @@ public class CenterData {
     public Long getId() {
         return this.id;
     }
-    
+
     public String getAccountNo(){
-    	return this.accountNo;
+        return this.accountNo;
     }
 
     public String getName() {
@@ -265,5 +265,45 @@ public class CenterData {
 
     public void setDatatables(final List<DatatableData> datatables) {
         this.datatables = datatables;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CenterData)) return false;
+        CenterData that = (CenterData) o;
+        return Objects.equals(active, that.active) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(accountNo, that.accountNo) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(externalId, that.externalId) &&
+                Objects.equals(officeId, that.officeId) &&
+                Objects.equals(officeName, that.officeName) &&
+                Objects.equals(staffId, that.staffId) &&
+                Objects.equals(staffName, that.staffName) &&
+                Objects.equals(hierarchy, that.hierarchy) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(activationDate, that.activationDate) &&
+                Objects.equals(timeline, that.timeline) &&
+                Objects.equals(groupMembers, that.groupMembers) &&
+                Objects.equals(groupMembersOptions, that.groupMembersOptions) &&
+                Objects.equals(collectionMeetingCalendar, that.collectionMeetingCalendar) &&
+                Objects.equals(closureReasons, that.closureReasons) &&
+                Objects.equals(officeOptions, that.officeOptions) &&
+                Objects.equals(staffOptions, that.staffOptions) &&
+                Objects.equals(totalCollected, that.totalCollected) &&
+                Objects.equals(totalOverdue, that.totalOverdue) &&
+                Objects.equals(totaldue, that.totaldue) &&
+                Objects.equals(installmentDue, that.installmentDue) &&
+                Objects.equals(datatables, that.datatables) &&
+                Objects.equals(rowIndex, that.rowIndex) &&
+                Objects.equals(dateFormat, that.dateFormat) &&
+                Objects.equals(locale, that.locale) &&
+                Objects.equals(submittedOnDate, that.submittedOnDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, accountNo, name, externalId, officeId, officeName, staffId, staffName, hierarchy, status, active, activationDate, timeline, groupMembers, groupMembersOptions, collectionMeetingCalendar, closureReasons, officeOptions, staffOptions, totalCollected, totalOverdue, totaldue, installmentDue, datatables, rowIndex, dateFormat, locale, submittedOnDate);
     }
 }

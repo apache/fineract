@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.data;
 
+import java.io.Serializable;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 
-public class ChargeToGLAccountMapper {
+public class ChargeToGLAccountMapper implements Serializable {
 
     @SuppressWarnings("unused")
     private final ChargeData charge;

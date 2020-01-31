@@ -24,6 +24,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -32,13 +38,6 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
-
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.joda.time.DateTimeZone;
@@ -62,7 +61,7 @@ public class Utils {
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
 
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
-    private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
+    private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -116,9 +115,13 @@ public class Utils {
         try {
             logger.info("Logging in, for integration test...");
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
-            final String json = RestAssured.post(LOGIN_URL).asString();
+            String json = RestAssured.given().contentType(ContentType.JSON)
+                .body("{\"username\":\"mifos\", \"password\":\"password\"}")
+                .expect().log().ifError().when().post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
-            return JsonPath.with(json).get("base64EncodedAuthenticationKey");
+            String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
+            assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
+            return key;
         } catch (final Exception e) {
             if (e instanceof HttpHostConnectException) {
                 final HttpHostConnectException hh = (HttpHostConnectException) e;

@@ -18,12 +18,10 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Date;
-
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
@@ -31,11 +29,10 @@ import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
-public class ShareAccountData implements AccountData {
+public class ShareAccountData implements Serializable, AccountData {
 
     private Long id;
 
@@ -50,7 +47,7 @@ public class ShareAccountData implements AccountData {
     private String clientName;
 
     private Long defaultShares ;
-    
+
     private Long productId;
 
     private String productName;
@@ -151,7 +148,7 @@ public class ShareAccountData implements AccountData {
     public Integer getRowIndex() {
         return rowIndex;
     }
-    
+
     // Data for template
     private Collection<ProductData> productOptions;
     private Collection<ChargeData> chargeOptions;
@@ -311,7 +308,7 @@ public class ShareAccountData implements AccountData {
     public void setCurrentMarketPrice(final BigDecimal currentMarketPrice) {
         this.currentMarketPrice = currentMarketPrice;
     }
-    
+
     public void setDividends(Collection<ShareAccountDividendData> dividends) {
         this.dividends = dividends ;
     }

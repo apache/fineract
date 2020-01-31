@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.infrastructure.jobs.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,8 +35,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -44,7 +49,10 @@ import org.springframework.stereotype.Component;
 
 @Path("/scheduler")
 @Component
-@Api(value = "Scheduler", description = "")
+@Api(tags = {"Scheduler"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Scheduler", description = "")
+})
 public class SchedulerApiResource {
 
     private final PlatformSecurityContext context;

@@ -21,7 +21,6 @@ package org.apache.fineract.useradministration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
@@ -76,7 +75,7 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
 
         public String schema() {
             return " pvp.id as id, pvp.active as active, pvp.description as description, pvp.`key` as `key`"
-            		+ " from m_password_validation_policy pvp";
+                    + " from m_password_validation_policy pvp";
         }
     }
 

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.group.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;

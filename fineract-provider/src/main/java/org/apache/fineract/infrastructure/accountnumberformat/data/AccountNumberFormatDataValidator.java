@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.data;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,11 +27,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations;
-import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
+import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -39,9 +40,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public class AccountNumberFormatDataValidator {
 
@@ -49,8 +47,8 @@ public class AccountNumberFormatDataValidator {
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
 
-	private static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName));
+    private static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName));
 
     @Autowired
     public AccountNumberFormatDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -61,8 +59,8 @@ public class AccountNumberFormatDataValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -105,31 +103,31 @@ public class AccountNumberFormatDataValidator {
 
     }
 
-	public Set<Integer> determineValidAccountNumberPrefixes(
-			EntityAccountType entityAccountType) {
-		Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
+    public Set<Integer> determineValidAccountNumberPrefixes(
+            EntityAccountType entityAccountType) {
+        Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
 
-		switch (entityAccountType) {
-		case CLIENT:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
-			break;
+        switch (entityAccountType) {
+        case CLIENT:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
+            break;
 
-		case LOAN:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
-			break;
+        case LOAN:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
+            break;
 
-		case SAVINGS:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
-			break;
+        case SAVINGS:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
+            break;
 
-		case CENTER:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
-			break;
-			
-		case GROUP:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
-			break;
-		}
+        case CENTER:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
+            break;
+
+        case GROUP:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
+            break;
+        }
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();
         for (AccountNumberPrefixType validAccountNumberPrefix : validAccountNumberPrefixes) {
@@ -143,8 +141,8 @@ public class AccountNumberFormatDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

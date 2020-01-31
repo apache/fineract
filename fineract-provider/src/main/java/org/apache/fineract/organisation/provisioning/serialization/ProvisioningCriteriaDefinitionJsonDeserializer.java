@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.organisation.provisioning.serialization;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -38,29 +41,24 @@ import org.apache.fineract.organisation.provisioning.exception.ProvisioningCrite
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public class ProvisioningCriteriaDefinitionJsonDeserializer implements ProvisioningCriteriaConstants {
 
-	private final FromJsonHelper fromApiJsonHelper;
+    private final FromJsonHelper fromApiJsonHelper;
 
-	private final static Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(JSON_LOCALE_PARAM,
-			JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+    private final static Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(JSON_LOCALE_PARAM,
+            JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
 
-	private final static Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList(JSON_CRITERIAID_PARAM,
-			JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+    private final static Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList(JSON_CRITERIAID_PARAM,
+            JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
 
-	private final static Set<String> loanProductSupportedParams = new HashSet<>(Arrays
-			.asList(JSON_LOAN_PRODUCT_ID_PARAM, JSON_LOAN_PRODUCTNAME_PARAM, JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM));
+    private final static Set<String> loanProductSupportedParams = new HashSet<>(Arrays
+            .asList(JSON_LOAN_PRODUCT_ID_PARAM, JSON_LOAN_PRODUCTNAME_PARAM, JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM));
 
-	private final static Set<String> provisioningcriteriaSupportedParams = new HashSet<>(
-			Arrays.asList(JSON_CATEOGRYID_PARAM, JSON_CATEOGRYNAME_PARAM, JSON_MINIMUM_AGE_PARAM,
-					JSON_MAXIMUM_AGE_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_PROVISIONING_PERCENTAGE_PARAM,
-					JSON_EXPENSE_ACCOUNT_PARAM, JSON_LIABILITY_ACCOUNT_PARAM));
+    private final static Set<String> provisioningcriteriaSupportedParams = new HashSet<>(
+            Arrays.asList(JSON_CATEOGRYID_PARAM, JSON_CATEOGRYNAME_PARAM, JSON_MINIMUM_AGE_PARAM,
+                    JSON_MAXIMUM_AGE_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_PROVISIONING_PERCENTAGE_PARAM,
+                    JSON_EXPENSE_ACCOUNT_PARAM, JSON_LIABILITY_ACCOUNT_PARAM));
 
     @Autowired
     public ProvisioningCriteriaDefinitionJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -126,7 +124,7 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
                         .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i+1));
 
-                
+
                 BigDecimal provisioningpercentage = this.fromApiJsonHelper.extractBigDecimalNamed(
                         ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM)
@@ -165,13 +163,13 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcriteria");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
-        
+
         if(this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element);
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM).value(name).notBlank()
-                    .notExceedingLengthOf(200);    
+                    .notExceedingLengthOf(200);
         }
-        
+
 
         // if the param present, then we should have the loan product ids. If
         // not we will load all loan products
@@ -235,7 +233,7 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    
+
     }
 
 }

@@ -22,12 +22,11 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.domain.PurchasedSharesStatusType;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
@@ -63,10 +62,10 @@ public class ShareProductDividendAssembler {
         if(shareAccountDatas == null || shareAccountDatas.isEmpty()) {
             throw new ShareAccountsNotFoundException(product.getId()) ;
         }
-        
+
         ShareProductDividendPayOutDetails productDividendPayOutDetails = null;
         int minimumActivePeriod = 0 ;
-        if(product.getMinimumActivePeriod() != null) { //minimum active period may be null 
+        if(product.getMinimumActivePeriod() != null) { //minimum active period may be null
             minimumActivePeriod = product.getMinimumActivePeriod();
         }
         final Map<Long, Long> numberOfSharesdaysPerAccount = new HashMap<>();
@@ -105,7 +104,7 @@ public class ShareProductDividendAssembler {
                 final PurchasedSharesStatusType type = PurchasedSharesStatusType.fromInt(purchasedSharesData.getType().getId()
                         .intValue());
                 if (status.isApproved() && !type.isChargePayment()) {
-                    
+
                     LocalDate shareStartDate = purchasedSharesData.getPurchasedDate();
                     if (shareStartDate.isBefore(lastDividendPostDate)) {
                         shareStartDate = lastDividendPostDate;

@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanproduct.serialization;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -50,11 +53,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public final class LoanProductDataValidator {
@@ -148,7 +146,7 @@ public final class LoanProductDataValidator {
             final Long fundId = this.fromApiJsonHelper.extractLongNamed("fundId", element);
             baseDataValidator.reset().parameter("fundId").value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-        
+
         boolean isEqualAmortization = false;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -320,7 +318,7 @@ public final class LoanProductDataValidator {
                 .value(isInterestRecalculationEnabled).notNull().isOneOfTheseValues(true, false);
 
         if (isInterestRecalculationEnabled != null) {
-            if (isInterestRecalculationEnabled.booleanValue()) {
+            if (isInterestRecalculationEnabled) {
                 if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("interest.recalculation",
                         "interest recalculation"); }
                 validateInterestRecalculationParams(element, baseDataValidator, null);
@@ -331,8 +329,8 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)
                 && this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true) {
             if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate",
-                    "floating interest rate"); }      	
-        	if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
+                    "floating interest rate"); }
+            if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator
                         .reset()
                         .parameter("interestRatePerPeriod")
@@ -363,7 +361,7 @@ public final class LoanProductDataValidator {
                         .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
                                 "interestRateFrequencyType param is not supported when isLinkedToFloatingInterestRates is true");
             }
-            if ((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue())
+            if ((interestType == null || !interestType.equals(InterestMethod.DECLINING_BALANCE.getValue()))
                     || (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)) {
                 baseDataValidator
                         .reset()
@@ -652,7 +650,7 @@ public final class LoanProductDataValidator {
     private void validateVariableInstallmentSettings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowVariableInstallmentsParamName, element)
                 && this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.allowVariableInstallmentsParamName, element)) {
-        	
+
             boolean isEqualAmortization = false;
             if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
                 isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -739,7 +737,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.multiDisburseLoanParameterName).value(multiDisburseLoan)
                     .ignoreIfNull().validateForBooleanValue();
         }
-        
+
         boolean isEqualAmortization = false;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -1139,7 +1137,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName)
                     .value(npaChangeConfig).notNull().isOneOfTheseValues(true, false);
         }
-        
+
         boolean isEqualAmortization = loanProduct.isEqualAmortization();
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -1170,8 +1168,8 @@ public final class LoanProductDataValidator {
             isLinkedToFloatingInterestRates = this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element);
         }
         if (isLinkedToFloatingInterestRates) {
-        	if(isEqualAmortization){
-            	throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate", "floating interest rate");
+            if(isEqualAmortization){
+                throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate", "floating interest rate");
             }
             if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator
@@ -1208,7 +1206,7 @@ public final class LoanProductDataValidator {
             Integer interestType = this.fromApiJsonHelper.parameterExists("interestType", element) ? this.fromApiJsonHelper
                     .extractIntegerNamed("interestType", element, Locale.getDefault()) : loanProduct.getLoanProductRelatedDetail()
                     .getInterestMethod().getValue();
-            if ((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue())
+            if ((interestType == null || !interestType.equals(InterestMethod.DECLINING_BALANCE.getValue()))
                     || (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)) {
                 baseDataValidator
                         .reset()

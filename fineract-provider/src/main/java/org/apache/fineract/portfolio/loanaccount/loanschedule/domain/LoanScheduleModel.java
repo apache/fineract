@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -121,10 +120,10 @@ public final class LoanScheduleModel {
         return this.totalPenaltyChargesCharged;
     }
 
-    
+
     public BigDecimal getTotalInterestCharged() {
         return this.totalInterestCharged;
     }
-    
-    
+
+
 }

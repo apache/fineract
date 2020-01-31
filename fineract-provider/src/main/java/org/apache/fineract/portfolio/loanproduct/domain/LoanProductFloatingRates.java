@@ -22,19 +22,17 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_product_loan_floating_rates")
@@ -61,22 +59,22 @@ public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
     private BigDecimal maxDifferentialLendingRate;
 
     @Column(name = "is_floating_interest_rate_calculation_allowed", nullable = false)
-	private boolean isFloatingInterestRateCalculationAllowed;
-    
-	public LoanProductFloatingRates(){
-		
-	}
-	public LoanProductFloatingRates(FloatingRate floatingRate, LoanProduct loanProduct, BigDecimal interestRateDifferential, 
-            BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate, 
+    private boolean isFloatingInterestRateCalculationAllowed;
+
+    public LoanProductFloatingRates(){
+
+    }
+    public LoanProductFloatingRates(FloatingRate floatingRate, LoanProduct loanProduct, BigDecimal interestRateDifferential,
+            BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             boolean isFloatingInterestRateCalculationAllowed){
-		this.floatingRate = floatingRate;
-		this.loanProduct = loanProduct;
-		this.interestRateDifferential = interestRateDifferential;
-		this.minDifferentialLendingRate = minDifferentialLendingRate;
-		this.maxDifferentialLendingRate = maxDifferentialLendingRate;
-		this.defaultDifferentialLendingRate = defaultDifferentialLendingRate;
-		this.isFloatingInterestRateCalculationAllowed = isFloatingInterestRateCalculationAllowed;
-	}
+        this.floatingRate = floatingRate;
+        this.loanProduct = loanProduct;
+        this.interestRateDifferential = interestRateDifferential;
+        this.minDifferentialLendingRate = minDifferentialLendingRate;
+        this.maxDifferentialLendingRate = maxDifferentialLendingRate;
+        this.defaultDifferentialLendingRate = defaultDifferentialLendingRate;
+        this.isFloatingInterestRateCalculationAllowed = isFloatingInterestRateCalculationAllowed;
+    }
 
     public LoanProduct getLoanProduct() {
         return this.loanProduct;

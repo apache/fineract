@@ -18,26 +18,35 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.campaigns.email.ScheduledEmailConstants;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.domain.Report;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.dataqueries.domain.Report;
-import org.apache.fineract.infrastructure.campaigns.email.ScheduledEmailConstants;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-import javax.persistence.*;
-import java.security.InvalidParameterException;
-import java.util.*;
 
 @Entity
 @Table(name = "scheduled_email_campaign")

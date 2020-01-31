@@ -18,7 +18,29 @@
  */
 package org.apache.fineract.portfolio.floatingrates.api;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -33,115 +55,109 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 @Path("/floatingrates")
 @Component
 @Scope("singleton")
-@Api(value = "Floating Rates", description = "It lets you create, list, retrieve and upload the floating rates")
+@Api(tags = {"Floating Rates"})
+@SwaggerDefinition(tags = {
+  @Tag(name = "Floating Rates", description = "It lets you create, list, retrieve and upload the floating rates")
+})
 public class FloatingRatesApiResource {
 
-	private static final String RESOURCE_NAME = "FLOATINGRATE";
-	private static final Set<String> LIST_FLOATING_RATES_PARAMETERS = new HashSet<>(
-			Arrays.asList("id", "name", "isBaseLendingRate", "isActive",
-					"createdby", "createdOn", "modifiedBy", "modifiedOn"));
-	private static final Set<String> INDIVIDUAL_FLOATING_RATES_PARAMETERS = new HashSet<>(
-			Arrays.asList("id", "name", "isBaseLendingRate", "isActive",
-					"createdBy", "createdOn", "modifiedBy", "modifiedOn",
-					"ratePeriods"));
-	private final PlatformSecurityContext context;
-	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-	private final DefaultToApiJsonSerializer<FloatingRateData> toApiJsonSerializer;
-	private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
-	private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private static final String RESOURCE_NAME = "FLOATINGRATE";
+    private static final Set<String> LIST_FLOATING_RATES_PARAMETERS = new HashSet<>(
+            Arrays.asList("id", "name", "isBaseLendingRate", "isActive",
+                    "createdby", "createdOn", "modifiedBy", "modifiedOn"));
+    private static final Set<String> INDIVIDUAL_FLOATING_RATES_PARAMETERS = new HashSet<>(
+            Arrays.asList("id", "name", "isBaseLendingRate", "isActive",
+                    "createdBy", "createdOn", "modifiedBy", "modifiedOn",
+                    "ratePeriods"));
+    private final PlatformSecurityContext context;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final DefaultToApiJsonSerializer<FloatingRateData> toApiJsonSerializer;
+    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
-	@Autowired
-	public FloatingRatesApiResource(
-			final PlatformSecurityContext context,
-			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-			final DefaultToApiJsonSerializer<FloatingRateData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
-		this.context = context;
-		this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-		this.toApiJsonSerializer = toApiJsonSerializer;
-		this.apiRequestParameterHelper = apiRequestParameterHelper;
-		this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
-	}
+    @Autowired
+    public FloatingRatesApiResource(
+            final PlatformSecurityContext context,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final DefaultToApiJsonSerializer<FloatingRateData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
+        this.context = context;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
+    }
 
-	@POST
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@ApiOperation(value = "Create a new Floating Rate", httpMethod = "POST", notes = "Creates a new Floating Rate\n" + "Mandatory Fields: name\n" + "Optional Fields: isBaseLendingRate, isActive, ratePeriods")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PostFloatingRatesRequest.class)})
-	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.PostFloatingRatesResponse.class)})
-	public String createFloatingRate(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Create a new Floating Rate", httpMethod = "POST", notes = "Creates a new Floating Rate\n" + "Mandatory Fields: name\n" + "Optional Fields: isBaseLendingRate, isActive, ratePeriods")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PostFloatingRatesRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.PostFloatingRatesResponse.class)})
+    public String createFloatingRate(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-		final CommandWrapper commandRequest = new CommandWrapperBuilder()
-				.createFloatingRate().withJson(apiRequestBodyAsJson).build();
-		final CommandProcessingResult result = this.commandsSourceWritePlatformService
-				.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-	}
+        final CommandWrapper commandRequest = new CommandWrapperBuilder()
+                .createFloatingRate().withJson(apiRequestBodyAsJson).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService
+                .logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
 
-	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@ApiOperation(value = "List Floating Rates", httpMethod = "GET", notes = "Lists Floating Rates")
-	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.GetFloatingRatesResponse.class, responseContainer = "List")})
-	public String retrieveAll(@Context final UriInfo uriInfo) {
-		this.context.authenticatedUser().validateHasReadPermission(
-				RESOURCE_NAME);
-		final List<FloatingRateData> floatingRates = this.floatingRatesReadPlatformService
-				.retrieveAll();
-		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, floatingRates,
-				FloatingRatesApiResource.LIST_FLOATING_RATES_PARAMETERS);
-	}
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "List Floating Rates", httpMethod = "GET", notes = "Lists Floating Rates")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.GetFloatingRatesResponse.class, responseContainer = "List")})
+    public String retrieveAll(@Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(
+                RESOURCE_NAME);
+        final List<FloatingRateData> floatingRates = this.floatingRatesReadPlatformService
+                .retrieveAll();
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
+                .process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, floatingRates,
+                FloatingRatesApiResource.LIST_FLOATING_RATES_PARAMETERS);
+    }
 
-	@GET
-	@Path("{floatingRateId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@ApiOperation(value = "Retrieve Floating Rate", httpMethod = "GET", notes = "Retrieves Floating Rate")
-	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.GetFloatingRatesFloatingRateIdResponse.class)})
-	public String retrieveOne(
-			@PathParam("floatingRateId") @ApiParam(value = "floatingRateId") final Long floatingRateId,
-			@Context final UriInfo uriInfo) {
-		this.context.authenticatedUser().validateHasReadPermission(
-				RESOURCE_NAME);
-		final FloatingRateData floatingRates = this.floatingRatesReadPlatformService
-				.retrieveOne(floatingRateId);
-		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, floatingRates,
-				FloatingRatesApiResource.INDIVIDUAL_FLOATING_RATES_PARAMETERS);
-	}
+    @GET
+    @Path("{floatingRateId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Floating Rate", httpMethod = "GET", notes = "Retrieves Floating Rate")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.GetFloatingRatesFloatingRateIdResponse.class)})
+    public String retrieveOne(
+            @PathParam("floatingRateId") @ApiParam(value = "floatingRateId") final Long floatingRateId,
+            @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(
+                RESOURCE_NAME);
+        final FloatingRateData floatingRates = this.floatingRatesReadPlatformService
+                .retrieveOne(floatingRateId);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
+                .process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, floatingRates,
+                FloatingRatesApiResource.INDIVIDUAL_FLOATING_RATES_PARAMETERS);
+    }
 
-	@PUT
-	@Path("{floatingRateId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@ApiOperation(value = "Update Floating Rate", httpMethod = "PUT", notes = "Updates new Floating Rate. Rate Periods in the past cannot be modified. All the future rateperiods would be replaced with the new ratePeriods data sent.")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdRequest.class)})
-	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdResponse.class)})
-	public String updateFloatingRate(
-			@PathParam("floatingRateId") @ApiParam(value = "floatingRateId") final Long floatingRateId,
-			@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder()
-				.updateFloatingRate(floatingRateId)
-				.withJson(apiRequestBodyAsJson).build();
-		final CommandProcessingResult result = this.commandsSourceWritePlatformService
-				.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-	}
+    @PUT
+    @Path("{floatingRateId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Update Floating Rate", httpMethod = "PUT", notes = "Updates new Floating Rate. Rate Periods in the past cannot be modified. All the future rateperiods would be replaced with the new ratePeriods data sent.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdResponse.class)})
+    public String updateFloatingRate(
+            @PathParam("floatingRateId") @ApiParam(value = "floatingRateId") final Long floatingRateId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder()
+                .updateFloatingRate(floatingRateId)
+                .withJson(apiRequestBodyAsJson).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService
+                .logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
 
 }

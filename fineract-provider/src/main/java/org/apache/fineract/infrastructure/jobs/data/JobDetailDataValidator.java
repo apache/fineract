@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.data;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -36,16 +37,13 @@ import org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public class JobDetailDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-			SchedulerJobApiConstants.cronExpressionParamName));
+    private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
+            SchedulerJobApiConstants.cronExpressionParamName));
 
     @Autowired
     public JobDetailDataValidator(final FromJsonHelper fromApiJsonHelper) {

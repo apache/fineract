@@ -130,11 +130,11 @@ public class CommandWrapper {
         this.creditBureauId=creditBureauId;
         this.organisationCreditBureauId=organisationCreditBureauId;
     }
-    
+
     public Long getCreditBureauId() {
         return this.creditBureauId;
     }
-    
+
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }

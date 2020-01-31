@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;
@@ -41,7 +40,7 @@ import org.springframework.stereotype.Component;
  * Global job Listener class to set Tenant details to
  * {@link ThreadLocalContextUtil} for batch Job and stores the batch job status
  * to database after the execution
- * 
+ *
  */
 @Component
 public class SchedulerJobListener implements JobListener {
@@ -53,9 +52,9 @@ public class SchedulerJobListener implements JobListener {
     private final SchedularWritePlatformService schedularService;
 
     private final AppUserRepositoryWrapper userRepository ;
-    
+
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-    
+
     @Autowired
     public SchedulerJobListener(final SchedularWritePlatformService schedularService,
             final AppUserRepositoryWrapper userRepository) {

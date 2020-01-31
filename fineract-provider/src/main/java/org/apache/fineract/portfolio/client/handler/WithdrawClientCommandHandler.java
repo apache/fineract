@@ -31,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "CLIENT", action = "WITHDRAW")
 public class WithdrawClientCommandHandler  implements NewCommandSourceHandler {
-	
-	private final ClientWritePlatformService clientWritePlatformService;
+
+    private final ClientWritePlatformService clientWritePlatformService;
 
 @Autowired
 public WithdrawClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {

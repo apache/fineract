@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "ENTITYMAPPING", action = "UPDATE")
 public class UpdateEntityToEntityMappingCommandHandler implements NewCommandSourceHandler {
-    
+
     private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
 
     @Autowired

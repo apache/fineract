@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import java.util.Set;
-
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
+import java.util.Set;
 
 // FIXME - KW - General thing to fix about REST API is if use partial response approach of fields=id,name,selectedPermissions
 //        It will return just id,name parameters of RoleData and ignore description, however as PermissionData used in selectedPermissions collection

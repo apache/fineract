@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.organisation.workingdays.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 
 @Entity
 @Table(name = "m_working_days")
@@ -44,7 +42,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
 
     @Column(name = "extend_term_holiday_repayment", nullable = false)
     private Boolean extendTermForRepaymentsOnHolidays;
-    
+
     protected WorkingDays() {
 
     }
@@ -73,7 +71,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
     public void setRepaymentReschedulingType(Integer repaymentReschedulingType) {
         this.repaymentReschedulingType = repaymentReschedulingType;
     }
-    
+
     public Boolean getExtendTermForDailyRepayments(){
         return this.extendTermForDailyRepayments;
     }
@@ -96,7 +94,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
             actualChanges.put(repaymentRescheduleTypeParamName,  WorkingDaysEnumerations.workingDaysStatusType(newValue));
             this.repaymentReschedulingType = RepaymentRescheduleType.fromInt(newValue).getValue();
         }
-        
+
         if(command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments, this.extendTermForDailyRepayments)){
             final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments);
             actualChanges.put(WorkingDaysApiConstants.extendTermForDailyRepayments, newValue);

@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,7 +39,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -136,10 +134,10 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "center", orphanRemoval = true)
     private Set<StaffAssignmentHistory> staffHistory;
-    
+
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
-    
+
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
 
@@ -167,7 +165,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
             status = GroupingTypeStatus.ACTIVE;
             groupActivationDate = activationDate;
         }
-        
+
         return new Group(office, staff, parent, groupLevel, name, externalId, status, groupActivationDate, clientMembers, groupMembers,
                 submittedOnDate, currentUser, accountNo);
     }
@@ -186,7 +184,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
         if (parent != null) {
             this.parent.addChild(this);
         }
-        
+
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -334,11 +332,11 @@ public final class Group extends AbstractPersistableCustom<Long> {
             actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-			if (newValue != null) {
-				this.activationDate = newValue.toDate();
-			}
+            if (newValue != null) {
+                this.activationDate = newValue.toDate();
+            }
         }
-        
+
         if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.accountNoParamName, this.accountNumber)) {
             final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.accountNoParamName);
             actualChanges.put(GroupingTypesApiConstants.accountNoParamName, newValue);
@@ -401,24 +399,24 @@ public final class Group extends AbstractPersistableCustom<Long> {
         return this.clientMembers.contains(client);
     }
 
-	public void generateHierarchy() {
-		if (this.parent != null) {
-			this.hierarchy = this.parent.hierarchyOf(getId());
-		} else {
-			this.hierarchy = "." + getId() + ".";
-			for (Group group : this.groupMembers) {
-				group.setParent(this);
-				group.generateHierarchy();
-			}
-		}
-	}
-    
-	public void resetHierarchy() {
-			this.hierarchy = "." + this.getId();
-	}
-    
+    public void generateHierarchy() {
+        if (this.parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(getId());
+        } else {
+            this.hierarchy = "." + getId() + ".";
+            for (Group group : this.groupMembers) {
+                group.setParent(this);
+                group.generateHierarchy();
+            }
+        }
+    }
+
+    public void resetHierarchy() {
+            this.hierarchy = "." + this.getId();
+    }
+
     private String hierarchyOf(final Long id) {
-    	return this.hierarchy + id.toString() + ".";
+        return this.hierarchy + id.toString() + ".";
     }
 
     public boolean isOfficeIdentifiedBy(final Long officeId) {
@@ -436,7 +434,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
         }
         return staffId;
     }
-   
+
     private void addChild(final Group group) {
         this.groupMembers.add(group);
     }
@@ -584,7 +582,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
             this.groupMembers.add(group);
             differences.add(group.getId().toString());
             group.setParent(this);
-    		group.generateHierarchy();
+            group.generateHierarchy();
         }
 
         return differences;
@@ -597,7 +595,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
             if (hasGroupAsMember(group)) {
                 this.groupMembers.remove(group);
                 differences.add(group.getId().toString());
-    			group.resetHierarchy();
+                group.resetHierarchy();
             } else {
                 throw new GroupNotExistsInCenterException(group.getId(), getId());
             }
@@ -745,7 +743,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
         }
         return latestRecordWithNoEndDate;
     }
-    
+
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
     }
@@ -753,15 +751,15 @@ public final class Group extends AbstractPersistableCustom<Long> {
     public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
-    
+
     public void updateAccountNo(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
         this.accountNumberRequiresAutoGeneration = false;
     }
 
-	public void setGroupMembers(List<Group> groupMembers) {
-		this.groupMembers = groupMembers;
-	}
-    
-    
+    public void setGroupMembers(List<Group> groupMembers) {
+        this.groupMembers = groupMembers;
+    }
+
+
 }

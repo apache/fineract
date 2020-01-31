@@ -30,7 +30,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -39,7 +38,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -208,7 +206,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<L
         this.maturityAmount = this.depositAmount.add(interestPayable);
         this.maturityDate = maturityDate.toDate();
     }
-    
+
     public void updateDepositAmount(final BigDecimal depositAmount) {
         this.depositAmount = depositAmount;
     }

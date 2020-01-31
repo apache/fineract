@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import java.io.Serializable;
 import org.joda.time.LocalDate;
 
 /**
@@ -25,7 +26,7 @@ import org.joda.time.LocalDate;
  * account application.
  */
 @SuppressWarnings("unused")
-public class SavingsAccountApplicationTimelineData {
+public class SavingsAccountApplicationTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;
     private final String submittedByUsername;

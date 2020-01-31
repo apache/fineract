@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests.useradministration.roles;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class RolesHelper {
 

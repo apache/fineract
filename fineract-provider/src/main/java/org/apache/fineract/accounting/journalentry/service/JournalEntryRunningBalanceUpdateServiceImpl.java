@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.journalentry.api.JournalEntryJsonInputParams;
@@ -65,11 +64,11 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     private final FromJsonHelper fromApiJsonHelper;
 
     private final GLJournalEntryMapper entryMapper = new GLJournalEntryMapper();
-    
-    // if a limit is not added to the running balance select statements below and the resultset is more than 400,000, 
+
+    // if a limit is not added to the running balance select statements below and the resultset is more than 400,000,
     // the script will eat up all of the server memory
     private final String selectRunningBalanceSqlLimit = "limit 0, 10000";
-    
+
     private final String officeRunningBalanceSql = "select je.office_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
             + "inner join (select max(id) as id from acc_gl_journal_entry where office_id=?  and entry_date < ? group by account_id,entry_date) je2 "
             + "inner join (select max(entry_date) as date from acc_gl_journal_entry where office_id=? and entry_date < ? group by account_id) je3 "
@@ -138,7 +137,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(organizationRunningBalanceSql, entityDate, entityDate);
         for (Map<String, Object> entries : list) {
-        	Long accountId = Long.parseLong(entries.get("accountId").toString()); //Drizzle is returning Big Integer where as MySQL returns Long.
+            Long accountId = Long.parseLong(entries.get("accountId").toString()); //Drizzle is returning Big Integer where as MySQL returns Long.
             if (!runningBalanceMap.containsKey(accountId)) {
                 runningBalanceMap.put(accountId, (BigDecimal) entries.get("runningBalance"));
             }
@@ -168,7 +167,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             ArrayList<String> updateSql = new ArrayList<>();
             int batchIndex = 0;
             for (int index = 0 ; index < entryDatas.size() ; index++) {
-            	JournalEntryData entryData = entryDatas.get(index) ;
+                JournalEntryData entryData = entryDatas.get(index) ;
                 Map<Long, BigDecimal> officeRunningBalanceMap = null;
                 if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
                     officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
@@ -184,8 +183,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 batchIndex++ ;
                 if (batchIndex == batchUpdateSize || index == entryDatas.size()-1) {
                     // run a batch update of the 1000 update SQL statements
-                	String[] batch = new String[updateSql.size()] ;
-                	updateSql.toArray(batch) ;
+                    String[] batch = new String[updateSql.size()] ;
+                    updateSql.toArray(batch) ;
                     this.jdbcTemplate.batchUpdate(batch);
                     // reset counter and string array
                     batchIndex = 0;

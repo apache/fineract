@@ -19,6 +19,11 @@
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
 
+import java.io.File;
+import java.util.List;
+import java.util.Properties;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfiguration;
@@ -27,13 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 @Service
 public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {

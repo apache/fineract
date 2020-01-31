@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.domain;
 
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.fineract.infrastructure.security.data.OTPRequest;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.context.annotation.Profile;

@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
@@ -163,7 +162,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
         return deposit;
     }
-    
+
     @Transactional
     @Override
     public SavingsAccountTransaction handleSavingDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
@@ -247,7 +246,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-            updateAlreadyPostedTransactions(existingTransactionIds, account);  
+            updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
@@ -322,7 +321,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-            updateAlreadyPostedTransactions(existingTransactionIds, account);  
+            updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
@@ -394,8 +393,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
         Long savingsTransactionId = null;
-       
-        
+
+
         // post interest
         account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth);
@@ -414,14 +413,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-            updateAlreadyPostedTransactions(existingTransactionIds, account);          
+            updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
             savingsTransactionId = withdrawal.getId();
         }
 
-      
+
         account.prematureClosure(user, command, tenantsTodayDate, changes);
 
         this.savingsAccountRepository.save(account);
@@ -471,7 +470,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-            updateAlreadyPostedTransactions(existingTransactionIds, account);  
+            updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
@@ -513,7 +512,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             }
         }
     }
-    
+
     private AppUser getAppUserIfPresent() {
         AppUser user = null;
         if (this.context != null) {

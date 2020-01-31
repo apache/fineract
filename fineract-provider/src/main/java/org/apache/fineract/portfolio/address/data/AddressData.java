@@ -18,205 +18,205 @@
  */
 package org.apache.fineract.portfolio.address.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 @SuppressWarnings("unused")
-public class AddressData {
-	
-	private final Long client_id;
+public class AddressData implements Serializable {
 
-	private final String addressType;
+    private final Long client_id;
 
-	private final Long addressId;
+    private final String addressType;
 
-	private final Long addressTypeId;
+    private final Long addressId;
 
-	private final Boolean isActive;
+    private final Long addressTypeId;
 
-	private final String street;
+    private final Boolean isActive;
 
-	private final String addressLine1;
+    private final String street;
 
-	private final String addressLine2;
+    private final String addressLine1;
 
-	private final String addressLine3;
+    private final String addressLine2;
 
-	private final String townVillage;
+    private final String addressLine3;
 
-	private final String city;
+    private final String townVillage;
 
-	private final String countyDistrict;
+    private final String city;
 
-	private final Long stateProvinceId;
+    private final String countyDistrict;
 
-	private final String countryName;
+    private final Long stateProvinceId;
 
-	private final String stateName;
+    private final String countryName;
 
-	private final Long countryId;
+    private final String stateName;
 
-	private final String postalCode;
+    private final Long countryId;
 
-	private final BigDecimal latitude;
+    private final String postalCode;
 
-	private final BigDecimal longitude;
+    private final BigDecimal latitude;
 
-	private final String createdBy;
+    private final BigDecimal longitude;
 
-	private final Date createdOn;
+    private final String createdBy;
 
-	private final String updatedBy;
+    private final Date createdOn;
 
-	private final Date updatedOn;
+    private final String updatedBy;
 
-	// template holder
-	private final Collection<CodeValueData> countryIdOptions;
-	private final Collection<CodeValueData> stateProvinceIdOptions;
-	private final Collection<CodeValueData> addressTypeIdOptions;
+    private final Date updatedOn;
 
-	public AddressData(Long addressTypeId,String street, String addressLine1, String addressLine2, String addressLine3,
-			String city,String postalCode, Boolean isActive,Long stateProvinceId,Long countryId) {
+    // template holder
+    private final Collection<CodeValueData> countryIdOptions;
+    private final Collection<CodeValueData> stateProvinceIdOptions;
+    private final Collection<CodeValueData> addressTypeIdOptions;
 
-		this.addressTypeId = addressTypeId;
-		this.isActive = isActive;
-		this.street = street;
-		this.addressLine1 = addressLine1;
-		this.addressLine2 = addressLine2;
-		this.addressLine3 = addressLine3;
-		this.countryId = countryId;
-		this.postalCode = postalCode;
-		this.stateProvinceId = stateProvinceId;
-		this.city = city;
-		this.townVillage = null;
-		this.client_id = null;
-		this.addressType = null;
-		this.addressId = null;
-		this.countyDistrict = null;
-		this.countryName = null;
-		this.stateName = null;
-		this.latitude = null;
-		this.longitude = null;
-		this.createdBy = null;
-		this.createdOn = null;
-		this.updatedBy = null;
-		this.updatedOn = null;
-		this.countryIdOptions = null;
-		this.stateProvinceIdOptions = null;
-		this.addressTypeIdOptions = null;
-	}
+    public AddressData(Long addressTypeId,String street, String addressLine1, String addressLine2, String addressLine3,
+            String city,String postalCode, Boolean isActive,Long stateProvinceId,Long countryId) {
+
+        this.addressTypeId = addressTypeId;
+        this.isActive = isActive;
+        this.street = street;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.addressLine3 = addressLine3;
+        this.countryId = countryId;
+        this.postalCode = postalCode;
+        this.stateProvinceId = stateProvinceId;
+        this.city = city;
+        this.townVillage = null;
+        this.client_id = null;
+        this.addressType = null;
+        this.addressId = null;
+        this.countyDistrict = null;
+        this.countryName = null;
+        this.stateName = null;
+        this.latitude = null;
+        this.longitude = null;
+        this.createdBy = null;
+        this.createdOn = null;
+        this.updatedBy = null;
+        this.updatedOn = null;
+        this.countryIdOptions = null;
+        this.stateProvinceIdOptions = null;
+        this.addressTypeIdOptions = null;
+    }
 
 
-	private AddressData(final String addressType, final Long client_id, final Long addressId, final Long addressTypeId,
-			final Boolean is_active, final String street, final String addressLine1, final String addressLine2,
-			final String addressLine3, final String townVillage, final String city, final String countyDistrict,
-			final Long stateProvinceId, final Long countryId, final String stateName, final String countryName,
-			final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
-			final Date createdOn, final String updatedBy, final Date updatedOn,
-			final Collection<CodeValueData> countryIdOptions, final Collection<CodeValueData> stateProvinceIdOptions,
-			final Collection<CodeValueData> addressTypeIdOptions) {
-		this.addressType = addressType;
-		this.client_id = client_id;
-		this.addressId = addressId;
-		this.addressTypeId = addressTypeId;
-		this.isActive = is_active;
-		this.street = street;
-		this.addressLine1 = addressLine1;
-		this.addressLine2 = addressLine2;
-		this.addressLine3 = addressLine3;
-		this.townVillage = townVillage;
-		this.city = city;
-		this.countyDistrict = countyDistrict;
-		this.stateProvinceId = stateProvinceId;
-		this.countryId = countryId;
-		this.stateName = stateName;
-		this.countryName = countryName;
-		this.postalCode = postalCode;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.createdBy = createdBy;
-		this.createdOn = createdOn;
-		this.updatedBy = updatedBy;
-		this.updatedOn = updatedOn;
-		this.countryIdOptions = countryIdOptions;
-		this.stateProvinceIdOptions = stateProvinceIdOptions;
-		this.addressTypeIdOptions = addressTypeIdOptions;
-	}
+    private AddressData(final String addressType, final Long client_id, final Long addressId, final Long addressTypeId,
+            final Boolean is_active, final String street, final String addressLine1, final String addressLine2,
+            final String addressLine3, final String townVillage, final String city, final String countyDistrict,
+            final Long stateProvinceId, final Long countryId, final String stateName, final String countryName,
+            final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
+            final Date createdOn, final String updatedBy, final Date updatedOn,
+            final Collection<CodeValueData> countryIdOptions, final Collection<CodeValueData> stateProvinceIdOptions,
+            final Collection<CodeValueData> addressTypeIdOptions) {
+        this.addressType = addressType;
+        this.client_id = client_id;
+        this.addressId = addressId;
+        this.addressTypeId = addressTypeId;
+        this.isActive = is_active;
+        this.street = street;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.addressLine3 = addressLine3;
+        this.townVillage = townVillage;
+        this.city = city;
+        this.countyDistrict = countyDistrict;
+        this.stateProvinceId = stateProvinceId;
+        this.countryId = countryId;
+        this.stateName = stateName;
+        this.countryName = countryName;
+        this.postalCode = postalCode;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.createdBy = createdBy;
+        this.createdOn = createdOn;
+        this.updatedBy = updatedBy;
+        this.updatedOn = updatedOn;
+        this.countryIdOptions = countryIdOptions;
+        this.stateProvinceIdOptions = stateProvinceIdOptions;
+        this.addressTypeIdOptions = addressTypeIdOptions;
+    }
 
-	public static AddressData instance(final String addressType, final Long client_id, final Long addressId,
-			final Long addressTypeId, final Boolean is_active, final String street, final String addressLine1,
-			final String addressLine2, final String addressLine3, final String townVillage, final String city,
-			final String countyDistrict, final Long stateProvinceId, final Long countryId, final String stateName,
-			final String countryName, final String postalCode, final BigDecimal latitude, final BigDecimal longitude,
-			final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn) {
+    public static AddressData instance(final String addressType, final Long client_id, final Long addressId,
+            final Long addressTypeId, final Boolean is_active, final String street, final String addressLine1,
+            final String addressLine2, final String addressLine3, final String townVillage, final String city,
+            final String countyDistrict, final Long stateProvinceId, final Long countryId, final String stateName,
+            final String countryName, final String postalCode, final BigDecimal latitude, final BigDecimal longitude,
+            final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn) {
 
-		return new AddressData(addressType, client_id, addressId, addressTypeId, is_active, street, addressLine1,
-				addressLine2, addressLine3, townVillage, city, countyDistrict, stateProvinceId, countryId,
-				stateName, countryName, postalCode, latitude, longitude, createdBy, createdOn, updatedBy,
-				updatedOn, null, null, null);
-	}
+        return new AddressData(addressType, client_id, addressId, addressTypeId, is_active, street, addressLine1,
+                addressLine2, addressLine3, townVillage, city, countyDistrict, stateProvinceId, countryId,
+                stateName, countryName, postalCode, latitude, longitude, createdBy, createdOn, updatedBy,
+                updatedOn, null, null, null);
+    }
 
-	public static AddressData instance1(final Long addressId, final String street, final String addressLine1,
-			final String addressLine2, final String addressLine3, final String townVillage, final String city,
-			final String countyDistrict, final Long stateProvinceId, final Long countryId, final String postalCode,
-			final BigDecimal latitude, final BigDecimal longitude, final String createdBy, final Date createdOn,
-			final String updatedBy, final Date updatedOn) {
-		return new AddressData(null, null, addressId, null, false, street, addressLine1, addressLine2,
-				addressLine3, townVillage, city, countyDistrict, stateProvinceId, countryId, null, null,
-				postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn, null, null, null);
-	}
+    public static AddressData instance1(final Long addressId, final String street, final String addressLine1,
+            final String addressLine2, final String addressLine3, final String townVillage, final String city,
+            final String countyDistrict, final Long stateProvinceId, final Long countryId, final String postalCode,
+            final BigDecimal latitude, final BigDecimal longitude, final String createdBy, final Date createdOn,
+            final String updatedBy, final Date updatedOn) {
+        return new AddressData(null, null, addressId, null, false, street, addressLine1, addressLine2,
+                addressLine3, townVillage, city, countyDistrict, stateProvinceId, countryId, null, null,
+                postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn, null, null, null);
+    }
 
-	public static AddressData template(final Collection<CodeValueData> countryIdOptions,
-			final Collection<CodeValueData> stateProvinceIdOptions,
-			final Collection<CodeValueData> addressTypeIdOptions) {
-		final Long client_idtemp = null;
+    public static AddressData template(final Collection<CodeValueData> countryIdOptions,
+            final Collection<CodeValueData> stateProvinceIdOptions,
+            final Collection<CodeValueData> addressTypeIdOptions) {
+        final Long client_idtemp = null;
 
-		final Long addressIdtemp = null;
+        final Long addressIdtemp = null;
 
-		final Long addressTypeIdtemp = null;
+        final Long addressTypeIdtemp = null;
 
-		final Boolean is_activetemp = null;
+        final Boolean is_activetemp = null;
 
-		final String streettemp = null;
+        final String streettemp = null;
 
-		final String addressLine1temp = null;
+        final String addressLine1temp = null;
 
-		final String addressLine2temp = null;
+        final String addressLine2temp = null;
 
-		final String addressLine3temp = null;
+        final String addressLine3temp = null;
 
-		final String townVillagetemp = null;
+        final String townVillagetemp = null;
 
-		final String citytemp = null;
+        final String citytemp = null;
 
-		final String countyDistricttemp = null;
+        final String countyDistricttemp = null;
 
-		final Long stateProvinceIdtemp = null;
+        final Long stateProvinceIdtemp = null;
 
-		final Long countryIdtemp = null;
+        final Long countryIdtemp = null;
 
-		final String postalCodetemp = null;
+        final String postalCodetemp = null;
 
-		final BigDecimal latitudetemp = null;
+        final BigDecimal latitudetemp = null;
 
-		final BigDecimal longitudetemp = null;
+        final BigDecimal longitudetemp = null;
 
-		final String createdBytemp = null;
+        final String createdBytemp = null;
 
-		final Date createdOntemp = null;
+        final Date createdOntemp = null;
 
-		final String updatedBytemp = null;
+        final String updatedBytemp = null;
 
-		final Date updatedOntemp = null;
+        final Date updatedOntemp = null;
 
-		return new AddressData(null, client_idtemp, addressIdtemp, addressTypeIdtemp, is_activetemp, streettemp,
-				addressLine1temp, addressLine2temp, addressLine3temp, townVillagetemp, citytemp,
-				countyDistricttemp, stateProvinceIdtemp, countryIdtemp, null, null, postalCodetemp, latitudetemp,
-				longitudetemp, createdBytemp, createdOntemp, updatedBytemp, updatedOntemp, countryIdOptions,
-				stateProvinceIdOptions, addressTypeIdOptions);
-	}
+        return new AddressData(null, client_idtemp, addressIdtemp, addressTypeIdtemp, is_activetemp, streettemp,
+                addressLine1temp, addressLine2temp, addressLine3temp, townVillagetemp, citytemp,
+                countyDistricttemp, stateProvinceIdtemp, countryIdtemp, null, null, postalCodetemp, latitudetemp,
+                longitudetemp, createdBytemp, createdOntemp, updatedBytemp, updatedOntemp, countryIdOptions,
+                stateProvinceIdOptions, addressTypeIdOptions);
+    }
 
 }

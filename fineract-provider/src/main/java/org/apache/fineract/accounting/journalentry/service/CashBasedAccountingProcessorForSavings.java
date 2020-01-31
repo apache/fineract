@@ -21,7 +21,6 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SAVINGS;
 import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
@@ -145,7 +144,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
 
             else if (savingsTransactionDTO.getTransactionType().isEscheat()) {
                 this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                		CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(), CASH_ACCOUNTS_FOR_SAVINGS.ESCHEAT_LIABILITY.getValue(),
+                        CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(), CASH_ACCOUNTS_FOR_SAVINGS.ESCHEAT_LIABILITY.getValue(),
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
             }
             /**

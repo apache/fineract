@@ -21,13 +21,11 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -80,7 +78,7 @@ public final class SavingsAccountSummary {
 
     @Column(name = "total_withhold_tax_derived", scale = 6, precision = 19)
     private BigDecimal totalWithholdTax;
-    
+
     @Temporal(TemporalType.DATE)
     @Column(name = "last_interest_calculation_date")
     private Date lastInterestCalculationDate;
@@ -103,7 +101,7 @@ public final class SavingsAccountSummary {
         this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
         this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
-        
+
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)

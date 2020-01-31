@@ -19,7 +19,6 @@
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 

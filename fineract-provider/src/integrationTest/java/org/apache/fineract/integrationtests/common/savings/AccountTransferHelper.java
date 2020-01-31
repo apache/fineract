@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class AccountTransferHelper {
 
@@ -84,7 +82,7 @@ public class AccountTransferHelper {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
                 accountTransferJSON, "savingsId");
     }
-    
+
     public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
         System.out.println("--------------------------------ACCOUNT TRANSFER--------------------------------");

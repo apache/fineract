@@ -19,11 +19,14 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import javax.persistence.Transient;
-
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -267,7 +270,7 @@ public class LoanAccountData {
                 transactionProcessingStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 interestChargedFromDate, repaymentsStartingFromDate, rowIndex, externalId, null, null, linkAccountId,locale,dateFormat);
     }
-    
+
     private LoanAccountData(EnumOptionData loanType,Long clientId,Long productId,Long loanOfficerId,LocalDate submittedOnDate,
             Long fundId,BigDecimal principal, Integer numberOfRepayments,Integer repaymentEvery,
             EnumOptionData repaymentFrequencyType, Integer loanTermFrequency,EnumOptionData loanTermFrequencyType,
@@ -1589,7 +1592,7 @@ public class LoanAccountData {
         this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
         this.graceOnPrincipalPayment = graceOnPrincipalPayment;
         this.recurringMoratoriumOnPrincipalPeriods = recurringMoratoriumOnPrincipalPeriods;
-        
+
         this.graceOnInterestPayment = graceOnInterestPayment;
         this.graceOnInterestCharged = graceOnInterestCharged;
         this.interestChargedFromDate = interestChargedFromDate;
@@ -1840,29 +1843,29 @@ public class LoanAccountData {
 
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options for now.
-     * 
+     *
      * @return {@link LoanAccountData} object
      */
     public static LoanAccountData emptyTemplate() {
         final Collection<CodeValueData> loanCollateralOptions = null;
-        
+
         return LoanAccountData.collateralTemplate(loanCollateralOptions);
     }
-    
+
     public boolean isLoanProductLinkedToFloatingRate() {
         return this.isLoanProductLinkedToFloatingRate;
     }
-    
+
     public LocalDate getDisbursementDate(){
         return this.timeline.getDisbursementDate();
     }
 
-    
+
     public boolean isFloatingInterestRate() {
         return this.isFloatingInterestRate;
     }
 
-    
+
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;
     }

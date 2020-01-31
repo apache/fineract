@@ -18,12 +18,17 @@
  */
 package org.apache.fineract.interoperation.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.interoperation.data.*;
-import org.apache.fineract.interoperation.domain.InteropIdentifierType;
-
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.interoperation.data.InteropAccountData;
+import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
+import org.apache.fineract.interoperation.data.InteropIdentifiersResponseData;
+import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
+import org.apache.fineract.interoperation.data.InteropTransactionRequestResponseData;
+import org.apache.fineract.interoperation.data.InteropTransactionsData;
+import org.apache.fineract.interoperation.data.InteropTransferResponseData;
+import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 
 public interface InteropService {
 

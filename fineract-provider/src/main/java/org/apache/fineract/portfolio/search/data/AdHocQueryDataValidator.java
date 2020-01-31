@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.search.data;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -38,29 +39,26 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public class AdHocQueryDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(AdHocQuerySearchConstants.entitiesParamName, AdHocQuerySearchConstants.loanStatusParamName,
-					AdHocQuerySearchConstants.loanProductsParamName, AdHocQuerySearchConstants.officesParamName,
-					AdHocQuerySearchConstants.loanDateOptionParamName, AdHocQuerySearchConstants.loanFromDateParamName,
-					AdHocQuerySearchConstants.loanToDateParamName,
-					AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName,
-					AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName,
-					AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName,
-					AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName,
-					AdHocQuerySearchConstants.outStandingAmountPercentageParamName,
-					AdHocQuerySearchConstants.includeOutstandingAmountParamName,
-					AdHocQuerySearchConstants.outstandingAmountConditionParamName,
-					AdHocQuerySearchConstants.minOutstandingAmountParamName,
-					AdHocQuerySearchConstants.maxOutstandingAmountParamName,
-					AdHocQuerySearchConstants.outstandingAmountParamName, AdHocQuerySearchConstants.localeParamName,
-					AdHocQuerySearchConstants.dateFormatParamName));
+    private static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AdHocQuerySearchConstants.entitiesParamName, AdHocQuerySearchConstants.loanStatusParamName,
+                    AdHocQuerySearchConstants.loanProductsParamName, AdHocQuerySearchConstants.officesParamName,
+                    AdHocQuerySearchConstants.loanDateOptionParamName, AdHocQuerySearchConstants.loanFromDateParamName,
+                    AdHocQuerySearchConstants.loanToDateParamName,
+                    AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName,
+                    AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName,
+                    AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName,
+                    AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName,
+                    AdHocQuerySearchConstants.outStandingAmountPercentageParamName,
+                    AdHocQuerySearchConstants.includeOutstandingAmountParamName,
+                    AdHocQuerySearchConstants.outstandingAmountConditionParamName,
+                    AdHocQuerySearchConstants.minOutstandingAmountParamName,
+                    AdHocQuerySearchConstants.maxOutstandingAmountParamName,
+                    AdHocQuerySearchConstants.outstandingAmountParamName, AdHocQuerySearchConstants.localeParamName,
+                    AdHocQuerySearchConstants.dateFormatParamName));
 
     private static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<>(
             Arrays.asList("between", "<=", ">=", "<", ">", "="));
@@ -69,10 +67,10 @@ public class AdHocQueryDataValidator {
             AdHocQuerySearchConstants.createDateOption,
             AdHocQuerySearchConstants.disbursalDateOption };
 
-	private static final Object[] loanStatusOptions = {AdHocQuerySearchConstants.allLoanStatusOption,
-			AdHocQuerySearchConstants.activeLoanStatusOption, AdHocQuerySearchConstants.overpaidLoanStatusOption,
-			AdHocQuerySearchConstants.arrearsLoanStatusOption, AdHocQuerySearchConstants.closedLoanStatusOption,
-			AdHocQuerySearchConstants.writeoffLoanStatusOption};
+    private static final Object[] loanStatusOptions = {AdHocQuerySearchConstants.allLoanStatusOption,
+            AdHocQuerySearchConstants.activeLoanStatusOption, AdHocQuerySearchConstants.overpaidLoanStatusOption,
+            AdHocQuerySearchConstants.arrearsLoanStatusOption, AdHocQuerySearchConstants.closedLoanStatusOption,
+            AdHocQuerySearchConstants.writeoffLoanStatusOption};
 
     @Autowired
     public AdHocQueryDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -215,10 +213,10 @@ public class AdHocQueryDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         List<String> loanStatus = null;
-		if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanStatusParamName, element)) {
-			loanStatus = Arrays.asList(
-					this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanStatusParamName, element));
-		}
+        if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanStatusParamName, element)) {
+            loanStatus = Arrays.asList(
+                    this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanStatusParamName, element));
+        }
 
         List<Long> loanProducts = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanProductsParamName, element)) {
@@ -289,7 +287,7 @@ public class AdHocQueryDataValidator {
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outstandingAmountConditionParamName, element)) {
             outstandingAmountCondition = this.fromApiJsonHelper.extractStringNamed(
                     AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
-        	SQLInjectionValidator.validateSQLInput(outstandingAmountCondition);
+            SQLInjectionValidator.validateSQLInput(outstandingAmountCondition);
         }
 
         BigDecimal minOutstandingAmount = null;

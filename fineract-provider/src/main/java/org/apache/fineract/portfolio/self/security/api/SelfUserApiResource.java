@@ -20,7 +20,22 @@
 package org.apache.fineract.portfolio.self.security.api;
 
 import com.google.gson.reflect.TypeToken;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -30,17 +45,12 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 @Path("/self/user")
 @Component
-@Api(value = "Self User", description = "")
+@Api(tags = {"Self User"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Self User", description = "")
+})
 public class SelfUserApiResource {
 
         private final UsersApiResource usersApiResource;

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.search.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
 import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
 import org.apache.fineract.portfolio.search.data.SearchConditions;

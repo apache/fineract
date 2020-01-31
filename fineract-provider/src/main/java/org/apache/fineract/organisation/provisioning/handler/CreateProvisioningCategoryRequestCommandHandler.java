@@ -30,19 +30,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "PROVISIONCATEGORY", action = "CREATE")
 public class CreateProvisioningCategoryRequestCommandHandler implements NewCommandSourceHandler {
-	
-	private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
-	
-	@Autowired
-	public CreateProvisioningCategoryRequestCommandHandler(
-	        ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
-		this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
-	}
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-		return this.provisioningCategoryWritePlatformService.createProvisioningCateogry(jsonCommand);
-	}
+    private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
+
+    @Autowired
+    public CreateProvisioningCategoryRequestCommandHandler(
+            ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
+        this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+        return this.provisioningCategoryWritePlatformService.createProvisioningCateogry(jsonCommand);
+    }
 
 }

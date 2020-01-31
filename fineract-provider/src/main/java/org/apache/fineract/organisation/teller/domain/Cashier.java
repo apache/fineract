@@ -18,22 +18,30 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.staff.domain.Staff;
-import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.staff.domain.Staff;
+import org.joda.time.LocalDate;
 
 /**
  * Provides the base model for a cashier. Represents a row in the
  * &quot;m_cashiers&quot; database table, with each column mapped to a property
  * of this class.
- * 
+ *
  * @author Markus Geiss
  * @since 2.0.0
  */
@@ -206,7 +214,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the office of this cashier.
-     * 
+     *
      * @return the office of this cashier
      * @see org.apache.fineract.organisation.office.domain.Office
      */
@@ -252,7 +260,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the office of this cashier.
-     * 
+     *
      * @param office
      *            the office of this cashier
      * @see org.apache.fineract.organisation.office.domain.Office
@@ -263,7 +271,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the staff of this cashier.
-     * 
+     *
      * @return the staff of this cashier
      * @see org.apache.fineract.organisation.staff.domain.Staff
      */
@@ -273,7 +281,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the staff of this cashier.
-     * 
+     *
      * @param staff
      *            the staff of this cashier
      * @see org.apache.fineract.organisation.staff.domain.Staff
@@ -284,7 +292,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the teller of this cashier.
-     * 
+     *
      * @return the teller of this cashier
      * @see org.apache.fineract.organisation.teller.domain.Teller
      */
@@ -294,7 +302,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the teller of this cashier.
-     * 
+     *
      * @param teller
      *            the teller of this cashier
      * @see org.apache.fineract.organisation.teller.domain.Teller
@@ -305,7 +313,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the description of this cashier. .
-     * 
+     *
      * @return the description of this cashier or {@code null} if not present.
      */
     public String getDescription() {
@@ -314,7 +322,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the description of this cashier.
-     * 
+     *
      * @param description
      *            the description of this cashier
      */
@@ -324,12 +332,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the valid from date of this cashier.
-     * 
+     *
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
      * </p>
-     * 
+     *
      * @return the valid from date of this cashier
      */
     public Date getStartDate() {
@@ -346,12 +354,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the valid from date of this cashier.
-     * 
+     *
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
      * </p>
-     * 
+     *
      * @param  startDate validFrom
      *            the valid from date of this cashier
      */
@@ -361,12 +369,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the valid to date of this cashier.
-     * 
+     *
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
      * </p>
-     * 
+     *
      * @return the valid to date of this cashier
      */
     public Date getEndDate() {
@@ -383,12 +391,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the valid to date of this cashier.
-     * 
+     *
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
      * </p>
-     * 
+     *
      * @param endDate validTo
      *            the valid to date of this cashier
      */
@@ -398,7 +406,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns whether this cashier works part time or not.
-     * 
+     *
      * @return {@code true} if this cashier works part time; {@code false}
      *         otherwise
      */
@@ -408,7 +416,7 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the part time flag of this cashier.
-     * 
+     *
      * @param isFullDay partTime
      *            the part time flag of this cashier
      */
@@ -418,12 +426,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the start time of this cashier.
-     * 
+     *
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
      * </p>
-     * 
+     *
      * @return the start time of this cashier
      */
     public String getStartTime() {
@@ -432,12 +440,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Set the start time of this cashier.
-     * 
+     *
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
      * </p>
-     * 
+     *
      * @param startTime
      *            the start time of this cashier
      */
@@ -447,12 +455,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Returns the end time of this cashier.
-     * 
+     *
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
      * </p>
-     * 
+     *
      * @return the end time of this cashier
      */
     public String getEndTime() {
@@ -461,12 +469,12 @@ public class Cashier extends AbstractPersistableCustom<Long> {
 
     /**
      * Sets the end time of this cashier.
-     * 
+     *
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
      * </p>
-     * 
+     *
      * @param endTime
      *            the end time of this cashier
      */

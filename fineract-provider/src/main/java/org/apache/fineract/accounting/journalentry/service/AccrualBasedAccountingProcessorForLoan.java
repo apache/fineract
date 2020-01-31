@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
 import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
@@ -102,7 +101,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
     /**
      * Debit loan Portfolio and credit Fund source for Disbursement.
-     * 
+     *
      * @param loanDTO
      * @param loanTransactionDTO
      * @param office
@@ -141,20 +140,20 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     }
 
     /**
-     * 
+     *
      * Handles repayments using the following posting rules <br/>
      * <br/>
      * <br/>
-     * 
+     *
      * <b>Principal Repayment</b>: Debits "Fund Source" and Credits
      * "Loan Portfolio"<br/>
-     * 
+     *
      * <b>Interest Repayment</b>:Debits "Fund Source" and and Credits
      * "Receivable Interest" <br/>
-     * 
+     *
      * <b>Fee Repayment</b>:Debits "Fund Source" (or "Interest on Loans" in case
      * of repayment at disbursement) and and Credits "Receivable Fees" <br/>
-     * 
+     *
      * <b>Penalty Repayment</b>: Debits "Fund Source" and and Credits
      * "Receivable Penalties" <br/>
      * <br/>
@@ -162,24 +161,24 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * <br/>
      * <b>Principal Write off</b>: Debits "Losses Written Off" and Credits
      * "Loan Portfolio"<br/>
-     * 
+     *
      * <b>Interest Write off</b>:Debits "Losses Written off" and and Credits
      * "Receivable Interest" <br/>
-     * 
+     *
      * <b>Fee Write off</b>:Debits "Losses Written off" and and Credits
      * "Receivable Fees" <br/>
-     * 
+     *
      * <b>Penalty Write off</b>: Debits "Losses Written off" and and Credits
      * "Receivable Penalties" <br/>
      * <br/>
      * <br/>
      * In case the loan transaction has been reversed, all debits are turned
      * into credits and vice versa
-     * 
+     *
      * @param loanTransactionDTO
      * @param loanDTO
      * @param office
-     * 
+     *
      */
     private void createJournalEntriesForRepaymentsAndWriteOffs(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office, final boolean writeOff, final boolean isIncomeFromFee) {
@@ -320,7 +319,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     /**
      * Create a single Debit to fund source and a single credit to
      * "Income from Recovery"
-     * 
+     *
      * In case the loan transaction is a reversal, all debits are turned into
      * credits and vice versa
      */
@@ -347,15 +346,15 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     /**
      * Recognize the receivable interest <br/>
      * Debit "Interest Receivable" and Credit "Income from Interest"
-     * 
+     *
      * <b>Fees:</b> Debit <i>Fees Receivable</i> and credit <i>Income from
      * Fees</i> <br/>
-     * 
+     *
      * <b>Penalties:</b> Debit <i>Penalties Receivable</i> and credit <i>Income
      * from Penalties</i>
-     * 
+     *
      * Also handles reversals for both fees and payment applications
-     * 
+     *
      * @param loanDTO
      * @param loanTransactionDTO
      * @param office

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
@@ -53,7 +52,7 @@ public class SavingsAccountSummaryData {
 
     public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String productName, final String shortProductName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
-            final BigDecimal accountBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline, final EnumOptionData depositType, 
+            final BigDecimal accountBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline, final EnumOptionData depositType,
             final SavingsAccountSubStatusEnumData subStatus, final LocalDate lastActiveTransactionDate) {
         this.id = id;
         this.accountNo = accountNo;

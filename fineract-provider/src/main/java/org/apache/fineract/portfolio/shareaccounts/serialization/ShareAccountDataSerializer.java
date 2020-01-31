@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.serialization;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -69,11 +72,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
 @Service
 public class ShareAccountDataSerializer {
 
@@ -110,7 +108,7 @@ public class ShareAccountDataSerializer {
             ShareAccountApiConstants.requesteddate_paramname, ShareAccountApiConstants.requestedshares_paramname,
             ShareAccountApiConstants.purchasedprice_paramname, ShareAccountApiConstants.dateformat_paramname));
 
-    
+
     @Autowired
     public ShareAccountDataSerializer(final PlatformSecurityContext platformSecurityContext, final FromJsonHelper fromApiJsonHelper,
             final ChargeRepositoryWrapper chargeRepository, final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
@@ -152,17 +150,17 @@ public class ShareAccountDataSerializer {
         final Long requestedShares = this.fromApiJsonHelper.extractLongNamed(ShareAccountApiConstants.requestedshares_paramname, element);
         baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requestedShares).notNull()
                 .longGreaterThanZero();
-        
+
         if(shareProduct.getMinimumClientShares() != null && requestedShares < shareProduct.getMinimumClientShares()) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requestedShares)
             .failWithCode("client.can.not.purchase.shares.lessthan.product.definition", "Client can not purchase shares less than product definition");
         }
-        
+
         if(shareProduct.getMaximumClientShares() != null && requestedShares > shareProduct.getMaximumClientShares()) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requestedShares)
             .failWithCode("client.can.not.purchase.shares.morethan.product.definition", "Client can not purchase shares more than product definition");
         }
-        
+
         LocalDate applicationDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareAccountApiConstants.applicationdate_param, element);
         baseDataValidator.reset().parameter(ShareAccountApiConstants.applicationdate_param).value(applicationDate).notNull();
 
@@ -304,14 +302,14 @@ public class ShareAccountDataSerializer {
                 SavingsAccount savingsAccount = this.savingsAccountRepositoryWrapper.findOneWithNotFoundDetection(savingsAccountId);
                 if (account.setSavingsAccount(savingsAccount)) {
                     actualChanges.put(ShareAccountApiConstants.savingsaccountid_paramname, savingsAccount.getId());
-                }    
+                }
             }
         }
 
         Date existingApplicationDate = null ;
         List<ShareAccountTransaction> purchaseTransactionsList = new ArrayList<>() ;
         Set<ShareAccountCharge> chargesList = new HashSet<>() ;
-        
+
         if (this.fromApiJsonHelper.parameterExists(ShareAccountApiConstants.requestedshares_paramname, element)
                 || this.fromApiJsonHelper.parameterExists(ShareAccountApiConstants.charges_paramname, element)) {
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
@@ -328,7 +326,7 @@ public class ShareAccountDataSerializer {
                     }
                 }
             }
-            
+
             actualChanges.put("reversalIds", reveralIds);
             Set<ShareAccountCharge> charges = account.getCharges() ;
             for(ShareAccountCharge charge: charges) {
@@ -339,7 +337,7 @@ public class ShareAccountDataSerializer {
                     Boolean status = Boolean.TRUE;
                     ShareAccountCharge accountCharge = ShareAccountCharge.createNewWithoutShareAccount(charge.getCharge(), charge.percentageOrAmount(), chargeTime,
                             chargeCalculation, status);
-                    chargesList.add(accountCharge) ;    
+                    chargesList.add(accountCharge) ;
                 }
             }
         }
@@ -360,24 +358,24 @@ public class ShareAccountDataSerializer {
             ShareAccountTransaction transaction = new ShareAccountTransaction(applicationDate, requestedShares, unitPrice);
             purchaseTransactionsList.add(transaction) ;
             actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, "Transaction");
-            
+
             if(shareProduct.getMinimumClientShares() != null && requestedShares < shareProduct.getMinimumClientShares()) {
                 baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requestedShares)
                 .failWithCode("client.can.not.purchase.shares.lessthan.product.definition", "Client can not purchase shares less than product definition");
             }
-            
+
             if(shareProduct.getMaximumClientShares() != null && requestedShares > shareProduct.getMaximumClientShares()) {
                 baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requestedShares)
                 .failWithCode("client.can.not.purchase.shares.morethan.product.definition", "Client can not purchase shares more than product definition");
             }
         }
-        
+
         if(!purchaseTransactionsList.isEmpty()) {
             ShareAccountTransaction transaction = purchaseTransactionsList.get(0) ;
             account.addTransaction(transaction);
             account.setTotalPendingShares(transaction.getTotalShares());
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(ShareAccountApiConstants.allowdividendcalculationforinactiveclients_paramname, element)) {
             Boolean allowdividendsForInactiveClients = this.fromApiJsonHelper.extractBooleanNamed(
                     ShareAccountApiConstants.allowdividendcalculationforinactiveclients_paramname, element);
@@ -436,7 +434,7 @@ public class ShareAccountDataSerializer {
             }
             account.addCharges(chargesList);
         }
-        
+
         createChargeTransaction(account);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         return actualChanges;
@@ -462,16 +460,16 @@ public class ShareAccountDataSerializer {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.approveddate_paramname).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("approved.date.cannot.be.before.submitted.date");
         }
-        
+
         Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions() ;
         for(ShareAccountTransaction transaction: transactions) {
             if(transaction.isActive() && transaction.isPendingForApprovalTransaction()) {
                 validateTotalSubsribedShares(account, transaction, baseDataValidator) ;
             }
         }
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         AppUser approvedUser = this.platformSecurityContext.authenticatedUser();
         account.approve(approvedDate.toDate(), approvedUser);
         actualChanges.put(ShareAccountApiConstants.id_paramname, account.getId());
@@ -681,7 +679,7 @@ public class ShareAccountDataSerializer {
                 if(requestedDate.isBefore(transactionDate)) {
                     isTransactionBeforeExistingTransactions = true ;
                     break ;
-                }    
+                }
             }
         }
         if(isTransactionBeforeExistingTransactions) {
@@ -689,7 +687,7 @@ public class ShareAccountDataSerializer {
             .value(requestedDate)
             .failWithCodeNoParameterAddedToErrorCode("purchase.transaction.date.cannot.be.before.existing.transactions");
         }
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         final BigDecimal unitPrice = shareProduct.deriveMarketPrice(requestedDate.toDate());
         ShareAccountTransaction purchaseTransaction = new ShareAccountTransaction(requestedDate.toDate(), sharesRequested, unitPrice);
@@ -830,7 +828,7 @@ public class ShareAccountDataSerializer {
                 if(requestedDate.isBefore(transactionDate)) {
                     isTransactionBeforeExistingTransactions = true ;
                     break ;
-                }    
+                }
             }
         }
         if(isTransactionBeforeExistingTransactions) {
@@ -845,21 +843,21 @@ public class ShareAccountDataSerializer {
         validateRedeemRequest(account, transaction, baseDataValidator, dataValidationErrors) ;
         account.addAdditionalPurchasedShares(transaction);
         actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, transaction);
-        
+
         handleRedeemSharesChargeTransactions(account, transaction);
         return actualChanges;
     }
-    
+
     private void validateRedeemRequest(final ShareAccount account, ShareAccountTransaction redeemTransaction,
             final DataValidatorBuilder baseDataValidator,  final List<ApiParameterError> dataValidationErrors ) {
-        
+
         if (account.getTotalApprovedShares() < redeemTransaction.getTotalShares()) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname)
                     .value(redeemTransaction.getTotalShares())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.redeemed.due.to.insufficient.shares");
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         LocalDate redeemDate = new LocalDate(redeemTransaction.getPurchasedDate());
         final Integer lockinPeriod = account.getLockinPeriodFrequency();
         final PeriodFrequencyType periodType = account.getLockinPeriodFrequencyType();
@@ -867,7 +865,7 @@ public class ShareAccountDataSerializer {
         Long totalSharesCanBeRedeemed = new Long(0);
         Long totalSharesPurchasedBeforeRedeem = new Long(0) ;
         boolean isPurchaseTransactionExist = false ;
-        
+
         Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
         for (ShareAccountTransaction transaction : transactions) {
             if (transaction.isActive() && !transaction.isChargeTransaction()) {
@@ -880,7 +878,7 @@ public class ShareAccountDataSerializer {
                         totalSharesCanBeRedeemed -= transaction.getTotalShares();
                     }
                 }
-                
+
                 if(!purchaseDate.isAfter(redeemDate)) {
                     isPurchaseTransactionExist = true ;
                     if (transaction.isPurchasTransaction()) {
@@ -906,7 +904,7 @@ public class ShareAccountDataSerializer {
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
-    
+
     private LocalDate deriveLockinPeriodDuration(final Integer lockinPeriod, final PeriodFrequencyType periodType, LocalDate purchaseDate) {
         LocalDate lockinDate = purchaseDate ;
         if(periodType != null) {
@@ -925,11 +923,11 @@ public class ShareAccountDataSerializer {
                 case YEARS:
                     lockinDate = purchaseDate.plusYears(lockinPeriod) ;
                     break ;
-            }    
+            }
         }
         return lockinDate ;
     }
-    
+
     private void handleRedeemSharesChargeTransactions(final ShareAccount account, final ShareAccountTransaction transaction) {
         Set<ShareAccountCharge> charges = account.getCharges();
         BigDecimal totalChargeAmount = BigDecimal.ZERO;
@@ -974,7 +972,7 @@ public class ShareAccountDataSerializer {
                 if(closedDate.isBefore(transactionDate)) {
                     isTransactionBeforeExistingTransactions = true ;
                     break ;
-                }    
+                }
             }
         }
         if(isTransactionBeforeExistingTransactions) {
@@ -982,9 +980,9 @@ public class ShareAccountDataSerializer {
             .value(closedDate)
             .failWithCodeNoParameterAddedToErrorCode("share.account.cannot.be.closed.before.existing.transactions");
         }
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         AppUser approvedUser = this.platformSecurityContext.authenticatedUser();
         final BigDecimal unitPrice = account.getShareProduct().deriveMarketPrice(DateUtils.getDateOfTenant());
         ShareAccountTransaction transaction = ShareAccountTransaction.createRedeemTransaction(closedDate.toDate(),

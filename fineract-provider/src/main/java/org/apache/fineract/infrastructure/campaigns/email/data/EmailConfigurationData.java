@@ -22,42 +22,42 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
  * Immutable data object representing an Email configuration.
  */
 public class EmailConfigurationData {
-	@SuppressWarnings("unused")
-	private final Long id;
-	
-	private final String name;
-	
+    @SuppressWarnings("unused")
+    private final Long id;
+
+    private final String name;
+
     private final String value;
-	
-	/** 
-	 * @return an instance of the EmailConfigurationData class
-	 **/
-	public static EmailConfigurationData instance(Long id, String name, String value) {
-		return new EmailConfigurationData(id, name, value);
-	}
-	
-	/** 
-	 * EmailConfigurationData constructor
-	 **/
-	private EmailConfigurationData(Long id, String name, String value) {
-		this.id = id;
-		this.name = name;
-		this.value = value;
-	}
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return an instance of the EmailConfigurationData class
+     **/
+    public static EmailConfigurationData instance(Long id, String name, String value) {
+        return new EmailConfigurationData(id, name, value);
+    }
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * EmailConfigurationData constructor
+     **/
+    private EmailConfigurationData(Long id, String name, String value) {
+        this.id = id;
+        this.name = name;
+        this.value = value;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
 
 }

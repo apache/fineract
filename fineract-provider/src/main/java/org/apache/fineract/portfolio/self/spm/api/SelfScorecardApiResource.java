@@ -19,8 +19,10 @@
 
 package org.apache.fineract.portfolio.self.spm.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -28,7 +30,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
@@ -43,51 +44,55 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/self/surveys/scorecards")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Score Card"})
+@SwaggerDefinition(tags = {
+  @Tag(name = "Self Score Card", description = "")
+})
 public class SelfScorecardApiResource {
 
-	private final PlatformSecurityContext context;
-	private final ScorecardApiResource scorecardApiResource;
-	private final AppuserClientMapperReadService appuserClientMapperReadService;
+    private final PlatformSecurityContext context;
+    private final ScorecardApiResource scorecardApiResource;
+    private final AppuserClientMapperReadService appuserClientMapperReadService;
 
-	@Autowired
-	public SelfScorecardApiResource(final PlatformSecurityContext securityContext,
-			final AppuserClientMapperReadService appuserClientMapperReadService,
-			final ScorecardApiResource scorecardApiResource) {
-		this.context = securityContext;
-		this.scorecardApiResource = scorecardApiResource;
-		this.appuserClientMapperReadService = appuserClientMapperReadService;
-	}
+    @Autowired
+    public SelfScorecardApiResource(final PlatformSecurityContext securityContext,
+            final AppuserClientMapperReadService appuserClientMapperReadService,
+            final ScorecardApiResource scorecardApiResource) {
+        this.context = securityContext;
+        this.scorecardApiResource = scorecardApiResource;
+        this.appuserClientMapperReadService = appuserClientMapperReadService;
+    }
 
-	@GET
-	@Path("clients/{clientId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Transactional
-	public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {
+    @GET
+    @Path("clients/{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {
 
-		validateAppuserClientsMapping(clientId);
-		return this.scorecardApiResource.findByClient(clientId);
-	}
+        validateAppuserClientsMapping(clientId);
+        return this.scorecardApiResource.findByClient(clientId);
+    }
 
-	@POST
-	@Path("{surveyId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Transactional
-	public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
-		if (scorecardData.getClientId() != null) {
-			validateAppuserClientsMapping(scorecardData.getClientId());
-			this.scorecardApiResource.createScorecard(surveyId, scorecardData);
-		}
+    @POST
+    @Path("{surveyId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
+        if (scorecardData.getClientId() != null) {
+            validateAppuserClientsMapping(scorecardData.getClientId());
+            this.scorecardApiResource.createScorecard(surveyId, scorecardData);
+        }
 
-	}
+    }
 
-	private void validateAppuserClientsMapping(final Long clientId) {
-		AppUser user = this.context.authenticatedUser();
-		final boolean mappedClientId = this.appuserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-		if (!mappedClientId) {
-			throw new ClientNotFoundException(clientId);
-		}
-	}
+    private void validateAppuserClientsMapping(final Long clientId) {
+        AppUser user = this.context.authenticatedUser();
+        final boolean mappedClientId = this.appuserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
+    }
 
 }

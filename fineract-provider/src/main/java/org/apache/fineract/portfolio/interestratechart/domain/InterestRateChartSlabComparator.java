@@ -20,11 +20,10 @@ package org.apache.fineract.portfolio.interestratechart.domain;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-
 import org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChartSlabs;
 
 /**
- * Sort InterestRateChartSlab by input range 
+ * Sort InterestRateChartSlab by input range
  */
 public class InterestRateChartSlabComparator<T> implements Comparator<T> {
 

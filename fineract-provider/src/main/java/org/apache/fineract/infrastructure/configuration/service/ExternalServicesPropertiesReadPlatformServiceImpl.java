@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.campaigns.sms.data.MessageGatewayConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
@@ -199,7 +198,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
     }
-    
+
     private static final class NotificationDataExtractor implements ResultSetExtractor<NotificationConfigurationData> {
 
         @Override
@@ -209,11 +208,11 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
             String fcmEndPoint = null;
             while (rs.next()) {
                 if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_SERVER_KEY )) {
-                	serverKey = rs.getString("value");
+                    serverKey = rs.getString("value");
                 } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_GCM_END_POINT )) {
-                	gcmEndPoint = rs.getString("value");
+                    gcmEndPoint = rs.getString("value");
                 } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_FCM_END_POINT )) {
-                	fcmEndPoint = rs.getString("value");
+                    fcmEndPoint = rs.getString("value");
                 }
             }
             return new NotificationConfigurationData(null, serverKey, gcmEndPoint, fcmEndPoint);
@@ -221,13 +220,13 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
     }
 
 
-	@Override
-	public NotificationConfigurationData getNotificationConfiguration() {
-		final ResultSetExtractor<NotificationConfigurationData> resultSetExtractor = new NotificationDataExtractor();
+    @Override
+    public NotificationConfigurationData getNotificationConfiguration() {
+        final ResultSetExtractor<NotificationConfigurationData> resultSetExtractor = new NotificationDataExtractor();
         final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
                 + ExternalServicesConstants.NOTIFICATION_SERVICE_NAME + "'";
         final NotificationConfigurationData notificationConfigurationData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
         return notificationConfigurationData;
-	}
+    }
 
 }

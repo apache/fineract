@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.group.data;
 
 import java.util.Collection;
-
 import org.apache.fineract.organisation.monetary.data.MoneyData;
 
 public class GroupSummary {

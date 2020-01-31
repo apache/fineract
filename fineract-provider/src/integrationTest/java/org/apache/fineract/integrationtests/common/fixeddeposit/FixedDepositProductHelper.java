@@ -18,23 +18,16 @@
  */
 package org.apache.fineract.integrationtests.common.fixeddeposit;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class FixedDepositProductHelper {
@@ -74,7 +67,7 @@ public class FixedDepositProductHelper {
     private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
-    
+
 
     private String name = Utils.randomNameGenerator("FIXED_DEPOSIT_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
@@ -147,7 +140,7 @@ public class FixedDepositProductHelper {
             map.put("taxGroupId", taxGroupId);
         }
 
-        
+
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -389,7 +382,7 @@ public class FixedDepositProductHelper {
         this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
         return this;
     }
-    
+
     public FixedDepositProductHelper withWithHoldTax(final String taxGroupId) {
         if (taxGroupId != null) {
             this.withHoldTax = true;

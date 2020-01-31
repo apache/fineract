@@ -18,15 +18,17 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
+import java.io.Serializable;
+import java.util.Objects;
 import org.joda.time.LocalDate;
 
 /**
  * Immutable data object represent the important time-line events of a
  * group/center.
- * 
+ *
  */
 @SuppressWarnings("unused")
-public class GroupTimelineData {
+public class GroupTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;
     private final String submittedByUsername;
@@ -64,4 +66,27 @@ public class GroupTimelineData {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GroupTimelineData)) return false;
+        GroupTimelineData that = (GroupTimelineData) o;
+        return Objects.equals(submittedOnDate, that.submittedOnDate) &&
+                Objects.equals(submittedByUsername, that.submittedByUsername) &&
+                Objects.equals(submittedByFirstname, that.submittedByFirstname) &&
+                Objects.equals(submittedByLastname, that.submittedByLastname) &&
+                Objects.equals(activatedOnDate, that.activatedOnDate) &&
+                Objects.equals(activatedByUsername, that.activatedByUsername) &&
+                Objects.equals(activatedByFirstname, that.activatedByFirstname) &&
+                Objects.equals(activatedByLastname, that.activatedByLastname) &&
+                Objects.equals(closedOnDate, that.closedOnDate) &&
+                Objects.equals(closedByUsername, that.closedByUsername) &&
+                Objects.equals(closedByFirstname, that.closedByFirstname) &&
+                Objects.equals(closedByLastname, that.closedByLastname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname, activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname);
+    }
 }

@@ -21,7 +21,6 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SHARES;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
@@ -123,13 +122,13 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
                         transactionId, transactionDate, amount.subtract(chargeAmount));
                 this.helper.createCreditJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId,
                         transactionId, transactionDate, amount);
-                
+
             }else{
-            	this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
+                this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
                         CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                         transactionDate, amount);
             }
-            
+
         }
     }
 

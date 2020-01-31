@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -319,12 +318,12 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
 
         /*
          * private final String schemaSql;
-         * 
+         *
          * public String schema() { return this.schemaSql; }
-         * 
+         *
          * private DepositAccountInterestRateChartSlabsMapper() { final
          * StringBuilder sqlBuilder = new StringBuilder(400);
-         * 
+         *
          * sqlBuilder .append(
          * "ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, "
          * ) .append(

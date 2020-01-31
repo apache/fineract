@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -151,16 +150,16 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     sql += " and sa.deposit_type_enum = ?";
                     sqlParams.add(portfolioAccountDTO.getDepositType());
                 }
-                
+
                 if(portfolioAccountDTO.isExcludeOverDraftAccounts()){
                     sql += " and sa.allow_overdraft = 0";
                 }
-                
+
                 if(portfolioAccountDTO.getClientId() == null && portfolioAccountDTO.getGroupId() != null){
                     sql += " and sa.group_id = ? ";
                     sqlParams.add(portfolioAccountDTO.getGroupId());
                 }
-                
+
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
             break;
             default:
@@ -295,24 +294,24 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
         }
     }
-    
+
     private static final class PortfolioLoanAccountRefundByTransferMapper implements RowMapper<PortfolioAccountData> {
 
         private final String schemaSql;
 
         public PortfolioLoanAccountRefundByTransferMapper() {
-            
+
             final StringBuilder amountQueryString = new StringBuilder(400);
-            amountQueryString.append("(select (SUM(ifnull(mr.principal_completed_derived, 0)) +"); 
-            amountQueryString.append("SUM(ifnull(mr.interest_completed_derived, 0)) + "); 
-             amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + "); 
-             amountQueryString.append(" SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived"); 
-             amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id"); 
-             amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300"); 
-             amountQueryString.append("  and  mr.duedate >= CURDATE() group by ml.id having"); 
-             amountQueryString.append(" (SUM(ifnull(mr.principal_completed_derived, 0)) + "); 
-             amountQueryString.append(" SUM(ifnull(mr.interest_completed_derived, 0)) + "); 
-             amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + "); 
+            amountQueryString.append("(select (SUM(ifnull(mr.principal_completed_derived, 0)) +");
+            amountQueryString.append("SUM(ifnull(mr.interest_completed_derived, 0)) + ");
+             amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
+             amountQueryString.append(" SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
+             amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id");
+             amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300");
+             amountQueryString.append("  and  mr.duedate >= CURDATE() group by ml.id having");
+             amountQueryString.append(" (SUM(ifnull(mr.principal_completed_derived, 0)) + ");
+             amountQueryString.append(" SUM(ifnull(mr.interest_completed_derived, 0)) + ");
+             amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
              amountQueryString.append("SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0) as totalOverpaid ");
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -373,7 +372,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
         }
     }
-    
+
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {
         // TODO Auto-generated method stub
@@ -383,7 +382,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         try {
             String sql = null;
             //final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
-           
+
                     sql = "select " + this.accountRefundByTransferMapper.schema() + " where la.id = ?";
                   /*  if (currencyCode != null) {
                         sql += " and la.currency_code = ?";
@@ -391,7 +390,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     }*/
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.accountRefundByTransferMapper, sqlParams);
-         
+
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(accountId);
         }

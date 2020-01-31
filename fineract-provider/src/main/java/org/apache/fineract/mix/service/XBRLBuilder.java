@@ -24,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.fineract.mix.data.ContextData;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.NamespaceData;
@@ -165,7 +164,7 @@ public class XBRLBuilder {
 
     /**
      * Adds the currency unit to the document
-     * 
+     *
      * @param currencyCode
      */
     public void addCurrencyUnit(final String currencyCode) {

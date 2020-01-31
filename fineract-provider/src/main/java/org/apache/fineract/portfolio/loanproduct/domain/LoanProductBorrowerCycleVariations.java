@@ -19,13 +19,12 @@
 package org.apache.fineract.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -55,7 +54,6 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
     private BigDecimal defaultValue;
 
     protected LoanProductBorrowerCycleVariations() {
-
     }
 
     public LoanProductBorrowerCycleVariations(final Integer borrowerCycleNumber, final Integer paramType, final Integer valueConditionType,
@@ -82,25 +80,19 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
 
     @Override
     public boolean equals(final Object obj) {
-        final LoanProductBorrowerCycleVariations borrowerCycleVariations = (LoanProductBorrowerCycleVariations) obj;
-        boolean minValequal = false;
-        if (borrowerCycleVariations.minValue == null && this.minValue == null) {
-            minValequal = true;
-        } else if (borrowerCycleVariations.minValue != null && this.minValue != null) {
-            minValequal = borrowerCycleVariations.minValue.equals(this.minValue);
-        }
+        final LoanProductBorrowerCycleVariations other = (LoanProductBorrowerCycleVariations) obj;
+        return Objects.equals(loanProduct, other.loanProduct)
+            && Objects.equals(borrowerCycleNumber, other.borrowerCycleNumber)
+            && Objects.equals(paramType, other.paramType)
+            && Objects.equals(valueConditionType, other.valueConditionType)
+            && Objects.equals(minValue, other.minValue)
+            && Objects.equals(maxValue, other.maxValue)
+            && Objects.equals(defaultValue, other.defaultValue);
+    }
 
-        boolean maxValequal = false;
-        if (borrowerCycleVariations.maxValue == null && this.maxValue == null) {
-            maxValequal = true;
-        } else if (borrowerCycleVariations.maxValue != null && this.maxValue != null) {
-            maxValequal = borrowerCycleVariations.maxValue.equals(this.maxValue);
-        }
-        if (borrowerCycleVariations.borrowerCycleNumber.equals(this.borrowerCycleNumber)
-                && borrowerCycleVariations.defaultValue.equals(this.defaultValue) && minValequal && maxValequal
-                && borrowerCycleVariations.valueConditionType.equals(this.valueConditionType)
-                && borrowerCycleVariations.paramType.equals(this.paramType)) { return true; }
-        return false;
+    @Override
+    public int hashCode() {
+        return Objects.hash(loanProduct, borrowerCycleNumber, paramType, valueConditionType, minValue, maxValue, defaultValue);
     }
 
     public void copy(final LoanProductBorrowerCycleVariations borrowerCycleVariations) {
@@ -126,5 +118,4 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
     public BigDecimal getDefaultValue() {
         return this.defaultValue;
     }
-
 }

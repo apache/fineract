@@ -18,26 +18,24 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
-import org.junit.Assert;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
+import org.junit.Assert;
 
 /**
  * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}. It
  * takes care of creation of {@code BatchRequest} list and posting this list to
  * the server.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.integrationtests.BatchApiTest
  */
 public class BatchHelper {
@@ -51,7 +49,7 @@ public class BatchHelper {
 
     /**
      * Returns a JSON String for a list of {@code BatchRequest}s
-     * 
+     *
      * @param batchRequests
      * @return JSON String of BatchRequest
      */
@@ -71,7 +69,7 @@ public class BatchHelper {
 
     /**
      * Returns the converted string response into JSON.
-     * 
+     *
      * @param json
      * @return List<BatchResponse>
      */
@@ -83,7 +81,7 @@ public class BatchHelper {
      * Returns a list of BatchResponse with query parameter enclosing
      * transaction set to false by posting the jsonified BatchRequest to the
      * server.
-     * 
+     *
      * @param requestSpec
      * @param responseSpec
      * @param jsonifiedBatchRequests
@@ -99,7 +97,7 @@ public class BatchHelper {
      * Returns a list of BatchResponse with query parameter enclosing
      * transaction set to true by posting the jsonified BatchRequest to the
      * server.
-     * 
+     *
      * @param requestSpec
      * @param responseSpec
      * @param jsonifiedBatchRequests
@@ -114,7 +112,7 @@ public class BatchHelper {
     /**
      * Returns a BatchResponse based on the given BatchRequest, by posting the
      * request to the server.
-     * 
+     *
      * @param BatchRequest
      * @return List<BatchResponse>
      */
@@ -139,7 +137,7 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy}
      * Request as one of the request in Batch.
-     * 
+     *
      * @param reqId
      * @param externalId
      * @return BatchRequest
@@ -202,7 +200,7 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy}
      * Request with given requestId and reference.
-     * 
+     *
      * @param reqId
      * @param clientId
      * @return BatchRequest
@@ -224,7 +222,7 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy}
      * Request with given requestId and reference.
-     * 
+     *
      * @param requestId
      * @param reference
      * @param productId
@@ -255,7 +253,7 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy}
      * Request with given requestId and reference.
-     * 
+     *
      * @param requestId
      * @param reference
      * @param productId
@@ -281,7 +279,7 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy}
      * Request with given requestId and reference
-     * 
+     *
      * @param requestId
      * @param reference
      * @return BatchRequest
@@ -305,7 +303,7 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy}
      * Request with given requestId and reference.
-     * 
+     *
      * @param requestId
      * @param reference
      * @return BatchRequest
@@ -327,8 +325,8 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy}
      * Request with given requestId and reference.
-     * 
-     * 
+     *
+     *
      * @param requestId
      * @param reference
      * @return BatchRequest
@@ -345,13 +343,13 @@ public class BatchHelper {
 
         return br;
     }
-    
+
     /**
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy}
      * Request with given requestId and reference.
-     * 
-     * 
+     *
+     *
      * @param requestId
      * @param reference
      * @return BatchRequest
@@ -363,7 +361,7 @@ public class BatchHelper {
         br.setRelativeUrl("loans/$.loanId?command=approve");
         br.setReference(reference);
         br.setMethod("POST");
-        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"12 September 2013\"," 
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"12 September 2013\","
                 + "\"note\": \"Loan approval note\"}");
 
         return br;
@@ -373,8 +371,8 @@ public class BatchHelper {
      * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy}
      * Request with given requestId and reference.
-     * 
-     * 
+     *
+     *
      * @param requestId
      * @param reference
      * @return BatchRequest
@@ -413,11 +411,11 @@ public class BatchHelper {
 
         return br;
     }
-    
+
     /**
      * Checks that the client with given externalId is not created on the
      * server.
-     * 
+     *
      * @param requestSpec
      * @param responseSpec
      * @param externalId

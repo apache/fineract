@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -58,12 +57,12 @@ public class LoanTransactionData {
     private final BigDecimal outstandingLoanBalance;
     private final LocalDate submittedOnDate;
     private final boolean manuallyReversed;
-	private final LocalDate possibleNextRepaymentDate;
+    private final LocalDate possibleNextRepaymentDate;
 
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
-    
-	private  Collection<CodeValueData> writeOffReasonOptions = null;
+
+    private  Collection<CodeValueData> writeOffReasonOptions = null;
 
     //import fields
     private transient Integer rowIndex;
@@ -197,7 +196,7 @@ public class LoanTransactionData {
                 feeChargesPortion, penaltyChargesPortion, overpaymentPortion, unrecognizedIncomePortion, null, externalId, transfer,
                 fixedEmiAmount, outstandingLoanBalance,manuallyReversed);
     }
- 
+
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
@@ -257,38 +256,38 @@ public class LoanTransactionData {
                 penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, null, null, null, null, outstandingLoanBalance, null,
                 manuallyReversed);
     }
-    
-    public static LoanTransactionData LoanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate, 
-			final BigDecimal disburseAmountForTemplate,	final Collection<PaymentTypeData> paymentOptions,
-			final BigDecimal retriveLastEmiAmount, final LocalDate possibleNextRepaymentDate) {
-		    final Long id = null;
-		    final Long officeId = null;
-		    final String officeName = null;
-		    final PaymentDetailData paymentDetailData = null;
-		    final CurrencyData currency = null;
-		    final BigDecimal unrecognizedIncomePortion = null;
-		    final BigDecimal principalPortion = null;;
-		    final BigDecimal interestPortion = null;
-		    final BigDecimal feeChargesPortion = null;
-		    final BigDecimal penaltyChargesPortion = null;
-		    final BigDecimal overpaymentPortion = null;
-		    final String externalId = null;
-		    final BigDecimal outstandingLoanBalance = null;
-		    final AccountTransferData transfer = null;
-		    final LocalDate submittedOnDate = null;
-		    final boolean manuallyReversed = false;
-			return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, expectedDisbursedOnLocalDateForTemplate,
-					disburseAmountForTemplate, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overpaymentPortion,	unrecognizedIncomePortion, 
-					paymentOptions, transfer, externalId, retriveLastEmiAmount, outstandingLoanBalance, submittedOnDate, manuallyReversed, possibleNextRepaymentDate);
-		
-	}
+
+    public static LoanTransactionData LoanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate,
+            final BigDecimal disburseAmountForTemplate,    final Collection<PaymentTypeData> paymentOptions,
+            final BigDecimal retriveLastEmiAmount, final LocalDate possibleNextRepaymentDate) {
+            final Long id = null;
+            final Long officeId = null;
+            final String officeName = null;
+            final PaymentDetailData paymentDetailData = null;
+            final CurrencyData currency = null;
+            final BigDecimal unrecognizedIncomePortion = null;
+            final BigDecimal principalPortion = null;;
+            final BigDecimal interestPortion = null;
+            final BigDecimal feeChargesPortion = null;
+            final BigDecimal penaltyChargesPortion = null;
+            final BigDecimal overpaymentPortion = null;
+            final String externalId = null;
+            final BigDecimal outstandingLoanBalance = null;
+            final AccountTransferData transfer = null;
+            final LocalDate submittedOnDate = null;
+            final boolean manuallyReversed = false;
+            return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, expectedDisbursedOnLocalDateForTemplate,
+                    disburseAmountForTemplate, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overpaymentPortion,    unrecognizedIncomePortion,
+                    paymentOptions, transfer, externalId, retriveLastEmiAmount, outstandingLoanBalance, submittedOnDate, manuallyReversed, possibleNextRepaymentDate);
+
+    }
 
     private LoanTransactionData(Long id , final Long officeId, final String officeName, LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
-    		final CurrencyData currency, final LocalDate date,	BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion, 
-    		final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, BigDecimal unrecognizedIncomePortion,	Collection<PaymentTypeData> paymentOptions,
-    		final AccountTransferData transfer, final String externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance, 
-    		final LocalDate submittedOnDate, final boolean manuallyReversed, final LocalDate possibleNextRepaymentDate) {
-    	 this.id = id;
+            final CurrencyData currency, final LocalDate date,    BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion,
+            final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, BigDecimal unrecognizedIncomePortion,    Collection<PaymentTypeData> paymentOptions,
+            final AccountTransferData transfer, final String externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance,
+            final LocalDate submittedOnDate, final boolean manuallyReversed, final LocalDate possibleNextRepaymentDate) {
+         this.id = id;
          this.officeId = officeId;
          this.officeName = officeName;
          this.type = transactionType;
@@ -310,34 +309,34 @@ public class LoanTransactionData {
          this.submittedOnDate = submittedOnDate;
          this.manuallyReversed = manuallyReversed;
          this.possibleNextRepaymentDate = possibleNextRepaymentDate;
-	}
+    }
 
-	
 
-	public LocalDate dateOf() {
+
+    public LocalDate dateOf() {
         return this.date;
     }
 
     public boolean isNotDisbursement() {
-        return Integer.valueOf(1).equals(this.type.id());
+        return type.id() == 1;
     }
 
-    
+
     public BigDecimal getAmount() {
         return this.amount;
     }
 
-    
+
     public BigDecimal getUnrecognizedIncomePortion() {
         return this.unrecognizedIncomePortion;
     }
 
-    
+
     public BigDecimal getInterestPortion() {
         return this.interestPortion;
     }
-    
+
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions){
-    	this.writeOffReasonOptions =writeOffReasonOptions;
+        this.writeOffReasonOptions =writeOffReasonOptions;
     }
 }

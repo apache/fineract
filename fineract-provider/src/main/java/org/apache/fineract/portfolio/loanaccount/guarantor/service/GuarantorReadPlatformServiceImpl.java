@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -173,7 +172,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                 }
             }
 
-           
+
 
             return new GuarantorData(id, loanId, clientRelationshipType, entityId, guarantorType, firstname, lastname, dob, addressLine1,
                     addressLine2, city, state, zip, country, mobileNumber, housePhoneNumber, comment, null, null, null, status,
@@ -290,56 +289,56 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         return guarantorData;
     }
 
-	@Override
-	public List<ObligeeData> retrieveObligeeDetails(final Long clientId) {
-		final ObligeeMapper rm = new ObligeeMapper();
-		String sql = rm.schema();
-		try {
-			return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
-		} catch (final EmptyResultDataAccessException e) {
-			return null;
-		}
+    @Override
+    public List<ObligeeData> retrieveObligeeDetails(final Long clientId) {
+        final ObligeeMapper rm = new ObligeeMapper();
+        String sql = rm.schema();
+        try {
+            return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
+        } catch (final EmptyResultDataAccessException e) {
+            return null;
+        }
 
-	}
+    }
 
-	private static final class ObligeeMapper implements RowMapper<ObligeeData> {
+    private static final class ObligeeMapper implements RowMapper<ObligeeData> {
 
-		private final String sql;
+        private final String sql;
 
-		public ObligeeMapper() {
-			StringBuilder sb = new StringBuilder(
-					"SELECT cl.firstname, cl.lastname,cl.display_name as displayName, loan.account_no as loanAccountNumber, loan.principal_amount as loanAmount, gfd.amount as guaranteedAmount, ");
-			sb.append(
-					"gfd.amount_released_derived as amountReleased, gfd.amount_transfered_derived as amountTransferred FROM m_guarantor mg");
-			sb.append(" JOIN m_guarantor_funding_details gfd on mg.id = gfd.guarantor_id ");
-			sb.append(
-					" JOIN m_client mc ON mg.entity_id = mc.id AND mc.id = ? JOIN m_loan loan ON mg.loan_id = loan.id ");
-			sb.append(" JOIN m_client cl ON loan.client_id = cl.id ");
-			sql = sb.toString();
-		}
+        public ObligeeMapper() {
+            StringBuilder sb = new StringBuilder(
+                    "SELECT cl.firstname, cl.lastname,cl.display_name as displayName, loan.account_no as loanAccountNumber, loan.principal_amount as loanAmount, gfd.amount as guaranteedAmount, ");
+            sb.append(
+                    "gfd.amount_released_derived as amountReleased, gfd.amount_transfered_derived as amountTransferred FROM m_guarantor mg");
+            sb.append(" JOIN m_guarantor_funding_details gfd on mg.id = gfd.guarantor_id ");
+            sb.append(
+                    " JOIN m_client mc ON mg.entity_id = mc.id AND mc.id = ? JOIN m_loan loan ON mg.loan_id = loan.id ");
+            sb.append(" JOIN m_client cl ON loan.client_id = cl.id ");
+            sql = sb.toString();
+        }
 
-		public String schema() {
-			return this.sql;
-		}
+        public String schema() {
+            return this.sql;
+        }
 
-		@Override
-		public ObligeeData mapRow(final ResultSet rs, final int rowNum)
-				throws SQLException {
-			final String firstName = rs.getString("firstname");
-			final String lastName = rs.getString("lastname");
-			final String displayName = rs.getString("displayName");
-			final String loanAccountNumber = rs.getString("loanAccountNumber");
+        @Override
+        public ObligeeData mapRow(final ResultSet rs, final int rowNum)
+                throws SQLException {
+            final String firstName = rs.getString("firstname");
+            final String lastName = rs.getString("lastname");
+            final String displayName = rs.getString("displayName");
+            final String loanAccountNumber = rs.getString("loanAccountNumber");
 
-			final BigDecimal loanAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "loanAmount");
-			final BigDecimal guaranteeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "guaranteedAmount");
-			final BigDecimal amountReleased = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountReleased");
-			final BigDecimal amountTransferred = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountTransferred");
+            final BigDecimal loanAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "loanAmount");
+            final BigDecimal guaranteeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "guaranteedAmount");
+            final BigDecimal amountReleased = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountReleased");
+            final BigDecimal amountTransferred = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountTransferred");
 
-			return ObligeeData.instance(firstName, lastName, displayName, loanAccountNumber, loanAmount,
-					guaranteeAmount, amountReleased, amountTransferred);
+            return ObligeeData.instance(firstName, lastName, displayName, loanAccountNumber, loanAmount,
+                    guaranteeAmount, amountReleased, amountTransferred);
 
-		}
+        }
 
-	}
+    }
 
 }

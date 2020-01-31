@@ -18,13 +18,19 @@
  */
 package org.apache.fineract.spm.domain;
 
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_surveys")
@@ -80,7 +86,7 @@ public class Survey extends AbstractPersistableCustom<Long> {
         }else{
             this.questions = new ArrayList<>();
         }
-        
+
         this.questions.addAll(questions);
     }
 

@@ -28,37 +28,37 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AppuserClientMapperReadServiceImpl implements
-		AppuserClientMapperReadService {
+        AppuserClientMapperReadService {
 
-	private final JdbcTemplate jdbcTemplate;
-	private final PlatformSecurityContext context;
+    private final JdbcTemplate jdbcTemplate;
+    private final PlatformSecurityContext context;
 
-	@Autowired
-	public AppuserClientMapperReadServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.context = context;
-	}
+    @Autowired
+    public AppuserClientMapperReadServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.context = context;
+    }
 
-	@Override
-	public Boolean isClientMappedToUser(Long clientId, Long appUserId) {
-		return this.jdbcTemplate
-				.queryForObject(
-						"select case when (count(*) > 0) then true else false end "
-								+ " from m_selfservice_user_client_mapping where client_id = ? and appuser_id = ?",
-						new Object[] { clientId, appUserId }, Boolean.class);
-	}
-	
-	@Override
-	public void validateAppuserClientsMapping(final Long clientId) {
-		AppUser user = this.context.authenticatedUser();
-		if (clientId != null) {
-			final boolean mappedClientId = isClientMappedToUser(clientId, user.getId());
-			if (!mappedClientId) {
-				throw new ClientNotFoundException(clientId);
-			}
-		} else
-			throw new ClientNotFoundException(clientId);
+    @Override
+    public Boolean isClientMappedToUser(Long clientId, Long appUserId) {
+        return this.jdbcTemplate
+                .queryForObject(
+                        "select case when (count(*) > 0) then true else false end "
+                                + " from m_selfservice_user_client_mapping where client_id = ? and appuser_id = ?",
+                        new Object[] { clientId, appUserId }, Boolean.class);
+    }
 
-	}
+    @Override
+    public void validateAppuserClientsMapping(final Long clientId) {
+        AppUser user = this.context.authenticatedUser();
+        if (clientId != null) {
+            final boolean mappedClientId = isClientMappedToUser(clientId, user.getId());
+            if (!mappedClientId) {
+                throw new ClientNotFoundException(clientId);
+            }
+        } else
+            throw new ClientNotFoundException(clientId);
+
+    }
 
 }

@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -40,7 +39,6 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -394,8 +392,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-            		searchParameters.getSortOrder());
-            
+                    searchParameters.getSortOrder());
+
         }
 
         if (searchParameters.isLimited()) {
@@ -407,7 +405,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-        		paramList.toArray(), this.centerMapper);
+                paramList.toArray(), this.centerMapper);
     }
 
     @Override
@@ -435,7 +433,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-                		searchParameters.getSortOrder());
+                        searchParameters.getSortOrder());
             }
 
             if (searchParameters.isLimited()) {
@@ -601,8 +599,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                         flag = false;
                         if (staffCenterData.getStaffId().equals(centerData.staffId())) {
                             staffCenterData.getMeetingFallCenters().add(centerData);
-                 
-                            
+
+
                             flag = true;
                             break;
                         }

@@ -24,11 +24,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface HookConfigurationRepository extends
-		JpaRepository<HookConfiguration, Long>,
-		JpaSpecificationExecutor<HookConfiguration> {
+        JpaRepository<HookConfiguration, Long>,
+        JpaSpecificationExecutor<HookConfiguration> {
 
-	@Query("select config.fieldValue from HookConfiguration config where config.hook.id = :hookId and config.fieldName = :fieldName")
-	String findOneByHookIdAndFieldName(@Param("hookId") Long hookId,
-			@Param("fieldName") String fieldName);
+    @Query("select config.fieldValue from HookConfiguration config where config.hook.id = :hookId and config.fieldName = :fieldName")
+    String findOneByHookIdAndFieldName(@Param("hookId") Long hookId,
+            @Param("fieldName") String fieldName);
 
 }

@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.codes.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -61,7 +60,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             final String description = rs.getString("description");
             final boolean isActive = rs.getBoolean("isActive");
             final boolean mandatory = rs.getBoolean("mandatory");
-            
+
             return CodeValueData.instance(id, value, position, description, isActive, mandatory);
         }
     }

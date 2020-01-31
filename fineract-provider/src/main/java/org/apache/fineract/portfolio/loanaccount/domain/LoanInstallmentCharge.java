@@ -19,13 +19,11 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -74,7 +72,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
     public int compareTo(LoanInstallmentCharge o) {
         return this.installment.getInstallmentNumber().compareTo(o.installment.getInstallmentNumber());
     }
-    
+
     public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment) {
         this.loancharge = loanCharge;
         this.installment = installment;
@@ -266,15 +264,15 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         }
     }
 
-    
+
     public void updateInstallment(LoanRepaymentScheduleInstallment installment) {
         this.installment = installment;
     }
-    
+
     public Money undoPaidAmountBy(final Money incrementBy, final Money feeAmount) {
 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
-       
+
         Money amountToDeductOnThisCharge = Money.zero(incrementBy.getCurrency());
         if (incrementBy.isGreaterThanOrEqualTo(amountPaidToDate)) {
                 amountToDeductOnThisCharge = amountPaidToDate;
@@ -293,12 +291,12 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         return amountToDeductOnThisCharge;
     }
 
-	public LoanCharge getLoancharge() {
-		return this.loancharge;
-	}
-	public LoanRepaymentScheduleInstallment getInstallment() {
-		return this.installment;
-	}
+    public LoanCharge getLoancharge() {
+        return this.loancharge;
+    }
+    public LoanRepaymentScheduleInstallment getInstallment() {
+        return this.installment;
+    }
 
-    
+
 }

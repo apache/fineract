@@ -18,7 +18,17 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
-import io.swagger.annotations.*;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +36,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -41,7 +50,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -69,13 +77,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
-
 @Path("/clients")
 @Component
 @Scope("singleton")
-@Api(value = "Client", description = "Clients are people and businesses that have applied (or may apply) to an MFI for loans.\n" + "\n" + "Clients can be created in Pending or straight into Active state.")
+@Api(tags = {"Client"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Client", description = "Clients are people and businesses that have applied (or may apply) to an MFI for loans.\n" + "\n" + "Clients can be created in Pending or straight into Active state.")
+})
 public class ClientsApiResource {
 
     private final PlatformSecurityContext context;
@@ -99,11 +107,11 @@ public class ClientsApiResource {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
-			final BulkImportWorkbookService bulkImportWorkbookService,
-			final GuarantorReadPlatformService guarantorReadPlatformService) {
-		this.context = context;
-		this.clientReadPlatformService = readPlatformService;
-		this.toApiJsonSerializer = toApiJsonSerializer;
+            final BulkImportWorkbookService bulkImportWorkbookService,
+            final GuarantorReadPlatformService guarantorReadPlatformService) {
+        this.context = context;
+        this.clientReadPlatformService = readPlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
         this.clientAccountSummaryToApiJsonSerializer = clientAccountSummaryToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -156,10 +164,10 @@ public class ClientsApiResource {
             @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
             @QueryParam("orphansOnly") @ApiParam(value = "orphansOnly") final Boolean orphansOnly) {
 
-        return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, 
-        		lastname, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, false);
+        return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname,
+                lastname, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, false);
     }
-    
+
     public String retrieveAll(final UriInfo uriInfo, final String sqlSearch,
             final Long officeId, final String externalId,
             final String displayName, final String firstname,
@@ -314,16 +322,16 @@ public class ClientsApiResource {
         } else if (is(commandParam, "withdraw")) {
             commandRequest = builder.withdrawClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		} else if (is(commandParam, "reactivate")) {
-			commandRequest = builder.reActivateClient(clientId).build();
-			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		} else if (is(commandParam, "undoRejection")) {
-			commandRequest = builder.undoRejection(clientId).build();
-			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		} else if (is(commandParam, "undoWithdrawal")) {
-			commandRequest = builder.undoWithdrawal(clientId).build();
-			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		}
+        } else if (is(commandParam, "reactivate")) {
+            commandRequest = builder.reActivateClient(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undoRejection")) {
+            commandRequest = builder.undoRejection(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undoWithdrawal")) {
+            commandRequest = builder.undoWithdrawal(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate",
                 "unassignStaff", "assignStaff", "close", "proposeTransfer", "withdrawTransfer", "acceptTransfer", "rejectTransfer",
@@ -376,27 +384,27 @@ public class ClientsApiResource {
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
 
-	@GET
-	@Path("{clientId}/obligeedetails")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+    @GET
+    @Path("{clientId}/obligeedetails")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-		this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-		final List<ObligeeData> ObligeeList = this.guarantorReadPlatformService.retrieveObligeeDetails(clientId);
+        final List<ObligeeData> ObligeeList = this.guarantorReadPlatformService.retrieveObligeeDetails(clientId);
 
-		return this.toApiJsonSerializer.serialize(ObligeeList);
-	}
+        return this.toApiJsonSerializer.serialize(ObligeeList);
+    }
 
-	@GET
-	@Path("{clientId}/transferproposaldate")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+    @GET
+    @Path("{clientId}/transferproposaldate")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-		this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-		final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-		return this.toApiJsonSerializer.serialize((transferDate != null ? new LocalDate(transferDate) : null));
-	}
+        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
+        return this.toApiJsonSerializer.serialize((transferDate != null ? new LocalDate(transferDate) : null));
+    }
 }

@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
 public class LoanStatusChecker {

@@ -20,24 +20,28 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
+import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignType;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignType;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Type;
-import java.util.*;
 
 @Component
 public class EmailCampaignValidator {
 
-   
+
 
     public static final String RESOURCE_NAME = "email";
     public static final String campaignName  = "campaignName";
@@ -89,18 +93,18 @@ public class EmailCampaignValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.supportedParams);
-        
+
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(EmailCampaignValidator.RESOURCE_NAME);
-        
+
         final String campaignName =  this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.campaignName,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.campaignName).value(campaignName).notBlank().notExceedingLengthOf(100);
-        
-        
+
+
         final Long campaignType = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.campaignType,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.campaignType).value(campaignType).notNull().integerGreaterThanZero();
 
@@ -115,9 +119,9 @@ public class EmailCampaignValidator {
         final Long businessRuleId = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.businessRuleId,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.businessRuleId).value(businessRuleId).notNull().integerGreaterThanZero();
 
-		final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailSubject, element);
+        final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailSubject, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.emailSubject).value(emailSubject).notBlank().notExceedingLengthOf(50);
-		
+
         final String emailMessage = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailMessage, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.emailMessage).value(emailMessage).notBlank().notExceedingLengthOf(480);
 

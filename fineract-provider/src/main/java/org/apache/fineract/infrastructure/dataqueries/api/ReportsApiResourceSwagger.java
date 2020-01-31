@@ -20,10 +20,9 @@ package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
-
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
 
 /**
  * Created by sanyam on 4/8/17.

@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -214,12 +213,12 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             if (taxGroupId != null) {
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
-            
+
             final Boolean isDormancyTrackingActive = rs.getBoolean("isDormancyTrackingActive");
             final Long daysToInactive = JdbcSupport.getLong(rs, "daysToInactive");
             final Long daysToDormancy = JdbcSupport.getLong(rs, "daysToDormancy");
             final Long daysToEscheat = JdbcSupport.getLong(rs, "daysToEscheat");
-            
+
             return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
@@ -268,11 +267,11 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             }
             return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, new Object[] {isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         }
-        
+
         if(inClauseAdded) {
-        	sql += " and sp.deposit_type_enum = ?";
+            sql += " and sp.deposit_type_enum = ?";
         }else {
-        	 sql += " where sp.deposit_type_enum = ?";
+             sql += " where sp.deposit_type_enum = ?";
         }
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
 

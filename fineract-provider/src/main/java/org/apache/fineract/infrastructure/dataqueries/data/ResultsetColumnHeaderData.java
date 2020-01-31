@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 
 /**
  * Immutable data object representing a resultset column.
  */
-public final class ResultsetColumnHeaderData {
+public final class ResultsetColumnHeaderData implements Serializable {
 
     private final String columnName;
     private String columnType;

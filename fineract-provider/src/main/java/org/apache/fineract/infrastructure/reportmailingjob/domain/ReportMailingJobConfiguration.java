@@ -22,7 +22,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -32,26 +31,26 @@ public class ReportMailingJobConfiguration extends AbstractPersistableCustom<Int
 
     @Column(name = "name", nullable = false)
     private String name;
-    
+
     @Column(name = "value", nullable = false)
     private String value;
-    
-    /** 
+
+    /**
      * ReportMailingJobConfiguration protected constructor
      **/
     protected ReportMailingJobConfiguration() { }
-    
-    /** 
+
+    /**
      * ReportMailingJobConfiguration private constructor
      **/
     private ReportMailingJobConfiguration(final String name, final String value) {
         this.name = name;
         this.value = value;
     }
-    
-    /** 
+
+    /**
      * creates an instance of the ReportMailingJobConfiguration class
-     * 
+     *
      * @return ReportMailingJobConfiguration object
      **/
     public static ReportMailingJobConfiguration newInstance(final String name, final String value) {

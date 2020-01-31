@@ -27,17 +27,17 @@ public class LoanProductProvisioningEntryData {
     private final Long officeId;
 
     private final String officeName ;
-    
+
     private final String currencyCode;
 
     private final Long productId;
 
     private final String productName ;
-    
+
     private final Long categoryId;
 
     private final String categoryName ;
-    
+
     private final Long overdueInDays;
 
     private final BigDecimal percentage;
@@ -45,21 +45,21 @@ public class LoanProductProvisioningEntryData {
     private final BigDecimal balance;
 
     private final BigDecimal amountreserved ;
-    
+
     private final Long liablityAccount;
 
     private final String liabilityAccountCode ;
-    
+
     private final String liabilityAccountName ;
-    
+
     private final Long expenseAccount;
 
     private final String expenseAccountCode ;
-    
+
     private final String expenseAccountName ;
-    
+
     private final Long criteriaId ;
-    
+
     public LoanProductProvisioningEntryData(final Long historyId, final Long officeId, final String currencyCode, final Long productId,
             final Long categoryId, final Long overdueInDays, final BigDecimal percentage, final BigDecimal balance, Long liablityAccount,
             Long expenseAccount, final Long criteriaId) {
@@ -85,7 +85,7 @@ public class LoanProductProvisioningEntryData {
     }
 
     public LoanProductProvisioningEntryData(final Long historyId, final Long officeId, final String officeName, final String currencyCode, final Long productId,
-            final String productName, final Long categoryId, final String categoryName, final Long overdueInDays, final BigDecimal amountReserved, 
+            final String productName, final Long categoryId, final String categoryName, final Long overdueInDays, final BigDecimal amountReserved,
             Long liablityAccount, String liabilityAccountglCode, String liabilityAccountName, Long expenseAccount, String expenseAccountglCode, String expenseAccountName, final Long criteriaId) {
         this.historyId = historyId;
         this.officeId = officeId;
@@ -146,7 +146,7 @@ public class LoanProductProvisioningEntryData {
     public String getCurrencyCode() {
         return this.currencyCode;
     }
-    
+
     public Long getCriteriaId() {
         return this.criteriaId ;
     }

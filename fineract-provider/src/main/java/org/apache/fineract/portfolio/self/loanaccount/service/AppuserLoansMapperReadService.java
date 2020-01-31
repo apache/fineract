@@ -20,5 +20,5 @@ package org.apache.fineract.portfolio.self.loanaccount.service;
 
 public interface AppuserLoansMapperReadService {
 
-	public Boolean isLoanMappedToUser(Long loanId, Long appUserId);
+    public Boolean isLoanMappedToUser(Long loanId, Long appUserId);
 }

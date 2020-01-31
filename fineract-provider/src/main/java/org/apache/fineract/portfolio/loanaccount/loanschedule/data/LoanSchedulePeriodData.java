@@ -19,13 +19,12 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
-
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 /**
  * Immutable data object that represents a period of a loan schedule.
- * 
+ *
  */
 public class LoanSchedulePeriodData {
 

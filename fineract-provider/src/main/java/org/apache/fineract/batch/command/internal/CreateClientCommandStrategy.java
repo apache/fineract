@@ -19,7 +19,6 @@
 package org.apache.fineract.batch.command.internal;
 
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -37,9 +36,9 @@ import org.springframework.stereotype.Component;
  * back the response. This class will also catch any errors raised by
  * {@link org.apache.fineract.portfolio.client.api.ClientsApiResource} and map
  * those errors to appropriate status codes in BatchResponse.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.command.CommandStrategy
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse

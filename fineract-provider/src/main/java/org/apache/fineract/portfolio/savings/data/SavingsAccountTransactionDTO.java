@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -51,7 +50,7 @@ public class SavingsAccountTransactionDTO {
 
     /**
      * This constructor is used for bulk deposit transactions
-     * 
+     *
      * @param formatter
      * @param transactionDate
      * @param transactionAmount
@@ -99,9 +98,9 @@ public class SavingsAccountTransactionDTO {
         return this.appUser;
     }
 
-	public Integer getAccountType() {
-		return this.depositAccountType;
-	}
-    
-    
+    public Integer getAccountType() {
+        return this.depositAccountType;
+    }
+
+
 }

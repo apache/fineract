@@ -18,11 +18,19 @@
  */
 package org.apache.fineract.useradministration.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -35,8 +43,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
-import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -58,7 +64,10 @@ import org.springframework.stereotype.Component;
 @Path("/roles")
 @Component
 @Scope("singleton")
-@Api(value = "Roles", description = "An API capability to support management of application roles for user administration.")
+@Api(tags = {"Roles"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Roles", description = "An API capability to support management of application roles for user administration.")
+})
 public class RolesApiResource {
 
     /**
@@ -151,7 +160,7 @@ public class RolesApiResource {
 
     /**
      * Roles enable or disable
-     * 
+     *
      * @param roleId
      * @param commandParam
      * @param apiRequestBodyAsJson
@@ -239,7 +248,7 @@ public class RolesApiResource {
 
     /**
      * Delete Role
-     * 
+     *
      * @param roleId
      * @return
      */

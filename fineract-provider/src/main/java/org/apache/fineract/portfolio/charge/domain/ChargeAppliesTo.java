@@ -25,7 +25,7 @@ public enum ChargeAppliesTo {
     SAVINGS(2, "chargeAppliesTo.savings"), //
     CLIENT(3, "chargeAppliesTo.client"),
     SHARES(4, "chargeAppliesTo.shares");
-    
+
     private final Integer value;
     private final String code;
 
@@ -57,8 +57,8 @@ public enum ChargeAppliesTo {
                     chargeAppliesToType = CLIENT;
                 break;
                 case 4:
-                	chargeAppliesToType = SHARES ;
-                	break ;
+                    chargeAppliesToType = SHARES ;
+                    break ;
                 default:
                     chargeAppliesToType = INVALID;
                 break;
@@ -81,7 +81,7 @@ public enum ChargeAppliesTo {
     }
 
     public boolean isSharesCharge() {
-    	return this.value.equals(SHARES.getValue()) ;
+        return this.value.equals(SHARES.getValue()) ;
     }
     public static Object[] validValues() {
         return new Object[] { ChargeAppliesTo.LOAN.getValue(), ChargeAppliesTo.SAVINGS.getValue(), ChargeAppliesTo.CLIENT.getValue(), ChargeAppliesTo.SHARES.getValue() };

@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -26,9 +32,6 @@ import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceD
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.math.BigDecimal;
-import java.util.*;
 
 public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
     private List<ShareProductData> sharedProductDataList;
@@ -53,7 +56,7 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
     public SharedProductsSheetPopulator(List<ShareProductData> shareProductDataList,List<ChargeData> chargesForShares) {
         this.sharedProductDataList=shareProductDataList;
         this.chargesForSharedProducts=chargesForShares;
-        
+
     }
 
     @Override

@@ -17,7 +17,34 @@
  * under the License.
  */
 package org.apache.fineract.portfolio.savings.api;
-import io.swagger.annotations.*;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_INACTIVATE_CHARGE;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_PAY_CHARGE;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.COMMAND_WAIVE_CHARGE;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.util.Collection;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -36,18 +63,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Collection;
-
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.*;
-
 @Path("/savingsaccounts/{savingsAccountId}/charges")
 @Component
 @Scope("singleton")
-@Api(value = "Savings Charges", description = "Its typical for MFIs to add maintenance and operating charges. They can be either Fees or Penalties.\n" + "\n" + "Savings Charges are instances of Charges and represent either fees and penalties for savings products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Savings account) are described here")
+@Api(tags = {"Savings Charges"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Savings Charges", description = "Its typical for MFIs to add maintenance and operating charges. They can be either Fees or Penalties.\n" + "\n" + "Savings Charges are instances of Charges and represent either fees and penalties for savings products. Refer Charges for documentation of the various properties of a charge, Only additional properties ( specific to the context of a Charge being associated with a Savings account) are described here")
+})
 public class SavingsAccountChargesApiResource {
 
     private final PlatformSecurityContext context;

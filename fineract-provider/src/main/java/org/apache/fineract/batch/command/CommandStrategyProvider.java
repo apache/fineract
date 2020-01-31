@@ -19,7 +19,6 @@
 package org.apache.fineract.batch.command;
 
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -28,9 +27,9 @@ import org.springframework.stereotype.Component;
 /**
  * Provides an appropriate CommandStrategy using the 'method' and 'resourceUrl'.
  * CommandStrategy bean is created using Spring Application Context.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy
  */
 @Component
@@ -44,7 +43,7 @@ public class CommandStrategyProvider {
      * type. It also initialize commandStrategies using init() function by
      * filling it with available CommandStrategies in
      * {@link org.apache.fineract.batch.command.internal}.
-     * 
+     *
      * @param applicationContext
      */
     @Autowired
@@ -60,7 +59,7 @@ public class CommandStrategyProvider {
      * Returns an appropriate commandStrategy after determining it using the
      * CommandContext of the request. If no such Strategy is found then a
      * default strategy is returned back.
-     * 
+     *
      * @param commandContext
      * @return CommandStrategy
      * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy

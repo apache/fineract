@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateShareAccountCommandHandler implements NewCommandSourceHandler {
 
     private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
-    
+
     @Autowired
     public UpdateShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
         this.shareAccountWritePlatformService = shareAccountWritePlatformService ;

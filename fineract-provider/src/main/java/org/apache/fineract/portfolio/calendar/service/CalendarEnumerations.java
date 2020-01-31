@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.calendar.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -138,9 +137,9 @@ public class CalendarEnumerations {
     }
     public static List<EnumOptionData> calendarFrequencyNthDayType() {
         final List<EnumOptionData> optionDatas = Arrays.asList(calendarFrequencyNthDayType(NthDayType.ONE),
-        		calendarFrequencyNthDayType(NthDayType.TWO), calendarFrequencyNthDayType(NthDayType.THREE),
-        		calendarFrequencyNthDayType(NthDayType.FOUR), calendarFrequencyNthDayType(NthDayType.LAST), 
-        		calendarFrequencyNthDayType(NthDayType.ONDAY));
+                calendarFrequencyNthDayType(NthDayType.TWO), calendarFrequencyNthDayType(NthDayType.THREE),
+                calendarFrequencyNthDayType(NthDayType.FOUR), calendarFrequencyNthDayType(NthDayType.LAST),
+                calendarFrequencyNthDayType(NthDayType.ONDAY));
         return optionDatas;
     }
 }

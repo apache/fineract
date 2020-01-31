@@ -21,6 +21,8 @@ package org.apache.fineract.accounting.accrual.serialization;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.accrueTillParamName;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -43,9 +44,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 /**
  * Implementation of {@link FromApiJsonDeserializer} for
  * {@link GuarantorCommand}'s.
@@ -54,9 +52,9 @@ import com.google.gson.reflect.TypeToken;
 public final class AccrualAccountingDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(accrueTillParamName, AccrualAccountingConstants.localeParamName,
-					AccrualAccountingConstants.dateFormatParamName));
+    private static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(accrueTillParamName, AccrualAccountingConstants.localeParamName,
+                    AccrualAccountingConstants.dateFormatParamName));
 
     @Autowired
     public AccrualAccountingDataValidator(final FromJsonHelper fromApiJsonfromApiJsonHelper) {

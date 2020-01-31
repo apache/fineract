@@ -21,7 +21,6 @@ package org.apache.fineract.notification.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.notification.data.TopicData;
 import org.apache.fineract.notification.exception.TopicNotFoundException;
@@ -33,15 +32,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
-	
-	private final JdbcTemplate jdbcTemplate;
-	
-	@Autowired
-	public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
-    
-	private static final class TopicMapper implements RowMapper<TopicData> {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    private static final class TopicMapper implements RowMapper<TopicData> {
 
         private final String schema;
 
@@ -68,31 +67,31 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
 
             return new TopicData(id, title, enabled, entityId, entityType, memberType);
         }
-        
+
     }
 
-	@Override
-	public Collection<TopicData> getAllTopics() {
-		final TopicMapper tm = new TopicMapper();
-		String sql = "select " + tm.schema();
-		return this.jdbcTemplate.query(sql, tm, new Object[] {});
-	}
+    @Override
+    public Collection<TopicData> getAllTopics() {
+        final TopicMapper tm = new TopicMapper();
+        String sql = "select " + tm.schema();
+        return this.jdbcTemplate.query(sql, tm, new Object[] {});
+    }
 
-	@Override
-	public Collection<TopicData> getAllEnabledTopics() {
-		final TopicMapper tm = new TopicMapper();
+    @Override
+    public Collection<TopicData> getAllEnabledTopics() {
+        final TopicMapper tm = new TopicMapper();
         final String sql = "select " + tm.schema() + " where t.is_active = ?";
         return this.jdbcTemplate.query(sql, tm, new Object[] { true });
-	}
+    }
 
-	@Override
-	public TopicData findById(Long topicId) {
-		try {
+    @Override
+    public TopicData findById(Long topicId) {
+        try {
             final TopicMapper tm = new TopicMapper();
             final String sql = "select " + tm.schema() + " where t.id = ?";
             return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId });
         } catch (final EmptyResultDataAccessException e) {
-        	throw new TopicNotFoundException(topicId);
+            throw new TopicNotFoundException(topicId);
         }
-	}	
+    }
 }

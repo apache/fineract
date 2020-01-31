@@ -23,20 +23,19 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name="m_loan_reschedule_request_term_variations_mapping")
 public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersistableCustom<Long> {
-    
-    
+
+
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_term_variations_id", nullable = false)
     private LoanTermVariations loanTermVariations;
-    
+
     protected LoanRescheduleRequestToTermVariationMapping(){
-        
+
     }
 
     private LoanRescheduleRequestToTermVariationMapping(final LoanTermVariations loanTermVariations) {
@@ -46,7 +45,7 @@ public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersist
     public static LoanRescheduleRequestToTermVariationMapping createNew(final LoanTermVariations loanTermVariation) {
         return new LoanRescheduleRequestToTermVariationMapping(loanTermVariation);
     }
-    
+
     public LoanTermVariations getLoanTermVariations() {
         return this.loanTermVariations;
     }

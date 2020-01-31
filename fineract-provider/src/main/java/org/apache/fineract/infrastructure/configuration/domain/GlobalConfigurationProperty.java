@@ -21,16 +21,14 @@ package org.apache.fineract.infrastructure.configuration.domain;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetException;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetException;
 
 @Entity
 @Table(name = "c_configuration")
@@ -44,7 +42,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
 
     @Column(name = "value", nullable = true)
     private Long value;
-    
+
     @Column(name = "date_value", nullable = true)
     private Date dateValue;
 
@@ -80,7 +78,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
     public Long getValue() {
         return this.value;
     }
-    
+
     public Date getDateValue(){
         return this.dateValue;
     }
@@ -106,7 +104,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
             actualChanges.put(valueParamName, newValue);
             this.value = newValue;
         }
-        
+
         final String dateValueParamName = "dateValue";
         if(command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)){
             final Date newDateValue = command.DateValueOfParameterNamed(dateValueParamName);
@@ -127,12 +125,12 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
     public static GlobalConfigurationProperty newSurveyConfiguration(final String name) {
         return new GlobalConfigurationProperty(name, false, null, null, null, false);
     }
-    
+
     public GlobalConfigurationPropertyData toData() {
         return new GlobalConfigurationPropertyData(getName(), isEnabled(), getValue(), getDateValue(), this.getId(), this.description,
                 this.isTrapDoor);
     }
-    
+
     public String getName() {
         return this.name;
     }

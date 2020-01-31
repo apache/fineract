@@ -18,21 +18,17 @@
  */
 package org.apache.fineract.integrationtests.common.recurringdeposit;
 
+import com.google.gson.Gson;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class RecurringDepositAccountHelper {
@@ -504,7 +500,7 @@ public class RecurringDepositAccountHelper {
         this.interestPostingPeriodType = interestPostingPeriodTypeId;
         return this;
     }
-    
+
     public RecurringDepositAccountHelper withDepositPeriod(final String depositPeriod) {
         this.depositPeriod = depositPeriod;
         return this;

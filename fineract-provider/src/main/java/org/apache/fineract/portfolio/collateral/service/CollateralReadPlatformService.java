@@ -19,14 +19,13 @@
 package org.apache.fineract.portfolio.collateral.service;
 
 import java.util.List;
-
 import org.apache.fineract.portfolio.collateral.data.CollateralData;
 
 public interface CollateralReadPlatformService {
 
     /**
      * Validates the passed in loanId before retrieving Collaterals for the same
-     * 
+     *
      * @param loanId
      * @return
      */

@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.core.boot;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+import java.nio.charset.StandardCharsets;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public abstract class ApplicationExitUtil {
@@ -37,7 +37,7 @@ public abstract class ApplicationExitUtil {
         System.out.println("\nHit Enter to quit...");
         // NOTE: In Eclipse, System.console() is not available.. so:
         // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429)
-        BufferedReader d = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader d = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
         d.readLine();
 
         ctx.stop();

@@ -21,20 +21,18 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
-import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
-import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
 import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
-import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
-import org.joda.time.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.Months;
+import org.joda.time.Weeks;
+import org.joda.time.Years;
 
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
@@ -73,13 +71,13 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 // calendar associated with
                 // the loan, and we should use it in order to calculate next
                 // repayment
-                
+
                 CalendarHistory calendarHistory = null;
                 CalendarHistoryDataWrapper calendarHistoryDataWrapper = loanApplicationTerms.getCalendarHistoryDataWrapper();
                 if(calendarHistoryDataWrapper != null){
                     calendarHistory = loanApplicationTerms.getCalendarHistoryDataWrapper().getCalendarHistory(dueRepaymentPeriodDate);
                 }
- 
+
                 // get the start date from the calendar history
                 if (calendarHistory == null) {
                     seedDate = currentCalendar.getStartDateLocalDate();
@@ -96,7 +94,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                         loanApplicationTerms.getNumberOfdays());
             }
         }
-        
+
         return dueRepaymentPeriodDate;
     }
 
@@ -121,7 +119,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
      * Recursively checking non working days and holidays and working days
      * exemption to generate next repayment period date Base on the
      * configuration
-     * 
+     *
      * @param adjustedDateDetailsDTO
      * @param loanApplicationTerms
      * @param holidayDetailDTO
@@ -133,10 +131,10 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     private AdjustedDateDetailsDTO recursivelyCheckNonWorkingDaysAndHolidaysAndWorkingDaysExemptionToGenerateNextRepaymentPeriodDate(
             final AdjustedDateDetailsDTO adjustedDateDetailsDTO, final LoanApplicationTerms loanApplicationTerms,
             final HolidayDetailDTO holidayDetailDTO, final boolean isFirstRepayment) {
-        
+
         checkAndUpdateWorkingDayIfRepaymentDateIsNonWorkingDay(adjustedDateDetailsDTO, holidayDetailDTO, loanApplicationTerms,
                 isFirstRepayment);
-        
+
         checkAndUpdateWorkingDayIfRepaymentDateIsHolidayDay(adjustedDateDetailsDTO, holidayDetailDTO, loanApplicationTerms,
                 isFirstRepayment);
 
@@ -151,12 +149,12 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                     loanApplicationTerms, holidayDetailDTO, isFirstRepayment);
         }
         return adjustedDateDetailsDTO;
-    } 
+    }
 
     /**
      * This method to check and update the working day if repayment date is
      * holiday
-     * 
+     *
      * @param adjustedDateDetailsDTO
      * @param holidayDetailDTO
      * @param loanApplicationTerms
@@ -188,11 +186,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     /**
      * This method to check and update the working day if repayment date is non
      * working day
-     * 
+     *
      * @param adjustedDateDetailsDTO
      * @param holidayDetailDTO
-     * @param isFirstRepayment 
-     * @param loanApplicationTerms 
+     * @param isFirstRepayment
+     * @param loanApplicationTerms
      */
     private void checkAndUpdateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO,
             final HolidayDetailDTO holidayDetailDTO, final LoanApplicationTerms loanApplicationTerms, final boolean isFirstRepayment) {
@@ -289,7 +287,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
     @Override
     public LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(final PeriodFrequencyType repaymentPeriodFrequencyType,
-            final int repaidEvery, final LocalDate firstRepaymentDate, final Calendar loanCalendar, final HolidayDetailDTO holidayDetailDTO, 
+            final int repaidEvery, final LocalDate firstRepaymentDate, final Calendar loanCalendar, final HolidayDetailDTO holidayDetailDTO,
             final LoanApplicationTerms loanApplicationTerms) {
 
         LocalDate idealDisbursementDate = null;

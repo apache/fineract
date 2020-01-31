@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -59,17 +58,17 @@ public class SavingsDueData {
         this.dueAmount = dueAmount;
         this.depositAccountType = depositAccountType;
     }
-    
+
     public String productName() {
         return this.productName;
     }
-    
+
     public Long productId() {
         return this.productId;
     }
 
-	public String getDepositAccountType() {
-		return depositAccountType;
-	}
-    
+    public String getDepositAccountType() {
+        return depositAccountType;
+    }
+
 }

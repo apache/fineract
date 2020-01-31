@@ -18,11 +18,19 @@
  */
 package org.apache.fineract.organisation.provisioning.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,8 +42,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-
-import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -54,7 +60,10 @@ import org.springframework.stereotype.Component;
 @Path("/provisioningcriteria")
 @Component
 @Scope("singleton")
-@Api(value = "Provisioning Criteria", description = "This defines the Provisioning Criteria")
+@Api(tags = {"Provisioning Criteria"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Provisioning Criteria", description = "This defines the Provisioning Criteria")
+})
 public class ProvisioningCriteriaApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
@@ -63,17 +72,17 @@ public class ProvisioningCriteriaApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final DefaultToApiJsonSerializer<ProvisioningCriteriaData> toApiJsonSerializer;
 
-	private static final Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(
-			Arrays.asList(ProvisioningCriteriaConstants.DEFINITIONS_PARAM,
-					ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.GLACCOUNTS_PARAM));
+    private static final Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(
+            Arrays.asList(ProvisioningCriteriaConstants.DEFINITIONS_PARAM,
+                    ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.GLACCOUNTS_PARAM));
 
-	private static final Set<String> PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
-			Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_PARAM,
-					ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.DEFINITIONS_PARAM));
+    private static final Set<String> PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
+            Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_PARAM,
+                    ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.DEFINITIONS_PARAM));
 
-	private static final Set<String> ALL_PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
-			Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_ID_PARAM,
-					ProvisioningCriteriaConstants.CRITERIA_NAME_PARAM, ProvisioningCriteriaConstants.CREATED_BY_PARAM));
+    private static final Set<String> ALL_PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
+            Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_ID_PARAM,
+                    ProvisioningCriteriaConstants.CRITERIA_NAME_PARAM, ProvisioningCriteriaConstants.CREATED_BY_PARAM));
 
     @Autowired
     public ProvisioningCriteriaApiResource(final PlatformSecurityContext platformSecurityContext,
@@ -98,7 +107,7 @@ public class ProvisioningCriteriaApiResource {
         ProvisioningCriteriaData data = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate();
         return this.toApiJsonSerializer.serialize(settings, data, PROVISIONING_CRITERIA_TEMPLATE_PARAMETER);
     }
-    
+
     @GET
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -110,11 +119,11 @@ public class ProvisioningCriteriaApiResource {
         ProvisioningCriteriaData criteria = this.provisioningCriteriaReadPlatformService.retrieveProvisioningCriteria(criteriaId) ;
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if(settings.isTemplate()) {
-            criteria = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate(criteria);   
+            criteria = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate(criteria);
         }
         return this.toApiJsonSerializer.serialize(settings, criteria, PROVISIONING_CRITERIA_PARAMETERS);
     }
-        
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -126,7 +135,7 @@ public class ProvisioningCriteriaApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, data, ALL_PROVISIONING_CRITERIA_PARAMETERS);
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -140,7 +149,7 @@ public class ProvisioningCriteriaApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @PUT
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -155,7 +164,7 @@ public class ProvisioningCriteriaApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @DELETE
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -18,29 +18,28 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 
 public interface EmailReadPlatformService {
 
     Collection<EmailData> retrieveAll();
 
     EmailData retrieveOne(Long resourceId);
-    
+
     Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters);
-    
+
     Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters);
-    
+
     Collection<EmailData> retrieveAllDelivered(Integer limit);
-    
+
     Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters);
 
     Page<EmailData> retrieveEmailByStatus(Integer limit, Integer status, Date dateFrom, Date dateTo);
-    
+
     List<Long> retrieveExternalIdsOfAllSent(Integer limit);
 }

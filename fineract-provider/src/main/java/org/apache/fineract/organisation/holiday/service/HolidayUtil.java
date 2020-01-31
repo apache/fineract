@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.holiday.service;
 
 import java.util.List;
-
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.joda.time.LocalDate;
@@ -57,7 +56,7 @@ public class HolidayUtil {
 
         return false;
     }
-    
+
     public static Holiday getApplicableHoliday(final LocalDate repaymentDate, final List<Holiday> holidays) {
         Holiday referedHoliday = null;
         for (final Holiday holiday : holidays) {

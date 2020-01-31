@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,9 +38,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -50,7 +49,6 @@ import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
@@ -143,9 +141,9 @@ public class ClientTransaction extends AbstractPersistableCustom<Long> {
     /**
      * Converts the content of this Client Transaction to a map which can be
      * passed to the accounting module
-     * 
-     * 
-     * 
+     *
+     *
+     *
      */
     public Map<String, Object> toMapData() {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
@@ -208,7 +206,7 @@ public class ClientTransaction extends AbstractPersistableCustom<Long> {
     public Client getClient() {
         return this.client ;
     }
-    
+
     public Money getAmount() {
         return Money.of(getCurrency(), this.amount);
     }

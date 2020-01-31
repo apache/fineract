@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -79,16 +78,16 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
 
-	void setSubStatusInactive(Long savingsId);
+    void setSubStatusInactive(Long savingsId);
 
-	void setSubStatusDormant(Long savingsId);
+    void setSubStatusDormant(Long savingsId);
 
-	void escheat(Long savingsId);
+    void escheat(Long savingsId);
 
     CommandProcessingResult postInterest(JsonCommand command);
 
     void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate);
-    
+
     CommandProcessingResult blockAccount(Long savingsId);
 
     CommandProcessingResult unblockAccount(Long savingsId);

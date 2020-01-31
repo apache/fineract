@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.integrationtests.common.BatchHelper;
@@ -33,17 +37,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
 /**
  * Test class for testing the integration of Batch API with custom batch
  * requests and various user defined workflow. Like in the case of mifos
  * community-app
- * 
+ *
  * @author Rishabh Shukla
  */
 public class BatchRequestsIntegrationTest {
@@ -70,12 +68,12 @@ public class BatchRequestsIntegrationTest {
 
     @Test
     /**
-     * Tests that a loan is successfully applied to client members of a group. 
+     * Tests that a loan is successfully applied to client members of a group.
      * Firstly, it'll create a few new clients and then will add those clients
      * to the group. Then a few loans will be created and one of those loans
      * will be chosen at random and similarily a few of the created clients will
      * be chosen on random. Now, the selected loan will be applied to these
-     * clients through Batch - API ApplyLoanCommandStrategy.  
+     * clients through Batch - API ApplyLoanCommandStrategy.
      */
     public void shouldReturnOkStatusForLoansAppliedToSelectedClients() {
 

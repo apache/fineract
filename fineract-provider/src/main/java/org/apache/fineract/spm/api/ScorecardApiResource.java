@@ -18,8 +18,14 @@
  */
 package org.apache.fineract.spm.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -27,8 +33,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -48,7 +52,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/surveys/scorecards")
 @Component
 @Scope("singleton")
-@Api(value = "SPM - Scorecards", description = " ")
+@Api(tags = {"Score Card"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Score Card", description = "")
+})
 public class ScorecardApiResource {
 
     private final PlatformSecurityContext securityContext;

@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.portfolio.tax.data;
 
+import java.io.Serializable;
 import org.joda.time.LocalDate;
 
-public class TaxGroupMappingsData {
+public class TaxGroupMappingsData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Long id;

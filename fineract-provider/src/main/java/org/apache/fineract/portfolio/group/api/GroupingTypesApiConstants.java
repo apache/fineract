@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.group.api;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.fineract.portfolio.group.data.CenterData;
 
 public class GroupingTypesApiConstants {

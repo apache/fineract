@@ -18,13 +18,15 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.apache.fineract.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -44,10 +46,6 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 @Component
 public class ProductToGLAccountMappingHelper {
@@ -94,7 +92,7 @@ public class ProductToGLAccountMappingHelper {
                     portfolioProductType.getValue(), accountTypeId);
             if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(portfolioProductType, productId,
                     accountTypeName); }
-            if (accountMapping.getGlAccount().getId() != accountId) {
+            if (!accountMapping.getGlAccount().getId().equals(accountId)) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
                 accountMapping.setGlAccount(glAccount);
@@ -118,7 +116,7 @@ public class ProductToGLAccountMappingHelper {
                 ProductToGLAccountMapping newAccountMapping  = new ProductToGLAccountMapping(glAccount, productId,
                 portfolioProductType.getValue(), accountTypeId) ;
                 this.accountMappingRepository.save(newAccountMapping);
-            }else if (accountMapping.getGlAccount().getId() != accountId) {
+            }else if (!accountMapping.getGlAccount().getId().equals(accountId)) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
                 accountMapping.setGlAccount(glAccount);
@@ -129,7 +127,7 @@ public class ProductToGLAccountMappingHelper {
     /**
      * Saves the payment type to Fund source mappings for a particular
      * product/product type (also populates the changes array if passed in)
-     * 
+     *
      * @param command
      * @param element
      * @param productId
@@ -156,7 +154,7 @@ public class ProductToGLAccountMappingHelper {
     /**
      * Saves the Charge to Income / Liability account mappings for a particular
      * product/product type (also populates the changes array if passed in)
-     * 
+     *
      * @param command
      * @param element
      * @param productId
@@ -242,7 +240,7 @@ public class ProductToGLAccountMappingHelper {
              * as a part of Jsoncommand)<br/>
              * Create new mappings for charges that are passed in as a part of
              * the Jsoncommand but not already present
-             * 
+             *
              **/
             else {
                 for (final ProductToGLAccountMapping chargeToIncomeAccountMapping : existingChargeToIncomeAccountMappings) {
@@ -251,7 +249,7 @@ public class ProductToGLAccountMappingHelper {
                     // update existing mappings (if required)
                     if (inputChargeToIncomeAccountMap.containsKey(currentCharge)) {
                         final Long newGLAccountId = inputChargeToIncomeAccountMap.get(currentCharge);
-                        if (newGLAccountId != chargeToIncomeAccountMapping.getGlAccount().getId()) {
+                        if (!newGLAccountId.equals(chargeToIncomeAccountMapping.getGlAccount().getId())) {
                             final GLAccount glAccount;
                             if (isPenalty) {
                                 glAccount = getAccountByIdAndType(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue(),
@@ -328,7 +326,7 @@ public class ProductToGLAccountMappingHelper {
              * as a part of Jsoncommand)<br/>
              * Create new mappings for payment types that are passed in as a
              * part of the Jsoncommand but not already present
-             * 
+             *
              **/
             else {
                 for (final ProductToGLAccountMapping existingPaymentChannelToFundSourceMapping : existingPaymentChannelToFundSourceMappings) {
@@ -337,7 +335,7 @@ public class ProductToGLAccountMappingHelper {
                     // update existing mappings (if required)
                     if (inputPaymentChannelFundSourceMap.containsKey(currentPaymentChannelId)) {
                         final Long newGLAccountId = inputPaymentChannelFundSourceMap.get(currentPaymentChannelId);
-                        if (newGLAccountId != existingPaymentChannelToFundSourceMapping.getGlAccount().getId()) {
+                        if (!newGLAccountId.equals(existingPaymentChannelToFundSourceMapping.getGlAccount().getId())) {
                             final GLAccount glAccount = getAccountByIdAndType(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
                                     GLAccountType.ASSET, newGLAccountId);
                             existingPaymentChannelToFundSourceMapping.setGlAccount(glAccount);
@@ -417,7 +415,7 @@ public class ProductToGLAccountMappingHelper {
     /**
      * Fetches account with a particular Id and throws and Exception it is not
      * of the expected Account Category ('ASSET','liability' etc)
-     * 
+     *
      * @param paramName
      * @param expectedAccountType
      * @param accountId

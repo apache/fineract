@@ -18,13 +18,15 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -43,10 +45,6 @@ import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundEx
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 @Service
 public class LoanChargeAssembler {
@@ -153,7 +151,7 @@ public class LoanChargeAssembler {
                                             LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
                                 }
                             }
-                            
+
                             if ( ChargeTimeType.DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
                                     LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
@@ -231,7 +229,7 @@ public class LoanChargeAssembler {
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
-                        if (chargeDefinition.getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) {
+                        if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {
                             associatedChargesForLoan.add(chargeDefinition);
                         }
                     }

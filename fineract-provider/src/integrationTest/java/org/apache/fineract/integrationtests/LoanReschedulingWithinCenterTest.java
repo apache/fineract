@@ -21,6 +21,12 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.gson.Gson;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,10 +35,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
@@ -47,13 +49,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class LoanReschedulingWithinCenterTest {
 
@@ -99,7 +97,7 @@ public class LoanReschedulingWithinCenterTest {
         Integer clientId = createClient(officeId);
 
         associateClientsToGroup(groupId, clientId);
-        
+
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -114,7 +112,7 @@ public class LoanReschedulingWithinCenterTest {
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
-                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, 
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan,
                 null, null);
 
         // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
@@ -151,10 +149,9 @@ public class LoanReschedulingWithinCenterTest {
 
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals(String.valueOf(interestDue), "90.82");
-
+        assertEquals("90.82", String.valueOf(interestDue));
     }
-    
+
     private void associateClientsToGroup(Integer groupId, Integer clientId) {
         // Associate client to the group
         GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
@@ -176,7 +173,11 @@ public class LoanReschedulingWithinCenterTest {
         final String startDate = dateFormat.format(today.getTime());
         final String frequency = "2"; // 2:Weekly
         final String interval = "2"; // Every one week
-        final Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
+        Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
+
+        if (repeatsOnDay.intValue() == 0){
+            repeatsOnDay = 7;
+        }
 
         Integer calendarId = CalendarHelper.createMeetingForGroup(this.requestSpec, this.responseSpec, centerId, startDate, frequency,
                 interval, repeatsOnDay.toString());
@@ -226,13 +227,13 @@ public class LoanReschedulingWithinCenterTest {
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
-                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, 
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan,
                 null, null);
 
         Calendar seondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         seondTrancheDate.add(Calendar.MONTH, 1);
         String secondDisbursement = dateFormat.format(seondTrancheDate.getTime()) ;
-        
+
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
         createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
@@ -280,8 +281,7 @@ public class LoanReschedulingWithinCenterTest {
 
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals(String.valueOf(interestDue), "41.05");
-
+        assertEquals("41.05", String.valueOf(interestDue));
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
@@ -297,8 +297,8 @@ public class LoanReschedulingWithinCenterTest {
         return createLoanProductWithInterestRecalculation(repaymentStrategy, interestRecalculationCompoundingMethod,
                 rescheduleStrategyMethod, recalculationRestFrequencyType, recalculationRestFrequencyInterval,
                 recalculationRestFrequencyDate, recalculationCompoundingFrequencyType, recalculationCompoundingFrequencyInterval,
-                recalculationCompoundingFrequencyDate, preCloseInterestCalculationStrategy, accounts, null, false, isMultiTrancheLoan, 
-                recalculationCompoundingFrequencyOnDayType, recalculationCompoundingFrequencyDayOfWeekType, recalculationRestFrequencyOnDayType, 
+                recalculationCompoundingFrequencyDate, preCloseInterestCalculationStrategy, accounts, null, false, isMultiTrancheLoan,
+                recalculationCompoundingFrequencyOnDayType, recalculationCompoundingFrequencyDayOfWeekType, recalculationRestFrequencyOnDayType,
                 recalculationRestFrequencyDayOfWeekType);
     }
 
@@ -308,7 +308,7 @@ public class LoanReschedulingWithinCenterTest {
             final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
             final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
             final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
-            boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan, 
+            boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan,
             final Integer recalculationCompoundingFrequencyOnDayType,
             final Integer recalculationCompoundingFrequencyDayOfWeekType, final Integer recalculationRestFrequencyOnDayType,
             final Integer recalculationRestFrequencyDayOfWeekType) {
@@ -335,7 +335,9 @@ public class LoanReschedulingWithinCenterTest {
             builder = builder.withAccountingRulePeriodicAccrual(accounts);
         }
 
-        if (isArrearsBasedOnOriginalSchedule) builder = builder.withArrearsConfiguration();
+        if (isArrearsBasedOnOriginalSchedule) {
+            builder = builder.withArrearsConfiguration();
+        }
 
         final String loanProductJSON = builder.build(chargeId);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);

@@ -22,11 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 @SuppressWarnings("serial")
 public class CashierInsufficientAmountException extends
-		AbstractPlatformDomainRuleException {
+        AbstractPlatformDomainRuleException {
 
-	public CashierInsufficientAmountException() {
-		super("cashier.insufficient.amount.exception",
-				"Cashier do not have sufficient amount for this transaction.");
-	}
+    public CashierInsufficientAmountException() {
+        super("cashier.insufficient.amount.exception",
+                "Cashier do not have sufficient amount for this transaction.");
+    }
 
 }

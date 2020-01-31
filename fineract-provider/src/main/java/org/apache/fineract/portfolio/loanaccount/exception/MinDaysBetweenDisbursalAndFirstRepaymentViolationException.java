@@ -25,7 +25,7 @@ import org.joda.time.LocalDate;
  * {@link AbstractPlatformDomainRuleException} thrown when a number of days
  * between disbursal date and firstRepayment is less than
  * minimumDaysBetweenDisbursalAndFirstRepayment
- * 
+ *
  */
 public class MinDaysBetweenDisbursalAndFirstRepaymentViolationException extends AbstractPlatformDomainRuleException {
 

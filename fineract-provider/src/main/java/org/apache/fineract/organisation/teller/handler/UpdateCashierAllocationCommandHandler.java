@@ -52,7 +52,7 @@ public class UpdateCashierAllocationCommandHandler implements NewCommandSourceHa
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateCashierAllocation(command.entityId(), 
-        		command.subentityId(), command);
+        return this.writePlatformService.updateCashierAllocation(command.entityId(),
+                command.subentityId(), command);
     }
 }

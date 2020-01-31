@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -40,22 +41,19 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-
 @Component
 public class AccountTransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
-	private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
-			AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
-			AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
-			AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
-			AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
-			AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName,
-			AccountTransfersApiConstants.transferDescriptionParamName));
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
+            AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
+            AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
+            AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
+            AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
+            AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName,
+            AccountTransfersApiConstants.transferDescriptionParamName));
 
 
     @Autowired
@@ -82,8 +80,8 @@ public class AccountTransfersDataValidator {
 
         this.accountTransfersDetailDataValidator.validate(command, baseDataValidator);
 
-		final LocalDate transactionDate = this.fromApiJsonHelper
-				.extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName, element);
+        final LocalDate transactionDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName, element);
         baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDateParamName).value
                 (transactionDate).notNull();
 

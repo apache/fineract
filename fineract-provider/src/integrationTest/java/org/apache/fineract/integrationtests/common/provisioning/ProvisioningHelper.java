@@ -18,17 +18,15 @@
  */
 package org.apache.fineract.integrationtests.common.provisioning;
 
+import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-
-import com.google.gson.Gson;
 
 public class ProvisioningHelper {
 
@@ -56,7 +54,7 @@ public class ProvisioningHelper {
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }
-    
+
     public final static String createProvisioningEntryJsonWithJournalsEnabled() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.TRUE);

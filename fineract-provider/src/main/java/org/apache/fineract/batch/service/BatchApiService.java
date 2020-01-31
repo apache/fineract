@@ -19,18 +19,16 @@
 package org.apache.fineract.batch.service;
 
 import java.util.List;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 
 /**
  * Provides an interface for service class, that implements the method to handle
  * separate Batch Requests.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse
  * @see BatchApiServiceImpl
@@ -42,7 +40,7 @@ public interface BatchApiService {
      * by getting the appropriate CommandStrategy for every
      * {@link org.apache.fineract.batch.domain.BatchRequest}. It will be used when
      * the Query Parameter "enclosingTransaction "is set to 'false'.
-     * 
+     *
      * @param requestList
      * @param uriInfo
      * @return List&lt;BatchResponse&gt;
@@ -56,7 +54,7 @@ public interface BatchApiService {
      * the Query Parameter "enclosingTransaction "is set to 'true'. If one or
      * more of the requests are not completed properly then whole of the
      * transaction will be rolled back properly.
-     * 
+     *
      * @param requestList
      * @param uriInfo
      * @return List&lt;BatchResponse&gt;

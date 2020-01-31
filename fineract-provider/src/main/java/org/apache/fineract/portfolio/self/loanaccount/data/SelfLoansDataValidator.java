@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.self.loanaccount.data;
 
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -38,52 +37,50 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
-
 @Component
 public class SelfLoansDataValidator {
-	private static final Set<String> allowedAssociationParameters = new HashSet<>(
-			Arrays.asList("repaymentSchedule", "futureSchedule",
-					"originalSchedule", "transactions", "charges",
-					"guarantors", "collateral", "linkedAccount",
-					"multiDisburseDetails"));
-	private final FromJsonHelper fromApiJsonHelper;
-	
-	@Autowired
-	public SelfLoansDataValidator(final FromJsonHelper fromApiJsonHelper){
-		this.fromApiJsonHelper = fromApiJsonHelper;
-	}
-	
-	public void validateRetrieveLoan(final UriInfo uriInfo) {
-		List<String> unsupportedParams = new ArrayList<>();
+ private static final Set<String> allowedAssociationParameters = new HashSet<>(
+   Arrays.asList("repaymentSchedule", "futureSchedule",
+     "originalSchedule", "transactions", "charges",
+     "guarantors", "collateral", "linkedAccount",
+     "multiDisburseDetails"));
+ private final FromJsonHelper fromApiJsonHelper;
 
-		Set<String> associationParameters = ApiParameterHelper
-				.extractAssociationsForResponseIfProvided(uriInfo
-						.getQueryParameters());
-		if (!associationParameters.isEmpty()) {
-			associationParameters.removeAll(allowedAssociationParameters);
-			if (!associationParameters.isEmpty()) {
-				unsupportedParams.addAll(associationParameters);
-			}
-		}
+ @Autowired
+ public SelfLoansDataValidator(final FromJsonHelper fromApiJsonHelper){
+  this.fromApiJsonHelper = fromApiJsonHelper;
+ }
 
-		if (uriInfo.getQueryParameters().getFirst("exclude") != null) {
-			unsupportedParams.add("exclude");
-		}
+ public void validateRetrieveLoan(final UriInfo uriInfo) {
+  List<String> unsupportedParams = new ArrayList<>();
 
-		throwExceptionIfReqd(unsupportedParams);
-	}
+  Set<String> associationParameters = ApiParameterHelper
+    .extractAssociationsForResponseIfProvided(uriInfo
+      .getQueryParameters());
+  if (!associationParameters.isEmpty()) {
+   associationParameters.removeAll(allowedAssociationParameters);
+   if (!associationParameters.isEmpty()) {
+    unsupportedParams.addAll(associationParameters);
+   }
+  }
 
-	public void validateRetrieveTransaction(UriInfo uriInfo) {
-		List<String> unsupportedParams = new ArrayList<>();
+  if (uriInfo.getQueryParameters().getFirst("exclude") != null) {
+   unsupportedParams.add("exclude");
+  }
 
-		validateTemplate(uriInfo, unsupportedParams);
+  throwExceptionIfReqd(unsupportedParams);
+ }
 
-		throwExceptionIfReqd(unsupportedParams);
+ public void validateRetrieveTransaction(UriInfo uriInfo) {
+  List<String> unsupportedParams = new ArrayList<>();
 
-	}
-	
-	public HashMap<String, Object> validateLoanApplication(final String json){
+  validateTemplate(uriInfo, unsupportedParams);
+
+  throwExceptionIfReqd(unsupportedParams);
+
+ }
+
+ public HashMap<String, Object> validateLoanApplication(final String json){
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -93,22 +90,21 @@ public class SelfLoansDataValidator {
 
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
-        baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull().equals("individual");
+        baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull().isOneOfTheseStringValues("individual");
 
         final String clientIdParameterName = "clientId";
         final String clientId = this.fromApiJsonHelper.extractStringNamed(clientIdParameterName, element);
         baseDataValidator.reset().parameter(clientIdParameterName).value(clientId).notNull().longGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         HashMap<String, Object> retAttr = new HashMap<>();
         retAttr.put("clientId", Long.parseLong(clientId));
-        
+
         return retAttr;
+ }
 
-	}
-
-	public HashMap<String, Object> validateModifyLoanApplication(final String json) {
+ public HashMap<String, Object> validateModifyLoanApplication(final String json) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
@@ -117,7 +113,7 @@ public class SelfLoansDataValidator {
         final String loanTypeParameterName = "loanType";
         if(this.fromApiJsonHelper.parameterExists(loanTypeParameterName, element)){
             final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
-            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull().equals("individual");
+            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull().isOneOfTheseStringValues("individual");
         }
 
         final String clientIdParameterName = "clientId";
@@ -128,29 +124,27 @@ public class SelfLoansDataValidator {
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         HashMap<String, Object> retAttr = new HashMap<>();
         if(clientId != null){
             retAttr.put("clientId", Long.parseLong(clientId));
         }
-        
+
         return retAttr;
-	}
+ }
 
-	private void throwExceptionIfReqd(List<String> unsupportedParams) {
-		if (unsupportedParams.size() > 0) {
-			throw new UnsupportedParameterException(unsupportedParams);
-		}
-	}
+ private void throwExceptionIfReqd(List<String> unsupportedParams) {
+  if (unsupportedParams.size() > 0) {
+   throw new UnsupportedParameterException(unsupportedParams);
+  }
+ }
 
-	private void validateTemplate(final UriInfo uriInfo,
-			List<String> unsupportedParams) {
-		final boolean templateRequest = ApiParameterHelper.template(uriInfo
-				.getQueryParameters());
-		if (templateRequest) {
-			unsupportedParams.add("template");
-		}
-	}
-
-
+ private void validateTemplate(final UriInfo uriInfo,
+   List<String> unsupportedParams) {
+  final boolean templateRequest = ApiParameterHelper.template(uriInfo
+    .getQueryParameters());
+  if (templateRequest) {
+   unsupportedParams.add("template");
+  }
+ }
 }

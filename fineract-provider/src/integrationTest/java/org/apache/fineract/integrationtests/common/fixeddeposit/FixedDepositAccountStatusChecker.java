@@ -20,13 +20,11 @@ package org.apache.fineract.integrationtests.common.fixeddeposit;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.Assert;
 
 @SuppressWarnings("rawtypes")
 public class FixedDepositAccountStatusChecker {
@@ -87,7 +85,7 @@ public class FixedDepositAccountStatusChecker {
         assertTrue("ERROR IN PREMATURELY CLOSING THE FIXED DEPOSIT ACCOUNT", getStatus(fixedDepositStatusHashMap, "prematureClosed"));
         System.out.println(fixedDepositStatusHashMap);
     }
-    
+
     public static void verifyFixedDepositAccountIsMatured(HashMap fixedDepositStatusHashMap) {
         System.out.println("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS MATURED ---------------------");
         assertTrue("ERROR IN MATURITY JOB OF THE FIXED DEPOSIT ACCOUNT", getStatus(fixedDepositStatusHashMap, "matured"));

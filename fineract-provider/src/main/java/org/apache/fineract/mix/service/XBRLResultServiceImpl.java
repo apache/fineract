@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.mix.service;
 
+import com.google.gson.Gson;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -25,11 +26,9 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
@@ -39,8 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
 
 @Component
 public class XBRLResultServiceImpl implements XBRLResultService {

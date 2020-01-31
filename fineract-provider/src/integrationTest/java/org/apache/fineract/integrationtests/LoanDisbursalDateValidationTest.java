@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -31,12 +35,6 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("rawtypes")
 public class LoanDisbursalDateValidationTest {
@@ -74,7 +72,7 @@ public class LoanDisbursalDateValidationTest {
         System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
                 + loanProductID);
 
-        // APPLY FOR LOAN 
+        // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
         System.out.println("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
                 + loanID);
@@ -93,15 +91,15 @@ public class LoanDisbursalDateValidationTest {
         // DISBURSE A LOAN
         @SuppressWarnings("unchecked")
         List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID, this.responseForbiddenError);
-        
+
         Assert.assertEquals("error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date",
-        	disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));     
-       
+            disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
         final String loanApplication = new LoanApplicationTestBuilder()
-        		.withPrincipal(proposedAmount).withLoanTermFrequency("5")
+                .withPrincipal(proposedAmount).withLoanTermFrequency("5")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5")
                 .withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths()
@@ -112,6 +110,6 @@ public class LoanDisbursalDateValidationTest {
         return this.loanTransactionHelper.getLoanId(loanApplication);
     }
 
-    
+
 
 }

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
