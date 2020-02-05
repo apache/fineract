@@ -743,7 +743,7 @@ public class LoanProductData implements Serializable {
                            final List<EnumOptionData> rescheduleStrategyTypeOptions, final List<EnumOptionData> interestRecalculationFrequencyTypeOptions,
                            final List<EnumOptionData> preCloseInterestCalculationStrategyOptions, final List<FloatingRateData> floatingRateOptions,
                            final List<EnumOptionData> interestRecalculationNthDayTypeOptions,
-                           final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions) {
+                           final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions, final boolean isRatesEnabled) {
         this.id = productData.id;
         this.name = productData.name;
         this.shortName = productData.shortName;
