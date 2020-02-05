@@ -23,49 +23,51 @@ import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.rates.RatesHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 @SuppressWarnings({"rawtypes"})
 public class RatesTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
 
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header("Authorization",
+        "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
-    @Test
-    public void testRatesForLoans() {
+  @Test
+  public void testRatesForLoans() {
 
-        // Retrieving all Rates
-        ArrayList<HashMap> allRatesData = RatesHelper.getRates(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allRatesData);
+    // Retrieving all Rates
+    ArrayList<HashMap> allRatesData = RatesHelper.getRates(this.requestSpec, this.responseSpec);
+    Assert.assertNotNull(allRatesData);
 
-        // Testing Creation and Update of Loan Rate
-        final Integer loanRateId = RatesHelper.createRates(this.requestSpec, this.responseSpec,
-                RatesHelper.getLoanRateJSON());
-        Assert.assertNotNull(loanRateId);
+    // Testing Creation and Update of Loan Rate
+    final Integer loanRateId = RatesHelper.createRates(this.requestSpec, this.responseSpec,
+        RatesHelper.getLoanRateJSON());
+    Assert.assertNotNull(loanRateId);
 
-        //Update Rate percentage
-        HashMap changes = RatesHelper.updateRates(this.requestSpec, this.responseSpec, loanRateId,
-                RatesHelper.getModifyRateJSON());
+    //Update Rate percentage
+    HashMap changes = RatesHelper.updateRates(this.requestSpec, this.responseSpec, loanRateId,
+        RatesHelper.getModifyRateJSON());
 
-        HashMap rateDataAfterChanges = RatesHelper.getRateById(this.requestSpec, this.responseSpec, loanRateId);
-        Assert.assertEquals("Verifying Rate after modification", rateDataAfterChanges.get("percentage"), changes.get("percentage"));
+    HashMap rateDataAfterChanges = RatesHelper
+        .getRateById(this.requestSpec, this.responseSpec, loanRateId);
+    Assert.assertEquals("Verifying Rate after modification", rateDataAfterChanges.get("percentage"),
+        changes.get("percentage"));
 
-    }
+  }
 
-   
+
 }
