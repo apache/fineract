@@ -26,7 +26,7 @@ services:
       - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_ROOT_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 10s
@@ -43,6 +43,8 @@ services:
     depends_on:
       - fineractmysql
     environment:
-      - JAVA_OPTS=-Dfineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/mifosplatform-tenants -Djava.awt.headless=true -XX:+UseG1GC -Dfile.encoding=UTF-8
+      - JAVA_OPTS=-Dfineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/mifosplatform-tenants -Dfineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver -Dfineract_tenants_uid=root -Dfineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca -Djava.awt.headless=true -XX:+UseG1GC -Dfile.encoding=UTF-8
       - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
       - FINERACT_DEFAULT_TENANTDB_PORT=3306
+      - FINERACT_DEFAULT_TENANTDB_UID=root
+      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
