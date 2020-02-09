@@ -66,7 +66,7 @@ CREATE TABLE `tenants` (
 
 LOCK TABLES `tenants` WRITE;
 /*!40000 ALTER TABLE `tenants` DISABLE KEYS */;
-INSERT INTO `tenants` VALUES (1,'default','Default Demo Tenant','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'${fineract_default_tenantdb_hostname}','${fineract_default_tenantdb_port}','${fineract_tenants_uid}','${fineract_tenants_pwd}',1);
+INSERT INTO `tenants` VALUES (1,'default','Default Demo Tenant','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'${fineract_default_tenantdb_hostname}','${fineract_default_tenantdb_port}','${fineract_default_tenantdb_uid}','${fineract_default_tenantdb_pwd}',1);
 -- Add tenants to support interoperation multi-tenancy
 -- INSERT INTO `tenants` VALUES (2,'tn01','Buffalo','tn01','Africa/Bujumbura',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1);
 -- INSERT INTO `tenants` VALUES (3,'tn02','Lion','tn02','Africa/Bujumbura',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1);

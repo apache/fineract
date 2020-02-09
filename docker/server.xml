@@ -41,7 +41,7 @@
      <Resource type="javax.sql.DataSource"
         name="jdbc/mifosplatform-tenants"
         factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
-        driverClassName="${driver}"
+        driverClassName="${fineract_tenants_driver}"
         url="${fineract_tenants_url}"
         username="${fineract_tenants_uid}"
         password="${fineract_tenants_pwd}"
