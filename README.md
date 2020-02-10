@@ -107,6 +107,27 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 and the `mysqlserver` environment variable is now no longer supported.)_
 
 
+Instructions to run using minikube and kubectl
+===================================================
+
+You can also run Fineract using containers on a kubernetes cluster.
+
+As Prerequisites, you must have `minikube` and `kubectl` installed on your machine; see
+[Minikube & Kubectl install](https://kubernetes.io/docs/tasks/tools/install-minikube/).
+
+Now to run a new Fineract instance on minikube you can simply:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+1. `minikube start --mount-string="./fineract-db/docker:/fineract-db" --mount`
+1. `kubectl apply -f kubernetes/fineractmysql-deployment.yml`
+1. `kubectl apply -f kubernetes/fineract-server-deployment.yml`
+1. `minikube service fineract-server --url`
+1. Fineract will run at the provided url
+
+To check the status of your containers on kubernetes cluster, run:
+    `minikube dashboard`
+
+
 Checkstyle
 ============
 
