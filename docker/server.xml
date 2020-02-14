@@ -39,7 +39,7 @@
          UserDatabaseRealm to authenticate users
     -->
      <Resource type="javax.sql.DataSource"
-        name="jdbc/mifosplatform-tenants"
+        name="jdbc/fineract_tenants"
         factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
         driverClassName="${fineract_tenants_driver}"
         url="${fineract_tenants_url}"

@@ -36,8 +36,8 @@ Instructions how to run for local development
 ============
 
 Run the following commands:
-1. `./gradlew createDB -PdbName=mifosplatform-tenants`
-1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew tomcatRunWAR`
 
 
@@ -71,8 +71,8 @@ Instructions to execute Integration tests
 > Note that if this is the first time to access MySQL DB, then you may need to reset your password.
 
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
-1. `./gradlew createDB -PdbName=mifosplatform-tenants`
-1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew clean integrationTest`
 
 
