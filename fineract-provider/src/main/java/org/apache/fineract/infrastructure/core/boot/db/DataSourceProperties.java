@@ -47,7 +47,7 @@ public class DataSourceProperties extends PoolProperties {
     @Value("${" + HOST + ":localhost}")
     private volatile @NotNull String hostname;
 
-    @Value("${" + DB + ":mifosplatform-tenants}")
+    @Value("${" + DB + ":fineract_tenants}")
     private volatile @NotNull String dbName;
 
     @Value("${" + UID + ":root}")

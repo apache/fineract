@@ -19,7 +19,7 @@
 
 -- MySQL dump 10.13  Distrib 5.1.60, for Win32 (ia32)
 --
--- Host: localhost    Database: mifostenant-default
+-- Host: localhost    Database: fineract_default
 -- ------------------------------------------------------
 -- Server version	5.1.60-community
 

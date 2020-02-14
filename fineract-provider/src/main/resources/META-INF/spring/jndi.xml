@@ -29,6 +29,6 @@
     	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
 	<!-- name here must match TestDataSourceConfiguration -->
-	<jee:jndi-lookup jndi-name="java:comp/env/jdbc/mifosplatform-tenants"
+	<jee:jndi-lookup jndi-name="java:comp/env/jdbc/fineract_tenants"
 		id="tenantDataSourceJndi" />
 </beans>

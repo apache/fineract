@@ -22,6 +22,6 @@
 
 
 <Context>
-	<ResourceLink name="jdbc/mifosplatform-tenants" global="jdbc/mifosplatform-tenants"
+	<ResourceLink name="jdbc/fineract_tenants" global="jdbc/fineract_tenants"
 		type="javax.sql.DataSource" />
 </Context>
