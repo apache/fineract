@@ -63,6 +63,10 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
     @Column(name = "opening_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date openingDate;
+    
+    @Column(name = "curr_run_date", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date currRunDate;
 
     @Column(name = "external_id", length = 100)
     private String externalId;
@@ -86,9 +90,11 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
         this.externalId = null;
     }
 
-    private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
+    private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId,
+                  final LocalDate currRunDate) {
         this.parent = parent;
         this.openingDate = openingDate.toDateTimeAtStartOfDay().toDate();
+        this.currRunDate = currRunDate.toDateTimeAtStartOfDay().toDate();
         if (parent != null) {
             this.parent.addChild(this);
         }
@@ -135,6 +141,17 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
             final LocalDate newValue = command.localDateValueOfParameterNamed(openingDateParamName);
             this.openingDate = newValue.toDate();
         }
+            
+        final String currRunDateParamName = "currRunDate";
+        if (command.isChangeInLocalDateParameterNamed(currRunDateParamName, getRunDateLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(currRunDateParamName);
+            actualChanges.put(currRunDateParamName, valueAsInput);
+            actualChanges.put("dateFormat", dateFormatAsInput);
+            actualChanges.put("locale", localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(openingDateParamName);
+            this.openingDate = newValue.toDate();
+        }
 
         final String nameParamName = "name";
         if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
@@ -167,6 +184,14 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
             openingLocalDate = LocalDate.fromDateFields(this.openingDate);
         }
         return openingLocalDate;
+    }
+        
+    public LocalDate getRunDateLocalDate() {
+        LocalDate currRunDateLocalDate = null;
+        if (this.currRunDate != null) {
+            currRunDateLocalDate = LocalDate.fromDateFields(this.currRunDate);
+        }
+        return currRunDateLocalDate;
     }
 
     public void update(final Office newParent) {
