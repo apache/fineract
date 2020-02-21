@@ -23,4 +23,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
     // no added behaviour
+	@Query("select br.currRunDate from Office br where br.officeId= :officeId")
+    Date getCurrentDateOfTenant(Long officeId);
 }
