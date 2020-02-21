@@ -27,12 +27,17 @@ import java.util.TimeZone;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class DateUtils {
 
@@ -59,28 +64,50 @@ public class DateUtils {
         return getLocalDateOfTenant().toDateTimeAtStartOfDay().toDate();
     }
 
-    public static LocalDate getLocalDateOfTenant() {
-
-        LocalDate today = new LocalDate();
-
+public static LocalDate getLocalDateOfTenant() {
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = null;
+		LocalDate today = new LocalDate();
+		
+        if(context != null) {
+            authentication = context.getAuthentication();
+        }
+        if(authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
+            AppUser user = (AppUser) authentication.getPrincipal();
+			final Long officeId = user.getOffice().getId();
+			today = new LocalDate(OfficeRepository.getCurrentDateOfTenant(officeId));
+		}
+        return today;
+		
+        /*LocalDate today = new LocalDate();
         final DateTimeZone zone = getDateTimeZoneOfTenant();
         if (zone != null) {
             today = new LocalDate(zone);
         }
-
-        return today;
+        return today;*/
     }
 
     public static LocalDateTime getLocalDateTimeOfTenant() {
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = null;
+		LocalDateTime today = new LocalDateTime();
+		
+        if(context != null) {
+            authentication = context.getAuthentication();
+        }
+        if(authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
+            AppUser user = (AppUser) authentication.getPrincipal();
+			final Long officeId = user.getOffice().getId();
+			today = new LocalDateTime(OfficeRepository.getCurrentDateOfTenant(officeId));
+		}
+        return today;
 
-        LocalDateTime today = new LocalDateTime();
-
+        /*LocalDateTime today = new LocalDateTime();
         final DateTimeZone zone = getDateTimeZoneOfTenant();
         if (zone != null) {
             today = new LocalDateTime(zone);
         }
-
-        return today;
+        return today;*/
     }
 
     public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
