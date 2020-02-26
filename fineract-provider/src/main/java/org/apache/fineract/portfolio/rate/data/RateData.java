@@ -19,10 +19,9 @@
 
 package org.apache.fineract.portfolio.rate.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Bowpi GT Created by Jose on 19/07/2017.

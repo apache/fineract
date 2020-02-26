@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.rate.service;
 
-import org.apache.fineract.portfolio.rate.data.RateData;
-
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.portfolio.rate.data.RateData;
 
 /**
  * Bowpi GT
