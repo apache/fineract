@@ -19,25 +19,23 @@
 
 package org.apache.fineract.portfolio.rate.service;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
-import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
-import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
-import org.apache.fineract.portfolio.rate.domain.Rate;
-import org.apache.fineract.portfolio.rate.data.RateData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.rate.data.RateData;
+import org.apache.fineract.portfolio.rate.domain.Rate;
+import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
+import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
 
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
@@ -95,7 +93,7 @@ public class RateReadServiceImpl implements RateReadService {
     this.context.authenticatedUser();
     final RateMapper rm = new RateMapper();
     final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{true, RateAppliesTo.LOAN.getValue() });
+    return this.jdbcTemplate.query(sql, rm, new Object[]{true, RateAppliesTo.LOAN.getValue()});
   }
 
   @Override
@@ -146,7 +144,8 @@ public class RateReadServiceImpl implements RateReadService {
       final Long id = rateResponse.getId();
       final String name = rateResponse.getName();
       final BigDecimal percentage = rateResponse.getPercentage();
-      final EnumOptionData productApply = RateEnumerations.rateAppliesTo(rateResponse.getProductApply());;
+      final EnumOptionData productApply = RateEnumerations
+          .rateAppliesTo(rateResponse.getProductApply());
       final boolean active = rateResponse.isActive();
       return RateData.instance(id, name, percentage, productApply, active);
     }

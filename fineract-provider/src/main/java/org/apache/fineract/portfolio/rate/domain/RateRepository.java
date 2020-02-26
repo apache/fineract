@@ -18,19 +18,18 @@
  */
 package org.apache.fineract.portfolio.rate.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.List;
-
 /**
- * Bowpi GT
- * Rate repository to save on m_rate table (custom change for Credi Chapin)
- * Created by Jose on 19/07/2017.
+ * Bowpi GT Rate repository to save on m_rate table (custom change for Credi Chapin) Created by Jose
+ * on 19/07/2017.
  */
 public interface RateRepository extends JpaRepository<Rate, Long>, JpaSpecificationExecutor<Rate> {
 
-    Rate findByName(String name);
-    List<Rate> findAllByActiveAndProductApply(boolean active, String productApply);
+  Rate findByName(String name);
+
+  List<Rate> findAllByActiveAndProductApply(boolean active, String productApply);
 
 }
