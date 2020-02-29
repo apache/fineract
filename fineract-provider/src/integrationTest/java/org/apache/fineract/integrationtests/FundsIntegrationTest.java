@@ -340,7 +340,7 @@ public class FundsIntegrationTest {
             return null;
         }
 
-        return new Long(fundId);
+        return Long.valueOf(fundId);
     }
 
 }

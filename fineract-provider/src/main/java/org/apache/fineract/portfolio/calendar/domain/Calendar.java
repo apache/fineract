@@ -640,7 +640,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
     public void updateStartAndEndDate(final LocalDate startDate, final LocalDate endDate) {
 
         final CalendarFrequencyType frequencyType = CalendarUtils.getFrequency(this.recurrence);
-        final Integer interval = new Integer(CalendarUtils.getInterval(this.recurrence));
+        final Integer interval = Integer.valueOf(CalendarUtils.getInterval(this.recurrence));
         final String newRecurrence = Calendar.constructRecurrence(frequencyType, interval, startDate.getDayOfWeek(), null);
 
         this.recurrence = newRecurrence;

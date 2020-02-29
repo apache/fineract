@@ -700,7 +700,7 @@ public class Sender {
         HttpURLConnection conn = getConnection(url);
         conn.setDoOutput(true);
         conn.setUseCaches(false);
-        conn.setFixedLengthStreamingMode(bytes.length);
+        conn.setFixedLengthStreamingMode(Long.valueOf(bytes.length));
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", contentType);
         conn.setRequestProperty("Authorization", "key=" + key);

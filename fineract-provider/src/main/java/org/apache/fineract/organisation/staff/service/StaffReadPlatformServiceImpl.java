@@ -225,7 +225,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     private String getStaffCriteria(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly, final String status) {
 
-        final StringBuffer extraCriteria = new StringBuffer(200);
+        final StringBuilder extraCriteria = new StringBuilder(200);
 
         if (sqlSearch != null) {
             extraCriteria.append(" and (").append(sqlSearch).append(")");

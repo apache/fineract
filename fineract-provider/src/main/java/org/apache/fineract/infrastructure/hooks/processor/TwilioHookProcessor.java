@@ -123,7 +123,7 @@ public class TwilioHookProcessor implements HookProcessor {
                     payload, HashMap.class);
             map.put("BASE_URI", System.getProperty("baseUrl"));
             if (map.containsKey("clientId")) {
-                final Long clientId = new Long(Integer.toString((int) map
+                final Long clientId = Long.valueOf(Integer.toString((int) map
                         .get("clientId")));
                 final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
                 final String mobileNo = client.mobileNo();

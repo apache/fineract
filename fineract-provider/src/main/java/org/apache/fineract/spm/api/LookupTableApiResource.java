@@ -88,7 +88,7 @@ public class LookupTableApiResource {
             return LookupTableMapper.map(lookupTables);
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @GET

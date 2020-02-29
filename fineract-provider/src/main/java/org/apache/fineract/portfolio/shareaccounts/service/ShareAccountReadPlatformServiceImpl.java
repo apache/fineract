@@ -253,7 +253,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         public ShareAccountMapper(final Collection<ShareAccountChargeData> charges, final Collection<ShareAccountTransactionData> purchasedShares) {
             this.charges = charges;
             this.purchasedShares = purchasedShares;
-            StringBuffer buff = new StringBuffer()
+            StringBuilder buff = new StringBuilder()
                     .append("sa.id as id, sa.external_id as externalId, sa.status_enum as statusEnum, ")
                     .append("sa.savings_account_id, msa.account_no as savingsAccNo, ")
                     .append("c.id as clientId, c.display_name as clientName, ")
@@ -443,7 +443,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         private final String schema;
 
         public PurchasedSharesDataRowMapper() {
-            StringBuffer buff = new StringBuffer()
+            StringBuilder buff = new StringBuilder()
                     .append("saps.id as purchasedId, saps.account_id as accountId, saps.transaction_date as transactionDate, saps.total_shares as purchasedShares, saps.unit_price as unitPrice, ")
                     .append("saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount, ")
                     .append("saps.amount_paid as amountPaid ");
@@ -479,7 +479,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         private final String schema;
 
         ShareAccountDividendRowMapper() {
-            StringBuffer buff = new StringBuffer()
+            StringBuilder buff = new StringBuilder()
                     .append("spdp.created_date, sadd.id, sadd.amount, sadd.savings_transaction_id, sadd.status ")
                     .append(" from m_share_account_dividend_details sadd ")
                     .append("JOIN m_share_product_dividend_pay_out spdp ON spdp.id = sadd.dividend_pay_out_id ");

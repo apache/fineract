@@ -229,14 +229,14 @@ public class ImportHandlerUtils {
     }
 
     public static String getDefaultUserMessages(List<ApiParameterError> ApiParameterErrorList){
-        StringBuffer defaultUserMessages=new StringBuffer();
+        StringBuilder defaultUserMessages=new StringBuilder();
         for (ApiParameterError error:ApiParameterErrorList) {
             defaultUserMessages=defaultUserMessages.append(error.getDefaultUserMessage()+'\t');
         }
         return defaultUserMessages.toString();
     }
     public static String getErrorList(List<String> errorList){
-        StringBuffer errors=new StringBuffer();
+        StringBuilder errors=new StringBuilder();
         for (String error: errorList) {
                 errors=errors.append(error);
         }

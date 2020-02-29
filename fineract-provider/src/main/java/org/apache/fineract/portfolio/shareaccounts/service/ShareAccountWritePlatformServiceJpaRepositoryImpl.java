@@ -270,7 +270,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             }
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
             Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
-            Long totalSubsribedShares = new Long(0) ;
+            Long totalSubsribedShares = Long.valueOf(0) ;
 
             for (ShareAccountTransaction transaction : transactions) {
                 if (transaction.isActive() && transaction.isPurchasTransaction()) {
@@ -401,7 +401,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
                 ArrayList<Long> transactionIds = (ArrayList<Long>) changes.get(ShareAccountApiConstants.requestedshares_paramname);
-                Long totalSubscribedShares = new Long(0) ;
+                Long totalSubscribedShares = Long.valueOf(0) ;
                 if (transactionIds != null) {
                     Set<ShareAccountTransaction> transactions = new HashSet<>();
                     for (Long id : transactionIds) {
@@ -411,7 +411,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     }
                     this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
                 }
-                if(!totalSubscribedShares.equals(new Long(0))) {
+                if(!totalSubscribedShares.equals(Long.valueOf(0))) {
                     ShareProduct shareProduct = account.getShareProduct() ;
                     shareProduct.addSubscribedShares(totalSubscribedShares);
                     this.shareProductRepository.save(shareProduct);

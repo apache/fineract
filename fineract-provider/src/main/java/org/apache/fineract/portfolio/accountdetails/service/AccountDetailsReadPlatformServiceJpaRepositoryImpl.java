@@ -168,7 +168,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         private final String schema ;
 
         ShareAccountSummaryDataMapper() {
-            final StringBuffer buff = new StringBuffer()
+            final StringBuilder buff = new StringBuilder()
             .append("sa.id as id, sa.external_id as externalId, sa.status_enum as statusEnum, ")
             .append("sa.account_no as accountNo, sa.total_approved_shares as approvedShares, sa.total_pending_shares as pendingShares, ")
             .append("sa.savings_account_id as savingsAccountNo, sa.minimum_active_period_frequency as minimumactivePeriod,")

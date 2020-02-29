@@ -53,7 +53,7 @@ public class LookupTableMapper {
             return new ArrayList<>(lookupTableDataMap.values());
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public static List<LookupTable> map(final LookupTableData lookupTableData, final Survey survey) {

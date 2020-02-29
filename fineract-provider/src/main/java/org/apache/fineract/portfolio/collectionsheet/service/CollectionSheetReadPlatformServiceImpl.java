@@ -215,7 +215,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private static final class JLGCollectionSheetFaltDataMapper implements RowMapper<JLGCollectionSheetFlatData> {
 
         public String collectionSheetSchema(final boolean isCenterCollection) {
-            StringBuffer sql = new StringBuffer(400);
+            StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue from ")
                     .append("(SELECT gp.display_name As groupName, ")
                     .append("gp.id As groupId, ")
@@ -498,7 +498,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         public String collectionSheetSchema(final boolean isCenterCollection) {
 
-            final StringBuffer sql = new StringBuffer(400);
+            final StringBuilder sql = new StringBuilder(400);
             sql.append("SELECT gp.display_name As groupName, ")
                     .append("gp.id As groupId, ")
                     .append("cl.display_name As clientName, ")
@@ -820,7 +820,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         public IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId) {
 
-            final StringBuffer sb = new StringBuffer(400);
+            final StringBuilder sb = new StringBuilder(400);
             sb.append("SELECT if(sa.deposit_type_enum=100,'Saving Deposit',if(sa.deposit_type_enum=300,'Recurring Deposit','Current Deposit')) as depositAccountType, cl.display_name As clientName, cl.id As clientId, ");
             sb.append("sa.id As savingsId, sa.account_no As accountId, sa.status_enum As accountStatusId, ");
             sb.append("sp.short_name As productShortName, sp.id As productId, ");
