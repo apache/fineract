@@ -93,7 +93,7 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
             isActive = isActiveObj;
         }
         if (position == null) {
-            position = new Integer(0);
+            position = Integer.valueOf(0);
         }
 
         Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(

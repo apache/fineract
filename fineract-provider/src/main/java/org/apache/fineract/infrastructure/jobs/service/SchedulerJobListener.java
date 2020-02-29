@@ -98,7 +98,7 @@ public class SchedulerJobListener implements JobListener {
             StackTraceElement[] stackTraceElements = null;
             errorMessage = throwable.getMessage();
             stackTraceElements = throwable.getStackTrace();
-            final StringBuffer sb = new StringBuffer(throwable.toString());
+            final StringBuilder sb = new StringBuilder(throwable.toString());
             for (final StackTraceElement element : stackTraceElements) {
                 sb.append("\n \t at ").append(element.getClassName()).append(".").append(element.getMethodName()).append("(")
                         .append(element.getLineNumber()).append(")");

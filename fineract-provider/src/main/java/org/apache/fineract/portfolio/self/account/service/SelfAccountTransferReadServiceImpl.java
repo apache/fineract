@@ -44,7 +44,7 @@ public class SelfAccountTransferReadServiceImpl implements
     public Collection<SelfAccountTemplateData> retrieveSelfAccountTemplateData(
             AppUser user) {
         SelfAccountTemplateMapper mapper = new SelfAccountTemplateMapper();
-        StringBuffer sql = new StringBuffer()
+        StringBuilder sql = new StringBuilder()
                 .append("select s.id as accountId, ")
                 .append("s.account_no as accountNo, ")
                 .append("2 as accountType, ")

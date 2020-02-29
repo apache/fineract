@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -100,9 +101,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 try {
 
                     final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
-                    final StringBuffer sb = generateCsvFileBuffer(result);
+                    final StringBuilder sb = generateCsvFileBuffer(result);
 
-                    final InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+                    final InputStream in = new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
 
                     final byte[] outputByte = new byte[4096];
                     Integer readLen = in.read(outputByte, 0, 4096);
@@ -122,8 +123,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     }
 
-    private StringBuffer generateCsvFileBuffer(final GenericResultsetData result) {
-        final StringBuffer writer = new StringBuffer();
+    private StringBuilder generateCsvFileBuffer(final GenericResultsetData result) {
+        final StringBuilder writer = new StringBuilder();
 
         final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
         logger.info("NO. of Columns: {}", columnHeaders.size());

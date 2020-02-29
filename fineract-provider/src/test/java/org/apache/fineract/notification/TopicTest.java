@@ -79,7 +79,7 @@ public class TopicTest {
 
         verify(this.roleRepository, times(1)).save(role);
         verify(this.topicWritePltfService, times(1)).create(refEq(topic));
-        assertEquals(topicId, new Long(1));
+        assertEquals(topicId, Long.valueOf(1));
 
     }
 
@@ -97,7 +97,7 @@ public class TopicTest {
         Long subscriberId = this.topicSubscriberWritePltfService.create(topicSubscriber);
 
         verify(this.topicSubscriberWritePltfService, times(1)).create(refEq(topicSubscriber));
-        assertEquals(subscriberId, new Long(1));
+        assertEquals(subscriberId, Long.valueOf(1));
 
     }
 

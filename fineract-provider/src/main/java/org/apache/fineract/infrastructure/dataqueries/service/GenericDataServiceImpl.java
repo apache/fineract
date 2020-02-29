@@ -97,7 +97,7 @@ public class GenericDataServiceImpl implements GenericDataService {
         // apache one to be about the same then this can be removed.
         int s = 0;
         int e = 0;
-        final StringBuffer result = new StringBuffer();
+        final StringBuilder result = new StringBuilder();
 
         while ((e = str.indexOf(pattern, s)) >= 0) {
             result.append(str.substring(s, e));
@@ -122,7 +122,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     @Override
     public String generateJsonFromGenericResultsetData(final GenericResultsetData grs) {
 
-        final StringBuffer writer = new StringBuffer();
+        final StringBuilder writer = new StringBuilder();
 
         writer.append("[");
 

@@ -78,7 +78,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                     Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId,
                             includeAllOffices);
         String returnIdListStr = null;
-        StringBuffer accessListCSVStrBuf = null;
+        StringBuilder accessListCSVStrBuf = null;
         if ((accesslist != null) && (accesslist.size() > 0)) {
             for(FineractEntityToEntityMappingData accessData: accesslist){
                                 if (accessData == null) {
@@ -86,7 +86,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                                  }
 
                                 if(accessListCSVStrBuf == null){
-                                    accessListCSVStrBuf = new StringBuffer() ;
+                                    accessListCSVStrBuf = new StringBuilder() ;
                                 }else{
                                     accessListCSVStrBuf.append(",");
                                 }
@@ -99,7 +99,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         } else {
 
-            accessListCSVStrBuf = new StringBuffer();
+            accessListCSVStrBuf = new StringBuilder();
             accessListCSVStrBuf.append("false"); // Append false so that no rows
                                                  // will be returned
         }
@@ -138,7 +138,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     }
 
     private String getSQLForRetriveEntityAccessFor() {
-        StringBuffer str = new StringBuffer("select  eem.rel_id as relId,eem.from_id as fromId, ");
+        StringBuilder str = new StringBuilder("select  eem.rel_id as relId,eem.from_id as fromId, ");
                 str.append("eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate ");
                 str.append("from  m_entity_to_entity_mapping eem ");
                 str.append("where eem.rel_id = ? ");
@@ -268,7 +268,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         public GetOneEntityMapper() {
 
-            StringBuffer str = new StringBuffer("select eem.rel_id as relId, ");
+            StringBuilder str = new StringBuilder("select eem.rel_id as relId, ");
             str.append("eem.from_id as fromId,eem.to_Id as toId,eem.start_date as startDate,eem.end_date as endDate ");
             str.append("from m_entity_to_entity_mapping eem ");
             str.append("where eem.id= ? ");
@@ -298,7 +298,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         public EntityToEntityMapper() {
 
-            StringBuffer str = new StringBuffer("select eem.id as mapId, ");
+            StringBuilder str = new StringBuilder("select eem.id as mapId, ");
             str.append("eem.rel_id as relId, ");
             str.append("eem.from_id as from_id, ");
             str.append("eem.to_id as to_id, ");

@@ -362,7 +362,7 @@ public class AccountingScenarioIntegrationTest {
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
@@ -445,7 +445,7 @@ public class AccountingScenarioIntegrationTest {
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);

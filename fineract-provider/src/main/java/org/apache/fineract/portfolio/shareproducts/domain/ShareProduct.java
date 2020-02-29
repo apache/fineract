@@ -416,7 +416,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public void addSubscribedShares(final Long subscribedShares) {
         if(this.totalSubscribedShares == null) {
-            this.totalSubscribedShares = new Long(0) ;
+            this.totalSubscribedShares = Long.valueOf(0) ;
         }
         this.totalSubscribedShares += subscribedShares ;
     }

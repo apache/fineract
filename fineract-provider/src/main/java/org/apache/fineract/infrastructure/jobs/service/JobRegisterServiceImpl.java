@@ -418,7 +418,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private String getStackTraceAsString(final Throwable throwable) {
         final StackTraceElement[] stackTraceElements = throwable.getStackTrace();
-        final StringBuffer sb = new StringBuffer(throwable.toString());
+        final StringBuilder sb = new StringBuilder(throwable.toString());
         for (final StackTraceElement element : stackTraceElements) {
             sb.append("\n \t at ").append(element.getClassName()).append(".").append(element.getMethodName()).append("(")
                     .append(element.getLineNumber()).append(")");

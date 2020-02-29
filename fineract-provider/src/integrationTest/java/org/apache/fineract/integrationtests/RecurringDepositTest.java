@@ -148,7 +148,7 @@ public class RecurringDepositTest {
         final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
@@ -300,7 +300,7 @@ public class RecurringDepositTest {
         final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
@@ -505,7 +505,7 @@ public class RecurringDepositTest {
         final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
@@ -721,7 +721,7 @@ public class RecurringDepositTest {
         final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
@@ -888,7 +888,7 @@ public class RecurringDepositTest {
         final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
@@ -1374,7 +1374,7 @@ public class RecurringDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1454,7 +1454,7 @@ public class RecurringDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1591,7 +1591,7 @@ public class RecurringDepositTest {
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
 
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
         Float interestToBePosted = new Float(decimalFormat.format(interestPerDay * principal * daysInMonth));
@@ -1698,7 +1698,7 @@ public class RecurringDepositTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(calendar.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
@@ -1830,7 +1830,7 @@ public class RecurringDepositTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(calendar.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
@@ -1970,7 +1970,7 @@ public class RecurringDepositTest {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
         calendar.add(Calendar.DAY_OF_MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(calendar.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
@@ -2115,7 +2115,7 @@ public class RecurringDepositTest {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
         calendar.add(Calendar.DAY_OF_MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(calendar.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
@@ -2178,7 +2178,7 @@ public class RecurringDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -2262,7 +2262,7 @@ public class RecurringDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -2344,10 +2344,10 @@ public class RecurringDepositTest {
 
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.YEAR, -1);
-        Integer currentMonth = new Integer(currentMonthFormat.format(todaysDate.getTime()));
+        Integer currentMonth = Integer.valueOf(currentMonthFormat.format(todaysDate.getTime()));
         Integer numberOfMonths = 12 - currentMonth;
         todaysDate.add(Calendar.MONTH, numberOfMonths);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
@@ -2435,10 +2435,10 @@ public class RecurringDepositTest {
 
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.YEAR, -1);
-        Integer currentMonth = new Integer(currentMonthFormat.format(todaysDate.getTime()));
+        Integer currentMonth = Integer.valueOf(currentMonthFormat.format(todaysDate.getTime()));
         Integer numberOfMonths = 12 - currentMonth;
         todaysDate.add(Calendar.MONTH, numberOfMonths);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
@@ -2525,10 +2525,10 @@ public class RecurringDepositTest {
         Calendar todaysDate = Calendar.getInstance();
 
         todaysDate.add(Calendar.YEAR, -1);
-        Integer currentMonth = new Integer(currentMonthFormat.format(todaysDate.getTime()));
+        Integer currentMonth = Integer.valueOf(currentMonthFormat.format(todaysDate.getTime()));
         Integer numberOfMonths = 12 - currentMonth;
         todaysDate.add(Calendar.MONTH, numberOfMonths);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
@@ -2616,10 +2616,10 @@ public class RecurringDepositTest {
         Calendar todaysDate = Calendar.getInstance();
 
         todaysDate.add(Calendar.YEAR, -1);
-        Integer currentMonth = new Integer(currentMonthFormat.format(todaysDate.getTime()));
+        Integer currentMonth = Integer.valueOf(currentMonthFormat.format(todaysDate.getTime()));
         Integer numberOfMonths = 12 - currentMonth;
         todaysDate.add(Calendar.MONTH, numberOfMonths);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
@@ -2708,10 +2708,10 @@ public class RecurringDepositTest {
 
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.YEAR, -1);
-        Integer currentMonth = new Integer(currentMonthFormat.format(todaysDate.getTime()));
+        Integer currentMonth = Integer.valueOf(currentMonthFormat.format(todaysDate.getTime()));
         Integer numberOfMonths = 12 - currentMonth;
         todaysDate.add(Calendar.MONTH, numberOfMonths);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
@@ -2799,10 +2799,10 @@ public class RecurringDepositTest {
 
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.YEAR, -1);
-        Integer currentMonth = new Integer(currentMonthFormat.format(todaysDate.getTime()));
+        Integer currentMonth = Integer.valueOf(currentMonthFormat.format(todaysDate.getTime()));
         Integer numberOfMonths = 12 - currentMonth;
         todaysDate.add(Calendar.MONTH, numberOfMonths);
-        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));

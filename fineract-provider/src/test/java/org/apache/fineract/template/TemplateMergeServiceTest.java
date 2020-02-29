@@ -20,7 +20,6 @@ package org.apache.fineract.template;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -32,6 +31,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,8 +83,8 @@ public class TemplateMergeServiceTest {
         Map<String, Object> scopes = new HashMap<>();
         scopes.put("installments", installments);
 
-        String templateText = Resources.toString(Resources.getResource("template.mustache"), Charsets.UTF_8);
-        String expectedOutput = Resources.toString(Resources.getResource("template-expected.html"), Charsets.UTF_8);
+        String templateText = Resources.toString(Resources.getResource("template.mustache"), StandardCharsets.UTF_8);
+        String expectedOutput = Resources.toString(Resources.getResource("template-expected.html"), StandardCharsets.UTF_8);
 
         String output = compileTemplateText(templateText, scopes);
         assertEquals(expectedOutput, output);
