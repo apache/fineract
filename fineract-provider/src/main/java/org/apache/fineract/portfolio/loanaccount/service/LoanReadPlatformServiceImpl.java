@@ -292,7 +292,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // to support senario where loan has group_id only OR client_id will
         // probably require a UNION query
         // but that at present is an edge case
-        sqlBuilder.append(" join m_office o on o.id = c.office_id");
+        sqlBuilder.append(" join m_office o on (o.id = c.office_id or o.id = g.office_id) ");
         sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
         sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
 
