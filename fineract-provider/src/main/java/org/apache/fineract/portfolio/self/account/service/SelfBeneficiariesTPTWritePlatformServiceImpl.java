@@ -200,7 +200,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
                     NAME_PARAM_NAME, name);
         }
 
-        this.logger.error(dae.getMessage(), dae);
+        this.logger.error("Error occured.", dae);
         throw new PlatformDataIntegrityException(
                 "error.msg.beneficiary.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

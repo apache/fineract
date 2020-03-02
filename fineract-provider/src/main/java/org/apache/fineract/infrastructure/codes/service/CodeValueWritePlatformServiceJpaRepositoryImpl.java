@@ -102,7 +102,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     + "' already exists", "name", name);
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
@@ -161,7 +161,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withSubEntityId(codeValueId)//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            logger.error(dve.getMessage(), dve);
+            logger.error("Error occured.", dve);
             final Throwable realCause = dve.getMostSpecificCause();
             if (realCause.getMessage().contains("code_value")) { throw new PlatformDataIntegrityException("error.msg.codeValue.in.use",
                     "This code value is in use", codeValueId); }

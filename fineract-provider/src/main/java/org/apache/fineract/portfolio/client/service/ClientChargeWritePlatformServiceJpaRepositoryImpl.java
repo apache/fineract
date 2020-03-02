@@ -438,7 +438,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                 "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
                 "clientChargeId", clientChargeId); }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.charges.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

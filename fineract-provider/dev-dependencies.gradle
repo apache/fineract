@@ -26,6 +26,8 @@ dependencies {
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
+    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
+
      api(
             'com.google.code.gson:gson',
             'org.quartz-scheduler:quartz',
@@ -109,6 +111,7 @@ dependencies {
     testCompile 'junit:junit:4.11',
             //'junit:junit-dep:4.11',
             'org.mockito:mockito-core',
+            'org.slf4j:slf4j-simple',
             'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',

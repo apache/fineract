@@ -185,7 +185,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     "name", name);
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

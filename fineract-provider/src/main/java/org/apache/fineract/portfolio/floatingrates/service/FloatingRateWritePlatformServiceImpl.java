@@ -138,7 +138,7 @@ public class FloatingRateWritePlatformServiceImpl implements
 
     private void logAsErrorUnexpectedDataIntegrityException(
             Exception dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
 
     }
 

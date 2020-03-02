@@ -67,7 +67,7 @@ public class ImageData {
                 return IOUtils.toByteArray(fileInputStream);
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error occured.", e);
         }
         return null;
     }
@@ -112,7 +112,7 @@ public class ImageData {
                 out = resizeImage(this.inputStream, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
                         maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                logger.error("Error occured.", e);
             }
         } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
             FileInputStream fis = null;
@@ -120,13 +120,13 @@ public class ImageData {
                 fis = new FileInputStream(this.file);
                 out = resizeImage(fis, maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             } catch (IOException ex) {
-                logger.error(ex.getMessage());
+                logger.error("Error occured.", ex);
             } finally {
                 if (fis != null) {
                     try {
                         fis.close();
                     } catch (IOException ex) {
-                        logger.error(ex.getMessage());
+                        logger.error("Error occured.", ex);
                     }
                 }
             }
@@ -181,7 +181,7 @@ public class ImageData {
             try {
                 available = this.inputStream.available();
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                logger.error("Error occured.", e);
             }
         } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
             FileInputStream fileInputStream = null;
@@ -190,9 +190,9 @@ public class ImageData {
                 available = fileInputStream.available();
                 fileInputStream.close();
             } catch (FileNotFoundException e) {
-                logger.error(e.getMessage());
+                logger.error("Error occured.", e);
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                logger.error("Error occured.", e);
             } finally {
                 if (fileInputStream != null) {
                     try {

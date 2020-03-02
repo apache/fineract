@@ -1079,7 +1079,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
     @Transactional

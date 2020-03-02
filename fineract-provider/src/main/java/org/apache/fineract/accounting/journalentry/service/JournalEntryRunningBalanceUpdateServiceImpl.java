@@ -124,7 +124,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class, officeId);
                 updateRunningBalance(officeId, entityDate);
             } catch (EmptyResultDataAccessException e) {
-                logger.debug("No results found for updation of office running balance with office id:" + officeId);
+                logger.debug("No results found for updation of office running balance with office id: {}", officeId);
             }
             commandProcessingResultBuilder.withOfficeId(officeId);
         }

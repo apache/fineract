@@ -235,9 +235,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         }
                     }
                 } catch (final IOException e) {
-                    logger.error("smsParams does not contain the key: " + e.getMessage());
+                    logger.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
-                    logger.debug("Client Office Id and SMS Campaign Office id doesn't match");
+                    logger.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
                 }
             }
         }
@@ -293,9 +293,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
                     }
                 } catch (final IOException e) {
-                    logger.error("smsParams does not contain the key: " + e.getMessage());
+                    logger.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
-                    logger.debug("Client Office Id and SMS Campaign Office id doesn't match");
+                    logger.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
                 }
             }
         }

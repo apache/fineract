@@ -586,7 +586,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      **/
     private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
 
         throw new PlatformDataIntegrityException("error.msg.loan.reschedule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

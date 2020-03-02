@@ -351,7 +351,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             throw new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist", "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 }

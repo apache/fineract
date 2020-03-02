@@ -93,7 +93,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
     @Transactional

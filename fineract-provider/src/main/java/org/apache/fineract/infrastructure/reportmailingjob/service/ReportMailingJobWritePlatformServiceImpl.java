@@ -399,7 +399,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     ReportMailingJobConstants.NAME_PARAM_NAME, name);
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
 
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

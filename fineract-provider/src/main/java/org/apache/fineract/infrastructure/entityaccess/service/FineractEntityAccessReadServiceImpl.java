@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.infrastructure.dataqueries.service.GenericDataServiceImpl;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
@@ -47,7 +46,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final static Logger logger = LoggerFactory.getLogger(GenericDataServiceImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
 
     @Autowired
@@ -107,7 +106,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         if (accessListCSVStrBuf != null) {
             returnIdListStr = accessListCSVStrBuf.toString();
         }
-        logger.debug("List of IDs applicable:" + returnIdListStr);
+        logger.debug("List of IDs applicable: {}", returnIdListStr);
         return returnIdListStr;
     }
 
@@ -144,7 +143,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                 str.append("from  m_entity_to_entity_mapping eem ");
                 str.append("where eem.rel_id = ? ");
                 str.append("and eem.from_id = ? ");
-        logger.debug(str.toString());
+        logger.debug("{}", str);
         return str.toString();
     }
 
