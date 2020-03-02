@@ -159,6 +159,7 @@ Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+1
 
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
+Please visit <https://issues.apache.org/jira/projects/FINERACT/> to open or find issues.
 
 Roadmap
 ============
