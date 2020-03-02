@@ -118,7 +118,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })

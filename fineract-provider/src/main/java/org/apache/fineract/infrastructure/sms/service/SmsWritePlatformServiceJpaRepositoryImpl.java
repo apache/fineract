@@ -126,7 +126,7 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
         if (realCause.getMessage().contains("mobile_no")) { throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists",
                 "The group, client or staff provided has no mobile no.", "id"); }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.sms.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

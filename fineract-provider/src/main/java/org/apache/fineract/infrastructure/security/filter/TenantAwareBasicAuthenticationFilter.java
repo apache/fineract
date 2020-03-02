@@ -152,7 +152,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         } finally {
             task.stop();
             final PlatformRequestLog log = PlatformRequestLog.from(task, request);
-            logger.debug(this.toApiJsonSerializer.serialize(log));
+            logger.debug("{}", this.toApiJsonSerializer.serialize(log));
         }
     }
 

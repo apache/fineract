@@ -154,7 +154,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }

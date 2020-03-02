@@ -86,7 +86,7 @@ public class Utils {
                     sleep(3);
                 }
             } catch (Exception e) {
-                logger.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, new Object[] {  e.getMessage(), attempt++ });
+                logger.info("{} caused {}, going to wait and retry (attempt {})", new Object[] { HEALTH_URL, e.getMessage(), attempt++ });
                 lastException = e;
                 sleep(3);
             }
@@ -96,7 +96,7 @@ public class Utils {
             logger.error("{} still not reachable, giving up", HEALTH_URL, lastException);
             throw new AssertionError(HEALTH_URL + " not reachable", lastException);
         } else {
-            logger.error("{} still has not returned HTTP 200, giving up; (last) body: ", HEALTH_URL, response.prettyPrint());
+            logger.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL, response.prettyPrint());
             fail(HEALTH_URL + " returned " + response.prettyPrint());
         }
     }

@@ -72,7 +72,7 @@ public class TenantDataSourcePortFixService {
 
     public void fixUpTenantsSchemaServerPort() {
     if (!enabled)  {
-        logger.info("No schema_server_port UPDATE made to tenant_server_connections table of the fineract_tenants schema, because " + ENABLED + " = false");
+        logger.info("No schema_server_port UPDATE made to tenant_server_connections table of the fineract_tenants schema, because {} = false", ENABLED);
         return;
     }
     if (dsp == null) {
@@ -86,10 +86,8 @@ public class TenantDataSourcePortFixService {
     if ( r == 0 )
         logger.warn("UPDATE tenant_server_connections SET ... did not update ANY rows - something is probably wrong");
     else
-            logger.info("Upated "
-                    + r
-                    + " rows in the tenant_server_connections table of the fineract_tenants schema to the real current host: "
-                    + dsp.getHost() + ", port: " + dsp.getPort());
+            logger.info("Upated {} rows in the tenant_server_connections table of the fineract_tenants schema to the real current host: {}, port: {}",
+                    new Object[] { r, dsp.getHost(), dsp.getPort() });
     }
 
 }

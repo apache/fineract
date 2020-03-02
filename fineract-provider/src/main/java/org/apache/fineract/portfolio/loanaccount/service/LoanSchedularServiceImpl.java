@@ -206,7 +206,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         // gets the loanIds data set iteratively and call addAccuruals for that paginated dataset
         do {
             int totalFilteredRecords = loanIds.size();
-            logger.info("Starting accrual - total filtered records - " + totalFilteredRecords);
+            logger.info("Starting accrual - total filtered records - {}", totalFilteredRecords);
             recalculateInterest(loanIds, threadPoolSize, batchSize, executorService);
             maxLoanIdInList+= pageSize+1;
             loanIds = Collections.synchronizedList(this.loanReadPlatformService

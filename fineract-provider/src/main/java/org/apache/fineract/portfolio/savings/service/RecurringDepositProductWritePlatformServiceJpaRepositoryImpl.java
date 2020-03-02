@@ -207,6 +207,6 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        this.logger.error(dae.getMessage(), dae);
+        this.logger.error("Error occured.", dae);
     }
 }

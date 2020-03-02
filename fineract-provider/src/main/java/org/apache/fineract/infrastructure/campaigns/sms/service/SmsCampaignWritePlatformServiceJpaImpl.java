@@ -240,7 +240,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error occured.", e) ;
         }
 
     }
@@ -302,9 +302,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error(e.getMessage()) ;
+            logger.error("Error occured.", e) ;
         } catch (final RuntimeException e) {
-            logger.error(e.getMessage()) ;
+            logger.error("Error occured.", e) ;
         }
     }
 
@@ -347,9 +347,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error(e.getMessage()) ;
+            logger.error("Error occured.", e) ;
         } catch (final RuntimeException e) {
-            logger.error(e.getMessage()) ;
+            logger.error("Error occured.", e) ;
         }
     }
 
@@ -391,9 +391,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error(e.getMessage()) ;
+            logger.error("Error occured.", e) ;
         } catch (final RuntimeException e) {
-            logger.error(e.getMessage()) ;
+            logger.error("Error occured.", e) ;
         }
     }
 
@@ -537,7 +537,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
             resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
         } catch (JsonParseException e) {
-            logger.info("Conversion of report query results to JSON failed: " + e.getMessage() + " - Location: " + e.getLocation());
+            logger.info("Conversion of report query results to JSON failed", e);
             return resultList;
         }
         // loop changes array date to string date
@@ -656,7 +656,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 LocalDateTime tenantDateNow = tenantDateTime();
                 LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
 
-                logger.info("tenant time " + tenantDateNow.toString() + " trigger time " + nextTriggerDate.toString() + JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name());
+                logger.info("tenant time {} trigger time {} {}",
+                    new Object[] { tenantDateNow, nextTriggerDate, JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name() });
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
                     this.updateTriggerDates(smsCampaign.getId());

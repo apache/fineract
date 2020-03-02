@@ -82,7 +82,7 @@ public class SchedulerTriggerListener implements TriggerListener {
                 proceedJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (Exception exception) { //Adding generic exception as it depends on JPA provider
-                logger.debug("Not able to acquire the lock to update job running status for JobKey: " + jobKey);
+                logger.debug("Not able to acquire the lock to update job running status for JobKey: {}", jobKey);
                 try {
                     Random random = new Random();
                     int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);

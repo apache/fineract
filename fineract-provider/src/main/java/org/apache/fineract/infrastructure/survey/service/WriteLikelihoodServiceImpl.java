@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
-    private final static Logger logger = LoggerFactory.getLogger(PovertyLineService.class);
+    private final static Logger logger = LoggerFactory.getLogger(WriteLikelihoodServiceImpl.class);
     private final PlatformSecurityContext context;
     private final LikelihoodDataValidator likelihoodDataValidator;
     private final LikelihoodRepository repository;
@@ -95,7 +95,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
     private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
 
         final Throwable realCause = dve.getMostSpecificCause();
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.likelihood.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

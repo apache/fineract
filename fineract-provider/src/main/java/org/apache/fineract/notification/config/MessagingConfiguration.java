@@ -21,7 +21,6 @@ package org.apache.fineract.notification.config;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.apache.fineract.notification.eventandlistener.NotificationEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ public class MessagingConfiguration {
     private NotificationEventListener notificationEventListener;
 
     @Bean
-      public Logger loggerBean() { return LoggerFactory.getLogger(TenantDataSourcePortFixService.class); }
+      public Logger loggerBean() { return LoggerFactory.getLogger(MessagingConfiguration.class); }
 
     private static final String DEFAULT_BROKER_URL = "tcp://localhost:61616";
 

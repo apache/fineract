@@ -105,16 +105,17 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             .append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = this.jdbcTemplate.update(insertSqlBuilder.toString());
-                        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by inserted: " + result);
+                        logger.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
 
                         this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
                     }
                 } else {
-                    logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Skipping execution of " + adhoc.getName() + ", scheduled for execution on " + next);
+                    logger.info("{}: Skipping execution of {}, scheduled for execution on {}",
+                        new Object[] { ThreadLocalContextUtil.getTenant().getName(), adhoc.getName(), next });
                 }
             });
         }else{
-            logger.info(ThreadLocalContextUtil.getTenant().getName() + "Nothing to update ");
+            logger.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
         }
 
 

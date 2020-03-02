@@ -575,7 +575,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     public void validateHasPermissionTo(final String function) {
         if (hasNotPermissionTo(function)) {
             final String authorizationMessage = "User has no authority to: " + function;
-            logger.info("Unauthorized access: userId: " + getId() + " action: " + function + " allowed: " + getAuthorities());
+            logger.info("Unauthorized access: userId: {} action: {} allowed: {}", new Object[] { getId(), function, getAuthorities() });
             throw new NoAuthorizationException(authorizationMessage);
         }
     }

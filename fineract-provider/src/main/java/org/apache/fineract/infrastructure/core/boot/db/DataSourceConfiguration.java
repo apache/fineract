@@ -46,7 +46,7 @@ public class DataSourceConfiguration {
     public DataSource tenantDataSourceJndi() {
     PoolConfiguration p = getProperties();
         org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(p);
-        logger.info("Created new DataSource; url=" + p.getUrl());
+        logger.info("Created new DataSource; url={}", p.getUrl());
         return ds;
     }
 

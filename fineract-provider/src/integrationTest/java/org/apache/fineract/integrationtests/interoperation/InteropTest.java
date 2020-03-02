@@ -140,7 +140,7 @@ public class InteropTest {
         savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
         Assert.assertNotNull(savingsProductId);
 
-        log.debug("Sucessfully created Interoperable Saving Product (id: " + savingsProductId + ")");
+        log.debug("Sucessfully created Interoperable Saving Product (id: {})", savingsProductId);
     }
 
     private void createCharge() {
@@ -167,7 +167,7 @@ public class InteropTest {
             savingsAccountHelper.addChargesForSavings(savingsId, chargeId, false, interopHelper.getFee());
         }
 
-        log.debug("Sucessfully created Interoperable Saving Account (id: " + savingsId + ")");
+        log.debug("Sucessfully created Interoperable Saving Account (id: {})", savingsId);
     }
 
     private void testParties() {
@@ -245,7 +245,7 @@ public class InteropTest {
 
         // prepare
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
-        log.debug("Response Interoperable GET Saving: " + savings);
+        log.debug("Response Interoperable GET Saving: {}", savings);
         savingsJson = JsonPath.from(savings);
         BigDecimal onHold2 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
         BigDecimal balance2 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
@@ -263,7 +263,7 @@ public class InteropTest {
         Assert.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
 
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
-        log.debug("Response Interoperable GET Saving: " + savings);
+        log.debug("Response Interoperable GET Saving: {}", savings);
         savingsJson = JsonPath.from(savings);
         BigDecimal onHold3 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
         BigDecimal balance3 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
@@ -277,7 +277,7 @@ public class InteropTest {
         Assert.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
 
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
-        log.debug("Response Interoperable GET Saving: " + savings);
+        log.debug("Response Interoperable GET Saving: {}", savings);
         savingsJson = JsonPath.from(savings);
         BigDecimal onHold4 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
         BigDecimal balance4 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);

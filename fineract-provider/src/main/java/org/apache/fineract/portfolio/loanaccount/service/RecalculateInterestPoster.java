@@ -58,7 +58,7 @@ public class RecalculateInterestPoster implements Callable<Void> {
         if (!loanIds.isEmpty()) {
             int errors = 0;
             for (Long loanId : loanIds) {
-                logger.info("Loan ID " + loanId);
+                logger.info("Loan ID {}", loanId);
                 Integer numberOfRetries = 0;
                 while (numberOfRetries <= maxNumberOfRetries) {
                     try {
@@ -66,7 +66,7 @@ public class RecalculateInterestPoster implements Callable<Void> {
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException
                             | ObjectOptimisticLockingFailureException exception) {
-                        logger.info("Recalulate interest job has been retried time(s)", numberOfRetries);
+                        logger.info("Recalulate interest job has been retried {} time(s)", numberOfRetries);
                         // Fail if the transaction has been retired for maxNumberOfRetries
                         if (numberOfRetries >= maxNumberOfRetries) {
                             logger.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back", numberOfRetries);
@@ -91,7 +91,7 @@ public class RecalculateInterestPoster implements Callable<Void> {
                     }
                     i++;
                 }
-                logger.info("Loans count " + i);
+                logger.info("Loans count {}", i);
             }
             if (errors > 0) { throw new JobExecutionException(errors); }
         }
