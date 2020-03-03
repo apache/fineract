@@ -108,11 +108,14 @@ dependencies {
             'javax.validation:validation-api',
     )
 
-    testCompile 'junit:junit:4.11',
+    testCompile 'io.rest-assured:rest-assured-common',
+            'io.rest-assured:rest-assured',
+            'io.rest-assured:json-path',
+            'io.rest-assured:xml-path',
+            'junit:junit',
             //'junit:junit-dep:4.11',
             'org.mockito:mockito-core',
             'org.slf4j:slf4j-simple',
-            'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',

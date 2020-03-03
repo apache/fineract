@@ -25,7 +25,7 @@ dependencies {
         tomcat "org.apache.tomcat:tomcat-dbcp"
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-    
+
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
 
     compile ("org.springframework.boot:spring-boot-starter-data-jpa") {
@@ -108,11 +108,14 @@ dependencies {
 
     implementation 'org.apache.bval:org.apache.bval.bundle'
 
-    testCompile 'junit:junit',
+    testCompile 'io.rest-assured:rest-assured-common',
+            'io.rest-assured:rest-assured',
+            'io.rest-assured:json-path',
+            'io.rest-assured:xml-path',
+            'junit:junit',
             //'junit:junit-dep',
             'org.mockito:mockito-core',
             'org.slf4j:slf4j-simple',
-            'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',

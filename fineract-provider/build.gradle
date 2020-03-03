@@ -99,10 +99,15 @@ dependencyManagement {
      dependency 'org.apache.activemq:activemq-broker:+'
      dependency 'javax.validation:validation-api:+'
      dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
+     dependencySet(group: 'io.rest-assured', version: '+'){
+         entry 'rest-assured-common'
+         entry 'rest-assured'
+         entry 'json-path'
+         entry 'xml-path'
+     }
      dependency 'junit:junit:+'
      //dependency 'junit:junit-dep:4.11'
      dependency 'org.mockito:mockito-core:+'
-     dependency 'com.jayway.restassured:rest-assured:2.3.3'
      dependency 'org.slf4j:slf4j-simple:1.7.30'
      dependency 'com.mockrunner:mockrunner-jms:2.0.1'
      dependency 'com.mockrunner:mockrunner-jdbc:2.0.1'
