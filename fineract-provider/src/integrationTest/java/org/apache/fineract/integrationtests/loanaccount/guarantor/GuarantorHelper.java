@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests.loanaccount.guarantor;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.CommonConstants;
