@@ -27,6 +27,6 @@ public interface GLClosureWritePlatformService {
 
     CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
 
-    CommandProcessingResult deleteGLClosure(Long glClosureId);
+    CommandProcessingResult deleteGLClosure(Long glClosureId, JsonCommand command);
 
 }

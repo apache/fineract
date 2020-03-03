@@ -245,4 +245,5 @@ public class GLAccount extends AbstractPersistableCustom<Long> {
         this.parent = parentAccount;
         generateHierarchy();
     }
+
 }

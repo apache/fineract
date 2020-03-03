@@ -245,4 +245,8 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
     public void loadLazyCollections() {
         this.children.size() ;
     }
+
+    public List<Office> getChildren() {
+        return this.children;
+    }
 }

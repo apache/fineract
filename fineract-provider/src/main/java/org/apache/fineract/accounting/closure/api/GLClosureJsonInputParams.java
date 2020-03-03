@@ -25,8 +25,10 @@ import java.util.Set;
  * Enum of all parameters passed in while creating/updating a loan product
  ***/
 public enum GLClosureJsonInputParams {
-    ID("id"), OFFICE_ID("officeId"), CLOSING_DATE("closingDate"), COMMENTS("comments"), LOCALE("locale"), DATE_FORMAT("dateFormat");
-
+    ID("id"), OFFICE_ID("officeId"), CLOSING_DATE("closingDate"), COMMENTS("comments"), LOCALE("locale"), DATE_FORMAT("dateFormat"),
+    BOOK_OFF_INCOME_AND_EXPENSE("bookOffIncomeAndExpense"),EQUITY_GL_ACCOUNT_ID("equityGlAccountId"),CURRENCY_CODE("currencyCode"),
+    REVERSE_INCOME_AND_EXPENSE_BOOKING("reverseIncomeAndExpenseBooking"),SUB_BRANCHES("subBranches"),
+    INCOME_AND_EXPENSE_COMMENTS("incomeAndExpenseComments");
     private final String value;
 
     private GLClosureJsonInputParams(final String value) {
