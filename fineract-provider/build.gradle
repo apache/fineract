@@ -129,10 +129,7 @@ dependencyManagement {
          entry 'tomcat-embed-jasper'
          entry 'tomcat-embed-logging-log4j'
      }
-     dependencySet(group: 'org.apache.tomcat', version: '7.0.94') {
-         entry 'tomcat-dbcp'
-         entry 'tomcat-jdbc'
-     }
+     
   }
 }
 
@@ -404,7 +401,6 @@ tomcatRun {
     stopPort = 8081
     stopKey=   'stopKey'
     enableSSL = true
-    configFile = file('src/test/resources/META-INF/context.xml')
 }
 
 tomcatRunWar {
@@ -415,7 +411,6 @@ tomcatRunWar {
     enableSSL = true
     keystoreFile = file('src/main/resources/keystore.jks')
     keystorePass = 'openmf'
-    configFile = file('src/test/resources/META-INF/context.xml')
 }
 
 task tomcatRunWarAsDaemonForIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatRunWar) {
@@ -426,7 +421,6 @@ task tomcatRunWarAsDaemonForIntegrationTest(type: com.bmuschko.gradle.tomcat.tas
     enableSSL = true
     keystoreFile = file('src/main/resources/keystore.jks')
     keystorePass = 'openmf'
-    configFile = file('src/test/resources/META-INF/context.xml')
     daemon = true
 }
 

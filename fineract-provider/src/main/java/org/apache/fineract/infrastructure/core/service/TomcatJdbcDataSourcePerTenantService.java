@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
-import org.apache.tomcat.jdbc.pool.PoolConfiguration;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private JDBCDriverConfig driverConfig ;
 
     @Autowired
-    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("tenantDataSourceJndi") DataSource tenantDataSource) {
+    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
         this.tenantDataSource = tenantDataSource;
     }
 
@@ -85,42 +85,20 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
         // see also org.apache.fineract.DataSourceProperties.setDefaults()
-         String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName()) ;
-        //final String jdbcUrl = tenantConnectionObj.databaseURL();
-        final PoolConfiguration poolConfiguration = new PoolProperties();
-        poolConfiguration.setDriverClassName(this.driverConfig.getDriverClassName());
-        poolConfiguration.setName(tenantConnectionObj.getSchemaName() + "_pool");
-        poolConfiguration.setUrl(jdbcUrl);
-        poolConfiguration.setUsername(tenantConnectionObj.getSchemaUsername());
-        poolConfiguration.setPassword(tenantConnectionObj.getSchemaPassword());
+         String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName());
 
-        poolConfiguration.setInitialSize(tenantConnectionObj.getInitialSize());
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName(this.driverConfig.getDriverClassName());
+        config.setPoolName(tenantConnectionObj.getSchemaName() + "_pool");
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(tenantConnectionObj.getSchemaUsername());
+        config.setPassword(tenantConnectionObj.getSchemaPassword());
 
-        poolConfiguration.setTestOnBorrow(tenantConnectionObj.isTestOnBorrow());
-        poolConfiguration.setValidationQuery("SELECT 1");
-        poolConfiguration.setValidationInterval(tenantConnectionObj.getValidationInterval());
+        config.setConnectionTestQuery("SELECT 1");
+        config.setValidationTimeout(tenantConnectionObj.getValidationInterval());
 
-        poolConfiguration.setRemoveAbandoned(tenantConnectionObj.isRemoveAbandoned());
-        poolConfiguration.setRemoveAbandonedTimeout(tenantConnectionObj.getRemoveAbandonedTimeout());
-        poolConfiguration.setLogAbandoned(tenantConnectionObj.isLogAbandoned());
-        poolConfiguration.setAbandonWhenPercentageFull(tenantConnectionObj.getAbandonWhenPercentageFull());
-        poolConfiguration.setDefaultAutoCommit(true);
+        config.setAutoCommit(true);
 
-        /**
-         * Vishwas- Do we need to enable the below properties and add
-         * ResetAbandonedTimer for long running batch Jobs?
-         **/
-        // poolConfiguration.setMaxActive(tenant.getMaxActive());
-        // poolConfiguration.setMinIdle(tenant.getMinIdle());
-        // poolConfiguration.setMaxIdle(tenant.getMaxIdle());
-
-        // poolConfiguration.setSuspectTimeout(tenant.getSuspectTimeout());
-        // poolConfiguration.setTimeBetweenEvictionRunsMillis(tenant.getTimeBetweenEvictionRunsMillis());
-        // poolConfiguration.setMinEvictableIdleTimeMillis(tenant.getMinEvictableIdleTimeMillis());
-
-        poolConfiguration.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-                + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport");
-
-        return new org.apache.tomcat.jdbc.pool.DataSource(poolConfiguration);
+        return new HikariDataSource(config);
     }
 }

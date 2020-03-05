@@ -31,35 +31,6 @@
   <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
   <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
 
-  <!-- Global JNDI resources
-       Documentation at /docs/jndi-resources-howto.html
-  -->
-  <GlobalNamingResources>
-    <!-- Editable user database that can also be used by
-         UserDatabaseRealm to authenticate users
-    -->
-     <Resource type="javax.sql.DataSource"
-        name="jdbc/fineract_tenants"
-        factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
-        driverClassName="${fineract_tenants_driver}"
-        url="${fineract_tenants_url}"
-        username="${fineract_tenants_uid}"
-        password="${fineract_tenants_pwd}"
-        initialSize="3"
-        maxActive="10"
-        maxIdle="6"
-        minIdle="3"
-        validationQuery="SELECT 1"
-        testOnBorrow="true"
-        testOnReturn="true"
-        testWhileIdle="true"
-        timeBetweenEvictionRunsMillis="30000"
-        minEvictableIdleTimeMillis="60000"
-        logAbandoned="true"
-        suspectTimeout="60"
-      />
-  </GlobalNamingResources>
-
   <!-- A "Service" is a collection of one or more "Connectors" that share
        a single "Container" Note:  A "Service" is not itself a "Container",
        so you may not define subcomponents such as "Valves" at this level.

@@ -39,7 +39,7 @@ import org.springframework.context.annotation.ImportResource;
  */
 public class WarWebApplicationInitializer extends SpringBootServletInitializer {
 
-    @ImportResource({ "classpath*:META-INF/spring/jndi.xml" })
+    @ImportResource({ "classpath*:META-INF/spring/hikariDataSource.xml" })
     private static class Configuration extends AbstractApplicationConfiguration {
     }
 

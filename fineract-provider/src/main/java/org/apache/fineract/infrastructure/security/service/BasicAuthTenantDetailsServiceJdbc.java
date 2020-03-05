@@ -42,7 +42,7 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public BasicAuthTenantDetailsServiceJdbc(@Qualifier("tenantDataSourceJndi") final DataSource dataSource) {
+    public BasicAuthTenantDetailsServiceJdbc(@Qualifier("hikariTenantDataSource") final DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

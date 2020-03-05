@@ -43,7 +43,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public JdbcTenantDetailsService(@Qualifier("tenantDataSourceJndi") final DataSource dataSource) {
+    public JdbcTenantDetailsService(@Qualifier("hikariTenantDataSource") final DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
