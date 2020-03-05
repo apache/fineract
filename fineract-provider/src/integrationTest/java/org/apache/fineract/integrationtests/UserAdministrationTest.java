@@ -142,7 +142,6 @@ public class UserAdministrationTest {
 
         final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId, "errors");
         Map reason = (Map) errors.get(0);
-        
         Assert.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.", reason.get("defaultUserMessage"));
     }
 
