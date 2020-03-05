@@ -44,6 +44,7 @@
 	<logger name="org.springframework.beans" level="info" />
 	<logger name="net.sf.ehcache" level="error" />
 	<logger name="org.hibernate.cache" level="error" />
+	<logger name="com.zaxxer.hikari" level="debug" additivity="false" />
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

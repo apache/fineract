@@ -22,7 +22,6 @@ dependencies {
         tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
             exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
         }
-        tomcat "org.apache.tomcat:tomcat-dbcp"
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
@@ -79,8 +78,6 @@ dependencies {
 
             //'mysql:mysql-connector-java',
             'org.drizzle.jdbc:drizzle-jdbc',
-            'org.apache.tomcat:tomcat-jdbc',
-
 
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
@@ -125,7 +122,7 @@ dependencies {
             'com.sun.jersey:jersey-core',
             'com.mockrunner:mockrunner-jdbc'
 
-     testCompile ("org.springframework.boot:spring-boot-starter-test") {
-         exclude group: 'com.jayway.jsonpath', module: 'json-path'
-     }
+    testCompile ("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: 'com.jayway.jsonpath', module: 'json-path'
+    }
 }

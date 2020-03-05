@@ -22,17 +22,14 @@ dependencies {
         tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
             exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
         }
-        tomcat "org.apache.tomcat:tomcat-dbcp"
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
 
-    compile ("org.springframework.boot:spring-boot-starter-data-jpa") {
-        exclude group: 'com.zaxxer', module: 'HikariCP'
-    }
+    compile ("org.springframework.boot:spring-boot-starter-data-jpa")
 
-     api(
+    api(
             'com.google.code.gson:gson',
             'org.quartz-scheduler:quartz',
             'org.apache.openjpa:openjpa',
@@ -78,8 +75,6 @@ dependencies {
 
             //'mysql:mysql-connector-java',
             'org.drizzle.jdbc:drizzle-jdbc',
-            'org.apache.tomcat:tomcat-jdbc',
-
 
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
@@ -125,6 +120,6 @@ dependencies {
             'com.mockrunner:mockrunner-jdbc'
 
     testCompile ("org.springframework.boot:spring-boot-starter-test") {
-         exclude group: 'com.jayway.jsonpath', module: 'json-path'
-     }
+        exclude group: 'com.jayway.jsonpath', module: 'json-path'
+    }
 }
