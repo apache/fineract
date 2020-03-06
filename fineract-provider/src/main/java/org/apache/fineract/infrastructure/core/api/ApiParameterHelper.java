@@ -169,6 +169,12 @@ public class ApiParameterHelper {
         return singleQuote + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1) + singleQuote;
     }
 
+    public static String sqlEncodedStringWithoutValidation(final String str){
+        final String singleQuote = "'";
+        final String twoSingleQuotes = "''";
+        return singleQuote + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1) + singleQuote;
+    }
+
 
     public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
 

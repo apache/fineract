@@ -213,7 +213,6 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(rm.schema(includeJson, hierarchy));
         sqlBuilder.append(' ').append(updatedExtraCriteria);
-        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(' ').append(parameters.orderBySql());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.orderBySql());
