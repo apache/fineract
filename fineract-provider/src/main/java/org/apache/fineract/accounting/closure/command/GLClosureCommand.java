@@ -36,12 +36,29 @@ public class GLClosureCommand {
     private final Long officeId;
     private final LocalDate closingDate;
     private final String comments;
+    private final Boolean bookOffIncomeAndExpense;
+    private final Long equityGlAccountId;
+    private final String currencyCode;
+    private final Boolean reverseIncomeAndExpenseBooking;
+    private final Boolean subBranches;
+    private final String incomeAndExpenseComments;
 
-    public GLClosureCommand(final Long id, final Long officeId, final LocalDate closingDate, final String comments) {
+    public GLClosureCommand(final Long id, final Long officeId, final LocalDate closingDate, final String comments,
+            final Boolean bookOffIncomeAndExpense, final Long equityGlAccountId,
+            final String currencyCode,final Boolean reverseIncomeAndExpenseBooking,
+            final Boolean subBranches,final String incomeAndExpenseComments
+            )
+    {
         this.id = id;
         this.officeId = officeId;
         this.closingDate = closingDate;
         this.comments = comments;
+        this.bookOffIncomeAndExpense = bookOffIncomeAndExpense == null ? false : bookOffIncomeAndExpense;
+        this.equityGlAccountId = equityGlAccountId;
+        this.currencyCode = currencyCode;
+        this.reverseIncomeAndExpenseBooking = reverseIncomeAndExpenseBooking == null ? false : reverseIncomeAndExpenseBooking;
+        this.subBranches = subBranches == null ? false : subBranches;
+        this.incomeAndExpenseComments = incomeAndExpenseComments;
     }
 
     public void validateForCreate() {
@@ -55,6 +72,12 @@ public class GLClosureCommand {
                 .integerGreaterThanZero();
         baseDataValidator.reset().parameter(GLClosureJsonInputParams.COMMENTS.getValue()).value(this.comments).ignoreIfNull()
                 .notExceedingLengthOf(500);
+        if(this.bookOffIncomeAndExpense){
+            baseDataValidator.reset().parameter(GLClosureJsonInputParams.EQUITY_GL_ACCOUNT_ID.getValue()).value(this.equityGlAccountId).notNull();
+            baseDataValidator.reset().parameter(GLClosureJsonInputParams.CURRENCY_CODE.getValue()).value(this.currencyCode).notNull();
+            baseDataValidator.reset().parameter(GLClosureJsonInputParams.COMMENTS.getValue()).value(this.incomeAndExpenseComments).ignoreIfNull()
+                    .notExceedingLengthOf(500);
+        }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -71,6 +94,42 @@ public class GLClosureCommand {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
+    }
+
+    public Boolean getBookOffIncomeAndExpense() {
+        return this.bookOffIncomeAndExpense;
+    }
+
+    public Long getEquityGlAccountId() {
+        return this.equityGlAccountId;
+    }
+
+    public String getCurrencyCode() {
+        return this.currencyCode;
+    }
+
+    public Boolean getSubBranches() {
+        return this.subBranches;
+    }
+
+    public Boolean getReverseIncomeAndExpenseBooking() {
+        return this.reverseIncomeAndExpenseBooking;
+    }
+
+    public String getIncomeAndExpenseComments() {
+        return this.incomeAndExpenseComments;
+    }
+
+    public Long getOfficeId() {
+        return this.officeId;
+    }
+
+    public LocalDate getClosingDate() {
+        return this.closingDate;
+    }
+
+    public String getComments() {
+        return this.comments;
     }
 
 }

@@ -25,10 +25,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -85,8 +83,8 @@ public class GLClosure extends AbstractAuditableCustom {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             // now update actual property
-            if (paramName.equals(GLClosureJsonInputParams.COMMENTS.getValue())) {
-                this.comments = newValue;
+        if (paramName.equals(GLClosureJsonInputParams.COMMENTS.getValue())) {
+            this.comments = newValue;
             }
         }
     }
@@ -97,6 +95,10 @@ public class GLClosure extends AbstractAuditableCustom {
 
     public Office getOffice() {
         return this.office;
+    }
+
+    public void updateDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 }

@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.glaccount.domain;
+package org.apache.fineract.accounting.closure.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.List;
+import org.apache.fineract.accounting.closure.data.IncomeAndExpenseJournalEntryData;
+import org.joda.time.LocalDate;
 
-public interface GLAccountRepository extends JpaRepository<GLAccount, Long>, JpaSpecificationExecutor<GLAccount> {
 
-    GLAccount findByParent(Long equityGlAccountId);
-    // no added behaviour
+
+
+public interface IncomeAndExpenseReadPlatformService {
+    List<IncomeAndExpenseJournalEntryData> retrieveAllIncomeAndExpenseJournalEntryData(Long officeId,LocalDate date,String currencyCode);
 }
