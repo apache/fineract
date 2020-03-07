@@ -47,4 +47,7 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     JournalEntry findLOANJournalEntryWith(@Param("accountId") Long accountId, @Param("transactionId") String transactionId,
             @Param("transactionDate") Date transactionDate, @Param("journalEntryType") Integer journalEntryType,
             @Param("loanId") Long loanId, @Param("loanTransactionId") Long loanTransactionId);*/
+
+    @Query("select journalEntry from JournalEntry  journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false")
+    List<JournalEntry> findUnReversedJournalEntriesByTransactionId(@Param("transactionId") String transactionId);
 }

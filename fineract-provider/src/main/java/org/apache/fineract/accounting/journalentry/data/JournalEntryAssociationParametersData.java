@@ -22,15 +22,19 @@ public class JournalEntryAssociationParametersData {
 
     private final boolean transactionDetailsRequired;
     private final boolean runningBalanceRequired;
+    private final boolean glClosureRequired;
 
     public JournalEntryAssociationParametersData() {
         this.transactionDetailsRequired = false;
         this.runningBalanceRequired = false;
+        this.glClosureRequired = false;
     }
 
-    public JournalEntryAssociationParametersData(final boolean transactionDetailsRequired, final boolean runningBalanceRequired) {
+    public JournalEntryAssociationParametersData(final boolean transactionDetailsRequired, final boolean runningBalanceRequired,
+            final boolean glClosureRequired) {
         this.transactionDetailsRequired = transactionDetailsRequired;
         this.runningBalanceRequired = runningBalanceRequired;
+        this.glClosureRequired = glClosureRequired;
     }
 
     public boolean isTransactionDetailsRequired() {
@@ -39,5 +43,8 @@ public class JournalEntryAssociationParametersData {
 
     public boolean isRunningBalanceRequired() {
         return this.runningBalanceRequired;
+    }
+    public boolean isGlClosureRequired (){
+        return this.glClosureRequired;
     }
 }

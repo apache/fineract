@@ -266,4 +266,20 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     public PlatformSecurityContext getContext() {
         return this.context;
     }
+
+    @Override
+    public Collection<Long> officeByHierarchy(Long officeId) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT ounder.id FROM m_office mo ");
+        sqlBuilder.append(" JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%') ");
+        sqlBuilder.append(" AND ounder.hierarchy like CONCAT('.', '%') where mo.id = ? ");
+
+
+        try {
+            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
+                    new Object[] { officeId});
+        } catch (final EmptyResultDataAccessException e) {
+           return null;
+        }
+    }
 }

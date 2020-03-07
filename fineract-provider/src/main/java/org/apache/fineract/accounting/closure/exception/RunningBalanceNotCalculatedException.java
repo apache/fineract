@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.glaccount.domain;
+package org.apache.fineract.accounting.closure.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface GLAccountRepository extends JpaRepository<GLAccount, Long>, JpaSpecificationExecutor<GLAccount> {
+public class RunningBalanceNotCalculatedException extends AbstractPlatformDomainRuleException {
+    public RunningBalanceNotCalculatedException(final Long officeId) {
+        super("error.msg.running.balance.not.calculated", "Office with identifier " + officeId + " running balance is not calculated");
+    }
 
-    GLAccount findByParent(Long equityGlAccountId);
-    // no added behaviour
 }

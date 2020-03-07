@@ -41,6 +41,6 @@ public class DeleteGLClosureCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.closureWritePlatformService.deleteGLClosure(command.entityId());
+        return this.closureWritePlatformService.deleteGLClosure(command.entityId(), command);
     }
 }
