@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
     @Autowired
     public GLClosureReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -49,10 +48,12 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             return " glClosure.id as id, glClosure.office_id as officeId,office.name as officeName ,glClosure.closing_date as closingDate,"
                     + " glClosure.is_deleted as isDeleted, creatingUser.id as creatingUserId,creatingUser.username as creatingUserName,"
                     + " updatingUser.id as updatingUserId,updatingUser.username as updatingUserName, glClosure.created_date as createdDate,"
-                    + " glClosure.lastmodified_date as updatedDate, glClosure.comments as comments "
-                    + " from acc_gl_closure as glClosure, m_appuser as creatingUser, m_appuser as updatingUser,m_office as office"
-                    + " where glClosure.createdby_id=creatingUser.id and "
-                    + " glClosure.lastmodifiedby_id=updatingUser.id and glClosure.office_id=office.id";
+                    + " glClosure.lastmodified_date as updatedDate, glClosure.comments as comments,ie.journal_entry_transaction_id as journalEntryTransactionId "
+                    + " from acc_gl_closure as glClosure "
+                    + " left join m_appuser as creatingUser on glClosure.createdby_id=creatingUser.id "
+                    + " left join m_appuser as updatingUser on glClosure.lastmodifiedby_id=updatingUser.id "
+                    + " left join m_office as office on glClosure.office_id=office.id "
+                    + " left join acc_income_and_expense_bookings as ie on ie.gl_closure_id = glClosure.id ";
         }
 
         @Override
@@ -70,9 +71,11 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
             final String comments = rs.getString("comments");
+            final String journalEntryBookingForIncomeAndExpense = rs.getString("journalEntryTransactionId");
+
 
             return new GLClosureData(id, officeId, officeName, closingDate, deleted, createdDate, lastUpdatedDate, creatingByUserId,
-                    createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName, comments);
+                    createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName, comments, journalEntryBookingForIncomeAndExpense);
         }
     }
 
@@ -80,7 +83,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     public List<GLClosureData> retrieveAllGLClosures(final Long officeId) {
         final GLClosureMapper rm = new GLClosureMapper();
 
-        String sql = "select " + rm.schema() + " and glClosure.is_deleted = 0";
+        String sql = "select " + rm.schema() + " where (glClosure.is_deleted = 0 or glClosure.is_deleted = 1) ";
         final Object[] objectArray = new Object[1];
         int arrayPos = 0;
         if (officeId != null && officeId != 0) {
@@ -100,7 +103,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         try {
 
             final GLClosureMapper rm = new GLClosureMapper();
-            final String sql = "select " + rm.schema() + " and glClosure.id = ?";
+            final String sql = "select " + rm.schema() + " where glClosure.id = ?";
 
             final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId });
 

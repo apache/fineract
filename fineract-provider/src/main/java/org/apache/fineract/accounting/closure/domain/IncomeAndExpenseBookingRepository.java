@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.glaccount.domain;
+package org.apache.fineract.accounting.closure.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface GLAccountRepository extends JpaRepository<GLAccount, Long>, JpaSpecificationExecutor<GLAccount> {
+public interface IncomeAndExpenseBookingRepository extends JpaRepository<IncomeAndExpenseBooking, Long>, JpaSpecificationExecutor<IncomeAndExpenseBooking> {
+    IncomeAndExpenseBooking findByGlClosureAndReversedIsFalse(final GLClosure glClosure);
 
-    GLAccount findByParent(Long equityGlAccountId);
-    // no added behaviour
 }

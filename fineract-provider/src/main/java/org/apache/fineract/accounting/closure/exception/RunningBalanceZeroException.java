@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.glaccount.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+package org.apache.fineract.accounting.closure.exception;
 
-public interface GLAccountRepository extends JpaRepository<GLAccount, Long>, JpaSpecificationExecutor<GLAccount> {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-    GLAccount findByParent(Long equityGlAccountId);
-    // no added behaviour
+
+public class RunningBalanceZeroException extends AbstractPlatformDomainRuleException {
+    public RunningBalanceZeroException(final String officeName) {
+        super("error.msg.running.balance.is.zero", officeName + " running balance is zero");
+    }
 }
