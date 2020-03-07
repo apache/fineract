@@ -13,7 +13,7 @@
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
+ * specific langGLClosureCommanduage governing permissions and limitations
  * under the License.
  */
 
@@ -31,7 +31,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
 @Table(name = "acc_income_and_expense_bookings",uniqueConstraints = { @UniqueConstraint(columnNames = { "journal_entry_transaction_id" }, name = "journal_entry_transaction_id") })
-public class IncomeAndExpenseBooking extends AbstractPersistableCustom<Long>  {
+public class IncomeAndExpenseBooking extends AbstractPersistableCustom  {
 
     @ManyToOne
     @JoinColumn(name = "gl_closure_id", nullable = false)
