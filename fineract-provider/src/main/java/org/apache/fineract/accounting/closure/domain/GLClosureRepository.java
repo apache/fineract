@@ -25,6 +25,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface GLClosureRepository extends JpaRepository<GLClosure, Long>, JpaSpecificationExecutor<GLClosure> {
 
-    @Query("select closure from GLClosure closure where closure.closingDate = (select max(closure1.closingDate) from GLClosure closure1 where closure1.office.id=:officeId)  and closure.office.id= :officeId")
+    @Query("select closure from GLClosure closure where closure.closingDate = (select max(closure1.closingDate) from GLClosure closure1 where closure1.office.id=:officeId and closure1.deleted = false )  and closure.office.id= :officeId and closure.deleted = false order by closure.id")
     GLClosure getLatestGLClosureByBranch(@Param("officeId") Long officeId);
 }

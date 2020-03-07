@@ -55,10 +55,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         calculateIncomeAndExpenseBooking =  new CalculateIncomeAndExpenseBookingImpl(null, null, null, null, incomeAndExpenseReadPlatformService,officeReadPlatformService);
      }
 
-    @After
-    public void tearDown() {
-
-    }
     /*
         Case 1: All running balances has to be calculated before booking off income and expense account
         If not running balances, then throw exception
