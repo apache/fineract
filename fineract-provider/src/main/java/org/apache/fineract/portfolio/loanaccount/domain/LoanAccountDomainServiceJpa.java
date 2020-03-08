@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -227,10 +228,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         // disable all active standing orders linked to this loan if status changes to closed
         disableStandingInstructionsLinkedToClosedLoan(loan);
 
-        builderResult.withEntityId(newRepaymentTransaction.getId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId()); //
+        builderResult.withEntityId(newRepaymentTransaction.getId())
+        .withOfficeId(loan.getOfficeId())
+        .withClientId(loan.getClientId())
+        .withGroupId(loan.getGroupId());
 
         return newRepaymentTransaction;
     }
@@ -244,7 +245,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
             if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
                 baseDataValidator.reset().parameter("externalId").value(newRepaymentTransaction.getExternalId())
-                        .failWithCode("value.must.be.unique");
+                .failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                     "Validation errors exist.", dataValidationErrors); }
@@ -412,10 +413,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_REFUND,
                 constructEntityMap(BUSINESS_ENTITY.LOAN_TRANSACTION, newRefundTransaction));
-        builderResult.withEntityId(newRefundTransaction.getId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId()); //
+        builderResult.withEntityId(newRefundTransaction.getId())
+        .withOfficeId(loan.getOfficeId())
+        .withClientId(loan.getClientId())
+        .withGroupId(loan.getGroupId());
 
         return newRefundTransaction;
     }
@@ -509,10 +510,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         if (!loanScheduleAccrualDatas.isEmpty()) {
-            String error = this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
-            if (error.length() > 0) {
+            try {
+                this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
+            } catch (MultiException e) {
                 String globalisationMessageCode = "error.msg.accrual.exception";
-                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, error, error);
+                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage());
             }
         }
     }
@@ -543,10 +545,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, installment.getInstallmentNumber(),
                     accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
                     installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
-                            .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
+                    .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
                     installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(), installment
-                            .getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom, installment
-                            .getInterestWaived(currency).getAmount());
+                    .getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom, installment
+                    .getInterestWaived(currency).getAmount());
             loanScheduleAccrualDatas.add(accrualData);
 
         }
@@ -604,10 +606,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_REFUND,
                 constructEntityMap(BUSINESS_ENTITY.LOAN_TRANSACTION, newRefundTransaction));
 
-        builderResult.withEntityId(newRefundTransaction.getId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId()); //
+        builderResult.withEntityId(newRefundTransaction.getId())
+        .withOfficeId(loan.getOfficeId())
+        .withClientId(loan.getClientId())
+        .withGroupId(loan.getGroupId());
 
         return newRefundTransaction;
     }
