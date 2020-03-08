@@ -108,21 +108,19 @@ public class InteropServiceImpl implements InteropService {
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
 
     private final SavingsAccountDomainService savingsAccountService;
-    private final PaymentDetailWritePlatformService paymentDetailService;
-
     @Autowired
     public InteropServiceImpl(PlatformSecurityContext securityContext,
-                              InteropDataValidator interopDataValidator,
-                              SavingsAccountRepository savingsAccountRepository,
-                              SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-                              ApplicationCurrencyRepository applicationCurrencyRepository,
-                              NoteRepository noteRepository,
-                              PaymentTypeRepository paymentTypeRepository,
-                              InteropIdentifierRepository identifierRepository,
-                              SavingsHelper savingsHelper,
-                              SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-                              SavingsAccountDomainService savingsAccountService,
-                              PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+            InteropDataValidator interopDataValidator,
+            SavingsAccountRepository savingsAccountRepository,
+            SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            ApplicationCurrencyRepository applicationCurrencyRepository,
+            NoteRepository noteRepository,
+            PaymentTypeRepository paymentTypeRepository,
+            InteropIdentifierRepository identifierRepository,
+            SavingsHelper savingsHelper,
+            SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+            SavingsAccountDomainService savingsAccountService,
+            PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
         this.securityContext = securityContext;
         this.dataValidator = interopDataValidator;
         this.savingsAccountRepository = savingsAccountRepository;
@@ -134,7 +132,6 @@ public class InteropServiceImpl implements InteropService {
         this.savingsHelper = savingsHelper;
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsAccountService = savingsAccountService;
-        this.paymentDetailService = paymentDetailWritePlatformService;
     }
 
     @NotNull
@@ -153,11 +150,13 @@ public class InteropServiceImpl implements InteropService {
         ZoneId zoneId = ZoneId.of(ThreadLocalContextUtil.getTenant().getTimezoneId());
         Predicate<SavingsAccountTransaction> transFilter = t -> {
             SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(t.getTypeOf());
-            if (debit != transactionType.isDebit() && credit != transactionType.isCredit())
+            if (debit != transactionType.isDebit() && credit != transactionType.isCredit()) {
                 return false;
+            }
 
-            if (transactionsFrom == null && transactionsTo == null)
+            if (transactionsFrom == null && transactionsTo == null) {
                 return true;
+            }
 
             java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().toDateTimeAtStartOfDay().toDate().toInstant().atZone(zoneId).toLocalDateTime();
             return (transactionsTo == null || transactionsTo.compareTo(transactionDate) > 0)
@@ -175,19 +174,18 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @NotNull
+    @Override
     @Transactional
     public InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
-        if (identifier == null)
-            throw new UnsupportedOperationException("Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
-
         return InteropIdentifierAccountResponseData.build(identifier.getAccount().getExternalId());
     }
 
     @NotNull
+    @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                                          String subIdOrType, @NotNull JsonCommand command) {
+            String subIdOrType, @NotNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         //TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
@@ -202,13 +200,12 @@ public class InteropServiceImpl implements InteropService {
         return InteropIdentifierAccountResponseData.build(savingsAccount.getExternalId());
     }
 
+    @Override
     @NotNull
     @Transactional(propagation = Propagation.MANDATORY)
     public InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                                        String subIdOrType) {
+            String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
-        if (identifier == null)
-            throw new UnsupportedOperationException("Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
 
         String accountId = identifier.getAccount().getExternalId();
 
@@ -230,8 +227,7 @@ public class InteropServiceImpl implements InteropService {
         // only when Payee request transaction from Payer, so here role must be always Payer
         InteropTransactionRequestData request = dataValidator.validateAndParseCreateRequest(command);
 
-        //TODO: error handling
-        SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
+        validateAndGetSavingAccount(request);
 
         return InteropTransactionRequestResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
                 request.getExpiration(), request.getExtensionList(), request.getRequestCode());
@@ -282,8 +278,9 @@ public class InteropServiceImpl implements InteropService {
             if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), total)) {
                 throw new UnsupportedOperationException();
             }
-            if (findTransaction(savingsAccount, transferCode, SavingsAccountTransactionType.AMOUNT_HOLD) != null)
+            if (findTransaction(savingsAccount, transferCode, SavingsAccountTransactionType.AMOUNT_HOLD) != null) {
                 throw new UnsupportedOperationException("Transfer amount was already put on hold " + transferCode);
+            }
 
             PaymentDetail paymentDetail = PaymentDetail.instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null);
             AppUser appUser = getLoginUser();
@@ -316,8 +313,9 @@ public class InteropServiceImpl implements InteropService {
         validateTransfer(request, savingsAccount);
 
         String transferCode = request.getTransferCode();
-        if (findTransaction(savingsAccount, transferCode, debit ? SavingsAccountTransactionType.WITHDRAWAL : SavingsAccountTransactionType.DEPOSIT) != null)
+        if (findTransaction(savingsAccount, transferCode, debit ? SavingsAccountTransactionType.WITHDRAWAL : SavingsAccountTransactionType.DEPOSIT) != null) {
             throw new UnsupportedOperationException("Transfer was already committed " + transferCode);
+        }
 
         PaymentDetail paymentDetail = PaymentDetail.instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode, null);
 
@@ -366,8 +364,9 @@ public class InteropServiceImpl implements InteropService {
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
         SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(accountId);
-        if (savingsAccount == null)
+        if (savingsAccount == null) {
             throw new SavingsAccountNotFoundException(accountId);
+        }
         return savingsAccount;
     }
 
@@ -377,16 +376,19 @@ public class InteropServiceImpl implements InteropService {
         savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper);
 
         ApplicationCurrency currency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
-        if (!savingsAccount.getCurrency().getCode().equals(currency.getCode()))
+        if (!savingsAccount.getCurrency().getCode().equals(currency.getCode())) {
             throw new UnsupportedOperationException();
+        }
 
         SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
-        if (!savingsAccount.isTransactionAllowed(transactionType, request.getExpirationLocalDate()))
+        if (!savingsAccount.isTransactionAllowed(transactionType, request.getExpirationLocalDate())) {
             throw new UnsupportedOperationException();
+        }
 
         request.normalizeAmounts(savingsAccount.getCurrency());
-        if (transactionType.isDebit() && MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), request.getAmount().getAmount()))
+        if (transactionType.isDebit() && MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), request.getAmount().getAmount())) {
             throw new UnsupportedOperationException();
+        }
 
         return savingsAccount;
     }
@@ -398,15 +400,17 @@ public class InteropServiceImpl implements InteropService {
         BigDecimal total = transactionType.isDebit() ? amount : MathUtil.negate(amount);
         MoneyData fspFee = request.getFspFee();
         if (fspFee != null) {
-            if (!savingsAccount.getCurrency().getCode().equals(fspFee.getCurrency()))
+            if (!savingsAccount.getCurrency().getCode().equals(fspFee.getCurrency())) {
                 throw new UnsupportedOperationException();
+            }
             //TODO: compare with calculated quote fee
             total = MathUtil.add(total, fspFee.getAmount());
         }
         MoneyData fspCommission = request.getFspCommission();
         if (fspCommission != null) {
-            if (!savingsAccount.getCurrency().getCode().equals(fspCommission.getCurrency()))
+            if (!savingsAccount.getCurrency().getCode().equals(fspCommission.getCurrency())) {
                 throw new UnsupportedOperationException();
+            }
             //TODO: compare with calculated quote commission
             total = MathUtil.subtractToZero(total, fspCommission.getAmount());
         }
@@ -415,11 +419,13 @@ public class InteropServiceImpl implements InteropService {
 
     private DateTimeFormatter getDateTimeFormatter(@NotNull JsonCommand command) {
         Locale locale = command.extractLocale();
-        if (locale == null)
+        if (locale == null) {
             locale = DEFAULT_LOCALE;
+        }
         String dateFormat = command.dateFormat();
-        if (StringUtils.isEmpty(dateFormat))
+        if (StringUtils.isEmpty(dateFormat)) {
             dateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
+        }
 
         return DateTimeFormat.forPattern(dateFormat).withLocale(locale);
     }
@@ -427,11 +433,12 @@ public class InteropServiceImpl implements InteropService {
     PaymentType findPaymentType() {
         List<PaymentType> paymentTypes = paymentTypeRepository.findAll();
         for (PaymentType paymentType : paymentTypes) {
-            if (!paymentType.isCashPayment())
+            if (!paymentType.isCashPayment()) {
                 return paymentType;
-            //TODO: for now first not cash is retured:
-            // 1. must be added as initial setup,
-            // 2. if more than one non-cashe type added then update this code
+                //TODO: for now first not cash is retured:
+                // 1. must be added as initial setup,
+                // 2. if more than one non-cashe type added then update this code
+            }
         }
         return null;
     }
@@ -439,18 +446,22 @@ public class InteropServiceImpl implements InteropService {
     SavingsAccountTransaction findTransaction(@NotNull SavingsAccount savingsAccount, @NotNull String transactionCode, SavingsAccountTransactionType transactionType) {
         String routingCode = getRoutingCode();
         for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
-            if (transactionType != null && !transactionType.getValue().equals(transaction.getTypeOf()))
+            if (transactionType != null && !transactionType.getValue().equals(transaction.getTypeOf())) {
                 continue;
+            }
 
             PaymentDetail detail = transaction.getPaymentDetail();
-            if (detail != null && routingCode.equals(detail.getRoutingCode()) && transactionCode.equals(detail.getReceiptNumber()))
+            if (detail != null && routingCode.equals(detail.getRoutingCode()) && transactionCode.equals(detail.getReceiptNumber())) {
                 return transaction;
+            }
         }
         return null;
     }
 
     public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
-        return identifierRepository.findOne(where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType))).get();
+        return identifierRepository.findOne(where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType)))
+                .orElseThrow(() -> new UnsupportedOperationException(
+                        "Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType))));
     }
 
     public static Specification<InteropIdentifier> idTypeEqual(@NotNull InteropIdentifierType idType) {
