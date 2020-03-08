@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.Map;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.organisation.office.data.OfficeData;
 
 
 public interface LoanSchedularService {
@@ -29,8 +28,5 @@ public interface LoanSchedularService {
 
     void recalculateInterest() throws JobExecutionException;
 
-    void recalculateInterest(final OfficeData office, final int threadPoolSize, final int batchSize);
-
     void recalculateInterest(@SuppressWarnings("unused") final Map<String, String> jobParameters);
-
 }

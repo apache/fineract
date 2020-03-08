@@ -112,12 +112,16 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements DepositAccountWritePlatformService {
+
+    private final static Logger LOG = LoggerFactory.getLogger(DepositAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper;
@@ -571,21 +575,20 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Override
     @CronTarget(jobName = JobName.TRANSFER_INTEREST_TO_SAVINGS)
     public void transferInterestToSavings() throws JobExecutionException {
+        int errors = 0;
         Collection<AccountTransferDTO> accountTrasferData = this.depositAccountReadPlatformService.retrieveDataForInterestTransfer();
-        StringBuilder sb = new StringBuilder(200);
         for (AccountTransferDTO accountTransferDTO : accountTrasferData) {
             try {
                 this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             } catch (final PlatformApiDataValidationException e) {
-                sb.append("Validation exception while trasfering Interest form ").append(accountTransferDTO.getFromAccountId())
-                        .append(" to ").append(accountTransferDTO.getToAccountId()).append("--------");
+                LOG.error("Validation exception while trasfering Interest from {} to {}", accountTransferDTO.getFromAccountId(), accountTransferDTO.getToAccountId(), e);
+                ++errors;
             } catch (final InsufficientAccountBalanceException e) {
-                sb.append("InsufficientAccountBalance Exception while trasfering Interest form ")
-                        .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
-                        .append("--------");
+                LOG.error("InsufficientAccountBalanceException while trasfering Interest from {} to {} ", accountTransferDTO.getFromAccountId(), accountTransferDTO.getToAccountId(), e);
+                ++errors;
             }
         }
-        if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
+        if (errors > 0) { throw new JobExecutionException(errors); }
     }
 
     @Override
@@ -615,8 +618,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (!allowAccountTransferModification
                 && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) { throw new PlatformServiceUnavailableException(
-                "error.msg.recurring.deposit.account.transfer.transaction.update.not.allowed", "Recurring deposit account transaction:"
-                        + transactionId + " update not allowed as it involves in account transfer", transactionId); }
+                        "error.msg.recurring.deposit.account.transfer.transaction.update.not.allowed", "Recurring deposit account transaction:"
+                                + transactionId + " update not allowed as it involves in account transfer", transactionId); }
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         final MathContext mc = MathContext.DECIMAL64;
@@ -689,12 +692,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 .findOneByIdAndSavingsAccountId(transactionId, savingsId);
         if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
 
-        if (!(savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal()) || savingsAccountTransaction.isReversed()) { throw new TransactionUpdateNotAllowedException(
+        if ((!savingsAccountTransaction.isDeposit() && !savingsAccountTransaction.isWithdrawal()) || savingsAccountTransaction.isReversed()) { throw new TransactionUpdateNotAllowedException(
                 savingsId, transactionId); }
 
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) { throw new PlatformServiceUnavailableException(
                 "error.msg.saving.account.transfer.transaction.update.not.allowed", "Deposit account transaction:" + transactionId
-                        + " update not allowed as it involves in account transfer", transactionId); }
+                + " update not allowed as it involves in account transfer", transactionId); }
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
 
@@ -1071,14 +1074,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()
                     && this.holidayRepository.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
-                        .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
+                .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
-                        .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
+                .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
         }
@@ -1126,14 +1129,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()
                     && this.holidayRepository.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
-                        .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
+                .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
-                        .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
+                .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
         }
@@ -1253,14 +1256,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled()
                 && this.holidayRepository.isHoliday(savingsAccountCharge.savingsAccount().officeId(), transactionDate)) {
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.on.holiday");
+            .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.on.holiday");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                 && !this.workingDaysRepository.isWorkingDay(transactionDate)) {
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.a.nonworking.day");
+            .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.a.nonworking.day");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 

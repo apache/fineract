@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.slf4j.Logger;
@@ -29,41 +30,25 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
-
 @Component
-
 @Scope("prototype")
+public class RecalculateInterestPoster implements Callable<Void> {
 
-public class RecalculateInterestPoster implements Runnable {
-
-
-
-    private final static Logger logger = LoggerFactory.getLogger(" recalculate interest poster");
+    private final static Logger logger = LoggerFactory.getLogger(RecalculateInterestPoster.class);
 
     private Collection<Long> loanIds;
-
     private LoanWritePlatformService loanWritePlatformService;
 
-
     public void setLoanIds(final Collection<Long> loanIds) {
-
         this.loanIds = loanIds;
-
     }
-
-
 
     public void setLoanWritePlatformService(final LoanWritePlatformService loanWritePlatformService) {
-
         this.loanWritePlatformService = loanWritePlatformService;
-
     }
 
-
-
     @Override
-    public void run() {
-
+    public Void call() throws JobExecutionException {
         Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant()
                 .getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant()
@@ -71,72 +56,45 @@ public class RecalculateInterestPoster implements Runnable {
 
         int i = 0;
         if (!loanIds.isEmpty()) {
-            final StringBuilder sb = new StringBuilder();
+            int errors = 0;
             for (Long loanId : loanIds) {
                 logger.info("Loan ID " + loanId);
                 Integer numberOfRetries = 0;
                 while (numberOfRetries <= maxNumberOfRetries) {
                     try {
-                        this.loanWritePlatformService
-                                .recalculateInterest(loanId);
+                        this.loanWritePlatformService.recalculateInterest(loanId);
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException
                             | ObjectOptimisticLockingFailureException exception) {
-                        logger.info("Recalulate interest job has been retried  "
-                                + numberOfRetries + " time(s)");
-                        /***
-                         * Fail if the transaction has been retired for
-                         * maxNumberOfRetries
-                         **/
+                        logger.info("Recalulate interest job has been retried time(s)", numberOfRetries);
+                        // Fail if the transaction has been retired for maxNumberOfRetries
                         if (numberOfRetries >= maxNumberOfRetries) {
-                            logger.warn("Recalulate interest job has been retried for the max allowed attempts of "
-                                    + numberOfRetries
-                                    + " and will be rolled back");
-                            sb.append("Recalulate interest job has been retried for the max allowed attempts of "
-                                    + numberOfRetries
-                                    + " and will be rolled back");
+                            logger.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back", numberOfRetries);
+                            ++errors;
                             break;
                         }
-                        /***
-                         * Else sleep for a random time (between 1 to 10
-                         * seconds) and continue
-                         **/
+                        // Else sleep for a random time (between 1 to 10 seconds) and continue
                         try {
                             Random random = new Random();
-                            int randomNum = random
-                                    .nextInt(maxIntervalBetweenRetries + 1);
+                            int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                             Thread.sleep(1000 + (randomNum * 1000));
                             numberOfRetries = numberOfRetries + 1;
                         } catch (InterruptedException e) {
-                            sb.append("Interest recalculation for loans failed " + exception.getMessage()) ;
+                            logger.error("Interest recalculation for loans retry failed due to InterruptedException", e) ;
+                            ++errors;
                             break;
                         }
                     } catch (Exception e) {
-                        Throwable realCause = e;
-                        if (e.getCause() != null) {
-                            realCause = e.getCause();
-                        }
-                        logger.error("Interest recalculation for loans failed for account:"    + loanId + " with message " + realCause.getMessage(), e);
-                        sb.append("Interest recalculation for loans failed for account:").append(loanId).append(" with message ")
-                                .append(realCause.getMessage());
+                        logger.error("Interest recalculation for loans failed for account {}", loanId, e);
                         numberOfRetries = maxNumberOfRetries + 1;
+                        ++errors;
                     }
                     i++;
                 }
                 logger.info("Loans count " + i);
             }
-            if (sb.length() > 0) {
-                try {
-                    throw new JobExecutionException(sb.toString());
-                } catch (JobExecutionException e) {
-                    logger.info("JobExecutionException occured :", e);
-                }
-            }
+            if (errors > 0) { throw new JobExecutionException(errors); }
         }
-
-
+        return null;
     }
-
-
-
 }

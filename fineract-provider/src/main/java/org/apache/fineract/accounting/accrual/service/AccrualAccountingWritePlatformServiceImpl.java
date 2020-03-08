@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
 import org.joda.time.LocalDate;
@@ -52,12 +53,13 @@ public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccount
     public CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command) {
         this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
         LocalDate tilldate = command.localDateValueOfParameterNamed(accrueTillParamName);
-        String errorlog = this.loanAccrualPlatformService.addPeriodicAccruals(tilldate);
-        if (errorlog.length() > 0) {
+        try {
+            this.loanAccrualPlatformService.addPeriodicAccruals(tilldate);
+        } catch (MultiException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                     .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE, errorlog);
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE, e.getMessage());
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         return CommandProcessingResult.empty();
