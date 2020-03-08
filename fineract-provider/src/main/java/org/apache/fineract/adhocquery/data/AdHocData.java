@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.adhocquery.data;
 
-import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.DateTime;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.joda.time.DateTime;
 
 /**
  * Immutable data object represent note or case information AdHocData

@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -39,12 +43,6 @@ import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 public class AccountNumberPreferencesTest {
 
@@ -154,8 +152,7 @@ public class AccountNumberPreferencesTest {
             System.out.println("Successfully deleted account number preference (ID: " + delResponse.get("resourceId") + ")");
         }
         /* Deletion of invalid account preference ID should fail */
-        System.out
-                .println("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE WITH INVALID ID------------------------------------------");
+        System.out.println("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE WITH INVALID ID------------------------------------------");
 
         HashMap<String, Object> deletionError = this.accountNumberPreferencesHelper.deleteAccountNumberPreference(10,
                 this.responseNotFoundError, "");
@@ -211,8 +208,7 @@ public class AccountNumberPreferencesTest {
 
     private void createAccountNumberPreferenceDuplicateData(final String accountType, final String prefixType) {
         /* Creating account Preference with duplicate data should fail */
-        System.out
-                .println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH DUPLICATE DATA------------------------------------------");
+        System.out.println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH DUPLICATE DATA------------------------------------------");
 
         HashMap<String, Object> creationError = this.accountNumberPreferencesHelper.createAccountNumberPreferenceWithInvalidData(
                 this.responseForbiddenError, accountType, prefixType, "");
@@ -225,8 +221,7 @@ public class AccountNumberPreferencesTest {
     private void createAccountNumberPreferenceInvalidData(final String accountType, final String prefixType) {
 
         /* Creating account Preference with invalid data should fail */
-        System.out
-                .println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
+        System.out.println("---------------------------------CREATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
 
         HashMap<String, Object> creationError = this.accountNumberPreferencesHelper.createAccountNumberPreferenceWithInvalidData(
                 this.responseValidationError, accountType, prefixType, "");
@@ -253,8 +248,7 @@ public class AccountNumberPreferencesTest {
                 this.responseSpec, this.requestSpec);
 
         /* Update invalid account preference id should fail */
-        System.out
-                .println("---------------------------------UPDATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
+        System.out.println("---------------------------------UPDATING ACCOUNT NUMBER PREFERENCE WITH INVALID DATA------------------------------------------");
 
         /* Invalid Account Type */
         HashMap<String, Object> updationError = this.accountNumberPreferencesHelper.updateAccountNumberPreference(9999, "101",
@@ -375,7 +369,7 @@ public class AccountNumberPreferencesTest {
 
     private void validateAccountNumberLengthAndStartsWithPrefix(final String accountNumber, String prefix) {
         if (prefix != null) {
-                prefix = prefix.substring(0, Math.min(prefix.length(), 10));
+            prefix = prefix.substring(0, Math.min(prefix.length(), 10));
             Assert.assertEquals(accountNumber.length(), prefix.length() + 9);
             Assert.assertTrue(accountNumber.startsWith(prefix));
         } else {

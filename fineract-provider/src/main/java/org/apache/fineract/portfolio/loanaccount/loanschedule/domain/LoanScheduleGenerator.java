@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
 import java.util.Set;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;

@@ -19,6 +19,7 @@
 package org.apache.fineract.commands.provider;
 
 import com.google.common.base.Preconditions;
+import java.util.HashMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.annotation.CommandType;
@@ -31,8 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
 
 /**
  * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for a given entity and action.

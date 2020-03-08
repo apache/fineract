@@ -27,13 +27,12 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAcc
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toClientIdParamName;
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toOfficeIdParamName;
 
+import com.google.gson.JsonElement;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
 
 @Component
 public class AccountTransfersDetailDataValidator {

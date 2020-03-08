@@ -18,11 +18,9 @@
  */
 package org.apache.fineract.integrationtests.loanaccount.guarantor;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.google.gson.Gson;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class GuarantorTestBuilder {
 

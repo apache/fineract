@@ -19,7 +19,6 @@
 package org.apache.fineract.integrationtests.common.savings;
 
 import com.google.gson.Gson;
-
 import java.util.HashMap;
 import java.util.List;
 

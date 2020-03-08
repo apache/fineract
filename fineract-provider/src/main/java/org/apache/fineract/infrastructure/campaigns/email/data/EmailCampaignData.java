@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class EmailCampaignData {
 

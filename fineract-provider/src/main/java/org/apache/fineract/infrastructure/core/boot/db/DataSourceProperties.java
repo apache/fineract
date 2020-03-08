@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.boot.db;
 
 import javax.validation.constraints.NotNull;
-
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -48,7 +47,7 @@ public class DataSourceProperties extends PoolProperties {
     @Value("${" + HOST + ":localhost}")
     private volatile @NotNull String hostname;
 
-    @Value("${" + DB + ":mifosplatform-tenants}")
+    @Value("${" + DB + ":fineract_tenants}")
     private volatile @NotNull String dbName;
 
     @Value("${" + UID + ":root}")

@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
-
 import java.io.Serializable;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 
 /**
  * Immutable data object represent savings account transaction type

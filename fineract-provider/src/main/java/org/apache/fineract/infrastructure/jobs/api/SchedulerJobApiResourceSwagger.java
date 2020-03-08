@@ -20,10 +20,9 @@ package org.apache.fineract.infrastructure.jobs.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
-
 import java.util.Date;
 import java.util.List;
+import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
 
 /**
  * Created by sanyam on 12/8/17.

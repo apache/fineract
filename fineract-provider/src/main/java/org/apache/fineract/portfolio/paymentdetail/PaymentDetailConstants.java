@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.portfolio.paymentdetail;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class PaymentDetailConstants {
 
     // Code representing Payment Details

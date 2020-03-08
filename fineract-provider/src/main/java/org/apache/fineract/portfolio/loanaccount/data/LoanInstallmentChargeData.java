@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-
 import org.joda.time.LocalDate;
 
 public class LoanInstallmentChargeData {

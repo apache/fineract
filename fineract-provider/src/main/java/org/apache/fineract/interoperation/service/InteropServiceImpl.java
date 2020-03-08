@@ -18,21 +18,48 @@
  */
 package org.apache.fineract.interoperation.service;
 
+import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_LOCALE;
+import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_ROUTING_CODE;
+import static org.springframework.data.jpa.domain.Specification.where;
+
+import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Predicate;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.interoperation.data.*;
+import org.apache.fineract.interoperation.data.InteropAccountData;
+import org.apache.fineract.interoperation.data.InteropIdentifierAccountResponseData;
+import org.apache.fineract.interoperation.data.InteropIdentifierRequestData;
+import org.apache.fineract.interoperation.data.InteropIdentifiersResponseData;
+import org.apache.fineract.interoperation.data.InteropQuoteRequestData;
+import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
+import org.apache.fineract.interoperation.data.InteropRequestData;
+import org.apache.fineract.interoperation.data.InteropTransactionRequestData;
+import org.apache.fineract.interoperation.data.InteropTransactionRequestResponseData;
+import org.apache.fineract.interoperation.data.InteropTransactionsData;
+import org.apache.fineract.interoperation.data.InteropTransferRequestData;
+import org.apache.fineract.interoperation.data.InteropTransferResponseData;
+import org.apache.fineract.interoperation.data.MoneyData;
+import org.apache.fineract.interoperation.domain.InteropActionState;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.interoperation.domain.InteropIdentifierRepository;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.interoperation.serialization.InteropDataValidator;
+import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.interoperation.domain.InteropActionState;
-import org.apache.fineract.interoperation.serialization.InteropDataValidator;
-import org.apache.fineract.interoperation.util.MathUtil;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -58,25 +85,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.Predicate;
-
-import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_LOCALE;
-import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_ROUTING_CODE;
 
 @Service
 public class InteropServiceImpl implements InteropService {
@@ -439,7 +450,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
-        return identifierRepository.findOne(Specifications.where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType))).get();
+        return identifierRepository.findOne(where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType))).get();
     }
 
     public static Specification<InteropIdentifier> idTypeEqual(@NotNull InteropIdentifierType idType) {

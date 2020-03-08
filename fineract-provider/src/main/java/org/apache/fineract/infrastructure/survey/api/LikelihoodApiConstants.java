@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.survey.api;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 
 public class LikelihoodApiConstants {

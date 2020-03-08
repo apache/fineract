@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.useradministration.service;
 
-import org.apache.fineract.useradministration.data.AppUserData;
-
 import java.util.Collection;
+import org.apache.fineract.useradministration.data.AppUserData;
 
 public interface AppUserReadPlatformService {
 

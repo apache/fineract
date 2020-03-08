@@ -20,10 +20,7 @@ package org.apache.fineract.portfolio.self.pockets.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Set;
-import java.util.List;
-import java.time.LocalDate;
 
 /**
  * Created by Kang Breder on 07/08/19.

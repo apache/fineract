@@ -18,19 +18,32 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import com.google.gson.JsonObject;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.interoperation.domain.InteropAmountType;
-import org.apache.fineract.interoperation.domain.InteropTransactionRole;
-import org.joda.time.LocalDateTime;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_ACCOUNT_ID;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_AMOUNT;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_AMOUNT_TYPE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_DATE_FORMAT;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_EXPIRATION;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_EXTENSION_LIST;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_FEES;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_GEO_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_LOCALE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_NOTE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_QUOTE_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_REQUEST_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_ROLE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_TYPE;
 
-import javax.validation.constraints.NotNull;
+import com.google.gson.JsonObject;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.apache.fineract.interoperation.util.InteropUtil.*;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.interoperation.domain.InteropAmountType;
+import org.apache.fineract.interoperation.domain.InteropTransactionRole;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.joda.time.LocalDateTime;
 
 public class InteropQuoteRequestData extends InteropRequestData {
 

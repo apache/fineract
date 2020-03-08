@@ -48,7 +48,6 @@
     </module>
   -->
     <module name="TreeWalker">
-<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
         <module name="EqualsHashCode"/>
 
         <module name="RedundantImport"/>
@@ -59,6 +58,8 @@
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
+
+<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
             <property name="ignoreAbstractMethods" value="true" />

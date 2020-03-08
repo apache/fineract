@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.integrationtests.interoperation;
 
+import static org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL;
+import static org.apache.fineract.integrationtests.interoperation.InteropHelper.PARAM_ACCOUNT_BALANCE;
+
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
@@ -25,6 +28,12 @@ import com.jayway.restassured.internal.path.ObjectConverter;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -45,16 +54,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL;
-import static org.apache.fineract.integrationtests.interoperation.InteropHelper.PARAM_ACCOUNT_BALANCE;
 
 public class InteropTest {
 

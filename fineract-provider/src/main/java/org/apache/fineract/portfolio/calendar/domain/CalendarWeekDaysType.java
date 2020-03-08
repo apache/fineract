@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.util.StringUtils;
 
 public enum CalendarWeekDaysType {

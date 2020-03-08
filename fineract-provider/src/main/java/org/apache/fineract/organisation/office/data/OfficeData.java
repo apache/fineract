@@ -21,8 +21,6 @@ package org.apache.fineract.organisation.office.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.joda.time.LocalDate;
 
 /**

@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.LocalDate;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
 public class ShareAccountTransactionData implements Serializable {

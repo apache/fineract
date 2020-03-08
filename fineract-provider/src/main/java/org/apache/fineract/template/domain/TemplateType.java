@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.template.domain;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import com.google.gson.annotations.SerializedName;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 @JsonSerialize(using = TemplateTypeSerializer.class)
 public enum TemplateType {

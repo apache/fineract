@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.group.data;
 
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-
 import java.io.Serializable;
 import java.util.Objects;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 public class GroupRoleData implements Serializable {
 

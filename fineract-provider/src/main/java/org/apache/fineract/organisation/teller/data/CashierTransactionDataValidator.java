@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;

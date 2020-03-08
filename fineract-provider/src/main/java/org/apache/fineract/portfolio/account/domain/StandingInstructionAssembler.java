@@ -31,7 +31,6 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validTillParamName;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.joda.time.LocalDate;

@@ -20,11 +20,9 @@ package org.apache.fineract.portfolio.client.command;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.portfolio.client.domain.ClientIdentifierStatus;
 
 /**
  * Immutable command for creating or updating details of a client identifier.

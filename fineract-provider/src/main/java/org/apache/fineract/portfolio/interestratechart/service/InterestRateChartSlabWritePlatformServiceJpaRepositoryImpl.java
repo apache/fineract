@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.interestratechart.service;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;

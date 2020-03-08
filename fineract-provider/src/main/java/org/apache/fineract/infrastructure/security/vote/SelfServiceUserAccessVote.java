@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.vote;
 
 import java.util.Collection;
-
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;

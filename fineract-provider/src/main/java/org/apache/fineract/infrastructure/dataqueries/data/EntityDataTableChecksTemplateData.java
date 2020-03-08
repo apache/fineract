@@ -18,15 +18,12 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
-import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
+import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
 /**
  * Immutable data object for role data.

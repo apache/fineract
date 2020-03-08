@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.joda.time.LocalDate;

@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.organisation.provisioning.constants;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public interface ProvisioningCriteriaConstants {
     public final static String JSON_LOCALE_PARAM = "locale";
     public final static String JSON_CRITERIAID_PARAM = "criteriaId";

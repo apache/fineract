@@ -37,6 +37,6 @@ tasks:
       # NB MySQL on GitPod.io is currently quite slow.
       # similar to .travis.yml, but using authentication_string= instead of password= due to mysql major version difference
       mysql -e "USE mysql;\nUPDATE user SET authentication_string=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n"
-      ./gradlew createDB -PdbName=mifosplatform-tenants
-      ./gradlew createDB -PdbName=mifostenant-default
+      ./gradlew createDB -PdbName=fineract_tenants
+      ./gradlew createDB -PdbName=fineract_default
       ./gradlew build -x test

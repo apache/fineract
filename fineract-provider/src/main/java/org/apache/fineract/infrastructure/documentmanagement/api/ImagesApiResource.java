@@ -18,8 +18,12 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
+import com.lowagie.text.pdf.codec.Base64;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.annotations.Api;
 import java.io.InputStream;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -33,8 +37,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-
-import io.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -50,11 +52,6 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.lowagie.text.pdf.codec.Base64;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataParam;
 
 @Path("{entity}/{entityId}/images")
 @Component

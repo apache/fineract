@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.sms;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class SmsApiConstants {
 
     public static final String RESOURCE_NAME = "sms";

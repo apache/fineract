@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -27,10 +34,6 @@ import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.joda.time.LocalDate;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.*;
 
 /**
  * Immutable data object representing a savings account.

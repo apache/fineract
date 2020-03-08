@@ -19,14 +19,12 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.joda.time.LocalDate;
@@ -61,7 +59,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         Integer totalPageSize = 0;
         StringBuffer sb = new StringBuffer();
         do {
-            PageRequest pageRequest = new PageRequest(page, initialSize);
+            PageRequest pageRequest = PageRequest.of(page, initialSize);
             Page<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findByStatus(SavingsAccountStatusType.ACTIVE.getValue(),
                     pageRequest);
             for (SavingsAccount savingsAccount : savingsAccounts.getContent()) {

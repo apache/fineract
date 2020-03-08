@@ -18,9 +18,15 @@
  */
 package org.apache.fineract.infrastructure.accountnumberformat.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
-import java.util.*;
 
 public class AccountNumberFormatEnumerations {
 

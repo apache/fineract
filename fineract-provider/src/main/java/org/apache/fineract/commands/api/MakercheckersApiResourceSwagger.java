@@ -20,12 +20,11 @@ package org.apache.fineract.commands.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.commands.data.ProcessingResultLookup;
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.joda.time.DateTime;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by sanyam on 27/7/17.

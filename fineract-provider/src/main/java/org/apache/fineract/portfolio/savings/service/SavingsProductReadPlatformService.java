@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
 public interface SavingsProductReadPlatformService {

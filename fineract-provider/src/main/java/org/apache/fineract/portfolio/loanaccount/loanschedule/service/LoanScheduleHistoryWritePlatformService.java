@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
 import java.util.List;
-
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;

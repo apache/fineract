@@ -20,9 +20,7 @@ package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.joda.time.LocalDate;

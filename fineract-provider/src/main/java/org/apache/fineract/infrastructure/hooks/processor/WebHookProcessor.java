@@ -21,20 +21,17 @@ package org.apache.fineract.infrastructure.hooks.processor;
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.contentTypeName;
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.payloadURLName;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
-
 import retrofit.Callback;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 @Service
 public class WebHookProcessor implements HookProcessor {

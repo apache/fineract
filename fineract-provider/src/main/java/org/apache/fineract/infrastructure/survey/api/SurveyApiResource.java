@@ -18,8 +18,14 @@
  */
 package org.apache.fineract.infrastructure.survey.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,8 +35,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -110,7 +114,7 @@ public class SurveyApiResource {
     @Path("{surveyName}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.openmf.org/api-docs/apiLive.htm#survey_create ] ")
+    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.mifos.io/api-docs/apiLive.htm#survey_create ] ")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class)})
     public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,

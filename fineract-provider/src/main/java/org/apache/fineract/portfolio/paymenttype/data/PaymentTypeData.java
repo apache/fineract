@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.portfolio.paymenttype.data;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import java.io.Serializable;
 import java.util.Objects;
 

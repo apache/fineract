@@ -35,25 +35,25 @@
         <property name="version" value="1.0.0" />
         <property name="description" value="Apache Fineract is a secure, multi-tenanted microfinance platform. &lt;br /&gt;
 
-            The goal of the Apache Fineract API is to empower developers to build apps on top of the Apache Fineract Platform. The reference app [  https://demo.openmf.org  ] (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation.
+            The goal of the Apache Fineract API is to empower developers to build apps on top of the Apache Fineract Platform. The reference app [  https://demo.mifos.io  ] (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation.
 
             &lt;br/&gt;The API
 
                is organized around REST [ https://en.wikipedia.org/wiki/Representational_state_transfer ]
-              &lt;br/&gt; Find out more about Apache Fineract on [ https://demo.openmf.org/api-docs/apiLive.htm#top ]
+              &lt;br/&gt; Find out more about Apache Fineract on [ https://demo.mifos.io/api-docs/apiLive.htm#top ]
 
-            &lt;br/&gt; You can Try The API From Your Browser itself at [ https://demo.openmf.org/api-docs/apiLive.htm#interact ]
+            &lt;br/&gt; You can Try The API From Your Browser itself at [ https://demo.mifos.io/api-docs/apiLive.htm#interact ]
 
-            &lt;br/&gt; The Generic Options are available at [ https://demo.openmf.org/api-docs/apiLive.htm#genopts ]
+            &lt;br/&gt; The Generic Options are available at [ https://demo.mifos.io/api-docs/apiLive.htm#genopts ]
 
-            &lt;br/&gt; Find out more about Updating Dates and Numbers at [ https://demo.openmf.org/api-docs/apiLive.htm#dates_and_numbers ]
+            &lt;br/&gt; Find out more about Updating Dates and Numbers at [ https://demo.mifos.io/api-docs/apiLive.htm#dates_and_numbers ]
 
-            &lt;br/&gt; For the Authentication and the Basic of HTTP and HTTPS refer [ https://demo.openmf.org/api-docs/apiLive.htm#authentication_overview ]
+            &lt;br/&gt; For the Authentication and the Basic of HTTP and HTTPS refer [ https://demo.mifos.io/api-docs/apiLive.htm#authentication_overview ]
 
-            &lt;br/&gt; Check about ERROR codes at [ https://demo.openmf.org/api-docs/apiLive.htm#errors ]
+            &lt;br/&gt; Check about ERROR codes at [ https://demo.mifos.io/api-docs/apiLive.htm#errors ]
 
 
-            &lt;br/&gt; &lt;br/&gt; Please refer to the old documentation for any documentation queries [ https://demo.openmf.org/api-docs/apiLive.htm ]
+            &lt;br/&gt; &lt;br/&gt; Please refer to the old documentation for any documentation queries [ https://demo.mifos.io/api-docs/apiLive.htm ]
 
             &lt;br/&gt;
             ______________________________________________________________________________________________________________________________
@@ -62,9 +62,9 @@
 
         <property name="license" value="Apache 2.0" />
         <property name="schemes" value="https" />
-        <property name="host" value="https://demo.openmf.org" />
+        <property name="host" value="https://demo.mifos.io" />
         <property name="basePath" value="fineract-provider/api/v1"/>
-        <property name="termsOfServiceUrl" value="https://demo.openmf.org/api-docs/apiLive.htm"/>
+        <property name="termsOfServiceUrl" value="https://demo.mifos.io/api-docs/apiLive.htm"/>
         <property name="contact" value="https://gitter.im/openMF/mifos"/>
         <!--<property name="resourcePackage" value="io.swagger.resources"/>-->
         <property name="resourcePackage" value="org.apache.fineract"/>

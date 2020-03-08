@@ -18,18 +18,21 @@
  */
 package org.apache.fineract.portfolio.self.security.api;
 
-import io.swagger.annotations.*;
-import org.apache.fineract.infrastructure.security.api.AuthenticationApiResource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.apache.fineract.infrastructure.security.api.AuthenticationApiResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 @Component
 @Scope("singleton")
@@ -51,7 +54,7 @@ public class SelfAuthenticationApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Verify authentication", httpMethod = "POST", notes = "Authenticates the credentials provided and returns the set roles and permissions allowed.\n\n" + "Please visit this link for more info - https://demo.openmf.org/api-docs/apiLive.htm#selfbasicauth")
+    @ApiOperation(value = "Verify authentication", httpMethod = "POST", notes = "Authenticates the credentials provided and returns the set roles and permissions allowed.\n\n" + "Please visit this link for more info - https://demo.mifos.io/api-docs/apiLive.htm#selfbasicauth")
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfAuthenticationApiResourceSwagger.PostSelfAuthenticationResponse.class)})
     public String authenticate(final String apiRequestBodyAsJson) {
         return this.authenticationApiResource.authenticate(apiRequestBodyAsJson);

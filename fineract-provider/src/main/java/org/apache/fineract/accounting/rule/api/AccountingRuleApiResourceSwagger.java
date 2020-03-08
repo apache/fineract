@@ -20,12 +20,11 @@ package org.apache.fineract.accounting.rule.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.rule.data.AccountingTagRuleData;
 import org.apache.fineract.organisation.office.data.OfficeData;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by sanyam on 26/7/17.

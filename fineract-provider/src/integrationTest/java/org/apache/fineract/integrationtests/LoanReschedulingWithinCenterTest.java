@@ -21,6 +21,12 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.gson.Gson;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,10 +35,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
@@ -47,13 +49,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class LoanReschedulingWithinCenterTest {
 
@@ -175,7 +173,11 @@ public class LoanReschedulingWithinCenterTest {
         final String startDate = dateFormat.format(today.getTime());
         final String frequency = "2"; // 2:Weekly
         final String interval = "2"; // Every one week
-        final Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
+        Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
+
+        if (repeatsOnDay.intValue() == 0){
+            repeatsOnDay = 7;
+        }
 
         Integer calendarId = CalendarHelper.createMeetingForGroup(this.requestSpec, this.responseSpec, centerId, startDate, frequency,
                 interval, repeatsOnDay.toString());
@@ -333,7 +335,9 @@ public class LoanReschedulingWithinCenterTest {
             builder = builder.withAccountingRulePeriodicAccrual(accounts);
         }
 
-        if (isArrearsBasedOnOriginalSchedule) builder = builder.withArrearsConfiguration();
+        if (isArrearsBasedOnOriginalSchedule) {
+            builder = builder.withArrearsConfiguration();
+        }
 
         final String loanProductJSON = builder.build(chargeId);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);

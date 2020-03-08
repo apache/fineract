@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.exception;
 
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 
 /**

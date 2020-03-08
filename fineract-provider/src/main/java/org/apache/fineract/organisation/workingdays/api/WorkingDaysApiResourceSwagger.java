@@ -20,9 +20,8 @@ package org.apache.fineract.organisation.workingdays.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.util.Collection;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Created by sanyam on 19/8/17.

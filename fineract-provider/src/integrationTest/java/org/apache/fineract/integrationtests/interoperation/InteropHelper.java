@@ -22,6 +22,9 @@ import com.google.gson.Gson;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.UUID;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.interoperation.domain.InteropAmountType;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
@@ -32,10 +35,6 @@ import org.apache.fineract.interoperation.domain.InteropTransferActionType;
 import org.apache.fineract.interoperation.util.InteropUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.UUID;
 
 @SuppressWarnings({ "rawtypes" })
 public class InteropHelper {

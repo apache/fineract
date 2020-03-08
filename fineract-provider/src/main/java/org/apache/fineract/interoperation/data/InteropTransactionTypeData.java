@@ -18,18 +18,22 @@
  */
 package org.apache.fineract.interoperation.data;
 
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_BALANCE_OF_PAYMENTS;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_INITIATOR;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_INITIATOR_TYPE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_REFUND_INFO;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SCENARIO;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SUB_SCENARIO;
+
 import com.google.gson.JsonObject;
+import java.util.Arrays;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropInitiatorType;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 import org.apache.fineract.interoperation.domain.InteropTransactionScenario;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-
-import static org.apache.fineract.interoperation.util.InteropUtil.*;
 
 public class InteropTransactionTypeData {
 

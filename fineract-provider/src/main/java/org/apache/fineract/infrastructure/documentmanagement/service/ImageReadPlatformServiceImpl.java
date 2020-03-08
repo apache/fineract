@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.ENTITY_TYPE_FOR_IMAGES;

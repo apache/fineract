@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.useradministration.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -69,9 +69,6 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
@@ -282,7 +279,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         if (passWordEncodedValue != null) {
 
-            PageRequest pageRequest = new PageRequest(0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC, "removalDate");
+            PageRequest pageRequest = PageRequest.of(0, AppUserApiConstant.numberOfPreviousPasswords,
+                    Sort.Direction.DESC, "removalDate");
 
             final List<AppUserPreviousPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
                     pageRequest);
@@ -347,6 +345,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     .append(" already exists.");
             throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username",
                     username);
+        }
+
+        if (realCause.getMessage().contains("'unique_self_client'")) {
+            throw new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist", "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
         }
 
         logger.error(dve.getMessage(), dve);

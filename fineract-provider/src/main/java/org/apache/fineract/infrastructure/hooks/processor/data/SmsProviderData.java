@@ -25,7 +25,6 @@ import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsP
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.smsProviderTokenIdName;
 
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 
 public class SmsProviderData {

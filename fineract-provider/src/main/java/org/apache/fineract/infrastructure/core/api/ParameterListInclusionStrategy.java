@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import java.util.Set;
-
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
+import java.util.Set;
 
 public class ParameterListInclusionStrategy implements ExclusionStrategy {
 

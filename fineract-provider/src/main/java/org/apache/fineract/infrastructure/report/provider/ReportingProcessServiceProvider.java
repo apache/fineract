@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.report.provider;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;

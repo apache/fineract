@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.google.gson.Gson;
 
 public class LoanApplicationTestBuilder {
 

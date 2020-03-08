@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.boot.db;
 
 import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +29,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service which "fixes up" the schemaServerPort in the tenants table of the
- * mifosplatform-tenants schema. It sets it to the actual current port of
+ * fineract_tenants schema. It sets it to the actual current port of
  * MariaDB4j, instead of the default 3306 which is hard-coded in the initial
  * set-up SQL script (V1__mifos-platform-shared-tenants.sql).
  *
  * This service is called by the TenantDatabaseUpgradeService
  * "just at the right time" during start-up, that is AFTER the initialization of
- * the mifosplatform-tenants but BEFORE Flyway runs on all tenant schemas.
+ * the fineract_tenants but BEFORE Flyway runs on all tenant schemas.
  *
  * It's difficult to achieve the same goal elsewhere, because we cannot do this
  * e.g. in MariaDB4jSetupService, as that's too early
@@ -73,12 +72,12 @@ public class TenantDataSourcePortFixService {
 
     public void fixUpTenantsSchemaServerPort() {
     if (!enabled)  {
-        logger.info("No schema_server_port UPDATE made to tenant_server_connections table of the mifosplatform-tenants schema, because " + ENABLED + " = false");
+        logger.info("No schema_server_port UPDATE made to tenant_server_connections table of the fineract_tenants schema, because " + ENABLED + " = false");
         return;
     }
     if (dsp == null) {
         // we don't have any generic mechanism to know the DB port, given just a tenant DataSource
-        logger.debug("No schema_server_port UPDATE made to tenant_server_connections table of the mifosplatform-tenants schema (because neither MariaDB4j nor our own Spring Boot DataSourceConfiguration is used in a traditional WAR)");
+        logger.debug("No schema_server_port UPDATE made to tenant_server_connections table of the fineract_tenants schema (because neither MariaDB4j nor our own Spring Boot DataSourceConfiguration is used in a traditional WAR)");
         return;
     }
         int r = jdbcTemplate
@@ -89,7 +88,7 @@ public class TenantDataSourcePortFixService {
     else
             logger.info("Upated "
                     + r
-                    + " rows in the tenant_server_connections table of the mifosplatform-tenants schema to the real current host: "
+                    + " rows in the tenant_server_connections table of the fineract_tenants schema to the real current host: "
                     + dsp.getHost() + ", port: " + dsp.getPort());
     }
 

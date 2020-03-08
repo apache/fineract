@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Collection;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;

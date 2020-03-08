@@ -18,14 +18,13 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.fineract.interoperation.domain.InteropActionState;
-import org.joda.time.LocalDateTime;
-
-import javax.validation.constraints.NotNull;
 import java.beans.Transient;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.interoperation.domain.InteropActionState;
+import org.joda.time.LocalDateTime;
 
 public class InteropTransferResponseData extends InteropResponseData {
 

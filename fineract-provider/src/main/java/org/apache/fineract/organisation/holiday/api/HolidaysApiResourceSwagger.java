@@ -20,10 +20,9 @@ package org.apache.fineract.organisation.holiday.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * Created by sanyam on 14/8/17.

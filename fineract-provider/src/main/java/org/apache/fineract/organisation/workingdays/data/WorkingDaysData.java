@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.organisation.workingdays.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.util.Collection;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class WorkingDaysData {
 

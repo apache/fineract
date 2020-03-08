@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collectionsheet.command;
 
 import java.math.BigDecimal;
-
 import org.joda.time.LocalDate;
 
 /**

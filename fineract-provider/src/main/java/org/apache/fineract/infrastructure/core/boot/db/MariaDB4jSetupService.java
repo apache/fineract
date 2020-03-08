@@ -38,13 +38,13 @@ public class MariaDB4jSetupService {
     @PostConstruct
     protected void setUpDBs() throws ManagedProcessException {
         db.createDB(getTenantDBName());
-        db.createDB("mifostenant-default");
+        db.createDB("fineract_default");
         // Note that we don't need to initialize the DBs, because
         // the TenantDatabaseUpgradeService will do this in just a moment.
     }
 
     public String getTenantDBName() {
-        return "mifosplatform-tenants";
+        return "fineract_tenants";
     }
 
     @PreDestroy

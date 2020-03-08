@@ -19,9 +19,7 @@
 package org.apache.fineract.infrastructure.core.api;
 
 import java.util.Set;
-
 import javax.ws.rs.core.MultivaluedMap;
-
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.springframework.stereotype.Component;
 

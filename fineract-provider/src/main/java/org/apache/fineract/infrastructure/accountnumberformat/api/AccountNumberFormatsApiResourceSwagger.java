@@ -20,10 +20,9 @@ package org.apache.fineract.infrastructure.accountnumberformat.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Created by sanyam on 28/7/17.

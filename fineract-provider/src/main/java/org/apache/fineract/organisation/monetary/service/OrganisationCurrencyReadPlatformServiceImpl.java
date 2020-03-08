@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.monetary.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.springframework.beans.factory.annotation.Autowired;

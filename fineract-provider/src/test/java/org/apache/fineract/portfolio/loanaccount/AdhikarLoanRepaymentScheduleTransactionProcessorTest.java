@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount;
 import java.lang.reflect.Field;
 import java.math.RoundingMode;
 import java.util.List;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;

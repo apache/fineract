@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.notification.domain.Topic;
 import org.apache.fineract.notification.domain.TopicRepository;
 import org.apache.fineract.notification.domain.TopicSubscriber;

@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.interoperation.util;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-
 import java.util.Locale;
 
 public class InteropUtil {

@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.spm.service;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.PersistenceException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -32,12 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import javax.persistence.PersistenceException;
 
 @Service
 public class SpmService {

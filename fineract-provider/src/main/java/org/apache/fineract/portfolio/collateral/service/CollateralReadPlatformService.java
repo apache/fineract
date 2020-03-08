@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collateral.service;
 
 import java.util.List;
-
 import org.apache.fineract.portfolio.collateral.data.CollateralData;
 
 public interface CollateralReadPlatformService {

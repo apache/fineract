@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.variableinstallments;
 
+import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,12 +27,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-
-import com.google.gson.Gson;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VariableInstallmentsDecliningBalanceHelper {

@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-
 import org.joda.time.LocalDate;
 
 public class FloatingRateDTO {

@@ -19,7 +19,6 @@
 package org.apache.fineract.accounting.closure.service;
 
 import java.util.List;
-
 import org.apache.fineract.accounting.closure.data.GLClosureData;
 
 public interface GLClosureReadPlatformService {

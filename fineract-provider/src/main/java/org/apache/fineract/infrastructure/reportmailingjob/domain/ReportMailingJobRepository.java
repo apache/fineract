@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
 import java.util.Collection;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

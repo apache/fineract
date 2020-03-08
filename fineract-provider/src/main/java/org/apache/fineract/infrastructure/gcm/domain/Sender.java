@@ -18,23 +18,61 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_CANONICAL_IDS;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_ERROR;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_FAILURE;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_MESSAGE_ID;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_MULTICAST_ID;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_BADGE;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_BODY;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_BODY_LOC_ARGS;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_BODY_LOC_KEY;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_CLICK_ACTION;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_COLOR;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_ICON;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_SOUND;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_TAG;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_TITLE;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_TITLE_LOC_ARGS;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_NOTIFICATION_TITLE_LOC_KEY;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_PAYLOAD;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_REGISTRATION_IDS;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_RESULTS;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_SUCCESS;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.JSON_TO;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_COLLAPSE_KEY;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_CONTENT_AVAILABLE;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_DELAY_WHILE_IDLE;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_DRY_RUN;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_PRIORITY;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_RESTRICTED_PACKAGE_NAME;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.PARAM_TIME_TO_LIVE;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.TOKEN_CANONICAL_REG_ID;
+import static org.apache.fineract.infrastructure.gcm.GcmConstants.TOPIC_PREFIX;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.fineract.infrastructure.gcm.GcmConstants;
-import org.apache.fineract.infrastructure.gcm.exception.InvalidRequestException;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.apache.fineract.infrastructure.gcm.GcmConstants.*;
+import org.apache.fineract.infrastructure.gcm.GcmConstants;
+import org.apache.fineract.infrastructure.gcm.exception.InvalidRequestException;
 
 /**
  * Helper class to send messages to the GCM service using an API Key.

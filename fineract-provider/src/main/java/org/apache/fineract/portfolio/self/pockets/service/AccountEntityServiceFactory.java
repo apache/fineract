@@ -22,7 +22,6 @@ package org.apache.fineract.portfolio.self.pockets.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

@@ -21,7 +21,6 @@ package org.apache.fineract.useradministration.data;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.client.data.ClientData;

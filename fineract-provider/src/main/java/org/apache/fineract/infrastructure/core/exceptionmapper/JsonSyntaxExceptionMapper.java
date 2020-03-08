@@ -18,17 +18,15 @@
  */
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
+import com.google.gson.JsonSyntaxException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonSyntaxException;
 
 /**
  * An {@link ExceptionMapper} to map {@link JsonSyntaxException} thrown by

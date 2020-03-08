@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailAttachmentFileFormat;
 import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailStretchyReportParamDateOption;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class ScheduledEmailEnumerations {
     public static EnumOptionData emailAttachementFileFormat(final Integer emailAttachementFileFormatId) {

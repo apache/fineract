@@ -18,24 +18,20 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import com.google.gson.JsonElement;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationValidator;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfiguration;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfigurationRepository;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationSMTPUsernameNotValid;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 @Service
 public class EmailConfigurationWritePlatformServiceImpl implements EmailConfigurationWritePlatformService {

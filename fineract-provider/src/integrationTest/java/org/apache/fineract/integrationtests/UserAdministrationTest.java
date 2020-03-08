@@ -27,6 +27,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
@@ -35,6 +36,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 
 public class UserAdministrationTest {
 
@@ -64,6 +66,7 @@ public class UserAdministrationTest {
 
     @Test
     public void testCreateNewUserBlocksDuplicateUsername() {
+
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
@@ -121,6 +124,25 @@ public class UserAdministrationTest {
         Map reason = (Map) errors.get(0);
         Assert.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
         Assert.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
+    }
+    @Test
+    public void testCreateNewUserBlocksDuplicateClientId() {
+        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(roleId);
+
+        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(staffId);
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientId);
+
+        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId, "resourceId");
+        Assert.assertNotNull(userId);
+        this.transientUsers.add(userId);
+
+        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId, "errors");
+        Map reason = (Map) errors.get(0);
+        Assert.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.", reason.get("defaultUserMessage"));
     }
 
 }

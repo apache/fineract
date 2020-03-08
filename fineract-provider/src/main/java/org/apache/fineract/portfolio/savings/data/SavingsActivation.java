@@ -20,8 +20,6 @@ package org.apache.fineract.portfolio.savings.data;
 
 import org.joda.time.LocalDate;
 
-import java.util.Locale;
-
 public class SavingsActivation {
 
     private final transient Integer rowIndex;

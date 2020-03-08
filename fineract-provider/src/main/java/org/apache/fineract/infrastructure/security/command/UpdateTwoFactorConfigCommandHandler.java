@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.command;
 
 import java.util.Map;
-
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

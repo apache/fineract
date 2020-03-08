@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.accounting.glaccount.domain;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public enum GLAccountType {
     ASSET(1, "accountType.asset"), LIABILITY(2, "accountType.liability"), EQUITY(3, "accountType.equity"), INCOME(4, "accountType.income"), EXPENSE(

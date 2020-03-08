@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.hooks.listener;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
@@ -30,8 +31,6 @@ import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class FineractHookListener implements HookListener {

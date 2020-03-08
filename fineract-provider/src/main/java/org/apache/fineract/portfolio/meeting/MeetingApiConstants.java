@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.portfolio.meeting;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class MeetingApiConstants {
 
     public static final String MEETING_RESOURCE_NAME = "meeting";

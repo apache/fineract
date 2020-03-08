@@ -24,7 +24,6 @@ import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConsta
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.accounting.accrual.serialization.AccrualAccountingDataValidator;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;

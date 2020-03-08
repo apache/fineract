@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.notification.service;
 
-import org.apache.fineract.notification.domain.NotificationMapper;
-
 import java.util.List;
+import org.apache.fineract.notification.domain.NotificationMapper;
 
 public interface NotificationMapperReadRepositoryWrapper {
 

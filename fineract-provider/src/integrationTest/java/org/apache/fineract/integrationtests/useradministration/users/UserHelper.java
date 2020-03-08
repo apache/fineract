@@ -20,7 +20,6 @@ package org.apache.fineract.integrationtests.useradministration.users;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
 import org.apache.fineract.integrationtests.common.Utils;
 
 
@@ -34,6 +33,9 @@ public class UserHelper {
 
     public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId, int staffId, String username, String attribute) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId, username), attribute);
+    }
+    public static Object createUserForSelfService(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId, int staffId, int clientId, String attribute) {
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSONForSelfService(roleId, staffId, clientId), attribute);
     }
 
     public static String getTestCreateUserAsJSON(int roleId, int staffId) {
@@ -56,6 +58,15 @@ public class UserHelper {
         return "{ \"username\": \"" + username
             + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
             + " \"officeId\": \"1\"}";
+    }
+    public static String getTestCreateUserAsJSONForSelfService(int roleId, int staffId, int clientId) {
+        return "{ \"username\": \"" + Utils.randomNameGenerator("User_Name_", 3)
+                + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
+                + " \"officeId\": \"1\", \"staffId\": " + "\""
+                + staffId +"\",\"roles\": [\""
+                + roleId + "\"], \"sendPasswordToEmail\": false,"
+                +"\"isSelfServiceUser\" : true,"
+                +"\"clients\" : [\""+clientId+"\"]}";
     }
 
     public static Integer deleteUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer userId) {

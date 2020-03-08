@@ -19,17 +19,17 @@
 package org.apache.fineract.infrastructure.core.domain;
 
 import java.io.Serializable;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-
 import org.springframework.data.domain.Persistable;
 
 
 @MappedSuperclass
-public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long> {
+public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long>, Serializable {
+
+        private static final long serialVersionUID = 9181640245194392646L;
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

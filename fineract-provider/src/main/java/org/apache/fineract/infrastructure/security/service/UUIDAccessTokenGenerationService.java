@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.service;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 
 @Service

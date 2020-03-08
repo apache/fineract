@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.interestratechart.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;

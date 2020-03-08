@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
-
 import java.util.Collection;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 
 public interface EmailConfigurationReadPlatformService {
 

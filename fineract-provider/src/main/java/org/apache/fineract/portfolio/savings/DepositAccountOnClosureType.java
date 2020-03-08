@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.savings;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 

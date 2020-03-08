@@ -22,7 +22,6 @@ import java.math.MathContext;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.joda.time.LocalDate;

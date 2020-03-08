@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-
+import java.util.Map;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Map;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public class InteropIdentifierAccountResponseData extends CommandProcessingResult {
 

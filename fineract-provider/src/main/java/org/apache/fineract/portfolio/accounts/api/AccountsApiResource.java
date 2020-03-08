@@ -18,7 +18,18 @@
  */
 package org.apache.fineract.portfolio.accounts.api;
 
-import io.swagger.annotations.*;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -31,9 +42,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -47,7 +55,6 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
-import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
 import org.apache.fineract.portfolio.products.exception.ResourceNotFoundException;
@@ -56,8 +63,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import java.io.InputStream;
 
 
 @Path("/accounts/{type}")
@@ -169,7 +174,7 @@ public class AccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Approve share application | Undo approval share application | Reject share application | Activate a share account | Close a share account | Apply additional shares on a share account | Approve additional shares request on a share account | Reject additional shares request on a share account | Redeem shares on a share account", httpMethod = "POST", notes = "Approve share application:\n\n" + "Approves share application so long as its in 'Submitted and pending approval' state.\n\n" + "Undo approval share application:\n\n" + "Will move 'approved' share application back to 'Submitted and pending approval' state.\n\n" + "Reject share application:\n\n" + "Rejects share application so long as its in 'Submitted and pending approval' state.\n\n" + "Activate a share account:\n\n" + "Results in an approved share application being converted into an 'active' share account.\n\n" + "Close a share account:\n\n" + "Results in an Activated share application being converted into an 'closed' share account.\n" + "\n" + "closedDate is closure date of share account\n\n" + "Mandatory Fields: dateFormat,locale,closedDate\n\n" + "Apply additional shares on a share account:\n\n" + "requestedDate is requsted date of share purchase\n" + "\n" + "requestedShares is number of shares to be purchase\n\n" + "Mandatory Fields: dateFormat,locale,requestedDate, requestedShares\n\n" + "Approve additional shares request on a share account\n\n" + "requestedShares is Share purchase transaction ids\n\n" + "Mandatory Fields: requestedShares\n\n" + "Reject additional shares request on a share account:\n\n" + "requestedShares is Share purchase transaction ids\n\n" + "Mandatory Fields: requestedShares\n\n" + "Redeem shares on a share account:\n\n" + "Results redeem some/all shares from share account.\n" + "\n" + "requestedDate is requsted date of shares redeem\n" + "\n" + "requestedShares is number of shares to be redeemed\n\n" + "Mandatory Fields: dateFormat,locale,requestedDate,requestedShares\n\n" + "Showing request/response for 'Reject additional shares request on a share account'\n\n" + "For more info visit this link - https://demo.openmf.org/api-docs/apiLive.htm#shareaccounts")
+    @ApiOperation(value = "Approve share application | Undo approval share application | Reject share application | Activate a share account | Close a share account | Apply additional shares on a share account | Approve additional shares request on a share account | Reject additional shares request on a share account | Redeem shares on a share account", httpMethod = "POST", notes = "Approve share application:\n\n" + "Approves share application so long as its in 'Submitted and pending approval' state.\n\n" + "Undo approval share application:\n\n" + "Will move 'approved' share application back to 'Submitted and pending approval' state.\n\n" + "Reject share application:\n\n" + "Rejects share application so long as its in 'Submitted and pending approval' state.\n\n" + "Activate a share account:\n\n" + "Results in an approved share application being converted into an 'active' share account.\n\n" + "Close a share account:\n\n" + "Results in an Activated share application being converted into an 'closed' share account.\n" + "\n" + "closedDate is closure date of share account\n\n" + "Mandatory Fields: dateFormat,locale,closedDate\n\n" + "Apply additional shares on a share account:\n\n" + "requestedDate is requsted date of share purchase\n" + "\n" + "requestedShares is number of shares to be purchase\n\n" + "Mandatory Fields: dateFormat,locale,requestedDate, requestedShares\n\n" + "Approve additional shares request on a share account\n\n" + "requestedShares is Share purchase transaction ids\n\n" + "Mandatory Fields: requestedShares\n\n" + "Reject additional shares request on a share account:\n\n" + "requestedShares is Share purchase transaction ids\n\n" + "Mandatory Fields: requestedShares\n\n" + "Redeem shares on a share account:\n\n" + "Results redeem some/all shares from share account.\n" + "\n" + "requestedDate is requsted date of shares redeem\n" + "\n" + "requestedShares is number of shares to be redeemed\n\n" + "Mandatory Fields: dateFormat,locale,requestedDate,requestedShares\n\n" + "Showing request/response for 'Reject additional shares request on a share account'\n\n" + "For more info visit this link - https://demo.mifos.io/api-docs/apiLive.htm#shareaccounts")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountsApiResourceSwagger.PostAccountsTypeAccountIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.PostAccountsTypeAccountIdResponse.class)})
     public String handleCommands(@PathParam("type") @ApiParam(value = "type") final String accountType, @PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,

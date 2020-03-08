@@ -36,8 +36,8 @@ Instructions how to run for local development
 ============
 
 Run the following commands:
-1. `./gradlew createDB -PdbName=mifosplatform-tenants`
-1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew tomcatRunWAR`
 
 
@@ -71,8 +71,8 @@ Instructions to execute Integration tests
 > Note that if this is the first time to access MySQL DB, then you may need to reset your password.
 
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
-1. `./gradlew createDB -PdbName=mifosplatform-tenants`
-1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew clean integrationTest`
 
 
@@ -107,6 +107,14 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 and the `mysqlserver` environment variable is now no longer supported.)_
 
 
+Checkstyle
+============
+
+This project enforces [its code conventions](fineract-provider/config/checkstyle/checkstyle.xml) using Checkstyle.
+We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
+File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
+
+
 Version
 ============
 
@@ -133,13 +141,13 @@ complies with the [Apache Software Foundation third-party license policy](https:
 Apache Fineract Platform API
 ============
 
-The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.openmf.org/api-docs/apiLive.htm "API Documentation").
+The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.mifos.io/api-docs/apiLive.htm "API Documentation").
 
 
 Online Demos
 ============
 
-* [Community App](https://demo.openmf.org "Reference Client App")
+* [Community App](https://demo.mifos.io "Reference Client App")
 > For this demo, a demo account is also provided for users to experience the functionality of this Community App. Users can use "mifos" for USERNAME and "password" for PASSWORD(without quotation marks).
 
 
@@ -151,6 +159,7 @@ Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+1
 
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
+Please visit <https://issues.apache.org/jira/projects/FINERACT/> to open or find issues.
 
 Roadmap
 ============

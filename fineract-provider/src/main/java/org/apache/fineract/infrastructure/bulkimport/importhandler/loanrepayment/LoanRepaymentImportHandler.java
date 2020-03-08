@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.loanrepayment;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -41,9 +42,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 @Service
 public class LoanRepaymentImportHandler implements ImportHandler {
     private  Workbook workbook;

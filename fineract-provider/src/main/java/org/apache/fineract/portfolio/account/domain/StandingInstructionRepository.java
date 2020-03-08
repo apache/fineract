@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.account.domain;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
