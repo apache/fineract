@@ -45,12 +45,12 @@ import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
 import org.apache.fineract.commands.service.AuditReadPlatformService;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -98,7 +98,7 @@ public class MakercheckersApiResource {
             @QueryParam("groupId") @ApiParam(value = "groupId") final Integer groupId, @QueryParam("clientId") @ApiParam(value = "clientId") final Integer clientId,
             @QueryParam("loanid") @ApiParam(value = "loanid") final Integer loanId, @QueryParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Integer savingsAccountId) {
 
-        final String extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
+        final SQLBuilder extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
                 officeId, groupId, clientId, loanId, savingsAccountId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -164,55 +164,24 @@ public class MakercheckersApiResource {
         return this.toApiJsonSerializerAudit.serialize(CommandProcessingResult.commandOnlyResult(id));
     }
 
-    private String getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
+    private SQLBuilder getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
             final String makerDateTimeFrom, final String makerDateTimeTo, final Integer officeId, final Integer groupId,
             final Integer clientId, final Integer loanId, final Integer savingsAccountId) {
 
-        String extraCriteria = "";
-
-        if (actionName != null) {
-            extraCriteria += " and aud.action_name = " + ApiParameterHelper.sqlEncodeString(actionName);
-        }
+        SQLBuilder extraCriteria = new SQLBuilder();
+        extraCriteria.addNonNullCriteria("aud.action_name = ", actionName);
         if (entityName != null) {
-            extraCriteria += " and aud.entity_name like " + ApiParameterHelper.sqlEncodeString(entityName + "%");
+            extraCriteria.addCriteria("aud.entity_name like ", entityName + "%");
         }
-
-        if (resourceId != null) {
-            extraCriteria += " and aud.resource_id = " + resourceId;
-        }
-        if (makerId != null) {
-            extraCriteria += " and aud.maker_id = " + makerId;
-        }
-        if (makerDateTimeFrom != null) {
-            extraCriteria += " and aud.made_on_date >= " + ApiParameterHelper.sqlEncodeString(makerDateTimeFrom);
-        }
-        if (makerDateTimeTo != null) {
-            extraCriteria += " and aud.made_on_date <= " + ApiParameterHelper.sqlEncodeString(makerDateTimeTo);
-        }
-
-        if (officeId != null) {
-            extraCriteria += " and aud.office_id = " + officeId;
-        }
-
-        if (groupId != null) {
-            extraCriteria += " and aud.group_id = " + groupId;
-        }
-
-        if (clientId != null) {
-            extraCriteria += " and aud.client_id = " + clientId;
-        }
-
-        if (loanId != null) {
-            extraCriteria += " and aud.loan_id = " + loanId;
-        }
-
-        if (savingsAccountId != null) {
-            extraCriteria += " and aud.savings_account_id = " + savingsAccountId;
-        }
-
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
-        }
+        extraCriteria.addNonNullCriteria("aud.resource_id = ", resourceId);
+        extraCriteria.addNonNullCriteria("aud.maker_id = ", makerId);
+        extraCriteria.addNonNullCriteria("aud.made_on_date >= ", makerDateTimeFrom);
+        extraCriteria.addNonNullCriteria("aud.made_on_date <= ", makerDateTimeTo);
+        extraCriteria.addNonNullCriteria("aud.office_id = ", officeId);
+        extraCriteria.addNonNullCriteria("aud.group_id = ", groupId);
+        extraCriteria.addNonNullCriteria("aud.client_id = ", clientId);
+        extraCriteria.addNonNullCriteria("aud.loan_id = ", loanId);
+        extraCriteria.addNonNullCriteria("aud.savings_account_id = ", savingsAccountId);
 
         return extraCriteria;
     }
