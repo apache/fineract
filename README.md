@@ -40,6 +40,14 @@ Run the following commands:
 1. `./gradlew createDB -PdbName=mifostenant-default`
 1. `./gradlew tomcatRunWAR`
 
+> You can add certain parameters to the execution like oauth2 security or enabling two factor authentication.
+	To add oauth2 instead of basic auth: -Psecurity=oauth 
+	To enable two factor authentication: -Ptwofactor=enabled
+
+If you want to drop DBs run the following commands
+1. `./gradlew dropDB -PdbName=fineract_tenants`
+1. `./gradlew dropDB -PdbName=fineract_default`
+
 
 Instructions to download gradle wrapper
 ============
@@ -160,6 +168,15 @@ Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+1
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
 Please visit <https://issues.apache.org/jira/projects/FINERACT/> to open or find issues.
+
+* [Versions]
+> java 1.8.232
+> gradle >= 5.1
+> spring 5.2.3.RELEASE
+
+* [IntelliJ IDEA]
+> Open fineract-provider project only. In case you need to refresh the project structure you may run: 
+	./gradlew cleanIdea idea
 
 Roadmap
 ============
