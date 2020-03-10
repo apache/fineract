@@ -18,12 +18,16 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.importhandler.savings;
 
+import static org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.readAsBoolean;
+import static org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.readAsDouble;
+import static org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.readAsInt;
+import static org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.readAsString;
+
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -40,18 +44,20 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.slf4j.LoggerFactory;
 
-import static org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.*;
 
 public class SavingsImportHandlerTest {
     private ResponseSpecification responseSpec;
