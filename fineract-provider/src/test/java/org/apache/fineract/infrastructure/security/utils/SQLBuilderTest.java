@@ -36,7 +36,7 @@ public class SQLBuilderTest {
         SQLBuilder sqlBuilder = new SQLBuilder();
         assertEquals("", sqlBuilder.getSQLTemplate());
         assertArrayEquals(new Object[] {}, sqlBuilder.getArguments());
-        // TODO assertEquals("SQLBuilder{}", sqlBuilder.toString());
+        assertEquals("SQLBuilder{}", sqlBuilder.toString());
     }
 
     @Test
@@ -47,7 +47,7 @@ public class SQLBuilderTest {
         sqlBuilder.addCriteria("age <  ", 123);
         assertEquals(" WHERE  name = ?  AND  hobby LIKE ?  AND  age < ?", sqlBuilder.getSQLTemplate());
         assertArrayEquals(new Object[] { "Michael", "Mifos/Apache Fineract", 123}, sqlBuilder.getArguments());
-        // TODO assertEquals("SQLBuilder{ WHERE  name = ['Michael']  AND  hobby = ['Mifos/Apache Fineract']  AND  age < [123]}", sqlBuilder.toString());
+        assertEquals("SQLBuilder{WHERE  name = ['Michael']  AND  hobby LIKE ['Mifos/Apache Fineract']  AND  age < [123]}", sqlBuilder.toString());
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SQLBuilderTest {
         sqlBuilder.addCriteria("ref =", null);
         assertEquals(" WHERE  ref = ?", sqlBuilder.getSQLTemplate());
         assertArrayEquals(new Object[] { null }, sqlBuilder.getArguments());
-        // TODO assertEquals("SQLBuilder{ WHERE  ref = [null] }", sqlBuilder.toString());
+        assertEquals("SQLBuilder{WHERE  ref = [null]}", sqlBuilder.toString());
     }
 
     @Test
