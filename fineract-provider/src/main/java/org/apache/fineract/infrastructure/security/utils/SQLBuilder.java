@@ -43,6 +43,8 @@ public class SQLBuilder {
     // This holds the arguments, in the order of the '?' placeholders in sb
     private final List<Object> args = new ArrayList<>();
 
+    // This holds the criterias, where nth element corresponds to nth element in args
+    private final ArrayList<String> crts = new ArrayList<String>();
     /**
      * Adds a criteria for a SQL WHERE clause.
      * All criteria are appended by AND (support for OR, or nesting, can be added when needed).
@@ -84,6 +86,7 @@ public class SQLBuilder {
         }
         sb.append(trimmedCriteria);
         sb.append(" ?");
+        crts.add(trimmedCriteria);
         args.add(argument);
     }
 
@@ -118,9 +121,38 @@ public class SQLBuilder {
     /*
      * Returns a String representation suitable for debugging and log output.
      * This is ONLY intended for debugging in logs, and NEVER for passing to a JDBC database.
+     */
     @Override
     public String toString() {
-        return "SQLBuilder{..."; // TODO implement this...
+       StringBuilder whereClause  = new StringBuilder("SQLBuilder{");
+       for (int i=0;i<args.size();i++)
+        {
+            if (i!=0)
+            {
+                whereClause.append("  AND  ");
+            }
+            else
+            {
+                whereClause.append("WHERE  ");
+            }
+            Object currentArg = args.get(i);
+            whereClause.append(crts.get(i));
+            whereClause.append(" ");
+            whereClause.append("[");
+            if(currentArg instanceof String)
+            {
+                whereClause.append("'");
+                whereClause.append(currentArg);
+                whereClause.append("'");
+            }else if(currentArg == null)
+            {
+                whereClause.append("null");
+            }else{
+                whereClause.append(String.valueOf(currentArg));
+            }
+            whereClause.append("]");
+        }
+         whereClause.append("}");
+         return whereClause.toString();
     }
-     */
 }
