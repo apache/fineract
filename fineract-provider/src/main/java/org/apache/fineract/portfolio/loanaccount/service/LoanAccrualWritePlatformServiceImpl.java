@@ -430,7 +430,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             final Collection<LoanTransactionData> loanWaiverTansactions, final Collection<LoanSchedulePeriodData> loanSchedulePeriodDatas,
             final LocalDate tilldate) {
 
-        BigDecimal interestIncome = accrualData.getInterestIncome();
+        BigDecimal interestIncome = BigDecimal.ZERO;
+        if(accrualData.getInterestIncome() != null) {
+             interestIncome = accrualData.getInterestIncome();
+        }
         if (accrualData.getWaivedInterestIncome() != null) {
             BigDecimal recognized = BigDecimal.ZERO;
             BigDecimal unrecognized = BigDecimal.ZERO;
