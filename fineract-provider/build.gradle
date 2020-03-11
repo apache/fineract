@@ -47,6 +47,7 @@ buildscript {
       // Use Guava version 23+ as a workaround to spotbug intergration.
       // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
       classpath 'com.google.guava:guava:28.1-jre'
+      classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.8"
   }
 }
 
@@ -65,6 +66,7 @@ apply plugin: 'openjpa'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
 // apply plugin: 'pmd'
+apply plugin: 'org.sonarqube'
 
 dependencyManagement {
   imports {
@@ -531,4 +533,10 @@ tasks.withType(SpotBugsTask) {
     reports.xml.enabled = false
     reports.html.enabled = true
     reportLevel = "high"
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "fineract"
+    }
 }
