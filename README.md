@@ -41,7 +41,9 @@ Run the following commands:
 1. `./gradlew tomcatRunWAR`
 
 > You can add certain parameters to the execution like oauth2 security or enabling two factor authentication.
+
 	To add oauth2 instead of basic auth: -Psecurity=oauth 
+
 	To enable two factor authentication: -Ptwofactor=enabled
 
 If you want to drop DBs run the following commands
@@ -176,7 +178,17 @@ Please visit <https://issues.apache.org/jira/projects/FINERACT/> to open or find
 
 * [IntelliJ IDEA]
 > Open fineract-provider project only. In case you need to refresh the project structure you may run: 
+
 	./gradlew cleanIdea idea
+
+* [Enable remote debugging in Intellij IDEA]
+
+    To enable debugging, you must add the following to the gradle tomcatRunWar task execution in command line:
+    
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8005
+
+    Once the tomcat has started successfully, you may add the remote debug to listen through port 8005 to the process execution. To do so, just create a Remote configuration and be sure to use 8005 as the port.
+
 
 Roadmap
 ============
