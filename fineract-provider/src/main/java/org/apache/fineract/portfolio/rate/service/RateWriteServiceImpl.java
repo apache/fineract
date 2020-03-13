@@ -48,108 +48,106 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RateWriteServiceImpl implements RateWriteService {
 
-  private final static Logger logger = LoggerFactory
-      .getLogger(RateWriteServiceImpl.class);
-  private final RateRepository rateRepository;
-  private final AppUserRepository appUserRepository;
-  private final PlatformSecurityContext context;
-  private final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final static Logger logger = LoggerFactory.getLogger(RateWriteServiceImpl.class);
 
-  @Autowired
-  public RateWriteServiceImpl(RateRepository rateRepository, AppUserRepository appUserRepository,
-      final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-      PlatformSecurityContext context) {
-    this.rateRepository = rateRepository;
-    this.appUserRepository = appUserRepository;
-    this.context = context;
-    this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-  }
+    private final RateRepository rateRepository;
+    private final AppUserRepository appUserRepository;
+    private final PlatformSecurityContext context;
+    private final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-  @Override
-  public CommandProcessingResult createRate(JsonCommand command) {
-    try {
-      this.context.authenticatedUser();
-      this.fromApiJsonDeserializer.validateForCreate(command.json());
-
-      final Long approveUserId = command.longValueOfParameterNamed(approveUserIdParamName);
-      AppUser approveUser = null;
-      if (approveUserId != null) {
-        approveUser = this.appUserRepository.findById(approveUserId).orElseThrow(() -> new UserNotFoundException(approveUserId));
-      }
-      final Rate rate = Rate.fromJson(command, approveUser);
-
-      this.rateRepository.save(rate);
-
-      return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-          .withEntityId(rate.getId()).build();
-
-    } catch (final DataIntegrityViolationException dve) {
-      handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-      return CommandProcessingResult.empty();
-    } catch (final PersistenceException dve) {
-      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-      handleRateDataIntegrityIssues(command, throwable, dve);
-      return CommandProcessingResult.empty();
+    @Autowired
+    public RateWriteServiceImpl(RateRepository rateRepository, AppUserRepository appUserRepository,
+            final RateDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            PlatformSecurityContext context) {
+        this.rateRepository = rateRepository;
+        this.appUserRepository = appUserRepository;
+        this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
-  }
 
-  @Transactional
-  @Override
-  public CommandProcessingResult updateRate(final Long rateId, final JsonCommand command) {
-    try {
-      this.context.authenticatedUser();
+    @Override
+    public CommandProcessingResult createRate(JsonCommand command) {
+        try {
+            this.context.authenticatedUser();
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-      final Rate rateToUpdate = this.rateRepository.findById(rateId).orElseThrow(() -> new RateNotFoundException(rateId));
+            final Long approveUserId = command.longValueOfParameterNamed(approveUserIdParamName);
+            AppUser approveUser = null;
+            if (approveUserId != null) {
+                approveUser = this.appUserRepository.findById(approveUserId).orElseThrow(() -> new UserNotFoundException(approveUserId));
+            }
+            final Rate rate = Rate.fromJson(command, approveUser);
 
-      final Map<String, Object> changes = rateToUpdate.update(command);
+            this.rateRepository.save(rate);
 
-      this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+                    .withEntityId(rate.getId()).build();
 
-      if (changes.containsKey(approveUserIdParamName)) {
-        final Long newApproveUserId = (Long) changes.get(approveUserIdParamName);
-        AppUser newApproveUser = null;
-        if (newApproveUserId != null) {
-          newApproveUser = this.appUserRepository.findById(newApproveUserId).orElseThrow(() -> new UserNotFoundException(newApproveUserId));
+        } catch (final DataIntegrityViolationException dve) {
+            handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleRateDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
-        rateToUpdate.setApproveUser(newApproveUser);
-      }
-      if (!changes.isEmpty()) {
-        this.rateRepository.saveAndFlush(rateToUpdate);
-      }
-
-      return new CommandProcessingResultBuilder() //
-          .withCommandId(command.commandId()) //
-          .withEntityId(rateId) //
-          .with(changes) //
-          .build();
-
-    } catch (final DataIntegrityViolationException dve) {
-      handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-      return new CommandProcessingResult(Long.valueOf(-1));
-    } catch (final PersistenceException dve) {
-      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-      handleRateDataIntegrityIssues(command, throwable, dve);
-      return CommandProcessingResult.empty();
     }
 
-  }
+    @Transactional
+    @Override
+    public CommandProcessingResult updateRate(final Long rateId, final JsonCommand command) {
+        try {
+            this.context.authenticatedUser();
 
-   /*
-   * Guaranteed to throw an exception no matter what the data integrity issue
-   * is.
-   */
-  private void handleRateDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-      final Exception dve) {
-    if (realCause.getMessage().contains("rate_name_org")) {
-      final String name = command.stringValueOfParameterNamed("name");
-      throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId",
-          "A rate with name '" + name
-              + "' already exists", "name", name);
+            final Rate rateToUpdate = this.rateRepository.findById(rateId).orElseThrow(() -> new RateNotFoundException(rateId));
+
+            final Map<String, Object> changes = rateToUpdate.update(command);
+
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+            if (changes.containsKey(approveUserIdParamName)) {
+                final Long newApproveUserId = (Long) changes.get(approveUserIdParamName);
+                AppUser newApproveUser = null;
+                if (newApproveUserId != null) {
+                    newApproveUser = this.appUserRepository.findById(newApproveUserId).orElseThrow(() -> new UserNotFoundException(newApproveUserId));
+                }
+                rateToUpdate.setApproveUser(newApproveUser);
+            }
+            if (!changes.isEmpty()) {
+                this.rateRepository.saveAndFlush(rateToUpdate);
+            }
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(rateId) //
+                    .with(changes) //
+                    .build();
+
+        } catch (final DataIntegrityViolationException dve) {
+            handleRateDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return new CommandProcessingResult((long) -1);
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleRateDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
+        }
     }
 
-    logger.error(dve.getMessage(), dve);
-    throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",
-        "Unknown data integrity issue with resource: " + realCause.getMessage());
-  }
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleRateDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final Exception dve) {
+        if (realCause.getMessage().contains("rate_name_org")) {
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId",
+                    "A rate with name '" + name
+                    + "' already exists", "name", name);
+        }
 
+        logger.error("Error due to Exception", dve);
+        throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
 }
