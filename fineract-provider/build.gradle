@@ -147,6 +147,7 @@ group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
 repositories {
 	jcenter()
+    mavenCentral()
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 
@@ -462,9 +463,6 @@ task integrationTest(type:Test) {
 import com.github.spotbugs.SpotBugsTask
 import groovy.sql.Sql
 
-repositories {
-    mavenCentral()
-}
 configurations {
     driver
 }
@@ -533,13 +531,4 @@ tasks.withType(SpotBugsTask) {
     reports.xml.enabled = false
     reports.html.enabled = true
     reportLevel = "high"
-}
-
-sonarqube {
-  properties {
-    property "sonar.projectKey", "fineract"
-    property "sonar.organization", "apache"
-    property "sonar.host.url", "https://sonarcloud.io"
-    property "sonar.login", "3e00e30e26f03a53967aa77807d8847bf90b4b73"
-  }
 }
