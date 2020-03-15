@@ -29,9 +29,11 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NotificationApiTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
@@ -48,7 +50,7 @@ public class NotificationApiTest {
     public void testNotificationRetrieval() {
         HashMap<String, Object> response = (HashMap<String, Object>) NotificationHelper.getNotifications(this.requestSpec,
                 this.responseSpec, "");
-        System.out.println("Response : " + response.toString());
+        LOG.info("Response : " + response.toString());
         Assert.assertNotNull(response);
     }
 }

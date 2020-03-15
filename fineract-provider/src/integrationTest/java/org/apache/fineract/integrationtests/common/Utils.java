@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("unchecked")
 public class Utils {
-
+   private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
    private final static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
@@ -114,7 +114,7 @@ public class Utils {
         awaitSpringBootActuatorHealthyUp();
         try {
             logger.info("Logging in, for integration test...");
-            System.out.println("-----------------------------------LOGIN-----------------------------------------");
+            LOG.info("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.given().contentType(ContentType.JSON)
                 .body("{\"username\":\"mifos\", \"password\":\"password\"}")
                 .expect().log().ifError().when().post(LOGIN_URL).asString();

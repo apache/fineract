@@ -39,10 +39,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
 public class FlexibleSavingsInterestPostingIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
     private ResponseSpecification responseSpec;
@@ -84,7 +86,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
         for (Entry<String, Object> entry : interestPostingTransaction.entrySet())
-            System.out.println(entry.getKey() + "-" + entry.getValue().toString());
+            LOG.info(entry.getKey() + "-" + entry.getValue().toString());
         // 1st Dec 13 to 31st March 14 - 365 days, daily compounding using daily
         // balance
         // 33.7016 obtained from formula in excel provided by Subramanya

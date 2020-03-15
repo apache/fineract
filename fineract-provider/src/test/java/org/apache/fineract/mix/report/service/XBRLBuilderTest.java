@@ -43,12 +43,14 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class XBRLBuilderTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
     @Mock
     private NamespaceReadPlatformServiceImpl readNamespaceService;
     @InjectMocks
@@ -72,7 +74,7 @@ public class XBRLBuilderTest {
         when(data1.getName()).thenReturn("Assets");
         map.put(data1, new BigDecimal(10000));
         final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
-        System.out.println(result);
+        LOG.info(result);
         NodeList nodes = null;
         try {
             nodes =

@@ -35,10 +35,12 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class LoanApplicationUndoLastTrancheTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -65,14 +67,14 @@ public class LoanApplicationUndoLastTrancheTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
+        LOG.info("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
                 + clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
                 .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .build(null));
-        System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
                 + loanProductID);
 
         // CREATE TRANCHES
@@ -87,14 +89,14 @@ public class LoanApplicationUndoLastTrancheTest {
 
         // APPLY FOR LOAN WITH TRANCHES
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
-        System.out.println("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
+        LOG.info("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
                 + loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, approveTranches);
 
@@ -109,11 +111,11 @@ public class LoanApplicationUndoLastTrancheTest {
         // VALIDATE THE LOAN IS ACTIVE STATUS
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        System.out.println("-------------Make repayment 1-----------");
+        LOG.info("-------------Make repayment 1-----------");
         this.loanTransactionHelper.makeRepayment("01 April 2014", Float.valueOf("420"), loanID);
-        System.out.println("-------------Make repayment 2-----------");
+        LOG.info("-------------Make repayment 2-----------");
         this.loanTransactionHelper.makeRepayment("01 May 2014", Float.valueOf("412"), loanID);
-        System.out.println("-------------Make repayment 3-----------");
+        LOG.info("-------------Make repayment 3-----------");
         this.loanTransactionHelper.makeRepayment("01 June 2014", Float.valueOf("204"), loanID);
         // DISBURSE A SECOND TRANCHE
         this.loanTransactionHelper.disburseLoan("23 June 2014", loanID);
@@ -129,7 +131,7 @@ public class LoanApplicationUndoLastTrancheTest {
 
     public Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, String principal,
             List<HashMap> tranches) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
         //
                 .withPrincipal(principal)

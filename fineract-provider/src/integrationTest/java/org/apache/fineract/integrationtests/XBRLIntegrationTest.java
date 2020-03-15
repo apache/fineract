@@ -31,10 +31,12 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.xbrl.XBRLIntegrationTestHelper;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class XBRLIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(XBRLIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
@@ -57,7 +59,7 @@ public class XBRLIntegrationTest {
     }
 
     private void verifyTaxonomyList(final ArrayList<HashMap> taxonomyList) {
-        System.out.println("--------------------VERIFYING TAXONOMY LIST--------------------------");
+        LOG.info("--------------------VERIFYING TAXONOMY LIST--------------------------");
         assertEquals("Checking for the 1st taxonomy", "AdministrativeExpense", taxonomyList.get(0).get("name"));
     }
 

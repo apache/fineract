@@ -26,9 +26,11 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HookHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(HookHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -40,7 +42,7 @@ public class HookHelper {
     }
 
     public Integer createHook(final String payloadURL) {
-        System.out.println("---------------------------------CREATING A HOOK---------------------------------------------");
+        LOG.info("---------------------------------CREATING A HOOK---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_HOOK_URL, getTestHookAsJson(payloadURL),
                 "resourceId");
     }
@@ -60,31 +62,31 @@ public class HookHelper {
         createOfficeEvent.put("entityName", "OFFICE");
         events.add(createOfficeEvent);
         map.put("events", events);
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
 
     public Integer updateHook(final String payloadURL, final Long hookId) {
-        System.out.println("---------------------------------UPDATING HOOK---------------------------------------------");
+        LOG.info("---------------------------------UPDATING HOOK---------------------------------------------");
         final String UPDATE_HOOK_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPut(this.requestSpec, this.responseSpec, UPDATE_HOOK_URL, getTestHookAsJson(payloadURL), "resourceId");
     }
 
     public Integer deleteHook(final Long hookId) {
-        System.out.println("---------------------------------DELETING HOOK---------------------------------------------");
+        LOG.info("---------------------------------DELETING HOOK---------------------------------------------");
         final String DELETE_HOOK_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, DELETE_HOOK_URL, "resourceId");
     }
 
     public void verifyHookCreatedOnServer(final Long hookId) {
-        System.out.println("------------------------------CHECK CREATE HOOK DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK CREATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseHookId = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_URL, "id");
         assertEquals(hookId.toString(), responseHookId.toString());
     }
 
     public void verifyUpdateHook(final String updateURL, final Long hookId) {
-        System.out.println("------------------------------CHECK UPDATE HOOK DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK UPDATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         ArrayList map = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_URL, "config");
         HashMap<String, String> hash = (HashMap<String, String>) map.get(1);
@@ -92,7 +94,7 @@ public class HookHelper {
     }
 
     public void verifyDeleteHook(final Long hookId) {
-        System.out.println("------------------------------CHECK DELETE HOOK DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK DELETE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         ResponseSpecification responseSpec404 = new ResponseSpecBuilder().expectStatusCode(404).build();
         ArrayList array = Utils.performServerGet(this.requestSpec, responseSpec404, GET_URL, "errors");

@@ -52,9 +52,11 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoanReschedulingWithinCenterTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -133,7 +135,7 @@ public class LoanReschedulingWithinCenterTest {
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        System.out.println("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
+        LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
         Calendar todaysdate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysdate.add(Calendar.DAY_OF_MONTH, 14);
         String oldMeetingDate = dateFormat.format(todaysdate.getTime());
@@ -181,7 +183,7 @@ public class LoanReschedulingWithinCenterTest {
 
         Integer calendarId = CalendarHelper.createMeetingForGroup(this.requestSpec, this.responseSpec, centerId, startDate, frequency,
                 interval, repeatsOnDay.toString());
-        System.out.println("calendarId " + calendarId);
+        LOG.info("calendarId " + calendarId);
         return calendarId;
     }
 
@@ -253,7 +255,7 @@ public class LoanReschedulingWithinCenterTest {
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, approveTranches);
 
@@ -265,7 +267,7 @@ public class LoanReschedulingWithinCenterTest {
         this.loanTransactionHelper.disburseLoan(disbursementDate, loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
-        System.out.println("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
+        LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
         Calendar todaysdate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysdate.add(Calendar.DAY_OF_MONTH, 14);
         String oldMeetingDate = dateFormat.format(todaysdate.getTime());
@@ -312,7 +314,7 @@ public class LoanReschedulingWithinCenterTest {
             final Integer recalculationCompoundingFrequencyOnDayType,
             final Integer recalculationCompoundingFrequencyDayOfWeekType, final Integer recalculationRestFrequencyOnDayType,
             final Integer recalculationRestFrequencyDayOfWeekType) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder()
                 .withPrincipal("10000.00")
                 .withNumberOfRepayments("12")
@@ -359,7 +361,7 @@ public class LoanReschedulingWithinCenterTest {
             final Integer loanProductID, final String disbursementDate, final String restStartDate, final String compoundingStartDate,
             final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
             final String graceOnPrincipalPayment, List<HashMap> tranches) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000.00") //
                 .withLoanTermFrequency("24") //

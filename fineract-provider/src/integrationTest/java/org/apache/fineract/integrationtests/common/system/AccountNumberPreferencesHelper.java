@@ -23,9 +23,11 @@ import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AccountNumberPreferencesHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesHelper.class);
     private final RequestSpecification requestSpec;
 
     private final ResponseSpecification responseSpec;
@@ -41,8 +43,7 @@ public class AccountNumberPreferencesHelper {
 
     public Object createClientAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
-        System.out
-                .println("---------------------------------CREATING CLIENT ACCOUNT NUMBER PREFERENCE------------------------------------------");
+        LOG.info("---------------------------------CREATING CLIENT ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder()
                 .clientBuild();
@@ -56,8 +57,7 @@ public class AccountNumberPreferencesHelper {
 
     public Object createLoanAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
-        System.out
-                .println("---------------------------------CREATING LOAN ACCOUNT NUMBER PREFERENCE------------------------------------------");
+        LOG.info("---------------------------------CREATING LOAN ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder()
                 .loanBuild();
@@ -70,8 +70,7 @@ public class AccountNumberPreferencesHelper {
 
     public Object createSavingsAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
-        System.out
-                .println("---------------------------------CREATING SAVINGS ACCOUNT NUMBER PREFERENCE------------------------------------------");
+        LOG.info("---------------------------------CREATING SAVINGS ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder()
                 .savingsBuild();
@@ -85,8 +84,7 @@ public class AccountNumberPreferencesHelper {
 
     public Object createGroupsAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
-        System.out
-                .println("---------------------------------CREATING GROUPS ACCOUNT NUMBER PREFERENCE------------------------------------------");
+        LOG.info("---------------------------------CREATING GROUPS ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder()
                 .groupsBuild();
@@ -100,8 +98,7 @@ public class AccountNumberPreferencesHelper {
 
     public Object createCenterAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
-        System.out
-                .println("---------------------------------CREATING CENTER ACCOUNT NUMBER PREFERENCE------------------------------------------");
+        LOG.info("---------------------------------CREATING CENTER ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
         final String requestJSON = new AccountNumberPreferencesTestBuilder()
                 .centerBuild();
@@ -146,8 +143,7 @@ public class AccountNumberPreferencesHelper {
             final Integer accountNumberFormatId,
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
 
-        System.out
-                .println("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE------------------------------------------");
+        LOG.info("---------------------------------DELETING ACCOUNT NUMBER PREFERENCE------------------------------------------");
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/"
                 + accountNumberFormatId + "?" + Utils.TENANT_IDENTIFIER;

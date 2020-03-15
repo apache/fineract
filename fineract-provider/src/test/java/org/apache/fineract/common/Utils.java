@@ -30,8 +30,8 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
-
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Util for RestAssured tests. This class here in src/test is copy/pasted :(
@@ -47,6 +47,7 @@ public class Utils {
 
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
 
+    private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
         RestAssured.port = 8443;
@@ -55,7 +56,7 @@ public class Utils {
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
-            System.out.println("-----------------------------------LOGIN-----------------------------------------");
+            LOG.info("-----------------------------------LOGIN-----------------------------------------");
             final String json = RestAssured.post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
             return JsonPath.with(json).get("base64EncodedAuthenticationKey");

@@ -28,6 +28,8 @@ import java.util.Map;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}. It
@@ -39,7 +41,7 @@ import org.junit.Assert;
  * @see org.apache.fineract.integrationtests.BatchApiTest
  */
 public class BatchHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
     private static final String BATCH_API_URL = "/fineract-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
 
@@ -422,7 +424,7 @@ public class BatchHelper {
      */
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String externalId) {
-        System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String CLIENT_URL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
         final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
         Assert.assertEquals("No records found with given externalId", (long) responseRecords, (long) 0);

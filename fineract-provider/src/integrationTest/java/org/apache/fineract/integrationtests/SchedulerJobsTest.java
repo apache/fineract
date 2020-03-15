@@ -30,10 +30,12 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class SchedulerJobsTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(SchedulerJobsTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpecForSchedulerJob;
@@ -106,7 +108,7 @@ public class SchedulerJobsTest {
                 Thread.sleep(15000);
                 schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
                 Assert.assertNotNull(schedulerJob);
-                System.out.println("Job " +jobId.toString() +" is Still Running");
+                LOG.info("Job " +jobId.toString() +" is Still Running");
             }
             ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
                     jobId.toString());

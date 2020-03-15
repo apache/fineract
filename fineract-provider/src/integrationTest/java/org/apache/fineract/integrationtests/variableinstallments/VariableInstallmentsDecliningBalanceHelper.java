@@ -30,12 +30,14 @@ import java.util.Map;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VariableInstallmentsDecliningBalanceHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(VariableInstallmentsDecliningBalanceHelper.class);
     public static String createLoanProductWithoutVaribleConfig(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
                 .withNumberOfRepayments("4") //
@@ -51,7 +53,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
     }
 
     public static String createLoanProductWithVaribleConfig(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
                 .withNumberOfRepayments("4") //
@@ -69,7 +71,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
     }
 
     public static String createLoanProductWithVaribleConfigwithEqualPrincipal(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
                 .withNumberOfRepayments("4") //
@@ -88,7 +90,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
 
     public static String applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //
@@ -108,7 +110,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
 
     public static String applyForLoanApplicationWithEqualPrincipal(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //

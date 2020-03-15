@@ -37,9 +37,11 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConcurrencyIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -73,7 +75,7 @@ public class ConcurrencyIntegrationTest {
         date.set(2011, 9, 20);
         Float repaymentAmount = 100.0f;
         for (int i = 0; i < 10; i++) {
-            System.out.println("Starting concurrent transaction number " + i);
+            LOG.info("Starting concurrent transaction number " + i);
             date.add(Calendar.DAY_OF_MONTH, 1);
             repaymentAmount = repaymentAmount + 100;
             Runnable worker = new LoanRepaymentExecutor(loanTransactionHelper, loanID, repaymentAmount, date);
@@ -85,12 +87,12 @@ public class ConcurrencyIntegrationTest {
         while (!executor.isTerminated()) {
 
         }
-        System.out.println("\nFinished all threads");
+        LOG.info("\nFinished all threads");
 
     }
 
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
@@ -111,7 +113,7 @@ public class ConcurrencyIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //
@@ -150,12 +152,12 @@ public class ConcurrencyIntegrationTest {
             try {
                 this.loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
             } catch (Exception e) {
-                System.out.println("Found an exception" + e.getMessage());
-                System.out.println("Details of failed concurrent transaction (date, amount, loanId) are " + repaymentDate + ","
+                LOG.info("Found an exception" + e.getMessage());
+                LOG.info("Details of failed concurrent transaction (date, amount, loanId) are " + repaymentDate + ","
                         + repaymentAmount + "," + loanId);
                 throw (e);
             }
-            System.out.println("Details of passed concurrent transaction, details (date, amount, loanId) are " + repaymentDate + ","
+            LOG.info("Details of passed concurrent transaction, details (date, amount, loanId) are " + repaymentDate + ","
                     + repaymentAmount + "," + loanId);
         }
     }

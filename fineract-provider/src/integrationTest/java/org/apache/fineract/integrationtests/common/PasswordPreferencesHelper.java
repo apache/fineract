@@ -22,23 +22,24 @@ import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PasswordPreferencesHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(PasswordPreferencesHelper.class);
     private static final String PASSWORD_PREFERENCES_URL = "/fineract-provider/api/v1/passwordpreferences";
 
     public static Object updatePasswordPreferences(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             String validationPolicyId) {
         final String UPDATE_PASSWORD_PREFERENCES_URL = PASSWORD_PREFERENCES_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------UPDATE PASSWORD PREFERENCE---------------------------------------------");
+        LOG.info("---------------------------------UPDATE PASSWORD PREFERENCE---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_PASSWORD_PREFERENCES_URL, updatePreferencesAsJson(validationPolicyId), "");
     }
 
     public static Object updateWithInvalidValidationPolicyId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec,String invalidValidationPolicyId, String jsonAttributeToGetback) {
         final String UPDATE_PASSWORD_PREFERENCES_URL = PASSWORD_PREFERENCES_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out
-                .println("---------------------------------UPDATE PASSWORD PREFERENCES WITH INVALID ID-----------------------------------------");
+        LOG.info("---------------------------------UPDATE PASSWORD PREFERENCES WITH INVALID ID-----------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_PASSWORD_PREFERENCES_URL, updatePreferencesWithInvalidId(invalidValidationPolicyId),
                 jsonAttributeToGetback);
     }

@@ -47,6 +47,7 @@
         <property name="fileExtensions" value="java"/>
     </module>
   -->
+  
     <module name="TreeWalker">
         <module name="EqualsHashCode"/>
 
@@ -59,6 +60,11 @@
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
 
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
+            <property name="message" value="Line contains console output."/>
+            <property name="ignoreComments" value="false" />
+        </module>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">

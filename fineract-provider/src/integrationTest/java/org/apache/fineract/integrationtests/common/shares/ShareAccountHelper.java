@@ -23,10 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ShareAccountHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ShareAccountHelper.class);
     private static final String LOCALE = "en_GB";
 
     private String clientId ;
@@ -96,7 +98,7 @@ public class ShareAccountHelper {
         }
 
         String shareAccountCreateJson = new Gson().toJson(map);
-        System.out.println(shareAccountCreateJson);
+        LOG.info(shareAccountCreateJson);
         return shareAccountCreateJson;
     }
 

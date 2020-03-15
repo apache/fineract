@@ -49,6 +49,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JUnit Test Cases for Account Transfer for.
@@ -56,6 +58,7 @@ import org.junit.Test;
 @SuppressWarnings({ "rawtypes", "unused" })
 public class AccountTransferTest {
 
+    private final static Logger LOG = LoggerFactory.getLogger(AccountTransferTest.class);
     public static final String MINIMUM_OPENING_BALANCE = "30000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String ACCOUNT_TRANSFER_AMOUNT = "15000.0";
@@ -443,7 +446,7 @@ public class AccountTransferTest {
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //
@@ -454,7 +457,7 @@ public class AccountTransferTest {
     }
 
     private Integer createLoanProduct(final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("8,000.00") //
                 .withNumberOfRepayments("4") //
@@ -470,7 +473,7 @@ public class AccountTransferTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("8,000.00") //
                 .withLoanTermFrequency("4") //

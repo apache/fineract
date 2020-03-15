@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroupHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(GroupHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -46,30 +48,30 @@ public class GroupHelper {
 
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             @SuppressWarnings("unused") final boolean active) {
-        System.out.println("---------------------------------CREATING A GROUP---------------------------------------------");
+        LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return createGroup(requestSpec, responseSpec, "04 March 2011");
     }
 
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate) {
-        System.out.println("---------------------------------CREATING A GROUP---------------------------------------------");
+        LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(true, activationDate), "groupId");
     }
 
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        System.out.println("---------------------------------CREATING A GROUP---------------------------------------------");
+        LOG.info("---------------------------------CREATING A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(false, ""), "groupId");
     }
 
     public Object createGroupWithError(final String jsonAttributeToGetBack) {
-        System.out.println("---------------------------------CREATING A GROUP WITH ERROR---------------------------------------------");
+        LOG.info("---------------------------------CREATING A GROUP WITH ERROR---------------------------------------------");
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(false, ""),
                 jsonAttributeToGetBack);
     }
 
     public static Integer createGroupPendingWithDatatable(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String registeredTableName) {
-        System.out.println("-------------------------- CREATING A GROUP WITH DATATABLES --------------------------------");
+        LOG.info("-------------------------- CREATING A GROUP WITH DATATABLES --------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL,
                 getTestGroupWithDatatableAsJson(registeredTableName), "groupId");
     }
@@ -78,7 +80,7 @@ public class GroupHelper {
             final String groupId, final String clientMember) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId
                 + "?command=associateClients&" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------Associate Client To A GROUP---------------------------------------------");
+        LOG.info("---------------------------------Associate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
@@ -86,39 +88,39 @@ public class GroupHelper {
             final String groupId, final String clientMember) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId
                 + "?command=disassociateClients&" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
+        LOG.info("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------Activate A GROUP---------------------------------------------");
+        LOG.info("---------------------------------Activate A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
     }
 
     public static Integer updateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String name,
             final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------UPDATE GROUP---------------------------------------------");
+        LOG.info("---------------------------------UPDATE GROUP---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
     }
 
     public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId) {
         final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
+        LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
     }
 
 
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final Long staffId){
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
-        System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
+        LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAsJSON(staffId),"changes");
     }
     public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final String staffId){
         final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
-        System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
+        LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAndInheritStaffForClientAccountsAsJSON(staffId),"changes");
     }
 
@@ -136,10 +138,10 @@ public class GroupHelper {
         } else {
             map.put("active", "false");
             map.put("submittedOnDate", "04 March 2011");
-            System.out.println("defaulting to inactive group: 04 March 2011");
+            LOG.info("defaulting to inactive group: 04 March 2011");
         }
 
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
 
@@ -148,7 +150,7 @@ public class GroupHelper {
         final List<String> list = new ArrayList<>();
         list.add(clientMember);
         map.put("clientMembers", list);
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
 
@@ -160,36 +162,36 @@ public class GroupHelper {
             map.put("activationDate", activationDate);
         } else {
             map.put("activationDate", "04 March 2011");
-            System.out.println("defaulting to fixed date: 04 March 2011");
+            LOG.info("defaulting to fixed date: 04 March 2011");
         }
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
 
     public static String updateGroupAsJSON(final String name) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
     public static String assignStaffAsJSON(final Long staffId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("staffId", staffId);
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
     public static String assignStaffAndInheritStaffForClientAccountsAsJSON(final String staffId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("staffId", staffId);
         map.put("inheritStaffForClientAccounts","true");
-        System.out.println("map : " + map);
+        LOG.info("map : " + map);
         return new Gson().toJson(map);
     }
 
 
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
-        System.out.println("------------------------------CHECK GROUP DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
         assertEquals("ERROR IN CREATING THE GROUP", generatedGroupID, responseGroupID);
@@ -197,7 +199,7 @@ public class GroupHelper {
 
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final String field, final String expectedValue) {
-        System.out.println("------------------------------CHECK GROUP DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
         assertEquals("ERROR IN CREATING THE GROUP", expectedValue, responseValue);
@@ -205,7 +207,7 @@ public class GroupHelper {
 
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final boolean generatedGroupStatus) {
-        System.out.println("------------------------------CHECK GROUP STATUS------------------------------------\n");
+        LOG.info("------------------------------CHECK GROUP STATUS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
         assertEquals("ERROR IN ACTIVATING THE GROUP", generatedGroupStatus, responseGroupStatus);
@@ -214,7 +216,7 @@ public class GroupHelper {
     public static void verifyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final Integer groupMember) {
         List<String> list = new ArrayList<>();
-        System.out.println("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
+        LOG.info("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID
                 + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
@@ -224,7 +226,7 @@ public class GroupHelper {
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
-        System.out.println("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
+        LOG.info("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID
                 + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
@@ -234,7 +236,7 @@ public class GroupHelper {
     public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
-        System.out.println("------------------------------CHECK GROUP DELETED------------------------------------\n");
+        LOG.info("------------------------------CHECK GROUP DELETED------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");
 
@@ -259,7 +261,6 @@ public class GroupHelper {
         map.put("active", "false");
         map.put("submittedOnDate", "04 March 2011");
         String requestJson = getTestDatatableAsJson(map, registeredTableName);
-        System.out.println("map : " + requestJson);
         return requestJson;
     }
 

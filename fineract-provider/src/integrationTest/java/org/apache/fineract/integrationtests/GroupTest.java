@@ -37,13 +37,15 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Group Test for checking Group: Creation, Activation, Client Association,
  * Updating & Deletion
  */
 public class GroupTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -107,11 +109,11 @@ public class GroupTest {
 
         // create staff
         Integer createStaffId1 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        System.out.println("--------------creating first staff with id-------------" + createStaffId1);
+        LOG.info("--------------creating first staff with id-------------" + createStaffId1);
         Assert.assertNotNull(createStaffId1);
 
         Integer createStaffId2 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        System.out.println("--------------creating second staff with id-------------" + createStaffId2);
+        LOG.info("--------------creating second staff with id-------------" + createStaffId2);
         Assert.assertNotNull(createStaffId2);
 
         // assign staff "createStaffId1" to group
@@ -155,7 +157,7 @@ public class GroupTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //

@@ -23,9 +23,11 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AccountTransferHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(AccountTransferHelper.class);
     private static final String ACCOUNT_TRANSFER_URL = "/fineract-provider/api/v1/accounttransfers";
     private static final String LOAN_REFUND_BY_TRANSFER_URL = "/fineract-provider/api/v1/accounttransfers/refundByTransfer";
     private static final String LOCALE = "en_GB";
@@ -63,7 +65,6 @@ public class AccountTransferHelper {
         map.put("transferAmount", transferAmount);
         map.put("transferDescription", this.transferDescription);
         String savingsApplicationJSON = new Gson().toJson(map);
-        System.out.println(savingsApplicationJSON);
         return savingsApplicationJSON;
     }
 
@@ -74,7 +75,7 @@ public class AccountTransferHelper {
 
     public Integer accountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
-        System.out.println("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
                 .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
@@ -85,7 +86,7 @@ public class AccountTransferHelper {
 
     public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
             final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
-        System.out.println("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        LOG.info("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(date) //
                 .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,

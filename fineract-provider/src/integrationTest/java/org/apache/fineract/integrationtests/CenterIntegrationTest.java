@@ -38,9 +38,11 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CenterIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(CenterIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
@@ -198,7 +200,7 @@ public class CenterIntegrationTest {
     public void testStaffAssignmentDuringCenterCreation() {
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        System.out.println("--------------creating first staff with id-------------" + staffId);
+        LOG.info("--------------creating first staff with id-------------" + staffId);
         Assert.assertNotNull(staffId);
 
         final int centerWithStaffId = CenterHelper.createCenterWithStaffId(this.requestSpec, this.responseSpec, staffId);
@@ -212,7 +214,7 @@ public class CenterIntegrationTest {
     @Test
     public void testAssignStaffToCenter() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        System.out.println("--------------creating first staff with id-------------" + staffId);
+        LOG.info("--------------creating first staff with id-------------" + staffId);
         Assert.assertNotNull(staffId);
 
         final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
@@ -233,7 +235,7 @@ public class CenterIntegrationTest {
     @Test
     public void testUnassignStaffToCenter() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        System.out.println("--------------creating first staff with id-------------" + staffId);
+        LOG.info("--------------creating first staff with id-------------" + staffId);
         Assert.assertNotNull(staffId);
 
         final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);

@@ -45,13 +45,15 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Group Savings Integration Test for checking Savings Application.
  */
 @SuppressWarnings({ "rawtypes", "unused" })
 public class GroupSavingsIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(GroupSavingsIntegrationTest.class);
     public static final String DEPOSIT_AMOUNT = "2000";
     public static final String WITHDRAW_AMOUNT = "1000";
     public static final String WITHDRAW_AMOUNT_ADJUSTED = "500";
@@ -536,7 +538,7 @@ public class GroupSavingsIntegrationTest {
     public static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, final String minBalanceForInterestCalculation, final String minRequiredBalance,
             final String enforceMinRequiredBalance) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //

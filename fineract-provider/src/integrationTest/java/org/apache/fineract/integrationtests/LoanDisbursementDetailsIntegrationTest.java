@@ -39,10 +39,12 @@ import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class LoanDisbursementDetailsIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(LoanDisbursementDetailsIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -73,20 +75,19 @@ public class LoanDisbursementDetailsIntegrationTest {
         createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 Sep 2015", "5000"));
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
+        LOG.info("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
                 + clientID);
 
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
                 .withInterestTypeAsDecliningBalance().withMoratorium("", "").withAmortizationTypeAsEqualInstallments().withTranches(true)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
-        System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
                 + loanProductID);
 
         final Integer loanIDWithEmi = applyForLoanApplicationWithEmiAmount(clientID, loanProductID, proposedAmount, createTranches,
                 installmentAmount);
 
-        System.out
-                .println("-----------------------------------LOAN CREATED WITH EMI LOANID-------------------------------------------------"
+        LOG.info("-----------------------------------LOAN CREATED WITH EMI LOANID-------------------------------------------------"
                         + loanIDWithEmi);
 
         HashMap repaymentScheduleWithEmi = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
@@ -100,13 +101,12 @@ public class LoanDisbursementDetailsIntegrationTest {
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanIDWithEmi);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount("01 June 2015", "01 June 2015", "10000", loanIDWithEmi,
                 createTranches);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        System.out
-                .println("-----------------------------------MULTI DISBURSAL LOAN WITH EMI APPROVED SUCCESSFULLY---------------------------------------");
+        LOG.info("-----------------------------------MULTI DISBURSAL LOAN WITH EMI APPROVED SUCCESSFULLY---------------------------------------");
 
         final Integer loanIDWithoutEmi = applyForLoanApplicationWithEmiAmount(clientID, loanProductID, proposedAmount, createTranches,
                 withoutInstallmentAmount);
@@ -117,8 +117,7 @@ public class LoanDisbursementDetailsIntegrationTest {
         ArrayList<HashMap> periods1 = (ArrayList<HashMap>) repaymentScheduleWithEmi.get("periods");
         assertEquals(periods1.size(), 15);
 
-        System.out
-                .println("-----------------------------------LOAN CREATED WITHOUT EMI LOANID-------------------------------------------------"
+        LOG.info("-----------------------------------LOAN CREATED WITHOUT EMI LOANID-------------------------------------------------"
                         + loanIDWithoutEmi);
 
         /* To be uncommented once issue MIFOSX-2006 is closed. */
@@ -127,13 +126,12 @@ public class LoanDisbursementDetailsIntegrationTest {
         HashMap loanStatusMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanIDWithoutEmi);
         LoanStatusChecker.verifyLoanIsPending(loanStatusMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount("01 June 2015", "01 June 2015", "10000",
                 loanIDWithoutEmi, createTranches);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        System.out
-                .println("-----------------------------------MULTI DISBURSAL LOAN WITHOUT EMI APPROVED SUCCESSFULLY---------------------------------------");
+        LOG.info("-----------------------------------MULTI DISBURSAL LOAN WITHOUT EMI APPROVED SUCCESSFULLY---------------------------------------");
 
     }
 
@@ -209,7 +207,7 @@ public class LoanDisbursementDetailsIntegrationTest {
 
         assertEquals(period.get("dueDate").toString(), expectedRepaymentSchedule.getDueDate());
         assertEquals(period.get("principalLoanBalanceOutstanding"), expectedRepaymentSchedule.getPrincipalLoanBalanceOutstanding());
-        System.out.println(period.get("totalOriginalDueForPeriod").toString());
+        LOG.info(period.get("totalOriginalDueForPeriod").toString());
         assertEquals(new Float(period.get("totalOriginalDueForPeriod").toString()), expectedRepaymentSchedule
                 .getTotalOriginalDueForPeriod().floatValue(), 0.0f);
 
@@ -342,7 +340,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     private Integer applyForLoanApplicationWithEmiAmount(final Integer clientID, final Integer loanProductID, final String proposedAmount,
             List<HashMap> tranches, final String installmentAmount) {
 
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
         //
                 .withPrincipal(proposedAmount)
@@ -373,29 +371,28 @@ public class LoanDisbursementDetailsIntegrationTest {
         createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 March 2014", "1000"));
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
+        LOG.info("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
                 + clientID);
 
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
                 .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .build(null));
-        System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
                 + loanProductID);
 
         this.loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
-        System.out.println("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
+        LOG.info("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
                 + loanID);
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, createTranches);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        System.out
-                .println("-----------------------------------MULTI DISBURSAL LOAN APPROVED SUCCESSFULLY---------------------------------------");
+        LOG.info("-----------------------------------MULTI DISBURSAL LOAN APPROVED SUCCESSFULLY---------------------------------------");
         ArrayList<HashMap> disbursementDetails = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanDetail(this.requestSpec,
                 this.responseSpec, this.loanID, "disbursementDetails");
         this.disbursementId = (Integer) disbursementDetails.get(0).get("id");
@@ -474,7 +471,7 @@ public class LoanDisbursementDetailsIntegrationTest {
 
     private Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, String principal,
             List<HashMap> tranches) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
         //
                 .withPrincipal(principal)

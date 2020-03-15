@@ -36,10 +36,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class UserAdministrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private List<Integer> transientUsers = new ArrayList<>();
@@ -79,8 +81,6 @@ public class UserAdministrationTest {
 
         final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
         Map reason = (Map) errors.get(0);
-        System.out.println("Reason: " + reason.get("defaultUserMessage"));
-        System.out.println("Code: " + reason.get("userMessageGlobalisationCode"));
         Assert.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
         Assert.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
     }

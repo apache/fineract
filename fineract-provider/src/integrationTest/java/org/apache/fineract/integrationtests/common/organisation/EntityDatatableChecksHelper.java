@@ -23,9 +23,11 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EntityDatatableChecksHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -59,7 +61,7 @@ public class EntityDatatableChecksHelper {
             map.put("productId", productId);
         }
         String requestJsonString = new Gson().toJson(map);
-        System.out.println("map : " + requestJsonString);
+        LOG.info("map : " + requestJsonString);
         return requestJsonString;
     }
 

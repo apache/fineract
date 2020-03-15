@@ -29,11 +29,13 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ShareProductHelper {
 
-
+    private final static Logger LOG = LoggerFactory.getLogger(ShareProductHelper.class);
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String LOCALE = "en_GB";
@@ -94,7 +96,7 @@ public class ShareProductHelper {
         }
 
         String shareProductCreateJson = new Gson().toJson(map);
-        System.out.println(shareProductCreateJson);
+        LOG.info(shareProductCreateJson);
         return shareProductCreateJson;
     }
 

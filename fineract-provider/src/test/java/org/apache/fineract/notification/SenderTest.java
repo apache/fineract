@@ -25,6 +25,8 @@ import javax.jms.Session;
 import org.apache.fineract.notification.data.NotificationData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -36,6 +38,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SenderTest {
+    private final static Logger LOG = LoggerFactory.getLogger(SenderTest.class);
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -68,7 +71,7 @@ public class SenderTest {
         jmsTemplate.send(mockQueue, new MessageCreator() {
             @Override
             public Message createMessage(Session session) throws JMSException {
-                System.out.println("Message send successfully");
+                LOG.info("Message send successfully");
                 return session.createObjectMessage(notificationData);
             }
         });

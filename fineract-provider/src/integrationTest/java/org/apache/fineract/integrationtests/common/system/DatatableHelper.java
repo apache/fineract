@@ -27,9 +27,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatatableHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -58,7 +60,7 @@ public class DatatableHelper {
 
     public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String generatedDatatableName) {
-        System.out.println("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
         final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec, DATATABLE_URL + "/"
                 + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
         assertEquals("ERROR IN CREATING THE DATATABLE", generatedDatatableName, responseRegisteredTableName);
@@ -76,7 +78,7 @@ public class DatatableHelper {
         addDatatableColumns(datatableColumnsList, "Date of Approval", "Date", false, null);
         map.put("columns", datatableColumnsList);
         String requestJsonString = new Gson().toJson(map);
-        System.out.println("map : " + requestJsonString);
+        LOG.info("map : " + requestJsonString);
         return requestJsonString;
     }
 

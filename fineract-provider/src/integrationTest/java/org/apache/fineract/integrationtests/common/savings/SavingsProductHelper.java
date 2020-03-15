@@ -28,10 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unused")
 public class SavingsProductHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
     private static final String CREATE_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
 
@@ -139,7 +141,7 @@ public class SavingsProductHelper {
 
         }
         String savingsProductCreateJson = new Gson().toJson(map);
-        System.out.println(savingsProductCreateJson);
+        LOG.info(savingsProductCreateJson);
         return savingsProductCreateJson;
     }
 
@@ -275,7 +277,7 @@ public class SavingsProductHelper {
 
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer generatedProductID) {
-        System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
         assertEquals("ERROR IN CREATING THE Savings Product", generatedProductID, responseSavingsProductID);

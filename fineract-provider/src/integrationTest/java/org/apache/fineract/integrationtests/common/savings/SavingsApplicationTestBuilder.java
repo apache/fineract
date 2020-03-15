@@ -21,9 +21,11 @@ package org.apache.fineract.integrationtests.common.savings;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SavingsApplicationTestBuilder {
-
+    private final static Logger LOG = LoggerFactory.getLogger(SavingsApplicationTestBuilder.class);
     private static final String LOCALE = "en_GB";
 
     private String submittedOnDate = "";
@@ -56,7 +58,7 @@ public class SavingsApplicationTestBuilder {
             map.put("datatables", this.datatables);
         }
         String savingsApplicationJSON = new Gson().toJson(map);
-        System.out.println(savingsApplicationJSON);
+        LOG.info(savingsApplicationJSON);
         return savingsApplicationJSON;
     }
 

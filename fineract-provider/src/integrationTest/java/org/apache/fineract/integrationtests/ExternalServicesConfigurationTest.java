@@ -30,10 +30,12 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class ExternalServicesConfigurationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ExternalServicesConfigurationHelper externalServicesConfigurationHelper;
@@ -67,7 +69,7 @@ public class ExternalServicesConfigurationTest {
                     value = "testnull";
                 }
                 String newValue = "test";
-                System.out.println(name + ":" + value);
+                LOG.info(name + ":" + value);
                 HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "S3", name, newValue);
                 Assert.assertNotNull(arrayListValue.get("value"));
@@ -95,7 +97,7 @@ public class ExternalServicesConfigurationTest {
                     value = "testnull";
                 }
                 String newValue = "test";
-                System.out.println(name + ":" + value);
+                LOG.info(name + ":" + value);
                 HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "SMTP", name, newValue);
                 Assert.assertNotNull(arrayListValue.get("value"));

@@ -64,10 +64,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access", "cast" })
 public class SchedulerJobsTestResults {
-
+    private final static Logger LOG = LoggerFactory.getLogger(SchedulerJobsTestResults.class);
     private static final String FROM_ACCOUNT_TYPE_LOAN = "1";
     private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
     private static final String TO_ACCOUNT_TYPE_LOAN = "1";
@@ -909,7 +911,7 @@ public class SchedulerJobsTestResults {
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //
@@ -920,7 +922,7 @@ public class SchedulerJobsTestResults {
     }
 
     private static Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
@@ -929,7 +931,7 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer createLoanProduct(final String chargeId) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("15,000.00") //
                 .withNumberOfRepayments("4") //
@@ -944,7 +946,7 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer applyForLoanApplication(final String clientID, final String loanProductID, final String savingsID) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("15,000.00") //
                 .withLoanTermFrequency("4") //
@@ -963,7 +965,7 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
-        System.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         final String fixedDepositProductJSON = fixedDepositProductHelper //
                 // .withAccountingRuleAsCashBased(accounts)
@@ -975,7 +977,7 @@ public class SchedulerJobsTestResults {
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
             final String validTo, final String submittedOnDate, final String penalInterestType, String savingsId,
             final boolean transferInterest, final FixedDepositAccountHelper fixedDepositAccountHelper) {
-        System.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
+        LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec)
                 //
                 .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)

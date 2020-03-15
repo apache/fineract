@@ -36,6 +36,8 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test class for testing the integration of Batch API with custom batch
@@ -45,7 +47,7 @@ import org.junit.Test;
  * @author Rishabh Shukla
  */
 public class BatchRequestsIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(BatchRequestsIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
@@ -88,7 +90,7 @@ public class BatchRequestsIntegrationTest {
         for (Integer i = 0; i < clientsCount; i++) {
             clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
             groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
-            System.out.println("client " + clientIDs[i] + " has been added to the group " + groupID);
+            LOG.info("client " + clientIDs[i] + " has been added to the group " + groupID);
         }
 
         // Generate a random count of number of new loan products to be created
