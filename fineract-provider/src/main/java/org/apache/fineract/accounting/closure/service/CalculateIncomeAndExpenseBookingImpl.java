@@ -36,6 +36,7 @@ import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalcula
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -54,14 +55,14 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
     private final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final OfficeRepositoryWrapper officeRepository;
     private final GLClosureRepository glClosureRepository;
-    private final GLAccountRepository glAccountRepository;
+    private final GLAccountRepositoryWrapper glAccountRepository;
     private final IncomeAndExpenseReadPlatformService incomeAndExpenseReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
     public CalculateIncomeAndExpenseBookingImpl(final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final OfficeRepositoryWrapper officeRepository,final GLClosureRepository glClosureRepository,
-            final GLAccountRepository glAccountRepository,final IncomeAndExpenseReadPlatformService incomeAndExpenseReadPlatformService,
+            final GLAccountRepositoryWrapper glAccountRepository,final IncomeAndExpenseReadPlatformService incomeAndExpenseReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.officeRepository = officeRepository;
@@ -106,7 +107,8 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
         Collection<IncomeAndExpenseBookingData> incomeAndExpenseBookingCollection = new ArrayList<>();
         final Long equityGlAccountId = closureCommand.getEquityGlAccountId();
 
-        final GLAccount glAccount= this.glAccountRepository.findByParent(equityGlAccountId);
+        final GLAccount glAccount= this.glAccountRepository.findOneWithNotFoundDetection(equityGlAccountId);
+        
 
         if(glAccount == null){throw new GLAccountNotFoundException(equityGlAccountId);}
 
@@ -184,5 +186,4 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
 
         return new IncomeAndExpenseBookingData(localDate,closureData.getComments(),journalEntries);
     }
-    
 }
