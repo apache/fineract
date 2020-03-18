@@ -42,6 +42,7 @@ import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalcula
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
 import org.apache.fineract.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
@@ -73,7 +74,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final GLAccountRepository glAccountRepository;
+    private final GLAccountRepositoryWrapper glAccountRepository;
     private final GLClosureReadPlatformService glClosureReadPlatformService;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final IncomeAndExpenseBookingRepository incomeAndExpenseBookingRepository;
@@ -83,7 +84,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
     @Autowired
     public GLClosureWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
             final OfficeRepositoryWrapper officeRepositoryWrapper, final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final GLAccountRepository glAccountRepository,final GLClosureReadPlatformService glClosureReadPlatformService,
+            final GLAccountRepositoryWrapper glAccountRepository,final GLClosureReadPlatformService glClosureReadPlatformService,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final IncomeAndExpenseBookingRepository incomeAndExpenseBookingRepository,
             final FromJsonHelper fromApiJsonHelper,final IncomeAndExpenseReadPlatformService incomeAndExpenseReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService) {
@@ -136,7 +137,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             if(bookOffIncomeAndExpense){
                 final Long equityGlAccountId = command.longValueOfParameterNamed(GLClosureJsonInputParams.EQUITY_GL_ACCOUNT_ID.getValue());
 
-                final GLAccount glAccount= this.glAccountRepository.findByParent(equityGlAccountId);
+                final GLAccount glAccount= this.glAccountRepository.findOneWithNotFoundDetection(equityGlAccountId);
 
                 if(glAccount == null){throw new GLAccountNotFoundException(equityGlAccountId);}
 
