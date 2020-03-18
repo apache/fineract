@@ -25,8 +25,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface GLClosureRepository extends JpaRepository<GLClosure, Long>, JpaSpecificationExecutor<GLClosure> {
 
-    public static final String FINDLASTESTGLCLOSUREBYBRANCH = "select * from acc_gl_closure t where t.closing_date =(select max(m.closing_date) from acc_gl_closure m where m.office_id =:officeId and m.is_deleted = 0) and t.office_id =:officeId and t.is_deleted = 0 order by t.id desc limit 1";
-
-    @Query(value=FINDLASTESTGLCLOSUREBYBRANCH,nativeQuery = true)
+    
+    @Query("select closure from GLClosure closure where closure.closingDate = (select max(closure1.closingDate) from GLClosure closure1 where closure1.office.id=:officeId)  and closure.office.id= :officeId")
     GLClosure getLatestGLClosureByBranch(@Param("officeId") Long officeId);
 }
