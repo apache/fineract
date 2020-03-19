@@ -41,7 +41,6 @@ import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundExcepti
 import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalculatedException;
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;

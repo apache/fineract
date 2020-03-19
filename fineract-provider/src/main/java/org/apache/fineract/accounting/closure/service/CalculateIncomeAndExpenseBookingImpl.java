@@ -35,7 +35,6 @@ import org.apache.fineract.accounting.closure.exception.GLClosureInvalidExceptio
 import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalculatedException;
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -108,8 +107,6 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
         final Long equityGlAccountId = closureCommand.getEquityGlAccountId();
 
         final GLAccount glAccount= this.glAccountRepository.findOneWithNotFoundDetection(equityGlAccountId);
-        
-
         if(glAccount == null){throw new GLAccountNotFoundException(equityGlAccountId);}
 
         if(closureCommand.getSubBranches() && childOfficesByHierarchy.size() > 0){
