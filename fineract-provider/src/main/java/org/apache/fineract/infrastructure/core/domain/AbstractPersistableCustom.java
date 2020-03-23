@@ -23,6 +23,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import org.springframework.data.domain.Persistable;
 
 /**
@@ -55,6 +56,7 @@ public abstract class AbstractPersistableCustom<PK extends Serializable> impleme
     }
 
     @Override
+    @Transient // DATAJPA-622
     public boolean isNew() {
         return null == this.id;
     }
