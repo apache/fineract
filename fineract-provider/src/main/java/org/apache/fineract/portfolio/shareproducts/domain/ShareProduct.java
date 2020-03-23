@@ -51,7 +51,7 @@ import org.joda.time.DateTime;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "m_share_product")
-public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
+public class ShareProduct extends AbstractAuditableCustom {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;

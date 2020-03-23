@@ -30,7 +30,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_interest_recalculation_additional_details")
-public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom<Long> {
+public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "effective_date")

@@ -35,7 +35,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_mandatory_savings_schedule")
-public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
+public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id")

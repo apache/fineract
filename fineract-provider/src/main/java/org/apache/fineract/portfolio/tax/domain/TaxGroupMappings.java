@@ -36,7 +36,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_group_mappings")
-public class TaxGroupMappings extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxGroupMappings extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "tax_component_id", nullable = false)

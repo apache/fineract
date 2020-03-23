@@ -54,7 +54,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "sms_campaign", uniqueConstraints = {@UniqueConstraint(columnNames = { "campaign_name" }, name = "campaign_name_UNIQUE")})
-public class SmsCampaign extends AbstractPersistableCustom<Long> {
+public class SmsCampaign extends AbstractPersistableCustom {
 
     @Column(name = "campaign_name", nullable = false)
     private String campaignName;

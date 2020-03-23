@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "m_teller_transactions")
-public class TellerTransaction extends AbstractPersistableCustom<Long> {
+public class TellerTransaction extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "office_id", nullable = false)

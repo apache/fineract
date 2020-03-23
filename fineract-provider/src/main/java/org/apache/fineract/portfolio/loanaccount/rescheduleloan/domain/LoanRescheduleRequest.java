@@ -43,7 +43,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_reschedule_request")
-public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
+public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

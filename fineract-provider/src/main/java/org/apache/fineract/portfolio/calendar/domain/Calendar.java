@@ -53,7 +53,7 @@ import org.joda.time.LocalDateTime;
 
 @Entity
 @Table(name = "m_calendar")
-public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
+public class Calendar extends AbstractAuditableCustom {
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;

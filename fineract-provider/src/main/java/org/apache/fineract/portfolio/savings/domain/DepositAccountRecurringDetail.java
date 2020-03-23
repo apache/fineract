@@ -43,7 +43,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_deposit_account_recurring_detail")
-public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Long> {
+public class DepositAccountRecurringDetail extends AbstractPersistableCustom {
 
     @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal mandatoryRecommendedDepositAmount;

@@ -48,7 +48,7 @@ import org.joda.time.LocalDate;
 @Entity
 @Table(name = "m_cashiers", uniqueConstraints = { @UniqueConstraint(name = "ux_cashiers_staff_teller", columnNames = { "staff_id",
         "teller_id" }) })
-public class Cashier extends AbstractPersistableCustom<Long> {
+public class Cashier extends AbstractPersistableCustom {
 
     // ManyToOne(fetch = FetchType.LAZY)
     // JoinColumn(name = "office_id", nullable = false)

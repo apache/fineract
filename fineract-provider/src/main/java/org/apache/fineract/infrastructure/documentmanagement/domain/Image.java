@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_image")
-public final class Image extends AbstractPersistableCustom<Long> {
+public final class Image extends AbstractPersistableCustom {
 
     @Column(name = "location", length = 500)
     private String location;

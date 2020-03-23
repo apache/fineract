@@ -40,7 +40,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "sms_messages_outbound")
-public class SmsMessage extends AbstractPersistableCustom<Long> {
+public class SmsMessage extends AbstractPersistableCustom {
 
     @Column(name = "external_id", nullable = true)
     private String externalId;

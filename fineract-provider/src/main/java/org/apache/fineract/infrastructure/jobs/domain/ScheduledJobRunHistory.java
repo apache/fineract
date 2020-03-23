@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "job_run_history")
-public class ScheduledJobRunHistory extends AbstractPersistableCustom<Long> {
+public class ScheduledJobRunHistory extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "job_id")

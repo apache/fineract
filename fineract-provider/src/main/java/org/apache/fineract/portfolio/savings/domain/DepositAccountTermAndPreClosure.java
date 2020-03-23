@@ -52,7 +52,7 @@ import org.joda.time.Years;
 
 @Entity
 @Table(name = "m_deposit_account_term_and_preclosure")
-public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<Long> {
+public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
 
     @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositAmount;

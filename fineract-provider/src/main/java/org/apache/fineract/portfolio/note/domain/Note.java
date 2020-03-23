@@ -39,7 +39,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_note")
-public class Note extends AbstractAuditableCustom<AppUser, Long> {
+public class Note extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)

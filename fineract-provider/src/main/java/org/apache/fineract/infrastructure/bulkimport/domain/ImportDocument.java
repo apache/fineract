@@ -34,7 +34,7 @@ import org.joda.time.LocalDateTime;
 
 @Entity
 @Table(name = "m_import_document")
-public class ImportDocument extends AbstractPersistableCustom<Long>{
+public class ImportDocument extends AbstractPersistableCustom{
 
     @OneToOne
     @JoinColumn(name = "document_id")

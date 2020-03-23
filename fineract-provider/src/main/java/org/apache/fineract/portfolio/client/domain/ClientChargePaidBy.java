@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_client_charge_paid_by")
-public class ClientChargePaidBy extends AbstractPersistableCustom<Long> {
+public class ClientChargePaidBy extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_transaction_id", nullable = false)

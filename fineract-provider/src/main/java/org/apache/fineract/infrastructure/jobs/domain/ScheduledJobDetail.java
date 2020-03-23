@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants;
 
 @Entity
 @Table(name = "job")
-public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
+public class ScheduledJobDetail extends AbstractPersistableCustom {
 
     @Column(name = "name")
     private String jobName;

@@ -29,7 +29,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "topic_subscriber")
-public class TopicSubscriber extends AbstractPersistableCustom<Long> {
+public class TopicSubscriber extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "topic_id")

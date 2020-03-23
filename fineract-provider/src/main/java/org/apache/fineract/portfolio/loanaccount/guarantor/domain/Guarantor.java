@@ -42,7 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GU
 
 @Entity
 @Table(name = "m_guarantor")
-public class Guarantor extends AbstractPersistableCustom<Long> {
+public class Guarantor extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

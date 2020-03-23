@@ -31,7 +31,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_component_history")
-public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxComponentHistory extends AbstractAuditableCustom {
 
     @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
     private BigDecimal percentage;

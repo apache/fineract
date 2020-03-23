@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 
 @Entity
 @Table(name = "m_savings_account_interest_rate_slab")
-public class DepositAccountInterestRateChartSlabs extends AbstractPersistableCustom<Long> {
+public class DepositAccountInterestRateChartSlabs extends AbstractPersistableCustom {
 
     @Embedded
     private InterestRateChartSlabFields slabFields;
