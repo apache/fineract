@@ -25,8 +25,8 @@ import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -50,7 +50,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     private static final long serialVersionUID = 141481953116476081L;
 
-    @OneToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "createdby_id")
     private AppUser createdBy;
 
@@ -58,7 +58,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
-    @OneToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "lastmodifiedby_id")
     private AppUser lastModifiedBy;
 
