@@ -31,7 +31,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_calendar_history")
-public class CalendarHistory extends AbstractPersistableCustom<Long> {
+public class CalendarHistory extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "calendar_id", referencedColumnName = "id", nullable = false)

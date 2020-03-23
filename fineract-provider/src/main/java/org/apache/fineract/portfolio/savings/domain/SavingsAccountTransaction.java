@@ -60,7 +60,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Entity
 @Table(name = "m_savings_account_transaction")
-public final class SavingsAccountTransaction extends AbstractPersistableCustom<Long> {
+public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName="id", nullable = false)

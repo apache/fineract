@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name="m_loan_reschedule_request_term_variations_mapping")
-public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersistableCustom<Long> {
+public class LoanRescheduleRequestToTermVariationMapping extends AbstractPersistableCustom {
 
 
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)

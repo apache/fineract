@@ -38,7 +38,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
-public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
+public class GLClosure extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)

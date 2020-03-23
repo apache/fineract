@@ -35,7 +35,7 @@ import org.joda.time.LocalDateTime;
 
 @Entity
 @Table(name = "m_floating_rates_periods")
-public class FloatingRatePeriod extends AbstractPersistableCustom<Long> {
+public class FloatingRatePeriod extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "floating_rates_id", nullable = false)

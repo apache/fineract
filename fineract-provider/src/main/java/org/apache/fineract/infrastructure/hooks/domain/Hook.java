@@ -47,7 +47,7 @@ import org.springframework.util.CollectionUtils;
 
 @Entity
 @Table(name = "m_hook")
-public class Hook extends AbstractAuditableCustom<AppUser, Long> {
+public class Hook extends AbstractAuditableCustom {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

@@ -38,7 +38,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_share_product_dividend_pay_out")
-public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom<AppUser, Long> {
+public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
 
     @Column(name = "product_id", nullable = true)
     private Long shareProductId;

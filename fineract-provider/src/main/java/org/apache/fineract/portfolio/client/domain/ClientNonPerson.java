@@ -43,7 +43,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_client_non_person")
-public class ClientNonPerson extends AbstractPersistableCustom<Long> {
+public class ClientNonPerson extends AbstractPersistableCustom {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false, unique = true)

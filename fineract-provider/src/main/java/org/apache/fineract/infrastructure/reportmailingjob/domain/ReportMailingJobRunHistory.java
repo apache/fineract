@@ -31,7 +31,7 @@ import org.joda.time.DateTime;
 
 @Entity
 @Table(name = "m_report_mailing_job_run_history")
-public class ReportMailingJobRunHistory extends AbstractPersistableCustom<Long> {
+public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
     private static final long serialVersionUID = -3757370929988421076L;
 
     @ManyToOne

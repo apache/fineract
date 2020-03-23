@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "scheduler_detail")
-public class SchedulerDetail extends AbstractPersistableCustom<Long> {
+public class SchedulerDetail extends AbstractPersistableCustom {
 
     @Column(name = "execute_misfired_jobs")
     private boolean executeInstructionForMisfiredJobs;

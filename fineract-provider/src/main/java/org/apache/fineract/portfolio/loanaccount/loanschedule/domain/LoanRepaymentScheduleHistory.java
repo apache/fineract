@@ -35,7 +35,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule_history")
-public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom<Long> {
+public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id")

@@ -34,7 +34,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_officer_assignment_history")
-public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUser, Long> {
+public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

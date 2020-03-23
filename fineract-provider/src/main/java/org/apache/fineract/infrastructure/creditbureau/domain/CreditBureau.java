@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_creditbureau")
-public class CreditBureau extends AbstractPersistableCustom<Long> {
+public class CreditBureau extends AbstractPersistableCustom {
 
 
     private String name;

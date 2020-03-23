@@ -52,7 +52,7 @@ import org.joda.time.MonthDay;
 
 @Entity
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
-public class Charge extends AbstractPersistableCustom<Long> {
+public class Charge extends AbstractPersistableCustom {
 
     @Column(name = "name", length = 100)
     private String name;

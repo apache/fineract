@@ -41,7 +41,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Entity
 @Table(name = "m_rate", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"name"}, name = "name")})
-public class Rate extends AbstractAuditableCustom<AppUser, Long> {
+public class Rate extends AbstractAuditableCustom {
 
   @Column(name = "name", length = 250, unique = true)
   private String name;

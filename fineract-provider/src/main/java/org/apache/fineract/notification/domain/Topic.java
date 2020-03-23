@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "topic")
-public class Topic extends AbstractPersistableCustom<Long> {
+public class Topic extends AbstractPersistableCustom {
 
     @Column(name = "title", unique = true, nullable = false, length = 100)
     private String title;

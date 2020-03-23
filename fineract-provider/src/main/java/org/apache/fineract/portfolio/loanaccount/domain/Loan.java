@@ -147,7 +147,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
-public class Loan extends AbstractPersistableCustom<Long> {
+public class Loan extends AbstractPersistableCustom {
 
     /** Disable optimistic locking till batch jobs failures can be fixed **/
     @Version

@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConst
 
 @Entity
 @Table(name = "m_entity_to_entity_access")
-public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
+public class FineractEntityAccess extends AbstractPersistableCustom {
 
     @Column(name = "entity_type", length = 50)
     private String entityType;

@@ -57,7 +57,7 @@ import org.joda.time.MonthDay;
  */
 @Entity
 @Table(name = "m_savings_account_charge")
-public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
+public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName = "id", nullable = false)

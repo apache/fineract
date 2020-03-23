@@ -96,7 +96,7 @@ import org.joda.time.LocalDate;
 @Inheritance
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
-public class SavingsProduct extends AbstractPersistableCustom<Long> {
+public class SavingsProduct extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, unique = true)
     protected String name;

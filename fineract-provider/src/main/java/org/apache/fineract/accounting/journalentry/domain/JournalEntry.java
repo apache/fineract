@@ -40,7 +40,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "acc_gl_journal_entry")
-public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
+public class JournalEntry extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)

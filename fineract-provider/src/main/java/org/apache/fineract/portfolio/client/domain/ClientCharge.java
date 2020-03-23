@@ -41,7 +41,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_client_charge")
-public class ClientCharge extends AbstractPersistableCustom<Long> {
+public class ClientCharge extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false)

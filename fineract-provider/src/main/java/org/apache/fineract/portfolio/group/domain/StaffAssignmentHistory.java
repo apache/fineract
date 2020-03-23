@@ -33,7 +33,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_staff_assignment_history")
-public class StaffAssignmentHistory extends AbstractAuditableCustom<AppUser, Long> {
+public class StaffAssignmentHistory extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "centre_id", nullable = true)

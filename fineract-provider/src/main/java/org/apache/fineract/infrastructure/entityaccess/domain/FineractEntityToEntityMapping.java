@@ -36,7 +36,7 @@ import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityT
 
 @Entity
 @Table(name = "m_entity_to_entity_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "rel_id", "from_id", "to_id" }) })
-public class FineractEntityToEntityMapping extends AbstractPersistableCustom<Long> {
+public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "rel_id")

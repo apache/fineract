@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_provisioning_criteria_definition")
-public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Long> {
+public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "criteria_id", referencedColumnName = "id", nullable = false)

@@ -41,7 +41,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 @Entity
 @Table(name = "m_template", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "unq_name")})
-public class Template extends AbstractPersistableCustom<Long> {
+public class Template extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;

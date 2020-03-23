@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "job_parameters")
-public class JobParameter extends AbstractPersistableCustom<Long> {
+public class JobParameter extends AbstractPersistableCustom {
 
     @Column(name = "job_id", nullable = false)
     private Long jobId;

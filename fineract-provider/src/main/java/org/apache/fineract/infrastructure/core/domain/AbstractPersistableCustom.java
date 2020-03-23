@@ -38,7 +38,7 @@ import org.springframework.data.domain.Persistable;
  * "we end up with issues on OpenJPA" (TODO clarify this).
  */
 @MappedSuperclass
-public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long>, Serializable {
+public abstract class AbstractPersistableCustom implements Persistable<Long>, Serializable {
 
     private static final long serialVersionUID = 9181640245194392646L;
 

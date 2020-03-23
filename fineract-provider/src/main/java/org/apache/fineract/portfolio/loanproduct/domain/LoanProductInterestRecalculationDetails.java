@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
 @Entity
 @Table(name = "m_product_loan_recalculation_details")
-public class LoanProductInterestRecalculationDetails extends AbstractPersistableCustom<Long> {
+public class LoanProductInterestRecalculationDetails extends AbstractPersistableCustom {
 
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)

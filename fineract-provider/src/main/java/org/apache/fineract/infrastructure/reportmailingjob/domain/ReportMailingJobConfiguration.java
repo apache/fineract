@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_report_mailing_job_configuration", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unique_name") })
-public class ReportMailingJobConfiguration extends AbstractPersistableCustom<Integer> {
+public class ReportMailingJobConfiguration extends AbstractPersistableCustom {
     private static final long serialVersionUID = 3099279770861263184L;
 
     @Column(name = "name", nullable = false)

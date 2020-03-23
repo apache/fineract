@@ -39,7 +39,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_cashier_transactions")
-public class CashierTransaction extends AbstractPersistableCustom<Long> {
+public class CashierTransaction extends AbstractPersistableCustom {
 
     @Transient
     private Office office;

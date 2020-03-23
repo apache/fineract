@@ -29,7 +29,7 @@ import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
 
 @Entity
 @Table(name = "m_working_days")
-public class WorkingDays extends AbstractPersistableCustom<Long> {
+public class WorkingDays extends AbstractPersistableCustom {
 
     @Column(name = "recurrence", length = 100, nullable = true)
     private String recurrence;

@@ -49,7 +49,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_component")
-public class TaxComponent extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxComponent extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
     private String name;

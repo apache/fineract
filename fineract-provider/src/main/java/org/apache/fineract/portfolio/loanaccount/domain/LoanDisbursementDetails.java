@@ -34,7 +34,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_disbursement_detail")
-public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
+public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

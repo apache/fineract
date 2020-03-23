@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
@@ -46,7 +45,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
  *            the type of the auditing type's identifier
  */
 @MappedSuperclass
-public abstract class AbstractAuditableCustom<U, PK extends Serializable> extends AbstractPersistableCustom<PK> implements Auditable<AppUser, Long, Instant> {
+public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<AppUser, Long, Instant> {
 
     private static final long serialVersionUID = 141481953116476081L;
 

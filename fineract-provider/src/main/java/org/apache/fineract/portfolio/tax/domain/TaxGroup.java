@@ -40,7 +40,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_tax_group")
-public class TaxGroup extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxGroup extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
     private String name;

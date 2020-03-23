@@ -37,7 +37,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_provisioning_history")
-public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
+public class ProvisioningEntry extends AbstractPersistableCustom {
 
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;
