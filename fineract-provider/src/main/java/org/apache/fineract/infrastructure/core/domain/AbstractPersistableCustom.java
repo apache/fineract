@@ -25,30 +25,37 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import org.springframework.data.domain.Persistable;
 
-
+/**
+ * Abstract base class for entities.
+ *
+ * Inspired by {@link org.springframework.data.jpa.domain.AbstractPersistable}, but
+ * Id is always Long (and this class thus does not require generic parameterization),
+ * and auto-generation is of strategy {@link javax.persistence.GenerationType#IDENTITY}.
+ *
+ * The {@link #equals(Object)} and {@link #hashCode()} methods are NOT implemented here,
+ * which is untypical for JPA (it's usually implemented based on the Id), because
+ * "we end up with issues on OpenJPA" (TODO clarify this).
+ */
 @MappedSuperclass
 public abstract class AbstractPersistableCustom<PK extends Serializable> implements Persistable<Long>, Serializable {
 
-        private static final long serialVersionUID = 9181640245194392646L;
+    private static final long serialVersionUID = 9181640245194392646L;
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        @Override
-        public Long getId() {
-                return id;
-        }
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-        protected void setId(final Long id) {
-                this.id = id;
-        }
+    protected void setId(final Long id) {
+        this.id = id;
+    }
 
-        @Override
-        public boolean isNew() {
-
-                return null == this.id;
-        }
-
-        // We have removed toString(), hashCode() and equals() methods here, because by adding them here, we end up with issues on OpenJPA.
+    @Override
+    public boolean isNew() {
+        return null == this.id;
+    }
 }
