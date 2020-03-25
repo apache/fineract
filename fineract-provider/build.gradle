@@ -26,6 +26,7 @@ project.ext.jerseyVersion = '1.17'
 buildscript {
   ext {
     openJPAVersion = '3.1.0'
+    jacocoVersion = '0.8.5'
   }
   repositories {
   	 jcenter()
@@ -66,6 +67,7 @@ apply plugin: 'openjpa'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
+apply plugin: 'jacoco'
 // apply plugin: 'pmd'
 
 dependencyManagement {
@@ -155,6 +157,19 @@ openjpa {
     includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
     enhance {
         enforcePropertyRestrictions true
+    }
+}
+
+jacoco {
+    toolVersion = jacocoVersion
+    reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport{
+    reports{
+        html.enabled=true
+        xml.enabled=true
+        html.destination file("${buildDir}/code-coverage")
     }
 }
 
