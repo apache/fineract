@@ -47,10 +47,10 @@ click "install gradle" (https://gradle.org/install/)
 click "installing manually" (https://gradle.org/install/#manually)
 click "releases page" (https://gradle.org/releases/)
 go to version 2.10
-click complete
-after the zip folder downloads extract the files into your C folder ( directory: "C:\gradle-2.10" )
-go to control panel -> system and security -> system -> advanced system settings -> environment variables 
-under user variables click path -> edit -> new -> C:\gradle-2.10\bin 
+click complete;
+after the zip folder downloads extract the files into your C folder ( directory: "C:\gradle-2.10" );
+go to control panel -> system and security -> system -> advanced system settings -> environment variables; 
+under user variables click path -> edit -> new -> C:\gradle-2.10\bin then 
 click OK 
 
 Instructions to download gradle wrapper
