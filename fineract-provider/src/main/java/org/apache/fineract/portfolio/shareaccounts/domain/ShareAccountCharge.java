@@ -413,33 +413,33 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
         this.active = active ;
     }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof ShareAccountCharge)) return false;
-		ShareAccountCharge that = (ShareAccountCharge) o;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ShareAccountCharge)) return false;
+        ShareAccountCharge that = (ShareAccountCharge) o;
 
-		return Objects.equals(shareAccount != null ? shareAccount.getId() : null, that.shareAccount != null ? that.shareAccount.getId() : null)
-				&& Objects.equals(charge != null ? charge.getId() : null, that.charge != null ? that.charge.getId() : null)
-				&& Objects.equals(chargeTime, that.chargeTime)
-				&& Objects.equals(chargeCalculation, that.chargeCalculation)
-				&& Objects.equals(percentage, that.percentage)
-				&& Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
-				&& Objects.equals(amount, that.amount)
-				&& Objects.equals(amountPaid, that.amountPaid)
-				&& Objects.equals(amountWaived, that.amountWaived)
-				&& Objects.equals(amountWrittenOff, that.amountWrittenOff)
-				&& Objects.equals(amountOutstanding, that.amountOutstanding)
-				&& Objects.equals(paid, that.paid)
-				&& Objects.equals(waived, that.waived)
-				&& Objects.equals(active, that.active)
-				&& Objects.equals(amountOrPercentage, that.amountOrPercentage);
-	}
+        return Objects.equals(shareAccount != null ? shareAccount.getId() : null, that.shareAccount != null ? that.shareAccount.getId() : null)
+                && Objects.equals(charge != null ? charge.getId() : null, that.charge != null ? that.charge.getId() : null)
+                && Objects.equals(chargeTime, that.chargeTime)
+                && Objects.equals(chargeCalculation, that.chargeCalculation)
+                && Objects.equals(percentage, that.percentage)
+                && Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
+                && Objects.equals(amount, that.amount)
+                && Objects.equals(amountPaid, that.amountPaid)
+                && Objects.equals(amountWaived, that.amountWaived)
+                && Objects.equals(amountWrittenOff, that.amountWrittenOff)
+                && Objects.equals(amountOutstanding, that.amountOutstanding)
+                && Objects.equals(paid, that.paid)
+                && Objects.equals(waived, that.waived)
+                && Objects.equals(active, that.active)
+                && Objects.equals(amountOrPercentage, that.amountOrPercentage);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(shareAccount != null ? shareAccount.getId() : null, charge != null ? charge.getId() : null,
-				chargeTime, chargeCalculation, percentage, amountPercentageAppliedTo, amount, amountPaid, amountWaived,
-				amountWrittenOff, amountOutstanding, paid, waived, active, amountOrPercentage);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(shareAccount != null ? shareAccount.getId() : null, charge != null ? charge.getId() : null,
+                chargeTime, chargeCalculation, percentage, amountPercentageAppliedTo, amount, amountPaid, amountWaived,
+                amountWrittenOff, amountOutstanding, paid, waived, active, amountOrPercentage);
+    }
 }
