@@ -482,18 +482,18 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assert.assertEquals("amount", "2.0", String.valueOf(chargeDef.get("amount")));
+                Assert.assertEquals("amountOutstanding", "2.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assert.assertEquals("amountPaid", "0.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assert.assertEquals("amount", "2.0", String.valueOf(chargeDef.get("amount")));
+                Assert.assertEquals("amountOutstanding", "0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assert.assertEquals("amountPaid", "2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assert.assertEquals("amountOrPercentage", "1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assert.assertEquals("amount","0.0", String.valueOf(chargeDef.get("amount")));
+                Assert.assertEquals("amountOutsanding", "0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assert.assertEquals("amountPaid", "0.0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
                 Assert.fail("Other Charge defintion found");
             }
