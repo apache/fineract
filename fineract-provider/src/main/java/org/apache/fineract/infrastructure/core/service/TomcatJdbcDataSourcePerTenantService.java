@@ -86,11 +86,32 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(tenantConnectionObj.getSchemaUsername());
         config.setPassword(tenantConnectionObj.getSchemaPassword());
+        config.setMinimumIdle(tenantConnectionObj.getInitialSize());
+        config.setMaximumPoolSize(tenantConnectionObj.getMaxActive());
         config.setConnectionTestQuery("SELECT 1");
         config.setValidationTimeout(tenantConnectionObj.getValidationInterval());
         config.setAutoCommit(true);
 
+        // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
+        config.setRegisterMbeans(true);
+
         // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        // These are the properties for each Tenant DB; the same configuration is also in src/main/resources/META-INF/spring/hikariDataSource.xml for the all Tenants DB -->
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
+        config.addDataSourceProperty("rewriteBatchedStatements", "true");
+        config.addDataSourceProperty("cacheResultSetMetadata", "true");
+        config.addDataSourceProperty("cacheServerConfiguration", "true");
+        config.addDataSourceProperty("elideSetAutoCommits", "true");
+        config.addDataSourceProperty("maintainTimeStats", "false");
+
+        // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
+        config.addDataSourceProperty("logger", "com.mysql.jdbc.log.StandardLogger");
+        config.addDataSourceProperty("logSlowQueries", "true");
+        config.addDataSourceProperty("dumpQueriesOnException", "true");
 
         return new HikariDataSource(config);
     }
