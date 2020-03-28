@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation that returns a new or existing tomcat 7 jdbc connection pool
+ * Implementation that returns a new or existing connection pool
  * datasource based on the tenant details stored in a {@link ThreadLocal}
  * variable for this request.
  *
@@ -45,7 +45,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final DataSource tenantDataSource;
 
     @Autowired
-    private JDBCDriverConfig driverConfig ;
+    private JDBCDriverConfig driverConfig;
 
     @Autowired
     public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
@@ -54,7 +54,6 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
     @Override
     public DataSource retrieveDataSource() {
-
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;
 
@@ -63,12 +62,10 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
             final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
 
             synchronized (this.tenantToDataSourceMap) {
-                // if tenantConnection information available switch to
-                // appropriate
-                // datasource
-                // for that tenant.
-                if (this.tenantToDataSourceMap.containsKey(tenantConnection.getConnectionId())) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
+                // if tenantConnection information available switch to the appropriate datasource for that tenant.
+                DataSource possibleDS = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
+                if (possibleDS != null) {
+                    tenantDataSource = possibleDS;
                 } else {
                     tenantDataSource = createNewDataSourceFor(tenantConnection);
                     this.tenantToDataSourceMap.put(tenantConnection.getConnectionId(), tenantDataSource);
@@ -79,13 +76,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         return tenantDataSource;
     }
 
-    // creates the data source oltp and report databases
+    // creates the tenant data source for the oltp and report database
     private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
-        // see
-        // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
-
-        // see also org.apache.fineract.DataSourceProperties.setDefaults()
-         String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName());
+        String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName());
 
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(this.driverConfig.getDriverClassName());
@@ -93,11 +86,11 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(tenantConnectionObj.getSchemaUsername());
         config.setPassword(tenantConnectionObj.getSchemaPassword());
-
         config.setConnectionTestQuery("SELECT 1");
         config.setValidationTimeout(tenantConnectionObj.getValidationInterval());
-
         config.setAutoCommit(true);
+
+        // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
 
         return new HikariDataSource(config);
     }

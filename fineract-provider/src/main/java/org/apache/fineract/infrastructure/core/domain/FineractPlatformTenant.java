@@ -54,5 +54,4 @@ public class FineractPlatformTenant {
     public FineractPlatformTenantConnection getConnection() {
         return connection;
     }
-
 }
