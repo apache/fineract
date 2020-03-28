@@ -44,21 +44,26 @@
         <property name="idleTimeout" value="60000" />
         <property name="ConnectionTestQuery" value="SELECT 1" />
 
-        <!-- https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration -->
+        <!-- These are the properties for the all Tenants DB; the same configuration is also (hard-coded) in the TomcatJdbcDataSourcePerTenantService class -->
         <property name="dataSourceProperties">
             <props>
+		        <!-- https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration -->
                 <prop key="cachePrepStmts">true</prop>
                 <prop key="prepStmtCacheSize">250</prop>
                 <prop key="prepStmtCacheSqlLimit">2048</prop>
                 <prop key="useServerPrepStmts">true</prop>
                 <prop key="useLocalSessionState">true</prop>
-
                 <prop key="rewriteBatchedStatements">true</prop>
                 <prop key="cacheResultSetMetadata">true</prop>
                 <prop key="cacheServerConfiguration">true</prop>
                 <prop key="elideSetAutoCommits">true</prop>
-                <prop key="maintainTimeStats">true</prop>
+                <prop key="maintainTimeStats">false</prop>
+
+                <!-- https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj -->
+                <prop key="logger">com.mysql.jdbc.log.StandardLogger</prop>
+                <prop key="logSlowQueries">true</prop>
+                <prop key="dumpQueriesOnException">true</prop>
             </props>
-        </property>        
+        </property>
     </bean>
 </beans>
