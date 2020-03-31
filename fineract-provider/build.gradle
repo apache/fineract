@@ -157,6 +157,8 @@ openjpa {
     }
 }
 
+spotbugsMain.maxHeapSize = '2g'
+
 jacoco {
     toolVersion = jacocoVersion
     reportsDir = file("$buildDir/reports/jacoco")
@@ -169,6 +171,7 @@ jacocoTestReport{
         html.destination file("${buildDir}/code-coverage")
     }
 }
+
 
 rat {
   xmlOutput = false

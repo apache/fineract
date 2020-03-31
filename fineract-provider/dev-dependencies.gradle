@@ -25,7 +25,11 @@ dependencies {
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
+    spotbugsPlugins (
+            "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar",
+            "com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0"
+    )
+
 
      api(
             'com.google.code.gson:gson',
