@@ -114,6 +114,14 @@ This project enforces [its code conventions](fineract-provider/config/checkstyle
 We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
 File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
 
+Code Coverage Reports
+============
+
+The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command: 
+
+    `./gradlew clean build jacocoTestReport`
+
+Generated reports can be found in build/code-coverage directory.
 
 Version
 ============
