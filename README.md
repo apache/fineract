@@ -115,6 +115,14 @@ We recommend that you configure your favourite Java IDE to match those conventio
 File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
 You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it.
 
+Code Coverage Reports
+============
+
+The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command: 
+
+    `./gradlew clean build jacocoTestReport`
+
+Generated reports can be found in build/code-coverage directory.
 
 Version
 ============
