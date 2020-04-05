@@ -30,7 +30,6 @@ import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity

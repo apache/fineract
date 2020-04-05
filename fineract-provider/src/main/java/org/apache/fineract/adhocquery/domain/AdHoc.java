@@ -29,7 +29,6 @@ import org.apache.fineract.adhocquery.api.AdHocJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 
 @Entity
