@@ -34,7 +34,6 @@ import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
