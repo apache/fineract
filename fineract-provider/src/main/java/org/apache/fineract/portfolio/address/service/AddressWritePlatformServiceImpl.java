@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.client.domain.ClientAddress;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepository;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,6 +89,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
 
         final Address add = Address.fromJson(command, stateIdobj, countryIdObj);
+        add.setCreatedOn(LocalDate.now());
+        add.setUpdatedOn(LocalDate.now());
         this.addressRepository.save(add);
         final Long addressid = add.getId();
         final Address addobj = this.addressRepository.getOne(addressid);
@@ -135,6 +138,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
 
                 final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
+                add.setCreatedOn(LocalDate.now());
+                add.setUpdatedOn(LocalDate.now());
                 this.addressRepository.save(add);
                 final Long addressid = add.getId();
                 final Address addobj = this.addressRepository.getOne(addressid);
@@ -269,7 +274,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         }
 
         if (is_address_update) {
-
+            addobj.setUpdatedOn(LocalDate.now());
             this.addressRepository.save(addobj);
 
         }
