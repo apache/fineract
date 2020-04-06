@@ -191,6 +191,8 @@ documents the process through which you can become a committer in this project.
 [Pull Request Size Limit](https://cwiki.apache.org/confluence/display/FINERACT/Pull+Request+Size+Limit)
 documents that we cannot accept huge "code dump" Pull Requests, with some related suggestions.
 
+[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this git repository into a binary release ZIP available on http://fineract.apache.org.
+
 
 More Information
 ============
