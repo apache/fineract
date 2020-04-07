@@ -33,7 +33,7 @@ COPY *NOTICE* fineract/
 
 WORKDIR fineract
 # RUN find .
-RUN ./gradlew clean -x rat -x test war
+RUN ./gradlew clean -x rat -x test -Psecurity=oauth war
 
 # =========================================
 
