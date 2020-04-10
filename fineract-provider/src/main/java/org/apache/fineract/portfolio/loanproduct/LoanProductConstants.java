@@ -134,5 +134,6 @@ public interface LoanProductConstants {
 
     public static final String isEqualAmortizationParam = "isEqualAmortization";
 
+    public static final String ratesParamName = "rates";
 
 }

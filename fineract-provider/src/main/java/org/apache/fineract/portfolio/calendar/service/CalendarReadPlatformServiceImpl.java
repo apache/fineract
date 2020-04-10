@@ -86,7 +86,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final boolean repeating = rs.getBoolean("repeating");
             final String recurrence = rs.getString("recurrence");
             final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarUtils.getFrequency(recurrence));
-            final Integer interval = new Integer(CalendarUtils.getInterval(recurrence));
+            final Integer interval = Integer.valueOf(CalendarUtils.getInterval(recurrence));
             final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarUtils.getRepeatsOnDay(recurrence));
             final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations.calendarFrequencyNthDayType(CalendarUtils.getRepeatsOnNthDayOfMonth(recurrence));
             final Integer remindById = rs.getInt("remindById");
@@ -477,7 +477,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final boolean repeating = rs.getBoolean("repeating");
             final String recurrence = rs.getString("recurrence");
             final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarUtils.getFrequency(recurrence));
-            final Integer interval = new Integer(CalendarUtils.getInterval(recurrence));
+            final Integer interval = Integer.valueOf(CalendarUtils.getInterval(recurrence));
             final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarUtils.getRepeatsOnDay(recurrence));
             final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations.calendarFrequencyNthDayType(CalendarUtils
                     .getRepeatsOnNthDayOfMonth(recurrence));

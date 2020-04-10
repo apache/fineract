@@ -31,7 +31,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_share_product_market_price")
-public class ShareProductMarketPrice extends AbstractPersistableCustom<Long> {
+public class ShareProductMarketPrice extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)

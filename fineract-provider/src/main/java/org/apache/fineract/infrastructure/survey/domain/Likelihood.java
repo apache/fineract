@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 
 @Entity
 @Table(name = "ppi_likelihoods_ppi")
-public final class Likelihood extends AbstractPersistableCustom<Long> {
+public final class Likelihood extends AbstractPersistableCustom {
 
     @Column(name = "ppi_name", nullable = false)
     private String ppiName;

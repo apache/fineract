@@ -125,7 +125,7 @@ import org.springframework.util.CollectionUtils;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
-public class SavingsAccount extends AbstractPersistableCustom<Long> {
+public class SavingsAccount extends AbstractPersistableCustom {
 
     @Version
     int version;

@@ -37,7 +37,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_account_transfer_transaction")
-public class AccountTransferTransaction extends AbstractPersistableCustom<Long> {
+public class AccountTransferTransaction extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "account_transfer_details_id", nullable = true)

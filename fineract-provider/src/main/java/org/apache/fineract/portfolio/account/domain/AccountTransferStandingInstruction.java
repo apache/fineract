@@ -56,7 +56,7 @@ import org.joda.time.MonthDay;
 
 @Entity
 @Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
-public class AccountTransferStandingInstruction extends AbstractPersistableCustom<Long> {
+public class AccountTransferStandingInstruction extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "account_transfer_details_id", nullable = true)

@@ -55,7 +55,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements
         private final String schema ;
 
         public PurchasedSharesDataRowMapper() {
-            StringBuffer buff = new StringBuffer()
+            StringBuilder buff = new StringBuilder()
             .append("saps.id, saps.account_id, saps.transaction_date, saps.total_shares, saps.unit_price, ")
             .append("saps.status_enum, saps.type_enum, saps.amount, saps.charge_amount as chargeamount, ")
             .append("saps.amount_paid as amountPaid")

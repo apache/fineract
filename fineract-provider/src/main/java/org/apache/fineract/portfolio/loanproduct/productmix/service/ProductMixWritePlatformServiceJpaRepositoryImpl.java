@@ -194,7 +194,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
     private List<ProductMix> updateRestrictedIds(final Set<String> restrictedIds, final List<ProductMix> existedProductMixes) {

@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_share_account_charge_paid_by")
-public class ShareAccountChargePaidBy extends AbstractPersistableCustom<Long>{
+public class ShareAccountChargePaidBy extends AbstractPersistableCustom{
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "share_transaction_id", referencedColumnName = "id", nullable = false)

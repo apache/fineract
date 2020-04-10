@@ -79,8 +79,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 27 global configurations.
-        Assert.assertEquals(27, expectedGlobalConfigurations.size());
-        Assert.assertEquals(27, actualGlobalConfigurations.size());
+        Assert.assertEquals(28, expectedGlobalConfigurations.size());
+        Assert.assertEquals(28, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -323,6 +323,14 @@ public class GlobalConfigurationHelper {
         enableAddressDefault.put("enabled", false);
         enableAddressDefault.put("trapDoor", false);
         defaults.add(enableAddressDefault);
+
+        HashMap<String, Object> enableSubRatesDefault = new HashMap<>();
+        enableSubRatesDefault.put("id", 32);
+        enableSubRatesDefault.put("name", "sub-rates");
+        enableSubRatesDefault.put("value", 0);
+        enableSubRatesDefault.put("enabled", false);
+        enableSubRatesDefault.put("trapDoor", false);
+        defaults.add(enableSubRatesDefault);
 
         return defaults;
     }

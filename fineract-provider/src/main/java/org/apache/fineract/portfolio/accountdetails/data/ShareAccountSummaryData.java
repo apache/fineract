@@ -49,12 +49,12 @@ public class ShareAccountSummaryData implements Serializable {
         this.accountNo = accountNo;
         this.externalId = externalId;
         if(approvedShares == null) {
-            this.totalApprovedShares = new Long(0) ;
+            this.totalApprovedShares = Long.valueOf(0) ;
         }else {
             this.totalApprovedShares = approvedShares;
         }
         if(pendingForApprovalShares == null) {
-            this.totalPendingForApprovalShares = new Long(0) ;
+            this.totalPendingForApprovalShares = Long.valueOf(0) ;
         }else {
             this.totalPendingForApprovalShares = pendingForApprovalShares;
         }

@@ -60,7 +60,7 @@ import org.joda.time.format.DateTimeFormatter;
 @Entity
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
-public final class Client extends AbstractPersistableCustom<Long> {
+public final class Client extends AbstractPersistableCustom {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;

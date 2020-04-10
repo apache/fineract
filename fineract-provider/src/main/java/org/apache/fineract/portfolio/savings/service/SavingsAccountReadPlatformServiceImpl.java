@@ -1211,7 +1211,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public boolean isAccountBelongsToClient(final Long clientId, final Long accountId, final DepositAccountType depositAccountType,
             final String currencyCode) {
         try {
-            final StringBuffer buff = new StringBuffer("select count(*) from m_savings_account sa ") ;
+            final StringBuilder buff = new StringBuilder("select count(*) from m_savings_account sa ") ;
             buff.append(" where sa.id = ? and sa.client_id = ? and sa.deposit_type_enum = ? and sa.currency_code = ? and sa.status_enum = 300");
             return this.jdbcTemplate.queryForObject(buff.toString(),
                     new Object[] { accountId, clientId, depositAccountType.getValue(), currencyCode }, Integer.class) > 0;

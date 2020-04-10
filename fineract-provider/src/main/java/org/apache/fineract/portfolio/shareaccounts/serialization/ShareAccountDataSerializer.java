@@ -479,13 +479,13 @@ public class ShareAccountDataSerializer {
 
     private void validateTotalSubsribedShares(final ShareAccount account, final ShareAccountTransaction transaction, final  DataValidatorBuilder baseDataValidator) {
         Long totalSubsribedShares = account.getShareProduct().getSubscribedShares() ;
-        Long requested = new Long(0) ;
+        Long requested = Long.valueOf(0) ;
         if(transaction.isActive() && transaction.isPendingForApprovalTransaction()) {
            requested +=transaction.getTotalShares() ;
         }
         Long totalSharesIssuable = account.getShareProduct().getSharesIssued() ;
         if(totalSharesIssuable == null) totalSharesIssuable = account.getShareProduct().getTotalShares() ;
-        if(totalSubsribedShares == null) totalSubsribedShares = new Long(0) ;
+        if(totalSubsribedShares == null) totalSubsribedShares = Long.valueOf(0) ;
         if((totalSubsribedShares+requested) > totalSharesIssuable) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requested)
             .failWithCodeNoParameterAddedToErrorCode("shares.requested.can.not.be.approved.exceeding.totalshares.issuable");
@@ -737,7 +737,7 @@ public class ShareAccountDataSerializer {
                 purchasedShares.add(purchasedSharesId);
             }
             if (totalShares > 0) {
-                account.updateApprovedShares(new Long(totalShares));
+                account.updateApprovedShares(Long.valueOf(totalShares));
             }
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -783,7 +783,7 @@ public class ShareAccountDataSerializer {
                 purchasedShares.add(purchasedSharesId);
             }
             if (totalShares > 0) {
-                account.removePendingShares(new Long(totalShares));
+                account.removePendingShares(Long.valueOf(totalShares));
             }
         }
         actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, purchasedShares);
@@ -862,8 +862,8 @@ public class ShareAccountDataSerializer {
         final Integer lockinPeriod = account.getLockinPeriodFrequency();
         final PeriodFrequencyType periodType = account.getLockinPeriodFrequencyType();
         if (lockinPeriod == null && periodType == null) { return; }
-        Long totalSharesCanBeRedeemed = new Long(0);
-        Long totalSharesPurchasedBeforeRedeem = new Long(0) ;
+        Long totalSharesCanBeRedeemed = Long.valueOf(0);
+        Long totalSharesPurchasedBeforeRedeem = Long.valueOf(0) ;
         boolean isPurchaseTransactionExist = false ;
 
         Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();

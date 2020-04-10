@@ -178,7 +178,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
     /*

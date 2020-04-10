@@ -26,7 +26,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
-import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
@@ -47,16 +46,13 @@ public class TenantDatabaseUpgradeService {
 
     private final TenantDetailsService tenantDetailsService;
     protected final DataSource tenantDataSource;
-    protected final TenantDataSourcePortFixService tenantDataSourcePortFixService;
 
     @Autowired private JDBCDriverConfig driverConfig;
 
     @Autowired
-    public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
-            @Qualifier("tenantDataSourceJndi") final DataSource dataSource, TenantDataSourcePortFixService tenantDataSourcePortFixService) {
+    public TenantDatabaseUpgradeService(final TenantDetailsService detailsService, @Qualifier("hikariTenantDataSource") final DataSource dataSource) {
         this.tenantDetailsService = detailsService;
         this.tenantDataSource = dataSource;
-        this.tenantDataSourcePortFixService = tenantDataSourcePortFixService;
     }
 
     @PostConstruct
@@ -104,8 +100,6 @@ public class TenantDatabaseUpgradeService {
                 "fineract_default_tenantdb_uid",      dbUid,
                 "fineract_default_tenantdb_pwd",      dbPwd));
         flyway.migrate();
-
-        tenantDataSourcePortFixService.fixUpTenantsSchemaServerPort();
     }
 
     private String getEnvVar(String name, String defaultValue) {

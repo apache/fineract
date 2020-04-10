@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
 @Entity
 @Table(name = "m_share_account_charge")
-public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
+public class ShareAccountCharge extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)

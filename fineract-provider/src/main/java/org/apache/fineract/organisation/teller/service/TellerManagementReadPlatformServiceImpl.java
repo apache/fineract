@@ -245,7 +245,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private String getTellerCriteria(final String sqlSearch, final Long officeId, final String status) {
 
-        final StringBuffer extraCriteria = new StringBuffer(200);
+        final StringBuilder extraCriteria = new StringBuilder(200);
 
         if (sqlSearch != null) {
             extraCriteria.append(" and (").append(sqlSearch).append(")");
@@ -291,7 +291,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private String getTellerCriteria(final String sqlSearch, final Long tellerId) {
 
-        final StringBuffer extraCriteria = new StringBuffer(200);
+        final StringBuilder extraCriteria = new StringBuilder(200);
 
         if (sqlSearch != null) {
             extraCriteria.append(" and (").append(sqlSearch).append(")");

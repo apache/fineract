@@ -89,7 +89,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
         } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Accounting Rule: " + realCause.getMessage());
     }

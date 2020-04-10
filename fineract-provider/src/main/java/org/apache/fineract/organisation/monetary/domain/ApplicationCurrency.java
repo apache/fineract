@@ -27,7 +27,7 @@ import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 
 @Entity
 @Table(name = "m_currency")
-public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
+public class ApplicationCurrency extends AbstractPersistableCustom {
 
     @Column(name = "code", nullable = false, length = 3)
     private String code;

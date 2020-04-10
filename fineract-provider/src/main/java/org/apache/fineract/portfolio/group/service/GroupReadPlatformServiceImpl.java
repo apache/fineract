@@ -215,7 +215,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     // caused by the same name of columns in m_office and m_group tables
     private String getGroupExtraCriteria(String schemaSql, List<Object> paramList, final SearchParameters searchCriteria) {
 
-        StringBuffer extraCriteria = new StringBuffer(200);
+        StringBuilder extraCriteria = new StringBuilder(200);
         extraCriteria.append(" and g.level_Id = ").append(GroupTypes.GROUP.getId());
             String sqlSearch = searchCriteria.getSqlSearch();
             if (sqlSearch != null) {

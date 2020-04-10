@@ -86,7 +86,7 @@ public class ClientTransactionDTO {
     }
 
     public boolean isChargePayment() {
-        return ClientTransactionType.PAY_CHARGE.getValue().equals(new Integer(this.transactionType.getId().intValue()));
+        return ClientTransactionType.PAY_CHARGE.getValue().equals(Integer.valueOf(this.transactionType.getId().intValue()));
     }
 
     public String getCurrencyCode() {

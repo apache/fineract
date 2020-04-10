@@ -68,7 +68,7 @@ public class SmsCampaignEnumerations {
     }
 
     public static EnumOptionData calendarMonthType(final Month entityType) {
-        final EnumOptionData optionData = new EnumOptionData(new Long(entityType.getValue()), entityType.name(), entityType.name());
+        final EnumOptionData optionData = new EnumOptionData(Long.valueOf(entityType.getValue()), entityType.name(), entityType.name());
         return optionData;
     }
 

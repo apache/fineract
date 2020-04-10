@@ -63,7 +63,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_group")
-public final class Group extends AbstractPersistableCustom<Long> {
+public final class Group extends AbstractPersistableCustom {
 
     @Column(name = "external_id", length = 100, unique = true)
     private String externalId;

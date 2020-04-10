@@ -113,7 +113,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, g.account_no as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum, null as parentType "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.account_no like :search or g.display_name like :search or g.external_id like :search or g.id like :search )) ";
-            final StringBuffer sql = new StringBuffer();
+            final StringBuilder sql = new StringBuilder();
 
             if (searchConditions.isClientSearch()) {
                 sql.append(clientMatchSql).append(union);
@@ -211,7 +211,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         // TODO- build the query dynamically based on selected entity types, for
         // now adding query for only loan entity.
         public String schema(final AdHocQuerySearchConditions searchConditions, final MapSqlParameterSource params) {
-            final StringBuffer sql = new StringBuffer();
+            final StringBuilder sql = new StringBuilder();
             sql.append(
                     "Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
                     .append("from (select mo.name, mp.name Product, sum(ifnull(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
@@ -306,7 +306,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             return sql.toString();
         }
 
-        private void checkAndUpdateWhereClause(final StringBuffer sql) {
+        private void checkAndUpdateWhereClause(final StringBuilder sql) {
             if (isWhereClauseAdded) {
                 sql.append(" and ");
             } else {

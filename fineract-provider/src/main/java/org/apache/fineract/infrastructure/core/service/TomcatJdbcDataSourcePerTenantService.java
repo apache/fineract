@@ -18,20 +18,20 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
-import org.apache.tomcat.jdbc.pool.PoolConfiguration;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation that returns a new or existing tomcat 7 jdbc connection pool
+ * Implementation that returns a new or existing connection pool
  * datasource based on the tenant details stored in a {@link ThreadLocal}
  * variable for this request.
  *
@@ -45,16 +45,15 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final DataSource tenantDataSource;
 
     @Autowired
-    private JDBCDriverConfig driverConfig ;
+    private JDBCDriverConfig driverConfig;
 
     @Autowired
-    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("tenantDataSourceJndi") DataSource tenantDataSource) {
+    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
         this.tenantDataSource = tenantDataSource;
     }
 
     @Override
     public DataSource retrieveDataSource() {
-
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;
 
@@ -63,12 +62,10 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
             final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
 
             synchronized (this.tenantToDataSourceMap) {
-                // if tenantConnection information available switch to
-                // appropriate
-                // datasource
-                // for that tenant.
-                if (this.tenantToDataSourceMap.containsKey(tenantConnection.getConnectionId())) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
+                // if tenantConnection information available switch to the appropriate datasource for that tenant.
+                DataSource possibleDS = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
+                if (possibleDS != null) {
+                    tenantDataSource = possibleDS;
                 } else {
                     tenantDataSource = createNewDataSourceFor(tenantConnection);
                     this.tenantToDataSourceMap.put(tenantConnection.getConnectionId(), tenantDataSource);
@@ -79,48 +76,43 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         return tenantDataSource;
     }
 
-    // creates the data source oltp and report databases
+    // creates the tenant data source for the oltp and report database
     private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
-        // see
-        // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
+        String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName());
 
-        // see also org.apache.fineract.DataSourceProperties.setDefaults()
-         String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName()) ;
-        //final String jdbcUrl = tenantConnectionObj.databaseURL();
-        final PoolConfiguration poolConfiguration = new PoolProperties();
-        poolConfiguration.setDriverClassName(this.driverConfig.getDriverClassName());
-        poolConfiguration.setName(tenantConnectionObj.getSchemaName() + "_pool");
-        poolConfiguration.setUrl(jdbcUrl);
-        poolConfiguration.setUsername(tenantConnectionObj.getSchemaUsername());
-        poolConfiguration.setPassword(tenantConnectionObj.getSchemaPassword());
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName(this.driverConfig.getDriverClassName());
+        config.setPoolName(tenantConnectionObj.getSchemaName() + "_pool");
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(tenantConnectionObj.getSchemaUsername());
+        config.setPassword(tenantConnectionObj.getSchemaPassword());
+        config.setMinimumIdle(tenantConnectionObj.getInitialSize());
+        config.setMaximumPoolSize(tenantConnectionObj.getMaxActive());
+        config.setConnectionTestQuery("SELECT 1");
+        config.setValidationTimeout(tenantConnectionObj.getValidationInterval());
+        config.setAutoCommit(true);
 
-        poolConfiguration.setInitialSize(tenantConnectionObj.getInitialSize());
+        // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
+        config.setRegisterMbeans(true);
 
-        poolConfiguration.setTestOnBorrow(tenantConnectionObj.isTestOnBorrow());
-        poolConfiguration.setValidationQuery("SELECT 1");
-        poolConfiguration.setValidationInterval(tenantConnectionObj.getValidationInterval());
+        // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        // These are the properties for each Tenant DB; the same configuration is also in src/main/resources/META-INF/spring/hikariDataSource.xml for the all Tenants DB -->
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
+        config.addDataSourceProperty("rewriteBatchedStatements", "true");
+        config.addDataSourceProperty("cacheResultSetMetadata", "true");
+        config.addDataSourceProperty("cacheServerConfiguration", "true");
+        config.addDataSourceProperty("elideSetAutoCommits", "true");
+        config.addDataSourceProperty("maintainTimeStats", "false");
 
-        poolConfiguration.setRemoveAbandoned(tenantConnectionObj.isRemoveAbandoned());
-        poolConfiguration.setRemoveAbandonedTimeout(tenantConnectionObj.getRemoveAbandonedTimeout());
-        poolConfiguration.setLogAbandoned(tenantConnectionObj.isLogAbandoned());
-        poolConfiguration.setAbandonWhenPercentageFull(tenantConnectionObj.getAbandonWhenPercentageFull());
-        poolConfiguration.setDefaultAutoCommit(true);
+        // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
+        config.addDataSourceProperty("logger", "com.mysql.jdbc.log.StandardLogger");
+        config.addDataSourceProperty("logSlowQueries", "true");
+        config.addDataSourceProperty("dumpQueriesOnException", "true");
 
-        /**
-         * Vishwas- Do we need to enable the below properties and add
-         * ResetAbandonedTimer for long running batch Jobs?
-         **/
-        // poolConfiguration.setMaxActive(tenant.getMaxActive());
-        // poolConfiguration.setMinIdle(tenant.getMinIdle());
-        // poolConfiguration.setMaxIdle(tenant.getMaxIdle());
-
-        // poolConfiguration.setSuspectTimeout(tenant.getSuspectTimeout());
-        // poolConfiguration.setTimeBetweenEvictionRunsMillis(tenant.getTimeBetweenEvictionRunsMillis());
-        // poolConfiguration.setMinEvictableIdleTimeMillis(tenant.getMinEvictableIdleTimeMillis());
-
-        poolConfiguration.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-                + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport");
-
-        return new org.apache.tomcat.jdbc.pool.DataSource(poolConfiguration);
+        return new HikariDataSource(config);
     }
 }

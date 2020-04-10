@@ -29,12 +29,11 @@ import org.apache.fineract.adhocquery.api.AdHocJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 
 @Entity
 @Table(name = "m_adhoc")
-public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
+public class AdHoc extends AbstractAuditableCustom {
 
       @Column(name = "name", length = 100)
     private  String name;

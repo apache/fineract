@@ -59,8 +59,8 @@ public class VariableInstallmentsIntegrationTest {
         System.out.println("------------------------------RETRIEVING CREATED LOAN PRODUCT DETAILS ---------------------------------------");
         Map loanProduct = (Map)loanTransactionHelper.getLoanProductDetail(requestSpec, responseSpec, loanProductID, "") ;
         Assert.assertTrue((Boolean)loanProduct.get("allowVariableInstallments")) ;
-        Assert.assertEquals(new Integer(5), loanProduct.get("minimumGap")) ;
-        Assert.assertEquals(new Integer(90), loanProduct.get("maximumGap")) ;
+        Assert.assertEquals(Integer.valueOf(5), loanProduct.get("minimumGap")) ;
+        Assert.assertEquals(Integer.valueOf(90), loanProduct.get("maximumGap")) ;
     }
 
 

@@ -164,7 +164,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         } catch (final Exception e) {
             final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
-            logger.error(msg, e);
+            logger.error("{}", msg, e);
             throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId());
         }
 
@@ -223,7 +223,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                                     }
                                 }
                             } catch (final SchedulerException e) {
-                                logger.error(e.getMessage(), e);
+                                logger.error("Error occured.", e);
                             }
                         }
                         jobDetail.updateTriggerMisfired(false);
@@ -281,7 +281,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             scheduledJobDetails.updateNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
-            logger.error("Could not schedule job: " + scheduledJobDetails.getJobName(), throwable);
+            logger.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
     }
@@ -292,7 +292,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             try {
                 scheduler.shutdown();
             } catch (final SchedulerException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("Error occured.", e);
             }
         }
     }
@@ -317,7 +317,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         try {
             scheduler.shutdown();
         } catch (final SchedulerException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Error occured.", e);
         }
     }
 
@@ -418,7 +418,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private String getStackTraceAsString(final Throwable throwable) {
         final StackTraceElement[] stackTraceElements = throwable.getStackTrace();
-        final StringBuffer sb = new StringBuffer(throwable.toString());
+        final StringBuilder sb = new StringBuilder(throwable.toString());
         for (final StackTraceElement element : stackTraceElements) {
             sb.append("\n \t at ").append(element.getClassName()).append(".").append(element.getMethodName()).append("(")
                     .append(element.getLineNumber()).append(")");

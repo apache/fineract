@@ -44,7 +44,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "m_report_mailing_job", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unique_name") })
-public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
+public class ReportMailingJob extends AbstractAuditableCustom {
     private static final long serialVersionUID = -2197602941230009227L;
 
     @Column(name = "name", nullable = false)

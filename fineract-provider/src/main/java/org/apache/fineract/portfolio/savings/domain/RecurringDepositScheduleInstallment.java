@@ -30,12 +30,11 @@ import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_mandatory_savings_schedule")
-public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
+public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id")

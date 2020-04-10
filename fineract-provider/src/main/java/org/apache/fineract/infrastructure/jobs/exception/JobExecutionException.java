@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.infrastructure.jobs.exception;
 
-public class JobExecutionException extends Exception {
+import org.apache.fineract.infrastructure.core.exception.MultiException;
 
-    public JobExecutionException(final String msg) {
-        super(msg);
+public class JobExecutionException extends MultiException {
+
+    public JobExecutionException(int n) {
+        super(n);
     }
 }

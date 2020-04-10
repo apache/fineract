@@ -63,11 +63,11 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             saveException(request, exception);
 
             if (this.forwardToDestination) {
-                this.logger.debug("Forwarding to " + this.defaultFailureUrl);
+                this.logger.debug("Forwarding to {}", this.defaultFailureUrl);
 
                 request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
             } else {
-                this.logger.debug("Redirecting to " + this.defaultFailureUrl);
+                this.logger.debug("Redirecting to {}", this.defaultFailureUrl);
 
                 final String oauthToken = request.getParameter("oauth_token");
                 request.setAttribute("oauth_token", oauthToken);

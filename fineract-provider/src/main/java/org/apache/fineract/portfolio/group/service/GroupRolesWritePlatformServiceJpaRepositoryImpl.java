@@ -106,7 +106,7 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
                     GroupingTypesApiConstants.clientIdParamName, roleId, clientId, command.getGroupId());
         }
 
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

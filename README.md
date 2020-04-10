@@ -8,7 +8,7 @@ Fineract is a mature platform with open APIs that provides a reliable, robust, a
 [![Code Now! (Gitpod)](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/fineract)
 to start contributing to this project in the online web-based IDE GitPod.io right away!
 (You may initially have to press F1 to Find Command and run "Java: Start Language Server".)
-It's of course also possible to contribute with a "traditional" loca ldevelopment environment (see below).
+It's of course also possible to contribute with a "traditional" local development environment (see below).
 
 Community
 =========
@@ -36,8 +36,8 @@ Instructions how to run for local development
 ============
 
 Run the following commands:
-1. `./gradlew createDB -PdbName=mifosplatform-tenants`
-1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew tomcatRunWAR`
 
 
@@ -71,8 +71,8 @@ Instructions to execute Integration tests
 > Note that if this is the first time to access MySQL DB, then you may need to reset your password.
 
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
-1. `./gradlew createDB -PdbName=mifosplatform-tenants`
-1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew createDB -PdbName=fineract_tenants`
+1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew clean integrationTest`
 
 
@@ -110,10 +110,19 @@ and the `mysqlserver` environment variable is now no longer supported.)_
 Checkstyle
 ============
 
-This project enforces [its code conventions](fineract-provider/config/checkstyle/checkstyle.xml) using Checkstyle.
+This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml).  It is configured to run automatically during the normal Gradle build, and fail if there are any style violations detected.
 We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
 File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
+You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it, for IntelliJ you can use [CheckStyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea).
 
+Code Coverage Reports
+============
+
+The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command: 
+
+    `./gradlew clean build jacocoTestReport`
+
+Generated reports can be found in build/code-coverage directory.
 
 Version
 ============
@@ -159,6 +168,7 @@ Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+1
 
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
+Please visit <https://issues.apache.org/jira/projects/FINERACT/> to open or find issues.
 
 Roadmap
 ============
@@ -180,6 +190,8 @@ documents the process through which you can become a committer in this project.
 
 [Pull Request Size Limit](https://cwiki.apache.org/confluence/display/FINERACT/Pull+Request+Size+Limit)
 documents that we cannot accept huge "code dump" Pull Requests, with some related suggestions.
+
+[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this git repository into a binary release ZIP available on http://fineract.apache.org.
 
 
 More Information

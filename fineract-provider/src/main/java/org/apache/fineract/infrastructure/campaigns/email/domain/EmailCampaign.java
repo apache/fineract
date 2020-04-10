@@ -50,7 +50,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "scheduled_email_campaign")
-public class EmailCampaign extends AbstractPersistableCustom<Long> {
+public class EmailCampaign extends AbstractPersistableCustom {
 
     @Column(name = "campaign_name", nullable = false)
     private String campaignName;

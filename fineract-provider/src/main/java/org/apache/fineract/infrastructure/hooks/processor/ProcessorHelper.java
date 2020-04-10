@@ -95,13 +95,12 @@ public class ProcessorHelper {
         return new Callback() {
             @Override
             public void success(final Object o, final Response response) {
-                logger.info("URL : " + url + "\tStatus : "
-                        + response.getStatus());
+                logger.info("URL: {}\tStatus: {}", url, response.getStatus());
             }
 
             @Override
             public void failure(final RetrofitError retrofitError) {
-                logger.info(retrofitError.getMessage());
+                logger.info("Error occured.", retrofitError);
             }
         };
     }

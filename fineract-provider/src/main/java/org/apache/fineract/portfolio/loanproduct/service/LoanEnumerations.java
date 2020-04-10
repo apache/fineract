@@ -176,7 +176,7 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "last");
             break;
             default:
-                optionData = new EnumOptionData(new Integer(0).longValue(), codePrefix + type.getCode(), "invalid");
+                optionData = new EnumOptionData(Integer.valueOf(0).longValue(), codePrefix + type.getCode(), "invalid");
             break;
         }
 
@@ -633,7 +633,7 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "last");
             break;
             default:
-                optionData = new EnumOptionData(new Integer(0).longValue(), codePrefix + type.getCode(), "invalid");
+                optionData = new EnumOptionData(Integer.valueOf(0).longValue(), codePrefix + type.getCode(), "invalid");
             break;
         }
         return optionData;

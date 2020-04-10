@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 
 @Entity
 @Table(name = "m_loan_tranche_charges")
-public class LoanTrancheCharge extends AbstractPersistableCustom<Long> {
+public class LoanTrancheCharge extends AbstractPersistableCustom {
 
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "loan_id", nullable = false)

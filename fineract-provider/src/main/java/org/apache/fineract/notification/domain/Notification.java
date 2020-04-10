@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "notification_generator")
-public class Notification extends AbstractPersistableCustom<Long> {
+public class Notification extends AbstractPersistableCustom {
 
     @Column(name = "object_type")
     private String objectType;

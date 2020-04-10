@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 @Entity
 @Table(name = "m_guarantor_funding_details")
-public class GuarantorFundingDetails extends AbstractPersistableCustom<Long> {
+public class GuarantorFundingDetails extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "guarantor_id", nullable = false)

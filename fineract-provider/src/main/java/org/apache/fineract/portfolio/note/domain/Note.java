@@ -35,11 +35,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_note")
-public class Note extends AbstractAuditableCustom<AppUser, Long> {
+public class Note extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)

@@ -125,7 +125,7 @@ public class StorageTest {
         verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification));
         verify(this.notificationMapperWritePlatformService, times(1)).create(refEq(notificationMapper));
         verify(this.notificationGeneratorReadRepositoryWrapper, times(1)).findById(1L);
-        assertEquals(actualGeneratedNotificationId, new Long(1));
+        assertEquals(actualGeneratedNotificationId, Long.valueOf(1));
     }
 
     private String getCurrentDateTime() {

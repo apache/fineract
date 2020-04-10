@@ -177,7 +177,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
 }

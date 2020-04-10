@@ -42,7 +42,7 @@ import org.joda.time.DateTime;
 
 @Entity
 @Table(name = "m_provisioning_criteria", uniqueConstraints = { @UniqueConstraint(columnNames = { "criteria_name" }, name = "criteria_name") })
-public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long> {
+public class ProvisioningCriteria extends AbstractAuditableCustom {
 
     @Column(name = "criteria_name", nullable = false)
     private String criteriaName;

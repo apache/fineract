@@ -26,12 +26,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_component_history")
-public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxComponentHistory extends AbstractAuditableCustom {
 
     @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
     private BigDecimal percentage;

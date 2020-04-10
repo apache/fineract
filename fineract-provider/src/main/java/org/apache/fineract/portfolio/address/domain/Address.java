@@ -40,7 +40,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "m_address")
-public class Address extends AbstractPersistableCustom<Long> {
+public class Address extends AbstractPersistableCustom {
 
     /*
      * @OneToMany(mappedBy = "address", cascade = CascadeType.ALL) private

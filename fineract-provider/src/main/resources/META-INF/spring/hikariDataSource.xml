@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+    	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<!-- HikariCP Database bean -->
+    <bean id="hikariTenantDataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <constructor-arg ref="hikariConfig" />
+    </bean>
+
+    <!-- HikariConfig config that is fed to above dataSource -->
+    <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+        <property name="driverClassName" value="${fineract_tenants_driver}" />
+        <property name="jdbcUrl" value="${fineract_tenants_url}" />
+        <property name="username" value="${fineract_tenants_uid}" />
+        <property name="password" value="${fineract_tenants_pwd}" />
+        <property name="minimumIdle" value="3" />
+        <property name="maximumPoolSize" value="10" />
+        <property name="idleTimeout" value="60000" />
+        <property name="ConnectionTestQuery" value="SELECT 1" />
+
+        <!-- These are the properties for the all Tenants DB; the same configuration is also (hard-coded) in the TomcatJdbcDataSourcePerTenantService class -->
+        <property name="dataSourceProperties">
+            <props>
+		        <!-- https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration -->
+                <prop key="cachePrepStmts">true</prop>
+                <prop key="prepStmtCacheSize">250</prop>
+                <prop key="prepStmtCacheSqlLimit">2048</prop>
+                <prop key="useServerPrepStmts">true</prop>
+                <prop key="useLocalSessionState">true</prop>
+                <prop key="rewriteBatchedStatements">true</prop>
+                <prop key="cacheResultSetMetadata">true</prop>
+                <prop key="cacheServerConfiguration">true</prop>
+                <prop key="elideSetAutoCommits">true</prop>
+                <prop key="maintainTimeStats">false</prop>
+
+                <!-- https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj -->
+                <prop key="logger">com.mysql.jdbc.log.StandardLogger</prop>
+                <prop key="logSlowQueries">true</prop>
+                <prop key="dumpQueriesOnException">true</prop>
+            </props>
+        </property>
+    </bean>
+</beans>

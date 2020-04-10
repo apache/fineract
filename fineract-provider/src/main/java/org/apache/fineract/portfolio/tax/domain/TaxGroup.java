@@ -36,11 +36,10 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.portfolio.tax.exception.TaxMappingNotFoundException;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_tax_group")
-public class TaxGroup extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxGroup extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
     private String name;

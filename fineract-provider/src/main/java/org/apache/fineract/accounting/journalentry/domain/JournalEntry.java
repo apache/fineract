@@ -36,11 +36,10 @@ import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "acc_gl_journal_entry")
-public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
+public class JournalEntry extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)

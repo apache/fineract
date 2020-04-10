@@ -41,7 +41,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
-import org.apache.fineract.scheduledjobs.service.ScheduledJobRunnerServiceImpl;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -57,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, BusinessEventListner {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(LoanArrearsAgingServiceImpl.class);
     private final BusinessEventNotifierService businessEventNotifierService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final JdbcTemplate jdbcTemplate;
@@ -126,7 +125,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
             result += i;
         }
 
-        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
+        logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override

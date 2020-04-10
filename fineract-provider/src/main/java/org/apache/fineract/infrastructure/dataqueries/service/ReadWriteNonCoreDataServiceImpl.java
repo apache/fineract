@@ -206,7 +206,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
     }
 
     @Transactional
@@ -749,7 +749,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         try {
             codeId = this.jdbcTemplate.queryForObject(checkColumnCodeMapping.toString(), Integer.class);
         } catch (final EmptyResultDataAccessException e) {
-            logger.info(e.getMessage());
+            logger.info("Error occured.", e);
         }
         return ObjectUtils.defaultIfNull(codeId, 0);
     }
@@ -1133,7 +1133,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 pkValue = datatableId;
             }
             final String sql = getUpdateSql(grs.getColumnHeaders(), dataTableName, pkName, pkValue, changes);
-            logger.info("Update sql: " + sql);
+            logger.info("Update sql: {}", sql);
             if (StringUtils.isNotBlank(sql)) {
                 this.jdbcTemplate.update(sql);
                 changes.put("locale", dataParams.get("locale"));
@@ -1240,7 +1240,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private CommandProcessingResult checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
 
         final String sql = dataScopedSQL(appTable, appTableId);
-        logger.info("data scoped sql: " + sql);
+        logger.info("data scoped sql: {}", sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
         if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
@@ -1432,7 +1432,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         addSql = "insert into `" + datatable + "` (`" + fkName + "` " + insertColumns + ")" + " select " + appTableId + " as id"
                 + selectColumns;
 
-        logger.info(addSql);
+        logger.info("{}", addSql);
 
         return addSql;
     }
@@ -1483,7 +1483,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + " as id" + selectColumns + " , ( SELECT SUM( code_score ) FROM m_code_value WHERE m_code_value.id IN (" + scoresId
                 + " ) ) as score";
 
-        logger.info(vaddSql);
+        logger.info("{}", vaddSql);
 
         return vaddSql;
     }

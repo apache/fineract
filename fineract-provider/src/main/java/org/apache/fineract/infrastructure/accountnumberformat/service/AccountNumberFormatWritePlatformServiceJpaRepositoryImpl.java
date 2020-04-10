@@ -149,7 +149,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
                     "Account Format preferences for Account type `" + entityAccountType.getCode() + "` already exists", "externalId",
                     entityAccountType.getValue(), entityAccountType.getCode());
         }
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.account.number.format.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

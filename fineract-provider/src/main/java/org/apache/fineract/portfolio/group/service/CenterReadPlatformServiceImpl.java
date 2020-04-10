@@ -123,7 +123,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     // caused by the same name of columns in m_office and m_group tables
     private String getCenterExtraCriteria(String schemaSl, List<Object> paramList,final SearchParameters searchCriteria) {
 
-        StringBuffer extraCriteria = new StringBuffer(200);
+        StringBuilder extraCriteria = new StringBuilder(200);
         extraCriteria.append(" and g.level_id = " + GroupTypes.CENTER.getId());
         if (searchCriteria!=null) {
             String sqlQueryCriteria = searchCriteria.getSqlSearch();

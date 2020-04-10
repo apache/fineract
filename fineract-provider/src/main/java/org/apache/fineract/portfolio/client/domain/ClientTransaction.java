@@ -52,7 +52,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
-public class ClientTransaction extends AbstractPersistableCustom<Long> {
+public class ClientTransaction extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", nullable = false)

@@ -47,7 +47,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_share_account")
-public class ShareAccount extends AbstractPersistableCustom<Long> {
+public class ShareAccount extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)
@@ -420,7 +420,7 @@ public class ShareAccount extends AbstractPersistableCustom<Long> {
         this.closedDate = null;
         this.closedBy = null;
         this.totalSharesApproved = null;
-        Long tempTotalShares = new Long(0);
+        Long tempTotalShares = Long.valueOf(0);
         for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
             if(transaction.isPurchasTransaction()) {
                 transaction.undoApprove();
@@ -540,8 +540,8 @@ public class ShareAccount extends AbstractPersistableCustom<Long> {
         for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
             transaction.setActive(false);
         }
-        this.totalSharesApproved = new Long(0) ;
-        this.totalSharesPending = new Long(0) ;
+        this.totalSharesApproved = Long.valueOf(0) ;
+        this.totalSharesPending = Long.valueOf(0) ;
     }
 
     public void removeCharges() {

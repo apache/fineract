@@ -93,7 +93,7 @@ public class FileSystemContentRepository implements ContentRepository {
         final boolean fileDeleted = deleteFile(location);
         if (!fileDeleted) {
             // no need to throw an Error, simply log a warning
-            logger.warn("Unable to delete image associated with clients with Id " + resourceId);
+            logger.warn("Unable to delete image associated with clients with Id {}", resourceId);
         }
     }
 

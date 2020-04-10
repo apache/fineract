@@ -36,7 +36,7 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 
 @Entity
 @Table(name = "m_product_loan_floating_rates")
-public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
+public class LoanProductFloatingRates extends AbstractPersistableCustom {
 
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)

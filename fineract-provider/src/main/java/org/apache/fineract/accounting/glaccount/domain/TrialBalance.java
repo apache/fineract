@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_trial_balance")
-public class TrialBalance extends AbstractPersistableCustom<Long> {
+public class TrialBalance extends AbstractPersistableCustom {
 
     @Column(name = "office_id", nullable = false)
     private Long officeId;

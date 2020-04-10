@@ -63,7 +63,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(multiDisburseLoan) //
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)//
-                .withVariableInstallmentsConfig(Boolean.TRUE, new Integer(5), new Integer(90))//
+                .withVariableInstallmentsConfig(Boolean.TRUE, Integer.valueOf(5), Integer.valueOf(90))//
                 .withAccounting(accountingRule, accounts).build(null);
         return loanProductJSON ;
     }
@@ -81,7 +81,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(multiDisburseLoan) //
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)//
-                .withVariableInstallmentsConfig(Boolean.TRUE, new Integer(5), new Integer(90))//
+                .withVariableInstallmentsConfig(Boolean.TRUE, Integer.valueOf(5), Integer.valueOf(90))//
                 .withAccounting(accountingRule, accounts).build(null);
         return loanProductJSON ;
     }

@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
-public class CodeValue extends AbstractPersistableCustom<Long> {
+public class CodeValue extends AbstractPersistableCustom {
 
     @Column(name = "code_value", length = 100)
     private String label;
@@ -93,7 +93,7 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
             isActive = isActiveObj;
         }
         if (position == null) {
-            position = new Integer(0);
+            position = Integer.valueOf(0);
         }
 
         Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(

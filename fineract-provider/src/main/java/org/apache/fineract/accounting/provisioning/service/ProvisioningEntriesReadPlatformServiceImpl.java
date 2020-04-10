@@ -281,7 +281,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
     private static final class ProvisioningEntryIdDateRowMapper implements RowMapper<ProvisioningEntryData> {
 
-        StringBuffer buff = new StringBuffer().append("select history1.id, history1.created_date from m_provisioning_history history1 ")
+        StringBuilder buff = new StringBuilder().append("select history1.id, history1.created_date from m_provisioning_history history1 ")
                 .append("where history1.created_date = (select max(history2.created_date) from m_provisioning_history history2 ")
                 .append("where history2.journal_entry_created='1')");
 

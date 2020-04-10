@@ -144,7 +144,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             throw new PlatformDataIntegrityException("error.msg.standinginstruction.duplicate.name", "Standinginstruction with name `"
                     + name + "` already exists", "name", name);
         }
-        logger.error(dve.getMessage(), dve);
+        logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -167,10 +167,10 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id)
                 .orElseThrow(() -> new StandingInstructionNotFoundException(id));
         final Map<String, Object> actualChanges = standingInstructionsForUpdate.update(command);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(id) //
-                .with(actualChanges) //
+        return new CommandProcessingResultBuilder()
+                .withCommandId(command.commandId())
+                .withEntityId(id)
+                .with(actualChanges)
                 .build();
     }
 
@@ -182,9 +182,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
         final Map<String, Object> actualChanges = new HashMap<>();
         actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(id) //
-                .with(actualChanges) //
+        return new CommandProcessingResultBuilder()
+                .withEntityId(id)
+                .with(actualChanges)
                 .build();
     }
 
@@ -237,8 +237,8 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                 final boolean isExceptionForBalanceCheck = false;
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(), data.name()
-                                + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
-                                .transferType().getValue(), null, null, null, null, null, fromSavingsAccount,
+                        + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
+                        .transferType().getValue(), null, null, null, null, null, fromSavingsAccount,
                         isRegularTransaction, isExceptionForBalanceCheck);
                 final boolean transferCompleted = transferAmount(sb, accountTransferDTO, data.getId());
 
@@ -249,40 +249,39 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
             }
         }
-        if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
-
+        if (sb.length() > 0) {
+            logger.error("executeStandingInstructions (transferAmount) encountered failure/s: {}", sb.toString());
+            // This is a bit of a hack (related to https://issues.apache.org/jira/browse/FINERACT-858) and could be improved..
+            throw new JobExecutionException(123456789);
+        }
     }
 
-    /**
-     * @param sb
-     * @param accountTransferDTO
-     */
     private boolean transferAmount(final StringBuilder sb, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
         boolean transferCompleted = true;
-        StringBuffer errorLog = new StringBuffer();
-        StringBuffer updateQuery = new StringBuffer(
+        StringBuilder errorLog = new StringBuilder();
+        StringBuilder updateQuery = new StringBuilder(
                 "INSERT INTO `m_account_transfer_standing_instructions_history` (`standing_instruction_id`, `status`, `amount`,`execution_time`, `error_log`) VALUES (");
         try {
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
             sb.append("Validation exception while trasfering funds for standing Instruction id").append(instructionId).append(" from ")
-                    .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
-                    .append("--------");
+            .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
+            .append("--------");
             errorLog.append("Validation exception while trasfering funds " + e.getDefaultUserMessage());
         } catch (final InsufficientAccountBalanceException e) {
             sb.append("InsufficientAccountBalance Exception while trasfering funds for standing Instruction id").append(instructionId)
-                    .append(" from ").append(accountTransferDTO.getFromAccountId()).append(" to ")
-                    .append(accountTransferDTO.getToAccountId()).append("--------");
+            .append(" from ").append(accountTransferDTO.getFromAccountId()).append(" to ")
+            .append(accountTransferDTO.getToAccountId()).append("--------");
             errorLog.append("InsufficientAccountBalance Exception ");
         } catch (final AbstractPlatformServiceUnavailableException e) {
             sb.append("Platform exception while trasfering funds for standing Instruction id").append(instructionId).append(" from ")
-                    .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
-                    .append("--------");
+            .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
+            .append("--------");
             errorLog.append("Platform exception while trasfering funds " + e.getDefaultUserMessage());
         } catch (Exception e) {
             sb.append("Exception while trasfering funds for standing Instruction id").append(instructionId).append(" from ")
-                    .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
-                    .append("--------");
+            .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
+            .append("--------");
             errorLog.append("Exception while trasfering funds " + e.getMessage());
 
         }
