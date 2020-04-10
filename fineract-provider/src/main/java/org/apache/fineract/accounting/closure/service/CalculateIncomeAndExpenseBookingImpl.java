@@ -124,7 +124,7 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
         return incomeAndExpenseBookingCollection;
     }
 
-    private IncomeAndExpenseBookingData bookOffIncomeAndExpense(final List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList,
+    public IncomeAndExpenseBookingData bookOffIncomeAndExpense(final List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList,
                                                                 final GLClosureCommand closureData,final boolean preview,final GLAccount glAccount,final Office office){
         /* All running balances has to be calculated before booking off income and expense account */
         boolean isRunningBalanceCalculated = true;
