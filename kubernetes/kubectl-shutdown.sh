@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
 # distributed with this work for additional information
@@ -17,11 +19,7 @@
 #
 
 
-apiVersion: v1
-kind: Secret
-metadata:
-  name: fineract-tenants-db-secret
-type: Opaque
-stringData:
-  username: root
-  password: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+kubectl delete -f secrets.yml
+kubectl delete -f fineractmysql-configmap.yml
+kubectl delete -f fineractmysql-deployment.yml
+kubectl delete -f fineract-server-deployment.yml

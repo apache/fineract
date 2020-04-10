@@ -16,6 +16,7 @@
 # under the License.
 #
 
+
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -30,7 +31,9 @@ spec:
     - ReadWriteMany
   hostPath:
     path: "/mnt/data"
+
 ---
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -42,7 +45,9 @@ spec:
   resources:
     requests:
       storage: 5Gi
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -58,7 +63,9 @@ spec:
     app: fineract-server
     tier: fineractmysql
   clusterIP: None
+
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -102,12 +109,12 @@ spec:
           volumeMounts:
             - name: fineractmysql-persistent-storage
               mountPath: /var/lib/mysql/
-            - name: fineractmysql-host-path
+            - name: fineractmysql-initdb
               mountPath: /docker-entrypoint-initdb.d/
       volumes:
         - name: fineractmysql-persistent-storage
           persistentVolumeClaim:
             claimName: fineractmysql-pv-claim
-        - name: fineractmysql-host-path
-          hostPath:
-            path: /fineract-db
+        - name: fineractmysql-initdb
+          configMap:
+            name: fineractmysql-initdb
