@@ -107,33 +107,40 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 and the `mysqlserver` environment variable is now no longer supported.)_
 
 
-Instructions to run using minikube and kubectl
-===================================================
+Instructions to run on kubernetes
+=================================
 
 You can also run Fineract using containers on a kubernetes cluster.
+Make sure you set up and connect to your Kubernetes cluster.
+You can follow [this](https://cwiki.apache.org/confluence/display/FINERACT/Install+and+configure+kubectl+and+Google+Cloud+SDK+on+ubuntu+16.04) guide to set up a Kubernetes cluster on GKE. Make sure to replace `apache-fineract-cn` with `apache-fineract`
 
+Now from your cloud shell, run the following commands:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+1. `sh kubectl-startup.sh`
+
+To shutdown and reset your cluster, run:
+    `sh kubectl-shutdown.sh`
+
+Alternatively, you can run fineract on a local kubernetes cluster(minikube).
 As Prerequisites, you must have `minikube` and `kubectl` installed on your machine; see
 [Minikube & Kubectl install](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 
 Now to run a new Fineract instance on minikube you can simply:
 
-1. `git clone https://github.com/apache/fineract.git ; cd fineract`
-1. `minikube start --mount-string="./fineract-db/docker:/fineract-db" --mount`
-1. `kubectl apply -f kubernetes/secrets.yml`
-1. `kubectl apply -f kubernetes/fineractmysql-deployment.yml`
-1. `kubectl apply -f kubernetes/fineract-server-deployment.yml`
+1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+1. `minikube start`
+1. `sh kubectl-startup.sh`
 1. `minikube service fineract-server --url`
 1. Fineract will run at the provided url
 
 NB : Change protocol from `http` to `https`
-=======================================
 
 To check the status of your containers on your local kubernetes cluster, run:
     `minikube dashboard`
 
-Having difficulties setting up minikube locally, you can try out the deployment
-using katacoda(https://www.katacoda.com/courses/kubernetes/launch-single-node-cluster)
-From there start the scenario and follow the instructions as indicated above.
+To shutdown and reset your cluster, run:
+    `sh kubectl-shutdown.sh`
 
 
 Checkstyle

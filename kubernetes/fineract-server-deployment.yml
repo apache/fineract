@@ -16,6 +16,7 @@
 # under the License.
 #
 
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -31,7 +32,9 @@ spec:
     app: fineract-server
     tier: backend
   type: LoadBalancer
+
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
