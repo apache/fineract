@@ -19,10 +19,10 @@
 #
 
 echo "Setting Up Fineract service configuration..."
-kubectl apply -f  secrets.yml
+kubectl apply -f secrets.yml
 kubectl apply -f fineractmysql-configmap.yml
 
-echo ""
+echo
 echo "Starting fineractmysql..."
 kubectl apply -f fineractmysql-deployment.yml
 
@@ -37,6 +37,6 @@ while [[ ${fineractmysql_status} -ne 'Running' ]]; do
     fineractmysql_status=$(kubectl get pods ${fineractmysql_pod} --no-headers -o custom-columns=":status.phase")
 done
 
-echo ""
+echo
 echo "Starting fineract server..."
 kubectl apply -f fineract-server-deployment.yml
