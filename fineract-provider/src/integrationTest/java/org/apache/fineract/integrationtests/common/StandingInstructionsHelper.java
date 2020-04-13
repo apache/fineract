@@ -24,7 +24,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings({"unused", "rawtypes", "unchecked" })
+@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
 public class StandingInstructionsHelper {
 
     private static final String STANDING_INSTRUCTIONS_URL = "/fineract-provider/api/v1/standinginstructions";
@@ -55,13 +55,15 @@ public class StandingInstructionsHelper {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
-    public StandingInstructionsHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public StandingInstructionsHelper(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
-    public String build(final String clientId, final String fromAccountId, final String toAccountId, final String fromAccountType,
-            final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
+    public String build(final String clientId, final String fromAccountId, final String toAccountId,
+            final String fromAccountType, final String toAccountType, final String validFrom, final String validTo,
+            final String monthDay) {
 
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", Utils.randomNameGenerator("STANDING_INSTRUCTION_", 5));
@@ -92,30 +94,35 @@ public class StandingInstructionsHelper {
         return savingsApplicationJSON;
     }
 
-    public Integer createStandingInstruction(final String clientId, final String fromAccountId, final String toAccountId,
-            final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
-        System.out.println("-------------------------------- CREATE STANDING INSTRUCTIONS --------------------------------");
+    public Integer createStandingInstruction(final String clientId, final String fromAccountId,
+            final String toAccountId, final String fromAccountType, final String toAccountType, final String validFrom,
+            final String validTo, final String monthDay) {
+        System.out.println(
+                "-------------------------------- CREATE STANDING INSTRUCTIONS --------------------------------");
         final String standingInstructionAsJSON = new StandingInstructionsHelper(this.requestSpec, this.responseSpec) //
-                .build(clientId.toString(), fromAccountId.toString(), toAccountId.toString(), fromAccountType, toAccountType, validFrom,
-                        validTo, monthDay);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, STANDING_INSTRUCTIONS_URL + "?" + Utils.TENANT_IDENTIFIER,
-                standingInstructionAsJSON, "resourceId");
+                .build(clientId.toString(), fromAccountId.toString(), toAccountId.toString(), fromAccountType,
+                        toAccountType, validFrom, validTo, monthDay);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                STANDING_INSTRUCTIONS_URL + "?" + Utils.TENANT_IDENTIFIER, standingInstructionAsJSON, "resourceId");
     }
 
     public HashMap getStandingInstructionById(final String standingInstructionId) {
 
-        System.out.println("----------------------------- RETRIEVING STANDING INSTRUCTION BY ID---------------------------");
+        System.out.println(
+                "----------------------------- RETRIEVING STANDING INSTRUCTION BY ID---------------------------");
         final String GET_STANDING_INSTRUCTION_BY_ID_URL = STANDING_INSTRUCTIONS_URL + "/" + standingInstructionId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_STANDING_INSTRUCTION_BY_ID_URL, "");
+        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec,
+                GET_STANDING_INSTRUCTION_BY_ID_URL, "");
         return response;
     }
 
-    public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId, Integer transferType) {
-        final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUNHISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
-                + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId
-                + "&transferType=" + transferType;
-        System.out.println("STANDING_INSTRUCTIONS_HISTORY_URL="+STANDING_INSTRUCTIONS_HISTORY_URL);
+    public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType,
+            Integer fromClientId, Integer transferType) {
+        final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUNHISTORY_URL + "?"
+                + Utils.TENANT_IDENTIFIER + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType
+                + "&clientId=" + fromClientId + "&transferType=" + transferType;
+        System.out.println("STANDING_INSTRUCTIONS_HISTORY_URL=" + STANDING_INSTRUCTIONS_HISTORY_URL);
         final List<HashMap> response = (List<HashMap>) Utils.performServerGet(this.requestSpec, this.responseSpec,
                 STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");
         return response;

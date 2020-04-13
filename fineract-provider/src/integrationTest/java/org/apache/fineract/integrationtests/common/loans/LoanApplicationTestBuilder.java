@@ -66,7 +66,8 @@ public class LoanApplicationTestBuilder {
     private boolean syncDisbursementWithMeeting = false;
     private List<HashMap<String, Object>> datatables = null;
 
-    public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
+    public String build(final String clientID, final String groupID, final String loanProductId,
+            final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("groupId", groupID);
         map.put("clientId", clientID);
@@ -276,8 +277,6 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-
-
     public LoanApplicationTestBuilder withFirstRepaymentDate(final String firstRepaymentDate) {
         this.repaymentsStartingFromDate = firstRepaymentDate;
         return this;
@@ -287,9 +286,8 @@ public class LoanApplicationTestBuilder {
      * calendarID parameter is used to sync repayments with group meetings,
      * especially when using jlg loans
      *
-     * @param calendarId
-     *            the id of the calender record of the group meeting from
-     *            m_calendar table
+     * @param calendarId the id of the calender record of the group meeting from
+     *                   m_calendar table
      * @return
      */
     public LoanApplicationTestBuilder withCalendarID(String calendarId) {
@@ -298,10 +296,9 @@ public class LoanApplicationTestBuilder {
     }
 
     /**
-     * This indicator is used mainly for jlg loans when we want to sync
-     * disbursement with the group meetings (it seems that if we do use this
-     * parameter we should also use calendarID to sync repayment with group
-     * meetings)
+     * This indicator is used mainly for jlg loans when we want to sync disbursement
+     * with the group meetings (it seems that if we do use this parameter we should
+     * also use calendarID to sync repayment with group meetings)
      *
      * @return
      */

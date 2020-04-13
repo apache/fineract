@@ -59,19 +59,19 @@ public class CurrencyHelper {
         return getCurrencies(CURRENCY_URL_SELECTED, permittedCurrencyArraySelected);
     }
 
-
     private ArrayList<Currency> getCurrencies(final String getUrl, final List<String> permittedCurrencyArrays) {
         System.out.println("--------------------------------- GET CURRENCY OPTIONS -------------------------------");
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when()
-                .get(getUrl).andReturn().asString();
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getUrl)
+                .andReturn().asString();
         final Gson gson = new Gson();
         Assert.notNull(json);
         final ArrayList<Currency> currencyList = new ArrayList<Currency>();
-        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() { }.getType();
+        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {
+        }.getType();
         final Map<String, List<Currency>> responseMap = gson.fromJson(json, typeOfHashMap);
-        for(Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
+        for (Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
             Assert.isTrue(permittedCurrencyArrays.contains(entry.getKey()));
-            for(Currency currency : entry.getValue()) {
+            for (Currency currency : entry.getValue()) {
                 currencyList.add(currency);
             }
         }
@@ -80,12 +80,13 @@ public class CurrencyHelper {
 
     public List<String> updateCurrencies(final List<String> currencies) {
         System.out.println("--------------------------------- UPDATE CURRENCY OPTIONS -------------------------------");
-        final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log().ifError().when()
-                .put(CURRENCY_URL).andReturn().asString();
+        final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log()
+                .ifError().when().put(CURRENCY_URL).andReturn().asString();
         final Gson gson = new Gson();
         Assert.notNull(json);
-        final Type typeOfHashMap = new TypeToken<Map<String,Map<String, List<String>>>>() { }.getType();
-        final Map<String,Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
+        final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {
+        }.getType();
+        final Map<String, Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
         return responseMap.get("changes").get("currencies");
     }
 

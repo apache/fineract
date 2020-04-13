@@ -131,7 +131,7 @@ public class SavingsProductHelper {
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
         }
-        if(this.isDormancyTrackingActive){
+        if (this.isDormancyTrackingActive) {
             map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
             map.put("daysToInactive", this.daysToInactive);
             map.put("daysToDormancy", this.daysToDormancy);
@@ -270,14 +270,17 @@ public class SavingsProductHelper {
 
     public static Integer createSavingsProduct(final String savingsProductJSON, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON,
+                "resourceId");
     }
 
     public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer generatedProductID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
+        final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec,
+                GET_SAVINGS_PRODUCT_URL, "id");
         assertEquals("ERROR IN CREATING THE Savings Product", generatedProductID, responseSavingsProductID);
     }
 

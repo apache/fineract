@@ -43,7 +43,8 @@ public class SchedulerJobsTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.responseSpecForSchedulerJob = new ResponseSpecBuilder().expectStatusCode(202).build();
@@ -69,7 +70,8 @@ public class SchedulerJobsTest {
         }
 
         // Retrieving All Scheduler Jobs
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec,
+                this.responseSpec);
         Assert.assertNotNull(allSchedulerJobsData);
 
         for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
@@ -77,7 +79,8 @@ public class SchedulerJobsTest {
             Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
             // Retrieving Scheduler Job by ID
-            HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec,
+                    jobId.toString());
             Assert.assertNotNull(schedulerJob);
 
             Boolean active = (Boolean) schedulerJob.get("active");
@@ -89,8 +92,8 @@ public class SchedulerJobsTest {
             }
 
             // Updating Scheduler Job
-            HashMap changes = this.schedulerJobHelper.updateSchedulerJob(this.requestSpec, this.responseSpec, jobId.toString(),
-                    active.toString());
+            HashMap changes = this.schedulerJobHelper.updateSchedulerJob(this.requestSpec, this.responseSpec,
+                    jobId.toString(), active.toString());
             // Verifying Scheduler Job updation
             Assert.assertEquals("Verifying Scheduler Job Updation", active, changes.get("active"));
 
@@ -98,18 +101,20 @@ public class SchedulerJobsTest {
             this.schedulerJobHelper.runSchedulerJob(this.requestSpec, jobId.toString());
 
             // Retrieving Scheduler Job by ID
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec,
+                    jobId.toString());
             Assert.assertNotNull(schedulerJob);
 
             // Waiting for Job to complete
             while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
                 Thread.sleep(15000);
-                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec,
+                        jobId.toString());
                 Assert.assertNotNull(schedulerJob);
-                System.out.println("Job " +jobId.toString() +" is Still Running");
+                System.out.println("Job " + jobId.toString() + " is Still Running");
             }
-            ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                    jobId.toString());
+            ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec,
+                    this.responseSpec, jobId.toString());
 
             // Verifying the Status of the Recently executed Scheduler Job
             Assert.assertEquals("Verifying Last Scheduler Job Status", "success",

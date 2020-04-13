@@ -53,321 +53,352 @@ import org.junit.Test;
 @Ignore
 public class DisbursalAndRepaymentScheduleTest {
 
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecForStatusCode403;
-    private ResponseSpecification generalResponseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
-    private Integer loanRescheduleRequestId;
-    private Integer clientId;
-    private Integer groupId;
-    private Integer groupCalendarId;
-    private Integer loanProductId;
-    private Integer loanId;
-    private final String loanPrincipalAmount = "100000.00";
-    private final String numberOfRepayments = "12";
-    private final String interestRatePerPeriod = "18";
+        private ResponseSpecification responseSpec;
+        private ResponseSpecification responseSpecForStatusCode403;
+        private ResponseSpecification generalResponseSpec;
+        private RequestSpecification requestSpec;
+        private LoanTransactionHelper loanTransactionHelper;
+        private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
+        private Integer loanRescheduleRequestId;
+        private Integer clientId;
+        private Integer groupId;
+        private Integer groupCalendarId;
+        private Integer loanProductId;
+        private Integer loanId;
+        private final String loanPrincipalAmount = "100000.00";
+        private final String numberOfRepayments = "12";
+        private final String interestRatePerPeriod = "18";
 
-    private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy");
+        private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy");
 
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-    }
-
-    @Test
-    public void testRescheduleJLGLoanSynk() {
-        System.out.println("---------------------------------STARTING RESCHEDULE JLG LOAN TEST ------------------------------------------");
-
-        Calendar meetingCalendar = Calendar.getInstance();
-        meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
-        meetingCalendar.setTime(new java.util.Date());
-
-        int today = meetingCalendar.get(Calendar.DAY_OF_WEEK);
-        // making sure that the meeting calendar is set for the coming monday.
-        if (today >= Calendar.MONDAY) {
-            meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today + 7));
-        } else {
-            meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today));
+        @Before
+        public void setup() {
+                Utils.initializeRESTAssured();
         }
 
-        Calendar groupMeetingChangeCalendar = (Calendar) meetingCalendar.clone();
+        @Test
+        public void testRescheduleJLGLoanSynk() {
+                System.out.println("-----------STARTING RESCHEDULE JLG LOAN TEST ---------");
 
-        meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
+                Calendar meetingCalendar = Calendar.getInstance();
+                meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+                meetingCalendar.setTime(new java.util.Date());
 
-        final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
+                int today = meetingCalendar.get(Calendar.DAY_OF_WEEK);
+                // making sure that the meeting calendar is set for the coming monday.
+                if (today >= Calendar.MONDAY) {
+                        meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today + 7));
+                } else {
+                        meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today));
+                }
 
-        final String disbursalDate = groupMeetingDate; // first meeting date
-        // after group creation
+                Calendar groupMeetingChangeCalendar = (Calendar) meetingCalendar.clone();
 
-        final String rescheduleSubmittedDate = this.dateFormatterStandard.format(new java.util.Date());
+                meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
 
-        final String loanType = "jlg";
-        final String rescheduleInterestRate = "28.0";
-        groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
-        final String groupMeetingNewStartDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
-        // The date
-        // from
-        // which we
-        // start the
-        // new group
-        // meeting
-        // occasion,
-        // this is a
-        // tuesday.
-        groupMeetingChangeCalendar.add(Calendar.WEEK_OF_YEAR, 2);
-        final String rescheduleDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
+                final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.generalResponseSpec = new ResponseSpecBuilder().build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+                final String disbursalDate = groupMeetingDate; // first meeting date
+                // after group creation
 
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
-        System.out.println("---------------------------------CREATING ENTITIES AND JLG LOAN ------------------------------------------");
-        // create all required entities
-        this.createRequiredEntitiesForJLGLoanSync(groupMeetingDate);
+                final String rescheduleSubmittedDate = this.dateFormatterStandard.format(new java.util.Date());
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount).withLoanTermFrequency("24")
-                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("12").withRepaymentEveryAfter("2")
-                .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
-                .withInterestRatePerPeriod(interestRatePerPeriod).withRepaymentFrequencyTypeAsWeeks().withSubmittedOnDate(disbursalDate)
-                .withExpectedDisbursementDate(disbursalDate).withLoanType(loanType).withSyncDisbursementWithMeetin()
-                .withCalendarID(this.groupCalendarId.toString())
-                .build(this.clientId.toString(), this.groupId.toString(), this.loanProductId.toString(), null);
+                final String loanType = "jlg";
+                final String rescheduleInterestRate = "28.0";
+                groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
+                final String groupMeetingNewStartDate = this.dateFormatterStandard
+                                .format(groupMeetingChangeCalendar.getTime());
+                // The date
+                // from
+                // which we
+                // start the
+                // new group
+                // meeting
+                // occasion,
+                // this is a
+                // tuesday.
+                groupMeetingChangeCalendar.add(Calendar.WEEK_OF_YEAR, 2);
+                final String rescheduleDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+                this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+                this.requestSpec.header("Authorization",
+                                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+                this.requestSpec.header("Fineract-Platform-TenantId", "default");
+                this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+                this.generalResponseSpec = new ResponseSpecBuilder().build();
+                this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        // Test for loan account is created
-        Assert.assertNotNull(this.loanId);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+                this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
+                System.out.println("-----------CREATING ENTITIES AND JLG LOAN ---------");
+                // create all required entities
+                this.createRequiredEntitiesForJLGLoanSync(groupMeetingDate);
 
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+                final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
+                                .withLoanTermFrequency("24").withLoanTermFrequencyAsWeeks().withNumberOfRepayments("12")
+                                .withRepaymentEveryAfter("2").withRepaymentFrequencyTypeAsMonths()
+                                .withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
+                                .withInterestRatePerPeriod(interestRatePerPeriod).withRepaymentFrequencyTypeAsWeeks()
+                                .withSubmittedOnDate(disbursalDate).withExpectedDisbursementDate(disbursalDate)
+                                .withLoanType(loanType).withSyncDisbursementWithMeetin()
+                                .withCalendarID(this.groupCalendarId.toString()).build(this.clientId.toString(),
+                                                this.groupId.toString(), this.loanProductId.toString(), null);
 
-        // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+                this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
-        // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+                // Test for loan account is created
+                Assert.assertNotNull(this.loanId);
+                HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec,
+                                this.loanId);
 
-        System.out.println("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
-        CalendarHelper.updateMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, this.groupCalendarId.toString(),
-                groupMeetingNewStartDate, "2", "2", "2"); // New meeting dates
-                                                          // will be the tuesday
-                                                          // after the
-        // coming
-        // monday
+                LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        ArrayList loanRepaymnetSchedule = this.loanTransactionHelper
-                .getLoanRepaymentSchedule(requestSpec, generalResponseSpec, this.loanId);
+                // Test for loan account is created, can be approved
+                this.loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
+                loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+                LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
-        Calendar dueDateCalendar = Calendar.getInstance();
-        dueDateCalendar.setFirstDayOfWeek(Calendar.MONDAY);
-        dueDateCalendar.set((Integer) dueDateLoanSchedule.get(0), (Integer) dueDateLoanSchedule.get(1) - 1,
-                (Integer) dueDateLoanSchedule.get(2));
-        assertEquals("AFTER MEETING CHANGE DATE THE NEXT REPAYMENT SHOULD BE ON TUESDAY", 3, dueDateCalendar.get(Calendar.DAY_OF_WEEK));
+                // Test for loan account approved can be disbursed
+                this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId);
+                loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+                LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        System.out.println("---------------------------------CREATING LOAN RESCHEDULE REQUEST------------------------------------------");
+                System.out.println("-----------CHANGING GROUP MEETING DATE ---------");
+                CalendarHelper.updateMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId,
+                                this.groupCalendarId.toString(), groupMeetingNewStartDate, "2", "2", "2"); // New
+                                                                                                           // meeting
+                                                                                                           // dates
+                                                                                                           // will be
+                                                                                                           // the
+                                                                                                           // tuesday
+                                                                                                           // after the
+                // coming
+                // monday
 
-        String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest("2").updateGraceOnPrincipal("2")
-                .updateNewInterestRate(rescheduleInterestRate).updateRescheduleFromDate(rescheduleDate)
-                .updateSubmittedOnDate(rescheduleSubmittedDate).build(this.loanId.toString());
+                ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                                generalResponseSpec, this.loanId);
 
-        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
-        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+                ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
+                Calendar dueDateCalendar = Calendar.getInstance();
+                dueDateCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+                dueDateCalendar.set((Integer) dueDateLoanSchedule.get(0), (Integer) dueDateLoanSchedule.get(1) - 1,
+                                (Integer) dueDateLoanSchedule.get(2));
+                assertEquals("AFTER MEETING CHANGE DATE THE NEXT REPAYMENT SHOULD BE ON TUESDAY", 3,
+                                dueDateCalendar.get(Calendar.DAY_OF_WEEK));
 
-        loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, this.loanId);
-        dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
-        dueDateCalendar.set((Integer) dueDateLoanSchedule.get(0), (Integer) dueDateLoanSchedule.get(1) - 1,
-                (Integer) dueDateLoanSchedule.get(2));
-        assertEquals("AFTER MEETING CHANGE DATE THE NEXT REPAYMENT SHOULD BE ON TUESDAY, EVEN AFTER LOAN RESCHEDULE REQUEST WAS SENT", 3,
-                dueDateCalendar.get(Calendar.DAY_OF_WEEK));
+                System.out.println("-----------CREATING LOAN RESCHEDULE REQUEST---------");
 
-        System.out.println("Successfully created loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");
+                String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnInterest("2")
+                                .updateGraceOnPrincipal("2").updateNewInterestRate(rescheduleInterestRate)
+                                .updateRescheduleFromDate(rescheduleDate).updateSubmittedOnDate(rescheduleSubmittedDate)
+                                .build(this.loanId.toString());
 
-        System.out.println("-----------------------------APPROVING LOAN RESCHEDULE REQUEST--------------------------");
+                this.loanRescheduleRequestId = this.loanRescheduleRequestHelper
+                                .createLoanRescheduleRequest(requestJSON);
+                this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
 
-        requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate(rescheduleSubmittedDate)
-                .getApproveLoanRescheduleRequestJSON();
-        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
+                loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                                generalResponseSpec, this.loanId);
+                dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
+                dueDateCalendar.set((Integer) dueDateLoanSchedule.get(0), (Integer) dueDateLoanSchedule.get(1) - 1,
+                                (Integer) dueDateLoanSchedule.get(2));
+                assertEquals("AFTER MEETING CHANGE DATE THE NEXT REPAYMENT SHOULD BE ON TUESDAY, EVEN AFTER LOAN RESCHEDULE REQUEST WAS SENT",
+                                3, dueDateCalendar.get(Calendar.DAY_OF_WEEK));
 
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean) response.get("approved"));
+                System.out.println("Successfully created loan reschedule request (ID: " + this.loanRescheduleRequestId
+                                + ")");
 
-        loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, this.loanId);
+                System.out.println("------------------APPROVING LOAN RESCHEDULE REQUEST---------------");
 
-        dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
-        dueDateCalendar.set((Integer) dueDateLoanSchedule.get(0), (Integer) dueDateLoanSchedule.get(1) - 1,
-                (Integer) dueDateLoanSchedule.get(2));
-        assertEquals("AFTER MEETING CHANGE DATE THE NEXT REPAYMENT SHOULD BE ON TUESDAY, EVEN AFTER RESCHEDULE", 3,
-                dueDateCalendar.get(Calendar.DAY_OF_WEEK));
-        System.out.println("Successfully changed group meeting date (CAELNDAR ID: " + this.groupCalendarId
-                + ") and rescheduled loan (RESCHEDULE ID: " + this.loanRescheduleRequestId + ")");
+                requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate(rescheduleSubmittedDate)
+                                .getApproveLoanRescheduleRequestJSON();
+                this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId,
+                                requestJSON);
 
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
-    }
+                final HashMap response = (HashMap) this.loanRescheduleRequestHelper
+                                .getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+                assertTrue((Boolean) response.get("approved"));
 
-    @Test
-    public void testChangeGroupMeetingMaturedOnDate() {
-        System.out
-                .println("---------------------------------STARTING GROUP LOAN MEETING CHANGE DATE EXPECTED MATURED CHANGE------------------------------------------");
+                loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                                generalResponseSpec, this.loanId);
 
-        Calendar meetingCalendar = Calendar.getInstance();
-        meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
-        meetingCalendar.setTime(new java.util.Date());
+                dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
+                dueDateCalendar.set((Integer) dueDateLoanSchedule.get(0), (Integer) dueDateLoanSchedule.get(1) - 1,
+                                (Integer) dueDateLoanSchedule.get(2));
+                assertEquals("AFTER MEETING CHANGE DATE THE NEXT REPAYMENT SHOULD BE ON TUESDAY, EVEN AFTER RESCHEDULE",
+                                3, dueDateCalendar.get(Calendar.DAY_OF_WEEK));
+                System.out.println("Successfully changed group meeting date (CAELNDAR ID: " + this.groupCalendarId
+                                + ") and rescheduled loan (RESCHEDULE ID: " + this.loanRescheduleRequestId + ")");
 
-        int today = meetingCalendar.get(Calendar.DAY_OF_WEEK);
-        // making sure that the meeting calendar is set for the coming monday.
-        if (today >= Calendar.MONDAY) {
-            meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today + 7));
-        } else {
-            meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today));
+                this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec,
+                                this.responseSpecForStatusCode403);
         }
 
-        Calendar groupMeetingChangeCalendar = (Calendar) meetingCalendar.clone();
+        @Test
+        public void testChangeGroupMeetingMaturedOnDate() {
+                System.out.println(
+                                "-----------STARTING GROUP LOAN MEETING CHANGE DATE EXPECTED MATURED CHANGE---------");
 
-        meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
+                Calendar meetingCalendar = Calendar.getInstance();
+                meetingCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+                meetingCalendar.setTime(new java.util.Date());
 
-        final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
+                int today = meetingCalendar.get(Calendar.DAY_OF_WEEK);
+                // making sure that the meeting calendar is set for the coming monday.
+                if (today >= Calendar.MONDAY) {
+                        meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today + 7));
+                } else {
+                        meetingCalendar.add(Calendar.DAY_OF_YEAR, +(Calendar.MONDAY - today));
+                }
 
-        final String disbursalDate = groupMeetingDate; // first meeting date
-                                                       // after group creation
+                Calendar groupMeetingChangeCalendar = (Calendar) meetingCalendar.clone();
 
-        final String loanType = "jlg";
-        groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
-        final String groupMeetingNewStartDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
-        // The date
-        // from
-        // which we
-        // start the
-        // new group
-        // meeting
-        // occasion,
-        // this is a
-        // tuesday.
+                meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.generalResponseSpec = new ResponseSpecBuilder().build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+                final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
 
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
-        System.out.println("---------------------------------CREATING ENTITIES AND JLG LOAN ------------------------------------------");
-        // create all required entities
-        this.createRequiredEntitiesForJLGLoanSync(groupMeetingDate);
+                final String disbursalDate = groupMeetingDate; // first meeting date
+                                                               // after group creation
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount).withLoanTermFrequency("24")
-                .withLoanTermFrequencyAsWeeks().withNumberOfRepayments("12").withRepaymentEveryAfter("2")
-                .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
-                .withInterestRatePerPeriod(interestRatePerPeriod).withRepaymentFrequencyTypeAsWeeks().withSubmittedOnDate(disbursalDate)
-                .withExpectedDisbursementDate(disbursalDate).withLoanType(loanType).withSyncDisbursementWithMeetin()
-                .withCalendarID(this.groupCalendarId.toString())
-                .build(this.clientId.toString(), this.groupId.toString(), this.loanProductId.toString(), null);
+                final String loanType = "jlg";
+                groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
+                final String groupMeetingNewStartDate = this.dateFormatterStandard
+                                .format(groupMeetingChangeCalendar.getTime());
+                // The date
+                // from
+                // which we
+                // start the
+                // new group
+                // meeting
+                // occasion,
+                // this is a
+                // tuesday.
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+                this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+                this.requestSpec.header("Authorization",
+                                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+                this.requestSpec.header("Fineract-Platform-TenantId", "default");
+                this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+                this.generalResponseSpec = new ResponseSpecBuilder().build();
+                this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        // Test for loan account is created
-        Assert.assertNotNull(this.loanId);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+                this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
+                System.out.println("-----------CREATING ENTITIES AND JLG LOAN ---------");
+                // create all required entities
+                this.createRequiredEntitiesForJLGLoanSync(groupMeetingDate);
 
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+                final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
+                                .withLoanTermFrequency("24").withLoanTermFrequencyAsWeeks().withNumberOfRepayments("12")
+                                .withRepaymentEveryAfter("2").withRepaymentFrequencyTypeAsMonths()
+                                .withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
+                                .withInterestRatePerPeriod(interestRatePerPeriod).withRepaymentFrequencyTypeAsWeeks()
+                                .withSubmittedOnDate(disbursalDate).withExpectedDisbursementDate(disbursalDate)
+                                .withLoanType(loanType).withSyncDisbursementWithMeetin()
+                                .withCalendarID(this.groupCalendarId.toString()).build(this.clientId.toString(),
+                                                this.groupId.toString(), this.loanProductId.toString(), null);
 
-        // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+                this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
-        // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+                // Test for loan account is created
+                Assert.assertNotNull(this.loanId);
+                HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec,
+                                this.loanId);
 
-        System.out.println("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
-        CalendarHelper.updateMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, this.groupCalendarId.toString(),
-                groupMeetingNewStartDate, "2", "2", "2"); // New meeting dates
-                                                          // will be the tuesday
-                                                          // after the
-                                                          // coming
-                                                          // monday
+                LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        Calendar expectedMaturityCalendar = Calendar.getInstance();
-        expectedMaturityCalendar.setFirstDayOfWeek(Calendar.MONDAY);
-        ArrayList expectedMaturityDate = ((ArrayList) ((HashMap) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec,
-                this.loanId, "timeline")).get("expectedMaturityDate"));
+                // Test for loan account is created, can be approved
+                this.loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
+                loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+                LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        expectedMaturityCalendar.set((Integer) expectedMaturityDate.get(0), (Integer) expectedMaturityDate.get(1) - 1,
-                (Integer) expectedMaturityDate.get(2));
+                // Test for loan account approved can be disbursed
+                this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId);
+                loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+                LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        assertEquals("AFTER MEETING CHANGE DATE THE EXPECTED MATURITY SHOULD BE ON TUESDAY", 3,
-                expectedMaturityCalendar.get(Calendar.DAY_OF_WEEK));
+                System.out.println("-----------CHANGING GROUP MEETING DATE ---------");
+                CalendarHelper.updateMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId,
+                                this.groupCalendarId.toString(), groupMeetingNewStartDate, "2", "2", "2"); // New
+                                                                                                           // meeting
+                                                                                                           // dates
+                                                                                                           // will be
+                                                                                                           // the
+                                                                                                           // tuesday
+                                                                                                           // after the
+                                                                                                           // coming
+                                                                                                           // monday
 
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
-    }
+                Calendar expectedMaturityCalendar = Calendar.getInstance();
+                expectedMaturityCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+                ArrayList expectedMaturityDate = ((ArrayList) ((HashMap) this.loanTransactionHelper
+                                .getLoanDetail(requestSpec, generalResponseSpec, this.loanId, "timeline"))
+                                                .get("expectedMaturityDate"));
 
-    /**
-     * entities for jlg loan
-     **/
-    private void createRequiredEntitiesForJLGLoanSync(final String groupActivationDate) {
-        this.createGroupEntityWithCalendar("2", "2", "1", groupActivationDate);// frequency=2:Weekly
-        // , interval=2:
-        // Every two weeks ,
-        // repeatsOnDay=1:Monday
-        // groupActivationDate is decided by the current date
-        this.createClientEntity();
-        this.associateClientToGroup(this.groupId, this.clientId);
-        this.createLoanProductEntity();
+                expectedMaturityCalendar.set((Integer) expectedMaturityDate.get(0),
+                                (Integer) expectedMaturityDate.get(1) - 1, (Integer) expectedMaturityDate.get(2));
 
-    }
+                assertEquals("AFTER MEETING CHANGE DATE THE EXPECTED MATURITY SHOULD BE ON TUESDAY", 3,
+                                expectedMaturityCalendar.get(Calendar.DAY_OF_WEEK));
 
-    /*
-     * Associate client to the group
-     */
+                this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec,
+                                this.responseSpecForStatusCode403);
+        }
 
-    private void associateClientToGroup(final Integer groupId, final Integer clientId) {
-        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupId, clientId);
-    }
+        /**
+         * entities for jlg loan
+         **/
+        private void createRequiredEntitiesForJLGLoanSync(final String groupActivationDate) {
+                this.createGroupEntityWithCalendar("2", "2", "1", groupActivationDate);// frequency=2:Weekly
+                // , interval=2:
+                // Every two weeks ,
+                // repeatsOnDay=1:Monday
+                // groupActivationDate is decided by the current date
+                this.createClientEntity();
+                this.associateClientToGroup(this.groupId, this.clientId);
+                this.createLoanProductEntity();
 
-    private void createGroupEntityWithCalendar(final String frequency, final String interval, final String repeatsOnDay,
-            final String groupActivationDate) {
-        this.groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, groupActivationDate);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, this.groupId);
+        }
 
-        final String startDate = groupActivationDate;
+        /*
+         * Associate client to the group
+         */
 
-        this.setGroupCalendarId(CalendarHelper.createMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, startDate,
-                frequency, interval, repeatsOnDay));
-    }
+        private void associateClientToGroup(final Integer groupId, final Integer clientId) {
+                GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(),
+                                clientId.toString());
+                GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupId, clientId);
+        }
 
-    /**
-     * create a new client
-     **/
-    private void createClientEntity() {
-        this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
-    }
+        private void createGroupEntityWithCalendar(final String frequency, final String interval,
+                        final String repeatsOnDay, final String groupActivationDate) {
+                this.groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, groupActivationDate);
+                GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, this.groupId);
 
-    /**
-     * create a new loan product
-     **/
-    private void createLoanProductEntity() {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear().build(null);
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-    }
+                final String startDate = groupActivationDate;
 
-    public void setGroupCalendarId(Integer groupCalendarId) {
-        this.groupCalendarId = groupCalendarId;
-    }
+                this.setGroupCalendarId(CalendarHelper.createMeetingCalendarForGroup(this.requestSpec,
+                                this.responseSpec, this.groupId, startDate, frequency, interval, repeatsOnDay));
+        }
+
+        /**
+         * create a new client
+         **/
+        private void createClientEntity() {
+                this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+                ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+        }
+
+        /**
+         * create a new loan product
+         **/
+        private void createLoanProductEntity() {
+                final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
+                                .withNumberOfRepayments(numberOfRepayments)
+                                .withinterestRatePerPeriod(interestRatePerPeriod).withInterestRateFrequencyTypeAsYear()
+                                .build(null);
+                this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        }
+
+        public void setGroupCalendarId(Integer groupCalendarId) {
+                this.groupCalendarId = groupCalendarId;
+        }
 }

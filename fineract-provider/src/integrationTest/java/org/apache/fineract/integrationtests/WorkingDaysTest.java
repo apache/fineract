@@ -45,7 +45,8 @@ public class WorkingDaysTest {
     public void setUp() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -59,8 +60,8 @@ public class WorkingDaysTest {
 
     @Test
     public void updateWorkingDaysWithWrongRecurrencePattern() {
-        final List<HashMap> error = (List) WorkingDaysHelper.updateWorkingDaysWithWrongRecurrence(requestSpec, generalResponseSpec,
-                CommonConstants.RESPONSE_ERROR);
+        final List<HashMap> error = (List) WorkingDaysHelper.updateWorkingDaysWithWrongRecurrence(requestSpec,
+                generalResponseSpec, CommonConstants.RESPONSE_ERROR);
         assertEquals("Verify wrong recurrence pattern error", "error.msg.recurring.rule.parsing.error",
                 error.get(0).get("userMessageGlobalisationCode"));
     }

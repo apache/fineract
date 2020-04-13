@@ -46,7 +46,8 @@ public class TemplateIntegrationTest {
 
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -64,11 +65,13 @@ public class TemplateIntegrationTest {
         ArrayList<?> get = Utils.performServerGet(this.requestSpec, this.responseSpec, this.GET_TEMPLATES_URL, "");
         final int entriesBeforeTest = get.size();
 
-        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, this.GET_TEMPLATES_URL, new Gson().toJson(map), "resourceId");
+        final Integer id = Utils.performServerPost(this.requestSpec, this.responseSpec, this.GET_TEMPLATES_URL,
+                new Gson().toJson(map), "resourceId");
 
         final String templateUrlForId = String.format(this.GET_TEMPLATE_ID_URL, id);
 
-        final String getrequest2 = Utils.performServerGet(this.requestSpec, this.responseSpec, templateUrlForId, this.RESPONSE_ATTRIBUTE_NAME);
+        final String getrequest2 = Utils.performServerGet(this.requestSpec, this.responseSpec, templateUrlForId,
+                this.RESPONSE_ATTRIBUTE_NAME);
 
         Assert.assertTrue(getrequest2.equals("foo"));
 

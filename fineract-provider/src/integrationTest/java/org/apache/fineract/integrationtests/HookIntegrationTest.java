@@ -49,7 +49,8 @@ public class HookIntegrationTest {
     public void setUp() throws Exception {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.hookHelper = new HookHelper(this.requestSpec, this.responseSpec);
         this.officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
@@ -67,16 +68,16 @@ public class HookIntegrationTest {
         try {
 
             /**
-             * sleep for a three seconds after each failure to increase the
-             * likelihood of the previous request for creating office completing
+             * sleep for a three seconds after each failure to increase the likelihood of
+             * the previous request for creating office completing
              **/
 
             for (int i = 0; i < 6; i++) {
                 try {
                     final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
                     final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
-                    Assert.assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
-                            notificationOfficeId);
+                    Assert.assertEquals("Equality check for created officeId and hook received payload officeId",
+                            createdOfficeID, notificationOfficeId);
                     System.out.println("Notification Office Id - " + notificationOfficeId);
                     i = 6;
                 } catch (Exception e) {
@@ -95,20 +96,23 @@ public class HookIntegrationTest {
     }
 
     @Test
-    public void createUpdateAndDeleteHook(){
+    public void createUpdateAndDeleteHook() {
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
         final String updateURL = "http://localhost";
 
         Long hookId = this.hookHelper.createHook(payloadURL).longValue();
         Assert.assertNotNull(hookId);
         this.hookHelper.verifyHookCreatedOnServer(hookId);
-        System.out.println("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK-------------------------"+hookId);
+        System.out.println(
+                "---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK-------------------------" + hookId);
         this.hookHelper.updateHook(updateURL, hookId);
         this.hookHelper.verifyUpdateHook(updateURL, hookId);
-        System.out.println("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK-------------------------"+hookId);
+        System.out.println(
+                "---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK-------------------------" + hookId);
         this.hookHelper.deleteHook(hookId);
         this.hookHelper.verifyDeleteHook(hookId);
-        System.out.println("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK-------------------------"+hookId);
+        System.out.println(
+                "---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK-------------------------" + hookId);
 
     }
 }

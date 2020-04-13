@@ -45,8 +45,9 @@ public class AccountTransferHelper {
         this.responseSpec = responseSpec;
     }
 
-    public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
-            final String fromAccountType, final String toAccountType, final String transferAmount) {
+    public String build(final String fromAccountId, final String fromClientId, final String toAccountId,
+            final String toClientId, final String fromAccountType, final String toAccountType,
+            final String transferAmount) {
 
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
@@ -73,24 +74,26 @@ public class AccountTransferHelper {
     }
 
     public Integer accountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+            final Integer toAccountId, final String fromAccountType, final String toAccountType,
+            final String transferAmount) {
         System.out.println("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
-                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
-                        toAccountType, transferAmount);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
-                accountTransferJSON, "savingsId");
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(),
+                        fromAccountType, toAccountType, transferAmount);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER, accountTransferJSON, "savingsId");
     }
 
-    public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
-            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount) {
+    public Integer refundLoanByTransfer(final String date, final Integer fromClientId, final Integer fromAccountId,
+            final Integer toClientId, final Integer toAccountId, final String fromAccountType,
+            final String toAccountType, final String transferAmount) {
         System.out.println("--------------------------------ACCOUNT TRANSFER--------------------------------");
         final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
                 .withTransferOnDate(date) //
-                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
-                        toAccountType, transferAmount);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, LOAN_REFUND_BY_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
-                accountTransferJSON, "savingsId");
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(),
+                        fromAccountType, toAccountType, transferAmount);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                LOAN_REFUND_BY_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER, accountTransferJSON, "savingsId");
     }
 }

@@ -48,7 +48,8 @@ public class LoanDisbursalDateValidationTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.responseForbiddenError = new ResponseSpecBuilder().expectStatusCode(403).build();
@@ -63,25 +64,22 @@ public class LoanDisbursalDateValidationTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
-                + clientID);
+        System.out.println("----------------------CLIENT CREATED WITH ID-----------------------------" + clientID);
 
-        // CREATE LOAN  PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withSyncExpectedWithDisbursementDate(true).build(null));
-        System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
-                + loanProductID);
+        // CREATE LOAN PRODUCT
+        final Integer loanProductID = this.loanTransactionHelper
+                .getLoanProductId(new LoanProductTestBuilder().withSyncExpectedWithDisbursementDate(true).build(null));
+        System.out.println("-----------------------LOAN PRODUCT CREATED WITH ID---------------------" + loanProductID);
 
         // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
-        System.out.println("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
-                + loanID);
+        System.out.println("------------------------LOAN CREATED WITH LOANID---------------------------" + loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        System.out.println("------------------------APPROVE LOAN-------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(approveDate, loanID);
 
         // VALIDATE THE LOAN IS APPROVED
@@ -90,26 +88,22 @@ public class LoanDisbursalDateValidationTest {
 
         // DISBURSE A LOAN
         @SuppressWarnings("unchecked")
-        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID, this.responseForbiddenError);
+        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID,
+                this.responseForbiddenError);
 
         Assert.assertEquals("error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date",
-            disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
-        final String loanApplication = new LoanApplicationTestBuilder()
-                .withPrincipal(proposedAmount).withLoanTermFrequency("5")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5")
-                .withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths()
-                .withInterestRatePerPeriod("2")
-                .withExpectedDisbursementDate("1 March 2014")
-                .withSubmittedOnDate("26 February 2014").
-                build(clientID.toString(), loanProductID.toString(), null);
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID,
+            final String proposedAmount) {
+        final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount)
+                .withLoanTermFrequency("5").withLoanTermFrequencyAsMonths().withNumberOfRepayments("5")
+                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2")
+                .withExpectedDisbursementDate("1 March 2014").withSubmittedOnDate("26 February 2014")
+                .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplication);
     }
-
-
 
 }

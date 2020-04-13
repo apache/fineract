@@ -48,7 +48,8 @@ public class LoanApplicationUndoLastTrancheTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
@@ -65,15 +66,13 @@ public class LoanApplicationUndoLastTrancheTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
-                + clientID);
+        System.out.println("----------------------CLIENT CREATED WITH ID-----------------------------" + clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
-                .build(null));
-        System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
-                + loanProductID);
+        final Integer loanProductID = this.loanTransactionHelper
+                .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                        .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
+        System.out.println("-----------------------LOAN PRODUCT CREATED WITH ID---------------------" + loanProductID);
 
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
@@ -86,17 +85,17 @@ public class LoanApplicationUndoLastTrancheTest {
         approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "1000"));
 
         // APPLY FOR LOAN WITH TRANCHES
-        final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
-        System.out.println("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
-                + loanID);
+        final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount,
+                createTranches);
+        System.out.println("------------------------LOAN CREATED WITH LOANID---------------------------" + loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
-                loanID, approveTranches);
+        System.out.println("------------------------APPROVE LOAN-------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate,
+                expectedDisbursementDate, approvalAmount, loanID, approveTranches);
 
         // VALIDATE THE LOAN IS APPROVED
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
@@ -127,11 +126,11 @@ public class LoanApplicationUndoLastTrancheTest {
 
     }
 
-    public Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, String principal,
-            List<HashMap> tranches) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+    public Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID,
+            String principal, List<HashMap> tranches) {
+        System.out.println("---------------------APPLYING FOR LOAN APPLICATION---------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
-        //
+                //
                 .withPrincipal(principal)
                 //
                 .withLoanTermFrequency("5")

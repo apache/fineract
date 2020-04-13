@@ -32,7 +32,8 @@ public class RolesHelper {
     private static final String ENABLE_ROLE_COMMAND = "enable";
 
     public static Integer createRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_ROLE_URL, getTestCreaRoleAsJSON(), "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_ROLE_URL, getTestCreaRoleAsJSON(),
+                "resourceId");
     }
 
     public static String getTestCreaRoleAsJSON() {
@@ -42,23 +43,29 @@ public class RolesHelper {
         return new Gson().toJson(map);
     }
 
-    public static HashMap<String, Object> getRoleDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer roleId) {
+    public static HashMap<String, Object> getRoleDetails(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer roleId) {
         final String GET_ROLE_URL = "/fineract-provider/api/v1/roles/" + roleId + "?" + Utils.TENANT_IDENTIFIER;
         HashMap<String, Object> role = Utils.performServerGet(requestSpec, responseSpec, GET_ROLE_URL, "");
         return role;
     }
 
-    public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer roleId) {
-        return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(DISABLE_ROLE_COMMAND, roleId), "", "resourceId");
+    public static Integer disableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId) {
+        return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(DISABLE_ROLE_COMMAND, roleId),
+                "", "resourceId");
     }
 
-    public static Integer enableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer roleId) {
-        return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "", "resourceId");
+    public static Integer enableRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId) {
+        return Utils.performServerPost(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId),
+                "", "resourceId");
     }
 
-    public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer roleId) {
-        return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId), "resourceId");
+    public static Integer deleteRole(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer roleId) {
+        return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(ENABLE_ROLE_COMMAND, roleId),
+                "resourceId");
     }
 
     private static String createRoleOperationURL(final String command, final Integer roleId) {

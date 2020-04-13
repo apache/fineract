@@ -52,7 +52,8 @@ public class ConcurrencyIntegrationTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
     }
@@ -89,8 +90,10 @@ public class ConcurrencyIntegrationTest {
 
     }
 
-    private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+    private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule,
+            final Account... accounts) {
+        System.out.println(
+                "------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
@@ -111,7 +114,8 @@ public class ConcurrencyIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        System.out.println(
+                "--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //
@@ -138,7 +142,8 @@ public class ConcurrencyIntegrationTest {
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
-        LoanRepaymentExecutor(LoanTransactionHelper loanTransactionHelper, Integer loanId, Float repaymentAmount, Calendar repaymentDate) {
+        LoanRepaymentExecutor(LoanTransactionHelper loanTransactionHelper, Integer loanId, Float repaymentAmount,
+                Calendar repaymentDate) {
             this.loanId = loanId;
             this.repaymentAmount = repaymentAmount;
             this.repaymentDate = dateFormat.format(repaymentDate.getTime());
@@ -151,12 +156,12 @@ public class ConcurrencyIntegrationTest {
                 this.loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
             } catch (Exception e) {
                 System.out.println("Found an exception" + e.getMessage());
-                System.out.println("Details of failed concurrent transaction (date, amount, loanId) are " + repaymentDate + ","
-                        + repaymentAmount + "," + loanId);
+                System.out.println("Details of failed concurrent transaction (date, amount, loanId) are "
+                        + repaymentDate + "," + repaymentAmount + "," + loanId);
                 throw (e);
             }
-            System.out.println("Details of passed concurrent transaction, details (date, amount, loanId) are " + repaymentDate + ","
-                    + repaymentAmount + "," + loanId);
+            System.out.println("Details of passed concurrent transaction, details (date, amount, loanId) are "
+                    + repaymentDate + "," + repaymentAmount + "," + loanId);
         }
     }
 

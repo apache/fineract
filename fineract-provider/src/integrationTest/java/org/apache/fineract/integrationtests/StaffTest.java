@@ -43,7 +43,8 @@ public class StaffTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
         this.responseSpecForNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
@@ -83,7 +84,7 @@ public class StaffTest {
         /** Long lastname test */
         map.put("lastname", Utils.randomNameGenerator("Doe_", 47));
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
-        map.put("lastname", Utils.randomNameGenerator("Doe_",4));
+        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
 
         /** Long mobileNo test */
         map.put("mobileNo", Utils.randomNameGenerator("num_", 47));
@@ -132,8 +133,9 @@ public class StaffTest {
 
     @Test
     public void testStaffListStatusActive() {
-        final List<HashMap> responseActive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
-        for(final HashMap staff : responseActive) {
+        final List<HashMap> responseActive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec,
+                responseSpec, "active");
+        for (final HashMap staff : responseActive) {
             Assert.assertNotNull(staff.get("id"));
             Assert.assertEquals(staff.get("isActive"), true);
         }
@@ -141,9 +143,10 @@ public class StaffTest {
 
     @Test
     public void testStaffListStatusInactive() {
-        final List<HashMap> responseInactive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
+        final List<HashMap> responseInactive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec,
+                responseSpec, "inactive");
 
-        for(final HashMap staff : responseInactive) {
+        for (final HashMap staff : responseInactive) {
             Assert.assertNotNull(staff.get("id"));
             Assert.assertEquals(staff.get("isActive"), false);
         }
@@ -173,7 +176,7 @@ public class StaffTest {
         map.put("mobileNo", mobileNo);
 
         final HashMap response = (HashMap) StaffHelper.updateStaff(requestSpec, responseSpec, 1, map);
-        final HashMap changes = (HashMap)  response.get("changes");
+        final HashMap changes = (HashMap) response.get("changes");
 
         Assert.assertEquals(1, response.get("resourceId"));
         Assert.assertEquals(firstname, changes.get("firstname"));

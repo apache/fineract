@@ -54,7 +54,8 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
@@ -72,24 +73,26 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
         final Integer savingsId = createSavingsAccount(clientID, startDate);
 
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000",
+                startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
         /***
-         * Perform Post interest transaction and verify the posted transaction
-         * date
+         * Perform Post interest transaction and verify the posted transaction date
          */
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails
+                .get("transactions");
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
         for (Entry<String, Object> entry : interestPostingTransaction.entrySet())
             System.out.println(entry.getKey() + "-" + entry.getValue().toString());
         // 1st Dec 13 to 31st March 14 - 365 days, daily compounding using daily
         // balance
         // 33.7016 obtained from formula in excel provided by Subramanya
-        assertEquals("Equality check for interest posted amount", "33.7016", interestPostingTransaction.get("amount").toString());
-        assertEquals("Date check for Interest Posting transaction", "[2014, 3, 31]", interestPostingTransaction.get("date").toString());
+        assertEquals("Equality check for interest posted amount", "33.7016",
+                interestPostingTransaction.get("amount").toString());
+        assertEquals("Date check for Interest Posting transaction", "[2014, 3, 31]",
+                interestPostingTransaction.get("date").toString());
 
     }
 
@@ -107,33 +110,34 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     }
 
     private void configureInterestPosting(final Boolean periodEndEnable, final Integer financialYearBeginningMonth) {
-        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
+                this.responseSpec);
         Assert.assertNotNull(globalConfig);
 
         // Updating flag for interest posting at period end
         Integer periodEndConfigId = (Integer) globalConfig.get(10).get("id");
         Assert.assertNotNull(periodEndConfigId);
 
-        HashMap periodEndConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                periodEndConfigId.toString());
+        HashMap periodEndConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec,
+                this.responseSpec, periodEndConfigId.toString());
         Assert.assertNotNull(periodEndConfigData);
 
         Boolean enabled = (Boolean) globalConfig.get(10).get("enabled");
 
         if (enabled != periodEndEnable)
-            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                    periodEndConfigId.toString(), periodEndEnable);
+            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
+                    this.responseSpec, periodEndConfigId.toString(), periodEndEnable);
 
         // Updating value for financial year beginning month
         Integer financialYearBeginningConfigId = (Integer) globalConfig.get(11).get("id");
         Assert.assertNotNull(financialYearBeginningConfigId);
 
-        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec,
-                this.responseSpec, financialYearBeginningConfigId.toString());
+        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(
+                this.requestSpec, this.responseSpec, financialYearBeginningConfigId.toString());
         Assert.assertNotNull(financialYearBeginningConfigData);
 
-        financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                financialYearBeginningConfigId.toString(), financialYearBeginningMonth.toString());
+        financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec,
+                this.responseSpec, financialYearBeginningConfigId.toString(), financialYearBeginningMonth.toString());
         Assert.assertNotNull(financialYearBeginningConfigId);
     }
 

@@ -40,7 +40,8 @@ public class PaymentTypeIntegrationTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
     }
@@ -53,10 +54,12 @@ public class PaymentTypeIntegrationTest {
         Boolean isCashPayment = true;
         Integer position = 1;
 
-        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
+        Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description,
+                isCashPayment, position);
         Assert.assertNotNull(paymentTypeId);
         PaymentTypeHelper.verifyPaymentTypeCreatedOnServer(requestSpec, responseSpec, paymentTypeId);
-        PaymentTypeDomain paymentTypeResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
+        PaymentTypeDomain paymentTypeResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec,
+                paymentTypeId);
         Assert.assertEquals(name, paymentTypeResponse.getName());
         Assert.assertEquals(description, paymentTypeResponse.getDescription());
         Assert.assertEquals(isCashPayment, paymentTypeResponse.getIsCashPayment());
@@ -74,7 +77,8 @@ public class PaymentTypeIntegrationTest {
         request.put("isCashPayment", isCashPaymentUpdatedValue);
         request.put("position", newPosition);
         PaymentTypeHelper.updatePaymentType(paymentTypeId, request, requestSpec, responseSpec);
-        PaymentTypeDomain paymentTypeUpdatedResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
+        PaymentTypeDomain paymentTypeUpdatedResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec,
+                paymentTypeId);
         Assert.assertEquals(newName, paymentTypeUpdatedResponse.getName());
         Assert.assertEquals(newDescription, paymentTypeUpdatedResponse.getDescription());
         Assert.assertEquals(isCashPaymentUpdatedValue, paymentTypeUpdatedResponse.getIsCashPayment());

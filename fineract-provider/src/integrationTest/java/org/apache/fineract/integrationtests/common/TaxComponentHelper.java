@@ -26,11 +26,12 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class TaxComponentHelper {
 
-    private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?"
+            + Utils.TENANT_IDENTIFIER;
 
-    public static Integer createTaxComponent(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String percentage, final Integer liabilityAccountId) {
-        System.out.println("---------------------------------CREATING A TAX COMPONENT---------------------------------------------");
+    public static Integer createTaxComponent(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String percentage, final Integer liabilityAccountId) {
+        System.out.println("----------------------CREATING A TAX COMPONENT-----------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL,
                 getTaxComponentAsJSON(percentage, liabilityAccountId), "resourceId");
     }

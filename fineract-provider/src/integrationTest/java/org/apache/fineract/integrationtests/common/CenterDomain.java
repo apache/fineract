@@ -39,9 +39,10 @@ public class CenterDomain implements Comparable<CenterDomain> {
         private String hierarchy;
         private ArrayList<HashMap> groupMembers;
 
-        private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-                final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
-                final String hierarchy, final ArrayList<HashMap> groupMembers) {
+        private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,
+                final boolean active, final String name, final String externalId, final Integer staffId,
+                final int officeID, final String officeName, final String hierarchy,
+                final ArrayList<HashMap> groupMembers) {
             this.id = id;
             this.status = new HashMap();
             this.status.put("id", statusid);
@@ -58,9 +59,9 @@ public class CenterDomain implements Comparable<CenterDomain> {
         }
 
         public CenterDomain build() {
-            return new CenterDomain(this.id, this.accountNo, (int) this.status.get("id"), (String) this.status.get("code"),
-                    (String) this.status.get("value"), this.active, this.name, this.externalId, this.staffId, this.officeId,
-                    this.officeName, this.hierarchy, groupMembers);
+            return new CenterDomain(this.id, this.accountNo, (int) this.status.get("id"),
+                    (String) this.status.get("code"), (String) this.status.get("value"), this.active, this.name,
+                    this.externalId, this.staffId, this.officeId, this.officeName, this.hierarchy, groupMembers);
         }
 
     }
@@ -81,9 +82,10 @@ public class CenterDomain implements Comparable<CenterDomain> {
         /* super(); */
     }
 
-    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-            final String name, final String externalId, final Integer staffId, final Integer officeID, final String officeName,
-            final String hierarchy, final ArrayList<HashMap> groupMembers) {
+    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode,
+            final String statusvalue, final boolean active, final String name, final String externalId,
+            final Integer staffId, final Integer officeID, final String officeName, final String hierarchy,
+            final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
         this.status = new HashMap();
@@ -108,23 +110,28 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return new Gson().fromJson(jsonData, CurrencyDomain.class);
     }
 
-    public static Builder create(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,
-            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeID,
-            final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
-        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID, officeName, hierarchy,
-                groupMembers);
+    public static Builder create(final Integer id, final Integer statusid, final String statuscode,
+            final String statusvalue, final boolean active, final String name, final String externalId,
+            final Integer staffId, final Integer officeID, final String officeName, final String hierarchy,
+            final ArrayList<HashMap> groupMembers) {
+        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID,
+                officeName, hierarchy, groupMembers);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static String jsonRequestToCreateCenter(Integer id, Integer statusId, String statusCode, String statusValue, Boolean active,
-            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeID,
-            String officeName, String hierarchy, final int[] groupMembers) {
+    public static String jsonRequestToCreateCenter(Integer id, Integer statusId, String statusCode, String statusValue,
+            Boolean active, String activationDate, String submittedDate, String name, String externalId,
+            Integer staffId, Integer officeID, String officeName, String hierarchy, final int[] groupMembers) {
         // String ids = String.valueOf(id);
         final HashMap map = new HashMap<>();
-        if (id != null) map.put("id", id);
-        if (statusId != null) map.put("statusId", statusId);
-        if (statusCode != null) map.put("statusCode", statusCode);
-        if (statusValue != null) map.put("statusValue", statusValue);
+        if (id != null)
+            map.put("id", id);
+        if (statusId != null)
+            map.put("statusId", statusId);
+        if (statusCode != null)
+            map.put("statusCode", statusCode);
+        if (statusValue != null)
+            map.put("statusValue", statusValue);
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Center_Name_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -145,8 +152,10 @@ public class CenterDomain implements Comparable<CenterDomain> {
             else
                 map.put("submittedOnDate", submittedDate);
         }
-        if (externalId != null) map.put("externalId", externalId);
-        if (groupMembers != null) map.put("groupMembers", groupMembers);
+        if (externalId != null)
+            map.put("externalId", externalId);
+        if (groupMembers != null)
+            map.put("groupMembers", groupMembers);
         System.out.println(map);
         return new Gson().toJson(map);
     }
@@ -195,7 +204,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return this.hierarchy;
     }
 
-    public String getAccountNo(){
+    public String getAccountNo() {
         return this.accountNo;
     }
 
@@ -211,30 +220,43 @@ public class CenterDomain implements Comparable<CenterDomain> {
     public int hashCode() {
         int hash = 1;
 
-        if (this.id >= 0) hash += this.id;
+        if (this.id >= 0)
+            hash += this.id;
         if (this.status != null) {
-            if ((Double) this.status.get("id") >= 0) hash += (Double) this.status.get("id");
-            if ((String) this.status.get("code") != null) hash += this.status.get("code").hashCode();
-            if ((String) this.status.get("value") != null) hash += this.status.get("value").hashCode();
+            if ((Double) this.status.get("id") >= 0)
+                hash += (Double) this.status.get("id");
+            if ((String) this.status.get("code") != null)
+                hash += this.status.get("code").hashCode();
+            if ((String) this.status.get("value") != null)
+                hash += this.status.get("value").hashCode();
         }
-        if (this.name != null) hash += this.name.hashCode();
-        if (this.officeId >= 0) hash += this.officeId;
-        if (this.officeName != null) hash += this.officeName.hashCode();
-        if (this.hierarchy != null) hash += this.hierarchy.hashCode();
-        if (this.groupMembers != null) hash += this.groupMembers.hashCode();
+        if (this.name != null)
+            hash += this.name.hashCode();
+        if (this.officeId >= 0)
+            hash += this.officeId;
+        if (this.officeName != null)
+            hash += this.officeName.hashCode();
+        if (this.hierarchy != null)
+            hash += this.hierarchy.hashCode();
+        if (this.groupMembers != null)
+            hash += this.groupMembers.hashCode();
 
         return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) { return true; }
+        if (obj == this) {
+            return true;
+        }
 
-        if (!(obj instanceof CenterDomain)) return false;
+        if (!(obj instanceof CenterDomain))
+            return false;
 
         CenterDomain cd = (CenterDomain) obj;
 
-        if (this.hashCode() == cd.hashCode()) return true;
+        if (this.hashCode() == cd.hashCode())
+            return true;
         return false;
     }
 

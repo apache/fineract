@@ -39,32 +39,34 @@ public class GuarantorHelper {
     }
 
     public Integer createGuarantor(final Integer loanId, final String guarantorJSON) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, guarantorJSON,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, guarantorJSON, CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public HashMap updateGuarantor(final Integer guarantorId, final Integer loanId, final String guarantorJSON) {
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
-                guarantorJSON, CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT, guarantorJSON,
+                CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap deleteGuarantor(final Integer guarantorId, final Integer fundId, final Integer loanId) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT
-                + "&guarantorFundingId=" + fundId, "");
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT + "&guarantorFundingId=" + fundId, "");
     }
 
     public HashMap deleteGuarantor(final Integer guarantorId, final Integer loanId) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
-                "");
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT, "");
     }
 
     public Object getGuarantor(final Integer guarantorId, final Integer loanId, final String jsonToGetBack) {
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT,
-                jsonToGetBack);
+        return Utils.performServerGet(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + guarantorId + TENANT, jsonToGetBack);
     }
 
     public List getAllGuarantor(final Integer loanId) {
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, "");
+        return Utils.performServerGet(this.requestSpec, this.responseSpec,
+                LOAN_URL + loanId + GUARANTOR_API_URL + TENANT, "");
     }
 
 }

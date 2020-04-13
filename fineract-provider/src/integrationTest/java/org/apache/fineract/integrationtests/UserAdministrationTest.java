@@ -37,7 +37,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class UserAdministrationTest {
 
     private ResponseSpecification responseSpec;
@@ -52,13 +51,14 @@ public class UserAdministrationTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = expectStatusCode(200);
     }
 
     @After
     public void tearDown() {
-        for(Integer userId : this.transientUsers) {
+        for (Integer userId : this.transientUsers) {
             UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
         }
         this.transientUsers.clear();
@@ -73,11 +73,13 @@ public class UserAdministrationTest {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet", "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId,
+                "alphabet", "resourceId");
         Assert.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
+        final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId,
+                "alphabet", "errors");
         Map reason = (Map) errors.get(0);
         System.out.println("Reason: " + reason.get("defaultUserMessage"));
         System.out.println("Code: " + reason.get("userMessageGlobalisationCode"));
@@ -93,14 +95,17 @@ public class UserAdministrationTest {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet", "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId,
+                "alphabet", "resourceId");
         Assert.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Integer userId2 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade",
+                "resourceId");
         Assert.assertNotNull(userId2);
 
-        final Integer userId3 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Integer userId3 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade",
+                "resourceId");
         Assert.assertNotNull(userId3);
     }
 
@@ -112,19 +117,23 @@ public class UserAdministrationTest {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet", "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId,
+                "alphabet", "resourceId");
         Assert.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "bilingual", "resourceId");
+        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId,
+                "bilingual", "resourceId");
         Assert.assertNotNull(userId2);
         this.transientUsers.add(userId2);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId2, "alphabet", "errors");
+        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId2, "alphabet",
+                "errors");
         Map reason = (Map) errors.get(0);
         Assert.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
         Assert.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
     }
+
     @Test
     public void testCreateNewUserBlocksDuplicateClientId() {
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
@@ -136,13 +145,17 @@ public class UserAdministrationTest {
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
 
-        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId, "resourceId");
+        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec,
+                roleId, staffId, clientId, "resourceId");
         Assert.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId, "errors");
+        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId,
+                staffId, clientId, "errors");
         Map reason = (Map) errors.get(0);
-        Assert.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.", reason.get("defaultUserMessage"));
+        Assert.assertEquals(
+                "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.",
+                reason.get("defaultUserMessage"));
     }
 
 }

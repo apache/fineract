@@ -49,9 +49,10 @@ public class LoanRepaymentScheduleInstallmentBuilder {
 
     public LoanRepaymentScheduleInstallment build() {
         final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
-        final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(this.loan, this.installmentNumber,
-                this.fromDate, this.dueDate, this.principal.getAmount(), this.interest.getAmount(), this.feeCharges.getAmount(),
-                this.penaltyCharges.getAmount(), this.recalculatedInterestComponent, compoundingDetails);
+        final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(this.loan,
+                this.installmentNumber, this.fromDate, this.dueDate, this.principal.getAmount(),
+                this.interest.getAmount(), this.feeCharges.getAmount(), this.penaltyCharges.getAmount(),
+                this.recalculatedInterestComponent, compoundingDetails);
         if (this.completed) {
             installment.payPrincipalComponent(this.latestTransactionDate, this.principal);
             installment.payInterestComponent(this.latestTransactionDate, this.interest);

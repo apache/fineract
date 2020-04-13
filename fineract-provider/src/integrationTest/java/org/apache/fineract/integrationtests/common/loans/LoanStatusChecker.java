@@ -62,8 +62,8 @@ public class LoanStatusChecker {
         assertEquals("Foreclosed", getSubStatus(loanSubStatusHashMap, "value"));
     }
 
-    public static HashMap<String, Object> getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer loanID) {
+    public static HashMap<String, Object> getStatusOfLoan(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanID) {
         final String url = "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }

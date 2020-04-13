@@ -62,18 +62,19 @@ public class BatchRequestsIntegrationTest {
 
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     /**
      * Tests that a loan is successfully applied to client members of a group.
-     * Firstly, it'll create a few new clients and then will add those clients
-     * to the group. Then a few loans will be created and one of those loans
-     * will be chosen at random and similarily a few of the created clients will
-     * be chosen on random. Now, the selected loan will be applied to these
-     * clients through Batch - API ApplyLoanCommandStrategy.
+     * Firstly, it'll create a few new clients and then will add those clients to
+     * the group. Then a few loans will be created and one of those loans will be
+     * chosen at random and similarily a few of the created clients will be chosen
+     * on random. Now, the selected loan will be applied to these clients through
+     * Batch - API ApplyLoanCommandStrategy.
      */
     public void shouldReturnOkStatusForLoansAppliedToSelectedClients() {
 
@@ -87,7 +88,8 @@ public class BatchRequestsIntegrationTest {
         // Create new clients and add those to this group
         for (Integer i = 0; i < clientsCount; i++) {
             clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
+            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(),
+                    clientIDs[i].toString());
             System.out.println("client " + clientIDs[i] + " has been added to the group " + groupID);
         }
 
@@ -108,7 +110,8 @@ public class BatchRequestsIntegrationTest {
                     .withInterestTypeAsDecliningBalance() //
                     .currencyDetails("0", "100").build(null);
 
-            loanProducts[i] = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+            loanProducts[i] = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+                    .getLoanProductId(loanProductJSON);
         }
 
         // Select anyone of the loan products at random
@@ -120,15 +123,16 @@ public class BatchRequestsIntegrationTest {
         Integer selClientsCount = (int) Math.ceil(Math.random() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
             BatchRequest br = BatchHelper.applyLoanRequest((long) selClientsCount, null, loanProductID);
-            br.setBody(br.getBody().replace("$.clientId", String.valueOf(clientIDs[(int) Math.floor(Math.random() * (clientsCount - 1))])));
+            br.setBody(br.getBody().replace("$.clientId",
+                    String.valueOf(clientIDs[(int) Math.floor(Math.random() * (clientsCount - 1))])));
             batchRequests.add(br);
         }
 
         // Send the request to Batch - API
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : response) {

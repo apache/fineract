@@ -29,7 +29,8 @@ public class LoanRescheduleRequestHelper {
 
     private static final String LOAN_RESCHEDULE_REQUEST_URL = "/fineract-provider/api/v1/rescheduleloans";
 
-    public LoanRescheduleRequestHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public LoanRescheduleRequestHelper(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
@@ -40,13 +41,15 @@ public class LoanRescheduleRequestHelper {
     }
 
     public Integer rejectLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
-        final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER + "&command=reject";
+        final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER
+                + "&command=reject";
 
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
     }
 
     public Integer approveLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
-        final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER + "&command=approve";
+        final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER
+                + "&command=approve";
 
         return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
     }

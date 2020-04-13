@@ -39,15 +39,16 @@ public class NotificationApiTest {
     public void setUp() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testNotificationRetrieval() {
-        HashMap<String, Object> response = (HashMap<String, Object>) NotificationHelper.getNotifications(this.requestSpec,
-                this.responseSpec, "");
+        HashMap<String, Object> response = (HashMap<String, Object>) NotificationHelper
+                .getNotifications(this.requestSpec, this.responseSpec, "");
         System.out.println("Response : " + response.toString());
         Assert.assertNotNull(response);
     }

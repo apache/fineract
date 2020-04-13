@@ -41,26 +41,29 @@ public class DatatableHelper {
     }
 
     public String createDatatable(final String apptableName, final boolean multiRow) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
-                getTestDatatableAsJSON(apptableName, multiRow), "resourceIdentifier");
-    }
-
-    public String deleteDatatable(final String datatableName) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER, getTestDatatableAsJSON(apptableName, multiRow),
                 "resourceIdentifier");
     }
 
-    public Integer deleteDatatableEntries(final String datatableName, final Integer apptableId, String jsonAttributeToGetBack) {
-        final String deleteEntryUrl = DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=true" + "&"
-                + Utils.TENANT_IDENTIFIER;
+    public String deleteDatatable(final String datatableName) {
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                DATATABLE_URL + "/" + datatableName + "?" + Utils.TENANT_IDENTIFIER, "resourceIdentifier");
+    }
+
+    public Integer deleteDatatableEntries(final String datatableName, final Integer apptableId,
+            String jsonAttributeToGetBack) {
+        final String deleteEntryUrl = DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet=true"
+                + "&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, deleteEntryUrl, jsonAttributeToGetBack);
     }
 
-    public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String generatedDatatableName) {
-        System.out.println("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
-        final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec, DATATABLE_URL + "/"
-                + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
+    public static void verifyDatatableCreatedOnServer(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String generatedDatatableName) {
+        System.out
+                .println("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
+        final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec,
+                DATATABLE_URL + "/" + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
         assertEquals("ERROR IN CREATING THE DATATABLE", generatedDatatableName, responseRegisteredTableName);
     }
 
@@ -80,8 +83,8 @@ public class DatatableHelper {
         return requestJsonString;
     }
 
-    public static List<HashMap<String, Object>> addDatatableColumns(List<HashMap<String, Object>> datatableColumnsList, String columnName,
-            String columnType, boolean isMandatory, Integer length) {
+    public static List<HashMap<String, Object>> addDatatableColumns(List<HashMap<String, Object>> datatableColumnsList,
+            String columnName, String columnType, boolean isMandatory, Integer length) {
 
         final HashMap<String, Object> datatableColumnMap = new HashMap<>();
 

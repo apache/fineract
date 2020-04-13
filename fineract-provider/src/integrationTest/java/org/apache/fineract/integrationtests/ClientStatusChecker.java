@@ -29,31 +29,31 @@ public class ClientStatusChecker {
     }
 
     public static void verifyClientClosed(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS CLOSED ------------------------------------");
+        System.out.println("\n--------------------------- VERIFYING CLIENT IS CLOSED -------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 600);
         System.out.println("Client Status:" + clientStatusHashMap + "\n");
     }
 
     public static void verifyClientPending(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS PENDING ------------------------------------");
+        System.out.println("\n--------------------------- VERIFYING CLIENT IS PENDING -------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 100);
         System.out.println("Client Status:" + clientStatusHashMap + "\n");
     }
 
     public static void verifyClientRejected(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS REJECTED ------------------------------------");
+        System.out.println("\n--------------------------- VERIFYING CLIENT IS REJECTED -------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 700);
         System.out.println("Client Status:" + clientStatusHashMap + "\n");
     }
 
     public static void verifyClientActiavted(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS ACTIVATED ------------------------------------");
+        System.out.println("\n--------------------------- VERIFYING CLIENT IS ACTIVATED -------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 300);
         System.out.println("Client Status:" + clientStatusHashMap + "\n");
     }
 
     public static void verifyClientWithdrawn(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS WITHDRAWN ------------------------------------");
+        System.out.println("\n--------------------------- VERIFYING CLIENT IS WITHDRAWN -------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 800);
         System.out.println("Client Status:" + clientStatusHashMap + "\n");
     }

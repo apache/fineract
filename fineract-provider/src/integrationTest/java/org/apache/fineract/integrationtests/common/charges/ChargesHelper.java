@@ -48,9 +48,9 @@ public class ChargesHelper {
     private static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
     private static final Integer CHARGE_OVERDRAFT_FEE = 10;
     private static final Integer WEEKLY_FEE = 11;
-    private static final Integer SHAREACCOUNT_ACTIVATION = 13 ;
-    private static final Integer SHARE_PURCHASE = 14 ;
-    private static final Integer SHARE_REDEEM = 15 ;
+    private static final Integer SHAREACCOUNT_ACTIVATION = 13;
+    private static final Integer SHARE_PURCHASE = 14;
+    private static final Integer SHARE_REDEEM = 15;
 
     private static final Integer CHARGE_SAVINGS_NO_ACTIVITY_FEE = 16;
 
@@ -166,11 +166,14 @@ public class ChargesHelper {
         return getLoanDisbursementJSON(chargeCalculationType, amount, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
     }
 
-    public static String getLoanDisbursementAccountTransferJSON(final Integer chargeCalculationType, final String amount) {
-        return getLoanDisbursementJSON(chargeCalculationType, amount, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
+    public static String getLoanDisbursementAccountTransferJSON(final Integer chargeCalculationType,
+            final String amount) {
+        return getLoanDisbursementJSON(chargeCalculationType, amount,
+                ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
-    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount, final Integer paymentmode) {
+    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount,
+            final Integer paymentmode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_DISBURSEMENT_FEE);
         map.put("chargePaymentMode", paymentmode);
@@ -182,15 +185,18 @@ public class ChargesHelper {
     }
 
     public static String getLoanSpecifiedDueDateJSON() {
-        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount, ChargesHelper.penalty);
+        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount,
+                ChargesHelper.penalty);
     }
 
-    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, boolean penalty) {
-        return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount,
+            boolean penalty) {
+        return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty,
+                ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
     }
 
-    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
-            final Integer paymentMode) {
+    public static String getLoanSpecifiedDueDateJSON(final Integer chargeCalculationType, final String amount,
+            final boolean penalty, final Integer paymentMode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
         map.put("chargePaymentMode", paymentMode);
@@ -203,22 +209,25 @@ public class ChargesHelper {
         return chargesCreateJson;
     }
 
-    public static String getLoanSpecifiedDueDateWithAccountTransferJSON(final Integer chargeCalculationType, final String amount,
-            boolean penalty) {
-        return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
-    }
-
-    public static String getLoanSpecifiedDueDateWithAccountTransferJSON() {
-        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount, ChargesHelper.penalty,
+    public static String getLoanSpecifiedDueDateWithAccountTransferJSON(final Integer chargeCalculationType,
+            final String amount, boolean penalty) {
+        return getLoanSpecifiedDueDateJSON(chargeCalculationType, amount, penalty,
                 ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
-    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, boolean penalty) {
-        return getLoanInstallmentJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+    public static String getLoanSpecifiedDueDateWithAccountTransferJSON() {
+        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount,
+                ChargesHelper.penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
-    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount, final boolean penalty,
-            final Integer paymentMode) {
+    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount,
+            boolean penalty) {
+        return getLoanInstallmentJSON(chargeCalculationType, amount, penalty,
+                ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+    }
+
+    public static String getLoanInstallmentJSON(final Integer chargeCalculationType, final String amount,
+            final boolean penalty, final Integer paymentMode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_INSTALLMENT_FEE);
         map.put("chargePaymentMode", paymentMode);
@@ -231,30 +240,33 @@ public class ChargesHelper {
         return chargesCreateJson;
     }
 
-    public static String getLoanInstallmentWithAccountTransferJSON(final Integer chargeCalculationType, final String amount, boolean penalty) {
-        return getLoanInstallmentJSON(chargeCalculationType, amount, penalty, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
+    public static String getLoanInstallmentWithAccountTransferJSON(final Integer chargeCalculationType,
+            final String amount, boolean penalty) {
+        return getLoanInstallmentJSON(chargeCalculationType, amount, penalty,
+                ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
     public static String getLoanInstallmentFeeJSON() {
-        return getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount, ChargesHelper.penalty);
+        return getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount,
+                ChargesHelper.penalty);
     }
 
     public static String getShareAccountActivationChargeJson() {
-        HashMap<String, Object> map = populateDefaultsShareActivationCharge() ;
+        HashMap<String, Object> map = populateDefaultsShareActivationCharge();
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
     }
 
     public static String getShareAccountPurchaseChargeJson() {
-        HashMap<String, Object> map = populateDefaultsSharePurchaseFlatCharge() ;
+        HashMap<String, Object> map = populateDefaultsSharePurchaseFlatCharge();
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
     }
 
     public static String getShareAccountRedeemChargeJson() {
-        HashMap<String, Object> map = populateDefaultsShareRedeemFlatCharge() ;
+        HashMap<String, Object> map = populateDefaultsShareRedeemFlatCharge();
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -304,7 +316,7 @@ public class ChargesHelper {
         map.put("amount", ChargesHelper.amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_CLIENT);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("chargeTimeType",ChargesHelper.CHARGE_SPECIFIED_DUE_DATE);
+        map.put("chargeTimeType", ChargesHelper.CHARGE_SPECIFIED_DUE_DATE);
         map.put("currencyCode", ChargesHelper.currencyCode);
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", ChargesHelper.monthDayFormat);
@@ -318,7 +330,7 @@ public class ChargesHelper {
         map.put("amount", ChargesHelper.amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("chargeTimeType",ChargesHelper.SHAREACCOUNT_ACTIVATION);
+        map.put("chargeTimeType", ChargesHelper.SHAREACCOUNT_ACTIVATION);
         map.put("currencyCode", ChargesHelper.currencyCode);
         map.put("locale", CommonConstants.locale);
         map.put("name", Utils.randomNameGenerator("Charge_Share_Activation_", 8));
@@ -331,7 +343,7 @@ public class ChargesHelper {
         map.put("amount", ChargesHelper.amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("chargeTimeType",ChargesHelper.SHARE_PURCHASE);
+        map.put("chargeTimeType", ChargesHelper.SHARE_PURCHASE);
         map.put("currencyCode", ChargesHelper.currencyCode);
         map.put("locale", CommonConstants.locale);
         map.put("name", Utils.randomNameGenerator("Charge_Share_Purchase_", 8));
@@ -344,43 +356,47 @@ public class ChargesHelper {
         map.put("amount", ChargesHelper.amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("chargeTimeType",ChargesHelper.SHARE_REDEEM);
+        map.put("chargeTimeType", ChargesHelper.SHARE_REDEEM);
         map.put("currencyCode", ChargesHelper.currencyCode);
         map.put("locale", CommonConstants.locale);
         map.put("name", Utils.randomNameGenerator("Charge_Share_Redeem_", 8));
         return map;
     }
 
-    public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String request) {
+    public static Integer createCharges(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");
     }
 
-    public static ArrayList<HashMap> getCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
+    public static ArrayList<HashMap> getCharges(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec,
+                CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
-    public static HashMap getChargeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId) {
-        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
+    public static HashMap getChargeById(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer chargeId) {
+        return Utils.performServerGet(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
     }
 
-    public static HashMap getChargeChanges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId) {
-        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
-                CommonConstants.RESPONSE_CHANGES);
+    public static HashMap getChargeChanges(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer chargeId) {
+        return Utils.performServerGet(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, CommonConstants.RESPONSE_CHANGES);
     }
 
-    public static HashMap updateCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer chargeId, final String request) {
-        return Utils.performServerPut(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, request,
+    public static HashMap updateCharges(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer chargeId, final String request) {
+        return Utils.performServerPut(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, request,
                 CommonConstants.RESPONSE_CHANGES);
     }
 
     public static Integer deleteCharge(final ResponseSpecification responseSpec, final RequestSpecification requestSpec,
             final Integer chargeId) {
-        return Utils.performServerDelete(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        return Utils.performServerDelete(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public static String getModifyChargeJSON() {
@@ -474,12 +490,14 @@ public class ChargesHelper {
     public static String getChargeSpecifiedDueDateJSON() {
         final HashMap<String, Object> map = populateDefaultsClientCharge();
         String chargesCreateJson = new Gson().toJson(map);
-        System.out.println("chargesCreateJson:"+chargesCreateJson);
+        System.out.println("chargesCreateJson:" + chargesCreateJson);
         return chargesCreateJson;
     }
 
-    public static String applyCharge(RequestSpecification requestSpec,ResponseSpecification responseSpec, String chargeId,String json) {
-        return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json,"status");
+    public static String applyCharge(RequestSpecification requestSpec, ResponseSpecification responseSpec,
+            String chargeId, String json) {
+        return Utils.performServerPost(requestSpec, responseSpec,
+                CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json, "status");
 
     }
 }

@@ -40,13 +40,13 @@
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
     <module name="SuppressWarningsFilter"/>
-<!-- TODO Enable maximum line length check:
+
     <module name="LineLength">
         <property name="max" value="120"/>
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
         <property name="fileExtensions" value="java"/>
     </module>
-  -->
+
     <module name="TreeWalker">
         <module name="EqualsHashCode"/>
 

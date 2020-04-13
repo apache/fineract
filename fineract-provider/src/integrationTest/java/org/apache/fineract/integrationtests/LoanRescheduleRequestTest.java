@@ -60,7 +60,8 @@ public class LoanRescheduleRequestTest {
     public void initialize() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
@@ -93,14 +94,11 @@ public class LoanRescheduleRequestTest {
      * create a new loan product
      **/
     private void createLoanProductEntity() {
-        System.out.println("---------------------------------CREATING LOAN PRODUCT------------------------------------------");
+        System.out.println("----------------------CREATING LOAN PRODUCT--------------------");
 
-        final String loanProductJSON = new LoanProductTestBuilder()
-                .withPrincipal(loanPrincipalAmount)
-                .withNumberOfRepayments(numberOfRepayments)
-                .withinterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear()
-                .build(null);
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
+                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
+                .withInterestRateFrequencyTypeAsYear().build(null);
 
         this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
         System.out.println("Successfully created loan product  (ID: " + this.loanProductId + ")");
@@ -110,23 +108,15 @@ public class LoanRescheduleRequestTest {
      * submit a new loan application, approve and disburse the loan
      **/
     private void createLoanEntity() {
-        System.out.println("---------------------------------NEW LOAN APPLICATION------------------------------------------");
+        System.out.println("----------------------NEW LOAN APPLICATION--------------------");
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder()
-                .withPrincipal(loanPrincipalAmount)
-                .withLoanTermFrequency(numberOfRepayments)
-                .withLoanTermFrequencyAsMonths()
-                .withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths()
-                .withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeAsDays()
-                .withInterestRatePerPeriod(interestRatePerPeriod)
-                .withLoanTermFrequencyAsMonths()
-                .withSubmittedOnDate(dateString)
-                .withExpectedDisbursementDate(dateString)
-                .withPrincipalGrace("2")
-                .withInterestGrace("2")
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
+                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsMonths()
+                .withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments()
+                .withInterestCalculationPeriodTypeAsDays().withInterestRatePerPeriod(interestRatePerPeriod)
+                .withLoanTermFrequencyAsMonths().withSubmittedOnDate(dateString)
+                .withExpectedDisbursementDate(dateString).withPrincipalGrace("2").withInterestGrace("2")
                 .build(this.clientId.toString(), this.loanProductId.toString(), null);
 
         this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
@@ -142,7 +132,7 @@ public class LoanRescheduleRequestTest {
      **/
     private void approveLoanApplication() {
 
-        if(this.loanId != null) {
+        if (this.loanId != null) {
             this.loanTransactionHelper.approveLoan(this.dateString, this.loanId);
             System.out.println("Successfully approved loan (ID: " + this.loanId + ")");
         }
@@ -153,7 +143,7 @@ public class LoanRescheduleRequestTest {
      **/
     private void disburseLoan() {
 
-        if(this.loanId != null) {
+        if (this.loanId != null) {
             this.loanTransactionHelper.disburseLoan(this.dateString, this.loanId);
             System.out.println("Successfully disbursed loan (ID: " + this.loanId + ")");
         }
@@ -163,7 +153,7 @@ public class LoanRescheduleRequestTest {
      * create new loan reschedule request
      **/
     private void createLoanRescheduleRequest() {
-        System.out.println("---------------------------------CREATING LOAN RESCHEDULE REQUEST------------------------------------------");
+        System.out.println("----------------------CREATING LOAN RESCHEDULE REQUEST--------------------");
 
         final String requestJSON = new LoanRescheduleRequestTestBuilder().build(this.loanId.toString());
 
@@ -182,13 +172,14 @@ public class LoanRescheduleRequestTest {
     public void testRejectLoanRescheduleRequest() {
         this.createLoanRescheduleRequest();
 
-        System.out.println("-----------------------------REJECTING LOAN RESCHEDULE REQUEST--------------------------");
+        System.out.println("------------------REJECTING LOAN RESCHEDULE REQUEST---------------");
 
         final String requestJSON = new LoanRescheduleRequestTestBuilder().getRejectLoanRescheduleRequestJSON();
         this.loanRescheduleRequestHelper.rejectLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
 
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean)response.get("rejected"));
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper
+                .getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("rejected"));
 
         System.out.println("Successfully rejected loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");
     }
@@ -197,20 +188,23 @@ public class LoanRescheduleRequestTest {
     public void testApproveLoanRescheduleRequest() {
         this.createLoanRescheduleRequest();
 
-        System.out.println("-----------------------------APPROVING LOAN RESCHEDULE REQUEST--------------------------");
+        System.out.println("------------------APPROVING LOAN RESCHEDULE REQUEST---------------");
 
         final String requestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
         this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
 
-        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean)response.get("approved"));
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper
+                .getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("approved"));
 
-        final Integer numberOfRepayments = (Integer) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId, "numberOfRepayments");
+        final Integer numberOfRepayments = (Integer) this.loanTransactionHelper.getLoanDetail(requestSpec,
+                generalResponseSpec, loanId, "numberOfRepayments");
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
         assertEquals("NUMBER OF REPAYMENTS SHOULD BE 16, NOT 12", "12", numberOfRepayments.toString());
-        assertEquals("TOTAL EXPECTED REPAYMENT MUST BE EQUAL TO 118000.0", "118000.0", totalExpectedRepayment.toString());
+        assertEquals("TOTAL EXPECTED REPAYMENT MUST BE EQUAL TO 118000.0", "118000.0",
+                totalExpectedRepayment.toString());
 
         System.out.println("Successfully approved loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");
     }

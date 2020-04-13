@@ -42,7 +42,8 @@ public class FixedDepositProductHelper {
 
     private static final String FIXED_DEPOSIT_PRODUCT_URL = "/fineract-provider/api/v1/fixeddepositproducts";
     private static final String INTEREST_CHART_URL = "/fineract-provider/api/v1/interestratecharts";
-    private static final String CREATE_FIXED_DEPOSIT_PRODUCT_URL = FIXED_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_FIXED_DEPOSIT_PRODUCT_URL = FIXED_DEPOSIT_PRODUCT_URL + "?"
+            + Utils.TENANT_IDENTIFIER;
 
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "4";
@@ -67,7 +68,6 @@ public class FixedDepositProductHelper {
     private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
-
 
     private String name = Utils.randomNameGenerator("FIXED_DEPOSIT_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
@@ -139,8 +139,6 @@ public class FixedDepositProductHelper {
         if (withHoldTax) {
             map.put("taxGroupId", taxGroupId);
         }
-
-
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -391,7 +389,6 @@ public class FixedDepositProductHelper {
         return this;
     }
 
-
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -419,24 +416,26 @@ public class FixedDepositProductHelper {
         return map;
     }
 
-    public static Integer createFixedDepositProduct(final String fixedDepositProductCreateJson, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+    public static Integer createFixedDepositProduct(final String fixedDepositProductCreateJson,
+            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         System.out.println("--------------------- CREATING FIXED DEPOSIT PRODUCT ------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_FIXED_DEPOSIT_PRODUCT_URL, fixedDepositProductCreateJson,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_FIXED_DEPOSIT_PRODUCT_URL,
+                fixedDepositProductCreateJson, CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
-    public static ArrayList retrieveAllFixedDepositProducts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static ArrayList retrieveAllFixedDepositProducts(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         System.out.println("-------------------- RETRIEVING ALL FIXED DEPOSIT PRODUCTS ---------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, FIXED_DEPOSIT_PRODUCT_URL + "?"
-                + Utils.TENANT_IDENTIFIER, "");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                FIXED_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
         return response;
     }
 
-    public static HashMap retrieveFixedDepositProductById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String productId) {
+    public static HashMap retrieveFixedDepositProductById(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String productId) {
         System.out.println("------------------------ RETRIEVING FIXED DEPOSIT PRODUCT BY ID ------------------------");
-        final String GET_FD_PRODUCT_BY_ID_URL = FIXED_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
+        final String GET_FD_PRODUCT_BY_ID_URL = FIXED_DEPOSIT_PRODUCT_URL + "/" + productId + "?"
+                + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_FD_PRODUCT_BY_ID_URL, "");
         return response;
     }
@@ -444,8 +443,8 @@ public class FixedDepositProductHelper {
     public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
         System.out.println("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
-                "chartSlabs");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                INTEREST_CHART_URL + "?productId=" + productId, "chartSlabs");
         return response;
     }
 

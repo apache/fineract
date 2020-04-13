@@ -30,14 +30,16 @@ public class PeriodicAccrualAccountingHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    public PeriodicAccrualAccountingHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public PeriodicAccrualAccountingHelper(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
     public Object runPeriodicAccrualAccounting(String date) {
         String json = getRunPeriodicAccrual(date);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, PERIODIC_ACCRUAL_URL + "?" + Utils.TENANT_IDENTIFIER, json, "");
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                PERIODIC_ACCRUAL_URL + "?" + Utils.TENANT_IDENTIFIER, json, "");
     }
 
     private String getRunPeriodicAccrual(String date) {

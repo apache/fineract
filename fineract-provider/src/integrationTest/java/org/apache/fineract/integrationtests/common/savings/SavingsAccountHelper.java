@@ -95,60 +95,67 @@ public class SavingsAccountHelper {
         return sdf.format(calendar.getTime());
     }
 
-    public Integer applyForSavingsApplication(final Integer ID, final Integer savingsProductID, final String accountType) {
+    public Integer applyForSavingsApplication(final Integer ID, final Integer savingsProductID,
+            final String accountType) {
         return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, CREATED_DATE);
     }
 
-    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID, final String accountType,
-                                                    final String submittedOnDate) {
+    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID,
+            final String accountType, final String submittedOnDate) {
         return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, null, false, submittedOnDate);
     }
 
-    public Integer applyForSavingsApplicationWithExternalId(final Integer ID, final Integer savingsProductID, final String accountType,
-                                                            String externalId, boolean withdrawalFeeForTransfers) {
-        return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, externalId, withdrawalFeeForTransfers, CREATED_DATE);
+    public Integer applyForSavingsApplicationWithExternalId(final Integer ID, final Integer savingsProductID,
+            final String accountType, String externalId, boolean withdrawalFeeForTransfers) {
+        return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, externalId,
+                withdrawalFeeForTransfers, CREATED_DATE);
     }
 
-    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID, final String accountType,
-                                                    String externalId, boolean withdrawalFeeForTransfers, final String submittedOnDate) {
-        System.out.println("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
+    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID,
+            final String accountType, String externalId, boolean withdrawalFeeForTransfers,
+            final String submittedOnDate) {
+        System.out.println(
+                "--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withExternalId(externalId) //
                 .withWithdrawalFeeForTransfers(withdrawalFeeForTransfers) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .build(ID.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsApplicationJSON, "savingsId");
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, "savingsId");
     }
 
-    public Integer applyForSavingsApplicationWithDatatables(final Integer ID, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate, final String datatableName) {
-        System.out.println("----------------------------APPLYING FOR SAVINGS APPLICATION WITH DATATABLES----------------------------");
+    public Integer applyForSavingsApplicationWithDatatables(final Integer ID, final Integer savingsProductID,
+            final String accountType, final String submittedOnDate, final String datatableName) {
+        System.out.println("------------------APPLYING FOR SAVINGS APPLICATION WITH DATATABLES--------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
                 .withDatatables(getTestDatatableAsJson(datatableName)) //
                 .build(ID.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsApplicationJSON, "savingsId");
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, "savingsId");
     }
 
-    public Object applyForSavingsApplicationWithFailure(final Integer ID, final Integer savingsProductID, final String accountType,
-            final String submittedOnDate, final String responseAttribute) {
-        System.out.println("----------------------------APPLYING FOR SAVINGS APPLICATION WITH ERROR----------------------------");
+    public Object applyForSavingsApplicationWithFailure(final Integer ID, final Integer savingsProductID,
+            final String accountType, final String submittedOnDate, final String responseAttribute) {
+        System.out.println(
+                "----------------------------APPLYING FOR SAVINGS APPLICATION WITH ERROR----------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
                 .build(ID.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsApplicationJSON, responseAttribute);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, responseAttribute);
     }
 
-    public HashMap updateSavingsAccount(final Integer ID, final Integer savingsProductID, final Integer savingsId, final String accountType) {
+    public HashMap updateSavingsAccount(final Integer ID, final Integer savingsProductID, final Integer savingsId,
+            final String accountType) {
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(CREATED_DATE_PLUS_ONE) //
                 .build(ID.toString(), savingsProductID.toString(), accountType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?"
-                + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER, savingsApplicationJSON,
+                CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap updateSavingsAccountWithHoldTaxStatus(final Integer savingsId, final boolean value) {
@@ -156,8 +163,10 @@ public class SavingsAccountHelper {
         map.put("withHoldTax", value);
         String json = new Gson().toJson(map);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?command="
-                + UPDATE_WITHHOLD_TAX_STATUS + "&" + Utils.TENANT_IDENTIFIER, json, CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(
+                this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?command="
+                        + UPDATE_WITHHOLD_TAX_STATUS + "&" + Utils.TENANT_IDENTIFIER,
+                json, CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap approveSavings(final Integer savingsID) {
@@ -165,93 +174,117 @@ public class SavingsAccountHelper {
     }
 
     public HashMap approveSavingsOnDate(final Integer savingsID, final String approvalDate) {
-        System.out.println("--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
+        System.out.println(
+                "--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
         final String savingsOperationURL = createSavingsOperationURL(APPROVE_SAVINGS_COMMAND, savingsID);
         if (approvalDate == null || approvalDate.equals(""))
             return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), isBlock);
-        return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), isBlock);
+        return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate),
+                isBlock);
     }
 
     public HashMap undoApproval(final Integer savingsID) {
-        System.out.println("--------------------------------- UNDO APPROVING SAVINGS APPLICATION -------------------------------");
+        System.out.println(
+                "--------------------------------- UNDO APPROVING SAVINGS APPLICATION -------------------------------");
         final String undoBodyJson = "{'note':'UNDO APPROVAL'}";
-        return performSavingApplicationActions(createSavingsOperationURL(UNDO_APPROVAL_SAVINGS_COMMAND, savingsID), undoBodyJson, isBlock);
+        return performSavingApplicationActions(createSavingsOperationURL(UNDO_APPROVAL_SAVINGS_COMMAND, savingsID),
+                undoBodyJson, isBlock);
     }
 
     public HashMap rejectApplication(final Integer savingsID) {
-        System.out.println("--------------------------------- REJECT SAVINGS APPLICATION -------------------------------");
+        System.out.println(
+                "--------------------------------- REJECT SAVINGS APPLICATION -------------------------------");
         return performSavingApplicationActions(createSavingsOperationURL(REJECT_SAVINGS_COMMAND, savingsID),
                 getRejectedSavingsAsJSON(CREATED_DATE_PLUS_ONE), isBlock);
     }
 
     public List rejectApplicationWithErrorCode(final Integer savingsId, final String date) {
-        System.out.println("--------------------------------- REJECT SAVINGS APPLICATION -------------------------------");
-        return (List) performSavingActions(createSavingsOperationURL(REJECT_SAVINGS_COMMAND, savingsId), getRejectedSavingsAsJSON(date),
-                CommonConstants.RESPONSE_ERROR);
+        System.out.println(
+                "--------------------------------- REJECT SAVINGS APPLICATION -------------------------------");
+        return (List) performSavingActions(createSavingsOperationURL(REJECT_SAVINGS_COMMAND, savingsId),
+                getRejectedSavingsAsJSON(date), CommonConstants.RESPONSE_ERROR);
     }
 
     public HashMap withdrawApplication(final Integer savingsID) {
-        System.out.println("--------------------------------- Withdraw SAVINGS APPLICATION -------------------------------");
-        return performSavingApplicationActions(createSavingsOperationURL(WITHDRAWN_BY_CLIENT_SAVINGS_COMMAND, savingsID),
-                getWithdrawnSavingsAsJSON(), isBlock);
+        System.out.println(
+                "--------------------------------- Withdraw SAVINGS APPLICATION -------------------------------");
+        return performSavingApplicationActions(
+                createSavingsOperationURL(WITHDRAWN_BY_CLIENT_SAVINGS_COMMAND, savingsID), getWithdrawnSavingsAsJSON(),
+                isBlock);
     }
 
     public HashMap activateSavings(final Integer savingsID) {
-        System.out.println("---------------------------------- ACTIVATING SAVINGS APPLICATION ----------------------------------");
-        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID), getActivatedSavingsAsJSON(), isBlock);
+        System.out.println(
+                "---------------------------------- ACTIVATING SAVINGS APPLICATION ----------------------------------");
+        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID),
+                getActivatedSavingsAsJSON(), isBlock);
     }
 
     public HashMap closeSavingsAccount(final Integer savingsID, String withdrawBalance) {
-        System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
+        System.out.println(
+                "---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), isBlock);
     }
 
     public Object deleteSavingsApplication(final Integer savingsId, final String jsonAttributeToGetBack) {
-        System.out.println("---------------------------------- DELETE SAVINGS APPLICATION ----------------------------------");
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?"
-                + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+        System.out.println(
+                "---------------------------------- DELETE SAVINGS APPLICATION ----------------------------------");
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
 
     }
 
-    public Object depositToSavingsAccount(final Integer savingsID, final String amount, String date, String jsonAttributeToGetback) {
-        System.out.println("--------------------------------- SAVINGS TRANSACTION DEPOSIT --------------------------------");
+    public Object depositToSavingsAccount(final Integer savingsID, final String amount, String date,
+            String jsonAttributeToGetback) {
+        System.out.println(
+                "--------------------------------- SAVINGS TRANSACTION DEPOSIT --------------------------------");
         return performSavingActions(createSavingsTransactionURL(DEPOSIT_SAVINGS_COMMAND, savingsID),
                 getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
     }
 
-    public Object withdrawalFromSavingsAccount(final Integer savingsId, final String amount, String date, String jsonAttributeToGetback) {
-        System.out.println("\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL --------------------------------");
+    public Object withdrawalFromSavingsAccount(final Integer savingsId, final String amount, String date,
+            String jsonAttributeToGetback) {
+        System.out.println(
+                "\n--------------------------------- SAVINGS TRANSACTION WITHDRAWAL --------------------------------");
         return performSavingActions(createSavingsTransactionURL(WITHDRAW_SAVINGS_COMMAND, savingsId),
                 getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
     }
 
-    public Integer updateSavingsAccountTransaction(final Integer savingsId, final Integer transactionId, final String amount) {
-        System.out.println("\n--------------------------------- MODIFY SAVINGS TRANSACTION  --------------------------------");
-        return (Integer) performSavingActions(createAdjustTransactionURL(MODIFY_TRASACTION_COMMAND, savingsId, transactionId),
+    public Integer updateSavingsAccountTransaction(final Integer savingsId, final Integer transactionId,
+            final String amount) {
+        System.out.println(
+                "\n--------------------------------- MODIFY SAVINGS TRANSACTION  --------------------------------");
+        return (Integer) performSavingActions(
+                createAdjustTransactionURL(MODIFY_TRASACTION_COMMAND, savingsId, transactionId),
                 getSavingsTransactionJSON(amount, LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer undoSavingsAccountTransaction(final Integer savingsId, final Integer transactionId) {
-        System.out.println("\n--------------------------------- UNDO SAVINGS TRANSACTION  --------------------------------");
-        return (Integer) performSavingActions(createAdjustTransactionURL(UNDO_TRASACTION_COMMAND, savingsId, transactionId),
+        System.out.println(
+                "\n--------------------------------- UNDO SAVINGS TRANSACTION  --------------------------------");
+        return (Integer) performSavingActions(
+                createAdjustTransactionURL(UNDO_TRASACTION_COMMAND, savingsId, transactionId),
                 getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public void calculateInterestForSavings(final Integer savingsId) {
-        System.out.println("--------------------------------- CALCULATING INTEREST FOR SAVINGS --------------------------------");
+        System.out.println(
+                "--------------------------------- CALCULATING INTEREST FOR SAVINGS --------------------------------");
         performSavingActions(createSavingsCalculateInterestURL(CALCULATE_INTEREST_SAVINGS_COMMAND, savingsId),
                 getCalculatedInterestForSavingsApplicationAsJSON(), "");
     }
 
     public void postInterestForSavings(final Integer savingsId) {
-        System.out.println("--------------------------------- POST INTEREST FOR SAVINGS --------------------------------");
+        System.out.println(
+                "--------------------------------- POST INTEREST FOR SAVINGS --------------------------------");
         performSavingActions(createSavingsCalculateInterestURL(POST_INTEREST_SAVINGS_COMMAND, savingsId),
                 getCalculatedInterestForSavingsApplicationAsJSON(), "");
     }
 
     public void postInterestAsOnSavings(final Integer savingsId, final String today) {
-        System.out.println("--------------------------------- POST INTEREST AS ON FOR SAVINGS --------------------------------");
+        System.out.println(
+                "--------------------------------- POST INTEREST AS ON FOR SAVINGS --------------------------------");
         performSavingActions(createSavingsPostInterestAsOnURL(POST_INTEREST_AS_ON_SAVINGS_COMMAND, savingsId),
                 getCalculatedInterestForSavingsApplicationAsJSON(today), CommonConstants.RESPONSE_RESOURCE_ID);
     }
@@ -260,88 +293,104 @@ public class SavingsAccountHelper {
         return addChargesForSavings(savingsId, chargeId, addDueDate, BigDecimal.valueOf(100));
     }
 
-    public Integer addChargesForSavings(final Integer savingsId, final Integer chargeId, boolean addDueDate, BigDecimal amount) {
-        System.out.println("--------------------------------- ADD CHARGES FOR SAVINGS --------------------------------");
-        return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
+    public Integer addChargesForSavings(final Integer savingsId, final Integer chargeId, boolean addDueDate,
+            BigDecimal amount) {
+        System.out
+                .println("--------------------------------- ADD CHARGES FOR SAVINGS --------------------------------");
+        return (Integer) performSavingActions(
+                SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
                 getPeriodChargeRequestJSON(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
-    public Integer addChargesForSavingsWithDueDate(final Integer savingsId, final Integer chargeId, String addDueDate,Integer amount) {
-        return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
-                getPeriodChargeRequestJSONWithDueDate(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
+    public Integer addChargesForSavingsWithDueDate(final Integer savingsId, final Integer chargeId, String addDueDate,
+            Integer amount) {
+        return (Integer) performSavingActions(
+                SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
+                getPeriodChargeRequestJSONWithDueDate(chargeId, addDueDate, amount),
+                CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer payCharge(final Integer chargeId, final Integer savingsId, String amount, String dueDate) {
-        return (Integer) performSavingActions(createChargesURL("paycharge", savingsId, chargeId), getSavingsPayChargeJSON(amount, dueDate),
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        return (Integer) performSavingActions(createChargesURL("paycharge", savingsId, chargeId),
+                getSavingsPayChargeJSON(amount, dueDate), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer waiveCharge(final Integer chargeId, final Integer savingsId) {
-        return (Integer) performSavingActions(createChargesURL("waive", savingsId, chargeId), getSavingsWaiveChargeJSON(),
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        return (Integer) performSavingActions(createChargesURL("waive", savingsId, chargeId),
+                getSavingsWaiveChargeJSON(), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public HashMap updateCharges(final Integer chargeId, final Integer savingsId) {
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges/" + chargeId
-                + "?" + Utils.TENANT_IDENTIFIER, getModifyChargeJSON(), CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
+                getModifyChargeJSON(), CommonConstants.RESPONSE_CHANGES);
     }
 
     public Integer deleteCharge(final Integer chargeId, final Integer savingsId) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges/"
-                + chargeId + "?" + Utils.TENANT_IDENTIFIER, CommonConstants.RESPONSE_RESOURCE_ID);
+        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+                SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
+                CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public HashMap blockSavings(final Integer savingsID) {
-        System.out.println("---------------------------------- BLOCKING SAVINGS ACCOUNT ----------------------------------");
+        System.out.println(
+                "---------------------------------- BLOCKING SAVINGS ACCOUNT ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_SAVINGS_COMMAND, savingsID),
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
     public HashMap unblockSavings(final Integer savingsID) {
-        System.out.println("---------------------------------- UNBLOCKING SAVINGS ACCOUNT ----------------------------------");
+        System.out.println(
+                "---------------------------------- UNBLOCKING SAVINGS ACCOUNT ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(UNBLOCK_SAVINGS_COMMAND, savingsID),
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
     public HashMap blockDebit(final Integer savingsID) {
-        System.out.println("---------------------------------- BLOCKING DEBIT TRANSACTIONS ----------------------------------");
+        System.out.println(
+                "---------------------------------- BLOCKING DEBIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_DEBITS_SAVINGS_COMMAND, savingsID),
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
     public HashMap unblockDebit(final Integer savingsID) {
-        System.out.println("---------------------------------- UNBLOCKING DEBIT TRANSACTIONS ----------------------------------");
+        System.out.println(
+                "---------------------------------- UNBLOCKING DEBIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(UNBLOCK_DEBITS_SAVINGS_COMMAND, savingsID),
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
     public HashMap blockCredit(final Integer savingsID) {
-        System.out.println("---------------------------------- BLOCKING CREDIT TRANSACTIONS ----------------------------------");
+        System.out.println(
+                "---------------------------------- BLOCKING CREDIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_CREDITS_SAVINGS_COMMAND, savingsID),
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
     public HashMap unblockCredit(final Integer savingsID) {
-        System.out.println("---------------------------------- UNBLOCKING CREDIT TRANSACTIONS ----------------------------------");
+        System.out.println(
+                "---------------------------------- UNBLOCKING CREDIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(UNBLOCK_CREDITS_SAVINGS_COMMAND, savingsID),
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
-    public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, String date, String jsonAttributeToGetback) {
-        System.out.println("--------------------------------- SAVINGS TRANSACTION HOLD AMOUNT--------------------------------");
+    public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, String date,
+            String jsonAttributeToGetback) {
+        System.out.println("--------------- SAVINGS TRANSACTION HOLD AMOUNT------------");
         return performSavingActions(createSavingsTransactionURL(HOLD_AMOUNT_SAVINGS_COMMAND, savingsID),
                 getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
     }
 
     public Integer releaseAmount(final Integer savingsId, final Integer transactionId) {
-        System.out.println("\n--------------------------------- SAVINGS TRANSACTION RELEASE AMOUNT--------------------------------");
-        return (Integer) performSavingActions(createAdjustTransactionURL(RELEASE_AMOUNT_SAVINGS_COMMAND, savingsId, transactionId),
+        System.out.println("\n------------ SAVINGS TRANSACTION RELEASE AMOUNT-------------");
+        return (Integer) performSavingActions(
+                createAdjustTransactionURL(RELEASE_AMOUNT_SAVINGS_COMMAND, savingsId, transactionId),
                 getSavingsTransactionJSON("1000", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
@@ -477,10 +526,12 @@ public class SavingsAccountHelper {
     }
 
     private String createSavingsTransactionURL(final String command, final Integer savingsID) {
-        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
     }
 
-    private String createAdjustTransactionURL(final String command, final Integer savingsID, final Integer transactionId) {
+    private String createAdjustTransactionURL(final String command, final Integer savingsID,
+            final Integer transactionId) {
         return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + transactionId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
     }
@@ -490,11 +541,13 @@ public class SavingsAccountHelper {
     }
 
     private String createSavingsPostInterestAsOnURL(final String command, final Integer savingsID) {
-        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + "?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
     }
 
     private String createChargesURL(final String command, final Integer savingsID, final Integer chargeId) {
-        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges/" + chargeId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges/" + chargeId + "?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
     }
 
     public ArrayList getSavingsCollectionAttribute(final Integer savingsID, final String jSONAttribute) {
@@ -514,12 +567,14 @@ public class SavingsAccountHelper {
     }
 
     public HashMap getSavingsCharge(final Integer savingsID, final Integer savingsChargeId) {
-        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges/" + savingsChargeId + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges/" + savingsChargeId + "?"
+                + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
 
     public HashMap getSavingsTransaction(final Integer savingsID, final Integer savingsTransactionId) {
-        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?" + Utils.TENANT_IDENTIFIER;
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?"
+                + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
 
@@ -547,10 +602,11 @@ public class SavingsAccountHelper {
         return response;
     }
 
-    private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent, final Boolean isBlock) {
+    private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction,
+            final String jsonToBeSent, final Boolean isBlock) {
         HashMap status = null;
-        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
-                CommonConstants.RESPONSE_CHANGES);
+        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec,
+                postURLForSavingsTransaction, jsonToBeSent, CommonConstants.RESPONSE_CHANGES);
         if (response != null) {
             status = (HashMap) response.get("status");
             if (isBlock != null && isBlock) {
@@ -568,14 +624,16 @@ public class SavingsAccountHelper {
 
     public Object closeSavingsAccountAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
             final String jsonAttributeToGetBack, final String closedOnDate) {
-        System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
+        System.out.println(
+                "---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
     }
 
-    public Object closeSavingsAccountPostInterestAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
-            final String jsonAttributeToGetBack, final String closedOnDate) {
-        System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
+    public Object closeSavingsAccountPostInterestAndGetBackRequiredField(final Integer savingsID,
+            String withdrawBalance, final String jsonAttributeToGetBack, final String closedOnDate) {
+        System.out.println(
+                "---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountPostInterestJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
     }
@@ -588,7 +646,7 @@ public class SavingsAccountHelper {
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", "dd MMMM");
         map.put("dateFormat", "dd MMMM yyy");
-        if(addDueDate){
+        if (addDueDate) {
             map.put("dueDate", "10 January 2013");
         }
         String json = new Gson().toJson(map);
@@ -620,9 +678,10 @@ public class SavingsAccountHelper {
                 getAccountActivationJSON(activationDate), isBlock);
     }
 
-    public Object inactivateCharge(final Integer chargeId, final Integer savingsId, final String jsonAttributeToGetBack) {
-        return performSavingActions(createChargesURL("inactivate", savingsId, chargeId), getSavingsInactivateChargeJSON(),
-                jsonAttributeToGetBack);
+    public Object inactivateCharge(final Integer chargeId, final Integer savingsId,
+            final String jsonAttributeToGetBack) {
+        return performSavingActions(createChargesURL("inactivate", savingsId, chargeId),
+                getSavingsInactivateChargeJSON(), jsonAttributeToGetBack);
     }
 
     private String getSavingsInactivateChargeJSON() {
@@ -633,14 +692,15 @@ public class SavingsAccountHelper {
         return josn;
     }
 
-    public static Integer openSavingsAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer clientId, final String minimumOpeningBalance) {
+    public static Integer openSavingsAccount(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer clientId, final String minimumOpeningBalance) {
         final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, minimumOpeningBalance);
         Assert.assertNotNull(savingsProductID);
 
         SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
-        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID,
+                ACCOUNT_TYPE_INDIVIDUAL);
         Assert.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -654,9 +714,10 @@ public class SavingsAccountHelper {
         return savingsId;
     }
 
-    private static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+    private static Integer createSavingsProduct(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String minOpenningBalance) {
+        System.out.println(
+                "------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //
@@ -683,26 +744,28 @@ public class SavingsAccountHelper {
     }
 
     public Workbook getSavingsWorkbook(String dateFormat) throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
-        byte[] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,SAVINGS_ACCOUNT_URL+"/downloadtemplate"+"?"+
-                Utils.TENANT_IDENTIFIER+"&dateFormat="+dateFormat);
-        InputStream inputStream= new ByteArrayInputStream(byteArray);
-        Workbook workbook=new HSSFWorkbook(inputStream);
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
+        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL
+                + "/downloadtemplate" + "?" + Utils.TENANT_IDENTIFIER + "&dateFormat=" + dateFormat);
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        Workbook workbook = new HSSFWorkbook(inputStream);
         return workbook;
     }
 
     public String importSavingsTemplate(File file) {
-        String locale="en";
-        String dateFormat="dd MMMM yyyy";
-        String legalFormType= null;
+        String locale = "en";
+        String dateFormat = "dd MMMM yyyy";
+        String legalFormType = null;
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
-        return Utils.performServerTemplatePost(requestSpec,responseSpec,SAVINGS_ACCOUNT_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
-                legalFormType,file,locale,dateFormat);
+        return Utils.performServerTemplatePost(requestSpec, responseSpec,
+                SAVINGS_ACCOUNT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER, legalFormType, file, locale,
+                dateFormat);
     }
 
-    public String getOutputTemplateLocation(final String importDocumentId){
-        requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
-        return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
-                +Utils.TENANT_IDENTIFIER,importDocumentId);
+    public String getOutputTemplateLocation(final String importDocumentId) {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
+                "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER,
+                importDocumentId);
     }
 }

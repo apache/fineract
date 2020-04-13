@@ -34,14 +34,16 @@ public class RecurringDepositProductHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    public RecurringDepositProductHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public RecurringDepositProductHelper(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
     private static final String RECURRING_DEPOSIT_PRODUCT_URL = "/fineract-provider/api/v1/recurringdepositproducts";
     private static final String INTEREST_CHART_URL = "/fineract-provider/api/v1/interestratecharts";
-    private static final String CREATE_RECURRING_DEPOSIT_PRODUCT_URL = RECURRING_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_RECURRING_DEPOSIT_PRODUCT_URL = RECURRING_DEPOSIT_PRODUCT_URL + "?"
+            + Utils.TENANT_IDENTIFIER;
 
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "4";
@@ -196,7 +198,6 @@ public class RecurringDepositProductHelper {
         return this;
     }
 
-
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -227,22 +228,24 @@ public class RecurringDepositProductHelper {
     public static Integer createRecurringDepositProduct(final String recurrungDepositProductCreateJson,
             final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         System.out.println("------------------ CREATING RECURRING DEPOSIT PRODUCT--------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_RECURRING_DEPOSIT_PRODUCT_URL, recurrungDepositProductCreateJson,
-                "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_RECURRING_DEPOSIT_PRODUCT_URL,
+                recurrungDepositProductCreateJson, "resourceId");
     }
 
     public static ArrayList retrieveAllRecurringDepositProducts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         System.out.println("----------------- RETRIEVING ALL RECURRING DEPOSIT PRODUCTS---------------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, RECURRING_DEPOSIT_PRODUCT_URL + "?"
-                + Utils.TENANT_IDENTIFIER, "");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                RECURRING_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
         return response;
     }
 
     public static HashMap retrieveRecurringDepositProductById(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String productId) {
-        System.out.println("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
-        final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
+        System.out
+                .println("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
+        final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?"
+                + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_RD_PRODUCT_BY_ID_URL, "");
         return response;
     }
@@ -250,8 +253,8 @@ public class RecurringDepositProductHelper {
     public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
         System.out.println("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
-                "chartSlabs");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                INTEREST_CHART_URL + "?productId=" + productId, "chartSlabs");
         return response;
     }
 

@@ -28,19 +28,19 @@ public class WorkingDaysHelper {
 
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
 
-    public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static Object updateWorkingDays(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
+        System.out.println("----------------------UPDATE WORKINGDAY-----------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
     }
 
     public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out
-                .println("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDayWithWrongRecur(),
-                jsonAttributeToGetback);
+        System.out.println("----------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL,
+                updateWorkingDayWithWrongRecur(), jsonAttributeToGetback);
     }
 
     public static String updateWorkingDaysAsJson() {
@@ -68,7 +68,8 @@ public class WorkingDaysHelper {
         return (int) workingDays.get("id");
     }
 
-    public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
 
         return Utils.performServerGet(requestSpec, responseSpec, WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 

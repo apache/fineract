@@ -42,7 +42,8 @@ public class CurrenciesTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -73,12 +74,12 @@ public class CurrenciesTest {
         currenciestoUpdate.add("USD");
         currenciestoUpdate.add("INR");
 
-
-        ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec, this.responseSpec,
-                currenciestoUpdate);
+        ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec,
+                this.responseSpec, currenciestoUpdate);
         Assert.assertNotNull(currenciesOutput);
 
-        Assert.assertEquals("Verifying Do Outputed Currencies Match after Updation", currenciestoUpdate, currenciesOutput);
+        Assert.assertEquals("Verifying Do Outputed Currencies Match after Updation", currenciestoUpdate,
+                currenciesOutput);
 
         // Test that output matches updation
         ArrayList<CurrencyDomain> currenciesBeforeUpdate = new ArrayList<CurrencyDomain>();
@@ -87,9 +88,11 @@ public class CurrenciesTest {
         }
         Collections.sort(currenciesBeforeUpdate);
 
-        ArrayList<CurrencyDomain> currenciesAfterUpdate = CurrenciesHelper.getSelectedCurrencies(requestSpec, responseSpec);
+        ArrayList<CurrencyDomain> currenciesAfterUpdate = CurrenciesHelper.getSelectedCurrencies(requestSpec,
+                responseSpec);
         Assert.assertNotNull(currenciesAfterUpdate);
 
-        Assert.assertEquals("Verifying Do Selected Currencies Match after Updation", currenciesBeforeUpdate, currenciesAfterUpdate);
+        Assert.assertEquals("Verifying Do Selected Currencies Match after Updation", currenciesBeforeUpdate,
+                currenciesAfterUpdate);
     }
 }

@@ -37,39 +37,44 @@ public class SchedulerJobHelper {
         this.responseSpec = responseSpec;
     }
 
-    public static ArrayList getAllSchedulerJobs(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static ArrayList getAllSchedulerJobs(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         final String GET_ALL_SCHEDULER_JOBS_URL = "/fineract-provider/api/v1/jobs?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING ALL SCHEDULER JOBS -------------------------");
+        System.out.println("------------- RETRIEVING ALL SCHEDULER JOBS --------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_SCHEDULER_JOBS_URL, "");
         return response;
     }
 
-    public static HashMap getSchedulerJobById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String jobId) {
-        final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
+    public static HashMap getSchedulerJobById(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String jobId) {
+        final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------- RETRIEVING SCHEDULER JOB BY ID --------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_JOB_BY_ID_URL, "");
         return response;
     }
 
-    public static HashMap getSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static HashMap getSchedulerStatus(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING SCHEDULER STATUS -------------------------");
+        System.out.println("------------- RETRIEVING SCHEDULER STATUS --------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_STATUS_URL, "");
         return response;
     }
 
-    public static void updateSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String command) {
-        final String UPDATE_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ UPDATING SCHEDULER STATUS -------------------------");
+    public static void updateSchedulerStatus(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String command) {
+        final String UPDATE_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------- UPDATING SCHEDULER STATUS --------------");
         Utils.performServerPost(requestSpec, responseSpec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
     }
 
-    public static HashMap updateSchedulerJob(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String jobId, final String active) {
-        final String UPDATE_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ UPDATING SCHEDULER JOB -------------------------");
+    public static HashMap updateSchedulerJob(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String jobId, final String active) {
+        final String UPDATE_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------- UPDATING SCHEDULER JOB --------------");
         final HashMap response = Utils.performServerPut(requestSpec, responseSpec, UPDATE_SCHEDULER_JOB_URL,
                 updateSchedulerJobAsJSON(active), "changes");
         return response;
@@ -82,18 +87,20 @@ public class SchedulerJobHelper {
         return new Gson().toJson(map);
     }
 
-    public static ArrayList getSchedulerJobHistory(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String jobId) {
-        final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/jobs/" + jobId + "/runhistory?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RETRIEVING SCHEDULER JOB HISTORY -------------------------");
+    public static ArrayList getSchedulerJobHistory(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String jobId) {
+        final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/jobs/" + jobId + "/runhistory?"
+                + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------- RETRIEVING SCHEDULER JOB HISTORY --------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_STATUS_URL, "");
         return (ArrayList) response.get("pageItems");
     }
 
     public static void runSchedulerJob(final RequestSpecification requestSpec, final String jobId) {
         final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
-        System.out.println("------------------------ RUN SCHEDULER JOB -------------------------");
+        final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?command=executeJob&"
+                + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------- RUN SCHEDULER JOB --------------");
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }
 
@@ -127,7 +134,8 @@ public class SchedulerJobHelper {
                     System.out.println("Job is Still Running");
                 }
 
-                ArrayList<HashMap> jobHistoryData = getSchedulerJobHistory(this.requestSpec, this.responseSpec, jobId.toString());
+                ArrayList<HashMap> jobHistoryData = getSchedulerJobHistory(this.requestSpec, this.responseSpec,
+                        jobId.toString());
 
                 // print error associated with recent job failure (if any)
                 System.out.println("Job run error message (printed only if the job fails: "

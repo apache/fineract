@@ -44,7 +44,8 @@ public class PasswordPreferencesIntegrationTest {
     public void setUp() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -57,20 +58,20 @@ public class PasswordPreferencesIntegrationTest {
         this.validateIfThePasswordIsUpdated(validationPolicyId);
     }
 
-    private void validateIfThePasswordIsUpdated(String validationPolicyId){
+    private void validateIfThePasswordIsUpdated(String validationPolicyId) {
         Integer id = PasswordPreferencesHelper.getActivePasswordPreference(requestSpec, responseSpec);
         assertEquals(validationPolicyId, id.toString());
-        System.out.println("---------------------------------PASSWORD PREFERENCE VALIDATED SUCCESSFULLY-----------------------------------------");
+        System.out.println("----------------------PASSWORD PREFERENCE VALIDATED SUCCESSFULLY-------------------");
 
     }
 
     @Test
     public void updateWithInvalidPolicyId() {
         String invalidValidationPolicyId = "2000";
-        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId,
-                CommonConstants.RESPONSE_ERROR);
-        assertEquals("Password Validation Policy with identifier 2000 does not exist", "error.msg.password.validation.policy.id.invalid",
-                error.get(0).get("userMessageGlobalisationCode"));
+        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec,
+                generalResponseSpec, invalidValidationPolicyId, CommonConstants.RESPONSE_ERROR);
+        assertEquals("Password Validation Policy with identifier 2000 does not exist",
+                "error.msg.password.validation.policy.id.invalid", error.get(0).get("userMessageGlobalisationCode"));
     }
 
 }

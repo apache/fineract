@@ -38,16 +38,14 @@ public class OfficeHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    public OfficeHelper(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+    public OfficeHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
     public OfficeDomain retrieveOfficeByID(int id) {
-        Object get = Utils.performServerGet(
-                requestSpec, responseSpec, OFFICE_URL + "/" + id + "?"
-                        + Utils.TENANT_IDENTIFIER, "");
+        Object get = Utils.performServerGet(requestSpec, responseSpec,
+                OFFICE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER, "");
         final String json = new Gson().toJson(get);
         return new Gson().fromJson(json, new TypeToken<OfficeDomain>() {
         }.getType());
@@ -55,9 +53,8 @@ public class OfficeHelper {
 
     public Integer createOffice(final String openingDate) {
         String json = getAsJSON(openingDate);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec,
-                OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER,
+                json, CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer updateOffice(int id, String name, String openingDate) {
@@ -69,8 +66,7 @@ public class OfficeHelper {
 
         System.out.println("map : " + map);
 
-        return Utils.performServerPut(requestSpec, responseSpec, OFFICE_URL
-                + "/" + id + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPut(requestSpec, responseSpec, OFFICE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER,
                 new Gson().toJson(map), "resourceId");
     }
 
@@ -85,26 +81,28 @@ public class OfficeHelper {
         return new Gson().toJson(map);
     }
 
-    public String importOfficeTemplate(File file){
-        String locale="en";
-        String dateFormat="dd MMMM yyyy";
+    public String importOfficeTemplate(File file) {
+        String locale = "en";
+        String dateFormat = "dd MMMM yyyy";
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
-        return Utils.performServerTemplatePost(requestSpec,responseSpec,OFFICE_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
-                null,file,locale,dateFormat);
+        return Utils.performServerTemplatePost(requestSpec, responseSpec,
+                OFFICE_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER, null, file, locale, dateFormat);
 
     }
 
-    public String getOutputTemplateLocation(final String importDocumentId){
-        requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
-        return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
-                +Utils.TENANT_IDENTIFIER,importDocumentId);
+    public String getOutputTemplateLocation(final String importDocumentId) {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
+                "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER,
+                importDocumentId);
     }
+
     public Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
-        requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
-        byte[] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,OFFICE_URL+"/downloadtemplate"+"?"+
-                Utils.TENANT_IDENTIFIER+"&dateFormat="+dateFormat);
-        InputStream inputStream= new ByteArrayInputStream(byteArray);
-        Workbook workbook=new HSSFWorkbook(inputStream);
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
+        byte[] byteArray = Utils.performGetBinaryResponse(requestSpec, responseSpec,
+                OFFICE_URL + "/downloadtemplate" + "?" + Utils.TENANT_IDENTIFIER + "&dateFormat=" + dateFormat);
+        InputStream inputStream = new ByteArrayInputStream(byteArray);
+        Workbook workbook = new HSSFWorkbook(inputStream);
         return workbook;
     }
 }

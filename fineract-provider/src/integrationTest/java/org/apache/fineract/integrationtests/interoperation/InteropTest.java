@@ -63,7 +63,7 @@ public class InteropTest {
     private final static String MIN_REQUIRED_BALANCE = null;
     private final static String MIN_OPENING_BALANCE = "100000.0";
     private final static boolean ENFORCE_MIN_REQUIRED_BALANCE = false;
-    private final static MathContext MATHCONTEXT  = new MathContext(12, RoundingMode.HALF_EVEN);
+    private final static MathContext MATHCONTEXT = new MathContext(12, RoundingMode.HALF_EVEN);
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -119,24 +119,19 @@ public class InteropTest {
     }
 
     private void createSavingsProduct() {
-        log.debug("------------------------------ Create Interoperable Saving Product ---------------------------------------");
+        log.debug("------------------- Create Interoperable Saving Product ----------------------------");
 
-        Account[] accounts = {accountHelper.createAssetAccount(), accountHelper.createIncomeAccount(), accountHelper.createExpenseAccount(),
-                accountHelper.createLiabilityAccount()};
+        Account[] accounts = { accountHelper.createAssetAccount(), accountHelper.createIncomeAccount(),
+                accountHelper.createExpenseAccount(), accountHelper.createLiabilityAccount() };
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper
-                .withCurrencyCode(interopHelper.getCurrency())
-                .withNominalAnnualInterestRate(BigDecimal.ZERO)
-                .withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsMonthly()
-                .withInterestCalculationPeriodTypeAsDailyBalance()
+        final String savingsProductJSON = savingsProductHelper.withCurrencyCode(interopHelper.getCurrency())
+                .withNominalAnnualInterestRate(BigDecimal.ZERO).withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
                 .withMinBalanceForInterestCalculation(MIN_INTEREST_CALCULATON_BALANCE)
                 .withMinRequiredBalance(MIN_REQUIRED_BALANCE)
                 .withEnforceMinRequiredBalance(Boolean.toString(ENFORCE_MIN_REQUIRED_BALANCE))
-                .withMinimumOpenningBalance(MIN_OPENING_BALANCE)
-                .withAccountingRuleAsCashBased(accounts)
-                .build();
+                .withMinimumOpenningBalance(MIN_OPENING_BALANCE).withAccountingRuleAsCashBased(accounts).build();
         savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
         Assert.assertNotNull(savingsProductId);
 
@@ -144,14 +139,15 @@ public class InteropTest {
     }
 
     private void createCharge() {
-        chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getSavingsJSON(interopHelper.getFee().toString(),
-                interopHelper.getCurrency(), ChargeTimeType.WITHDRAWAL_FEE));
+        chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getSavingsJSON(
+                interopHelper.getFee().toString(), interopHelper.getCurrency(), ChargeTimeType.WITHDRAWAL_FEE));
         Assert.assertNotNull(chargeId);
     }
 
     private void openSavingsAccount() {
-        log.debug("------------------------------ Create Interoperable Saving Account ---------------------------------------");
-        savingsId = savingsAccountHelper.applyForSavingsApplicationWithExternalId(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL, interopHelper.getAccountExternalId(), true);
+        log.debug("------------------- Create Interoperable Saving Account ----------------------------");
+        savingsId = savingsAccountHelper.applyForSavingsApplicationWithExternalId(clientId, savingsProductId,
+                ACCOUNT_TYPE_INDIVIDUAL, interopHelper.getAccountExternalId(), true);
         Assert.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -215,7 +211,8 @@ public class InteropTest {
         Map<Object, Object> fee = json.getMap(InteropUtil.PARAM_FSP_FEE);
         Assert.assertNotNull(fee);
         BigDecimal feeAmount = ObjectConverter.convertObjectTo(fee.get(InteropUtil.PARAM_AMOUNT), BigDecimal.class);
-        Assert.assertTrue("Quote fee expected: " + interopHelper.getFee() + ", actual: " + feeAmount, MathUtil.isEqualTo(interopHelper.getFee(), feeAmount));
+        Assert.assertTrue("Quote fee expected: " + interopHelper.getFee() + ", actual: " + feeAmount,
+                MathUtil.isEqualTo(interopHelper.getFee(), feeAmount));
         Assert.assertEquals(interopHelper.getCurrency(), fee.get(InteropUtil.PARAM_CURRENCY));
 
         // payee
@@ -227,14 +224,16 @@ public class InteropTest {
         fee = json.getMap(InteropUtil.PARAM_FSP_FEE);
         if (fee != null) {
             feeAmount = ObjectConverter.convertObjectTo(fee.get(InteropUtil.PARAM_AMOUNT), BigDecimal.class);
-            Assert.assertTrue("PAYEE Quote fee expected: " + BigDecimal.ZERO + ", actual: " + feeAmount, MathUtil.isZero(feeAmount));
+            Assert.assertTrue("PAYEE Quote fee expected: " + BigDecimal.ZERO + ", actual: " + feeAmount,
+                    MathUtil.isZero(feeAmount));
         }
     }
 
     private void testTransfers() {
         String savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
         JsonPath savingsJson = JsonPath.from(savings);
-        BigDecimal onHold = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
+        BigDecimal onHold = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold),
+                BigDecimal.class);
         BigDecimal balance = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
 
         transferCode = UUID.randomUUID().toString();
@@ -247,14 +246,17 @@ public class InteropTest {
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
         log.debug("Response Interoperable GET Saving: {}", savings);
         savingsJson = JsonPath.from(savings);
-        BigDecimal onHold2 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
+        BigDecimal onHold2 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold),
+                BigDecimal.class);
         BigDecimal balance2 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
 
         BigDecimal transferAmount = interopHelper.getTransferAmount();
         BigDecimal expectedHold = MathUtil.add(onHold, transferAmount, MATHCONTEXT);
-        Assert.assertTrue("On hold amount expected: " + expectedHold + ", actual: " + onHold2, MathUtil.isEqualTo(expectedHold, onHold2));
+        Assert.assertTrue("On hold amount expected: " + expectedHold + ", actual: " + onHold2,
+                MathUtil.isEqualTo(expectedHold, onHold2));
         BigDecimal expectedBalance = MathUtil.subtract(balance, transferAmount, MATHCONTEXT);
-        Assert.assertTrue("Balance amount expected: " + expectedBalance + ", actual: " + balance2, MathUtil.isEqualTo(expectedBalance, balance2));
+        Assert.assertTrue("Balance amount expected: " + expectedBalance + ", actual: " + balance2,
+                MathUtil.isEqualTo(expectedBalance, balance2));
 
         // payer
         response = interopHelper.createTransfer(transferCode, InteropTransactionRole.PAYER);
@@ -265,10 +267,13 @@ public class InteropTest {
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
         log.debug("Response Interoperable GET Saving: {}", savings);
         savingsJson = JsonPath.from(savings);
-        BigDecimal onHold3 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
+        BigDecimal onHold3 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold),
+                BigDecimal.class);
         BigDecimal balance3 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
-        Assert.assertTrue("On hold amount expected: " + onHold + ", actual: " + onHold3, MathUtil.isEqualTo(onHold, onHold3));
-        Assert.assertTrue("Balance amount expected: " + expectedBalance + ", actual: " + balance3, MathUtil.isEqualTo(expectedBalance, balance3));
+        Assert.assertTrue("On hold amount expected: " + onHold + ", actual: " + onHold3,
+                MathUtil.isEqualTo(onHold, onHold3));
+        Assert.assertTrue("Balance amount expected: " + expectedBalance + ", actual: " + balance3,
+                MathUtil.isEqualTo(expectedBalance, balance3));
 
         // payee
         response = interopHelper.createTransfer(transferCode, InteropTransactionRole.PAYEE);
@@ -279,10 +284,13 @@ public class InteropTest {
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
         log.debug("Response Interoperable GET Saving: {}", savings);
         savingsJson = JsonPath.from(savings);
-        BigDecimal onHold4 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
+        BigDecimal onHold4 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold),
+                BigDecimal.class);
         BigDecimal balance4 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
         expectedBalance = MathUtil.subtract(balance, interopHelper.getFee(), MATHCONTEXT);
-        Assert.assertTrue("On hold amount expected: " + onHold + ", actual: " + onHold4, MathUtil.isEqualTo(onHold, onHold4));
-        Assert.assertTrue("Balance amount expected: " + expectedBalance + ", actual: " + balance4, MathUtil.isEqualTo(balance, balance4));
+        Assert.assertTrue("On hold amount expected: " + onHold + ", actual: " + onHold4,
+                MathUtil.isEqualTo(onHold, onHold4));
+        Assert.assertTrue("Balance amount expected: " + expectedBalance + ", actual: " + balance4,
+                MathUtil.isEqualTo(balance, balance4));
     }
 }

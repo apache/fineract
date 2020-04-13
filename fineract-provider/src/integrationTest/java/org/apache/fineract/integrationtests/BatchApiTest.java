@@ -69,14 +69,14 @@ public class BatchApiTest {
 
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     /**
-     * Tests for the unimplemented command Strategies by returning 501 status
-     * code. For a unknownRequest a statusCode 501 is returned back with
-     * response.
+     * Tests for the unimplemented command Strategies by returning 501 status code.
+     * For a unknownRequest a statusCode 501 is returned back with response.
      *
      * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy
      */
@@ -98,8 +98,8 @@ public class BatchApiTest {
 
     /**
      * Tests for the successful response for a createClient request from
-     * createClientCommand. A successful response with statusCode '200' is
-     * returned back.
+     * createClientCommand. A successful response with statusCode '200' is returned
+     * back.
      *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      */
@@ -117,10 +117,9 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests for an erroneous response with statusCode '501' if transaction
-     * fails. If Query Parameter 'enclosingTransaction' is set to 'true' and if
-     * one of the request in BatchRequest fails then all transactions are rolled
-     * back.
+     * Tests for an erroneous response with statusCode '501' if transaction fails.
+     * If Query Parameter 'enclosingTransaction' is set to 'true' and if one of the
+     * request in BatchRequest fails then all transactions are rolled back.
      *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      * @see org.apache.fineract.batch.api.BatchApiResource
@@ -146,8 +145,8 @@ public class BatchApiTest {
         batchRequests.add(br3);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         // Verifies that none of the client in BatchRequest is created on the
         // server
@@ -161,8 +160,8 @@ public class BatchApiTest {
 
     /**
      * Tests that a client information was successfully updated through
-     * updateClientCommand. A 'changes' parameter is returned in the response
-     * after successful update of client information.
+     * updateClientCommand. A 'changes' parameter is returned in the response after
+     * successful update of client information.
      *
      * @see org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy
      */
@@ -182,11 +181,12 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         // Get the changes parameter from updateClient Response
-        final JsonObject changes = new FromJsonHelper().parse(response.get(1).getBody()).getAsJsonObject().get("changes").getAsJsonObject();
+        final JsonObject changes = new FromJsonHelper().parse(response.get(1).getBody()).getAsJsonObject()
+                .get("changes").getAsJsonObject();
 
         // Asserts the client information is successfully updated
         Assert.assertEquals("Verify Firstname", "TestFirstName", changes.get("firstname").getAsString());
@@ -195,9 +195,8 @@ public class BatchApiTest {
 
     /**
      * Tests that a ApplyLoanCommand was successfully executed and returned a
-     * 200(OK) status. It creates a new client and apply a loan to that client.
-     * This also verifies the successful resolution of dependencies among two
-     * requests.
+     * 200(OK) status. It creates a new client and apply a loan to that client. This
+     * also verifies the successful resolution of dependencies among two requests.
      *
      * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
      */
@@ -215,7 +214,8 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+                .getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4718L, "");
@@ -234,13 +234,15 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         // Get the clientId parameter from createClient Response
-        final JsonElement clientId = new FromJsonHelper().parse(response.get(0).getBody()).getAsJsonObject().get("clientId");
+        final JsonElement clientId = new FromJsonHelper().parse(response.get(0).getBody()).getAsJsonObject()
+                .get("clientId");
 
-        Assert.assertEquals("Verify Status Code 200" + clientId.getAsString(), 200L, (long) response.get(1).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200" + clientId.getAsString(), 200L,
+                (long) response.get(1).getStatusCode());
     }
 
     /**
@@ -260,7 +262,8 @@ public class BatchApiTest {
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance("5000").build();
 
-        final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec, this.responseSpec);
+        final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec,
+                this.responseSpec);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4720L, "");
@@ -279,17 +282,17 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         Assert.assertEquals("Verify Status Code 200", 200L, (long) response.get(1).getStatusCode());
     }
 
     /**
      * Tests that a new charge was added to a newly created loan and charges are
-     * Collected properly 200(OK) status was returned for successful responses.
-     * It first creates a new client and apply a loan, then creates a new charge
-     * for the create loan and then fetches all the applied charges
+     * Collected properly 200(OK) status was returned for successful responses. It
+     * first creates a new client and apply a loan, then creates a new charge for
+     * the create loan and then fetches all the applied charges
      *
      * @see org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy
      * @see org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy
@@ -308,7 +311,8 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+                .getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4722L, "");
@@ -331,17 +335,18 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Create Loan Charge", 200L, (long) response.get(3).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Create Loan Charge", 200L,
+                (long) response.get(3).getStatusCode());
     }
 
     /**
-     * Tests that batch repayment for loans is happening properly.
-     * Collected properly 200(OK) status was returned for successful responses.
-     * It first creates a new loan and then makes two repayments for it
-     * and then verifies that 200(OK) is returned for the repayment requests.
+     * Tests that batch repayment for loans is happening properly. Collected
+     * properly 200(OK) status was returned for successful responses. It first
+     * creates a new loan and then makes two repayments for it and then verifies
+     * that 200(OK) is returned for the repayment requests.
      *
      * @see org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy
      */
@@ -359,7 +364,8 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+                .getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
@@ -394,8 +400,8 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         Assert.assertEquals("Verify Status Code 200 for Repayment", 200L, (long) response.get(5).getStatusCode());
         Assert.assertEquals("Verify Status Code 200 for Repayment", 200L, (long) response.get(6).getStatusCode());
@@ -424,8 +430,8 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         Assert.assertEquals("Verify Status Code 200 for Create Client", 200L, (long) response.get(0).getStatusCode());
         Assert.assertEquals("Verify Status Code 200 for Activate Client", 200L, (long) response.get(1).getStatusCode());
@@ -452,7 +458,8 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+                .getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
@@ -479,22 +486,23 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         Assert.assertEquals("Verify Status Code 200 for Approve Loan", 200L, (long) response.get(3).getStatusCode());
         Assert.assertEquals("Verify Status Code 200 for Disburse Loan", 200L, (long) response.get(4).getStatusCode());
     }
 
     /**
-     * Test for the successful create client, apply loan,approval and disbursal of a loan using
-     * Batch API with enclosingTransaction. A '200' status code is expected on successful activation.
+     * Test for the successful create client, apply loan,approval and disbursal of a
+     * loan using Batch API with enclosingTransaction. A '200' status code is
+     * expected on successful activation.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */
     @Test
-    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction(){
+    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction() {
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withNumberOfRepayments("24") //
@@ -506,7 +514,8 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+                .getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createActiveClientRequest(4740L, "");
@@ -520,12 +529,12 @@ public class BatchApiTest {
         // Create a disburseLoan Request
         final BatchRequest br4 = BatchHelper.disburseLoanRequest(4744L, 4743L);
 
-        final List<BatchRequest> batchRequests = Arrays.asList(br1,br2,br3,br4);
+        final List<BatchRequest> batchRequests = Arrays.asList(br1, br2, br3, br4);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
+                this.responseSpec, jsonifiedRequest);
 
         Assert.assertEquals("Verify Status Code 200 for create client", 200L, (long) response.get(0).getStatusCode());
         Assert.assertEquals("Verify Status Code 200 for apply Loan", 200L, (long) response.get(1).getStatusCode());

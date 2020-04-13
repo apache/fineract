@@ -44,7 +44,8 @@ public class RolesTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -52,7 +53,8 @@ public class RolesTest {
     @Test
     public void testCreateRolesStatus() {
 
-        System.out.println("---------------------------------CREATING A ROLE---------------------------------------------");
+        System.out.println(
+                "---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
@@ -66,7 +68,8 @@ public class RolesTest {
     @Test
     public void testDisableRolesStatus() {
 
-        System.out.println("---------------------------------CREATING A ROLE---------------------------------------------");
+        System.out.println(
+                "---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
@@ -87,7 +90,8 @@ public class RolesTest {
     @Test
     public void testEnableRolesStatus() {
 
-        System.out.println("---------------------------------CREATING A ROLE---------------------------------------------");
+        System.out.println(
+                "---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
@@ -115,7 +119,8 @@ public class RolesTest {
     @Test
     public void testDeleteRoleStatus() {
 
-        System.out.println("-------------------------------- CREATING A ROLE---------------------------------------------");
+        System.out.println(
+                "-------------------------------- CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 

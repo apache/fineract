@@ -67,7 +67,7 @@ public class InteropHelper {
     private final BigDecimal fee;
 
     public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String tenantId,
-                         String accountExternalId, String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
+            String accountExternalId, String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
         this.tenantId = tenantId;
@@ -78,8 +78,10 @@ public class InteropHelper {
         this.fee = fee;
     }
 
-    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId, String transactionCode) {
-        this(requestSpec, responseSpec, Utils.DEFAULT_TENANT, accountExternalId, transactionCode, "TZS", BigDecimal.TEN, BigDecimal.ONE);
+    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId,
+            String transactionCode) {
+        this(requestSpec, responseSpec, Utils.DEFAULT_TENANT, accountExternalId, transactionCode, "TZS", BigDecimal.TEN,
+                BigDecimal.ONE);
     }
 
     public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
@@ -285,7 +287,8 @@ public class InteropHelper {
      * @return response 'transferCode' attribute
      */
     public String getTransfer(String transferCode) {
-        String url = buildUrl(TRANSACTIONS_URL + '/' + transactionCode + '/' + TRANSFERS_URL_PARAM + '/' + transferCode);
+        String url = buildUrl(
+                TRANSACTIONS_URL + '/' + transactionCode + '/' + TRANSFERS_URL_PARAM + '/' + transferCode);
         log.debug("Calling Interoperable GET Transfer: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
