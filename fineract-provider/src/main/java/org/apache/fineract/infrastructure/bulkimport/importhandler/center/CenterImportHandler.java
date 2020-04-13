@@ -222,7 +222,7 @@ public class CenterImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         Type groupCollectionType = new TypeToken<Collection<GroupGeneralData>>() {}.getType();
         gsonBuilder.registerTypeAdapter(groupCollectionType,new GroupIdSerializer());
-        String payload= gsonBuilder.create().toJson(centers.get(rowIndex));;
+        String payload= gsonBuilder.create().toJson(centers.get(rowIndex));
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCenter() //
                 .withJson(payload) //
