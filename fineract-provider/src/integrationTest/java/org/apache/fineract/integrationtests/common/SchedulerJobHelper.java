@@ -24,6 +24,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.junit.Assert;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -104,12 +105,12 @@ public class SchedulerJobHelper {
         return runSchedulerJob;
     }
 
-    public void executeJob(String JobName) throws InterruptedException {
+    public void executeJob(String jobName) throws InterruptedException {
         ArrayList<HashMap> allSchedulerJobsData = getAllSchedulerJobs(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(allSchedulerJobsData);
 
         for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
+            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(jobName)) {
                 Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
                 // Executing Scheduler Job
@@ -127,7 +128,9 @@ public class SchedulerJobHelper {
                     System.out.println("Job is Still Running");
                 }
 
-                ArrayList<HashMap> jobHistoryData = getSchedulerJobHistory(this.requestSpec, this.responseSpec, jobId.toString());
+                List<HashMap> jobHistoryData = getSchedulerJobHistory(this.requestSpec, this.responseSpec, jobId.toString());
+
+                Assert.assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
 
                 // print error associated with recent job failure (if any)
                 System.out.println("Job run error message (printed only if the job fails: "

@@ -1909,7 +1909,7 @@ public class ClientSavingsIntegrationTest {
     }
 
     @Test
-    public void testSavingsAccount_DormancyTracking() {
+    public void testSavingsAccount_DormancyTracking() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1973,11 +1973,7 @@ public class ClientSavingsIntegrationTest {
         }
 
         SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        try {
-            jobHelper.executeJob("Update Savings Dormant Accounts");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        jobHelper.executeJob("Update Savings Dormant Accounts");
 
         //VERIFY WITHIN PROVIDED RANGE DOESN'T INACTIVATE
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(0));
