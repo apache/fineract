@@ -109,7 +109,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         config.addDataSourceProperty("maintainTimeStats", "false");
 
         // https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj
-        config.addDataSourceProperty("logger", "com.mysql.jdbc.log.StandardLogger");
+        // TODO FINERACT-890: config.addDataSourceProperty("logger", "com.mysql.cj.log.Slf4JLogger");
         config.addDataSourceProperty("logSlowQueries", "true");
         config.addDataSourceProperty("dumpQueriesOnException", "true");
 
