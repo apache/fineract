@@ -36,11 +36,11 @@ ENGINE=InnoDB
 ;
 
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("datatable","READ_ENTITY_DATATABLE_CHECK","ENTITY_DATATABLE_CHECK","READ",0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("datatable","CREATE_ENTITY_DATATABLE_CHECK","ENTITY_DATATABLE_CHECK","CREATE",0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("datatable","DELETE_ENTITY_DATATABLE_CHECK","ENTITY_DATATABLE_CHECK","DELETE",0);
