@@ -942,8 +942,7 @@ public class ClientSavingsIntegrationTest {
         HashMap accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
-        Float accountDetailsPostInterest = Float.valueOf(summary.get(
-                "totalInterestPosted").toString());
+        // Float accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
                 "nominalAnnualInterestRate").toString());
@@ -1019,8 +1018,7 @@ public class ClientSavingsIntegrationTest {
             accountTransactionDetails = this.savingsAccountHelper
                     .getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
-            accountDetailsPostInterest = Float.valueOf(summary.get(
-                    "totalInterestPosted").toString());
+            // accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
 
             nominalAnnualInterest = Float.valueOf(accountDetails.get(
                     "nominalAnnualInterestRate").toString());
@@ -1063,8 +1061,7 @@ public class ClientSavingsIntegrationTest {
             accountTransactionDetails = this.savingsAccountHelper
                     .getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
-            accountDetailsPostInterest = Float.valueOf(summary.get(
-                    "totalInterestPosted").toString());
+            // accountDetailsPostInterest = Float.valueOf(summary.get("totalInterestPosted").toString());
 
             nominalAnnualInterest = Float.valueOf(accountDetails.get(
                     "nominalAnnualInterestRate").toString());
