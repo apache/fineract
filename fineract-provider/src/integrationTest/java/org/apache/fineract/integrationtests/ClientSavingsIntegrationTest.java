@@ -1012,7 +1012,7 @@ public class ClientSavingsIntegrationTest {
         transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
         transactionDate.set(Calendar.DAY_OF_MONTH, 22);
         TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
-        if (Calendar.DAY_OF_MONTH >= 22) { // TODO FINERACT-891 Dead Code..
+        if (transactionDate.get(Calendar.DAY_OF_MONTH) >= 22) {
             this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
                     TRANSACTION_DATE);
             accountTransactionDetails = this.savingsAccountHelper
@@ -1352,7 +1352,7 @@ public class ClientSavingsIntegrationTest {
         transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
         transactionDate.set(Calendar.DAY_OF_MONTH, 22);
         TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
-        if (Calendar.DAY_OF_MONTH >= 22) { // TODO FINERACT-891 Dead Code..
+        if (transactionDate.get(Calendar.DAY_OF_MONTH) >= 22) {
             this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
                     TRANSACTION_DATE);
             accountTransactionDetails = this.savingsAccountHelper
