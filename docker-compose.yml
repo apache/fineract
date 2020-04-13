@@ -55,3 +55,9 @@ services:
       - FINERACT_DEFAULT_TENANTDB_PORT=3306
       - FINERACT_DEFAULT_TENANTDB_UID=root
       - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+
+# https://issues.apache.org/jira/browse/FINERACT-762
+# To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
+# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
+# and remove ":thin:" from PROTOCOL and fineract_tenants_url.  Note that the mysql-connector-java-*.jar is already
+# bundled in the container by the Dockerfile, but just not used by default.
