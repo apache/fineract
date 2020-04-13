@@ -238,7 +238,7 @@ public class GroupImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         Type clientCollectionType = new TypeToken<Collection<ClientData>>() {}.getType();
         gsonBuilder.registerTypeAdapter(clientCollectionType,new ClientIdSerializer());
-        String payload= gsonBuilder.create().toJson(groups.get(rowIndex));;
+        String payload= gsonBuilder.create().toJson(groups.get(rowIndex));
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createGroup() //
                 .withJson(payload) //

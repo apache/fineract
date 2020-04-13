@@ -318,7 +318,7 @@ public class LoanImportHandler implements ImportHandler {
             CommandProcessingResult result=null;
             loanId="";
             try {
-                String status = statuses.get(i);;
+                String status = statuses.get(i);
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0&& loans.get(i)!=null) {

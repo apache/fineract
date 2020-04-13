@@ -82,7 +82,7 @@ public class Survey extends AbstractPersistableCustom {
 
     public void setQuestions(List<Question> questions) {
         if(this.questions != null){
-            this.questions.clear();;
+            this.questions.clear();
         }else{
             this.questions = new ArrayList<>();
         }

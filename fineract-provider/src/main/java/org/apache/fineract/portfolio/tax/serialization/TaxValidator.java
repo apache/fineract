@@ -279,7 +279,7 @@ public class TaxValidator {
                             .validateDateAfter(existing.startDate());
                 }
                 if(mapping.getTaxComponent()!= null && !existing.getTaxComponent().getId().equals(mapping.getTaxComponent().getId())){
-                    baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");;
+                    baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");
                 }
             } else if (mapping.endDate() != null) {
                 baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).failWithCode("not.supported.for.new.association");

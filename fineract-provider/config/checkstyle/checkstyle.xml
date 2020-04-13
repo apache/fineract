@@ -59,7 +59,7 @@
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
            <module name="OneStatementPerLine"/>
-
+           <module name="EmptyStatement"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -68,7 +68,6 @@
             <property name="ignoreSetter" value="true" />
             <property name="setterCanReturnItsClass" value="true" />
         </module>
-        <module name="EmptyStatement"/>
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
 
