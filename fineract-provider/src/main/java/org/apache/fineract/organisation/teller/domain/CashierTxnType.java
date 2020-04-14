@@ -51,13 +51,17 @@ public class CashierTxnType implements Serializable {
 
         switch(id) {
         case 101:
-            retVal = ALLOCATE; break;
+            retVal = ALLOCATE;
+            break;
         case 102:
-            retVal = SETTLE; break;
+            retVal = SETTLE;
+            break;
         case 103:
-            retVal = INWARD_CASH_TXN; break;
+            retVal = INWARD_CASH_TXN;
+            break;
         case 104:
-            retVal = OUTWARD_CASH_TXN; break;
+            retVal = OUTWARD_CASH_TXN;
+            break;
         default:
             break;
         }

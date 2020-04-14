@@ -81,7 +81,7 @@ final class UsersApiResourceSwagger {
         @ApiModelProperty(example = "false")
         public Boolean passwordNeverExpires;
         public StaffData staff;
-        public Collection<RoleData> availableRoles;;
+        public Collection<RoleData> availableRoles;
         public Collection<RoleData> selectedRoles;
 
     }
