@@ -93,6 +93,7 @@ public class FixedDepositAccountHelper {
     private String submittedOnDate = "";
     private String savingsId = null;
     private boolean transferInterest = false;
+    private Integer maturityInstructionId;
 
     public String build(final String clientId, final String productId, final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -124,6 +125,7 @@ public class FixedDepositAccountHelper {
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("linkAccountId", savingsId);
         map.put("transferInterestToSavings", transferInterest);
+        map.put("maturityInstructionId", maturityInstructionId);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
         System.out.println(fixedDepositAccountJson);
@@ -458,5 +460,10 @@ public class FixedDepositAccountHelper {
     private String getDepositAmount() {
         if (this.newDepositAmount == null) { return depositAmount; }
         return this.newDepositAmount;
+    }
+
+    public FixedDepositAccountHelper withMaturityInstructionId(Integer maturityInstructionId){
+        this.maturityInstructionId = maturityInstructionId;
+        return this;
     }
 }

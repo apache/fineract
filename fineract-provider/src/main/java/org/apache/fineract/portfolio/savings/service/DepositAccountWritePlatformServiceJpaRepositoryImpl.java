@@ -19,15 +19,23 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.activatedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.dateFormatParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.localeParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.toSavingsAccountIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferDescriptionParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +52,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -145,6 +154,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -164,7 +174,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository) {
+            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            final FromJsonHelper fromApiJsonHelper) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -188,6 +199,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.configurationDomainService = configurationDomainService;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Transactional
@@ -798,14 +810,15 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.depositAccountTransactionDataValidator.validateClosing(command, DepositAccountType.FIXED_DEPOSIT, isPreMatureClose);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+        final PaymentDetail
+                paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
         final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
         this.depositAccountDomainService.handleFDAccountClosure(account, paymentDetail, user, command, DateUtils.getLocalDateOfTenant(),
-                changes);
+                false, changes);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -1352,12 +1365,51 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (depositAccountType.isFixedDeposit()) {
             ((FixedDepositAccount) account).updateMaturityStatus(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            FixedDepositAccount fdAccount = ((FixedDepositAccount) account);
+            //handle maturity instructions
+
+            if(fdAccount.isMatured() && (fdAccount.isReinvestOnClosure() || fdAccount.isTransferToSavingsOnClosure())){
+                Long toSavingsId = fdAccount.getTransferToSavingsAccountId();
+                JsonCommand command = generateCommandForClosure(fdAccount.maturityDate(), toSavingsId,
+                            "Apply maturity instructions",  fdAccount.getOnAccountClosureId());
+                Map<String, Object> changes = new HashMap<>();
+                this.depositAccountDomainService.handleFDAccountClosure(fdAccount, null,
+                                                context.authenticatedUser(), command,
+                                                DateUtils.getLocalDateOfTenant(), true, changes);
+                if(changes.get("reinvestedDepositId") != null){
+                    Long reinvestedDepositId = (Long) changes.get("reinvestedDepositId");
+                    activateFDAccount(reinvestedDepositId, generateCommandForActivation(fdAccount.maturityDate()));
+                }
+            }
         } else if (depositAccountType.isRecurringDeposit()) {
             ((RecurringDepositAccount) account).updateMaturityStatus(isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
         }
         this.savingAccountRepositoryWrapper.saveAndFlush(account) ;
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+    }
+
+    private JsonCommand  generateCommandForClosure(LocalDate closedDate, Long toSavingsId, final String transferDescription,
+                                                   Integer onAccountClosureId){
+        JsonObject json = new JsonObject();
+        json.addProperty(localeParamName, "en");
+        json.addProperty(dateFormatParamName,"yyyy-MM-dd");
+        json.addProperty(SavingsApiConstants.closedOnDateParamName, closedDate.toString("yyyy-MM-dd"));
+        json.addProperty(toSavingsAccountIdParamName, toSavingsId);
+        json.addProperty(transferDescriptionParamName, transferDescription);
+        json.addProperty(onAccountClosureIdParamName, onAccountClosureId);
+        json.addProperty(SavingsApiConstants.approvedOnDateParamName, closedDate.toString("yyyy-MM-dd"));
+        json.addProperty(activatedOnDateParamName, closedDate.toString("yyyy-MM-dd"));
+
+        return JsonCommand.fromJsonElement(0L, json, this.fromApiJsonHelper);
+    }
+    private JsonCommand  generateCommandForActivation(LocalDate activatedOnDate){
+        JsonObject json = new JsonObject();
+        json.addProperty(localeParamName, "en");
+        json.addProperty(dateFormatParamName,"yyyy-MM-dd");
+        json.addProperty(activatedOnDateParamName, activatedOnDate.toString("yyyy-MM-dd"));
+
+        return JsonCommand.fromJsonElement(0L, json, this.fromApiJsonHelper);
     }
 
     private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,

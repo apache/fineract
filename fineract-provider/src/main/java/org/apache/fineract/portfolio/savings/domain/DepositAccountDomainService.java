@@ -41,7 +41,7 @@ public interface DepositAccountDomainService {
             BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isRegularTransaction);
 
     Long handleFDAccountClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
-            LocalDate tenantsTodayDate, Map<String, Object> changes);
+            LocalDate tenantsTodayDate, boolean processMaturityInstructionOnly, Map<String, Object> changes);
 
     Long handleRDAccountClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);

@@ -756,6 +756,14 @@ public class FixedDepositAccount extends SavingsAccount {
         return this.accountTermAndPreClosure.isTransferToSavingsOnClosure();
     }
 
+    public Integer getOnAccountClosureId(){
+        return this.accountTermAndPreClosure.getOnAccountClosureType();
+    }
+
+    public Long getTransferToSavingsAccountId() {
+        return this.accountTermAndPreClosure.getTransferToSavingsAccountId();
+    }
+
     public FixedDepositAccount reInvest(BigDecimal depositAmount) {
 
         final DepositAccountTermAndPreClosure newAccountTermAndPreClosure = this.accountTermAndPreClosure.copy(depositAmount);
@@ -830,4 +838,16 @@ public class FixedDepositAccount extends SavingsAccount {
         super.loadLazyCollections();
         this.chart.getId() ;
     }
+
+    public BigDecimal getDepositAmount() {
+        return this.accountTermAndPreClosure.depositAmount();
+    }
+    @Override
+    public BigDecimal getAccountBalance() {
+        return this.summary.getAccountBalance(this.currency).getAmount();
+    }
+    public boolean isMatured(){
+        return SavingsAccountStatusType.MATURED.getValue().equals(this.status);
+    }
+
 }

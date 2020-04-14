@@ -32,7 +32,9 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.expecte
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maturityInstructionIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferToSavingsIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.externalIdParamName;
@@ -298,6 +300,10 @@ public class DepositAccountAssembler {
                 throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
             }
         }
+        Integer depositRolloverId =  null;
+        if(command.parameterExists(maturityInstructionIdParamName)){
+            depositRolloverId = command.integerValueOfParameterNamed(maturityInstructionIdParamName);
+        }
 
         SavingsAccount account = null;
         if (depositAccountType.isFixedDeposit()) {
@@ -375,10 +381,12 @@ public class DepositAccountAssembler {
         final BigDecimal maturityAmount = null;// calculated and updated in
                                                // account
         final LocalDate maturityDate = null;// calculated and updated in account
-        final DepositAccountOnClosureType accountOnClosureType = null;
+        final Integer accountOnClosureTypeId = command.integerValueOfParameterNamed(maturityInstructionIdParamName);
+        final DepositAccountOnClosureType accountOnClosureType = accountOnClosureTypeId != null ? DepositAccountOnClosureType.fromInt(accountOnClosureTypeId) :null;
+        final Long transferToSavingsId  = command.longValueOfParameterNamed(transferToSavingsIdParamName);
         return DepositAccountTermAndPreClosure.createNew(updatedProductPreClosure, updatedProductTerm, account, depositAmount,
                 maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
-                trasferInterest);
+                trasferInterest, transferToSavingsId);
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(final JsonCommand command,

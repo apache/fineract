@@ -124,12 +124,35 @@ public final class JsonCommand {
         return new JsonCommand(resourceId, parsedCommand);
     }
 
+    public static JsonCommand fromJsonElement(final Long resourceId, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
+        return new JsonCommand(resourceId, parsedCommand, fromApiJsonHelper);
+    }
+
     public JsonCommand(final Long resourceId, final JsonElement parsedCommand) {
         this.parsedCommand = parsedCommand;
         this.resourceId = resourceId;
         this.commandId = null;
         this.jsonCommand = null;
         this.fromApiJsonHelper = null;
+        this.entityName = null;
+        this.subresourceId = null;
+        this.groupId = null;
+        this.clientId = null;
+        this.loanId = null;
+        this.savingsId = null;
+        this.transactionId = null;
+        this.url = null;
+        this.productId = null;
+        this.creditBureauId=null;
+        this.organisationCreditBureauId=null;
+    }
+
+    public JsonCommand(final Long resourceId, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper) {
+        this.parsedCommand = parsedCommand;
+        this.resourceId = resourceId;
+        this.commandId = null;
+        this.jsonCommand = null;
+        this.fromApiJsonHelper = fromApiJsonHelper;
         this.entityName = null;
         this.subresourceId = null;
         this.groupId = null;
