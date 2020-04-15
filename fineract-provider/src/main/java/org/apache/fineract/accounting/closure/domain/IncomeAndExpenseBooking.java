@@ -31,7 +31,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
 @Table(name = "acc_income_and_expense_bookings",uniqueConstraints = { @UniqueConstraint(columnNames = { "journal_entry_transaction_id" }, name = "journal_entry_transaction_id") })
-public class IncomeAndExpenseBooking extends AbstractPersistableCustom<Long>  {
+public class IncomeAndExpenseBooking extends AbstractPersistableCustom  {
 
     @ManyToOne
     @JoinColumn(name = "gl_closure_id", nullable = false)
