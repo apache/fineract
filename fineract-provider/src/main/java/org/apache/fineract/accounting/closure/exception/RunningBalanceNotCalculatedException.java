@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.office.domain;
+package org.apache.fineract.accounting.closure.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
+public class RunningBalanceNotCalculatedException extends AbstractPlatformDomainRuleException {
+    public RunningBalanceNotCalculatedException(final Long officeId) {
+        super("error.msg.running.balance.not.calculated", "Office with identifier " + officeId + " running balance is not calculated");
+    }
 
-    // no added behaviour
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.closure.api;
 
+import com.google.gson.JsonElement;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -28,6 +29,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,19 +46,25 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
+import org.apache.fineract.accounting.closure.data.IncomeAndExpenseBookingData;
+import org.apache.fineract.accounting.closure.service.CalculateIncomeAndExpenseBooking;
 import org.apache.fineract.accounting.closure.service.GLClosureReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+
 
 @Path("/glclosures")
 @Component
@@ -79,18 +87,26 @@ public class GLClosuresApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final FromJsonHelper fromJsonHelper;
+    private final CalculateIncomeAndExpenseBooking calculateIncomeAndExpenseBooking;
+    private final DefaultToApiJsonSerializer<IncomeAndExpenseBookingData> incomeAndExpenseBookingDataDefaultToApiJsonSerializer;
 
     @Autowired
     public GLClosuresApiResource(final PlatformSecurityContext context, final GLClosureReadPlatformService glClosureReadPlatformService,
             final DefaultToApiJsonSerializer<GLClosureData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService, final FromJsonHelper fromJsonHelper,
+            final CalculateIncomeAndExpenseBooking calculateIncomeAndExpenseBooking,
+            final DefaultToApiJsonSerializer<IncomeAndExpenseBookingData> incomeAndExpenseBookingDataDefaultToApiJsonSerializer) {
         this.context = context;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiJsonSerializerService = toApiJsonSerializer;
         this.glClosureReadPlatformService = glClosureReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
+        this.fromJsonHelper = fromJsonHelper;
+        this.calculateIncomeAndExpenseBooking = calculateIncomeAndExpenseBooking;
+        this.incomeAndExpenseBookingDataDefaultToApiJsonSerializer = incomeAndExpenseBookingDataDefaultToApiJsonSerializer;
     }
 
     @GET
@@ -142,6 +158,21 @@ public class GLClosuresApiResource {
 
         return this.apiJsonSerializerService.serialize(result);
     }
+
+    @POST
+    @Path("previewIncomeAndExpense")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Create an End of the Year Accounting Closure")
+    public String previewIncomeAndExpenseBooking(@Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
+            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
+            final Collection<IncomeAndExpenseBookingData> incomeAndExpenseBookingCollection = this.calculateIncomeAndExpenseBooking.CalculateIncomeAndExpenseBookings(query);
+            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return this.incomeAndExpenseBookingDataDefaultToApiJsonSerializer.serialize(settings, incomeAndExpenseBookingCollection, new HashSet<String>());
+
+    }
+
 
     @PUT
     @Path("{glClosureId}")

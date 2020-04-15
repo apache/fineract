@@ -16,12 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.office.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+package org.apache.fineract.accounting.closure.data;
+import java.util.List;
+import org.joda.time.LocalDate;
 
-public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
 
-    // no added behaviour
+
+
+public class IncomeAndExpenseBookingData {
+
+    private final LocalDate bookingDate;
+
+    private final String comments;
+
+    private List<JournalEntryData> journalEntries;
+
+    public IncomeAndExpenseBookingData(final LocalDate bookingDate, final String comments, final List<JournalEntryData> journalEntries) {
+        this.bookingDate = bookingDate;
+        this.comments = comments;
+        this.journalEntries = journalEntries;
+    }
+
+    public LocalDate getBookingDate() {return this.bookingDate;}
+
+    public String getComments() {return this.comments;}
+
+    public List<JournalEntryData> getJournalEntries() {return this.journalEntries;}
+
 }

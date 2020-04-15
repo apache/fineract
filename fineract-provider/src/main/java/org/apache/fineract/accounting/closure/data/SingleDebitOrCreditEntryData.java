@@ -16,12 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.office.domain;
+package org.apache.fineract.accounting.closure.data;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.math.BigDecimal;
 
-public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
+public class SingleDebitOrCreditEntryData {
 
-    // no added behaviour
+    private final Long glAccountId;
+    private final String glAccountName;
+    private final BigDecimal amount;
+    private final String comments;
+
+    public SingleDebitOrCreditEntryData(Long glAccountId, String glAccountName, BigDecimal amount, String comments) {
+        this.glAccountId = glAccountId;
+        this.glAccountName = glAccountName;
+        this.amount = amount;
+        this.comments = comments;
+    }
+
+    public Long getGlAccountId() {return this.glAccountId;}
+
+    public String getGlAccountName() {return this.glAccountName;}
+
+    public BigDecimal getAmount() {return this.amount;}
+
+    public String getComments() {return this.comments;}
+
 }

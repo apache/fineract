@@ -16,12 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.office.domain;
+package org.apache.fineract.integrationtests;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 
-public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
+public class JsonCommandWrapperTest {
+    private JsonCommand command;
 
-    // no added behaviour
+    public JsonCommand getCommand() {
+        return command;
+    }
+
+    public void setCommand(JsonCommand command) {
+        this.command = command;
+    }
 }

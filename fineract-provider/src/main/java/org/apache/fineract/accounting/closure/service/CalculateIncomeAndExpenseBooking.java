@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.office.domain;
+package org.apache.fineract.accounting.closure.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.Collection;
+import org.apache.fineract.accounting.closure.data.IncomeAndExpenseBookingData;
+import org.apache.fineract.infrastructure.core.api.JsonQuery;
 
-public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
 
-    // no added behaviour
+
+public interface CalculateIncomeAndExpenseBooking {
+    Collection<IncomeAndExpenseBookingData> CalculateIncomeAndExpenseBookings(JsonQuery query);
 }
