@@ -1400,12 +1400,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             account = this.depositAccountAssembler.assembleFrom(accountTransactionDTO.getSavingsAccountId(),
                     DepositAccountType.CURRENT_DEPOSIT);
         }
+        dummyTryTravis();
         return this.depositAccountDomainService.handleSavingDeposit(account, accountTransactionDTO.getFormatter(),
                 accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(), paymentDetail,
                 isRegularTransaction);
 
     }
 
+    private Integer dummyTryTravis(){
+        return  Integer.parseInt("10");
+    }
 
     private AppUser getAppUserIfPresent() {
         AppUser user = null;
