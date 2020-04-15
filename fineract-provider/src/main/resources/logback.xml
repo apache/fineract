@@ -45,7 +45,7 @@
 	<logger name="net.sf.ehcache" level="error" />
 	<logger name="org.hibernate.cache" level="error" />
 
-	<root level="info">
+	<root level="debug">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</root>
