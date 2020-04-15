@@ -280,6 +280,7 @@ configurations {
 /* Pick up dependencies based on the environemnt, defaults to production */
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'
+    apply from: rootProject.file('gradle/install-git-hooks.gradle')
 }  else {
     apply from: 'dependencies.gradle'
 }
