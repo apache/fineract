@@ -20,8 +20,8 @@ package org.apache.fineract.integrationtests.common;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 

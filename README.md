@@ -107,6 +107,57 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 and the `mysqlserver` environment variable is now no longer supported.)_
 
 
+Instructions to run on Kubernetes
+=================================
+
+General Clusters
+----------------
+
+You can also run Fineract using containers on a Kubernetes cluster.
+Make sure you set up and connect to your Kubernetes cluster.
+You can follow [this](https://cwiki.apache.org/confluence/display/FINERACT/Install+and+configure+kubectl+and+Google+Cloud+SDK+on+ubuntu+16.04) guide to set up a Kubernetes cluster on GKE. Make sure to replace `apache-fineract-cn` with `apache-fineract`
+
+Now e.g. from your Google Cloud shell, run the following commands:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+1. `./kubectl-startup`
+
+To shutdown and reset your Cluster, run:
+
+    ./kubectl-shutdown
+
+Using Minikube
+--------------
+
+Alternatively, you can run fineract on a local kubernetes cluster using [minikube](https://minikube.sigs.k8s.io/docs/).
+As Prerequisites, you must have `minikube` and `kubectl` installed on your machine; see
+[Minikube & Kubectl install](https://kubernetes.io/docs/tasks/tools/install-minikube/).
+
+Now to run a new Fineract instance on Minikube you can simply:
+
+1. `git clone https://github.com/apache/fineract.git ; cd fineract/kubernetes`
+1. `minikube start`
+1. `./kubectl-startup.sh`
+1. `minikube service fineract-server --url --https`
+1. Fineract is now running at the printed URL (note HTTP), which you can check e.g. using:
+
+    http --verify=no --timeout 240 --check-status get $(minikube service fineract-server --url --https)/fineract-provider/actuator/health
+
+To check the status of your containers on your local minikube Kubernetes cluster, run:
+
+    minikube dashboard
+
+You can check Fineract logs using:
+
+    kubectl logs deployment/fineract-server
+
+To shutdown and reset your cluster, run:
+
+    ./kubectl-shutdown
+
+We have [some open issues in JIRA with Kubernetes related enhancement ideas](https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20) which you are welcome to contribute to.
+
+
 Checkstyle
 ============
 
@@ -118,7 +169,7 @@ You could also use Checkstyle directly in your IDE (but you don't neccesarily ha
 Code Coverage Reports
 ============
 
-The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command: 
+The project uses Jacoco to measure unit tests code coverage, to generate a report run the following command:
 
     `./gradlew clean build jacocoTestReport`
 

@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.provisioning;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;

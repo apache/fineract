@@ -20,8 +20,8 @@ package org.apache.fineract.integrationtests.common.fixeddeposit;
 
 import static org.junit.Assert.assertTrue;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;

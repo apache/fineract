@@ -18,17 +18,18 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
@@ -50,6 +51,7 @@ public class SchedulerJobsTest {
     }
 
     @Test
+    @Ignore // TODO FINERACT-852
     public void testSchedulerJobs() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
 
@@ -91,8 +93,8 @@ public class SchedulerJobsTest {
             // Updating Scheduler Job
             HashMap changes = this.schedulerJobHelper.updateSchedulerJob(this.requestSpec, this.responseSpec, jobId.toString(),
                     active.toString());
-            // Verifying Scheduler Job updation
-            Assert.assertEquals("Verifying Scheduler Job Updation", active, changes.get("active"));
+            // Verifying Scheduler Job updates
+            Assert.assertEquals("Verifying Scheduler Job Updates", active, changes.get("active"));
 
             // Executing Scheduler Job
             this.schedulerJobHelper.runSchedulerJob(this.requestSpec, jobId.toString());
@@ -112,10 +114,9 @@ public class SchedulerJobsTest {
                     jobId.toString());
 
             // Verifying the Status of the Recently executed Scheduler Job
+            Assert.assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
             Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
                     jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
         }
-
     }
-
 }

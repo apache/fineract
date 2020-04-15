@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 public class NotificationHelper {
 
