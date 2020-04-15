@@ -51,6 +51,10 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 # NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
 # where you do not have access to any files like build/reports/tests/index.html, only the Console.
 # @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html
