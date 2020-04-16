@@ -19,7 +19,7 @@
 #
 
 echo "Setting Up Fineract service configuration..."
-kubectl apply -f secrets.yml
+kubectl create secret generic fineract-tenants-db-secret --from-literal=username=root --from-literal=password=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16)
 kubectl apply -f fineractmysql-configmap.yml
 
 echo
@@ -30,7 +30,7 @@ fineractmysql_pod=""
 while [[ ${#fineractmysql_pod} -eq 0 ]]; do
     fineractmysql_pod=$(kubectl get pods -l tier=fineractmysql --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
 done
-#sleep 5
+
 fineractmysql_status=$(kubectl get pods ${fineractmysql_pod} --no-headers -o custom-columns=":status.phase")
 while [[ ${fineractmysql_status} -ne 'Running' ]]; do
     sleep 1
@@ -40,3 +40,16 @@ done
 echo
 echo "Starting fineract server..."
 kubectl apply -f fineract-server-deployment.yml
+
+fineract-server_pod=""
+while [[ ${#fineract-server_pod} -eq 0 ]]; do
+    fineract-server_pod=$(kubectl get pods -l tier=fineract-server --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+done
+
+fineract-server_status=$(kubectl get pods ${fineract-server_pod} --no-headers -o custom-columns=":status.phase")
+while [[ ${fineract-server_status} -ne 'Running' ]]; do
+    sleep 1
+    fineract-server_status=$(kubectl get pods ${fineract-server_pod} --no-headers -o custom-columns=":status.phase")
+done
+
+echo "Fineract server is up and running"
