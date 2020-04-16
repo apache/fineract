@@ -99,7 +99,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getDebits().get(0).getAmount(), new BigDecimal(30));
@@ -119,7 +118,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getCredits().get(0).getAmount(), new BigDecimal(30));
@@ -139,7 +137,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getDebits().get(0).getAmount(), new BigDecimal(30));
@@ -159,7 +156,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getCredits().get(0).getAmount(), new BigDecimal(30));
