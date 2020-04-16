@@ -54,6 +54,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -1907,7 +1908,7 @@ public class ClientSavingsIntegrationTest {
         Assert.assertEquals(expected, actual, 1);
 
     }
-
+    @Ignore
     @Test
     public void testSavingsAccount_DormancyTracking() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
