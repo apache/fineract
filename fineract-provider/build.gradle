@@ -147,9 +147,11 @@ project.ext.mysqlPassword='mysql'
 
 group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
+
+
 repositories {
 	jcenter()
-	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
+	mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 
 openjpa {
@@ -192,6 +194,7 @@ rat {
 	'**/template.mustache',
 	'**/.classpath',
 	'**/.project',
+	'**/props/**',
 	'**/.idea/**',
     '**/*.ipr',
     '**/*.iws',
@@ -280,9 +283,10 @@ configurations {
 /* Pick up dependencies based on the environemnt, defaults to production */
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'
-    apply from: rootProject.file('gradle/install-git-hooks.gradle')
+    apply from: rootProject.file('install-git-hooks.gradle')
 }  else {
     apply from: 'dependencies.gradle'
+    apply from: rootProject.file('install-git-hooks.gradle')
 }
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
@@ -501,6 +505,7 @@ repositories {
 }
 configurations {
     driver
+    installGitHooks
 }
 dependencies {
     driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
@@ -568,3 +573,13 @@ tasks.withType(SpotBugsTask) {
     reports.html.enabled = true
     reportLevel = "high"
 }
+
+// GitHooks 
+afterEvaluate {
+    // We install the hook at the first occasion
+    tasks['clean'].dependsOn installGitHooks
+    tasks['assemble'].dependsOn installGitHooks
+}
+
+
+
