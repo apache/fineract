@@ -41,6 +41,7 @@ metadata:
   name: fineract-server
   labels:
     app: fineract-server
+    tier: fineract-server
 spec:
   selector:
     matchLabels:
@@ -58,8 +59,26 @@ spec:
       - name: fineract-server
         image: apache/fineract:latest
         env:
-        - name: JAVA_OPTS
-          value: -Dfineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants -Dfineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver -Dfineract_tenants_uid=root -Dfineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca -Djava.awt.headless=true -XX:+UseG1GC -Dfile.encoding=UTF-8
+        - name: DRIVERCLASS_NAME
+          value: org.drizzle.jdbc.DrizzleDriver
+        - name: PROTOCOL
+          value: jdbc
+        - name: SUB_PROTOCOL
+          value: mysql:thin
+        - name: fineract_tenants_driver
+          value: org.drizzle.jdbc.DrizzleDriver
+        - name: fineract_tenants_url
+          value: jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
+        - name: fineract_tenants_uid
+          valueFrom:
+            secretKeyRef:
+              name: fineract-tenants-db-secret
+              key: username
+        - name: fineract_tenants_pwd
+          valueFrom:
+            secretKeyRef:
+              name: fineract-tenants-db-secret
+              key: password
         - name: FINERACT_DEFAULT_TENANTDB_HOSTNAME
           value: fineractmysql
         - name: FINERACT_DEFAULT_TENANTDB_PORT

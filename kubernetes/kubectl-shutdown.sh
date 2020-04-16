@@ -18,7 +18,7 @@
 # under the License.
 #
 
-kubectl delete -f secrets.yml
+kubectl delete secret fineract-tenants-db-secret
 kubectl delete -f fineractmysql-configmap.yml
 kubectl delete -f fineractmysql-deployment.yml
 kubectl delete -f fineract-server-deployment.yml
