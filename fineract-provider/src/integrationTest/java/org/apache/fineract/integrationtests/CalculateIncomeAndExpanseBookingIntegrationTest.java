@@ -26,7 +26,6 @@ import org.apache.fineract.accounting.closure.data.IncomeAndExpenseJournalEntryD
 import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalculatedException;
 import org.apache.fineract.accounting.closure.service.CalculateIncomeAndExpenseBookingImpl;
 import org.apache.fineract.accounting.closure.service.IncomeAndExpenseReadPlatformService;
-import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.joda.time.LocalDate;
 import org.junit.After;
