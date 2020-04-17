@@ -22,7 +22,7 @@ ALTER TABLE `m_staff`
 	ADD CONSTRAINT `FK_m_staff_m_image` FOREIGN KEY (`image_id`) REFERENCES `m_image` (`id`);
 
 INSERT INTO m_permission (
-grouping ,
+`grouping` ,
 code ,
 entity_name ,
 action_name ,
