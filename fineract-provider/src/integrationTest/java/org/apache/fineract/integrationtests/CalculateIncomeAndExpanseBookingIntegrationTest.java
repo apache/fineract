@@ -28,7 +28,6 @@ import org.apache.fineract.accounting.closure.service.CalculateIncomeAndExpenseB
 import org.apache.fineract.accounting.closure.service.IncomeAndExpenseReadPlatformService;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.joda.time.LocalDate;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -158,10 +157,4 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         Assert.assertNotNull(calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false,null,null));
     }
 
-
-
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 9981ab9f73d7aa84e1cf9cfa29f328193619a456

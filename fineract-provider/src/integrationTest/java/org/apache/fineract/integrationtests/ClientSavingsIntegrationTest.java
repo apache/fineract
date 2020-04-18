@@ -1908,7 +1908,6 @@ public class ClientSavingsIntegrationTest {
         Assert.assertEquals(expected, actual, 1);
 
     }
-    @Ignore
     @Test
     @Ignore // TODO FINERACT-852
     public void testSavingsAccount_DormancyTracking() throws InterruptedException {
