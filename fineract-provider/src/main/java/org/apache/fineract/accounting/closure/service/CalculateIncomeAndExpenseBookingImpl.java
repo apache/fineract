@@ -184,3 +184,4 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
         return new IncomeAndExpenseBookingData(localDate,closureData.getComments(),journalEntries);
     }
 }
+
