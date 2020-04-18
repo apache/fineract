@@ -62,6 +62,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
@@ -668,6 +669,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-899
     public void checkPeriodicAccrualAccountingFlow_OVER_PAYMENT() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -726,6 +728,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-899
     public void checkPeriodicAccrualAccountingTillCurrentDateFlow() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
