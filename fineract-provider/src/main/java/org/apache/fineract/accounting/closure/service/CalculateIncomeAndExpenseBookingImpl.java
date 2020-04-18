@@ -36,7 +36,6 @@ import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalcula
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
-import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
