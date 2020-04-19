@@ -41,15 +41,15 @@ echo
 echo "Starting fineract server..."
 kubectl apply -f fineract-server-deployment.yml
 
-fineract-server_pod=""
-while [[ ${#fineract-server_pod} -eq 0 ]]; do
-    fineract-server_pod=$(kubectl get pods -l tier=fineract-server --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+fineract_server_pod=""
+while [[ ${#fineract_server_pod} -eq 0 ]]; do
+    fineract_server_pod=$(kubectl get pods -l tier=backend --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
 done
 
-fineract-server_status=$(kubectl get pods ${fineract-server_pod} --no-headers -o custom-columns=":status.phase")
-while [[ ${fineract-server_status} -ne 'Running' ]]; do
+fineract_server_status=$(kubectl get pods ${fineract_server_pod} --no-headers -o custom-columns=":status.phase")
+while [[ ${fineract_server_status} -ne 'Running' ]]; do
     sleep 1
-    fineract-server_status=$(kubectl get pods ${fineract-server_pod} --no-headers -o custom-columns=":status.phase")
+    fineract_server_status=$(kubectl get pods ${fineract_server_pod} --no-headers -o custom-columns=":status.phase")
 done
 
 echo "Fineract server is up and running"

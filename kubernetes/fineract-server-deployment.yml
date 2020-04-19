@@ -41,7 +41,6 @@ metadata:
   name: fineract-server
   labels:
     app: fineract-server
-    tier: fineract-server
 spec:
   selector:
     matchLabels:
