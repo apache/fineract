@@ -28,6 +28,8 @@
 	<persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
 		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
 	<properties>
+        <property name="openjpa.jdbc.EagerFetchMode" value="none"/>
+        <property name="openjpa.jdbc.SubclassFetchMode" value="none"/>
         <property name="openjpa.Compatibility" value="QuotedNumbersInQueries=true"/>
         <property name="openjpa.jdbc.DBDictionary" value="org.apache.fineract.infrastructure.core.domain.MySQLDictionaryCustom"/>
         <!--<property name="openjpa.InverseManager" value="true(Action=warn)"/> -->
