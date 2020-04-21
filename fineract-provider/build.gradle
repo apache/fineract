@@ -49,6 +49,7 @@ buildscript {
       // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
      classpath 'com.google.guava:guava:28.1-jre'
      classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
+     classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
   }
 }
 
@@ -68,6 +69,7 @@ apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 apply plugin: 'jacoco'
+apply plugin: "com.gorylenko.gradle-git-properties"
 // apply plugin: 'pmd'
 
 dependencyManagement {
@@ -250,8 +252,8 @@ rat {
 
 	//BSD License
 	'**/assets/uglify.js',
-         //Ignore out folder
-         '**/out/**'
+    //Ignore out folder
+    '**/out/**',
 	]
 }
 
@@ -403,7 +405,15 @@ war {
 
 license {
     header rootProject.file('../APACHE_LICENSETEXT.md')
-    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks", "**/swagger-ui/**"])
+    excludes([
+        "**/rat-report.txt",
+        "**/git.properties",
+        "**/*.html",
+        "**/*.mustache",
+        "**/package-info.java",
+        "**/keystore.jks",
+        "**/swagger-ui/**",
+    ])
     strictCheck true
 }
 
@@ -557,6 +567,7 @@ def qualifyVersionIfNecessary(version) {
 springBoot {
     mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
+
 bootWar {
     mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
@@ -567,3 +578,16 @@ tasks.withType(SpotBugsTask) {
     reports.html.enabled = true
     reportLevel = "high"
 }
+
+gitProperties {
+    gitPropertiesResourceDir = "${project.rootDir}/src/main/resources"
+    dateFormat = "yyyy-MM-dd'T'HH:mmZ"
+    dateFormatTimeZone = "GMT"
+}
+
+generateGitProperties.outputs.upToDateWhen { false }
+
+clean {
+    delete "${project.rootDir}/src/main/resources/git.properties"
+}
+
