@@ -204,11 +204,20 @@ Apache Fineract Platform API
 The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.mifos.io/api-docs/apiLive.htm "API Documentation").
 
 
+API clients (Web UIs, Mobile, etc.)
+============
+
+* https://github.com/openMF/community-app/ is the "traditional" Reference Client App Web UI for the API offered by this project
+* https://github.com/openMF/web-app is the next generation UI rewrite also using this project's API
+* https://github.com/openMF/android-client is an Android Mobile App client for this project's API
+* https://github.com/openMF has more related proejcts
+
+
 Online Demos
 ============
 
-* [Community App](https://demo.mifos.io "Reference Client App")
-> For this demo, a demo account is also provided for users to experience the functionality of this Community App. Users can use "mifos" for USERNAME and "password" for PASSWORD(without quotation marks).
+* [fineract.dev](https://www.fineract.dev) always runs the latest version of this code
+* [demo.mifos.io](https://demo.mifos.io) A demo account is provided for users to experience the functionality of the Community App.  Users can use "mifos" for USERNAME and "password" for PASSWORD (without quotation marks).
 
 
 Developers
