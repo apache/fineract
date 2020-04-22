@@ -59,7 +59,7 @@ insert into c_external_service_properties (`name`, `value`, `external_service_id
 
 insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('useTLS', 'true', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
-insert into m_permission(grouping, code, entity_name, action_name, can_maker_checker) values('externalservices', 'UPDATE_EXTERNALSERVICES', 'EXTERNALSERVICES', 'UPDATE', 0);
+insert into m_permission(`grouping`, code, entity_name, action_name, can_maker_checker) values('externalservices', 'UPDATE_EXTERNALSERVICES', 'EXTERNALSERVICES', 'UPDATE', 0);
 
 
 	
