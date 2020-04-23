@@ -1,7 +1,6 @@
 bin
 out/
 build
-src/main/resources/git.properties
 repos
 .classpath
 .project
