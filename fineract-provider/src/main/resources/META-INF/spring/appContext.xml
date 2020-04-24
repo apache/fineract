@@ -39,6 +39,7 @@
 									      org.apache.fineract.commands.provider.*,
 									      org.apache.fineract.commands.handler.*,
 										  org.apache.fineract.commands.service.*,
+										  org.apache.fineract.commands.kafka.*,
 										  org.apache.fineract.commands.*,
 										  org.apache.fineract.audit.*,
 										  org.apache.fineract.infrastructure.creditbureau.*,

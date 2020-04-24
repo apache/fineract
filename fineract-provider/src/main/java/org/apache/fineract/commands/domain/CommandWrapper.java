@@ -20,6 +20,8 @@ package org.apache.fineract.commands.domain;
 
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
 
+import java.util.Optional;
+
 public class CommandWrapper {
 
     private final Long commandId;
@@ -31,6 +33,7 @@ public class CommandWrapper {
     private final Long savingsId;
     private final String actionName;
     private final String entityName;
+    private String topicName = "";
     private final String taskPermissionName;
     private final Long entityId;
     private final Long subentityId;
@@ -83,9 +86,35 @@ public class CommandWrapper {
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
+            final String actionName, final String entityName, final String topicName, final Long entityId, final Long subentityId, final String href,
             final String json, final String transactionId, final Long productId, final Long templateId,
             final Long creditBureauId,final Long organisationCreditBureauId) {
+
+        this.commandId = null;
+        this.officeId = officeId;
+        this.groupId = groupId;
+        this.clientId = clientId;
+        this.loanId = loanId;
+        this.savingsId = savingsId;
+        this.actionName = actionName;
+        this.entityName = entityName;
+        this.topicName = topicName;
+        this.taskPermissionName = actionName + "_" + entityName;
+        this.entityId = entityId;
+        this.subentityId = subentityId;
+        this.href = href;
+        this.json = json;
+        this.transactionId = transactionId;
+        this.productId = productId;
+        this.templateId = templateId;
+        this.creditBureauId=creditBureauId;
+        this.organisationCreditBureauId=organisationCreditBureauId;
+    }
+
+    public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
+                          final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
+                          final String json, final String transactionId, final Long productId, final Long templateId,
+                          final Long creditBureauId,final Long organisationCreditBureauId) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -271,6 +300,10 @@ public class CommandWrapper {
 
     public String entityName() {
         return this.entityName;
+    }
+
+    public String getTopicName() {
+        return topicName;
     }
 
     public Long resourceId() {

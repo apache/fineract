@@ -130,7 +130,14 @@ dependencyManagement {
          entry 'tomcat-dbcp'
          entry 'tomcat-jdbc'
      }
+
   }
+}
+
+dependencies {
+    compile(
+        [group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.4.5.RELEASE']
+    )
 }
 
 /* define the valid syntax level for source files */

@@ -35,6 +35,7 @@ public class CommandWrapperBuilder {
     private Long savingsId;
     private String actionName;
     private String entityName;
+    private String topicName;
     private Long entityId;
     private Long subentityId;
     private String href;
@@ -48,7 +49,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
+                this.entityName, this.topicName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
                 this.templateId,this.creditBureauId,this.organisationCreditBureauId);
     }
 
@@ -602,6 +603,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder updateClient(final Long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENT";
+        this.topicName = "topic_clients";
         this.entityId = clientId;
         this.clientId = clientId;
         this.href = "/clients/" + clientId;
@@ -1199,6 +1201,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder createAccountTransfer() {
         this.actionName = "CREATE";
         this.entityName = "ACCOUNTTRANSFER";
+        this.topicName = "topic_account_transfers";
         this.entityId = null;
         this.href = "/accounttransfers";
         return this;
@@ -1231,6 +1234,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";
+        this.topicName = "topic_account_deposits";
         this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "/transactions";

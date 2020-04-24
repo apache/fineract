@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = "CLIENT", action = "UPDATE")
+@CommandType(entity = "CLIENT", action = "UPDATE", topic = "topic_clients")
 public class UpdateClientCommandHandler implements NewCommandSourceHandler {
 
     private final ClientWritePlatformService clientWritePlatformService;

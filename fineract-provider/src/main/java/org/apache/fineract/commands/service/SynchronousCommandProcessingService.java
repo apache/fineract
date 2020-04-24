@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.commands.service;
 
-import java.util.Map;
+import org.apache.fineract.commands.data.FineractEventData;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
+import org.apache.fineract.commands.kafka.KafkaProducer;
 import org.apache.fineract.commands.provider.CommandHandlerProvider;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -42,6 +43,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+import java.util.Optional;
+
 @Service
 public class SynchronousCommandProcessingService implements CommandProcessingService {
 
@@ -52,13 +56,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
+    private final KafkaProducer kafkaProducer;
 
     @Autowired
     public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
-            final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
-            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
-            final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService,
-            final CommandHandlerProvider commandHandlerProvider) {
+                                               final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
+                                               final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
+                                               final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService,
+                                               final CommandHandlerProvider commandHandlerProvider, final KafkaProducer kafkaProducer) {
         this.context = context;
         this.context = context;
         this.applicationContext = applicationContext;
@@ -68,14 +73,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         this.commandSourceRepository = commandSourceRepository;
         this.configurationDomainService = configurationDomainService;
         this.commandHandlerProvider = commandHandlerProvider;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
-            final boolean isApprovedByChecker) {
+                                                        final boolean isApprovedByChecker) {
 
-         final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
+        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
 
@@ -95,7 +101,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 result.getSavingsId(), result.getProductId(), result.getTransactionId());
 
         String changesOnlyJson = null;
-        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker ;
+        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker;
         if (result.hasChanges() && !rollBack) {
             changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
             commandSourceResult.updateJsonTo(changesOnlyJson);
@@ -125,6 +131,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult);
         }
         result.setRollbackTransaction(null);
+
+        if (!(wrapper.getTopicName() == null || wrapper.getTopicName().equalsIgnoreCase(""))) {
+            publishKafkaEvent(wrapper, result);
+        }
 
         publishEvent(wrapper.entityName(), wrapper.actionName(), result);
 
@@ -221,5 +231,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
 
         applicationContext.publishEvent(applicationEvent);
+    }
+
+    private void publishKafkaEvent(CommandWrapper request, CommandProcessingResult response) {
+        final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        kafkaProducer.sendMessage(request.getTopicName(), response.resourceId().toString(), new FineractEventData(request, response, tenantIdentifier));
+
     }
 }
