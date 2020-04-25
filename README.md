@@ -244,6 +244,9 @@ documents that we cannot accept huge "code dump" Pull Requests, with some relate
 
 [How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this git repository into a binary release ZIP available on http://fineract.apache.org.
 
+Guideline for new Feature commits involving Refactoring: If you are submitting PR for a new Feature, 
+and it involves refactoring, try to differentiate "new Feature code" with "Refactored" by placing
+them in different commits. This helps review to review your code faster.
 
 More Information
 ============
