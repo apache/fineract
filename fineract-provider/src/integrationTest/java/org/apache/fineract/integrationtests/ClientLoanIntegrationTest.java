@@ -107,7 +107,6 @@ public class ClientLoanIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
-
     }
 
     @Test
@@ -2563,6 +2562,7 @@ public class ClientLoanIntegrationTest {
      * charges with calculation type percentage of amount
      */
     @Test
+    @Ignore // TODO FINERACT-885
     public void loanWithCahargesOfTypeAmountPercentageAndPeriodicAccrualAccountingEnabled() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -2762,6 +2762,7 @@ public class ClientLoanIntegrationTest {
      * charges with calculation type percentage of amount and interest
      */
     @Test
+    @Ignore // TODO FINERACT-885
     public void loanWithCahargesOfTypeAmountPlusInterestPercentageAndPeriodicAccrualAccountingEnabled() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -5079,7 +5080,7 @@ public class ClientLoanIntegrationTest {
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
-    public Integer getDayOfWeek(Calendar date) {
+    private Integer getDayOfWeek(Calendar date) {
         int dayOfWeek = 0;
         if (null != date) {
             dayOfWeek = date.get(Calendar.DAY_OF_WEEK) - 1;
@@ -5090,7 +5091,7 @@ public class ClientLoanIntegrationTest {
         return Integer.valueOf(dayOfWeek);
     }
 
-    public Integer getDayOfMonth(Calendar date) {
+    private Integer getDayOfMonth(Calendar date) {
         int dayOfMonth = 0;
         if (null != date) {
             dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
