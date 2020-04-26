@@ -239,14 +239,33 @@ Governance and Policies
 [Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer)
 documents the process through which you can become a committer in this project.
 
+
+Pull Requests
+-------------
+
+If your PR is failing to pass our CI build due to a test failure, then:
+
+1. Understand if the failure is due to your PR or an unrelated unstable test.
+1. If you suspect it is because of a "flaky" test, and not due to a change in your PR, then please do not simply wait for an active maintainer to come and help you, but instead be a proactive contributor to the project - see next steps.
+1. Search for the name of the failed test on https://issues.apache.org/jira/, e.g. for `AccountingScenarioIntegrationTest` you would find [FINERACT-899](https://issues.apache.org/jira/browse/FINERACT-899).
+1. If you find previous comments "proving" that the same test has arbitrarily failed in at least 3 past PRs, then please do yourself raise a small separate new PR proposing to add an `@Ignore // TODO FINERACT-123` to the respective unstable test (e.g. [#774](https://github.com/apache/fineract/pull/774)) with the commit message mentioning said JIRA, as always.  (Please do NOT just `@Ignore` any existing tests mixed in as part of your larger PR.)
+1. If there is no existing JIRA for the test, then first please evaluate whether the failure couldn't be a (perhaps strange) impact of the change you are proposing after all.  If it's not, then please raise a new JIRA to document the suspected Flaky Test, and link it to [FINERACT-850](https://issues.apache.org/jira/browse/FINERACT-850).  This will allow the next person coming along hitting the same test failure to easily find it, and eventually propose to ignore the unstable test.
+1. Then (only) Close and Reopen your PR, which will cause a new build, to see if it passes.
+1. Of course, we very much appreciate you then jumping onto any such bugs and helping us figure out how to fix all ignored tests!
+
 [Pull Request Size Limit](https://cwiki.apache.org/confluence/display/FINERACT/Pull+Request+Size+Limit)
 documents that we cannot accept huge "code dump" Pull Requests, with some related suggestions.
 
-[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this git repository into a binary release ZIP available on http://fineract.apache.org.
-
-Guideline for new Feature commits involving Refactoring: If you are submitting PR for a new Feature, 
+Guideline for new Feature commits involving Refactoring: If you are submitting PR for a new Feature,
 and it involves refactoring, try to differentiate "new Feature code" with "Refactored" by placing
 them in different commits. This helps review to review your code faster.
+
+
+Releasing
+---------
+
+[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release ZIP available on http://fineract.apache.org.
+
 
 More Information
 ============
