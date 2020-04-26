@@ -553,6 +553,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    @Ignore // TODO FINERACT-899
     public void checkPeriodicAccrualAccountingFlow() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
