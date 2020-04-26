@@ -2367,6 +2367,7 @@ public class ClientLoanIntegrationTest {
      * charges with calculation type flat
      */
     @Test
+    @Ignore // TODO FINERACT-885
     public void loanWithFlatCahargesAndPeriodicAccrualAccountingEnabled() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
