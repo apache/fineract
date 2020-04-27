@@ -135,6 +135,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         result.setRollbackTransaction(null);
 
+        logger.debug("source:" + wrapper.getSource());
+        logger.debug("topicName:" + wrapper.getTopicName());
         if (wrapper.getSource().equalsIgnoreCase("") && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase("")) {
             publishKafkaEvent(wrapper, result);
         }

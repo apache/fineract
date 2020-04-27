@@ -35,9 +35,9 @@ public class KafkaTopicConfig {
     @Autowired
     private Environment env;
 
-    private String bootstrapAddress = env.getProperty("kafka-boostrap-address", "http://localhost:9092");
-    private Integer partitions = Integer.valueOf(env.getProperty("kafka-partitions"));
-    private Short replicaFactor = Short.valueOf(env.getProperty("kafka-replica-factor"));
+    private String bootstrapAddress = env.getProperty("KAFKA_BOOTSTRAP_ADDRESS", "http://localhost:9092");
+    private Integer partitions = Integer.valueOf(env.getProperty("KAFKA_PARTITIONS"));
+    private Short replicaFactor = Short.valueOf(env.getProperty("KAFKA_REPLICA_FACTOR"));
 
     @Bean
     public KafkaAdmin kafkaAdmin() {
