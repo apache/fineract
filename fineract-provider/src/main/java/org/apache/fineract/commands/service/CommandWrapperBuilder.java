@@ -36,6 +36,7 @@ public class CommandWrapperBuilder {
     private String actionName;
     private String entityName;
     private String topicName;
+    private String source = "";
     private Long entityId;
     private Long subentityId;
     private String href;
@@ -49,7 +50,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.topicName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
+                this.entityName, this.topicName, this.source, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
                 this.templateId,this.creditBureauId,this.organisationCreditBureauId);
     }
 
@@ -3149,6 +3150,11 @@ public class CommandWrapperBuilder {
         this.actionName = PocketApiConstants.delinkAccountsActionName;
         this.entityName = PocketApiConstants.pocketEntityName;
         this.href = "/self/pocket?command="+PocketApiConstants.delinkAccountsFromPocketCommandParam;
+        return this;
+    }
+
+    public CommandWrapperBuilder withSource(String source) {
+        this.source = source;
         return this;
     }
 }

@@ -71,7 +71,7 @@ public class UpdateClientCommandStrategy implements CommandStrategy {
 
             // Calls 'update' function from 'ClientsApiResource' to update a
             // client
-            responseBody = clientsApiResource.update(clientId, request.getBody());
+            responseBody = clientsApiResource.update("",clientId, request.getBody());
 
             response.setStatusCode(200);
             // Sets the body of the response after the successful update of

@@ -30,22 +30,8 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import java.util.*;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -240,11 +226,12 @@ public class ClientsApiResource {
     @ApiOperation(value = "Update a Client", notes = "Note: You can update any of the basic attributes of a client (but not its associations) using this API.\n" + "\n" + "Changing the relationship between a client and its office is not supported through this API. An API specific to handling transfers of clients between offices is available for the same.\n" + "\n" + "The relationship between a client and a group must be removed through the Groups API." )
     @ApiImplicitParams({@ApiImplicitParam( paramType = "body", dataType = "ClientData", required = true, type = "body", dataTypeClass = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.PutClientsClientIdResponse.class) })
-    public String update(@ApiParam(value = "clientId") @PathParam("clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    public String update(@HeaderParam("source") String source, @ApiParam(value = "clientId") @PathParam("clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateClient(clientId) //
                 .withJson(apiRequestBodyAsJson) //
+                .withSource(Optional.ofNullable(source).orElse(""))
                 .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

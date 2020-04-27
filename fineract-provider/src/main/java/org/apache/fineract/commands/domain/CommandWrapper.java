@@ -34,6 +34,7 @@ public class CommandWrapper {
     private final String actionName;
     private final String entityName;
     private String topicName = "";
+    private String source = "";
     private final String taskPermissionName;
     private final Long entityId;
     private final Long subentityId;
@@ -86,7 +87,7 @@ public class CommandWrapper {
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final String actionName, final String entityName, final String topicName, final Long entityId, final Long subentityId, final String href,
+            final String actionName, final String entityName, final String topicName, final String source, final Long entityId, final Long subentityId, final String href,
             final String json, final String transactionId, final Long productId, final Long templateId,
             final Long creditBureauId,final Long organisationCreditBureauId) {
 
@@ -99,6 +100,7 @@ public class CommandWrapper {
         this.actionName = actionName;
         this.entityName = entityName;
         this.topicName = topicName;
+        this.source = source;
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = entityId;
         this.subentityId = subentityId;
@@ -304,6 +306,10 @@ public class CommandWrapper {
 
     public String getTopicName() {
         return topicName;
+    }
+
+    public String getSource() {
+        return source;
     }
 
     public Long resourceId() {
