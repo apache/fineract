@@ -41,12 +41,12 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class SynchronousCommandProcessingService implements CommandProcessingService {
@@ -66,7 +66,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                                                final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
                                                final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
                                                final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService,
-                                               final CommandHandlerProvider commandHandlerProvider, final KafkaProducer kafkaProducer) {
+                                               final CommandHandlerProvider commandHandlerProvider,
+                                               @Qualifier("custom-kafka-producer") final KafkaProducer kafkaProducer) {
         this.context = context;
         this.context = context;
         this.applicationContext = applicationContext;
