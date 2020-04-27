@@ -38,6 +38,8 @@ import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
     private final KafkaProducer kafkaProducer;
+    private final Logger logger = LoggerFactory.getLogger(SynchronousCommandProcessingService.class);
 
     @Autowired
     public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
@@ -235,7 +238,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     private void publishKafkaEvent(CommandWrapper request, CommandProcessingResult response) {
         final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+        logger.info("Sending message to " + request.getTopicName() + " .TenantId is " + tenantIdentifier);
         kafkaProducer.sendMessage(request.getTopicName(), response.resourceId().toString(), new FineractEventData(request, response, tenantIdentifier));
-
+        logger.info("Finished sending message to kafka");
     }
 }
