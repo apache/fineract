@@ -20,6 +20,7 @@
 # (unless we'd install a more recent version in .travis.yml)
 version: '3.3'
 services:
+  # Backend service
   fineractmysql:
     image: mysql:5.7
     volumes:
@@ -54,6 +55,15 @@ services:
       - FINERACT_DEFAULT_TENANTDB_PORT=3306
       - FINERACT_DEFAULT_TENANTDB_UID=root
       - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+
+  # Frontend service
+  community-app:
+    image: openmf/community-app:latest
+    container_name: mifos-ui
+    restart: always
+    ports:
+      - 80:80
+
 
 # https://issues.apache.org/jira/browse/FINERACT-762
 # To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)

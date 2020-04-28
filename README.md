@@ -80,6 +80,8 @@ Instructions to run using Docker and docker-compose
 ===================================================
 
 It is possible to do a 'one-touch' installation of Fineract using containers (AKA "Docker").
+Fineract now packs the mifos community-app web ui in it's docker deploy.
+You can now run and test fineract with it a GUI directly from the combined docker builds.
 
 As Prerequisites, you must have `docker` and `docker-compose` installed on your machine; see
 [Docker Install](https://docs.docker.com/install/) and
@@ -94,7 +96,8 @@ Now to run a new Fineract instance you can simply:
 1. `git clone https://github.com/apache/fineract.git ; cd fineract`
 1. `docker-compose build`
 1. `docker-compose up -d`
-1. Fineract will run at https://localhost:8443/fineract-provider now!
+1. Fineract will run at https://localhost:8443/fineract-provider/ now!
+1. community-app + Fineract will run at http://localhost/?baseApiUrl=https://localhost:8443/fineract-provider/
 
 The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).
 
