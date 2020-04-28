@@ -47,16 +47,11 @@ VALUES (
 NULL ,  '^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{6,50}$',  'Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space',  '0'
 );
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("authorisation","READ_PASSWORD_PREFERENCES","PASSWORD_PREFERENCES","READ",0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("authorisation","UPDATE_PASSWORD_PREFERENCES","PASSWORD_PREFERENCES","UPDATE",0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("authorisation","UPDATE_PASSWORD_PREFERENCES_CHECKER","PASSWORD_PREFERENCES","UPDATE_CHECKER",0);
-
-
-
-
-

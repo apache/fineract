@@ -30,38 +30,23 @@ public class JDBCDriverConfig {
     private final static String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
     private final static String PROTOCOL_PROPERTYNAME = "PROTOCOL";
     private final static String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
-    private final static String PORT_PROPERTYNAME = "PORT";
 
     private String driverClassName;
     private String protocol;
     private String subProtocol;
-    private Integer port;
 
     @Autowired ApplicationContext context;
 
     @PostConstruct
     protected void init() {
-        Environment environment = context.getEnvironment() ;
-        driverClassName = environment.getProperty(DRIVER_CLASS_PROPERTYNAME) ;
-        protocol = environment.getProperty(PROTOCOL_PROPERTYNAME) ;
-        subProtocol = environment.getProperty(SUBPROTOCOL_PROPERTYNAME) ;
-        port = Integer.parseInt(environment.getProperty(PORT_PROPERTYNAME)) ;
+        Environment environment = context.getEnvironment();
+        driverClassName = environment.getProperty(DRIVER_CLASS_PROPERTYNAME);
+        protocol = environment.getProperty(PROTOCOL_PROPERTYNAME);
+        subProtocol = environment.getProperty(SUBPROTOCOL_PROPERTYNAME);
     }
 
     public String getDriverClassName() {
         return this.driverClassName;
-    }
-
-    public String getProtocol() {
-        return this.protocol;
-    }
-
-    public String getSubProtocol() {
-        return this.subProtocol;
-    }
-
-    public Integer getPort() {
-        return this.port;
     }
 
     public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {

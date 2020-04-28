@@ -17,5 +17,4 @@
 -- under the License.
 --
 
-delete from m_permission where grouping = 'transaction_deposit';
-
+delete from m_permission where `grouping` = 'transaction_deposit';

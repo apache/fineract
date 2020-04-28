@@ -279,7 +279,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
                     new Object[] { officeId});
         } catch (final EmptyResultDataAccessException e) {
-           return null;
+            throw new OfficeNotFoundException(officeId);
         }
     }
 }

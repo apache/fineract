@@ -1,3 +1,4 @@
+
 --
 -- Licensed to the Apache Software Foundation (ASF) under one
 -- or more contributor license agreements. See the NOTICE file
@@ -24,7 +25,6 @@
 this scripts removes all current m_role_permission and m_permission entries
 and then inserts new m_permission entries and just one m_role_permission entry
 which gives the role (id 1 - super user) an ALL_FUNCTIONS permission
-
 If you had other roles set up with specific permissions you will have to set up their permissions again.
 */
 
@@ -330,19 +330,19 @@ INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 -- This needs to always happen at end of the script
 
 /* add a create, read, update and delete permission for each registered datatable */
-insert into m_permission(grouping, `code`, entity_name, action_name)
+insert into m_permission(`grouping`, `code`, entity_name, action_name)
 select 'datatable', concat('CREATE_', r.registered_table_name), r.registered_table_name, 'CREATE'
 from x_registered_table r;
 
-insert into m_permission(grouping, `code`, entity_name, action_name)
+insert into m_permission(`grouping`, `code`, entity_name, action_name)
 select 'datatable', concat('READ_', r.registered_table_name), r.registered_table_name, 'READ'
 from x_registered_table r;
 
-insert into m_permission(grouping, `code`, entity_name, action_name)
+insert into m_permission(`grouping`, `code`, entity_name, action_name)
 select 'datatable', concat('UPDATE_', r.registered_table_name), r.registered_table_name, 'UPDATE'
 from x_registered_table r;
 
-insert into m_permission(grouping, `code`, entity_name, action_name)
+insert into m_permission(`grouping`, `code`, entity_name, action_name)
 select 'datatable', concat('DELETE_', r.registered_table_name), r.registered_table_name, 'DELETE'
 from x_registered_table r;
 

@@ -26,10 +26,8 @@ import org.apache.fineract.accounting.closure.data.IncomeAndExpenseJournalEntryD
 import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalculatedException;
 import org.apache.fineract.accounting.closure.service.CalculateIncomeAndExpenseBookingImpl;
 import org.apache.fineract.accounting.closure.service.IncomeAndExpenseReadPlatformService;
-import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.joda.time.LocalDate;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,12 +51,8 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
     @Before
     public void setup() {
         calculateIncomeAndExpenseBooking =  new CalculateIncomeAndExpenseBookingImpl(null, null, null, null, incomeAndExpenseReadPlatformService,officeReadPlatformService);
-     }
-
-    @After
-    public void tearDown() {
-
     }
+
     /*
         Case 1: All running balances has to be calculated before booking off income and expense account
         If not running balances, then throw exception
@@ -99,7 +93,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getDebits().get(0).getAmount(), new BigDecimal(30));
@@ -119,7 +112,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getCredits().get(0).getAmount(), new BigDecimal(30));
@@ -139,7 +131,6 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getDebits().get(0).getAmount(), new BigDecimal(30));
@@ -159,14 +150,11 @@ public class CalculateIncomeAndExpanseBookingIntegrationTest {
         List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = new ArrayList<>();
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData);
         incomeAndExpenseJournalEntryDataList.add(incomeAndExpenseJournalEntryData2);
-        GLAccount glAccount =  GLAccount.fromJson(null, jsonCommandWrapperTest.getCommand(),null);
         IncomeAndExpenseBookingData incomeAndExpenseBookingData = calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false, null, null);
         incomeAndExpenseBookingData.getJournalEntries().forEach(entry->{
             Assert.assertEquals(entry.getCredits().get(0).getAmount(), new BigDecimal(30));
         });
         Assert.assertNotNull(calculateIncomeAndExpenseBooking.bookOffIncomeAndExpense(incomeAndExpenseJournalEntryDataList, glClosureCommand, false,null,null));
     }
-
-
 
 }

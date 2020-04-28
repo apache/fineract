@@ -22,7 +22,7 @@ CREATE TABLE `m_entity_datatable_check` (
 	`application_table_name` VARCHAR(200) NOT NULL,
 	`x_registered_table_name` VARCHAR(50) NOT NULL,
 	`status_enum` INT(11) NOT NULL,
-	`system_defined` TINYINT(4) NOT NULL DEFAULT '0',
+	`system_defined` TINYINT(4) NOT NULL DEFAULT ''0'',
 	`product_id` BIGINT(10) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `unique_entity_check` (`application_table_name`, `x_registered_table_name`, `status_enum`, `product_id`),
@@ -31,16 +31,16 @@ CREATE TABLE `m_entity_datatable_check` (
 	CONSTRAINT `m_entity_datatable_check_ibfk_1` FOREIGN KEY (`x_registered_table_name`)
 	    REFERENCES `x_registered_table` (`registered_table_name`)
 )
-COLLATE='utf8_general_ci'
+COLLATE=''utf8_general_ci''
 ENGINE=InnoDB
 ;
 
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("datatable","READ_ENTITY_DATATABLE_CHECK","ENTITY_DATATABLE_CHECK","READ",0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("datatable","CREATE_ENTITY_DATATABLE_CHECK","ENTITY_DATATABLE_CHECK","CREATE",0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUE ("datatable","DELETE_ENTITY_DATATABLE_CHECK","ENTITY_DATATABLE_CHECK","DELETE",0);

@@ -69,42 +69,42 @@ CREATE TABLE `m_cashier_transactions` (
 
 	
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'CREATE_TELLER', 'TELLER', 'CREATE', 1
 	);
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'UPDATE_TELLER', 'TELLER', 'CREATE', 1
 	);
-	
+
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'ALLOCATECASHIER_TELLER', 'TELLER', 'ALLOCATE', 1
 	);
-	
+
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'UPDATECASHIERALLOCATION_TELLER', 'TELLER', 'UPDATECASHIERALLOCATION', 1
 	);
-	
+
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'DELETECASHIERALLOCATION_TELLER', 'TELLER', 'DELETECASHIERALLOCATION', 1
 	);
-	
+
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'ALLOCATECASHTOCASHIER_TELLER', 'TELLER', 'ALLOCATECASHTOCASHIER', 1
 	);
-	
+
 	INSERT INTO m_permission (
-		grouping, code, entity_name, action_name, can_maker_checker
+		`grouping`, code, entity_name, action_name, can_maker_checker
 	) values (
 		'cash_mgmt', 'SETTLECASHFROMCASHIER_TELLER', 'TELLER', 'SETTLECASHFROMCASHIER', 1
 	);

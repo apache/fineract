@@ -67,7 +67,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosureWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
@@ -82,11 +82,11 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
 
     @Autowired
     public GLClosureWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final GLAccountRepositoryWrapper glAccountRepository,final GLClosureReadPlatformService glClosureReadPlatformService,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final IncomeAndExpenseBookingRepository incomeAndExpenseBookingRepository,
-            final FromJsonHelper fromApiJsonHelper,final IncomeAndExpenseReadPlatformService incomeAndExpenseReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
+                                                          final OfficeRepositoryWrapper officeRepositoryWrapper, final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+                                                          final GLAccountRepositoryWrapper glAccountRepository,final GLClosureReadPlatformService glClosureReadPlatformService,
+                                                          final JournalEntryWritePlatformService journalEntryWritePlatformService, final IncomeAndExpenseBookingRepository incomeAndExpenseBookingRepository,
+                                                          final FromJsonHelper fromApiJsonHelper,final IncomeAndExpenseReadPlatformService incomeAndExpenseReadPlatformService,
+                                                          final OfficeReadPlatformService officeReadPlatformService) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -146,14 +146,16 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
 
                     final HashMap<Long,List<IncomeAndExpenseJournalEntryData>> allIncomeAndExpenseJLWithSubBranches = new HashMap<>();
                     for(final Long childOffice : childOfficesByHierarchy){
-                        final GLClosure gl = GLClosure.fromJson(this.officeRepositoryWrapper.findOneWithNotFoundDetection(childOffice), command); subOfficesGlClosure.add(gl);
+                        final GLClosure gl = GLClosure.fromJson(this.officeRepositoryWrapper.findOneWithNotFoundDetection(childOffice),command);
+                        subOfficesGlClosure.add(gl);
                         final List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList = this.incomeAndExpenseReadPlatformService.retrieveAllIncomeAndExpenseJournalEntryData(childOffice, incomeAndExpenseBookOffDate,closureCommand.getCurrencyCode());
                         officeGlClosure.put(childOffice,gl);
                         allIncomeAndExpenseJLWithSubBranches.put(childOffice,incomeAndExpenseJournalEntryDataList);
                     }
                     this.handleRunningBalanceNotCalculated(allIncomeAndExpenseJLWithSubBranches);
                     /*  add main office to the subBranches list*/
-                    subOfficesGlClosure.add(glClosure); officeGlClosure.put(officeId,glClosure);
+                    subOfficesGlClosure.add(glClosure);
+                    officeGlClosure.put(officeId,glClosure);
 
 
                     /* create journal entry for each office */
@@ -230,7 +232,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(glClosure.getOffice().getId());
         if (latestGLClosure.getClosingDate().after(closureDate)) { throw new GLClosureInvalidDeleteException(latestGLClosure.getOffice()
                 .getId(), latestGLClosure.getOffice().getName(), latestGLClosure.getClosingDate()); }
-                if(fromApiJsonHelper.parameterExists(GLClosureJsonInputParams.REVERSE_INCOME_AND_EXPENSE_BOOKING.getValue(),command.parsedJson())){
+        if(fromApiJsonHelper.parameterExists(GLClosureJsonInputParams.REVERSE_INCOME_AND_EXPENSE_BOOKING.getValue(),command.parsedJson())){
             final Boolean reverseBookOffIncomeAndExpense = command.booleanObjectValueOfParameterNamed(GLClosureJsonInputParams.REVERSE_INCOME_AND_EXPENSE_BOOKING.getValue());
             if(reverseBookOffIncomeAndExpense !=null && reverseBookOffIncomeAndExpense){
                 final IncomeAndExpenseBooking incomeAndExpenseBooking = this.incomeAndExpenseBookingRepository.findByGlClosureAndReversedIsFalse(glClosure);
@@ -253,7 +255,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("office_id_closing_date")) { throw new GLClosureDuplicateException(
                 command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue()), new LocalDate(
-                        command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()))); }
+                command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()))); }
 
         logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",
@@ -269,7 +271,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         }
     }
     private String bookOffIncomeAndExpense(final List<IncomeAndExpenseJournalEntryData> incomeAndExpenseJournalEntryDataList,
-            final GLClosureCommand closureData,final GLAccount glAccount, final Office office){
+                                           final GLClosureCommand closureData,final GLAccount glAccount, final Office office){
         /* All running balances has to be calculated before booking off income and expense account */
         for(final IncomeAndExpenseJournalEntryData incomeAndExpenseData :incomeAndExpenseJournalEntryDataList ){
             if(!incomeAndExpenseData.isRunningBalanceCalculated()){ throw new RunningBalanceNotCalculatedException(incomeAndExpenseData.getOfficeId());}
@@ -281,35 +283,53 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         int j = 0;
         for(final IncomeAndExpenseJournalEntryData incomeAndExpense : incomeAndExpenseJournalEntryDataList){
             if(incomeAndExpense.isIncomeAccountType()){
-                if(incomeAndExpense.getOfficeRunningBalance().signum() == 1){debits = debits.add(incomeAndExpense.getOfficeRunningBalance());i++;}
-                else{ credits = credits.add(incomeAndExpense.getOfficeRunningBalance().abs());j++;}
+                if(incomeAndExpense.getOfficeRunningBalance().signum() == 1){
+                    debits = debits.add(incomeAndExpense.getOfficeRunningBalance());
+                    i++;
+                }
+                else{
+                    credits = credits.add(incomeAndExpense.getOfficeRunningBalance().abs());
+                    j++;
+                }
             }
             if(incomeAndExpense.isExpenseAccountType()){
-                if(incomeAndExpense.getOfficeRunningBalance().signum() == 1){credits = credits.add(incomeAndExpense.getOfficeRunningBalance()); j++;}
-                else{debits= debits.add(incomeAndExpense.getOfficeRunningBalance().abs());i++;}
+                if(incomeAndExpense.getOfficeRunningBalance().signum() == 1){
+                    credits = credits.add(incomeAndExpense.getOfficeRunningBalance());
+                    j++;
+                }
+                else{
+                    debits= debits.add(incomeAndExpense.getOfficeRunningBalance().abs());
+                    i++;
+                }
             }
         }
         final int compare = debits.compareTo(credits);
         BigDecimal difference = BigDecimal.ZERO;
         JournalEntryCommand journalEntryCommand = null;
-        if(compare ==1){ j++;}else{ i++;}
+        if(compare ==1){ j++;}
+        else{ i++;}
 
         SingleDebitOrCreditEntryCommand[]  debitsJournalEntry  = new SingleDebitOrCreditEntryCommand[i];
         SingleDebitOrCreditEntryCommand[]  creditsJournalEntry  = new SingleDebitOrCreditEntryCommand[j];
-        int m=0; int n=0;
+        int m=0;
+        int n=0;
         for(final IncomeAndExpenseJournalEntryData incomeAndExpense : incomeAndExpenseJournalEntryDataList){
             if(incomeAndExpense.isIncomeAccountType()){
                 if(incomeAndExpense.getOfficeRunningBalance().signum() == 1){
-                    debitsJournalEntry[m] = new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);m++;
+                    debitsJournalEntry[m] = new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);
+                    m++;
                 }else{
-                    creditsJournalEntry[n]= new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);n++;
+                    creditsJournalEntry[n]= new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);
+                    n++;
                 }
             }
             if(incomeAndExpense.isExpenseAccountType()){
                 if(incomeAndExpense.getOfficeRunningBalance().signum() == 1){
-                    creditsJournalEntry[n]= new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);n++;
+                    creditsJournalEntry[n]= new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);
+                    n++;
                 }else{
-                    debitsJournalEntry[m]= new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);m++;
+                    debitsJournalEntry[m]= new SingleDebitOrCreditEntryCommand(null,incomeAndExpense.getAccountId(),incomeAndExpense.getOfficeRunningBalance().abs(),null);
+                    m++;
                 }
             }
         }

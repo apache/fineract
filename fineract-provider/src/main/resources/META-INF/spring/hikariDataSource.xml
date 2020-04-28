@@ -60,7 +60,7 @@
                 <prop key="maintainTimeStats">false</prop>
 
                 <!-- https://github.com/brettwooldridge/HikariCP/wiki/JDBC-Logging#mysql-connectorj -->
-                <prop key="logger">com.mysql.jdbc.log.StandardLogger</prop>
+                <!-- TODO FINERACT-890: <prop key="logger">com.mysql.cj.log.Slf4JLogger</prop>  -->
                 <prop key="logSlowQueries">true</prop>
                 <prop key="dumpQueriesOnException">true</prop>
             </props>

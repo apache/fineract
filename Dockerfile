@@ -51,6 +51,13 @@ COPY ./docker/server.xml /opt/bitnami/tomcat/conf
 RUN chmod 664 /opt/bitnami/tomcat/conf/server.xml
 
 WORKDIR /opt/bitnami/tomcat/lib
-# org.drizzle.jdbc.DrizzleDriver is used in docker/server.xml for jdbc/fineract_tenants DataSource
-# (But note that connections to individual tenant DBs may use another driver...)
+# org.drizzle.jdbc.DrizzleDriver is used by default for both the all tenants and demo tenant DB DataSource
 RUN wget https://repo1.maven.org/maven2/org/drizzle/jdbc/drizzle-jdbc/1.4/drizzle-jdbc-1.4.jar
+
+# https://issues.apache.org/jira/browse/LEGAL-462
+# https://issues.apache.org/jira/browse/FINERACT-762
+# We include an alternative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
+# allowing implementations to switch the driver used by changing start-up parameters (for both tenants and each tenant DB)
+# The commented out lines in the docker-compose.yml illustrate how to do this.
+# To be sure that this instead of Drizlle is used, comment out wget above.
+RUN wget https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar
