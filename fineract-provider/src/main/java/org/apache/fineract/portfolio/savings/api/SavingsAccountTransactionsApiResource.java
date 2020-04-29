@@ -29,6 +29,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -55,6 +57,10 @@ import org.springframework.stereotype.Component;
 @Path("/savingsaccounts/{savingsId}/transactions")
 @Component
 @Scope("singleton")
+@Api(tags = {"Saving Account Transactions"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Saving Account Transactions")
+})
 public class SavingsAccountTransactionsApiResource {
 
     private final PlatformSecurityContext context;
@@ -128,8 +134,11 @@ public class SavingsAccountTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String transaction(@PathParam("savingsId") final Long savingsId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a Transaction", httpMethod = "POST", notes = "commandParam: deposit - withdrawal - postInterestAsOn")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", dataType = "SavingsAccountTransactionData", required = true, type = "body", dataTypeClass = SavingsAccountTransactionsApiResourceSwagger.PostTransactionRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsAccountTransactionsApiResourceSwagger.PostTransactionResponse.class) })
+    public String transaction(@PathParam("savingsId") @ApiParam(value = "savingsId") final Long savingsId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+        @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         try {
             final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
