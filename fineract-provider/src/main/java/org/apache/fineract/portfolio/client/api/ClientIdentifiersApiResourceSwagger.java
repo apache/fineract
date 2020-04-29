@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.fineract.portfolio.client.domain.ClientIdentifierStatus;
+
 import java.util.Set;
 
 /**
@@ -86,6 +88,8 @@ final class ClientIdentifiersApiResourceSwagger {
         public String documentKey;
         @ApiModelProperty(example = "Document has been verified")
         public String description;
+        @ApiModelProperty(example = "Status of this Identifier")
+        public ClientIdentifierStatus status;
     }
 
     @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdRequest")
@@ -99,6 +103,8 @@ final class ClientIdentifiersApiResourceSwagger {
         public String documentKey;
         @ApiModelProperty(example = "Document has been updated")
         public String description;
+        @ApiModelProperty(example = "Status of this Identifier")
+        public ClientIdentifierStatus status;
     }
 
     @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdResponse")
