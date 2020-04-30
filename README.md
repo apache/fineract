@@ -20,6 +20,7 @@ Requirements
 ============
 * Java >= 1.8 (Oracle JVMs have been tested)
 * MySQL 5.5
+* Tomcat 9, if deploying to a separate servlet container. Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required. 
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
@@ -38,7 +39,7 @@ Instructions how to run for local development
 Run the following commands:
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew tomcatRunWAR`
+1. `./gradlew bootRun`
 
 
 Instructions to download gradle wrapper
@@ -63,7 +64,7 @@ Instructions to run Apache RAT (Release Audit Tool)
 Instructions to build a WAR file
 ============
 1. Extract the archive file to your local directory.
-2. Run `./gradlew clean war` or `./gradlew build` to build a deployable war file which will be created at build/libs directory.
+2. Run `./gradlew clean bootWar` or `./gradlew build` to build a deployable war file which will be created at build/libs directory.
 
 
 Instructions to execute Integration tests

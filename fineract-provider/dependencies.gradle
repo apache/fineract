@@ -17,25 +17,26 @@
  * under the License.
  */
 dependencies {
-        tomcat "org.apache.tomcat.embed:tomcat-embed-core",
-               "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
-        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
-            exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-        }
-
-    providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
-
-    spotbugsPlugins 'jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar'
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    
+    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
 
     compile ('org.springframework.boot:spring-boot-starter-data-jpa') {
 		exclude group: 'org.hibernate'
+    }
+
+    compile ('com.amazonaws:aws-java-sdk-s3') {
+                exclude group: 'commons-logging'
+    }
+
+    compile ('org.mnode.ical4j:ical4j') {
+                exclude group: 'commons-logging'
     }
 
     api(
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
             'joda-time:joda-time',
-            'org.mnode.ical4j:ical4j',
             'com.google.guava:guava',
             'org.springframework:spring-context-support',
             'org.springframework.security.oauth:spring-security-oauth2',
@@ -44,13 +45,15 @@ dependencies {
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api'
     )
+
 	api ('org.apache.openjpa:openjpa') {
 		exclude group: 'org.eclipse.persistence'
 		exclude group: 'org.apache.geronimo.specs'
 	}
-	api('org.quartz-scheduler:quartz') {
-		exclude group: 'com.zaxxer', module: 'HikariCP-java7'
-	}
+
+    api('org.quartz-scheduler:quartz') {
+        exclude group: 'com.zaxxer', module: 'HikariCP-java7'
+    }
 
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
@@ -73,6 +76,7 @@ dependencies {
 
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
+            'org.apache.commons:commons-io',
 
             'org.drizzle.jdbc:drizzle-jdbc',
 
@@ -84,7 +88,6 @@ dependencies {
 
             'com.googlecode.flyway:flyway-core',
 
-            'com.amazonaws:aws-java-sdk-s3',
             'net.sf.ehcache:ehcache',
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
@@ -108,7 +111,6 @@ dependencies {
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
             'joda-time:joda-time',
-            'org.mnode.ical4j:ical4j',
             'com.google.guava:guava',
             'org.apache.poi:poi-ooxml',
             'org.springframework:spring-context-support',
@@ -117,9 +119,13 @@ dependencies {
         exclude group: 'regexp'
     }
     testCompile ('io.rest-assured:rest-assured') {
+        exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
     }
     testCompile ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
+    }
+    testCompile ('org.mnode.ical4j:ical4j') {
+        exclude group: 'commons-logging'
     }
 }

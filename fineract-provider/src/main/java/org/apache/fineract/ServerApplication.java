@@ -18,14 +18,15 @@
  */
 package org.apache.fineract;
 
+import java.io.IOException;
 import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
-import org.apache.fineract.infrastructure.core.boot.ApplicationExitUtil;
 import org.apache.fineract.infrastructure.core.boot.EmbeddedTomcatWithSSLConfiguration;
-import org.apache.fineract.infrastructure.core.boot.db.DataSourceConfiguration;
-import org.apache.fineract.infrastructure.core.boot.db.DataSourceProperties;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * Fineract main() application which launches Fineract in an embedded Tomcat HTTP
@@ -40,17 +41,26 @@ import org.springframework.context.annotation.Import;
  *
  * It's the old/classic Mifos (non-X) Workspace 2.0 reborn for Fineract! ;-)
  *
- * @see DataSourceProperties about how to configure the DataSource used
  * @see ServerWithMariaDB4jApplication for an alternative with an embedded DB
  */
-public class ServerApplication {
 
-    @Import({ DataSourceConfiguration.class, EmbeddedTomcatWithSSLConfiguration.class })
+public class ServerApplication extends SpringBootServletInitializer {
+
+    @Import({ EmbeddedTomcatWithSSLConfiguration.class })
+    @ImportResource({ "classpath*:META-INF/spring/hikariDataSource.xml" })
     private static class Configuration extends AbstractApplicationConfiguration { }
 
-    public static void main(String[] args) throws Exception {
-        ConfigurableApplicationContext ctx = SpringApplication.run(Configuration.class, args);
-        ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(Configuration.class);
     }
 
+    private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
+        return builder.sources(Configuration.class);
+    }
+
+    public static void main(String[] args) throws IOException {
+        ConfigurableApplicationContext ctx = configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
+        //ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
+    }
 }

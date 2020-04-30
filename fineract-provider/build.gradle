@@ -18,8 +18,7 @@
  */
 description = '''\
 Run as:
-gradle clean tomcatrunwar
-'''
+gradle clean bootRun'''
 
 project.ext.jerseyVersion = '1.19.4'
 
@@ -35,7 +34,7 @@ buildscript {
 
     dependencies {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
-        classpath 'com.bmuschko:gradle-tomcat-plugin:2.5',
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1',
             'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
             'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
             'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE'
@@ -60,7 +59,7 @@ apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'com.bmuschko.tomcat'
+apply plugin: 'com.bmuschko.cargo'
 apply plugin: 'project-report'
 apply plugin: 'java-library'
 apply plugin: 'openjpa'
@@ -88,6 +87,7 @@ dependencyManagement {
         dependency 'com.google.code.gson:gson:+'
         dependency 'com.google.guava:guava:28.1-jre'
         dependency 'org.apache.commons:commons-email:1.5'
+        dependency 'org.apache.commons:commons-io:+'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
         dependency 'com.lowagie:itext:2.1.7'
         dependency 'com.lowagie:itext-rtf:2.1.7'
@@ -124,13 +124,7 @@ dependencyManagement {
             entry 'poi'
             entry 'poi-ooxml'
             entry 'poi-ooxml-schemas'
-        }
-        dependencySet(group: 'org.apache.tomcat.embed', version: '7.0.94') {
-            entry 'tomcat-embed-core'
-            entry 'tomcat-embed-jasper'
-            entry 'tomcat-embed-logging-log4j'
-        }
-
+        }             
     }
 }
 
@@ -274,7 +268,6 @@ configurations {
 		exclude module: 'classworlds'
 	}
 	runtime
-	all*.exclude group: 'commons-logging'
 	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
 /* Pick up dependencies based on the environemnt, defaults to production */
@@ -419,52 +412,51 @@ task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License)
 }
 licenseFormat.dependsOn licenseFormatBuildScripts
 
-tomcatRun {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
+configurations 
+{
+  tomcat
 }
 
-tomcatRunWar {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
-    keystoreFile = file('src/main/resources/keystore.jks')
-    keystorePass = 'openmf'
+dependencies {
+  tomcat "org.apache.tomcat:tomcat:9.0.34@zip"
 }
 
-task tomcatRunWarAsDaemonForIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatRunWar) {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
-    keystoreFile = file('src/main/resources/keystore.jks')
-    keystorePass = 'openmf'
-    daemon = true
+cargo {
+  containerId "tomcat9x"
+  
+  local {
+    installer {
+      installConfiguration = configurations.tomcat
+      downloadDir = file("$buildDir/download")
+      extractDir = file("$buildDir/tomcat")
+    }
+    
+    containerProperties {
+      property 'cargo.tomcat.connector.keystoreFile', file('src/main/resources/keystore.jks')
+      property 'cargo.tomcat.connector.keystorePass', 'openmf'       	
+      property 'cargo.tomcat.httpSecure', true
+      property 'cargo.tomcat.connector.sslProtocol', 'TLS'
+      property 'cargo.tomcat.connector.clientAuth', false
+      property 'cargo.protocol', 'https'
+      property 'cargo.servlet.port', 8443
+    }
+  }
 }
 
-task tomcatStopAfterIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatStop) {
-    stopPort = 8081
-    stopKey = 'stopKey'
-}
+cargoRunLocal.dependsOn bootWar
+cargoStartLocal.dependsOn bootWar
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
 sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
-/* Exclude maria db and embedded tomcat related files for non dev builds */
+/* Exclude maria db related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {
         main {
             java {
-                exclude '**/Server*'
+                exclude '**/ServerWithMariaDB*'
                 exclude '**/MariaDB4j*'
-                exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
             }
         }
         test {
@@ -489,10 +481,8 @@ configurations {
 
 task integrationTest(type:Test) {
     description = "Run integration tests (located in src/integrationTest/java). Starts Tomcat in daemon mode before executing the tests (and stops it after)."
-    dependsOn war
-    dependsOn tomcatRunWarAsDaemonForIntegrationTest
-    tasks.findByName('tomcatRunWarAsDaemonForIntegrationTest').mustRunAfter 'war'
-    finalizedBy tomcatStopAfterIntegrationTest
+    dependsOn cargoStartLocal
+    finalizedBy cargoStopLocal
 
     testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
@@ -576,11 +566,11 @@ def qualifyVersionIfNecessary(version) {
 }
 
 springBoot {
-    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClassName = 'org.apache.fineract.ServerApplication'
 }
 
 bootWar {
-    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClassName = 'org.apache.fineract.ServerApplication'
 }
 
 // To generate an HTML report instead of XML

@@ -21,11 +21,11 @@ package org.apache.fineract.infrastructure.core.boot;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-
 import org.apache.catalina.connector.Connector;
 import org.apache.commons.io.FileUtils;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -34,10 +34,10 @@ import org.springframework.core.io.Resource;
 @Configuration
 public class EmbeddedTomcatWithSSLConfiguration {
 
-    // http://docs.spring.io/spring-boot/docs/1.1.5.RELEASE/reference/htmlsingle/#howto-enable-multiple-connectors-in-tomcat
+    // https://docs.spring.io/spring-boot/docs/2.2.6.RELEASE/reference/html/howto.html#howto-enable-multiple-connectors-in-tomcat
 
     @Bean
-    public TomcatServletWebServerFactory servletContainer() {
+    public ServletWebServerFactory servletContainer() {
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
         tomcat.setContextPath(getContextPath());
         tomcat.addAdditionalTomcatConnectors(createSslConnector());
@@ -53,16 +53,12 @@ public class EmbeddedTomcatWithSSLConfiguration {
         Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
         try {
             File keystore = getFile(getKeystore());
-            File truststore = keystore;
             connector.setScheme("https");
             connector.setSecure(true);
             connector.setPort(getHTTPSPort());
             protocol.setSSLEnabled(true);
             protocol.setKeystoreFile(keystore.getAbsolutePath());
             protocol.setKeystorePass(getKeystorePass());
-            protocol.setTruststoreFile(truststore.getAbsolutePath());
-            protocol.setTruststorePass(getKeystorePass());
-            // ? protocol.setKeyAlias("apitester");
             return connector;
         } catch (IOException ex) {
             throw new IllegalStateException("can't access keystore: [" + "keystore" + "] or truststore: [" + "keystore" + "]", ex);
