@@ -3,6 +3,8 @@ package org.apache.fineract.commands.data;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class FineractEventData {
@@ -11,12 +13,13 @@ public class FineractEventData {
     private final CommandProcessingResult response;
     private final String tenantIdentifier;
     private final String timestamp;
+    private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     public FineractEventData(CommandWrapper request, CommandProcessingResult response, String tenantIdentifier) {
         this.request = request;
         this.response = response;
         this.tenantIdentifier = tenantIdentifier;
-        this.timestamp = new Date().toString();
+        this.timestamp = df.format(new Date());
     }
 
     public CommandWrapper getRequest() {
