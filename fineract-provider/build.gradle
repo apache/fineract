@@ -135,7 +135,6 @@ dependencyManagement {
             entry 'tomcat-embed-jasper'
             entry 'tomcat-embed-logging-log4j'
         }
-        
     }
 }
 
@@ -423,14 +422,6 @@ task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License)
     source = fileTree(dir: '../', includes: ['**/*.bat', '**/*.sh', '**/*.sql'])
 }
 licenseFormat.dependsOn licenseFormatBuildScripts
-
-tomcatRun {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
-}
 
 tomcatRunWar {
     httpPort = 8080
