@@ -25,7 +25,6 @@ project.ext.jerseyVersion = '1.17'
 
 buildscript {
     ext {
-        openJPAVersion = '3.1.0'
         jacocoVersion = '0.8.5'
     }
     repositories {
@@ -41,7 +40,7 @@ buildscript {
             'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
             'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE'
         // below
-        classpath "org.apache.openjpa:openjpa:$openJPAVersion"
+        classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
         classpath "com.github.spotbugs:spotbugs-gradle-plugin:2.0.1"
@@ -79,7 +78,7 @@ dependencyManagement {
 
     dependencies {
         dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
-        dependency 'org.apache.openjpa:openjpa:3.1.0'
+        dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
         dependency 'com.squareup.retrofit:retrofit:1.6.1'
         dependency 'com.squareup.okhttp:okhttp:2.0.0'
         dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
