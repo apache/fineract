@@ -217,8 +217,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withTransactionId(transactionId).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleJournalEntryDataIntegrityIssues(dve);
-            return null;
+            throw handleJournalEntryDataIntegrityIssues(dve);
         }
     }
 
@@ -539,7 +538,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + shareTransactionId.longValue();
             List<JournalEntry> journalEntries = this.glJournalEntryRepository.findJournalEntries(transactionId,
                     PortfolioProductType.SHARES.getValue());
-            if (journalEntries == null || journalEntries.isEmpty()) continue;
+            if (journalEntries == null || journalEntries.isEmpty()) {
+                continue;
+            }
             final Long officeId = journalEntries.get(0).getOffice().getId();
             final String reversalTransactionId = generateTransactionId(officeId);
             for (final JournalEntry journalEntry : journalEntries) {
@@ -637,10 +638,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         return transactionId;
     }
 
-    private void handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
+    private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
         logger.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
+        return new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());
     }
 
@@ -691,8 +692,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withTransactionId(transactionId).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleJournalEntryDataIntegrityIssues(dve);
-            return null;
+            throw handleJournalEntryDataIntegrityIssues(dve);
         }
     }
 
@@ -773,7 +773,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         @Override
         public boolean equals(Object obj) {
-            if (!obj.getClass().equals(this.getClass())) return false;
+            if (!obj.getClass().equals(this.getClass())) {
+                return false;
+            }
             OfficeCurrencyKey copy = (OfficeCurrencyKey) obj;
             return Objects.equals(this.office.getId(), copy.office.getId()) && this.currency.equals(copy.currency);
         }
