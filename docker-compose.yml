@@ -62,7 +62,7 @@ services:
     container_name: mifos-ui
     restart: always
     ports:
-      - 80:80
+      - 9090:80
 
 
 # https://issues.apache.org/jira/browse/FINERACT-762
