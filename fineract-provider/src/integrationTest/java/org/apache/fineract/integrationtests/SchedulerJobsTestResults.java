@@ -471,6 +471,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testUpdateLoanPaidInAdvanceJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -987,7 +988,7 @@ public class SchedulerJobsTestResults {
         return fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
 
-    public void validateNumberForEqualExcludePrecission(String val, String val2) {
+    private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#", new DecimalFormatSymbols(Locale.US));
         Assert.assertTrue(new Float(twoDForm.format(new Float(val))).compareTo(new Float(twoDForm.format(new Float(val2)))) == 0);
     }
