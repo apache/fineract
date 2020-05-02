@@ -140,7 +140,7 @@ public class JournalEntriesApiResource {
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
                 savingsId);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
-                runningBalance);
+                runningBalance, false);
 
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
                 onlyManualEntries, fromDate, toDate, transactionId, entityType, associationParametersData);
@@ -155,11 +155,12 @@ public class JournalEntriesApiResource {
     @ApiOperation(value = "Retrieve a single Entry", notes = "Example Requests:\n" + "\n" + "journalentries/1\n" + "\n" + "\n" + "\n" + "journalentries/1?fields=officeName,glAccountId,entryType,amount\n" + "\n" + "journalentries/1?runningBalance=true\n" + "\n" + "journalentries/1?transactionDetails=true")
     @ApiResponses({@ApiResponse(code = 200, message = "", response = JournalEntryData.class)})
     public String retreiveJournalEntryById(@PathParam("journalEntryId") @ApiParam(value = "journalEntryId") final Long journalEntryId, @Context final UriInfo uriInfo,
-            @QueryParam("runningBalance") @ApiParam(value = "runningBalance") final boolean runningBalance, @QueryParam("transactionDetails") @ApiParam(value = "transactionDetails") final boolean transactionDetails) {
+            @QueryParam("runningBalance") @ApiParam(value = "runningBalance") final boolean runningBalance, @QueryParam("transactionDetails") @ApiParam(value = "transactionDetails") final boolean transactionDetails,
+            @QueryParam("glClosure") final boolean glClosure) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
-                runningBalance);
+                runningBalance, glClosure);
         final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId,
                 associationParametersData);
 
