@@ -87,7 +87,8 @@ public class ClasspathHellDuplicatesChecker {
 
     private boolean skipJAR(String jarPath) {
         // ./gradlew test finds classes from the Gradle Wrapper (which don't show up in-IDE), exclude those
-        return jarPath.contains("/.gradle/wrapper/dists/");
+        return jarPath.contains("/.gradle/wrapper/dists/")
+                || jarPath.contains("/io.rest-assured/");  // TODO FINERACT-884 remove when RestAssured was bumped from 3.3.0 to 4.3.0 in Spring BOM
     }
 
     protected boolean isHarmlessDuplicate(String resourcePath) {
@@ -95,6 +96,7 @@ public class ClasspathHellDuplicatesChecker {
         return resourcePath.equals("META-INF/MANIFEST.MF")
                 || resourcePath.equals("META-INF/INDEX.LIST")
                 || resourcePath.equals("META-INF/ORACLE_J.SF")
+                || resourcePath.toUpperCase().startsWith("META-INF/ASL")
                 || resourcePath.toUpperCase().startsWith("META-INF/NOTICE")
                 || resourcePath.toUpperCase().startsWith("META-INF/LICENSE")
                 || resourcePath.toUpperCase().startsWith("LICENSE")
@@ -112,8 +114,9 @@ public class ClasspathHellDuplicatesChecker {
                 || resourcePath.equals("META-INF/jersey-module-version")
                 || resourcePath.startsWith("OSGI-INF/blueprint/")
                 || resourcePath.startsWith("org/opendaylight/blueprint/")
-                || resourcePath.equals("WEB-INF/web.xml")
                 || resourcePath.endsWith("reference.conf") // in Akka's JARs
+                || resourcePath.equals("WEB-INF/web.xml")
+                || resourcePath.equals("META-INF/web-fragment.xml")
                 || resourcePath.equals("META-INF/eclipse.inf")
                 || resourcePath.equals("META-INF/ECLIPSE_.SF")
                 || resourcePath.equals("META-INF/ECLIPSE_.RSA")
@@ -121,6 +124,12 @@ public class ClasspathHellDuplicatesChecker {
                 || resourcePath.equals("META-INF/BC2048KE.SF")
                 || resourcePath.equals("META-INF/BC1024KE.SF")
                 || resourcePath.equals("OSGI-INF/bundle.info")
+                // Spring Framework knows what they are do..
+                || resourcePath.startsWith("META-INF/spring")
+                || resourcePath.startsWith("META-INF/additional-spring")
+                || resourcePath.startsWith("META-INF/terracotta")
+                // Groovy is groovy
+                || resourcePath.startsWith("META-INF/groovy-release-info.properties")
                 // Something doesn't to be a perfectly clean in Maven Surefire:
                 || resourcePath.startsWith("META-INF/maven/")
                 || resourcePath.contains("surefire")

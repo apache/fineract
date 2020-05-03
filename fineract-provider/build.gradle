@@ -102,7 +102,6 @@ dependencyManagement {
         dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
         dependency 'org.springframework:spring-jms:4.0.7.RELEASE'
         dependency 'org.apache.activemq:activemq-broker:+'
-        dependency 'javax.validation:validation-api:+'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
         dependencySet(group: 'io.rest-assured', version: '3.3.0'){
             entry 'rest-assured'
