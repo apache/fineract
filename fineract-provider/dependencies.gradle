@@ -23,16 +23,16 @@ dependencies {
             exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
         }
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
 
-    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
+    spotbugsPlugins 'jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar'
 
-    compile ("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile ('org.springframework.boot:spring-boot-starter-data-jpa') {
+		exclude group: 'org.hibernate'
+    }
 
     api(
             'com.google.code.gson:gson',
-            'org.quartz-scheduler:quartz',
-            'org.apache.openjpa:openjpa',
             'org.springframework:spring-jms',
             'joda-time:joda-time',
             'org.mnode.ical4j:ical4j',
@@ -42,6 +42,14 @@ dependencies {
             'com.sun.jersey:jersey-core',
             'com.squareup.retrofit:retrofit'
     )
+	api ('org.apache.openjpa:openjpa') {
+		exclude group: 'org.eclipse.persistence'
+		exclude group: 'org.apache.geronimo.specs'
+	}
+	api('org.quartz-scheduler:quartz') {
+		exclude group: 'com.zaxxer', module: 'HikariCP-java7'
+	}
+
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
@@ -51,9 +59,7 @@ dependencies {
 
             //'org.eclipse.persistence:javax.persistence',
 
-
             'org.springframework.security.oauth:spring-security-oauth2',
-
 
             //'javax.ws.rs:jsr311-api',
 
@@ -96,20 +102,17 @@ dependencies {
             // Once we've switched to Java 8 this dep can be removed.
             //'com.google.code.findbugs:jsr305',
 
-            'io.swagger:swagger-jersey-jaxrs',
             'org.apache.activemq:activemq-broker',
-            'javax.validation:validation-api',
+            'org.apache.bval:org.apache.bval.bundle'
     )
+    implementation ('io.swagger:swagger-jersey-jaxrs') {
+		exclude group: 'javax.validation'
+    }
 
-    implementation 'org.apache.bval:org.apache.bval.bundle'
-
-    testCompile 'io.rest-assured:rest-assured',
-            'junit:junit',
+    testCompile 'junit:junit',
             //'junit:junit-dep',
             'org.mockito:mockito-core',
             'io.github.classgraph:classgraph:4.8.43',
-            'org.slf4j:slf4j-simple',
-            'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
             'joda-time:joda-time',
@@ -117,10 +120,17 @@ dependencies {
             'com.google.guava:guava',
             'org.apache.poi:poi-ooxml',
             'org.springframework:spring-context-support',
-            'com.sun.jersey:jersey-core',
-            'com.mockrunner:mockrunner-jdbc'
-
-    testCompile ("org.springframework.boot:spring-boot-starter-test") {
+            'com.sun.jersey:jersey-core'
+	testCompile ('com.mockrunner:mockrunner-jdbc' ) {
+        exclude group: 'regexp'
+    }
+    testCompile ('com.mockrunner:mockrunner-jms') {
+        exclude group: 'regexp'
+    }
+    testCompile ('io.rest-assured:rest-assured') {
+        exclude group: 'org.apache.sling'
+    }
+    testCompile ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
     }
 }
