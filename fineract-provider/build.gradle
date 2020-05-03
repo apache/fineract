@@ -424,6 +424,7 @@ license {
         "**/package-info.java",
         "**/keystore.jks",
         "**/swagger-ui/**",
+        "**/api-docs/**",
     ])
     strictCheck true
 }
