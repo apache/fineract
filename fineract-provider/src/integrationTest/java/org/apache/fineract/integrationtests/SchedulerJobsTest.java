@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNotNull;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -37,7 +36,6 @@ import org.junit.Test;
 @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class SchedulerJobsTest {
 
-    private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private SchedulerJobHelper schedulerJobHelper;
 
@@ -51,7 +49,7 @@ public class SchedulerJobsTest {
     }
 
     @Test
-    public void testGetAndUpdateSchedulerStatus() throws InterruptedException {
+    public void testFlippingSchedulerStatus() throws InterruptedException {
         // Retrieving Status of Scheduler
         Boolean schedulerStatus = this.schedulerJobHelper.getSchedulerStatus();
         if (schedulerStatus == true) {
@@ -71,15 +69,14 @@ public class SchedulerJobsTest {
     @Ignore // TODO FINERACT-852
     public void testSchedulerJobs() throws InterruptedException {
         // Retrieving All Scheduler Jobs
-        List<Map> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        List<Map> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs();
         assertNotNull(allSchedulerJobsData);
 
         for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-
             Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
             // Retrieving Scheduler Job by ID
-            Map schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            Map schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
             assertNotNull(schedulerJob);
 
             Boolean active = (Boolean) schedulerJob.get("active");
@@ -91,8 +88,7 @@ public class SchedulerJobsTest {
             }
 
             // Updating Scheduler Job
-            Map changes = this.schedulerJobHelper.updateSchedulerJob(this.requestSpec, this.responseSpec, jobId.toString(),
-                    active.toString());
+            Map changes = this.schedulerJobHelper.updateSchedulerJob(jobId.toString(), active.toString());
             // Verifying Scheduler Job updates
             assertEquals("Verifying Scheduler Job Updates", active, changes.get("active"));
 
@@ -100,18 +96,17 @@ public class SchedulerJobsTest {
             this.schedulerJobHelper.runSchedulerJob(this.requestSpec, jobId.toString());
 
             // Retrieving Scheduler Job by ID
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
             assertNotNull(schedulerJob);
 
             // Waiting for Job to complete
             while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                Thread.sleep(15000);
-                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+                Thread.sleep(500);
+                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
                 assertNotNull(schedulerJob);
                 System.out.println("Job " +jobId.toString() +" is Still Running");
             }
-            List<Map> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                    jobId.toString());
+            List<Map> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(jobId.toString());
 
             // Verifying the Status of the Recently executed Scheduler Job
             assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
