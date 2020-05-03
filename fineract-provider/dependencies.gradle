@@ -40,7 +40,9 @@ dependencies {
             'org.springframework:spring-context-support',
             'org.springframework.security.oauth:spring-security-oauth2',
             'com.sun.jersey:jersey-core',
-            'com.squareup.retrofit:retrofit'
+            'com.squareup.retrofit:retrofit',
+            'jakarta.jms:jakarta.jms-api',
+            'jakarta.management.j2ee:jakarta.management.j2ee-api'
     )
 	api ('org.apache.openjpa:openjpa') {
 		exclude group: 'org.eclipse.persistence'
@@ -102,11 +104,13 @@ dependencies {
             // Once we've switched to Java 8 this dep can be removed.
             //'com.google.code.findbugs:jsr305',
 
-            'org.apache.activemq:activemq-broker',
             'org.apache.bval:org.apache.bval.bundle'
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
 		exclude group: 'javax.validation'
+    }
+    implementation ('org.apache.activemq:activemq-broker') {
+    	exclude group: 'org.apache.geronimo.specs'
     }
 
     testCompile 'junit:junit',
