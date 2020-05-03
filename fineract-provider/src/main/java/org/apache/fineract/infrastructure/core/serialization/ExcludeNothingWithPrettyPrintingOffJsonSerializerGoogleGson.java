@@ -20,23 +20,12 @@ package org.apache.fineract.infrastructure.core.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
-import org.apache.fineract.infrastructure.core.api.JodaLocalDateAdapter;
-import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>
- * A google gson implementation of
- * contract.
- * </p>
+ * A Google GSON implementation of contract.
  *
- * <p>
  * It serializes all fields of any Java {@link Object} passed to it.
- * </p>
  */
 @Component
 public final class ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson {
@@ -45,9 +34,7 @@ public final class ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson {
 
     public ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson() {
         final GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
+        GoogleGsonSerializerHelper.registerTypeAdapters(builder);
 
         this.gson = builder.create();
     }
