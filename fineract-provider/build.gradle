@@ -21,7 +21,7 @@ Run as:
 gradle clean tomcatrunwar
 '''
 
-project.ext.jerseyVersion = '1.17'
+project.ext.jerseyVersion = '1.19.4'
 
 buildscript {
     ext {
@@ -134,7 +134,7 @@ dependencyManagement {
             entry 'tomcat-embed-jasper'
             entry 'tomcat-embed-logging-log4j'
         }
-        
+
     }
 }
 
@@ -329,7 +329,7 @@ modernizer {
 
     ignorePackages = []
     ignoreClassNamePatterns = [
-        '.*AbstractPersistableCustom'   
+        '.*AbstractPersistableCustom'
     ]
     ignoreGeneratedClasses = true
 
