@@ -27,22 +27,20 @@ import java.lang.reflect.Type;
 import org.joda.time.MonthDay;
 
 /**
- * Serializer for joda time {@link MonthDay} that returns date in array format
- * to match previous jackson functionality.
+ * Serializer for Joda Time {@link MonthDay} that returns the date in array format
+ * to match previous Jackson functionality.
  */
 public class JodaMonthDayAdapter implements JsonSerializer<MonthDay> {
 
-    @SuppressWarnings("unused")
     @Override
+    @SuppressWarnings("unused")
     public JsonElement serialize(final MonthDay src, final Type typeOfSrc, final JsonSerializationContext context) {
-
         JsonArray array = null;
         if (src != null) {
             array = new JsonArray();
             array.add(new JsonPrimitive(src.getMonthOfYear()));
             array.add(new JsonPrimitive(src.getDayOfMonth()));
         }
-
         return array;
     }
 }
