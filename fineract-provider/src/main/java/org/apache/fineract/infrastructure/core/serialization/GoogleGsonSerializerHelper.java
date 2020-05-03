@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.api.DateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaLocalDateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
@@ -98,6 +99,7 @@ public final class GoogleGsonSerializerHelper {
     }
 
     public static void registerTypeAdapters(final GsonBuilder builder) {
+        builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
         builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
         builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
