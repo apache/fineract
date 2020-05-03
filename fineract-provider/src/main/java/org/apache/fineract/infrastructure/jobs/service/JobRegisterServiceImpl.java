@@ -47,6 +47,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
+import org.quartz.plugins.history.LoggingTriggerHistoryPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,7 +343,10 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         schedulerFactoryBean.setQuartzProperties(quartzProperties);
         schedulerFactoryBean.afterPropertiesSet();
         schedulerFactoryBean.start();
-        return schedulerFactoryBean.getScheduler();
+        Scheduler scheduler = schedulerFactoryBean.getScheduler();
+        LoggingTriggerHistoryPlugin loggingTriggerListener = new LoggingTriggerHistoryPlugin();
+        loggingTriggerListener.initialize("Fineract's LoggingTriggerHistoryPlugin", scheduler, null);
+        return scheduler;
     }
 
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
@@ -421,7 +425,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final StringBuilder sb = new StringBuilder(throwable.toString());
         for (final StackTraceElement element : stackTraceElements) {
             sb.append("\n \t at ").append(element.getClassName()).append(".").append(element.getMethodName()).append("(")
-                    .append(element.getLineNumber()).append(")");
+            .append(element.getLineNumber()).append(")");
         }
         return sb.toString();
     }
