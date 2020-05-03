@@ -595,6 +595,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -738,6 +739,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testAvoidUnncessaryPenaltyWhenAmountZeroForOverdueLoansJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -835,6 +837,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testInterestTransferForSavings() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
