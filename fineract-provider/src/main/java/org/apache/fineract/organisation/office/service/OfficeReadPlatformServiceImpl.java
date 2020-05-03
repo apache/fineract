@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -279,7 +280,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
                     new Object[] { officeId});
         } catch (final EmptyResultDataAccessException e) {
-           return null;
+           return Collections.emptyList();
         }
     }
 }

@@ -39,6 +39,7 @@ import org.apache.fineract.accounting.closure.exception.GLClosureInvalidExceptio
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException.GL_CLOSURE_INVALID_REASON;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalculatedException;
+import org.apache.fineract.accounting.closure.exception.RunningBalanceZeroException;
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -349,8 +350,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
                     null,null,null,null,null,null,null,null);
             transactionId = this.journalEntryWritePlatformService.createJournalEntryForIncomeAndExpenseBookOff(journalEntryCommand);
         }else if(compare == 0){
-            //throw new RunningBalanceZeroException(office.getName());
-            return null;
+            throw new RunningBalanceZeroException(office.getName());
         }
         return transactionId;
 

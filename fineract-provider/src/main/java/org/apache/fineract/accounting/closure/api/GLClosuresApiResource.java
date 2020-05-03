@@ -30,6 +30,7 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -169,7 +170,7 @@ public class GLClosuresApiResource {
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
             final Collection<IncomeAndExpenseBookingData> incomeAndExpenseBookingCollection = this.calculateIncomeAndExpenseBooking.CalculateIncomeAndExpenseBookings(query);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.incomeAndExpenseBookingDataDefaultToApiJsonSerializer.serialize(settings, incomeAndExpenseBookingCollection, new HashSet<String>());
+            return this.incomeAndExpenseBookingDataDefaultToApiJsonSerializer.serialize(settings, incomeAndExpenseBookingCollection, Collections.emptySet());
 
     }
 
