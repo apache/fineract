@@ -59,11 +59,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-actuator',
 
-            //'org.eclipse.persistence:javax.persistence',
-
             'org.springframework.security.oauth:spring-security-oauth2',
-
-            //'javax.ws.rs:jsr311-api',
 
             'com.sun.jersey:jersey-servlet',
             'com.sun.jersey:jersey-server',
@@ -75,13 +71,9 @@ dependencies {
             'com.squareup.okhttp:okhttp',
             'com.squareup.okhttp:okhttp-urlconnection',
 
-            //'net.sourceforge.javacsvjavacsv',
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
 
-            // no slf4j & logback here (anymore), as spring-boot-starter-logging already brings this now, better assembled (log4j-over-slf4j was originally forgotten here)
-
-            //'mysql:mysql-connector-java',
             'org.drizzle.jdbc:drizzle-jdbc',
 
             'org.apache.poi:poi',
@@ -89,7 +81,6 @@ dependencies {
             'org.apache.poi:poi-ooxml-schemas',
 
             'com.lowagie:itext',
-            //'com.lowagie:itext-rtf',
 
             'com.googlecode.flyway:flyway-core',
 
@@ -101,8 +92,6 @@ dependencies {
             // Although fineract (at the time of writing) doesn't have any compile time dep. on this,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient',
-            // Once we've switched to Java 8 this dep can be removed.
-            //'com.google.code.findbugs:jsr305',
 
             'org.apache.bval:org.apache.bval.bundle'
     )
@@ -114,7 +103,6 @@ dependencies {
     }
 
     testCompile 'junit:junit',
-            //'junit:junit-dep',
             'org.mockito:mockito-core',
             'io.github.classgraph:classgraph:4.8.43',
             'com.google.code.gson:gson',
@@ -125,9 +113,6 @@ dependencies {
             'org.apache.poi:poi-ooxml',
             'org.springframework:spring-context-support',
             'com.sun.jersey:jersey-core'
-	testCompile ('com.mockrunner:mockrunner-jdbc' ) {
-        exclude group: 'regexp'
-    }
     testCompile ('com.mockrunner:mockrunner-jms') {
         exclude group: 'regexp'
     }
