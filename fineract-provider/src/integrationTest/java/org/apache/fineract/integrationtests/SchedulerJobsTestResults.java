@@ -798,6 +798,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testUpdateOverdueDaysForNPA() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
