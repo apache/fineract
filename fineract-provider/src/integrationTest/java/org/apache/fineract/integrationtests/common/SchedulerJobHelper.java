@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import static org.junit.Assert.assertNotNull;
+
 import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
@@ -26,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import org.junit.Assert;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -47,17 +51,23 @@ public class SchedulerJobHelper {
         this.response202Spec = responseSpec;
     }
 
-    public List getAllSchedulerJobs() {
+    private List getAllSchedulerJobs() {
         final String GET_ALL_SCHEDULER_JOBS_URL = "/fineract-provider/api/v1/jobs?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING ALL SCHEDULER JOBS -------------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, response200Spec, GET_ALL_SCHEDULER_JOBS_URL, "");
         return response;
     }
 
-    public HashMap getSchedulerJobById(final String jobId) {
+    public List<Integer> getAllSchedulerJobIds() {
+        ToIntFunction<Map> mapper = map -> (Integer) map.get("jobId");
+        return getAllSchedulerJobs().stream().mapToInt(mapper).boxed().collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getSchedulerJobById(int jobId) {
         final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
-        final HashMap response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_BY_ID_URL, "");
+        final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_BY_ID_URL, "");
+        assertNotNull(response);
         return response;
     }
 
@@ -74,10 +84,10 @@ public class SchedulerJobHelper {
         Utils.performServerPost(requestSpec, response202Spec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
     }
 
-    public Map updateSchedulerJob(final String jobId, final String active) {
+    public Map<String, Object> updateSchedulerJob(int jobId, final String active) {
         final String UPDATE_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ UPDATING SCHEDULER JOB -------------------------");
-        final Map response = Utils.performServerPut(requestSpec, response200Spec, UPDATE_SCHEDULER_JOB_URL,
+        final Map<String, Object> response = Utils.performServerPut(requestSpec, response200Spec, UPDATE_SCHEDULER_JOB_URL,
                 updateSchedulerJobAsJSON(active), "changes");
         return response;
     }
@@ -89,7 +99,7 @@ public class SchedulerJobHelper {
         return new Gson().toJson(map);
     }
 
-    public List getSchedulerJobHistory(final String jobId) {
+    public List getSchedulerJobHistory(int jobId) {
         final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/jobs/" + jobId + "/runhistory?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING SCHEDULER JOB HISTORY -------------------------");
         final Map response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_STATUS_URL, "");
@@ -122,18 +132,18 @@ public class SchedulerJobHelper {
                 runSchedulerJob(this.requestSpec, jobId.toString());
 
                 // Retrieving Scheduler Job by ID
-                Map schedulerJob = getSchedulerJobById(jobId.toString());
+                Map schedulerJob = getSchedulerJobById(jobId);
                 Assert.assertNotNull(schedulerJob);
 
                 // Waiting for Job to complete
                 while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
                     Thread.sleep(15000);
-                    schedulerJob = getSchedulerJobById(jobId.toString());
+                    schedulerJob = getSchedulerJobById(jobId);
                     Assert.assertNotNull(schedulerJob);
                     System.out.println("Job is Still Running");
                 }
 
-                List<Map> jobHistoryData = getSchedulerJobHistory(jobId.toString());
+                List<Map> jobHistoryData = getSchedulerJobHistory(jobId);
 
                 Assert.assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
 

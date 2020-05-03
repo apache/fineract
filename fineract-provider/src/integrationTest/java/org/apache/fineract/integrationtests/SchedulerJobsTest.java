@@ -42,71 +42,76 @@ public class SchedulerJobsTest {
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
     }
 
     @Test
     public void testFlippingSchedulerStatus() throws InterruptedException {
         // Retrieving Status of Scheduler
-        Boolean schedulerStatus = this.schedulerJobHelper.getSchedulerStatus();
+        Boolean schedulerStatus = schedulerJobHelper.getSchedulerStatus();
         if (schedulerStatus == true) {
-            this.schedulerJobHelper.updateSchedulerStatus("stop");
-            schedulerStatus = this.schedulerJobHelper.getSchedulerStatus();
+            schedulerJobHelper.updateSchedulerStatus("stop");
+            schedulerStatus = schedulerJobHelper.getSchedulerStatus();
             // Verifying Status of the Scheduler after stopping
             assertEquals("Verifying Scheduler Job Status", false, schedulerStatus);
         } else {
-            this.schedulerJobHelper.updateSchedulerStatus("start");
-            schedulerStatus = this.schedulerJobHelper.getSchedulerStatus();
+            schedulerJobHelper.updateSchedulerStatus("start");
+            schedulerStatus = schedulerJobHelper.getSchedulerStatus();
             // Verifying Status of the Scheduler after starting
             assertEquals("Verifying Scheduler Job Status", true, schedulerStatus);
         }
     }
 
     @Test
-    @Ignore // TODO FINERACT-852
-    public void testSchedulerJobs() throws InterruptedException {
-        // Retrieving All Scheduler Jobs
-        List<Map> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs();
-        assertNotNull(allSchedulerJobsData);
+    public void testFlippingJobsActiveStatus() throws InterruptedException {
+        // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side effects
+        schedulerJobHelper.updateSchedulerStatus("stop");
 
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
-
+        // For each retrieved scheduled job (by ID)...
+        for (Integer jobId : schedulerJobHelper.getAllSchedulerJobIds()) {
             // Retrieving Scheduler Job by ID
-            Map schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
-            assertNotNull(schedulerJob);
+            Map<String, Object> schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
 
             Boolean active = (Boolean) schedulerJob.get("active");
-
-            if (active == true) {
-                active = false;
-            } else {
-                active = true;
-            }
+            active = !active;
 
             // Updating Scheduler Job
-            Map changes = this.schedulerJobHelper.updateSchedulerJob(jobId.toString(), active.toString());
+            Map<String, Object> changes = schedulerJobHelper.updateSchedulerJob(jobId, active.toString());
+
             // Verifying Scheduler Job updates
             assertEquals("Verifying Scheduler Job Updates", active, changes.get("active"));
 
+            schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
+            assertEquals("Verifying Get Scheduler Job", active, schedulerJob.get("active"));
+        }
+    }
+
+    @Test
+    @Ignore // TODO FINERACT-852 & FINERACT-922
+    public void testSchedulerJobs() throws InterruptedException {
+        // For each retrieved scheduled job (by ID)...
+        for (Integer jobId : schedulerJobHelper.getAllSchedulerJobIds()) {
+            // Retrieving Scheduler Job by ID
+            Map<String, Object> schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
+
             // Executing Scheduler Job
-            this.schedulerJobHelper.runSchedulerJob(this.requestSpec, jobId.toString());
+            schedulerJobHelper.runSchedulerJob(requestSpec, jobId.toString());
 
             // Retrieving Scheduler Job by ID
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
+            schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
             assertNotNull(schedulerJob);
 
             // Waiting for Job to complete
             while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
                 Thread.sleep(500);
-                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
+                schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
                 assertNotNull(schedulerJob);
-                System.out.println("Job " +jobId.toString() +" is Still Running");
+                System.out.println("Job " + jobId +" is Still Running");
             }
-            List<Map> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(jobId.toString());
+            List<Map> jobHistoryData = schedulerJobHelper.getSchedulerJobHistory(jobId);
 
             // Verifying the Status of the Recently executed Scheduler Job
             assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
