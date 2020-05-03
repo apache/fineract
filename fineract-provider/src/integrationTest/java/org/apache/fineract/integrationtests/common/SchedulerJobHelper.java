@@ -113,7 +113,7 @@ public class SchedulerJobHelper {
         return response;
     }
 
-    private static String updateSchedulerJobAsJSON(final boolean active) {
+    private String updateSchedulerJobAsJSON(final boolean active) {
         final Map<String, String> map = new HashMap<>();
         map.put("active", Boolean.toString(active));
         LOG.info("map :  {}" , map);
@@ -135,7 +135,7 @@ public class SchedulerJobHelper {
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }
 
-    private static String runSchedulerJobAsJSON() {
+    private String runSchedulerJobAsJSON() {
         final Map<String, String> map = new HashMap<>();
         String runSchedulerJob = new Gson().toJson(map);
         LOG.info(runSchedulerJob);
