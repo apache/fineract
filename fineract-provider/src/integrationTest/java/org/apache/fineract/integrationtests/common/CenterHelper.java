@@ -20,13 +20,13 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class CenterHelper {
@@ -85,9 +85,15 @@ public class CenterHelper {
         hm.put("officeId", officeId);
         hm.put("active", false);
 
-        if (externalId != null) hm.put("externalId", externalId);
-        if (staffId != -1) hm.put("staffId", staffId);
-        if (groupMembers != null) hm.put("groupMembers", groupMembers);
+        if (externalId != null) {
+            hm.put("externalId", externalId);
+        }
+        if (staffId != -1) {
+            hm.put("staffId", staffId);
+        }
+        if (groupMembers != null) {
+            hm.put("groupMembers", groupMembers);
+        }
         if (activationDate != null) {
             hm.put("active", true);
             hm.put("locale", "en");
@@ -235,7 +241,7 @@ public class CenterHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
-        if (StringUtils.isNotEmpty(activationDate)) {
+        if (!Strings.isNullOrEmpty(activationDate)) {
             map.put("activationDate", activationDate);
         } else {
             map.put("activationDate", "CREATED_DATE");
@@ -247,10 +253,6 @@ public class CenterHelper {
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
-    }
-
-    private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

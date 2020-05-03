@@ -22,13 +22,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 
 public class GroupHelper {
 
@@ -144,7 +144,7 @@ public class GroupHelper {
     }
 
     public static String associateClientAsJSON(final String clientMember) {
-        final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+        final HashMap<String, List<String>> map = new HashMap<>();
         final List<String> list = new ArrayList<>();
         list.add(clientMember);
         map.put("clientMembers", list);
@@ -156,7 +156,7 @@ public class GroupHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
-        if (StringUtils.isNotEmpty(activationDate)) {
+        if (!Strings.isNullOrEmpty(activationDate)) {
             map.put("activationDate", activationDate);
         } else {
             map.put("activationDate", "04 March 2011");
