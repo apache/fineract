@@ -769,12 +769,12 @@ public class SchedulerJobsTestResults {
 
         this.schedulerJobHelper.executeJob(JobName);
 
-        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
 
         Assert.assertNotNull(schedulerJob);
         while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
             Thread.sleep(15000);
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
             Assert.assertNotNull(schedulerJob);
         }
 
