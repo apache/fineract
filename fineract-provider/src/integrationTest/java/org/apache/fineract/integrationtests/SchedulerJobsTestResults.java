@@ -111,6 +111,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-924
     public void testApplyAnnualFeeForSavingsJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
