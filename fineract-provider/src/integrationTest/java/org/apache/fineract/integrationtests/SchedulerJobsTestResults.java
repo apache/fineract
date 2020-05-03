@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.HolidayHelper;
@@ -772,12 +773,12 @@ public class SchedulerJobsTestResults {
 
         this.schedulerJobHelper.executeJob(JobName);
 
-        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
+        Map<String, Object> schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
 
         Assert.assertNotNull(schedulerJob);
         while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
             Thread.sleep(15000);
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId.toString());
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
             Assert.assertNotNull(schedulerJob);
         }
 
