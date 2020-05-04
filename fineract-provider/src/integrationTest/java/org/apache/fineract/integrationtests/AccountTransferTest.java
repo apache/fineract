@@ -77,8 +77,8 @@ public class AccountTransferTest {
     private AccountHelper accountHelper;
     private JournalEntryHelper journalEntryHelper;
 
-    Float TRANSFER_AMOUNT = new Float(ACCOUNT_TRANSFER_AMOUNT);
-    Float TRANSFER_AMOUNT_ADJUST = new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
+    Float TRANSFER_AMOUNT = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
+    Float TRANSFER_AMOUNT_ADJUST = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
 
     private FinancialActivityAccountHelper financialActivityAccountHelper;
     private Integer financialActivityAccountId;
@@ -195,14 +195,14 @@ public class AccountTransferTest {
 
         final HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
 
-        Float fromSavingsBalance = new Float(MINIMUM_OPENING_BALANCE);
-        Float toSavingsBalance = new Float(MINIMUM_OPENING_BALANCE);
+        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, fromClientID, toSavingsID, FROM_SAVINGS_ACCOUNT_TYPE,
                 TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
 
-        fromSavingsBalance -= new Float(ACCOUNT_TRANSFER_AMOUNT);
-        toSavingsBalance += new Float(ACCOUNT_TRANSFER_AMOUNT);
+        fromSavingsBalance -= Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
+        toSavingsBalance += Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
 
         HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
         assertEquals("Verifying From Savings Account Balance after Account Transfer", fromSavingsBalance,
@@ -211,9 +211,9 @@ public class AccountTransferTest {
         HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
         assertEquals("Verifying To Savings Account Balance after Account Transfer", toSavingsBalance,
                 toSavingsSummaryAfter.get("accountBalance"));
-        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT),
+        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT),
                 JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT),
+        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT),
                 JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
@@ -293,7 +293,7 @@ public class AccountTransferTest {
 
         final HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
 
-        Float fromSavingsBalance = new Float(MINIMUM_OPENING_BALANCE);
+        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, toClientID, toLoanID, FROM_SAVINGS_ACCOUNT_TYPE,
                 TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT_ADJUST);
@@ -308,9 +308,9 @@ public class AccountTransferTest {
         assertEquals("Verifying To Loan Repayment Amount after Account Transfer", TRANSFER_AMOUNT_ADJUST,
                 toLoanSummaryAfter.get("totalRepayment"));
 
-        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
+        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
+        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
@@ -403,7 +403,7 @@ public class AccountTransferTest {
 
         final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
 
-        Float fromSavingsBalance = new Float(MINIMUM_OPENING_BALANCE);
+        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, fromClientID, loanID, FROM_SAVINGS_ACCOUNT_TYPE,
                 TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
@@ -416,7 +416,7 @@ public class AccountTransferTest {
         assertEquals("Verifying From Savings Account Balance after Account Transfer", fromSavingsBalance,
                 fromSavingsSummaryAfter.get("accountBalance"));
 
-        Float toSavingsBalance = new Float(MINIMUM_OPENING_BALANCE);
+        Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         this.accountTransferHelper.accountTransfer(fromClientID, loanID, toClientID, toSavingsID, FROM_LOAN_ACCOUNT_TYPE,
                 TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT_ADJUST);
@@ -429,9 +429,9 @@ public class AccountTransferTest {
         assertEquals("Verifying From Savings Account Balance after Account Transfer", toSavingsBalance,
                 toSavingsSummaryAfter.get("accountBalance"));
 
-        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
+        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
+        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,

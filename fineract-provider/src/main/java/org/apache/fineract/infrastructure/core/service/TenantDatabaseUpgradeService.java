@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import com.google.common.collect.ImmutableMap;
 import com.googlecode.flyway.core.Flyway;
 import com.googlecode.flyway.core.api.FlywayException;
 import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
@@ -94,7 +94,7 @@ public class TenantDatabaseUpgradeService {
         flyway.setDataSource(tenantDataSource);
         flyway.setLocations("sql/migrations/list_db");
         flyway.setOutOfOrder(true);
-        flyway.setPlaceholders(ImmutableMap.of( // FINERACT-773
+        flyway.setPlaceholders(Map.of( // FINERACT-773
                 "fineract_default_tenantdb_hostname", dbHostname,
                 "fineract_default_tenantdb_port",     dbPort,
                 "fineract_default_tenantdb_uid",      dbUid,

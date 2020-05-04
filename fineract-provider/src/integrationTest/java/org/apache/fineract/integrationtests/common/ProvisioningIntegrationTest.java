@@ -106,7 +106,7 @@ public class ProvisioningIntegrationTest {
         ArrayList definitions = (ArrayList)newCriteria.get("definitions") ;
         for(int i = 0 ; i < definitions.size(); i++) {
             Map criteriadefinition = (Map) definitions.get(i) ;
-            criteriadefinition.put("provisioningPercentage", new Float(20.0)) ;
+            criteriadefinition.put("provisioningPercentage", Float.valueOf((float)20.0)) ;
         }
         newCriteria.put("locale", "en");
         String updateCriteriaString = new Gson().toJson(newCriteria) ;

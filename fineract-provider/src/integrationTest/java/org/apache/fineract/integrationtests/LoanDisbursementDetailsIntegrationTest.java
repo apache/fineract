@@ -210,20 +210,20 @@ public class LoanDisbursementDetailsIntegrationTest {
         assertEquals(period.get("dueDate").toString(), expectedRepaymentSchedule.getDueDate());
         assertEquals(period.get("principalLoanBalanceOutstanding"), expectedRepaymentSchedule.getPrincipalLoanBalanceOutstanding());
         System.out.println(period.get("totalOriginalDueForPeriod").toString());
-        assertEquals(new Float(period.get("totalOriginalDueForPeriod").toString()), expectedRepaymentSchedule
+        assertEquals(Float.valueOf(period.get("totalOriginalDueForPeriod").toString()), expectedRepaymentSchedule
                 .getTotalOriginalDueForPeriod().floatValue(), 0.0f);
 
-        assertEquals(new Float(period.get("totalOutstandingForPeriod").toString()).floatValue(),
+        assertEquals(Float.valueOf(period.get("totalOutstandingForPeriod").toString()).floatValue(),
                 expectedRepaymentSchedule.getTotalOutstandingForPeriod(), 0.0f);
 
         if (position != 0 && position != 3) {
 
-            assertEquals(new Float(period.get("interestOutstanding").toString()).floatValue(),
+            assertEquals(Float.valueOf(period.get("interestOutstanding").toString()).floatValue(),
                     expectedRepaymentSchedule.getInterestOutstanding(), 0.0f);
-            assertEquals(new Float(period.get("principalOutstanding").toString()).floatValue(),
+            assertEquals(Float.valueOf(period.get("principalOutstanding").toString()).floatValue(),
                     expectedRepaymentSchedule.getPrincipalOutstanding(), 0.0f);
-            assertEquals(new Float(period.get("principalDue").toString()).floatValue(), expectedRepaymentSchedule.getPrincipalDue(), 0.0f);
-            assertEquals(new Float(period.get("principalOriginalDue").toString()).floatValue(),
+            assertEquals(Float.valueOf(period.get("principalDue").toString()).floatValue(), expectedRepaymentSchedule.getPrincipalDue(), 0.0f);
+            assertEquals(Float.valueOf(period.get("principalOriginalDue").toString()).floatValue(),
                     expectedRepaymentSchedule.getPrincipalOriginalDue(), 0.0f);
             assertEquals(period.get("fromDate").toString(), expectedRepaymentSchedule.getFromDate());
         }

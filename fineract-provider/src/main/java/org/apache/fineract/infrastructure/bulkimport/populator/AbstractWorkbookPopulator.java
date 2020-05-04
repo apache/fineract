@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -55,7 +54,6 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
   }
 
   protected void writeFormula(int colIndex, Row row, String formula) {
-          row.createCell(colIndex).setCellType(Cell.CELL_TYPE_FORMULA);
           row.createCell(colIndex).setCellFormula(formula);
   }
 

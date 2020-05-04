@@ -88,10 +88,10 @@ public class AccountingScenarioIntegrationTest {
     public static final String WITHDRAWAL_AMOUNT = "3000";
     public static final String WITHDRAWAL_AMOUNT_ADJUSTED = "2000";
 
-    Float SP_BALANCE = new Float(MINIMUM_OPENING_BALANCE);
-    Float SP_DEPOSIT_AMOUNT = new Float(DEPOSIT_AMOUNT);
-    Float SP_WITHDRAWAL_AMOUNT = new Float(WITHDRAWAL_AMOUNT);
-    Float SP_WITHDRAWAL_AMOUNT_ADJUSTED = new Float(WITHDRAWAL_AMOUNT_ADJUSTED);
+    Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
+    Float SP_DEPOSIT_AMOUNT = Float.valueOf(DEPOSIT_AMOUNT);
+    Float SP_WITHDRAWAL_AMOUNT = Float.valueOf(WITHDRAWAL_AMOUNT);
+    Float SP_WITHDRAWAL_AMOUNT_ADJUSTED = Float.valueOf(WITHDRAWAL_AMOUNT_ADJUSTED);
 
     private final String REPAYMENT_DATE[] = { "", "04 May 2011", "04 July 2011", "04 September 2011", "04 November 2011", "04 January 2012" };
     private final Float REPAYMENT_AMOUNT[] = { .0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f };
@@ -817,7 +817,7 @@ public class AccountingScenarioIntegrationTest {
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
         float INTEREST_4_DAYS = totalInterest / totalDaysInPeriod * 4;
-        INTEREST_4_DAYS = new Float(numberFormat.format(INTEREST_4_DAYS));
+        INTEREST_4_DAYS = Float.valueOf(numberFormat.format(INTEREST_4_DAYS));
 
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(currentDate), INTEREST_4_DAYS, FEE_PORTION,
                 PENALTY_PORTION, loanID);
@@ -931,7 +931,7 @@ public class AccountingScenarioIntegrationTest {
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
         DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
         float INTEREST_3_DAYS = totalInterest / totalDaysInPeriod * 3;
-        INTEREST_3_DAYS = new Float(numberFormat.format(INTEREST_3_DAYS));
+        INTEREST_3_DAYS = Float.valueOf(numberFormat.format(INTEREST_3_DAYS));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), INTEREST_3_DAYS, FEE_PORTION,
                 PENALTY_PORTION, loanID);
 
@@ -939,7 +939,7 @@ public class AccountingScenarioIntegrationTest {
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
         float interestPerDay = (totalInterest / totalDaysInPeriod * 4) - INTEREST_3_DAYS;
-        interestPerDay = new Float(numberFormat.format(interestPerDay));
+        interestPerDay = Float.valueOf(numberFormat.format(interestPerDay));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION,
                 NEXT_PENALTY_PORTION, loanID);
 

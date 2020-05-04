@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SDKGlobalConfiguration;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -54,8 +53,6 @@ public class S3ContentRepository implements ContentRepository {
 
     public S3ContentRepository(final String bucketName, final String secretKey, final String accessKey) {
         this.s3BucketName = bucketName;
-        //On some AWS regions by default V4 signature is enabled. Setting this property.
-        System.setProperty(SDKGlobalConfiguration.ENABLE_S3_SIGV4_SYSTEM_PROPERTY, "true");
         this.s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
     }
 

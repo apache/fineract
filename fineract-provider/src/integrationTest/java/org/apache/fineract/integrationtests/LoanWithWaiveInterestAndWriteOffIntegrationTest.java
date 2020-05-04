@@ -160,21 +160,21 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         HashMap toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
         Assert.assertTrue("Checking for Principal paid ",
-                new Float("500.0").compareTo(new Float(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0);
+                Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0);
         Assert.assertTrue("Checking for interestPaid paid ",
-                new Float("180.0").compareTo(new Float(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0);
+                Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0);
         Assert.assertTrue("Checking for total paid ",
-                new Float("680.0").compareTo(new Float(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0);
+                Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0);
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
         LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("1 January 2011", loanID));
         toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
         Assert.assertTrue("Checking for Principal written off ",
-                new Float("4000.0").compareTo(new Float(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0);
+                Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0);
         Assert.assertTrue("Checking for interestPaid written off ",
-                new Float("1440.0").compareTo(new Float(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0);
+                Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0);
         Assert.assertTrue("Checking for total written off ",
-                new Float("5440.0").compareTo(new Float(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0);
+                Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0);
 
     }
 

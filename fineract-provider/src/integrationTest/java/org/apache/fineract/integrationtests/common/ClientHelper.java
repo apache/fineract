@@ -503,14 +503,14 @@ public class ClientHelper {
                 getUndoWithdrawnClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
     }
 
-    public Object undoRejectedclient(final Integer clientId, final String jsonAttributeToGetBack,
+    public ArrayList<HashMap<String, Object>> undoRejectedclient(final Integer clientId, final String jsonAttributeToGetBack,
             final String rejectedDate) {
         System.out.println("----------------------------------UNDO REJECT CLIENT ----------------------------------");
         return performClientActionsWithValidationErrors(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
                 getUndoRejectClientAsJSON(rejectedDate), jsonAttributeToGetBack);
     }
 
-    public Object undoWithdrawclient(final Integer clientId, final String jsonAttributeToGetBack,
+    public ArrayList<HashMap<String, Object>> undoWithdrawclient(final Integer clientId, final String jsonAttributeToGetBack,
             final String rejectedDate) {
         System.out.println("----------------------------------UNDO WITHDRAW CLIENT ----------------------------------");
         return performClientActionsWithValidationErrors(
@@ -518,7 +518,7 @@ public class ClientHelper {
                 getUndoWithdrawnClientAsJSON(rejectedDate), jsonAttributeToGetBack);
     }
 
-    public Object activateClient(final Integer clientId, final String jsonAttributeToGetBack) {
+    public ArrayList<HashMap<String, Object>> activateClient(final Integer clientId, final String jsonAttributeToGetBack) {
         System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
         return performClientActionsWithValidationErrors(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
                 getActivateClientAsJSON(CREATED_DATE_PLUS_ONE), jsonAttributeToGetBack);
@@ -531,7 +531,7 @@ public class ClientHelper {
                 getActivateClientAsJSON(activationDate), clientId);
     }
 
-    private ArrayList<HashMap> performClientActionsWithValidationErrors(final String postURLForClient,
+    private ArrayList<HashMap<String, Object>> performClientActionsWithValidationErrors(final String postURLForClient,
             final String jsonToBeSent, final String jsonAttributeToGetBack) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent,
                 jsonAttributeToGetBack);
