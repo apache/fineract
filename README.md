@@ -18,7 +18,7 @@ If you are interested in contributing to this project, but perhaps don't quite k
 
 Requirements
 ============
-* Java >= 1.8 (Oracle JVMs have been tested)
+* Java >= 11 (Oracle JVMs have been tested)
 * MySQL 5.5
 * Tomcat 9, if deploying to a separate servlet container. Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required. 
 

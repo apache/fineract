@@ -83,6 +83,7 @@ dependencies {
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
             'org.apache.poi:poi-ooxml-schemas',
+            'dom4j:dom4j',
 
             'com.lowagie:itext',
 
@@ -96,7 +97,10 @@ dependencies {
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
             'org.apache.httpcomponents:httpclient',
 
-            'org.apache.bval:org.apache.bval.bundle'
+            'org.apache.bval:org.apache.bval.bundle',
+
+             // JAX-B dependencies for JDK 9+
+             "jakarta.xml.bind:jakarta.xml.bind-api"
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
 		exclude group: 'javax.validation'
@@ -106,8 +110,9 @@ dependencies {
     }
 
     testCompile 'junit:junit',
+            'xerces:xercesImpl',
             'org.mockito:mockito-core',
-            'io.github.classgraph:classgraph:4.8.43',
+            'io.github.classgraph:classgraph',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
             'joda-time:joda-time',
@@ -115,12 +120,13 @@ dependencies {
             'org.apache.poi:poi-ooxml',
             'org.springframework:spring-context-support',
             'com.sun.jersey:jersey-core'
-    testCompile ('com.mockrunner:mockrunner-jms') {
-        exclude group: 'regexp'
-    }
+
     testCompile ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
+    }
+    testCompile ('com.mockrunner:mockrunner-jms') {
+        exclude group: 'regexp'
     }
     testCompile ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

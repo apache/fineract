@@ -112,7 +112,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
     private boolean isAnyLoanProductsAssociateWithThisProvisioningCategory(final Long categoryID) {
         final String sql = "select if((exists (select 1 from m_loanproduct_provisioning_details lpd where lpd.category_id = ?)) = 1, 'true', 'false')";
         final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { categoryID });
-        return new Boolean(isLoansUsingCharge);
+        return Boolean.valueOf(isLoansUsingCharge);
     }
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue

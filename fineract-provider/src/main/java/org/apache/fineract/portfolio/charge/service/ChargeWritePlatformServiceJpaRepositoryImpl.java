@@ -242,27 +242,27 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
         final String sql = "select if((exists (select 1 from m_loan_charge lc where lc.charge_id = ? and lc.is_active = 1)) = 1, 'true', 'false')";
         final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
-        return new Boolean(isLoansUsingCharge);
+        return Boolean.valueOf(isLoansUsingCharge);
     }
 
     private boolean isAnySavingsAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_savings_account_charge sc where sc.charge_id = ? and sc.is_active = 1)) = 1, 'true', 'false')";
         final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
-        return new Boolean(isSavingsUsingCharge);
+        return Boolean.valueOf(isSavingsUsingCharge);
     }
 
     private boolean isAnyLoanProductsAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_product_loan_charge lc where lc.charge_id = ?)) = 1, 'true', 'false')";
         final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
-        return new Boolean(isLoansUsingCharge);
+        return Boolean.valueOf(isLoansUsingCharge);
     }
 
     private boolean isAnySavingsProductsAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_savings_product_charge sc where sc.charge_id = ?)) = 1, 'true', 'false')";
         final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
-        return new Boolean(isSavingsUsingCharge);
+        return Boolean.valueOf(isSavingsUsingCharge);
     }
 }

@@ -106,7 +106,7 @@ public class TwilioHookProcessor implements HookProcessor {
                     return;
                 }
             } else {
-                json = new JsonParser().parse(payload).getAsJsonObject();
+                json = JsonParser.parseString(payload).getAsJsonObject();
             }
             service.sendSmsBridgeRequest(entityName, actionName,
                     tenantIdentifier, apiKey, json, callback);
@@ -136,7 +136,7 @@ public class TwilioHookProcessor implements HookProcessor {
                     jsonMap.put("mobileNo", mobileNo);
                     jsonMap.put("message", compiledMessage);
                     final String jsonString = new Gson().toJson(jsonMap);
-                    json = new JsonParser().parse(jsonString).getAsJsonObject();
+                    json = JsonParser.parseString(jsonString).getAsJsonObject();
                 }
             }
         } catch (IOException e) {

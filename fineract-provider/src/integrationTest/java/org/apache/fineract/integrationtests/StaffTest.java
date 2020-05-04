@@ -132,7 +132,7 @@ public class StaffTest {
 
     @Test
     public void testStaffListStatusActive() {
-        final List<HashMap> responseActive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
+        final List<HashMap> responseActive = (List<HashMap>)StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
         for(final HashMap staff : responseActive) {
             Assert.assertNotNull(staff.get("id"));
             Assert.assertEquals(staff.get("isActive"), true);
@@ -141,7 +141,7 @@ public class StaffTest {
 
     @Test
     public void testStaffListStatusInactive() {
-        final List<HashMap> responseInactive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
+        final List<HashMap> responseInactive = (List<HashMap>)StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
 
         for(final HashMap staff : responseInactive) {
             Assert.assertNotNull(staff.get("id"));

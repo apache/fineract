@@ -249,7 +249,7 @@ public class ClientSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = new Float(openningBalance);
+        Float balance = Float.valueOf(openningBalance);
         Float chargeAmt = 100f;
         balance -= chargeAmt;
         assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
@@ -266,15 +266,15 @@ public class ClientSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
 
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, withdrawAmt,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(withdrawAmt);
-        assertEquals("Verifying Withdrawal Amount", new Float(withdrawAmt), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(withdrawAmt);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(withdrawAmt), withdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
     }
 
@@ -435,28 +435,28 @@ public class ClientSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = new Float(MINIMUM_OPENING_BALANCE);
+        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
         assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
 
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
 
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
 
         Integer newWithdrawTransactionId = this.savingsAccountHelper.updateSavingsAccountTransaction(savingsId, withdrawTransactionId,
                 WITHDRAW_AMOUNT_ADJUSTED);
         HashMap newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, newWithdrawTransactionId);
-        balance = balance + new Float(WITHDRAW_AMOUNT) - new Float(WITHDRAW_AMOUNT_ADJUSTED);
-        assertEquals("Verifying adjusted Amount", new Float(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"));
+        balance = balance + Float.valueOf(WITHDRAW_AMOUNT) - Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
+        assertEquals("Verifying adjusted Amount", Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after adjust", balance, newWithdrawTransaction.get("runningBalance"));
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         assertEquals("Verifying Adjusted Balance", balance, summary.get("accountBalance"));
@@ -467,7 +467,7 @@ public class ClientSavingsIntegrationTest {
         newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         Assert.assertTrue((Boolean) newWithdrawTransaction.get("reversed"));
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        balance += new Float(WITHDRAW_AMOUNT_ADJUSTED);
+        balance += Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
         assertEquals("Verifying Balance After Undo Transaction", balance, summary.get("accountBalance"));
 
         error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "5000",
@@ -740,8 +740,8 @@ public class ClientSavingsIntegrationTest {
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
 
         /***
@@ -754,8 +754,8 @@ public class ClientSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
 
         /***
@@ -785,8 +785,8 @@ public class ClientSavingsIntegrationTest {
          */
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
         assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
 
         todaysDate = Calendar.getInstance();
@@ -897,8 +897,8 @@ public class ClientSavingsIntegrationTest {
                         WITHDRAWAL_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper
                 .getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT),
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT),
                 depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance,
                 depositTransaction.get("runningBalance"));
@@ -933,8 +933,8 @@ public class ClientSavingsIntegrationTest {
         DecimalFormat decimalFormat = new DecimalFormat("",
                 new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -965,8 +965,8 @@ public class ClientSavingsIntegrationTest {
         decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                 Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1002,8 +1002,8 @@ public class ClientSavingsIntegrationTest {
         decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                 Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1042,8 +1042,8 @@ public class ClientSavingsIntegrationTest {
             decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                     Locale.US));
             decimalFormat.applyPattern("#.###");
-            interestPosted = new Float(decimalFormat.format(interestPosted));
-            accountDetailsPostInterestPosted = new Float(
+            interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+            accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
             assertEquals("Verifying interest posted", interestPosted,
                     accountDetailsPostInterestPosted);
@@ -1086,8 +1086,8 @@ public class ClientSavingsIntegrationTest {
             decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                     Locale.US));
             decimalFormat.applyPattern("#.###");
-            interestPosted = new Float(decimalFormat.format(interestPosted));
-            accountDetailsPostInterestPosted = new Float(
+            interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+            accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
             assertEquals("Verifying interest posted", interestPosted,
                     accountDetailsPostInterestPosted);
@@ -1123,8 +1123,8 @@ public class ClientSavingsIntegrationTest {
         decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                 Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1228,8 +1228,8 @@ public class ClientSavingsIntegrationTest {
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
 
         /***
@@ -1242,8 +1242,8 @@ public class ClientSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 WITHDRAWAL_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
 
         /***
@@ -1276,8 +1276,8 @@ public class ClientSavingsIntegrationTest {
         DecimalFormat decimalFormat = new DecimalFormat("",
                 new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1308,8 +1308,8 @@ public class ClientSavingsIntegrationTest {
         decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                 Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1345,8 +1345,8 @@ public class ClientSavingsIntegrationTest {
         decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                 Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1385,8 +1385,8 @@ public class ClientSavingsIntegrationTest {
             decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                     Locale.US));
             decimalFormat.applyPattern("#.###");
-            interestPosted = new Float(decimalFormat.format(interestPosted));
-            accountDetailsPostInterestPosted = new Float(
+            interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+            accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
             assertEquals("Verifying interest posted", interestPosted,
                     accountDetailsPostInterestPosted);
@@ -1429,8 +1429,8 @@ public class ClientSavingsIntegrationTest {
             decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                     Locale.US));
             decimalFormat.applyPattern("#.###");
-            interestPosted = new Float(decimalFormat.format(interestPosted));
-            accountDetailsPostInterestPosted = new Float(
+            interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+            accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
             assertEquals("Verifying interest posted", interestPosted,
                     accountDetailsPostInterestPosted);
@@ -1466,8 +1466,8 @@ public class ClientSavingsIntegrationTest {
         decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
                 Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        accountDetailsPostInterestPosted = new Float(
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted,
                 accountDetailsPostInterestPosted);
@@ -1560,8 +1560,8 @@ public class ClientSavingsIntegrationTest {
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
 
         /***
@@ -1574,8 +1574,8 @@ public class ClientSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
 
         /***
@@ -1616,8 +1616,8 @@ public class ClientSavingsIntegrationTest {
          */
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        //actualInterestPosted = new Float(decimalFormat.format(accountDetailsPostInterestPosted));
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        //actualInterestPosted = Float.valueOf(decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted, accountDetailsPostInterestPosted);
         System.out.println("------Post Interest As On After doing a post interest Successfully worked--------");
 
@@ -1737,8 +1737,8 @@ public class ClientSavingsIntegrationTest {
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
         assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
 
         /***
@@ -1751,8 +1751,8 @@ public class ClientSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
         assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
 
         /***
@@ -1783,8 +1783,8 @@ public class ClientSavingsIntegrationTest {
          */
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern("#.###");
-        interestPosted = new Float(decimalFormat.format(interestPosted));
-        actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
+        interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
+        actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
        assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
        System.out.println("------Post Interest As On Successful Worked--------");
 
@@ -1803,8 +1803,8 @@ public class ClientSavingsIntegrationTest {
 
        DecimalFormat decimalLastFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
        decimalLastFormat.applyPattern("#.###");
-       interestLastPosted = new Float(decimalLastFormat.format(interestLastPosted));
-       actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
+       interestLastPosted = Float.valueOf(decimalLastFormat.format(interestLastPosted));
+       actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
       assertEquals("Verifying interest posted", interestLastPosted, actualInterestPosted);
       System.out.println("------Post Interest As On Successful Worked--------");
 
@@ -2108,7 +2108,7 @@ public class ClientSavingsIntegrationTest {
      * "--------------------VERIFYING THE BALANCE, INTEREST --------------------------"
      * );
      *
-     * assertEquals("Verifying Interest Calculation", new Float("238.3399"),
+     * assertEquals("Verifying Interest Calculation", Float.valueOf("238.3399"),
      * savingsInterest); }
      */
 
@@ -2142,7 +2142,7 @@ public class ClientSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = new Float(MINIMUM_OPENING_BALANCE);
+        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         savingsStatusHashMap = this.savingsAccountHelper.blockSavings(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusblock(savingsStatusHashMap);
@@ -2162,8 +2162,8 @@ public class ClientSavingsIntegrationTest {
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
 
         savingsStatusHashMap = this.savingsAccountHelper.blockDebit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsDebitBlocked(savingsStatusHashMap);
@@ -2175,16 +2175,16 @@ public class ClientSavingsIntegrationTest {
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
 
         savingsStatusHashMap = this.savingsAccountHelper.unblockDebit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
 
         savingsStatusHashMap = this.savingsAccountHelper.blockCredit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsCreditBlocked(savingsStatusHashMap);
@@ -2196,16 +2196,16 @@ public class ClientSavingsIntegrationTest {
         withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
 
         savingsStatusHashMap = this.savingsAccountHelper.unblockCredit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        balance += new Float(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        balance += Float.valueOf(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
 
         Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, String.valueOf(balance - 100),
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
@@ -2222,8 +2222,8 @@ public class ClientSavingsIntegrationTest {
         withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "300", todayDate,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        balance -= new Float("300");
-        assertEquals("Verifying Withdrawal Amount", new Float("300"), withdrawTransaction.get("amount"));
+        balance -= Float.valueOf("300");
+        assertEquals("Verifying Withdrawal Amount", Float.valueOf("300"), withdrawTransaction.get("amount"));
 
     }
 
@@ -2290,10 +2290,9 @@ public class ClientSavingsIntegrationTest {
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        Float balance = new Float("-300");
+        Float balance = Float.valueOf("-300");
 
         assertEquals("Verifying opening Balance is -300", balance, summary.get("accountBalance"));
 
     }
-
 }

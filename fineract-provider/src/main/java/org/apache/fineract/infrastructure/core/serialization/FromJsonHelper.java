@@ -49,12 +49,10 @@ public class FromJsonHelper {
 
     private final Gson gsonConverter;
     private final JsonParserHelper helperDelegator;
-    private final JsonParser parser;
 
     public FromJsonHelper() {
         this.gsonConverter = new Gson();
         this.helperDelegator = new JsonParserHelper();
-        this.parser = new JsonParser();
     }
 
     public Map<String, Boolean> extractMap(final Type typeOfMap, final String json) {
@@ -140,7 +138,7 @@ public class FromJsonHelper {
 
         JsonElement parsedElement = null;
         if (StringUtils.isNotBlank(json)) {
-            parsedElement = this.parser.parse(json);
+            parsedElement = JsonParser.parseString(json);
         }
         return parsedElement;
     }

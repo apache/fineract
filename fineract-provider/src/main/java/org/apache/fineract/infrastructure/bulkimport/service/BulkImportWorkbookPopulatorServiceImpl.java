@@ -297,14 +297,14 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
   private List<CodeValueData> fetchCodeValuesByCodeName(String codeName){
       List<CodeValueData> codeValues=null;
       if (codeName!=null){
-          codeValues=(List)codeValueReadPlatformService.retrieveCodeValuesByCode(codeName);
+          codeValues=(List<CodeValueData>)codeValueReadPlatformService.retrieveCodeValuesByCode(codeName);
     }else {
          throw new NullPointerException();
     }
     return codeValues;
   }
   private List<SavingsProductData>fetchSavingsProducts(){
-      List<SavingsProductData> savingsProducts=(List)savingsProductReadPlatformService.retrieveAll();
+      List<SavingsProductData> savingsProducts=(List<SavingsProductData>)savingsProductReadPlatformService.retrieveAll();
     return savingsProducts;
   }
 

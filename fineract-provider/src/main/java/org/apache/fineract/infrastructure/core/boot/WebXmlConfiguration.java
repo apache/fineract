@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.boot;
 
 import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
-import javax.servlet.Servlet;
 import org.apache.fineract.infrastructure.core.filters.ResponseCorsFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +43,8 @@ public class WebXmlConfiguration {
 
     @Bean
     public ServletRegistrationBean jersey() {
-        Servlet jerseyServlet = new SpringServlet();
-        ServletRegistrationBean jerseyServletRegistration = new ServletRegistrationBean();
-        jerseyServletRegistration.setServlet(jerseyServlet);
+        ServletRegistrationBean<SpringServlet> jerseyServletRegistration = new ServletRegistrationBean<SpringServlet>();
+        jerseyServletRegistration.setServlet(new SpringServlet());
         jerseyServletRegistration.addUrlMappings("/api/v1/*");
         jerseyServletRegistration.setName("jersey-servlet");
         jerseyServletRegistration.setLoadOnStartup(1);
@@ -62,7 +60,7 @@ public class WebXmlConfiguration {
 
     @Bean
     public FilterRegistrationBean filterRegistrationBean() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<TenantAwareBasicAuthenticationFilter>();
         filterRegistrationBean.setFilter(basicAuthenticationProcessingFilter);
         filterRegistrationBean.setEnabled(false);
         return filterRegistrationBean;

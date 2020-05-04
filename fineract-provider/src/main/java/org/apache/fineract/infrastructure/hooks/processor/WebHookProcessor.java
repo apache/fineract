@@ -78,7 +78,7 @@ public class WebHookProcessor implements HookProcessor {
 
         if (contentType.equalsIgnoreCase("json")
                 || contentType.contains("json")) {
-            final JsonObject json = new JsonParser().parse(payload)
+            final JsonObject json = JsonParser.parseString(payload)
                     .getAsJsonObject();
             service.sendJsonRequest(entityName, actionName, tenantIdentifier,
                     fineractEndpointUrl, json, callback);

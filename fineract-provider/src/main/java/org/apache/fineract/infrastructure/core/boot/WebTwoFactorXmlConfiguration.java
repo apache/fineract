@@ -29,7 +29,7 @@ public class WebTwoFactorXmlConfiguration {
 
     @Bean
     public FilterRegistrationBean twoFactorFilterBean(TwoFactorAuthenticationFilter filter) {
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
+        FilterRegistrationBean<TwoFactorAuthenticationFilter> registrationBean = new FilterRegistrationBean<TwoFactorAuthenticationFilter>(filter);
         registrationBean.setEnabled(false);
         return registrationBean;
     }

@@ -21,6 +21,8 @@ Run as:
 gradle clean bootRun'''
 
 project.ext.jerseyVersion = '1.19.4'
+ext["groovy.version"] = '3.0.3' 
+
 
 buildscript {
     ext {
@@ -103,12 +105,17 @@ dependencyManagement {
         dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
+	dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
         dependency 'org.apache.activemq:activemq-broker:+'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
-        dependency 'org.slf4j:slf4j-simple:1.7.30'
+        dependency 'org.slf4j:slf4j-simple:1.8.0-beta4'
+        dependency 'org.slf4j:slf4j-api:1.8.0-beta4'
         dependency 'com.mockrunner:mockrunner-jms:2.0.1'
+	dependency 'dom4j:dom4j:1.6.1'
+        dependency 'xerces:xercesImpl:2.12.0'
+        dependency 'io.github.classgraph:classgraph:4.8.43'
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
@@ -120,18 +127,24 @@ dependencyManagement {
             entry 'jersey-spring'
             entry 'jersey-multipart'
         }
-        dependencySet(group: 'org.apache.poi', version: '3.9') {
+        dependencySet(group: 'org.apache.poi', version: '4.1.2') {
             entry 'poi'
             entry 'poi-ooxml'
             entry 'poi-ooxml-schemas'
-        }             
+        }
+        dependencySet(group: 'io.rest-assured', version: '4.3.0')
+        {
+            entry 'rest-assured'
+            entry 'json-path'
+            entry 'xml-path'
+        }
     }
 }
 
 /* define the valid syntax level for source files */
-sourceCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
 /* define binary compatibility version */
-targetCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_11
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
@@ -270,6 +283,12 @@ configurations {
 	runtime
 	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
+}
+
 /* Pick up dependencies based on the environemnt, defaults to production */
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'

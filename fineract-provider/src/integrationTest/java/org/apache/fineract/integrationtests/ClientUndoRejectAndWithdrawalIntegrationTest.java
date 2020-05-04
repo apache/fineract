@@ -101,10 +101,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         status = this.clientHelper.rejectClient(clientId);
         ClientStatusChecker.verifyClientRejected(status);
 
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoRejectedclient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoRejectedclient(clientId,
                 CommonConstants.RESPONSE_ERROR, ClientHelper.CREATED_DATE);
         assertEquals("error.msg.client.reopened.date.cannot.before.client.rejected.date",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         status = this.clientHelper.undoReject(clientId);
         ClientStatusChecker.verifyClientPending(status);
@@ -130,10 +130,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         final String undoRejectDate = dateFormat.format(todaysDate.getTime());
 
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoRejectedclient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoRejectedclient(clientId,
                 CommonConstants.RESPONSE_ERROR, undoRejectDate);
         assertEquals("error.msg.client.undorejection.on.nonrejected.account",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         status = this.clientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
@@ -163,10 +163,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DATE, 1);
         final String undoRejectDate = dateFormat.format(todaysDate.getTime());
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoWithdrawclient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
                 CommonConstants.RESPONSE_ERROR, undoRejectDate);
         assertEquals("validation.msg.client.reopenedDate.is.greater.than.date",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         status = this.clientHelper.undoReject(clientId);
         ClientStatusChecker.verifyClientPending(status);
@@ -215,10 +215,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         status = this.clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(status);
 
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoWithdrawclient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
                 CommonConstants.RESPONSE_ERROR, ClientHelper.CREATED_DATE);
         assertEquals("error.msg.client.reopened.date.cannot.before.client.withdrawal.date",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         status = this.clientHelper.undoWithdrawn(clientId);
         ClientStatusChecker.verifyClientPending(status);
@@ -243,10 +243,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         final String undoWithdrawDate = dateFormat.format(todaysDate.getTime());
 
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoWithdrawclient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
                 CommonConstants.RESPONSE_ERROR, undoWithdrawDate);
         assertEquals("error.msg.client.undoWithdrawal.on.nonwithdrawal.account",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         status = this.clientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
@@ -276,10 +276,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DATE, 1);
         final String undoWithdrawDate = dateFormat.format(todaysDate.getTime());
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoWithdrawclient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.undoWithdrawclient(clientId,
                 CommonConstants.RESPONSE_ERROR, undoWithdrawDate);
         assertEquals("validation.msg.client.reopenedDate.is.greater.than.date",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         status = this.clientHelper.undoWithdrawn(clientId);
         ClientStatusChecker.verifyClientPending(status);
@@ -305,10 +305,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         ClientStatusChecker.verifyClientWithdrawn(status);
         status = this.clientHelper.undoWithdrawn(clientId);
         ClientStatusChecker.verifyClientPending(status);
-        ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.activateClient(clientId,
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.activateClient(clientId,
                 CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.clients.submittedOnDate.after.reopened.date",
-                ((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }
 

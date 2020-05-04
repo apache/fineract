@@ -125,7 +125,7 @@ public class TemplateMergeServiceTest {
     protected Map<String, Object> createMapFromJSON(String jsonText) {
         Gson gson = new Gson();
         Type ssMap = new TypeToken<Map<String, Object>>(){}.getType();
-        JsonElement json = new JsonParser().parse(jsonText);
+        JsonElement json = JsonParser.parseString(jsonText);
         return gson.fromJson(json, ssMap);
     }
 }

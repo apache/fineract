@@ -536,11 +536,11 @@ public class GroupsApiResource {
          List<GLIMContainer> glimContainer = Collections.emptyList();
               if(parentLoanAccountNo==null)
               {
-                   glimContainer=(List)glimAccountInfoReadPlatformService.findGlimAccount(groupId);
+                   glimContainer=(List<GLIMContainer>)glimAccountInfoReadPlatformService.findGlimAccount(groupId);
               }
               else
               {
-                   glimContainer=(List)glimAccountInfoReadPlatformService.findGlimAccountbyGroupAndAccount(groupId,parentLoanAccountNo);
+                   glimContainer=(List<GLIMContainer>)glimAccountInfoReadPlatformService.findGlimAccountbyGroupAndAccount(groupId,parentLoanAccountNo);
               }
 
 
@@ -568,11 +568,11 @@ public class GroupsApiResource {
               }
               else if(parentGSIMAccountNo !=null && parentGSIMId==null )
               {
-                   gsimContainer= (List)this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountNumber(parentGSIMAccountNo);
+                   gsimContainer= (List<GSIMContainer>)this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountNumber(parentGSIMAccountNo);
               }
               else
               {
-                   gsimContainer= (List)this.gsimReadPlatformService.findGSIMAccountContainerByGroupId(groupId);
+                   gsimContainer= (List<GSIMContainer>)this.gsimReadPlatformService.findGSIMAccountContainerByGroupId(groupId);
 
               }
 

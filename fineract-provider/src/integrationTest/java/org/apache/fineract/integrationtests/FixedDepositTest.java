@@ -26,6 +26,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -535,7 +536,7 @@ public class FixedDepositTest {
         final String chartToUse = "period";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = Float.valueOf((float)6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -544,7 +545,7 @@ public class FixedDepositTest {
         final String chartToUse = "period";
         final String depositAmount = "2000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = Float.valueOf((float)6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -553,7 +554,7 @@ public class FixedDepositTest {
         final String chartToUse = "period";
         final String depositAmount = "10000";
         final String depositPeriod = "18";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = Float.valueOf((float)7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -562,7 +563,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = Float.valueOf((float)7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -571,7 +572,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount";
         final String depositAmount = "5000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(5.0);
+        final Float interestRate = Float.valueOf((float)5.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -580,7 +581,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount";
         final String depositAmount = "10000";
         final String depositPeriod = "26";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = Float.valueOf((float)7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -589,7 +590,7 @@ public class FixedDepositTest {
         final String chartToUse = "period_amount";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = Float.valueOf((float)7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -598,7 +599,7 @@ public class FixedDepositTest {
         final String chartToUse = "period_amount";
         final String depositAmount = "5000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = Float.valueOf((float)6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -607,7 +608,7 @@ public class FixedDepositTest {
         final String chartToUse = "period_amount";
         final String depositAmount = "10000";
         final String depositPeriod = "20";
-        final Float interestRate = new Float(9.0);
+        final Float interestRate = Float.valueOf((float)9.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -616,7 +617,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount_period";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(8.0);
+        final Float interestRate = Float.valueOf((float)8.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -625,7 +626,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount_period";
         final String depositAmount = "5000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = Float.valueOf((float)6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -634,7 +635,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount_period";
         final String depositAmount = "10000";
         final String depositPeriod = "6";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = Float.valueOf((float)7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -1238,8 +1239,8 @@ public class FixedDepositTest {
 
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
     }
@@ -1311,8 +1312,8 @@ public class FixedDepositTest {
                 interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
     }
@@ -1414,8 +1415,8 @@ public class FixedDepositTest {
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
 
-        principal = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1522,8 +1523,8 @@ public class FixedDepositTest {
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
 
-        principal = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1634,8 +1635,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -1750,8 +1751,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -1826,8 +1827,8 @@ public class FixedDepositTest {
 
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
 
@@ -1901,8 +1902,8 @@ public class FixedDepositTest {
         principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
                 interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = new BigDecimal(principal).setScale(0, BigDecimal.ROUND_FLOOR).floatValue();
-        maturityAmount = new BigDecimal(maturityAmount).setScale(0, BigDecimal.ROUND_FLOOR).floatValue();
+        principal = new BigDecimal(principal).setScale(0, RoundingMode.FLOOR).floatValue();
+        maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
 
@@ -1985,8 +1986,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2069,8 +2070,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2151,8 +2152,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2233,8 +2234,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2315,8 +2316,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
     }
@@ -2396,8 +2397,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
     }

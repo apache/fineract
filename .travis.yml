@@ -22,7 +22,7 @@ dist: trusty
 language: java
 
 jdk:
-  - openjdk8
+  - openjdk12
 
 services:
   - mysql
