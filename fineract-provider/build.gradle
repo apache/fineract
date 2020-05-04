@@ -498,6 +498,20 @@ task integrationTest(type:Test) {
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 
+integrationTest {
+	testLogging { // FINERACT-927
+		events "skipped", "failed"
+		showStandardStreams = false
+		exceptionFormat "full"
+	}
+}
+test {
+	testLogging { // FINERACT-927
+		events "skipped", "failed"
+		showStandardStreams = false
+		exceptionFormat "full"
+	}
+}
 
 import com.github.spotbugs.SpotBugsTask
 import groovy.sql.Sql
