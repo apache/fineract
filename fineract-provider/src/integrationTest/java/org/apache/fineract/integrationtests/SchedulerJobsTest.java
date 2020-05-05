@@ -98,6 +98,12 @@ public class SchedulerJobsTest {
     }
 
     @Test
+    public void testNumberOfJobs() {
+        List<Integer> jobIds = schedulerJobHelper.getAllSchedulerJobIds();
+        assertEquals("Number of jobs in database and code do not match: " + jobIds, JobName.values().length, jobIds.size());
+    }
+
+    @Test
     public void testFlippingJobsActiveStatus() throws InterruptedException {
         // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side
         // effects
