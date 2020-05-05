@@ -42,7 +42,7 @@ import org.joda.time.LocalDate;
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
-public class Staff extends AbstractPersistableCustom<Long> {
+public class Staff extends AbstractPersistableCustom {
 
     @Column(name = "firstname", length = 50)
     private String firstname;

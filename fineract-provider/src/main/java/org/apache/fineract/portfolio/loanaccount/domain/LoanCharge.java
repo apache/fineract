@@ -56,7 +56,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_charge")
-public class LoanCharge extends AbstractPersistableCustom<Long> {
+public class LoanCharge extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)

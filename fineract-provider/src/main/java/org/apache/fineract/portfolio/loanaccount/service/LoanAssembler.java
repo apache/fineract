@@ -148,6 +148,7 @@ public class LoanAssembler {
         return loanAccount;
     }
 
+
     public void setHelpers(final Loan loanAccount) {
         loanAccount.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);

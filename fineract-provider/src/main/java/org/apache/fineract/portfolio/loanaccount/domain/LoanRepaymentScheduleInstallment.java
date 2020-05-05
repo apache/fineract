@@ -36,12 +36,11 @@ import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> implements Comparable<LoanRepaymentScheduleInstallment> {
+public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom implements Comparable<LoanRepaymentScheduleInstallment> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName="id")

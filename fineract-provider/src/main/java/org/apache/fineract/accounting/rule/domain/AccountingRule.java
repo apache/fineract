@@ -43,7 +43,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
 @Table(name = "acc_accounting_rule", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "accounting_rule_name_unique") })
-public class AccountingRule extends AbstractPersistableCustom<Long> {
+public class AccountingRule extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 500)
     private String name;

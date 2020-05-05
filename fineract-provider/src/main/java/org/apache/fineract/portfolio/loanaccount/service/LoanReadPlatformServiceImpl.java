@@ -234,6 +234,23 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
+    public List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber)
+    {
+
+
+            //final AppUser currentUser = this.context.authenticatedUser();
+            this.context.authenticatedUser();
+            final LoanMapper rm = new LoanMapper();
+
+            String sql="select "+rm.loanSchema()+" left join glim_parent_child_mapping as glim on glim.glim_child_account_id=l.account_no "+
+                   "where glim.glim_parent_account_id=?";
+
+
+            return this.jdbcTemplate.query(sql, rm, new Object[] { parentloanAccountNumber });
+
+    }
+
+    @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
                                                       final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
                                                       boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges) {

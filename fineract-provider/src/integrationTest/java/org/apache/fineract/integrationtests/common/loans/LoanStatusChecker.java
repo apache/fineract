@@ -22,8 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 
@@ -60,6 +60,10 @@ public class LoanStatusChecker {
 
     public static void verifyLoanAccountForeclosed(final HashMap loanSubStatusHashMap) {
         assertEquals("Foreclosed", getSubStatus(loanSubStatusHashMap, "value"));
+    }
+
+    public static void verifyLoanAccountRejected(final HashMap loanSubStatusHashMap) {
+        assertEquals("Rejected", getSubStatus(loanSubStatusHashMap, "value"));
     }
 
     public static HashMap<String, Object> getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

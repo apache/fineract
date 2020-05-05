@@ -30,7 +30,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 @Entity
 @Table(name = "m_creditbureau_loanproduct_mapping")
-public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Long> {
+public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
 
     @Column(name = "is_CreditCheck_Mandatory")
     private boolean isCreditCheckMandatory;

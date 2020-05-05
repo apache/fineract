@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.integrationtests.common.organisation;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -20,11 +20,11 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.HolidayHelper;
@@ -111,6 +112,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-924
     public void testApplyAnnualFeeForSavingsJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -162,6 +164,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore
     public void testInterestPostingForSavingsJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -199,6 +202,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testTransferFeeForLoansFromSavingsJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -265,6 +269,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-923
     public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -336,6 +341,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -383,10 +389,10 @@ public class SchedulerJobsTestResults {
 
         Assert.assertEquals("Verifying the Balance after running Pay due Savings Charges", balance,
                 (Float) summaryAfter.get("accountBalance"));
-
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testUpdateAccountingRunningBalancesJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -468,6 +474,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testUpdateLoanPaidInAdvanceJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -680,6 +687,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore
     public void testApplyPenaltyForOverdueLoansJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -765,12 +773,12 @@ public class SchedulerJobsTestResults {
 
         this.schedulerJobHelper.executeJob(JobName);
 
-        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+        Map<String, Object> schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
 
         Assert.assertNotNull(schedulerJob);
         while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
             Thread.sleep(15000);
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
             Assert.assertNotNull(schedulerJob);
         }
 
@@ -794,6 +802,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testUpdateOverdueDaysForNPA() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -984,7 +993,7 @@ public class SchedulerJobsTestResults {
         return fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
 
-    public void validateNumberForEqualExcludePrecission(String val, String val2) {
+    private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#", new DecimalFormatSymbols(Locale.US));
         Assert.assertTrue(new Float(twoDForm.format(new Float(val))).compareTo(new Float(twoDForm.format(new Float(val2)))) == 0);
     }

@@ -39,7 +39,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "scheduled_email_messages_outbound")
-public class EmailMessage extends AbstractPersistableCustom<Long> {
+public class EmailMessage extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)

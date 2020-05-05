@@ -57,7 +57,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_holiday", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "holiday_name") })
-public class Holiday extends AbstractPersistableCustom<Long> {
+public class Holiday extends AbstractPersistableCustom {
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;

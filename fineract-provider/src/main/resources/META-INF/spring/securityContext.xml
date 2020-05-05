@@ -35,6 +35,7 @@
 		<http create-session="stateless" use-expressions="true" pattern="/api/**"
 			entry-point-ref="basicAuthenticationEntryPoint">
 			<csrf disabled="true"/>
+			<intercept-url pattern="/api/*/echo" access="permitAll" />
 			<intercept-url pattern="/api/*/authentication" access="permitAll"
 				method="POST" requires-channel="https" />
 			<intercept-url pattern="/api/*/self/authentication" access="permitAll"
@@ -59,7 +60,7 @@
 				method="DELETE" requires-channel="https" />
 			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="HEAD" requires-channel="https" />
-	
+
 			<custom-filter after="SECURITY_CONTEXT_FILTER" ref="basicAuthenticationProcessingFilter" />
 			<custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
 		</http>
@@ -187,7 +188,7 @@
 			class="org.springframework.security.oauth2.provider.client.JdbcClientDetailsService">
 			<beans:constructor-arg ref="routingDataSource" />
 		</beans:bean>
-	
+
 		<beans:bean id="tokenStore"
 			class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">
 			<beans:constructor-arg ref="routingDataSource" />

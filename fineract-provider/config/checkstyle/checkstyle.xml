@@ -61,6 +61,7 @@
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
+           <module name="OneStatementPerLine"/>
 
         <module name="HiddenField">
             <property name="ignoreAbstractMethods" value="true" />
@@ -137,7 +138,7 @@
              value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
         </module>
         <module name="ParenPad" />
-        <module name="OneStatementPerLine"/>
+     
         <module name="MultipleVariableDeclarations"/>
         <module name="ArrayTypeStyle"/>
         <module name="MissingSwitchDefault"/>

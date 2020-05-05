@@ -34,7 +34,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_templates")
-public class HookTemplate extends AbstractPersistableCustom<Long> {
+public class HookTemplate extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

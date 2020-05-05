@@ -44,7 +44,7 @@ import org.joda.time.LocalDate;
 @Entity
 @Table(name = "m_office", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_org"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_org") })
-public class Office extends AbstractPersistableCustom<Long> implements Serializable {
+public class Office extends AbstractPersistableCustom implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.security.constants.TwoFactorConfigurat
 @Entity
 @Table(name = "twofactor_configuration",
         uniqueConstraints = {@UniqueConstraint(columnNames = { "name" }, name = "name_UNIQUE")})
-public class TwoFactorConfiguration extends AbstractPersistableCustom<Long> {
+public class TwoFactorConfiguration extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 32)
     private String name;

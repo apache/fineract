@@ -30,7 +30,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_loan_installment_charge")
-public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
+public class LoanInstallmentCharge extends AbstractPersistableCustom implements Comparable<LoanInstallmentCharge> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)

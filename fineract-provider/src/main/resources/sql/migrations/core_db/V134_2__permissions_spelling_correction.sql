@@ -17,4 +17,4 @@
 -- under the License.
 --
 
-update m_permission set grouping="organisation" where grouping = "organistion";
+update m_permission set `grouping`="organisation" where `grouping` = "organistion";

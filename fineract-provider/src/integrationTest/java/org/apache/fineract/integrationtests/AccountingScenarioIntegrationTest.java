@@ -20,11 +20,11 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -62,6 +62,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
@@ -552,6 +553,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    @Ignore // TODO FINERACT-899
     public void checkPeriodicAccrualAccountingFlow() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -668,6 +670,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-899
     public void checkPeriodicAccrualAccountingFlow_OVER_PAYMENT() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -726,6 +729,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-899
     public void checkPeriodicAccrualAccountingTillCurrentDateFlow() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();

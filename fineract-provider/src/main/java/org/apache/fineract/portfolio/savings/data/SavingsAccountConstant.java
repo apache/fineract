@@ -31,7 +31,7 @@ public class SavingsAccountConstant extends SavingsApiConstants {
      * parameters to match those of request parameters.
      */
     protected static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            localeParamName, dateFormatParamName, monthDayFormatParamName, staffIdParamName, accountNoParamName,
+            localeParamName, dateFormatParamName, monthDayFormatParamName, staffIdParamName, isGSIM, isParentAccount,accountNoParamName,
             externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName, fieldOfficerIdParamName,
             submittedOnDateParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
@@ -41,7 +41,8 @@ public class SavingsAccountConstant extends SavingsApiConstants {
             withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, chargesParamName,
             allowOverdraftParamName, overdraftLimitParamName, minRequiredBalanceParamName,
             enforceMinRequiredBalanceParamName, nominalAnnualInterestRateOverdraftParamName,
-            minOverdraftForInterestCalculationParamName, withHoldTaxParamName, datatables));
+            minOverdraftForInterestCalculationParamName, withHoldTaxParamName, datatables, gsimApplicationId,
+            gsimLastApplication));
 
     /**
      * These parameters will match the class level parameters of
@@ -52,7 +53,8 @@ public class SavingsAccountConstant extends SavingsApiConstants {
     protected static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName,
                     paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-                    routingCodeParamName, receiptNumberParamName, bankNumberParamName, noteParamName));
+                    routingCodeParamName, receiptNumberParamName, bankNumberParamName, retailEntriesParamName,
+                    childAccountIdParamName, noteParamName));
 
     protected static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(idParamName, accountNoParamName));

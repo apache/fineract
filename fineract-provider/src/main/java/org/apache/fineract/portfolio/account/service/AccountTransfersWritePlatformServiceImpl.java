@@ -52,6 +52,8 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
+import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
+import org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
@@ -77,6 +79,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanReadPlatformService loanReadPlatformService;
+    private final GSIMRepositoy gsimRepository;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
@@ -85,7 +88,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final AccountTransferDetailRepository accountTransferDetailRepository,
-            final LoanReadPlatformService loanReadPlatformService) {
+            final LoanReadPlatformService loanReadPlatformService,
+            final GSIMRepositoy gsimRepository) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -96,6 +100,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.gsimRepository=gsimRepository;
     }
 
     @Transactional
@@ -410,6 +415,16 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     toSavingsAccount, deposit, loanTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferTransactionId = accountTransferDetails.getId();
+
+            // if the savings account is GSIM, update its parent as well
+            if(toSavingsAccount.getGsim()!=null)
+            {
+                GroupSavingsIndividualMonitoring gsim=gsimRepository.findById(toSavingsAccount.getGsim().getId()).get();
+                BigDecimal currentBalance=gsim.getParentDeposit();
+                BigDecimal newBalance=currentBalance.add(accountTransferDTO.getTransactionAmount());
+                gsim.setParentDeposit(newBalance);
+                gsimRepository.save(gsim);
+            }
         } else {
             throw new GeneralPlatformDomainRuleException("error.msg.accounttransfer.loan.to.loan.not.supported",
                     "Account transfer from loan to another loan is not supported");

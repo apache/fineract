@@ -62,7 +62,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     final Set<String> supportedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dateFormatParameterName,
             LoanApiConstants.localeParameterName, LoanApiConstants.idParameterName, LoanApiConstants.clientIdParameterName,
             LoanApiConstants.groupIdParameterName, LoanApiConstants.loanTypeParameterName, LoanApiConstants.productIdParameterName,
-            LoanApiConstants.principalParamName, LoanApiConstants.loanTermFrequencyParameterName,
+            LoanApiConstants.principalParamName,LoanApiConstants.totalLoanParamName,LoanApiConstants.parentAccountParamName, LoanApiConstants.loanTermFrequencyParameterName,
             LoanApiConstants.loanTermFrequencyTypeParameterName, LoanApiConstants.numberOfRepaymentsParameterName,
             LoanApiConstants.repaymentEveryParameterName, LoanApiConstants.repaymentFrequencyTypeParameterName,
             LoanApiConstants.repaymentFrequencyNthDayTypeParameterName, LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName,
@@ -91,7 +91,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
             LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.ratesParamName));
+            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam,LoanProductConstants.ratesParamName,
+            LoanApiConstants.applicationId,                   // glim specific
+            LoanApiConstants.lastApplication));              // glim specific
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -120,7 +122,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         if (!StringUtils.isBlank(loanTypeStr)) {
             final AccountType loanType = AccountType.fromName(loanTypeStr);
-            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 3);
+            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 4);
 
             final Long clientId = this.fromApiJsonHelper.extractLongNamed("clientId", element);
             final Long groupId = this.fromApiJsonHelper.extractLongNamed("groupId", element);

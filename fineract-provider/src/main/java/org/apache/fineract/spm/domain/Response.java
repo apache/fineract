@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_survey_responses")
-public class Response extends AbstractPersistableCustom<Long> {
+public class Response extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")

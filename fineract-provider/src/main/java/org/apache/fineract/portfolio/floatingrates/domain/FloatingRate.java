@@ -50,7 +50,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_floating_rates", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
-public class FloatingRate extends AbstractPersistableCustom<Long> {
+public class FloatingRate extends AbstractPersistableCustom {
 
     @Column(name = "name", length = 200, unique = true, nullable = false)
     private String name;

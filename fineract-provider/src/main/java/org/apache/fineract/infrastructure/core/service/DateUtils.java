@@ -41,7 +41,6 @@ public class DateUtils {
         DateTimeZone zone = null;
         if (tenant != null) {
             zone = DateTimeZone.forID(tenant.getTimezoneId());
-            TimeZone.getTimeZone(tenant.getTimezoneId());
         }
         return zone;
     }

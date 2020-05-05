@@ -42,12 +42,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.template.domain.Template;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.util.CollectionUtils;
 
 @Entity
 @Table(name = "m_hook")
-public class Hook extends AbstractAuditableCustom<AppUser, Long> {
+public class Hook extends AbstractAuditableCustom {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;

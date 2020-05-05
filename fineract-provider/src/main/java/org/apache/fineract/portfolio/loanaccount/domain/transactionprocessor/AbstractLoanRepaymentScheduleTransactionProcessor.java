@@ -245,7 +245,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             installmentNumber = installments.get(0).getInstallmentNumber();
         }
 
-        if (loanTransaction.isNotWaiver()) {
+        if (loanTransaction.isNotWaiver() && !loanTransaction.isAccrual()) {
             Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
             Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
             if (chargeAmountToProcess != null && feeCharges.isGreaterThan(chargeAmountToProcess)) {

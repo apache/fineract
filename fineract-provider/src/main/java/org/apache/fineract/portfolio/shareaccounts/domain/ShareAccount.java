@@ -47,7 +47,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_share_account")
-public class ShareAccount extends AbstractPersistableCustom<Long> {
+public class ShareAccount extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)

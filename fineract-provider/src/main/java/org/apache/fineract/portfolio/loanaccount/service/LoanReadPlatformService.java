@@ -133,7 +133,6 @@ public interface LoanReadPlatformService {
 
     LoanTransactionData retrieveLoanForeclosureTemplate(final Long loanId, final LocalDate transactionDate);
 
-
     LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
 
     Long retrieveLoanIdByAccountNumber(String loanAccountNumber);
@@ -141,5 +140,7 @@ public interface LoanReadPlatformService {
     String retrieveAccountNumberByAccountId(Long accountId);
 
     Integer retrieveNumberOfActiveLoans();
+
+    List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber);
 
 }

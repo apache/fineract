@@ -38,7 +38,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_deposit_account_on_hold_transaction")
-public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom<Long> {
+public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "savings_account_id", nullable = true)

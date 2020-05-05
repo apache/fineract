@@ -20,6 +20,7 @@
 # (unless we'd install a more recent version in .travis.yml)
 version: '3.3'
 services:
+  # Backend service
   fineractmysql:
     image: mysql:5.7
     volumes:
@@ -43,8 +44,29 @@ services:
     depends_on:
       - fineractmysql
     environment:
-      - JAVA_OPTS=-Dfineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants -Dfineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver -Dfineract_tenants_uid=root -Dfineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca -Djava.awt.headless=true -XX:+UseG1GC -Dfile.encoding=UTF-8
+      - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
+      - PROTOCOL=jdbc
+      - SUB_PROTOCOL=mysql:thin
+      - fineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver
+      - fineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
+      - fineract_tenants_uid=root
+      - fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca 
       - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
       - FINERACT_DEFAULT_TENANTDB_PORT=3306
       - FINERACT_DEFAULT_TENANTDB_UID=root
       - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+
+  # Frontend service
+  community-app:
+    image: openmf/community-app:latest
+    container_name: mifos-ui
+    restart: always
+    ports:
+      - 9090:80
+
+
+# https://issues.apache.org/jira/browse/FINERACT-762
+# To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
+# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
+# and remove ":thin:" from SUB_PROTOCOL and fineract_tenants_url.  Note that the mysql-connector-java-*.jar is already
+# bundled in the container by the Dockerfile, but just not used by default.

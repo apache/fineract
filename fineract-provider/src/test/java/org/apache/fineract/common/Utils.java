@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.common;
 
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.path.json.JsonPath.from;
+import static io.restassured.RestAssured.given;
+import static io.restassured.path.json.JsonPath.from;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 
@@ -50,7 +50,8 @@ public class Utils {
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
         RestAssured.port = 8443;
-        RestAssured.keystore("src/main/resources/keystore.jks", "openmf");
+        RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
+        RestAssured.useRelaxedHTTPSValidation();
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {

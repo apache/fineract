@@ -37,7 +37,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_office_transaction")
-public class OfficeTransaction extends AbstractPersistableCustom<Long> {
+public class OfficeTransaction extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_office_id")

@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "mix_taxonomy_mapping")
-public class MixTaxonomyMapping extends AbstractPersistableCustom<Long> {
+public class MixTaxonomyMapping extends AbstractPersistableCustom {
 
     @Column(name = "identifier")
     private String identifier;

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
@@ -35,9 +34,9 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
 
 /**
  * A custom copy of {@link AbstractAuditable} to override the column names used
- * on database.
+ * on database.  It also uses Instant instead of LocalDateTime for created and modified.
  *
- * Abstract base class for auditable entities. Stores the audition values in
+ * Abstract base class for auditable entities. Stores the audit values in
  * persistent fields.
  *
  * @param <U>
@@ -46,7 +45,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
  *            the type of the auditing type's identifier
  */
 @MappedSuperclass
-public abstract class AbstractAuditableCustom<U, PK extends Serializable> extends AbstractPersistableCustom<PK> implements Auditable<AppUser, Long, Instant> {
+public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<AppUser, Long, Instant> {
 
     private static final long serialVersionUID = 141481953116476081L;
 
@@ -66,88 +65,41 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.domain.Auditable#getCreatedBy()
-     */
     @Override
     public Optional<AppUser> getCreatedBy() {
         return Optional.ofNullable(this.createdBy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.springframework.data.domain.Auditable#setCreatedBy(java.lang.Object)
-     */
     @Override
     public void setCreatedBy(final AppUser createdBy) {
-
         this.createdBy = createdBy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.domain.Auditable#getCreatedDate()
-     */
     @Override
     public Optional<Instant> getCreatedDate() {
         return null == this.createdDate ? Optional.empty() : Optional.of(this.createdDate.toInstant());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.springframework.data.domain.Auditable#setCreatedDate(T)
-     */
     @Override
     public void setCreatedDate(final Instant createdDate) {
         this.createdDate = null == createdDate ? null : Date.from(createdDate);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.domain.Auditable#getLastModifiedBy()
-     */
     @Override
     public Optional<AppUser> getLastModifiedBy() {
         return Optional.ofNullable(this.lastModifiedBy);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.springframework.data.domain.Auditable#setLastModifiedBy(java.lang
-     * .Object)
-     */
     @Override
     public void setLastModifiedBy(final AppUser lastModifiedBy) {
-
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.springframework.data.domain.Auditable#getLastModifiedDate()
-     */
     @Override
     public Optional<Instant> getLastModifiedDate() {
         return null == this.lastModifiedDate ? Optional.empty() : Optional.of(this.lastModifiedDate.toInstant());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.springframework.data.domain.Auditable#setLastModifiedDate(T)
-     */
     @Override
     public void setLastModifiedDate(final Instant lastModifiedDate) {
         this.lastModifiedDate = null == lastModifiedDate ? null : Date.from(lastModifiedDate);

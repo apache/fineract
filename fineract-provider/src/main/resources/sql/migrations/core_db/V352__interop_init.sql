@@ -48,28 +48,28 @@ INSERT INTO `m_appuser_role` VALUES ((SELECT id FROM m_appuser WHERE username = 
 
 -- Interoperation permissions
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'READ_INTERID', 'INTERID', 'READ', 0);
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'READ_INTERREQUEST', 'INTERREQUEST', 'READ', 0);
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'READ_INTERQUOTE', 'INTERQUOTE', 'READ', 0);
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'READ_INTERTRANSFER', 'INTERTRANSFER', 'READ', 0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'PREPARE_INTERTRANSFER', 'INTERTRANSFER', 'PREPARE', 0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'CREATE_INTERID', 'INTERID', 'CREATE', 0);
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'CREATE_INTERREQUEST', 'INTERREQUEST', 'CREATE', 0);
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'CREATE_INTERQUOTE', 'INTERQUOTE', 'CREATE', 0);
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'CREATE_INTERTRANSFER', 'INTERTRANSFER', 'CREATE', 0);
 
-INSERT INTO m_permission (grouping, code, entity_name, action_name, can_maker_checker)
+INSERT INTO m_permission (`grouping`, code, entity_name, action_name, can_maker_checker)
 VALUES ('interop', 'DELETE_INTERID', 'INTERID', 'DELETE', 0);
 
 

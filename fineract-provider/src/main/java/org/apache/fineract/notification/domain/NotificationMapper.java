@@ -29,7 +29,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "notification_mapper")
-public class NotificationMapper extends AbstractPersistableCustom<Long> {
+public class NotificationMapper extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "notification_id")

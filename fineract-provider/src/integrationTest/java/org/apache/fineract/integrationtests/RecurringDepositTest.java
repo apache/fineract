@@ -20,11 +20,11 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -60,6 +60,7 @@ import org.joda.time.Months;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
@@ -853,6 +854,7 @@ public class RecurringDepositTest {
      * transaction type ReInvest and Cash Based accounting enabled
      */
     @Test
+    @Ignore // TODO FINERACT-855
     public void testRecurringDepositAccountWithPrematureClosureTypeReinvest() {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);

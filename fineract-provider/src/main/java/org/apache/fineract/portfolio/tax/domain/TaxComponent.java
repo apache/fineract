@@ -44,12 +44,11 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_tax_component")
-public class TaxComponent extends AbstractAuditableCustom<AppUser, Long> {
+public class TaxComponent extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
     private String name;

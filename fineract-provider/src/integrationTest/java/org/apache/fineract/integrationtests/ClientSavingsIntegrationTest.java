@@ -20,11 +20,11 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -54,6 +54,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -67,6 +68,7 @@ public class ClientSavingsIntegrationTest {
     public static final String WITHDRAW_AMOUNT_ADJUSTED = "500";
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String DATE_FORMAT = "dd MMMM yyyy";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -1909,7 +1911,8 @@ public class ClientSavingsIntegrationTest {
     }
 
     @Test
-    public void testSavingsAccount_DormancyTracking() {
+    @Ignore // TODO FINERACT-852
+    public void testSavingsAccount_DormancyTracking() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1973,11 +1976,7 @@ public class ClientSavingsIntegrationTest {
         }
 
         SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        try {
-            jobHelper.executeJob("Update Savings Dormant Accounts");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        jobHelper.executeJob("Update Savings Dormant Accounts");
 
         //VERIFY WITHIN PROVIDED RANGE DOESN'T INACTIVATE
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(0));
@@ -2296,4 +2295,5 @@ public class ClientSavingsIntegrationTest {
         assertEquals("Verifying opening Balance is -300", balance, summary.get("accountBalance"));
 
     }
+
 }

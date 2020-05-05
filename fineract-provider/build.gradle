@@ -21,35 +21,35 @@ Run as:
 gradle clean tomcatrunwar
 '''
 
-project.ext.jerseyVersion = '1.17'
+project.ext.jerseyVersion = '1.19.4'
 
 buildscript {
-  ext {
-    openJPAVersion = '3.1.0'
-    jacocoVersion = '0.8.5'
-  }
-  repositories {
-  	 jcenter()
-  	 mavenCentral()
-  	 maven { url "https://plugins.gradle.org/m2/" }
-  }
+    ext {
+        jacocoVersion = '0.8.5'
+    }
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
 
-  dependencies {
-     classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
-     classpath 'com.bmuschko:gradle-tomcat-plugin:2.5',
-               'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
-               'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-               'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE'
-     // below
-     classpath "org.apache.openjpa:openjpa:$openJPAVersion"
-     classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-     classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
-     classpath "com.github.spotbugs:spotbugs-gradle-plugin:2.0.1"
-      // Use Guava version 23+ as a workaround to spotbug intergration.
-      // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
-     classpath 'com.google.guava:guava:28.1-jre'
-     classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
-  }
+    dependencies {
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
+        classpath 'com.bmuschko:gradle-tomcat-plugin:2.5',
+            'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
+            'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
+            'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE'
+        // below
+        classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
+        classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
+        classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
+        classpath "com.github.spotbugs:spotbugs-gradle-plugin:2.0.1"
+        // Use Guava version 23+ as a workaround to spotbug intergration.
+        // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
+        classpath 'com.google.guava:guava:28.1-jre'
+        classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
+    }
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -68,71 +68,70 @@ apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 apply plugin: 'jacoco'
+apply plugin: "com.gorylenko.gradle-git-properties"
 // apply plugin: 'pmd'
 
 dependencyManagement {
-  imports {
-    mavenBom 'org.springframework:spring-framework-bom:5.2.3.RELEASE'
-  }
+    imports {
+        mavenBom 'org.springframework:spring-framework-bom:5.2.6.RELEASE'
+    }
 
-  dependencies {
-     dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
-     dependency 'org.apache.openjpa:openjpa:3.1.0'
-     dependency 'com.squareup.retrofit:retrofit:1.6.1'
-     dependency 'com.squareup.okhttp:okhttp:2.0.0'
-     dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
-     dependency 'com.google.code.gson:gson:+'
-     dependency 'com.google.guava:guava:28.1-jre'
-     dependency 'joda-time:joda-time:+'
-     dependency 'org.apache.commons:commons-email:1.3.3'
-     dependency 'org.apache.commons:commons-lang3:+'
-     dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-     dependency 'com.lowagie:itext:2.1.7'
-     dependency 'com.lowagie:itext-rtf:2.1.7'
-     dependency 'org.mnode.ical4j:ical4j:1.0.4'
-     dependency 'com.googlecode.flyway:flyway-core:2.1.1'
-     dependency 'org.quartz-scheduler:quartz:+'
-     dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
-     dependency 'net.sf.ehcache:ehcache:+'
-     dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
-     dependency 'com.jayway.jsonpath:json-path:0.9.1'
-     dependency 'org.apache.tika:tika-core:1.9'
-     dependency 'org.apache.httpcomponents:httpclient:+'
-     dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
-     dependency 'org.springframework:spring-jms:4.0.7.RELEASE'
-     dependency 'org.apache.activemq:activemq-broker:+'
-     dependency 'javax.validation:validation-api:+'
-     dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
-     dependency 'junit:junit:+'
-     //dependency 'junit:junit-dep:4.11'
-     dependency 'org.mockito:mockito-core:+'
-     dependency 'com.jayway.restassured:rest-assured:2.3.3'
-     dependency 'org.slf4j:slf4j-simple:1.7.30'
-     dependency 'com.mockrunner:mockrunner-jms:2.0.1'
-     dependency 'com.mockrunner:mockrunner-jdbc:2.0.1'
+    dependencies {
+        // As much as possible, we avoid fixed versions, and prefer inheriting them from the Spring BOM, thus NOT listing versions here.
+        // (The :+ seems to mean latest available version available on Maven Central, which we should also avoid, as it's not isolated?)
 
-     dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
-         entry 'jersey-core'
-         entry 'jersey-servlet'
-         entry 'jersey-server'
-         entry 'jersey-json'
-     }
-     dependencySet(group: 'com.sun.jersey.contribs', version: jerseyVersion) {
-         entry 'jersey-spring'
-         entry 'jersey-multipart'
-     }
-     dependencySet(group: 'org.apache.poi', version: '3.9') {
-         entry 'poi'
-         entry 'poi-ooxml'
-         entry 'poi-ooxml-schemas'
-     }
-     dependencySet(group: 'org.apache.tomcat.embed', version: '7.0.94') {
-         entry 'tomcat-embed-core'
-         entry 'tomcat-embed-jasper'
-         entry 'tomcat-embed-logging-log4j'
-     }
-     
-  }
+        dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
+        dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
+        dependency 'com.squareup.retrofit:retrofit:1.6.1'
+        dependency 'com.squareup.okhttp:okhttp:2.0.0'
+        dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
+        dependency 'com.google.code.gson:gson:+'
+        dependency 'com.google.guava:guava:28.1-jre'
+        dependency 'org.apache.commons:commons-email:1.5'
+        dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
+        dependency 'com.lowagie:itext:2.1.7'
+        dependency 'com.lowagie:itext-rtf:2.1.7'
+        dependency 'org.mnode.ical4j:ical4j:1.0.7'
+        dependency 'com.googlecode.flyway:flyway-core:2.1.1'
+        dependency 'org.quartz-scheduler:quartz:+'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
+        dependency 'net.sf.ehcache:ehcache:+'
+        dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
+        dependency 'com.jayway.jsonpath:json-path:0.9.1'
+        dependency 'org.apache.tika:tika-core:1.9'
+        dependency 'org.apache.httpcomponents:httpclient:+'
+        dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
+        dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
+        dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
+        dependency 'org.apache.activemq:activemq-broker:+'
+        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
+        dependency 'junit:junit:+'
+        dependency 'org.mockito:mockito-core:+'
+        dependency 'org.slf4j:slf4j-simple:1.7.30'
+        dependency 'com.mockrunner:mockrunner-jms:2.0.1'
+
+        dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
+            entry 'jersey-core'
+            entry 'jersey-servlet'
+            entry 'jersey-server'
+            entry 'jersey-json'
+        }
+        dependencySet(group: 'com.sun.jersey.contribs', version: jerseyVersion) {
+            entry 'jersey-spring'
+            entry 'jersey-multipart'
+        }
+        dependencySet(group: 'org.apache.poi', version: '3.9') {
+            entry 'poi'
+            entry 'poi-ooxml'
+            entry 'poi-ooxml-schemas'
+        }
+        dependencySet(group: 'org.apache.tomcat.embed', version: '7.0.94') {
+            entry 'tomcat-embed-core'
+            entry 'tomcat-embed-jasper'
+            entry 'tomcat-embed-logging-log4j'
+        }
+
+    }
 }
 
 /* define the valid syntax level for source files */
@@ -171,86 +170,89 @@ jacocoTestReport{
 }
 
 rat {
-  xmlOutput = false
-  htmlOutput = false
-  plainOutput = true
-  verbose = false
-//  inputDir = './..'
-  reportDir = new File(buildDir,'reports/rat')
- excludes = [
-	'**/licenses/**',
-	'**/*.md',
-	'**/*.github/**',
-	'**/MANIFEST.MF',
-    '**/*.json',
-	'**/*.txt',
-	'**/*.log',
-	'**/fineractdev-eclipse-preferences.epf',
-	'**/template-expected.html',
-	'**/template.mustache',
-	'**/.classpath',
-	'**/.project',
-	'**/.idea/**',
-    '**/*.ipr',
-    '**/*.iws',
-	'**/.settings/**',
-	'**/bin/**',
-	'**/.git/**',
-    '**/.gitignore',
-    '**/.gitkeep',
-	'**/*.iml',
-	//Notice files
-	'**/NOTICE_RELEASE',
-	'**/NOTICE_SOURCE',
-    // Swagger License
-    '**/src/main/resources/swagger-ui/**',
-    // gradle
-    '**/.gradle/**',
-    '**/gradlew',
-    '**/gradlew.bat',
-    '**/gradle/wrapper/gradle-wrapper.properties',
-    '**/caches/**',
-    '**/daemon/**',
-    '**/native/**',
-    '**/wrapper/**',
-	'**/build/**',
+    xmlOutput = false
+    htmlOutput = false
+    plainOutput = true
+    verbose = false
+    // inputDir = './..'
+    reportDir = new File(buildDir,'reports/rat')
+    excludes = [
+        '**/licenses/**',
+        '**/*.md',
+        '**/*.github/**',
+        '**/MANIFEST.MF',
+        '**/*.json',
+        '**/*.txt',
+        '**/*.log',
+        '**/fineractdev-eclipse-preferences.epf',
+        '**/template-expected.html',
+        '**/template.mustache',
+        '**/.classpath',
+        '**/.project',
+        '**/.idea/**',
+        '**/*.ipr',
+        '**/*.iws',
+        '**/.settings/**',
+        '**/bin/**',
+        '**/.git/**',
+        '**/.gitignore',
+        '**/.gitkeep',
+        '**/*.iml',
+        //Notice files
+        '**/NOTICE_RELEASE',
+        '**/NOTICE_SOURCE',
+        // Swagger License
+        '**/src/main/resources/swagger-ui/**',
+        // gradle
+        '**/.gradle/**',
+        '**/gradlew',
+        '**/gradlew.bat',
+        '**/gradle/wrapper/gradle-wrapper.properties',
+        '**/caches/**',
+        '**/daemon/**',
+        '**/native/**',
+        '**/wrapper/**',
+        '**/build/**',
 
-	//Api Docs
-	'**/api-docs/*.*',
-	'**/docs/system-architecture/.htaccess',
-	'**/docs/system-architecture/404.html',
-	'**/docs/system-architecture/index.html',
-	'**/docs/system-architecture/**/*.xml',
-	'**/bootstrap-3.0.0/assets/application.js',
-	'**/system-architecture/js/plugins.js',
+        //Api Docs
+        '**/api-docs/*.*',
+        '**/docs/system-architecture/.htaccess',
+        '**/docs/system-architecture/404.html',
+        '**/docs/system-architecture/index.html',
+        '**/docs/system-architecture/**/*.xml',
+        '**/bootstrap-3.0.0/assets/application.js',
+        '**/system-architecture/js/plugins.js',
 
-	//Apache License
-	'**/bootstrap-3.0.0/assets/less.js',
-	'**/css/bootstrap-3.0.0/**/*.*',
+        //Apache License
+        '**/bootstrap-3.0.0/assets/less.js',
+        '**/css/bootstrap-3.0.0/**/*.*',
 
-	//Public Domain See http://www.JSON.org/js.html
-	'**/bootstrap-3.0.0/assets/json2.js.htm',
+        //Public Domain See http://www.JSON.org/js.html
+        '**/bootstrap-3.0.0/assets/json2.js.htm',
 
-	// MIT License
-	'**/modernizr-2.6.2.min.js',
-	'**/css/normalize.css',
-	'**/assets/filesaver.js',
-	'**/css/fonts/glyphicons-halflings-regular.svg',
-	'**/assets/jszip.js',
-	'**/assets/jquery.js',
-	'**/api-docs/jquery-1.7.min.js',
-	'**/css/toc-0.1.2/**/*.*',
-	'**/docs/system-architecture/css/main.css',
-	'**/system-architecture/js/vendor/jquery-1.9.1.min.js',
-	'**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
-	'**/assets/respond.min.js',
-	'**/assets/html5shiv.js',
+        // MIT License
+        '**/modernizr-2.6.2.min.js',
+        '**/css/normalize.css',
+        '**/assets/filesaver.js',
+        '**/css/fonts/glyphicons-halflings-regular.svg',
+        '**/assets/jszip.js',
+        '**/assets/jquery.js',
+        '**/api-docs/jquery-1.7.min.js',
+        '**/css/toc-0.1.2/**/*.*',
+        '**/docs/system-architecture/css/main.css',
+        '**/system-architecture/js/vendor/jquery-1.9.1.min.js',
+        '**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
+        '**/assets/respond.min.js',
+        '**/assets/html5shiv.js',
 
-	//BSD License
-	'**/assets/uglify.js',
-         //Ignore out folder
-         '**/out/**'
-	]
+        //BSD License
+        '**/assets/uglify.js',
+        //Ignore out folder
+        '**/out/**',
+
+        // Git build info
+        "**/git.properties",
+    ]
 }
 
 configurations {
@@ -323,14 +325,14 @@ modernizer {
 
     ignorePackages = []
     ignoreClassNamePatterns = [
-         '.*AbstractPersistableCustom'   
+        '.*AbstractPersistableCustom'
     ]
     ignoreGeneratedClasses = true
 
     exclusions = []
     exclusionPatterns = [
-//            To be removed when https://issues.apache.org/jira/browse/FINERACT-826 is fixed
-            'org/joda/time/.*'
+    // To be removed when https://issues.apache.org/jira/browse/FINERACT-826 is fixed
+        'org/joda/time/.*'
     ]
 }
 
@@ -401,7 +403,14 @@ war {
 
 license {
     header rootProject.file('../APACHE_LICENSETEXT.md')
-    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks", "**/swagger-ui/**"])
+    excludes([
+        "**/git.properties",
+        "**/*.html",
+        "**/*.mustache",
+        "**/package-info.java",
+        "**/keystore.jks",
+        "**/swagger-ui/**",
+    ])
     strictCheck true
 }
 
@@ -450,20 +459,20 @@ sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
 /* Exclude maria db and embedded tomcat related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
-sourceSets {
-    main {
-        java {
-            exclude '**/Server*'
-            exclude '**/MariaDB4j*'
-            exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
+    sourceSets {
+        main {
+            java {
+                exclude '**/Server*'
+                exclude '**/MariaDB4j*'
+                exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
+            }
+        }
+        test {
+            java {
+                exclude '**/core/boot/tests/**'
+            }
         }
     }
-    test {
-    	java {
-    		exclude '**/core/boot/tests/**'
-    	}
-    }
-}
 }
 
 sourceSets {
@@ -489,6 +498,20 @@ task integrationTest(type:Test) {
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 
+integrationTest {
+	testLogging { // FINERACT-927
+		events "skipped", "failed"
+		showStandardStreams = false
+		exceptionFormat "full"
+	}
+}
+test {
+	testLogging { // FINERACT-927
+		events "skipped", "failed"
+		showStandardStreams = false
+		exceptionFormat "full"
+	}
+}
 
 import com.github.spotbugs.SpotBugsTask
 import groovy.sql.Sql
@@ -569,6 +592,7 @@ def qualifyVersionIfNecessary(version) {
 springBoot {
     mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
+
 bootWar {
     mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
@@ -579,3 +603,13 @@ tasks.withType(SpotBugsTask) {
     reports.html.enabled = true
     reportLevel = "high"
 }
+
+gitProperties {
+    gitPropertiesResourceDir = "$buildDir/classes/java/main/resources"
+    dateFormat = "yyyy-MM-dd'T'HH:mmZ"
+    dateFormatTimeZone = "GMT"
+    failOnNoGitDirectory = false
+}
+
+// make sure the generateGitProperties task always executes (even when git.properties is not changed)
+generateGitProperties.outputs.upToDateWhen { false }

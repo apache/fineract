@@ -37,7 +37,7 @@ import org.joda.time.LocalDateTime;
 @Entity
 @Table(name = "twofactor_access_token",
         uniqueConstraints = {@UniqueConstraint(columnNames = { "token", "appuser_id" }, name = "token_appuser_UNIQUE")})
-public class TFAccessToken extends AbstractPersistableCustom<Long> {
+public class TFAccessToken extends AbstractPersistableCustom {
 
     @Column(name = "token", nullable = false, length = 32)
     private String token;

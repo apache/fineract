@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,6 +128,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -140,6 +143,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanOverdueInstallmentCh
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
@@ -191,6 +195,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
 
@@ -234,6 +239,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
+    private final GLIMAccountInfoRepository glimRepository;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -264,7 +271,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
             final CodeValueRepositoryWrapper codeValueRepository,
             final LoanRepositoryWrapper loanRepositoryWrapper,
-            final CashierTransactionDataValidator cashierTransactionDataValidator) {
+            final CashierTransactionDataValidator cashierTransactionDataValidator,
+            final GLIMAccountInfoRepository glimRepository,
+            final LoanRepository loanRepository
+            ) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -303,11 +313,39 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
         this.codeValueRepository = codeValueRepository;
         this.cashierTransactionDataValidator = cashierTransactionDataValidator;
+        this.loanRepository=loanRepository;
+        this.glimRepository=glimRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
         return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult disburseGLIMLoan(final Long loanId, final JsonCommand command)
+         {
+              final Long parentLoanId=loanId;
+              GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
+              List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
+              CommandProcessingResult result=null;
+              int count=0;
+         for(Loan loan:childLoans)
+         {
+              result=disburseLoan(loan.getId(),command,false);
+              if(result.getLoanId()!=null)
+              {
+                   count++;
+              // if all the child loans are approved, mark the parent loan as approved
+                   if(count==parentLoan.getChildAccountsCount())
+                   {
+                        parentLoan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+                        glimRepository.save(parentLoan);
+                   }
+              }
+         }
+         return result;
     }
 
     @Transactional
@@ -729,18 +767,44 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return changes;
     }
 
+
+    @Transactional
+    @Override
+    public CommandProcessingResult undoGLIMLoanDisbursal(final Long loanId, final JsonCommand command)
+    {
+         //GroupLoanIndividualMonitoringAccount glimAccount=glimRepository.findOne(loanId);
+         final Long parentLoanId=loanId;
+         GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
+         List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
+         CommandProcessingResult result=null;
+         int count=0;
+         for(Loan loan:childLoans)
+         {
+              result=undoLoanDisbursal(loan.getId(),command);
+              if(result.getLoanId()!=null)
+              {
+                   count++;
+              // if all the child loans are approved, mark the parent loan as approved
+                   if(count==parentLoan.getChildAccountsCount())
+                   {
+                        parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
+                        glimRepository.save(parentLoan);
+                   }
+              }
+         }
+         return result;
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult undoLoanDisbursal(final Long loanId, final JsonCommand command) {
 
         final AppUser currentUser = getAppUserIfPresent();
-
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_UNDO_DISBURSAL,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
         removeLoanCycle(loan);
-
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         //
@@ -782,6 +846,36 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+
+    @Transactional
+    @Override
+    public CommandProcessingResult makeGLIMLoanRepayment(final Long loanId, final JsonCommand command)
+    {
+
+         final Long parentLoanId=loanId;
+
+         GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
+
+         JsonArray repayments= command.arrayOfParameterNamed("formDataArray");
+         JsonCommand childCommand=null;
+         CommandProcessingResult result=null;
+          JsonObject jsonObject=null;
+
+         Long[] childLoanId=new Long[repayments.size()];
+         for (int i = 0; i < repayments.size(); i++) {
+               jsonObject=repayments.get(i).getAsJsonObject();
+               LOG.info("{}",jsonObject.toString());
+               childLoanId[i]=jsonObject.get("loanId").getAsLong();
+         }
+         int j=0;
+         for(JsonElement element:repayments )
+         {
+              childCommand=JsonCommand.fromExistingCommand(command,element);
+              result=makeLoanRepayment(childLoanId[j++],childCommand,false);
+         }
+         return result;
     }
 
     @Transactional

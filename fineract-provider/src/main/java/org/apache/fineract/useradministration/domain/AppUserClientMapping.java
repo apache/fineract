@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "m_selfservice_user_client_mapping")
-public class AppUserClientMapping extends AbstractPersistableCustom<Long> {
+public class AppUserClientMapping extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "client_id", nullable = false)

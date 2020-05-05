@@ -108,4 +108,10 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult forecloseLoan(final Long loanId, JsonCommand command);
 
+    CommandProcessingResult disburseGLIMLoan(Long loanId, JsonCommand command);
+
+    CommandProcessingResult undoGLIMLoanDisbursal(Long loanId, JsonCommand command);
+
+    CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
+
 }

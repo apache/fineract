@@ -41,7 +41,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_savings_account_interest_rate_chart")
-public class DepositAccountInterestRateChart extends AbstractPersistableCustom<Long> {
+public class DepositAccountInterestRateChart extends AbstractPersistableCustom {
 
     @Embedded
     private InterestRateChartFields chartFields;

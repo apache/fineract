@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetE
 
 @Entity
 @Table(name = "c_configuration")
-public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long> {
+public class GlobalConfigurationProperty extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false)
     private String name;

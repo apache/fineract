@@ -70,7 +70,8 @@ public class EmailConfigurationWritePlatformServiceImpl implements EmailConfigur
             for (EmailConfiguration config : configurations) {
                 if(config.getName() !=null){
                     String value = command.stringValueOfParameterNamed(config.getName());
-                    config.setValue(value); changes.put(config.getName(),value);
+                    config.setValue(value);
+                    changes.put(config.getName(),value);
                     this.repository.saveAndFlush(config);
                 }
             }

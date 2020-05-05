@@ -30,7 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_organisation_creditbureau")
-public class OrganisationCreditBureau extends AbstractPersistableCustom<Long> {
+public class OrganisationCreditBureau extends AbstractPersistableCustom {
 
     private String alias;
 

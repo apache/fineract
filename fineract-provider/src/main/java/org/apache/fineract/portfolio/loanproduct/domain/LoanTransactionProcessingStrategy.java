@@ -26,7 +26,7 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 
 @Entity
 @Table(name = "ref_loan_transaction_processing_strategy")
-public class LoanTransactionProcessingStrategy extends AbstractPersistableCustom<Long> {
+public class LoanTransactionProcessingStrategy extends AbstractPersistableCustom {
 
     @Column(name = "code", unique = true)
     private String code;

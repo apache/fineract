@@ -58,7 +58,7 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.approvedLoanAmountParameterName,
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.loanIdTobeApproved,LoanApiConstants.approvedLoanAmountParameterName,
                 LoanApiConstants.approvedOnDateParameterName, LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName,
                 LoanApiConstants.dateFormatParameterName,LoanApiConstants.disbursementDataParameterName,LoanApiConstants.disbursementDateParameterName));
 
