@@ -39,6 +39,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountAnnualFeeData;
+import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
@@ -249,6 +250,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     logger.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
                     ++numberOfErrors;
                 }
+            } catch(InsufficientAccountBalanceException e) {
+                logger.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), e.getDefaultUserMessage(), e);
+                ++numberOfErrors ;
             }
         }
         logger.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
