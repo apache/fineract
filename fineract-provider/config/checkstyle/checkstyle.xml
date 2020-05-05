@@ -40,13 +40,16 @@
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
     <module name="SuppressWarningsFilter"/>
-<!-- TODO Enable maximum line length check:
-    <module name="LineLength">
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-        <property name="fileExtensions" value="java"/>
+    <module name="FileLength">
+        <property name="max" value="1500"/>
     </module>
-  -->
+    <module name="LineLength">
+        <property name="max" value="1500"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+        <property name="fileExtensions" value="java, properties"/>
+    </module>
+    <module name="com.puppycrawl.tools.checkstyle.checks.sizes.LineLengthCheck"/>
+
     <module name="TreeWalker">
         <module name="EqualsHashCode"/>
 
@@ -59,19 +62,23 @@
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
 
-<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
-
         <module name="HiddenField">
             <property name="ignoreAbstractMethods" value="true" />
             <property name="ignoreConstructorParameter" value="true" />
-            <property name="ignoreSetter" value="true" />
+            <property name="ignoreSetters" value="true" />
+            <property name="ignoreGetters" value="true"/>
             <property name="setterCanReturnItsClass" value="true" />
+            <property name="getterCanReturnItsClass" value="true"/>
         </module>
         <module name="EmptyStatement"/>
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
 
-        < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
+
+<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
+
+
+      < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
         <module name="IllegalCatch"/>
         <module name="IllegalThrows" />
         <module name="MutableException"/>
