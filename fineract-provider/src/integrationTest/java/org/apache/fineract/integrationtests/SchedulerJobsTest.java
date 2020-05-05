@@ -28,6 +28,7 @@ import io.restassured.specification.RequestSpecification;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Before;
@@ -72,6 +73,12 @@ public class SchedulerJobsTest {
             // Verifying Status of the Scheduler after starting
             assertEquals("Verifying Scheduler Job Status", true, schedulerStatus);
         }
+    }
+
+    @Test
+    public void testNumberOfJobs() {
+        List<Integer> jobIds = schedulerJobHelper.getAllSchedulerJobIds();
+        assertEquals("Number of jobs in database and code do not match: " + jobIds, JobName.values().length, jobIds.size());
     }
 
     @Test
