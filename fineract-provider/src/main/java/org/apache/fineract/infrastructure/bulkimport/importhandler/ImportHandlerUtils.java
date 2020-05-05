@@ -222,10 +222,26 @@ public class ImportHandlerUtils {
     }
 
     public static CellStyle getCellStyle(Workbook workbook, IndexedColors color) {
+        CellReference cellReference = new CellReference("A1");
+        Sheet predefined = workbook.getSheet(color.toString());
+        // if we have already defined this style, return it and don't create another one
+        if (predefined != null) {
+            Row row = predefined.getRow(cellReference.getRow());
+            Cell cell = row.getCell(cellReference.getCol());
+            return cell.getCellStyle();
+        }
         CellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(color.getIndex());
         style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+
+        Sheet cache = workbook.createSheet(color.toString());
+        workbook.setSheetHidden(workbook.getSheetIndex(cache), HSSFWorkbook.SHEET_STATE_VERY_HIDDEN);
+        Row row = cache.createRow(cellReference.getRow());
+        Cell cell = row.createCell(cellReference.getCol());
+        cell.setCellStyle(style);
+
         return style;
+
     }
 
     public static String getDefaultUserMessages(List<ApiParameterError> ApiParameterErrorList){
