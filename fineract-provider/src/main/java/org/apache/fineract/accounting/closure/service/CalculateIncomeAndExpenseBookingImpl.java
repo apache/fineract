@@ -33,6 +33,7 @@ import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException;
 import org.apache.fineract.accounting.closure.exception.RunningBalanceNotCalculatedException;
+import org.apache.fineract.accounting.closure.exception.RunningBalanceZeroException;
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -176,7 +177,7 @@ public class CalculateIncomeAndExpenseBookingImpl implements CalculateIncomeAndE
             journalEntry = new JournalEntryData(office.getId(),today.toString(),closureData.getComments(),creditsJournalEntry,debitsJournalEntry,null,false,closureData.getCurrencyCode(),office.getName());
         }
         else if(compare == 0){
-            //throw new RunningBalanceZeroException(office.getName());
+            throw new RunningBalanceZeroException(office.getName());
         }
         final LocalDate localDate = LocalDate.now();
         final List<JournalEntryData> journalEntries = new ArrayList<>();

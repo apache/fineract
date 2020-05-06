@@ -652,8 +652,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
             return transactionId;
         }catch (final DataIntegrityViolationException dve) {
-            handleJournalEntryDataIntegrityIssues(dve);
-            return null;
+            throw handleJournalEntryDataIntegrityIssues(dve);
         }
     }
 

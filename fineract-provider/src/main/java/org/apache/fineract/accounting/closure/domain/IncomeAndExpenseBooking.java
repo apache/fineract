@@ -36,11 +36,14 @@ public class IncomeAndExpenseBooking extends AbstractPersistableCustom  {
     @ManyToOne
     @JoinColumn(name = "gl_closure_id", nullable = false)
     private GLClosure glClosure;
+
     @Column(name = "journal_entry_transaction_id",nullable = false)
     private String transactionId;
+
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
 
@@ -54,6 +57,7 @@ public class IncomeAndExpenseBooking extends AbstractPersistableCustom  {
     }
 
     protected IncomeAndExpenseBooking() {
+
     }
 
     public static IncomeAndExpenseBooking createNew(final GLClosure glClosure, final String transactionId, final Office office, final boolean reversed){

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.fineract.integrationtests;
+package org.apache.fineract.accounting.common;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class CalculateIncomeAndExpenseBookingIntegrationTest {
     /*
     Case 3: In the case of an income account type-  if the OfficeRunningBalance is greater than 0, then add to debits
      */
-    @Test(expected = NoClassDefFoundError.class)
+    @Test
     public void testIncomeAccountsRunningBalanceGreaterThanZero_Debit() {
         GLClosureCommand glClosureCommand =  new GLClosureCommand(10L, 10L, new LocalDate(), "Closing comment", false, 10L , "CAD", false, false, "comment" );
         IncomeAndExpenseJournalEntryData incomeAndExpenseJournalEntryData= new IncomeAndExpenseJournalEntryData(null, null,null, null, true, true, null,new BigDecimal(10),null,4,10,null,null);
@@ -107,7 +107,7 @@ public class CalculateIncomeAndExpenseBookingIntegrationTest {
     /*
     Case 4: In the case of an income account type-  if the OfficeRunningBalance is less than 0, then add to credits
      */
-    @Test(expected = NoClassDefFoundError.class)
+    @Test
     public void testIncomeAccountsRunningBalanceLessThanZero_Credit() {
         GLClosureCommand glClosureCommand =  new GLClosureCommand(10L, 10L, new LocalDate(), "Closing comment", false, 10L , "CAD", false, false, "comment" );
         IncomeAndExpenseJournalEntryData incomeAndExpenseJournalEntryData= new IncomeAndExpenseJournalEntryData(null, null,null, null, true, true, null,new BigDecimal(-10),null,4,10,null,null);
@@ -125,7 +125,7 @@ public class CalculateIncomeAndExpenseBookingIntegrationTest {
     /*
 Case 5: In the case of an Expanse account type-  if the OfficeRunningBalance is greater than 0, then add to credit
      */
-    @Test(expected = NoClassDefFoundError.class)
+    @Test
     public void testIncomeAccountsRunningBalanceGreaterThanZero_Credit() {
         GLClosureCommand glClosureCommand =  new GLClosureCommand(10L, 10L, new LocalDate(), "Closing comment", false, 10L , "CAD", false, false, "comment" );
         IncomeAndExpenseJournalEntryData incomeAndExpenseJournalEntryData= new IncomeAndExpenseJournalEntryData(null, null,null, null, true, true, null,new BigDecimal(10),null,5,10,null,null);
@@ -143,7 +143,7 @@ Case 5: In the case of an Expanse account type-  if the OfficeRunningBalance is 
     /*
 Case 6: In the case of an Expanse account type- if the OfficeRunningBalance is less than 0, then add to debits
      */
-    @Test(expected = NoClassDefFoundError.class)
+    @Test
     public void testIncomeAccountsRunningBalanceLessThanZero_Debit() {
         GLClosureCommand glClosureCommand =  new GLClosureCommand(10L, 10L, new LocalDate(), "Closing comment", false, 10L , "CAD", false, false, "comment" );
         IncomeAndExpenseJournalEntryData incomeAndExpenseJournalEntryData= new IncomeAndExpenseJournalEntryData(null, null,null, null, true, true, null,new BigDecimal(-10),null,5,10,null,null);
