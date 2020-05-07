@@ -143,6 +143,7 @@ public class SavingsApiConstants {
     public static final String savingsAmountOnHold = "savingsAmountOnHold";
     public static final String withHoldTaxParamName = "withHoldTax";
     public static final String taxGroupIdParamName = "taxGroupId";
+    public static final String blockNarrationOptionsParamName = "blockNarrationOptions";//blockNarrationsOptions
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -180,6 +181,7 @@ public class SavingsApiConstants {
     public static final String transactions = "transactions";
     public static final String charges = "charges";
     public static final String linkedAccount = "linkedAccount";
+    public static final String blockNarrations = "blockNarrationOptions";
 
     // Savings on hold transaction
     public static final String onHoldTransactionTypeParamName = "transactionType";
