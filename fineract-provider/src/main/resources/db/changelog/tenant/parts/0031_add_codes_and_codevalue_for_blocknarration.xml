@@ -24,10 +24,12 @@
 
         <sql>INSERT INTO `m_code` ( `code_name`, `is_system_defined`) VALUES ('SavingsAccountBlockUnblockNarration', 1);
 
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Reason 1', 'Reason 1', 1, null, 1, 0);
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Reason 2', 'Reason 2', 2, null, 1, 0);
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Reason 3', 'Reason 3', 3, null, 1, 0);
-            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Reason 4', 'Reason 4', 4, null, 1, 0);
+            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Compliance', 'Compliance', 1, null, 1, 0);
+            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Fraud', 'Fraud', 2, null, 1, 0);
+            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Legal', 'Legal', 3, null, 1, 0);
+            INSERT INTO `m_code_value` ( `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES ((select code.id from m_code code where code.code_name = 'SavingsAccountBlockUnblockNarration'), 'Suspicious', 'Suspicious', 4, null, 1, 0);
+
+            alter table `m_savings_account` add `block_narration_id` BIGINT(20);
         </sql>
     </changeSet>
 </databaseChangeLog>
