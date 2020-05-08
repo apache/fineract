@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.exception;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 
