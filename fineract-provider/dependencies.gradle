@@ -83,7 +83,6 @@ dependencies {
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
             'org.apache.poi:poi-ooxml-schemas',
-            'dom4j:dom4j',
 
             'com.lowagie:itext',
 
@@ -100,7 +99,10 @@ dependencies {
             'org.apache.bval:org.apache.bval.bundle',
 
              // JAX-B dependencies for JDK 9+
-             "jakarta.xml.bind:jakarta.xml.bind-api"
+             "jakarta.xml.bind:jakarta.xml.bind-api",
+             "org.dom4j:dom4j"
+
+
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
 		exclude group: 'javax.validation'
@@ -110,7 +112,6 @@ dependencies {
     }
 
     testCompile 'junit:junit',
-            'xerces:xercesImpl',
             'org.mockito:mockito-core',
             'io.github.classgraph:classgraph',
             'com.google.code.gson:gson',
