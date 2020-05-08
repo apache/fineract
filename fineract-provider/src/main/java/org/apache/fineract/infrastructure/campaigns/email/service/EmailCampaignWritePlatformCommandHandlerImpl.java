@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;

@@ -38,7 +38,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;

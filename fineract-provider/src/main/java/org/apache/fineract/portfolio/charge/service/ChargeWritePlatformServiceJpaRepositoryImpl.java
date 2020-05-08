@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

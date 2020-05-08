@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.configuration.domain;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Embeddable
 public class ExternalServicePropertiesPK implements Serializable {

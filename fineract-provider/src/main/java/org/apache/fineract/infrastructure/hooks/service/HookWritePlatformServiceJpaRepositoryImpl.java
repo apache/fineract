@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.persistence.PersistenceException;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;

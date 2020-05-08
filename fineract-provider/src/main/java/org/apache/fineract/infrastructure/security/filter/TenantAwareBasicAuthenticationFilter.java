@@ -23,7 +23,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -106,7 +106,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
                 String tenantIdentifier = request.getHeader(this.tenantRequestHeader);
 
-                if (org.apache.commons.lang.StringUtils.isBlank(tenantIdentifier)) {
+                if (org.apache.commons.lang3.StringUtils.isBlank(tenantIdentifier)) {
                     tenantIdentifier = request.getParameter("tenantIdentifier");
                 }
 

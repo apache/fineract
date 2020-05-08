@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobConfigurationData;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailData;
