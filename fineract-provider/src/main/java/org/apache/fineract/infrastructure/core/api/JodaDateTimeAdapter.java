@@ -26,15 +26,14 @@ import java.lang.reflect.Type;
 import org.joda.time.DateTime;
 
 /**
- * Serializer for joda time {@link DateTime} that returns date as long to match
- * previous functionality.
+ * Serializer for Joda Time {@link DateTime} that returns the date as long to
+ * match previous (Jackson) functionality.
  */
 public class JodaDateTimeAdapter implements JsonSerializer<DateTime> {
 
-    @SuppressWarnings("unused")
     @Override
+    @SuppressWarnings("unused")
     public JsonElement serialize(final DateTime src, final Type typeOfSrc, final JsonSerializationContext context) {
-
         JsonElement element = null;
         if (src != null) {
             element = new JsonPrimitive(src.getMillis());

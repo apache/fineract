@@ -18,29 +18,29 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
-import org.joda.time.MonthDay;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /**
- * Serializer for Joda Time {@link MonthDay} that returns the date in array format
- * to match previous Jackson functionality.
+ * GSON Serializer for JUL Dates (java.util.Date) in ISO-8601 format using {@link DateTimeFormatter#ISO_INSTANT} (see FINERACT-926).
+ *
+ * @author Michael Vorburger.ch
  */
-public class JodaMonthDayAdapter implements JsonSerializer<MonthDay> {
+public class DateAdapter implements JsonSerializer<Date> {
+
+    private final static DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
     @Override
     @SuppressWarnings("unused")
-    public JsonElement serialize(final MonthDay src, final Type typeOfSrc, final JsonSerializationContext context) {
-        JsonArray array = null;
-        if (src != null) {
-            array = new JsonArray();
-            array.add(new JsonPrimitive(src.getMonthOfYear()));
-            array.add(new JsonPrimitive(src.getDayOfMonth()));
+    public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
+        if (src == null) {
+            return null;
         }
-        return array;
+        return new JsonPrimitive(formatter.format(src.toInstant()));
     }
 }
