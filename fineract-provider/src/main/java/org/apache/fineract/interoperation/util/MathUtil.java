@@ -88,9 +88,13 @@ public class MathUtil {
     /** @return calculates minimum of the two values considering null values
      * @param notNull if true then null parameter is omitted, otherwise returns null */
     public static Long min(Long first, Long second, boolean notNull) {
-        return first == null
-                ? (notNull ? second : null)
-                : second == null ? (notNull ? first : null) : Math.min(first, second);
+        if (first == null){
+            return notNull ? second : null;
+        }
+        if (second == null) {
+            return notNull ? first : null;
+        }
+        return Math.min(first, second);
     }
 
     /** @return calculates minimum of the values considering null values

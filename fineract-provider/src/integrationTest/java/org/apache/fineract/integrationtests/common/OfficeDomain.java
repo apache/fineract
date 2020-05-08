@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common;
 
 import com.google.gson.Gson;
+import java.util.Arrays;
 
 public class OfficeDomain {
 
@@ -127,7 +128,7 @@ public class OfficeDomain {
             hash += this.externalId.hashCode();
         }
         if (this.openingDate != null) {
-            hash += this.openingDate.hashCode();
+            hash += Arrays.hashCode(this.openingDate);
         }
         if (this.hierarchy != null) {
             hash += this.hierarchy.hashCode();
@@ -151,7 +152,7 @@ public class OfficeDomain {
         if (this.id == od.getId() && this.name.equals(od.getName())
                 && this.nameDecorated.equals(od.getName())
                 && this.externalId.equals(od.getExternalId())
-                && this.openingDate.equals(od.getOpeningDate())
+                && Arrays.equals(this.openingDate, od.getOpeningDate())
                 && this.hierarchy.equals(od.getHierarchy())) {
             return true;
         }
