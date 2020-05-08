@@ -18,7 +18,7 @@
  */
 dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
-    
+
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
 
     compile ('org.springframework.boot:spring-boot-starter-data-jpa') {
@@ -112,6 +112,7 @@ dependencies {
     }
 
     testCompile 'junit:junit',
+    		'org.junit.platform:junit-platform-runner', // FINERACT-943
             'org.mockito:mockito-core',
             'io.github.classgraph:classgraph',
             'com.google.code.gson:gson',
