@@ -67,6 +67,7 @@ public class SchedulerJobHelper {
         final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
         final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_BY_ID_URL, "");
+        System.out.println(response);
         assertNotNull(response);
         return response;
     }
@@ -78,7 +79,8 @@ public class SchedulerJobHelper {
         return (Boolean) response.get("active");
     }
 
-    public void updateSchedulerStatus(final String command) {
+    public void updateSchedulerStatus(final boolean on) {
+        String command = on ? "start" : "stop";
         final String UPDATE_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ UPDATING SCHEDULER STATUS -------------------------");
         Utils.performServerPost(requestSpec, response202Spec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);

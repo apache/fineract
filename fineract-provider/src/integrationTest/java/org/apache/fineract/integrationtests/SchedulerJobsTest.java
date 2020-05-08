@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -34,7 +35,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class SchedulerJobsTest {
 
     private RequestSpecification requestSpec;
@@ -51,9 +51,10 @@ public class SchedulerJobsTest {
 
     @Test // FINERACT-926
     public void testDateFormat() {
-        Map<String, Object> schedulerJob1 = schedulerJobHelper.getSchedulerJobById(1);
-        String nextRunTimeText = (String)schedulerJob1.get("nextRunTime");
-        assertNotNull("nextRunTime == null: " + schedulerJob1, nextRunTimeText);
+        // must start scheduler and make job active to have nextRunTime (which is a java.util.Date)
+        schedulerJobHelper.updateSchedulerStatus(true);
+        schedulerJobHelper.updateSchedulerJob(1, "true");
+        String nextRunTimeText = await().until(() -> (String)schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"), nextRunTime -> nextRunTime != null);
         DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
     }
 
@@ -62,12 +63,12 @@ public class SchedulerJobsTest {
         // Retrieving Status of Scheduler
         Boolean schedulerStatus = schedulerJobHelper.getSchedulerStatus();
         if (schedulerStatus == true) {
-            schedulerJobHelper.updateSchedulerStatus("stop");
+            schedulerJobHelper.updateSchedulerStatus(false);
             schedulerStatus = schedulerJobHelper.getSchedulerStatus();
             // Verifying Status of the Scheduler after stopping
             assertEquals("Verifying Scheduler Job Status", false, schedulerStatus);
         } else {
-            schedulerJobHelper.updateSchedulerStatus("start");
+            schedulerJobHelper.updateSchedulerStatus(true);
             schedulerStatus = schedulerJobHelper.getSchedulerStatus();
             // Verifying Status of the Scheduler after starting
             assertEquals("Verifying Scheduler Job Status", true, schedulerStatus);
@@ -77,7 +78,7 @@ public class SchedulerJobsTest {
     @Test
     public void testFlippingJobsActiveStatus() throws InterruptedException {
         // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side effects
-        schedulerJobHelper.updateSchedulerStatus("stop");
+        schedulerJobHelper.updateSchedulerStatus(false);
 
         // For each retrieved scheduled job (by ID)...
         for (Integer jobId : schedulerJobHelper.getAllSchedulerJobIds()) {
