@@ -37,7 +37,6 @@ public class NotificationData implements Serializable {
     private List<Long> userIds;
 
     public NotificationData() {
-
     }
 
     public NotificationData(String objectType, Long objectId, String action, Long actorId, String content, boolean isSystemGenerated,
@@ -149,5 +148,4 @@ public class NotificationData implements Serializable {
     public void setTenantIdentifier(String tenantIdentifier) {
         this.tenantIdentifier = tenantIdentifier;
     }
-
 }

@@ -105,16 +105,14 @@ dependencyManagement {
         dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-	    dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+        dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
         dependency 'org.apache.activemq:activemq-broker:+'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
-        dependency 'com.mockrunner:mockrunner-jms:2.0.4'
         dependency 'io.github.classgraph:classgraph:4.8.78'
         dependency 'org.dom4j:dom4j:2.1.0'
-        dependency 'nekohtml:nekohtml:1.9.6.2'
-		dependency 'org.awaitility:awaitility:4.0.2'
+        dependency 'org.awaitility:awaitility:4.0.2'
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
