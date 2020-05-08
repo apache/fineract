@@ -15,3 +15,5 @@ build
 gradle
 catalina.base_IS_UNDEFINED/
 keystore.jks
+bin/
+fineract-provider/src/main/resources/application.properties
