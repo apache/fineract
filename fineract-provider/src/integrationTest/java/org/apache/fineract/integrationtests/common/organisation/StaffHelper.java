@@ -24,6 +24,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class StaffHelper {
@@ -32,13 +33,11 @@ public class StaffHelper {
 
     private static final String CREATE_STAFF_URL = "/fineract-provider/api/v1/staff";
 
-    private static final String RESOURCE_ID = "resourceId";
-
     public static final String GROUP_ID = "groupId";
 
 
     public static Integer transferStaffToGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-                                               final Integer groupId,final Integer staffToTransfer ,final String note){
+            final Integer groupId,final Integer staffToTransfer ,final String note){
         final String url = TRANSFER_STAFF_URL + "/" + groupId + "?command=transferStaff&"+ Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, transferStaffToGroupAsJSON(staffToTransfer, note), GROUP_ID);
     }
@@ -55,35 +54,35 @@ public class StaffHelper {
         return (Integer) createStaffWithJson(requestSpec, responseSpec, createStaffAsJSON()).get("resourceId");
     }
 
-    public static HashMap createStaffMap(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static Map<String, Object> createStaffMap(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createStaffWithJson(requestSpec, responseSpec, createStaffAsJSON());
     }
 
-    public static HashMap createStaffWithJson(final RequestSpecification requestSpec,
+    public static Map<String, Object> createStaffWithJson(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String json) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, json, "");
     }
 
-    public static HashMap getStaff(final RequestSpecification requestSpec,
+    public static Map<String, Object> getStaff(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer staffId) {
         final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
-    public static List<HashMap> getStaffList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static List<Map<String, Object>> getStaffList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
-    public static Object getStaffListWithState(final RequestSpecification requestSpec,
+    public static List<Map<String, Object>> getStaffListWithState(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String status) {
         final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&status=" + status;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
-    public static Object updateStaff(final RequestSpecification requestSpec,
-             final ResponseSpecification responseSpec, final Integer staffId, final HashMap<String, Object> changes) {
+    public static Map<String, Object> updateStaff(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer staffId, final Map<String, Object> changes) {
         final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
         final String json = new Gson().toJson(changes);
         return Utils.performServerPut(requestSpec, responseSpec, url, json, "");

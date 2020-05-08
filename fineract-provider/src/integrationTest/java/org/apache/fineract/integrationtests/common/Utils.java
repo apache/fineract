@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-   private final static Logger logger = LoggerFactory.getLogger(Utils.class);
+    private final static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
@@ -83,11 +83,11 @@ public class Utils {
                     logger.info("{} return HTTP 200, application is now ready for integration testing!", HEALTH_URL);
                     return;
                 } else {
-                    logger.info("{} returned HTTP {}, going to wait and retry (attempt {})", new Object[] { HEALTH_URL, healthHttpStatus, attempt++ });
+                    logger.info("{} returned HTTP {}, going to wait and retry (attempt {})", HEALTH_URL, healthHttpStatus, attempt++);
                     sleep(3);
                 }
             } catch (Exception e) {
-                logger.info("{} caused {}, going to wait and retry (attempt {})", new Object[] { HEALTH_URL, e.getMessage(), attempt++ });
+                logger.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, e.getMessage(), attempt++);
                 lastException = e;
                 sleep(3);
             }
@@ -117,8 +117,8 @@ public class Utils {
             logger.info("Logging in, for integration test...");
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.given().contentType(ContentType.JSON)
-                .body("{\"username\":\"mifos\", \"password\":\"password\"}")
-                .expect().log().ifError().when().post(LOGIN_URL).asString();
+                    .body("{\"username\":\"mifos\", \"password\":\"password\"}")
+                    .expect().log().ifError().when().post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
             String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
             assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
@@ -141,12 +141,12 @@ public class Utils {
     }
 
     public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-                                                final String getURL){
+            final String getURL){
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
     }
 
     public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-                                                final String getURL){
+            final String getURL){
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asByteArray();
     }
 
@@ -209,10 +209,10 @@ public class Utils {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
     public static Long randomNumberGenerator(final int expectedLength){
-       final String source="1234567890";
-       final int lengthofSource=source.length();
-       final Random random=new Random();
-       StringBuilder stringBuilder=new StringBuilder(expectedLength);
+        final String source="1234567890";
+        final int lengthofSource=source.length();
+        final Random random=new Random();
+        StringBuilder stringBuilder=new StringBuilder(expectedLength);
         for (int i = 0; i < expectedLength; i++) {
             stringBuilder.append(source.charAt(random.nextInt(lengthofSource)));
         }
@@ -239,7 +239,7 @@ public class Utils {
     }
 
     public static String performServerTemplatePost(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
-                                                   final String postURL,final String legalFormType,final File file,final String locale,final String dateFormat) {
+            final String postURL,final String legalFormType,final File file,final String locale,final String dateFormat) {
 
         final String importDocumentId=given().spec(requestSpec)
                 .queryParam("legalFormType",legalFormType)
@@ -253,7 +253,7 @@ public class Utils {
     }
 
     public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
-                                                                final String getURL,final String importDocumentId){
+            final String getURL,final String importDocumentId){
         final String templateLocation=given().spec(requestSpec).
                 queryParam("importDocumentId",importDocumentId)
                 .expect().spec(responseSpec)
