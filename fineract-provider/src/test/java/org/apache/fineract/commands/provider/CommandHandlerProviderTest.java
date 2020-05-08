@@ -18,12 +18,13 @@
  */
 package org.apache.fineract.commands.provider;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.configuration.spring.TestsWithoutDatabaseAndNoJobsConfiguration;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +48,14 @@ public class CommandHandlerProviderTest {
 
     @Test
     public void shouldRegisterHandler() {
-        try {
-            final Long testCommandId = 815L;
+        final Long testCommandId = 815L;
 
-            final NewCommandSourceHandler registeredHandler = this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
+        final NewCommandSourceHandler registeredHandler = this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
 
-            final CommandProcessingResult result =
-                    registeredHandler.processCommand(
-                            JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null,null,null));
-            Assert.assertEquals(testCommandId, result.commandId());
-        } catch (UnsupportedCommandException ucex) {
-            Assert.fail();
-        }
+        final CommandProcessingResult result =
+                registeredHandler.processCommand(
+                        JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null,null,null));
+        assertEquals(testCommandId, result.commandId());
     }
 
     @Test(expected = UnsupportedCommandException.class)
