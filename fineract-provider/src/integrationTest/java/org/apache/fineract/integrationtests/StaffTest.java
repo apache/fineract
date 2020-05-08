@@ -31,6 +31,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class StaffTest {
@@ -91,6 +92,8 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
     }
 
+    @Test
+    @Ignore //TODO FINERACT-1005
     public void testStaffCreateMaxNameLength() {
 
         final HashMap<String, Object> map = new HashMap<>();
@@ -102,6 +105,7 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
     }
 
+    @Test
     public void testStaffCreateExternalIdValidationError() {
         final HashMap<String, Object> map = new HashMap<>();
 
@@ -183,6 +187,8 @@ public class StaffTest {
         Assert.assertEquals(mobileNo, changes.get("mobileNo"));
     }
 
+    @Test
+    @Ignore // TODO FINERACT- 1005
     public void testStaffUpdateLongExternalIdError() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("externalId", Utils.randomStringGenerator("EXT", 98));
@@ -190,6 +196,8 @@ public class StaffTest {
         StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
     }
 
+    @Test
+    @Ignore // TODO FINERACT- 1005
     public void testStaffUpdateWrongActiveState() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("isActive", "xyz");

@@ -284,13 +284,14 @@ public class VariableInstallmentsDecliningBalanceHelper {
         }
         return toReturn;
     }
+
     public static String formatDate(ArrayList list) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, (int) list.get(0));
         cal.set(Calendar.MONTH, (int) list.get(1) - 1);
         cal.set(Calendar.DAY_OF_MONTH, (int) list.get(2));
         Date date = cal.getTime();
-        DateFormat requiredFormat = new SimpleDateFormat("dd MMMM YYYY");
+        DateFormat requiredFormat = new SimpleDateFormat("dd MMMM yyyy");
         return requiredFormat.format(date);
     }
 

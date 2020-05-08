@@ -47,6 +47,7 @@ buildscript {
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.2.0"
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.1.1"
     }
 }
 
@@ -67,6 +68,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 apply plugin: 'jacoco'
 apply plugin: "com.gorylenko.gradle-git-properties"
+apply plugin: "net.ltgt.errorprone"
 // apply plugin: 'pmd'
 
 dependencyManagement {
@@ -278,6 +280,88 @@ configurations {
 tasks.withType(JavaCompile) {
     options.compilerArgs += ["-Xlint:unchecked","-Xlint:cast","-Werror"] // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
     options.deprecation = true
+    options.errorprone {
+        disableWarningsInGeneratedCode = true
+        //Todo Remove necessary checks from this list
+        disable("UnusedVariable",
+                "VariableNameSameAsType",
+                "InconsistentCapitalization",
+                "UnnecessaryParentheses",
+                "ClassCanBeStatic",
+                "MissingCasesInEnumSwitch",
+                "CompareToZero",
+                "OperatorPrecedence",
+                "MixedMutabilityReturnType",
+                "SameNameButDifferent",
+                "EqualsGetClass",
+                "ReferenceEquality",
+                "StringSplitter",
+                "MissingOverride",
+                "BigDecimalEquals",
+                "ImmutableEnumChecker",
+                "EqualsUnsafeCast",
+                "AssertEqualsArgumentOrderChecker",
+                "BoxedPrimitiveEquality",
+                "BadImport",
+                "UnusedMethod",
+                "ModifiedButNotUsed",
+                "ArgumentSelectionDefectChecker",
+                "JodaPlusMinusLong",
+                "TypeParameterUnusedInFormals",
+                "DoubleBraceInitialization",
+                "UnusedNestedClass",
+                "UndefinedEquals",
+                "JdkObsolete",
+                "OperatorPrecedence",
+                "NarrowingCompoundAssignment"
+        )
+        //TODO gradually enable these checks
+        error(  "DefaultCharset",
+//                "ReturnMissingNullable",
+//                "InconsistentOverloads",
+//                "MethodCanBeStatic",
+//                "Var",
+//                "ConstantField",
+//                "EmptySetMultibindingContributions",
+//                "MixedArrayDimensions",
+//                "MultipleTopLevelClasses",
+//                "MultiVariableDeclaration",
+//                "PackageLocation",
+//                "PrivateConstructorForNoninstantiableModule",
+//                "RemoveUnusedImports",
+//                "UnnecessaryStaticImport",
+//                "UseBinds",
+//                "WildcardImport",
+//                "FutureReturnValueIgnored",
+//                "IntLongMath",
+//                "FloatCast",
+//                "ClassNewInstance",
+//                "ConstructorInvokesOverridable",
+//                "ThreeLetterTimeZoneID",
+//                "UnsafeFinalization",
+//                "MutableMethodReturnType",
+//                "SynchronizeOnNonFinalField",
+//                "WaitNotInLoop",
+//                "SwitchDefault",
+//                "ReachabilityFenceUsage",
+//                "BoxedPrimitiveConstructor",
+//                "InjectOnConstructorOfAbstractClass",
+////                "StringSplitter",
+//                "UnnecessaryDefaultInEnumSwitch",
+//                "StreamResourceLeak",
+////                "InconsistentCapitalization",
+//                "TruthIncompatibleType",
+//                "ByteBufferBackingArray",
+//                "OrphanedFormatString",
+//                "CatchAndPrintStackTrace",
+//                "VarTypeName",
+//                "ObjectToString",
+//                "AssertThrowsMultipleStatements",
+//                "FieldCanBeFinal"
+        )
+    }
+    options.compilerArgs +=["-Xmaxwarns",1500,"-Xmaxerrs",1500]
+
 }
 
 apply from: 'dependencies.gradle'
@@ -398,6 +482,9 @@ dependencies {
   tomcat "org.apache.tomcat:tomcat:9.0.34@zip"
 }
 
+dependencies { 
+    errorprone "com.google.errorprone:error_prone_core:2.3.4"
+}
 cargo {
   containerId "tomcat9x"
 

@@ -1657,7 +1657,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
             if ((transaction.getTransactionLocalDate().isEqual(transferDate)
-                    && transaction.getTransactionLocalDate().isAfter(new LocalDate(transferDate)))
+                    && transaction.getTransactionLocalDate().isAfter(transferDate))
                     || transaction.getTransactionLocalDate().isAfter(transferDate)) {
                 throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientSavingsException,
                         TransferApiConstants.transferClientSavingsException, new LocalDate(transaction.createdDate()),
