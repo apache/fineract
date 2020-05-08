@@ -21,7 +21,7 @@ Run as:
 gradle clean bootRun'''
 
 project.ext.jerseyVersion = '1.19.4'
-ext["groovy.version"] = '3.0.3' 
+ext["groovy.version"] = '3.0.3'
 
 
 buildscript {
@@ -39,7 +39,7 @@ buildscript {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1',
             'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
             'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-            'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE'
+            'org.springframework.boot:spring-boot-gradle-plugin:2.2.7.RELEASE'
         // below
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
@@ -432,7 +432,7 @@ task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License)
 }
 licenseFormat.dependsOn licenseFormatBuildScripts
 
-configurations 
+configurations
 {
   tomcat
 }
@@ -443,17 +443,17 @@ dependencies {
 
 cargo {
   containerId "tomcat9x"
-  
+
   local {
     installer {
       installConfiguration = configurations.tomcat
       downloadDir = file("$buildDir/download")
       extractDir = file("$buildDir/tomcat")
     }
-    
+
     containerProperties {
       property 'cargo.tomcat.connector.keystoreFile', file('src/main/resources/keystore.jks')
-      property 'cargo.tomcat.connector.keystorePass', 'openmf'       	
+      property 'cargo.tomcat.connector.keystorePass', 'openmf'
       property 'cargo.tomcat.httpSecure', true
       property 'cargo.tomcat.connector.sslProtocol', 'TLS'
       property 'cargo.tomcat.connector.clientAuth', false
