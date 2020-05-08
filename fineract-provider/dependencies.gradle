@@ -120,9 +120,6 @@ dependencies {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
     }
-    testImplementation ('com.mockrunner:mockrunner-jms') {
-        exclude group: 'regexp'
-    }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
     }
