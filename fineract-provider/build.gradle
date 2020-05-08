@@ -114,7 +114,7 @@ dependencyManagement {
         dependency 'io.github.classgraph:classgraph:4.8.43'
         dependency 'org.dom4j:dom4j:2.1.0'
         dependency 'nekohtml:nekohtml:1.9.6.2'
-
+		dependency 'org.awaitility:awaitility:4.0.2'
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
