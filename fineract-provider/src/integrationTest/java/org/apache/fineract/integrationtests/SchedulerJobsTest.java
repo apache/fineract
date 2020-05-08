@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -46,6 +47,14 @@ public class SchedulerJobsTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         requestSpec.header("Fineract-Platform-TenantId", "default");
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+    }
+
+    @Test // FINERACT-926
+    public void testDateFormat() {
+        Map<String, Object> schedulerJob1 = schedulerJobHelper.getSchedulerJobById(1);
+        String nextRunTimeText = (String)schedulerJob1.get("nextRunTime");
+        assertNotNull("nextRunTime == null: " + schedulerJob1, nextRunTimeText);
+        DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
     }
 
     @Test
