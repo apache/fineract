@@ -44,7 +44,7 @@ buildscript {
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
         classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
-        classpath "com.github.spotbugs:spotbugs-gradle-plugin:2.0.1"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.8"
         // Use Guava version 23+ as a workaround to spotbug intergration.
         // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
         classpath 'com.google.guava:guava:28.1-jre'
@@ -523,7 +523,6 @@ test {
 	}
 }
 
-import com.github.spotbugs.SpotBugsTask
 import groovy.sql.Sql
 
 repositories {
@@ -594,10 +593,33 @@ bootWar {
 }
 
 // To generate an HTML report instead of XML
-tasks.withType(SpotBugsTask) {
-    reports.xml.enabled = false
-    reports.html.enabled = true
-    reportLevel = "high"
+spotbugs {
+    reportLevel = 'high'
+}
+// https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
+spotbugsMain {
+    reports {
+        html {
+            enabled = true
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+spotbugsTest {
+    reports {
+        html {
+            enabled = true
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+spotbugsIntegrationTest {
+    reports {
+        html {
+            enabled = true
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
 }
 
 gitProperties {
