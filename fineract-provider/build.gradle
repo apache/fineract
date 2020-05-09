@@ -102,7 +102,7 @@ dependencyManagement {
         dependency 'com.jayway.jsonpath:json-path:0.9.1'
         dependency 'org.apache.tika:tika-core:1.9'
         dependency 'org.apache.httpcomponents:httpclient:+'
-        dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
+        dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
 	dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
