@@ -80,7 +80,7 @@ dependencyManagement {
         // As much as possible, we avoid fixed versions, and prefer inheriting them from the Spring BOM, thus NOT listing versions here.
         // (The :+ seems to mean latest available version available on Maven Central, which we should also avoid, as it's not isolated?)
 
-        dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
+        dependency 'org.springframework.security.oauth:spring-security-oauth2:2.4.1.RELEASE'
         dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
         dependency 'com.squareup.retrofit:retrofit:1.9.0'
         dependency 'com.squareup.okhttp:okhttp:2.7.5'
