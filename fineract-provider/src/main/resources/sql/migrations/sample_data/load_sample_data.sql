@@ -417,6 +417,8 @@ INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_
 	('s3_secret_key', NULL, 1),
 	('username', 'support@cloudmicrofinance.com', 2),
 	('password', 'support81', 2),
+	('fromEmail', 'support@cloudmicrofinance.com', 2),
+	('fromName', 'support@cloudmicrofinance.com', 2),
 	('host', 'smtp.gmail.com', 2),
 	('port', '25', 2),
 	('useTLS', 'true', 2),
@@ -4546,10 +4548,10 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job_configuration` (
 -- Dumping data for table mifostenant-reference.m_report_mailing_job_configuration: ~4 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job_configuration` DISABLE KEYS */;
 INSERT INTO `m_report_mailing_job_configuration` (`id`, `name`, `value`) VALUES
-	(1, 'GMAIL_SMTP_SERVER', 'smtp.gmail.com'),
-	(2, 'GMAIL_SMTP_PORT', '587'),
-	(3, 'GMAIL_SMTP_USERNAME', ''),
-	(4, 'GMAIL_SMTP_PASSWORD', '');
+	(1, 'EMAIL_SMTP_SERVER', 'smtp.gmail.com'),
+	(2, 'EMAIL_SMTP_PORT', '587'),
+	(3, 'EMAIL_SMTP_USERNAME', ''),
+	(4, 'EMAIL_SMTP_PASSWORD', '');
 /*!40000 ALTER TABLE `m_report_mailing_job_configuration` ENABLE KEYS */;
 
 
