@@ -93,7 +93,7 @@ dependencyManagement {
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
         dependency 'com.lowagie:itext:2.1.7'
         dependency 'com.lowagie:itext-rtf:2.1.7'
-        dependency 'org.mnode.ical4j:ical4j:1.0.7'
+        dependency 'org.mnode.ical4j:ical4j:3.0.18'
         dependency 'com.googlecode.flyway:flyway-core:2.1.1'
         dependency 'org.quartz-scheduler:quartz:+'
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
