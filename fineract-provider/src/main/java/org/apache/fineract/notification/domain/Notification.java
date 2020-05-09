@@ -109,5 +109,10 @@ public class Notification extends AbstractPersistableCustom {
         this.notificationContent = notificationContent;
     }
 
-
+    @Override
+    public String toString() {
+        return "Notification [objectType=" + this.objectType + ", objectIdentifier=" + this.objectIdentifier + ", action=" + this.action
+                + ", actorId=" + this.actorId + ", isSystemGenerated=" + this.isSystemGenerated + ", notificationContent="
+                + this.notificationContent + ", createdAt=" + this.createdAt + ", getId()=" + this.getId() + "]";
+    }
 }
