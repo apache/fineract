@@ -19,15 +19,15 @@ If you are interested in contributing to this project, but perhaps don't quite k
 Requirements
 ============
 * Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
-* MySQL 5.5
+* MySQL 5.7
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mysql-5.5 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.5
+    docker run --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7
 
 and stop and destroy it like this:
 
-    docker rm -f mysql-5.5
+    docker rm -f mysql-5.7
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistent instead of ephemeral.
 
