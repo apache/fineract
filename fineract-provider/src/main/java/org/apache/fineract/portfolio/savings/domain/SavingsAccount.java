@@ -1572,7 +1572,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         Long officeId = null;
         if (this.client != null) {
             officeId = this.client.officeId();
-        } else {
+        } else if (this.group != null) {
             officeId = this.group.officeId();
         }
         return officeId;
@@ -1582,7 +1582,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         Office office = null;
         if (this.client != null) {
             office = this.client.getOffice();
-        } else {
+        } else if (this.group != null) {
             office = this.group.getOffice();
         }
         return office;
