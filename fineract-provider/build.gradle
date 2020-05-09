@@ -107,7 +107,7 @@ dependencyManagement {
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
 	dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
         dependency 'org.apache.activemq:activemq-broker:+'
-        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
+        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
         dependency 'com.mockrunner:mockrunner-jms:2.0.4'
