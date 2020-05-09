@@ -88,7 +88,7 @@ public class SchedulerJobHelper {
         Utils.performServerPost(requestSpec, response202Spec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
     }
 
-    public Map<String, Object> updateSchedulerJob(int jobId, final String active) {
+    public Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {
         final String UPDATE_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ UPDATING SCHEDULER JOB -------------------------");
         final Map<String, Object> response = Utils.performServerPut(requestSpec, response200Spec, UPDATE_SCHEDULER_JOB_URL,
@@ -96,9 +96,9 @@ public class SchedulerJobHelper {
         return response;
     }
 
-    private static String updateSchedulerJobAsJSON(final String active) {
+    private static String updateSchedulerJobAsJSON(final boolean active) {
         final Map<String, String> map = new HashMap<>();
-        map.put("active", active);
+        map.put("active", Boolean.toString(active));
         LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }

@@ -27,10 +27,13 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,6 +42,8 @@ public class SchedulerJobsTest {
 
     private RequestSpecification requestSpec;
     private SchedulerJobHelper schedulerJobHelper;
+    private Boolean originalSchedulerStatus;
+    private final Map<Integer, Boolean> originalJobStatus = new HashMap<>();
 
     @Before
     public void setup() {
@@ -47,6 +52,20 @@ public class SchedulerJobsTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         requestSpec.header("Fineract-Platform-TenantId", "default");
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        originalSchedulerStatus = schedulerJobHelper.getSchedulerStatus();
+        for (Integer jobId : schedulerJobHelper.getAllSchedulerJobIds()) {
+            Map<String, Object> schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
+            Boolean active = (Boolean) schedulerJob.get("active");
+            originalJobStatus.put(jobId, active);
+        }
+    }
+
+    @After
+    public void tearDown() {
+        schedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
+        for (int jobId = 1; jobId < JobName.values().length; jobId++) {
+            schedulerJobHelper.updateSchedulerJob(jobId, originalJobStatus.get(jobId));
+        }
     }
 
     @Test // FINERACT-926
@@ -54,7 +73,7 @@ public class SchedulerJobsTest {
         // must start scheduler and make job active to have nextRunTime (which is a
         // java.util.Date)
         schedulerJobHelper.updateSchedulerStatus(true);
-        schedulerJobHelper.updateSchedulerJob(1, "true");
+        schedulerJobHelper.updateSchedulerJob(1, true);
         String nextRunTimeText = await().until(
                 () -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
                 nextRunTime -> nextRunTime != null);
@@ -93,7 +112,7 @@ public class SchedulerJobsTest {
             active = !active;
 
             // Updating Scheduler Job
-            Map<String, Object> changes = schedulerJobHelper.updateSchedulerJob(jobId, active.toString());
+            Map<String, Object> changes = schedulerJobHelper.updateSchedulerJob(jobId, active);
 
             // Verifying Scheduler Job updates
             assertEquals("Verifying Scheduler Job Updates", active, changes.get("active"));
