@@ -284,7 +284,7 @@ configurations {
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs << '-Xlint:unchecked'
+    options.compilerArgs += ["-Xlint:unchecked", "-Werror"] // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
     options.deprecation = true
 }
 
