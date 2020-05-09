@@ -99,7 +99,7 @@ dependencyManagement {
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
         dependency 'net.sf.ehcache:ehcache:+'
         dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
-        dependency 'com.jayway.jsonpath:json-path:0.9.1'
+        dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.9'
         dependency 'org.apache.httpcomponents:httpclient:+'
         dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
