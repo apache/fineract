@@ -17,7 +17,7 @@
 #
 
 # https://issues.apache.org/jira/browse/FINERACT-763
-dist: trusty
+dist: bionic
 
 language: java
 
@@ -35,7 +35,7 @@ addons:
     - httpie
 
 before_install:
-  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - echo "USE mysql;\nALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';\n" | mysql -u root
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `fineract_tenants`;'
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `fineract_default`;'
 # Hardcoding the time zone is a temporary fix for https://issues.apache.org/jira/browse/FINERACT-723
