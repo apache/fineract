@@ -96,7 +96,7 @@ dependencyManagement {
         dependency 'org.mnode.ical4j:ical4j:1.0.7'
         dependency 'com.googlecode.flyway:flyway-core:2.1.1'
         dependency 'org.quartz-scheduler:quartz:+'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.779'
         dependency 'net.sf.ehcache:ehcache:+'
         dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
         dependency 'com.jayway.jsonpath:json-path:0.9.1'
