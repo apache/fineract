@@ -100,7 +100,7 @@ dependencyManagement {
         dependency 'net.sf.ehcache:ehcache:+'
         dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
         dependency 'com.jayway.jsonpath:json-path:0.9.1'
-        dependency 'org.apache.tika:tika-core:1.9'
+        dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:+'
         dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
