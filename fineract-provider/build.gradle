@@ -110,8 +110,6 @@ dependencyManagement {
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
-        dependency 'org.slf4j:slf4j-simple:1.8.0-beta4'
-        dependency 'org.slf4j:slf4j-api:1.8.0-beta4'
         dependency 'com.mockrunner:mockrunner-jms:2.0.4'
         dependency 'io.github.classgraph:classgraph:4.8.43'
         dependency 'org.dom4j:dom4j:2.1.0'
