@@ -47,7 +47,7 @@ buildscript {
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.8"
         // Use Guava version 23+ as a workaround to spotbug intergration.
         // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
-        classpath 'com.google.guava:guava:28.1-jre'
+        classpath 'com.google.guava:guava:29.0-jre'
         classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
     }
