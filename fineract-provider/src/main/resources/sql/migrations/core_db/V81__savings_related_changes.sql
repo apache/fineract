@@ -18,35 +18,35 @@
 --
 
 ALTER TABLE `m_note`
-ADD COLUMN `savings_account_id` BIGINT(20) NULL DEFAULT NULL  AFTER `loan_transaction_id`,
-ADD COLUMN `savings_account_transaction_id` BIGINT(20) NULL DEFAULT NULL  AFTER `savings_account_id`;
+ADD COLUMN `savings_account_id` BIGINT NULL DEFAULT NULL  AFTER `loan_transaction_id`,
+ADD COLUMN `savings_account_transaction_id` BIGINT NULL DEFAULT NULL  AFTER `savings_account_id`;
 
 ALTER TABLE `m_note`   ADD CONSTRAINT `FK_savings_account_id`  FOREIGN KEY (`savings_account_id` )  REFERENCES `m_savings_account` (`id` )  ON DELETE NO ACTION  ON UPDATE NO ACTION, ADD INDEX `FK_savings_account_id` (`savings_account_id` ASC) ;
 
 
 ALTER TABLE `m_savings_account_transaction`
-CHANGE COLUMN `is_reversed` `is_reversed` TINYINT(1) NOT NULL AFTER `transaction_type_enum`,
+CHANGE COLUMN `is_reversed` `is_reversed` tinyint NOT NULL AFTER `transaction_type_enum`,
 CHANGE COLUMN `balance_end_date_derived` `balance_end_date_derived` DATE NULL DEFAULT NULL  AFTER `amount`,
-CHANGE COLUMN `balance_number_of_days_derived` `balance_number_of_days_derived` INT(11) NULL DEFAULT NULL AFTER `balance_end_date_derived`;
+CHANGE COLUMN `balance_number_of_days_derived` `balance_number_of_days_derived` INT NULL DEFAULT NULL AFTER `balance_end_date_derived`;
 
 ALTER TABLE `m_savings_account`
-ADD COLUMN `field_officer_id` bigint(20) DEFAULT NULL AFTER `product_id`,
+ADD COLUMN `field_officer_id` BIGINT DEFAULT NULL AFTER `product_id`,
 ADD COLUMN `submittedon_date` DATE NOT NULL AFTER `status_enum`,
-ADD COLUMN `submittedon_userid` bigint(20) DEFAULT NULL AFTER `submittedon_date`,
+ADD COLUMN `submittedon_userid` BIGINT DEFAULT NULL AFTER `submittedon_date`,
 ADD COLUMN `approvedon_date` DATE DEFAULT NULL AFTER `submittedon_userid`,
-ADD COLUMN `approvedon_userid` bigint(20) DEFAULT NULL AFTER `approvedon_date`,
+ADD COLUMN `approvedon_userid` BIGINT DEFAULT NULL AFTER `approvedon_date`,
 ADD COLUMN `rejectedon_date` DATE DEFAULT NULL AFTER `approvedon_userid`,
-ADD COLUMN `rejectedon_userid` bigint(20) DEFAULT NULL AFTER `rejectedon_date`,
+ADD COLUMN `rejectedon_userid` BIGINT DEFAULT NULL AFTER `rejectedon_date`,
 ADD COLUMN `withdrawnon_date` DATE DEFAULT NULL AFTER `rejectedon_userid`,
-ADD COLUMN `withdrawnon_userid` bigint(20) DEFAULT NULL AFTER `withdrawnon_date`;
+ADD COLUMN `withdrawnon_userid` BIGINT DEFAULT NULL AFTER `withdrawnon_date`;
 
 ALTER TABLE `m_savings_account`
 CHANGE COLUMN `activation_date` `activatedon_date` DATE NULL DEFAULT NULL AFTER `withdrawnon_userid`;
 
 ALTER TABLE `m_savings_account`
-ADD COLUMN `activatedon_userid` bigint(20) DEFAULT NULL AFTER `activatedon_date`,
+ADD COLUMN `activatedon_userid` BIGINT DEFAULT NULL AFTER `activatedon_date`,
 ADD COLUMN `closedon_date` DATE DEFAULT NULL AFTER `activatedon_userid`,
-ADD COLUMN `closedon_userid` bigint(20) DEFAULT NULL AFTER `closedon_date`;
+ADD COLUMN `closedon_userid` BIGINT DEFAULT NULL AFTER `closedon_date`;
 
 UPDATE `m_savings_account`
 SET

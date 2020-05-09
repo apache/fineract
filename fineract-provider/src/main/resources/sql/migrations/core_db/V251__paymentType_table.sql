@@ -18,14 +18,14 @@
 --
 
 CREATE TABLE `m_payment_type` (
-	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`id` INT NOT NULL AUTO_INCREMENT,
 	`value` VARCHAR(100) NULL DEFAULT NULL,
 	`description` VARCHAR(500) NULL DEFAULT NULL,
-	`is_cash_payment` TINYINT(1) NULL DEFAULT '0',
-	`order_position` INT(11) NOT NULL DEFAULT '0',
+	`is_cash_payment` tinyint NULL DEFAULT '0',
+	`order_position` INT NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`)
 )
-COLLATE='utf8_general_ci';
+COLLATE='utf8mb4_general_ci';
 
 INSERT INTO m_payment_type (id,value,description,order_position) 
 SELECT id,code_value,code_description,order_position 
@@ -39,7 +39,7 @@ ALTER TABLE `m_payment_detail`
 	DROP FOREIGN KEY `FK_m_payment_detail_m_code_value`;
 
 ALTER TABLE `m_payment_detail`
-	CHANGE COLUMN `payment_type_cv_id` `payment_type_id` INT(11) NULL DEFAULT NULL AFTER `id`;
+	CHANGE COLUMN `payment_type_cv_id` `payment_type_id` INT NULL DEFAULT NULL AFTER `id`;
 	
 ALTER TABLE `m_payment_detail`
 	ADD CONSTRAINT `FK_m_payment_detail_m_payment_type` FOREIGN KEY (`payment_type_id`) REFERENCES `m_payment_type` (`id`);

@@ -36,4 +36,4 @@ ALTER TABLE `m_loan_repayment_schedule_history`
 	DROP COLUMN `total_paid_late_derived`,
 	DROP COLUMN `completed_derived`,
 	DROP COLUMN `obligations_met_on_date`,
-	ADD COLUMN `version` INT(5) NOT NULL;
+	ADD COLUMN `version` INT NOT NULL;

@@ -18,13 +18,13 @@
 --
 
 CREATE TABLE `acc_accounting_rule` (
-	`id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL,
 	`name` VARCHAR(100) NULL DEFAULT NULL,
-	`office_id` BIGINT(20) NULL DEFAULT NULL,
-	`debit_account_id` BIGINT(20) NOT NULL,
-	`credit_account_id` BIGINT(20) NOT NULL,
+	`office_id` BIGINT NULL DEFAULT NULL,
+	`debit_account_id` BIGINT NOT NULL,
+	`credit_account_id` BIGINT NOT NULL,
 	`description` VARCHAR(500) NULL DEFAULT NULL,
-	`system_defined` TINYINT(1) NOT NULL DEFAULT '0',
+	`system_defined` tinyint NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `accounting_rule_name_unique` (`name`),
 	INDEX `FK_acc_accounting_rule_acc_gl_account_debit` (`debit_account_id`),
@@ -34,20 +34,20 @@ CREATE TABLE `acc_accounting_rule` (
 	CONSTRAINT `FK_acc_accounting_rule_acc_gl_account_debit` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
 	CONSTRAINT `FK_acc_accounting_rule_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `acc_auto_posting` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(100) NOT NULL,
 	`description` VARCHAR(500) NULL DEFAULT NULL,
-	`office_id` BIGINT(20) NULL DEFAULT NULL,
-	`product_type_enum` SMALLINT(5) NOT NULL,
-	`product_id` BIGINT(20) NULL DEFAULT NULL,
-	`charge_id` BIGINT(20) NULL DEFAULT NULL,
-	`event` INT(11) NOT NULL,
-	`event_attribute` INT(11) NULL DEFAULT NULL,
-	`accounting_rule_id` BIGINT(20) NOT NULL,
+	`office_id` BIGINT NULL DEFAULT NULL,
+	`product_type_enum` SMALLINT NOT NULL,
+	`product_id` BIGINT NULL DEFAULT NULL,
+	`charge_id` BIGINT NULL DEFAULT NULL,
+	`event` INT NOT NULL,
+	`event_attribute` INT NULL DEFAULT NULL,
+	`accounting_rule_id` BIGINT NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `auto_posting_name_unique` (`name`),
 	INDEX `FK_acc_auto_posting_m_office` (`office_id`),
@@ -61,5 +61,5 @@ CREATE TABLE `acc_auto_posting` (
 	CONSTRAINT `FK_acc_auto_posting_m_code_value` FOREIGN KEY (`event_attribute`) REFERENCES `m_code_value` (`id`),
 	CONSTRAINT `FK_acc_auto_posting_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

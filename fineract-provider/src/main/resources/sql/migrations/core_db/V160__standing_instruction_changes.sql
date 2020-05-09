@@ -18,25 +18,25 @@
 --
 
 CREATE TABLE `m_account_transfer_details` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`from_office_id` BIGINT(20) NOT NULL,
-	`to_office_id` BIGINT(20) NOT NULL,
-	`from_client_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_client_id` BIGINT(20) NULL DEFAULT NULL,
-	`from_savings_account_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_savings_account_id` BIGINT(20) NULL DEFAULT NULL,
-	`from_loan_account_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_loan_account_id` BIGINT(20) NULL DEFAULT NULL,
-	`transfer_type` SMALLINT(2) NULL DEFAULT NULL,
-	`from_savings_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`from_loan_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_savings_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_loan_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`is_reversed` TINYINT(1) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`from_office_id` BIGINT NOT NULL,
+	`to_office_id` BIGINT NOT NULL,
+	`from_client_id` BIGINT NULL DEFAULT NULL,
+	`to_client_id` BIGINT NULL DEFAULT NULL,
+	`from_savings_account_id` BIGINT NULL DEFAULT NULL,
+	`to_savings_account_id` BIGINT NULL DEFAULT NULL,
+	`from_loan_account_id` BIGINT NULL DEFAULT NULL,
+	`to_loan_account_id` BIGINT NULL DEFAULT NULL,
+	`transfer_type` SMALLINT NULL DEFAULT NULL,
+	`from_savings_transaction_id` BIGINT NULL DEFAULT NULL,
+	`from_loan_transaction_id` BIGINT NULL DEFAULT NULL,
+	`to_savings_transaction_id` BIGINT NULL DEFAULT NULL,
+	`to_loan_transaction_id` BIGINT NULL DEFAULT NULL,
+	`is_reversed` tinyint NOT NULL,
 	`transaction_date` DATE NOT NULL,
 	`currency_code` VARCHAR(3) NOT NULL,
-	`currency_digits` SMALLINT(5) NOT NULL,
-	`currency_multiplesof` SMALLINT(5) NULL DEFAULT NULL,
+	`currency_digits` SMALLINT NOT NULL,
+	`currency_multiplesof` SMALLINT NULL DEFAULT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,
 	`description` VARCHAR(200) NOT NULL,
 	PRIMARY KEY (`id`),
@@ -57,46 +57,46 @@ CREATE TABLE `m_account_transfer_details` (
 	CONSTRAINT `FK_m_account_transfer_details_to_office` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`),
 	CONSTRAINT `FK_m_account_transfer_details_to_savings_account` FOREIGN KEY (`to_savings_account_id`) REFERENCES `m_savings_account` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `m_account_transfer_standing_instructions` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(250) NOT NULL,
-	`account_transfer_details_id` BIGINT(20) NOT NULL,
-	`priority` TINYINT(2) NOT NULL,
-	`status` TINYINT(2) NOT NULL,
-	`instruction_type` TINYINT(2) NOT NULL,
+	`account_transfer_details_id` BIGINT NOT NULL,
+	`priority` TINYINT NOT NULL,
+	`status` TINYINT NOT NULL,
+	`instruction_type` TINYINT NOT NULL,
 	`amount` DECIMAL(19,6) NULL DEFAULT NULL,
 	`valid_from` DATE NOT NULL,
 	`valid_till` DATE NULL DEFAULT NULL,
-	`recurrence_type` TINYINT(1) NOT NULL,
-	`recurrence_frequency` SMALLINT(5) NULL DEFAULT NULL,
-	`recurrence_interval` SMALLINT(5) NULL DEFAULT NULL,
-	`recurrence_on_day` SMALLINT(2) NULL DEFAULT NULL,
-	`recurrence_on_month` SMALLINT(2) NULL DEFAULT NULL,
+	`recurrence_type` tinyint NOT NULL,
+	`recurrence_frequency` SMALLINT NULL DEFAULT NULL,
+	`recurrence_interval` SMALLINT NULL DEFAULT NULL,
+	`recurrence_on_day` SMALLINT NULL DEFAULT NULL,
+	`recurrence_on_month` SMALLINT NULL DEFAULT NULL,
 	`last_run_date` DATE NULL DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `name` (`name`),
 	INDEX `FK_m_standing_instructions_account_transfer_details` (`account_transfer_details_id`),
 	CONSTRAINT `FK_m_standing_instructions_account_transfer_details` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 
 CREATE TABLE `m_account_transfer_transaction` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`account_transfer_details_id` BIGINT(20) NOT NULL,
-	`from_savings_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`from_loan_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_savings_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`to_loan_transaction_id` BIGINT(20) NULL DEFAULT NULL,
-	`is_reversed` TINYINT(1) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`account_transfer_details_id` BIGINT NOT NULL,
+	`from_savings_transaction_id` BIGINT NULL DEFAULT NULL,
+	`from_loan_transaction_id` BIGINT NULL DEFAULT NULL,
+	`to_savings_transaction_id` BIGINT NULL DEFAULT NULL,
+	`to_loan_transaction_id` BIGINT NULL DEFAULT NULL,
+	`is_reversed` tinyint NOT NULL,
 	`transaction_date` DATE NOT NULL,
 	`currency_code` VARCHAR(3) NOT NULL,
-	`currency_digits` SMALLINT(5) NOT NULL,
-	`currency_multiplesof` SMALLINT(5) NULL DEFAULT NULL,
+	`currency_digits` SMALLINT NOT NULL,
+	`currency_multiplesof` SMALLINT NULL DEFAULT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,
 	`description` VARCHAR(200) NOT NULL,
 	PRIMARY KEY (`id`),
@@ -111,7 +111,7 @@ CREATE TABLE `m_account_transfer_transaction` (
 	CONSTRAINT `FK_m_account_transfer_transaction_to_m_loan_transaction` FOREIGN KEY (`to_loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`),
 	CONSTRAINT `FK_m_account_transfer_transaction_to_m_savings_transaction` FOREIGN KEY (`to_savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 

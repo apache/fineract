@@ -19,8 +19,8 @@
 
 DROP TABLE IF EXISTS `interop_identifier`;
 CREATE TABLE `interop_identifier` (
-	`id`                BIGINT(20)   NOT NULL AUTO_INCREMENT,
-	`account_id`        BIGINT(20)   NOT NULL,
+	`id`                BIGINT   NOT NULL AUTO_INCREMENT,
+	`account_id`        BIGINT   NOT NULL,
 	`type`              VARCHAR(32)  NOT NULL,
 	`a_value`           VARCHAR(128) NOT NULL,
 	`sub_value_or_type` VARCHAR(128) NULL,
@@ -34,7 +34,7 @@ CREATE TABLE `interop_identifier` (
 	INDEX `fk_interop_identifier_account` (`account_id`),
 	CONSTRAINT `fk_interop_identifier_account` FOREIGN KEY (`account_id`) REFERENCES `m_savings_account` (`id`)
 )
-	COLLATE = 'utf8_general_ci'
+	COLLATE = 'utf8mb4_general_ci'
 	ENGINE = InnoDB;
 
 -- user+roles
@@ -76,7 +76,7 @@ VALUES ('interop', 'DELETE_INTERID', 'INTERID', 'DELETE', 0);
 INSERT IGNORE INTO m_code (code_name, is_system_defined) VALUES ('PaymentType', 1);
 
 SET @code_id = -1;
-SELECT id INTO @code_id FROM m_code WHERE code_name = 'PaymentType';
+SELECT id FROM m_code WHERE code_name = 'PaymentType' INTO @code_id;
 
 INSERT IGNORE INTO m_code_value (code_id, code_value, order_position) VALUES (@code_id, 'Money Transfer', 1);
 

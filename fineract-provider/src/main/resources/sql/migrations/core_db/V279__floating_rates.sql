@@ -18,28 +18,28 @@
 --
 
 CREATE TABLE `m_floating_rates` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(200) NOT NULL,
 	`is_base_lending_rate` BIT(1) NOT NULL DEFAULT 0,
 	`is_active` BIT(1) NOT NULL DEFAULT 1,
-	`createdby_id` BIGINT(20) NOT NULL,
+	`createdby_id` BIGINT NOT NULL,
 	`created_date` DATETIME NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
+	`lastmodifiedby_id` BIGINT NOT NULL,
 	`lastmodified_date` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `unq_name` (`name`)
 );
 
 CREATE TABLE `m_floating_rates_periods` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`floating_rates_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`floating_rates_id` BIGINT NOT NULL,
 	`from_date` DATETIME NOT NULL,
 	`interest_rate` DECIMAL(19,6) NOT NULL,
 	`is_differential_to_base_lending_rate` BIT(1) NOT NULL DEFAULT 0,
 	`is_active` BIT(1) NOT NULL DEFAULT 1,
-	`createdby_id` BIGINT(20) NOT NULL,
+	`createdby_id` BIGINT NOT NULL,
 	`created_date` DATETIME NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
+	`lastmodifiedby_id` BIGINT NOT NULL,
 	`lastmodified_date` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	CONSTRAINT `FK_mappings_m_floating_rates` FOREIGN KEY (`floating_rates_id`) REFERENCES `m_floating_rates` (`id`)
@@ -48,13 +48,13 @@ CREATE TABLE `m_floating_rates_periods` (
 ALTER TABLE `m_product_loan`
 ADD COLUMN `is_linked_to_floating_interest_rates` BIT(1) NOT NULL DEFAULT 0 AFTER `fund_id`,
 MODIFY COLUMN `nominal_interest_rate_per_period` DECIMAL(19,6) NULL DEFAULT NULL,
-MODIFY COLUMN `interest_period_frequency_enum` SMALLINT(5) NULL DEFAULT NULL,
+MODIFY COLUMN `interest_period_frequency_enum` SMALLINT NULL DEFAULT NULL,
 MODIFY COLUMN `annual_nominal_interest_rate` DECIMAL(19,6) NULL DEFAULT NULL;
 
 CREATE TABLE `m_product_loan_floating_rates` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`loan_product_id` BIGINT(20) NOT NULL,
-	`floating_rates_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`loan_product_id` BIGINT NOT NULL,
+	`floating_rates_id` BIGINT NOT NULL,
 	`interest_rate_differential` DECIMAL(19,6) NOT NULL DEFAULT 0,
 	`min_differential_lending_rate` DECIMAL(19,6) NOT NULL DEFAULT 0,
 	`default_differential_lending_rate` DECIMAL(19,6) NOT NULL DEFAULT 0,
@@ -69,7 +69,7 @@ ALTER TABLE `m_loan`
 ADD COLUMN `is_floating_interest_rate` BIT(1) NULL DEFAULT 0 AFTER `arrearstolerance_amount`,
 ADD COLUMN `interest_rate_differential` DECIMAL(19,6) NULL DEFAULT 0 AFTER `is_floating_interest_rate`,
 MODIFY COLUMN `nominal_interest_rate_per_period` DECIMAL(19,6) NULL DEFAULT NULL,
-MODIFY COLUMN `interest_period_frequency_enum` SMALLINT(5) NULL DEFAULT NULL,
+MODIFY COLUMN `interest_period_frequency_enum` SMALLINT NULL DEFAULT NULL,
 MODIFY COLUMN `annual_nominal_interest_rate` DECIMAL(19,6) NULL DEFAULT NULL;
 
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 

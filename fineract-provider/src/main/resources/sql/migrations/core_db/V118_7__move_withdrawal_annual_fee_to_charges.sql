@@ -21,9 +21,9 @@ ALTER TABLE `m_savings_account_charge`
 	CHANGE COLUMN `due_for_collection_as_of_date` `charge_due_date` DATE NULL DEFAULT NULL AFTER `charge_time_enum`;
 
 ALTER TABLE `m_savings_account_charge`
-	ADD COLUMN `fee_on_month` SMALLINT(5) NULL DEFAULT NULL AFTER `charge_due_date`,
-	ADD COLUMN `fee_on_day` SMALLINT(5) NULL DEFAULT NULL AFTER `fee_on_month`,
-	ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT '1' AFTER `waived`;
+	ADD COLUMN `fee_on_month` SMALLINT NULL DEFAULT NULL AFTER `charge_due_date`,
+	ADD COLUMN `fee_on_day` SMALLINT NULL DEFAULT NULL AFTER `fee_on_month`,
+	ADD COLUMN `is_active` tinyint NOT NULL DEFAULT '1' AFTER `waived`;
 
 
 delimiter //
@@ -31,19 +31,19 @@ CREATE PROCEDURE migrate_withdrwal_fees()
 begin
 	declare no_more_rows boolean default false;
 	declare v_currency_code  VARCHAR(3);
-	declare v_withdrawal_fee_type_enum  SMALLINT(5);
+	declare v_withdrawal_fee_type_enum  SMALLINT;
 	declare v_withdrawal_fee_amount_charge_def DECIMAL(19,6);
-	declare v_account_id BIGINT(20);
+	declare v_account_id BIGINT;
 	declare v_withdrawal_fee_amount DECIMAL(19,6);
 	declare t_calculation_percentage DECIMAL(19,6);
 	declare t_calculation_on_amount DECIMAL(19,6);
 	declare t_withdrawal_fee_name VARCHAR(100);
 
-	declare t_charge_id BIGINT(20);
-	declare t_savings_charge_id BIGINT(20);
+	declare t_charge_id BIGINT;
+	declare t_savings_charge_id BIGINT;
 
 	-- savings transaction variables
-	declare v_savings_transaction_id BIGINT(20);
+	declare v_savings_transaction_id BIGINT;
 	declare v_transaction_amount DECIMAL(19,6);
 
 
@@ -148,17 +148,17 @@ begin
 	declare no_more_rows boolean default false;
 	declare v_currency_code  VARCHAR(3);
 	declare v_annual_fee_amount_charge_def DECIMAL(19,6);
-	declare v_account_id BIGINT(20);
+	declare v_account_id BIGINT;
 	declare v_annual_fee_amount DECIMAL(19,6);
-	declare v_annual_fee_on_month SMALLINT(5);
-	declare v_annual_fee_on_day SMALLINT(5);
+	declare v_annual_fee_on_month SMALLINT;
+	declare v_annual_fee_on_day SMALLINT;
 	declare v_annual_fee_next_due_date DATE;
 	declare t_annual_fee_name VARCHAR(100);
-	declare t_charge_id BIGINT(20);
-	declare t_savings_charge_id BIGINT(20);
+	declare t_charge_id BIGINT;
+	declare t_savings_charge_id BIGINT;
 
 	-- savings transaction variables
-	declare v_savings_transaction_id BIGINT(20);
+	declare v_savings_transaction_id BIGINT;
 	declare v_transaction_amount DECIMAL(19,6);
 
 

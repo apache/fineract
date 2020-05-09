@@ -18,12 +18,12 @@
 --
 
 CREATE TABLE IF NOT EXISTS `notification_generator` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `object_type` text,
-  `object_identifier` bigint(20) DEFAULT NULL,
+  `object_identifier` BIGINT DEFAULT NULL,
   `action` text,
-  `actor` bigint(20),
-  `is_system_generated` tinyint(1) DEFAULT '0',
+  `actor` BIGINT,
+  `is_system_generated` tinyint DEFAULT '0',
   `notification_content` text,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -31,10 +31,10 @@ CREATE TABLE IF NOT EXISTS `notification_generator` (
 
 
 CREATE TABLE IF NOT EXISTS `notification_mapper` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `notification_id` bigint(20) DEFAULT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `is_read` tinyint(1) DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `notification_id` BIGINT DEFAULT NULL,
+  `user_id` BIGINT DEFAULT NULL,
+  `is_read` tinyint DEFAULT '0',
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `notification_mapper` (`user_id`),

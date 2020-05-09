@@ -18,7 +18,7 @@
 --
 
 ALTER TABLE `stretchy_report`
-	ADD COLUMN `self_service_user_report` TINYINT(1) NOT NULL DEFAULT '0' AFTER `use_report`;
+	ADD COLUMN `self_service_user_report` tinyint NOT NULL DEFAULT '0' AFTER `use_report`;
 
 
 UPDATE `stretchy_parameter` SET `parameter_sql`='select sp.parameter_name, sp.parameter_variable, sp.parameter_label, sp.parameter_displayType, \r sp.parameter_FormatType, sp.parameter_default, sp.selectOne,  sp.selectAll, spp.parameter_name as parentParameterName\r from stretchy_parameter sp\r left join stretchy_parameter spp on spp.id = sp.parent_id\r where sp.special is null\r and exists \r   (select \'f\' \r  from stretchy_report sr\r   join stretchy_report_parameter srp on srp.report_id = sr.id   and sr.self_service_user_report = \'${isSelfServiceUser}\'\r   where sr.report_name in(${reportListing})\r   and srp.parameter_id = sp.id\r  )\r order by sp.id' WHERE  `parameter_name` = 'FullParameterList';

@@ -24,7 +24,7 @@ ALTER TABLE `m_guarantor_transaction`
 	ALTER `loan_transaction_id` DROP DEFAULT;
 	
 ALTER TABLE `m_guarantor_transaction`
-	CHANGE COLUMN `loan_transaction_id` `loan_transaction_id` BIGINT(20) NULL ;
+	CHANGE COLUMN `loan_transaction_id` `loan_transaction_id` BIGINT NULL ;
 	
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'RECOVERGUARANTEES_LOAN', 'LOAN', 'RECOVERGUARANTEES', 0);
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'RECOVERGUARANTEES_LOAN_CHECKER', 'LOAN', 'RECOVERGUARANTEES_CHECKER', 0);

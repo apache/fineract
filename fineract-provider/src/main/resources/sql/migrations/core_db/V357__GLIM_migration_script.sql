@@ -31,13 +31,13 @@
   -- new table glim_accounts added
  
  CREATE TABLE `glim_accounts` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`group_id` BIGINT(20) NOT NULL DEFAULT '0',
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`group_id` BIGINT NOT NULL DEFAULT '0',
 	`account_number` VARCHAR(50) NOT NULL,
 	`principal_amount` DECIMAL(19,6) NOT NULL DEFAULT '0.000000',
-	`child_accounts_count` INT(11) NOT NULL,
-	`accepting_child` TINYINT(4) NOT NULL DEFAULT '0',
-	`loan_status_id` SMALLINT(5) NOT NULL DEFAULT '0',
+	`child_accounts_count` INT NOT NULL,
+	`accepting_child` TINYINT NOT NULL DEFAULT '0',
+	`loan_status_id` SMALLINT NOT NULL DEFAULT '0',
 	`application_id` DECIMAL(10,0) NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `glim_account_no_UNIQUE` (`account_number`),
@@ -47,7 +47,7 @@
  
  -- change m_loan table
  
- alter table `m_loan` add COLUMN `glim_id` bigint(20) DEFAULT NULL AFTER `group_id`; 
+ alter table `m_loan` add COLUMN `glim_id` BIGINT DEFAULT NULL AFTER `group_id`; 
   
  alter table `m_loan` add CONSTRAINT `FK_glim_id` FOREIGN KEY  (`glim_id`) REFERENCES `glim_accounts` (`id`);
  

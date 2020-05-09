@@ -25,7 +25,7 @@ ALTER TABLE `acc_gl_office_mapping`
 	ALTER `financial_account_type` DROP DEFAULT;
 
 ALTER TABLE `acc_gl_office_mapping`
-	CHANGE COLUMN `financial_account_type` `financial_activity_type` SMALLINT(5) NOT NULL;
+	CHANGE COLUMN `financial_account_type` `financial_activity_type` SMALLINT NOT NULL;
 
 ALTER TABLE `acc_gl_office_mapping`
 	ADD UNIQUE INDEX `financial_activity_type` (`financial_activity_type`);

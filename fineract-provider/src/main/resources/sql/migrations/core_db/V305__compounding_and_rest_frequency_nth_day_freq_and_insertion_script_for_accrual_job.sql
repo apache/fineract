@@ -30,14 +30,14 @@ CREATE TABLE `m_loan_interest_recalculation_additional_details` (
 ALTER TABLE `m_loan` DROP `repayment_frequency_nth_day_enum`, DROP `repayment_frequency_day_of_week_enum`;
 
 
-ALTER TABLE `m_product_loan_recalculation_details` ADD `rest_frequency_nth_day_enum` INT(5), ADD `rest_frequency_on_day` INT(5), ADD `rest_frequency_weekday_enum` INT(5),
-ADD `compounding_frequency_nth_day_enum` INT(5), ADD `compounding_frequency_on_day` INT(5), ADD `compounding_frequency_weekday_enum` INT(5), ADD `is_compounding_to_be_posted_as_transaction` TINYINT(1) NOT NULL DEFAULT '0', ADD `allow_compounding_on_eod` TINYINT(1) NOT NULL DEFAULT '0';
+ALTER TABLE `m_product_loan_recalculation_details` ADD `rest_frequency_nth_day_enum` INT, ADD `rest_frequency_on_day` INT, ADD `rest_frequency_weekday_enum` INT,
+ADD `compounding_frequency_nth_day_enum` INT, ADD `compounding_frequency_on_day` INT, ADD `compounding_frequency_weekday_enum` INT, ADD `is_compounding_to_be_posted_as_transaction` tinyint NOT NULL DEFAULT '0', ADD `allow_compounding_on_eod` tinyint NOT NULL DEFAULT '0';
 
 
-ALTER TABLE `m_loan_recalculation_details` ADD `rest_frequency_nth_day_enum` INT(5), ADD `rest_frequency_on_day` INT(5), ADD `rest_frequency_weekday_enum` INT(5),
-ADD `compounding_frequency_nth_day_enum` INT(5), ADD `compounding_frequency_on_day` INT(5), 
-ADD `is_compounding_to_be_posted_as_transaction` TINYINT(1) NOT NULL DEFAULT '0',
-ADD `compounding_frequency_weekday_enum` INT(5), ADD `allow_compounding_on_eod` TINYINT(1) NOT NULL DEFAULT '0';
+ALTER TABLE `m_loan_recalculation_details` ADD `rest_frequency_nth_day_enum` INT, ADD `rest_frequency_on_day` INT, ADD `rest_frequency_weekday_enum` INT,
+ADD `compounding_frequency_nth_day_enum` INT, ADD `compounding_frequency_on_day` INT, 
+ADD `is_compounding_to_be_posted_as_transaction` tinyint NOT NULL DEFAULT '0',
+ADD `compounding_frequency_weekday_enum` INT, ADD `allow_compounding_on_eod` tinyint NOT NULL DEFAULT '0';
 
 
 UPDATE m_product_loan_recalculation_details plr SET plr.compounding_frequency_weekday_enum = (WEEKDAY(plr.compounding_freqency_date) + 1) WHERE plr.compounding_frequency_type_enum = 3 AND plr.compounding_freqency_date IS NOT NULL;

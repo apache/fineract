@@ -18,8 +18,8 @@
 --
 
 CREATE TABLE `m_account_transfer_standing_instructions_history` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`standing_instruction_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`standing_instruction_id` BIGINT NOT NULL,
 	`status` VARCHAR(20) NOT NULL,
 	`execution_time` DATETIME NOT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,

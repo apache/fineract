@@ -17,4 +17,4 @@
 -- under the License.
 --
 
-ALTER TABLE `m_working_days` ADD extend_term_daily_repayments TINYINT(1) NULL DEFAULT '0';
+ALTER TABLE `m_working_days` ADD extend_term_daily_repayments tinyint NULL DEFAULT '0';

@@ -19,7 +19,7 @@
 
 
 create table `m_holiday`(
-`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+`id` BIGINT NOT NULL AUTO_INCREMENT,
 `name` varchar(100) NOT NULL,
 `from_date` DATETIME NOT NULL,
 `to_date` DATETIME NOT NULL,
@@ -29,8 +29,8 @@ UNIQUE INDEX `holiday_name` (`name`)
 );
 
 CREATE TABLE `m_holiday_office` (
-	`holiday_id` BIGINT(20) NOT NULL,
-	`office_id` BIGINT(20) NOT NULL,
+	`holiday_id` BIGINT NOT NULL,
+	`office_id` BIGINT NOT NULL,
 	PRIMARY KEY (`holiday_id`, `office_id`),
 	INDEX `m_holiday_id_ibfk_1` (`holiday_id`),
 	INDEX `m_office_id_ibfk_2` (`office_id`),

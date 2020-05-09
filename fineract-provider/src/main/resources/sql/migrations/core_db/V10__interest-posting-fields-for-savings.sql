@@ -24,8 +24,8 @@ VALUES
 
 
 ALTER TABLE `m_savings_product`
-ADD COLUMN `interest_posting_period_enum` SMALLINT(5) NOT NULL DEFAULT 4 AFTER `interest_compounding_period_enum`;
+ADD COLUMN `interest_posting_period_enum` SMALLINT NOT NULL DEFAULT 4 AFTER `interest_compounding_period_enum`;
 
 
 ALTER TABLE `m_savings_account`
-ADD COLUMN `interest_posting_period_enum` SMALLINT(5) NOT NULL DEFAULT 4 AFTER `interest_compounding_period_enum`;
+ADD COLUMN `interest_posting_period_enum` SMALLINT NOT NULL DEFAULT 4 AFTER `interest_compounding_period_enum`;

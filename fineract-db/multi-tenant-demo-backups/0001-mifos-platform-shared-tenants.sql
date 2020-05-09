@@ -26,7 +26,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES UTF8MB4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -40,14 +40,14 @@
 
 DROP TABLE IF EXISTS `tenants`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `tenants` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `identifier` varchar(100) NOT NULL,
   `name` varchar(100) NOT NULL,
   `schema_name` varchar(100) NOT NULL,
   `timezone_id` varchar(100) NOT NULL,
-  `country_id` int(11) DEFAULT NULL,
+  `country_id` INT DEFAULT NULL,
   `joined_date` date DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
@@ -55,9 +55,9 @@ CREATE TABLE `tenants` (
   `schema_server_port` varchar(10) NOT NULL DEFAULT '3306',
   `schema_username` varchar(100) NOT NULL DEFAULT 'root',
   `schema_password` varchar(100) NOT NULL DEFAULT 'mysql',
-  `auto_update` tinyint(1) NOT NULL DEFAULT '1',
+  `auto_update` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -76,14 +76,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `timezones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `timezones` (
-  `id` int(3) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `country_code` varchar(2) NOT NULL,
   `timezonename` varchar(100) NOT NULL,
   `comments` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
