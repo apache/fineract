@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType.ACTIVE;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -62,7 +63,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         int page = 0;
         Integer initialSize = 500;
         Integer totalPageSize = 0;
-        int errors = 0;
+        List<Throwable> errors = new ArrayList<>();
         do {
             PageRequest pageRequest = PageRequest.of(page, initialSize);
             Page<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findByStatus(ACTIVE.getValue(), pageRequest);
@@ -74,14 +75,14 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
                     this.savingsAccountWritePlatformService.postInterest(savingsAccount, postInterestAsOn, transactionDate);
                 } catch (Exception e) {
                     LOG.error("Failed to post interest for Savings with id {}", savingsAccount.getId(), e);
-                    ++errors;
+                    errors.add(e);
                 }
             }
             page++;
             totalPageSize = savingsAccounts.getTotalPages();
         } while (page < totalPageSize);
 
-        if (errors > 0) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
     }
 
     @Override

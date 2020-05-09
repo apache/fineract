@@ -16,18 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.jobs.exception;
+package org.apache.fineract.infrastructure.core.exception;
 
+import static org.junit.Assert.assertThrows;
+
+import java.util.Collections;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.exception.MultiException;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class JobExecutionException extends MultiException {
+class MultiExceptionTest {
 
-    public JobExecutionException(List<Throwable> problems) {
-        super(problems);
+    Logger logger = LoggerFactory.getLogger(MultiExceptionTest.class);
+
+    @Test()
+    void testEmpty() throws MultiException {
+        assertThrows(IllegalArgumentException.class, () -> { throw new MultiException(Collections.emptyList()); });
     }
 
-    public JobExecutionException(MultiException multiException) {
-        super(multiException.getCauses());
+    @Test()
+    void test() throws MultiException {
+        List<Throwable> causes = List.of(new IllegalArgumentException(), new IllegalStateException());
+        MultiException e = new MultiException(causes);
+        logger.warn("Biep, bieb", e);
+        // Uncomment to see JUnit UI:
+        // throw e;
     }
 }

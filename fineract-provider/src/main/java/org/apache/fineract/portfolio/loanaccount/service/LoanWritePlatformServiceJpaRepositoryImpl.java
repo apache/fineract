@@ -181,7 +181,6 @@ import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -325,27 +324,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult disburseGLIMLoan(final Long loanId, final JsonCommand command)
-         {
-              final Long parentLoanId=loanId;
-              GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
-              List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
-              CommandProcessingResult result=null;
-              int count=0;
-         for(Loan loan:childLoans)
-         {
-              result=disburseLoan(loan.getId(),command,false);
-              if(result.getLoanId()!=null)
-              {
-                   count++;
-              // if all the child loans are approved, mark the parent loan as approved
-                   if(count==parentLoan.getChildAccountsCount())
-                   {
-                        parentLoan.setLoanStatus(LoanStatus.ACTIVE.getValue());
-                        glimRepository.save(parentLoan);
-                   }
-              }
-         }
-         return result;
+    {
+        final Long parentLoanId=loanId;
+        GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
+        List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
+        CommandProcessingResult result=null;
+        int count=0;
+        for(Loan loan:childLoans)
+        {
+            result=disburseLoan(loan.getId(),command,false);
+            if(result.getLoanId()!=null)
+            {
+                count++;
+                // if all the child loans are approved, mark the parent loan as approved
+                if(count==parentLoan.getChildAccountsCount())
+                {
+                    parentLoan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+                    glimRepository.save(parentLoan);
+                }
+            }
+        }
+        return result;
     }
 
     @Transactional
@@ -772,27 +771,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult undoGLIMLoanDisbursal(final Long loanId, final JsonCommand command)
     {
-         //GroupLoanIndividualMonitoringAccount glimAccount=glimRepository.findOne(loanId);
-         final Long parentLoanId=loanId;
-         GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
-         List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
-         CommandProcessingResult result=null;
-         int count=0;
-         for(Loan loan:childLoans)
-         {
-              result=undoLoanDisbursal(loan.getId(),command);
-              if(result.getLoanId()!=null)
-              {
-                   count++;
-              // if all the child loans are approved, mark the parent loan as approved
-                   if(count==parentLoan.getChildAccountsCount())
-                   {
-                        parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
-                        glimRepository.save(parentLoan);
-                   }
-              }
-         }
-         return result;
+        //GroupLoanIndividualMonitoringAccount glimAccount=glimRepository.findOne(loanId);
+        final Long parentLoanId=loanId;
+        GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
+        List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
+        CommandProcessingResult result=null;
+        int count=0;
+        for(Loan loan:childLoans)
+        {
+            result=undoLoanDisbursal(loan.getId(),command);
+            if(result.getLoanId()!=null)
+            {
+                count++;
+                // if all the child loans are approved, mark the parent loan as approved
+                if(count==parentLoan.getChildAccountsCount())
+                {
+                    parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
+                    glimRepository.save(parentLoan);
+                }
+            }
+        }
+        return result;
     }
 
     @Transactional
@@ -854,28 +853,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult makeGLIMLoanRepayment(final Long loanId, final JsonCommand command)
     {
 
-         final Long parentLoanId=loanId;
+        final Long parentLoanId=loanId;
 
-         GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findById(parentLoanId).get();
+        glimRepository.findById(parentLoanId).get();
 
-         JsonArray repayments= command.arrayOfParameterNamed("formDataArray");
-         JsonCommand childCommand=null;
-         CommandProcessingResult result=null;
-          JsonObject jsonObject=null;
+        JsonArray repayments= command.arrayOfParameterNamed("formDataArray");
+        JsonCommand childCommand=null;
+        CommandProcessingResult result=null;
+        JsonObject jsonObject=null;
 
-         Long[] childLoanId=new Long[repayments.size()];
-         for (int i = 0; i < repayments.size(); i++) {
-               jsonObject=repayments.get(i).getAsJsonObject();
-               LOG.info("{}",jsonObject.toString());
-               childLoanId[i]=jsonObject.get("loanId").getAsLong();
-         }
-         int j=0;
-         for(JsonElement element:repayments )
-         {
-              childCommand=JsonCommand.fromExistingCommand(command,element);
-              result=makeLoanRepayment(childLoanId[j++],childCommand,false);
-         }
-         return result;
+        Long[] childLoanId=new Long[repayments.size()];
+        for (int i = 0; i < repayments.size(); i++) {
+            jsonObject=repayments.get(i).getAsJsonObject();
+            LOG.info("{}",jsonObject.toString());
+            childLoanId[i]=jsonObject.get("loanId").getAsLong();
+        }
+        int j=0;
+        for(JsonElement element:repayments )
+        {
+            childCommand=JsonCommand.fromExistingCommand(command,element);
+            result=makeLoanRepayment(childLoanId[j++],childCommand,false);
+        }
+        return result;
     }
 
     @Transactional
@@ -1868,7 +1867,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Collection<LoanChargeData> chargeDatas = this.loanChargeReadPlatformService.retrieveLoanChargesForFeePayment(
                 ChargePaymentMode.ACCOUNT_TRANSFER.getValue(), LoanStatus.ACTIVE.getValue());
         final boolean isRegularTransaction = true;
-        int errors = 0;
+        List<Throwable> errors = new ArrayList<>();
         if (chargeDatas != null) {
             for (final LoanChargeData chargeData : chargeDatas) {
                 if (chargeData.isInstallmentFee()) {
@@ -1889,9 +1888,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                                     null, LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
                                     installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null,
                                     null, null, null, null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
-                            if (!transferFeeCharge(accountTransferDTO)) {
-                                ++errors;
-                            }
+                            transferFeeCharge(accountTransferDTO, errors);
                         }
                     }
                 } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(DateUtils.getLocalDateOfTenant())) {
@@ -1905,25 +1902,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
                             AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null, fromSavingsAccount,
                             isRegularTransaction, isExceptionForBalanceCheck);
-                    if (!transferFeeCharge(accountTransferDTO)) {
-                        ++errors;
-                    }
+                    transferFeeCharge(accountTransferDTO, errors);
                 }
             }
         }
-        if (errors > 0) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
     }
 
-    private boolean transferFeeCharge(final AccountTransferDTO accountTransferDTO) {
+    private void transferFeeCharge(final AccountTransferDTO accountTransferDTO, List<Throwable> errors) {
         try {
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-            return true;
-        } catch (final PlatformApiDataValidationException e) {
-            LOG.error("Validation exception while paying charge {} for loan id {}", accountTransferDTO.getChargeId(), accountTransferDTO.getToAccountId(), e);
-            return false;
-        } catch (final InsufficientAccountBalanceException e) {
-            LOG.error("InsufficientAccountBalanceException while paying charge {} for loan id {}", accountTransferDTO.getChargeId(), accountTransferDTO.getToAccountId(), e);
-            return false;
+        } catch (RuntimeException e) {
+            LOG.error("Exception while paying charge {} for loan id {}", accountTransferDTO.getChargeId(), accountTransferDTO.getToAccountId(), e);
+            errors.add(e);
         }
     }
 

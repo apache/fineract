@@ -95,7 +95,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 }
             }
 
-            int numberOfErrors = 0;
+            List<Throwable> exceptions = new ArrayList<>();
             for (final Long loanId : overdueScheduleData.keySet()) {
                 try {
                     this.loanWritePlatformService.applyOverdueChargesForLoan(loanId, overdueScheduleData.get(loanId));
@@ -104,17 +104,17 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                     final List<ApiParameterError> errors = e.getErrors();
                     for (final ApiParameterError error : errors) {
                         logger.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, error.getDeveloperMessage(), e);
-                        ++numberOfErrors;
                     }
+                    exceptions.add(e);
                 } catch (final AbstractPlatformDomainRuleException e) {
                     logger.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, e.getDefaultUserMessage(), e);
-                    ++numberOfErrors;
+                    exceptions.add(e);
                 } catch (Exception e) {
                     logger.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
-                    ++numberOfErrors;
+                    exceptions.add(e);
                 }
             }
-            if (numberOfErrors > 0) { throw new JobExecutionException(numberOfErrors); }
+            if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
         }
     }
 
@@ -129,7 +129,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 .fetchLoansForInterestRecalculation();
         int i = 0;
         if (!loanIds.isEmpty()) {
-            int errors = 0;
+            List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
                 logger.info("recalculateInterest: Loan ID = {}", loanId);
                 Integer numberOfRetries = 0;
@@ -143,7 +143,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                         // Fail if the transaction has been retried for maxNumberOfRetries
                         if (numberOfRetries >= maxNumberOfRetries) {
                             logger.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back", numberOfRetries);
-                            ++errors;
+                            errors.add(exception);
                             break;
                         }
                         // Else sleep for a random time (between 1 to 10 seconds) and continue
@@ -154,19 +154,19 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                             numberOfRetries = numberOfRetries + 1;
                         } catch (InterruptedException e) {
                             logger.error("Interest recalculation for loans retry failed due to InterruptedException", e) ;
-                            ++errors;
+                            errors.add(e);
                             break;
                         }
                     } catch (Exception e) {
                         logger.error("Interest recalculation for loans failed for account {}", loanId, e);
                         numberOfRetries = maxNumberOfRetries + 1;
-                        ++errors;
+                        errors.add(e);
                     }
                     i++;
                 }
                 logger.info("recalculateInterest: Loans count {}", i);
             }
-            if (errors > 0) { throw new JobExecutionException(errors); }
+            if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
         }
 
     }
