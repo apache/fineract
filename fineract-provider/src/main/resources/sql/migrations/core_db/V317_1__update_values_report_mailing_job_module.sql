@@ -28,3 +28,6 @@ UPDATE m_report_mailing_job_configuration
 
 UPDATE m_report_mailing_job_configuration
     SET name='EMAIL_SMTP_PASSWORD' WHERE name='GMAIL_SMTP_PASSWORD';
+
+INSERT INTO m_report_mailing_job_configuration (name, `value`)
+    VALUES ('EMAIL_FROM_EMAIL', ''), ('EMAIL_FROM_NAME', '');

@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Properties;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
@@ -67,6 +69,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
             // use the true flag to indicate you need a multipart message
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
+            mimeMessageHelper.setFrom(new InternetAddress(this.getEmailFromEmail(), this.getEmailFromName()));
             mimeMessageHelper.setTo(reportMailingJobEmailData.getTo());
             mimeMessageHelper.setText(reportMailingJobEmailData.getText());
             mimeMessageHelper.setSubject(reportMailingJobEmailData.getSubject());
@@ -78,7 +81,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
             javaMailSenderImpl.send(mimeMessage);
         }
 
-        catch (MessagingException e) {
+        catch (MessagingException | UnsupportedEncodingException e) {
             // handle the exception
             LOG.error("Problem occurred in sendEmailWithAttachment function",e);
         }
@@ -157,6 +160,26 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
     private String getEmailSmtpPassword() {
         final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
                 (ReportMailingJobConstants.EMAIL_SMTP_PASSWORD);
+
+        return (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
+    }
+
+    /**
+     * @return Email from email
+     **/
+    private String getEmailFromEmail() {
+        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
+                (ReportMailingJobConstants.EMAIL_FROM_EMAIL);
+
+        return (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
+    }
+
+    /**
+     * @return Email from name
+     **/
+    private String getEmailFromName() {
+        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
+                (ReportMailingJobConstants.EMAIL_FROM_NAME);
 
         return (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
     }
