@@ -63,7 +63,7 @@ dependencies {
             'org.apache.tika:tika-core',
 
             'org.drizzle.jdbc:drizzle-jdbc',
-            'com.googlecode.flyway:flyway-core',
+            'org.flywaydb:flyway-core',
 
             'net.sf.ehcache:ehcache',
             'com.lowagie:itext',
