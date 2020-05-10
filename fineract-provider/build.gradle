@@ -288,12 +288,15 @@ tasks.withType(JavaCompile) {
     options.deprecation = true
 }
 
-/* Pick up dependencies based on the environemnt, defaults to production */
+apply from: 'dependencies.gradle'
+/* TODO https://issues.apache.org/jira/browse/FINERACT-939 (dev-dependencies.gradle has been removed, as totally broken)
+// Pick up dependencies based on the environment, defaults to production
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'
 }  else {
     apply from: 'dependencies.gradle'
 }
+*/
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
 if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
