@@ -46,9 +46,10 @@ public class EmailApiConstants {
 
     public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(messageParamName));
 
-    public static final String SMTP_SERVER = "SMTP_SERVER";
-    public static final String SMTP_PORT = "SMTP_PORT";
-    public static final String SMTP_USERNAME = "SMTP_USERNAME";
-    public static final String SMTP_PASSWORD = "SMTP_PASSWORD";
-
+    public static final String EMAIL_SMTP_SERVER = "EMAIL_SMTP_SERVER";
+    public static final String EMAIL_SMTP_PORT = "EMAIL_SMTP_PORT";
+    public static final String EMAIL_SMTP_USERNAME = "EMAIL_SMTP_USERNAME";
+    public static final String EMAIL_SMTP_PASSWORD = "EMAIL_SMTP_PASSWORD";
+    public static final String EMAIL_FROM_EMAIL = "EMAIL_FROM_EMAIL";
+    public static final String EMAIL_FROM_NAME = "EMAIL_FROM_NAME";
 }

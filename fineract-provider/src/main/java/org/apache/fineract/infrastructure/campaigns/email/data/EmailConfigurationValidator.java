@@ -47,15 +47,13 @@ public class EmailConfigurationValidator {
     private static final String EMAIL_REGEX = "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
-    public static final Set<String> supportedParams = new HashSet<String>(Arrays.asList(EmailApiConstants.SMTP_PORT,EmailApiConstants.SMTP_PASSWORD,
-            EmailApiConstants.SMTP_USERNAME,EmailApiConstants.SMTP_SERVER));
+    public static final Set<String> supportedParams = new HashSet<String>(Arrays.asList(EmailApiConstants.EMAIL_SMTP_PORT,EmailApiConstants.EMAIL_SMTP_PASSWORD,
+            EmailApiConstants.EMAIL_SMTP_USERNAME,EmailApiConstants.EMAIL_SMTP_SERVER));
 
     @Autowired
     private EmailConfigurationValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
-
-
 
     public void validateUpdateConfiguration(String json){
 
@@ -70,23 +68,20 @@ public class EmailConfigurationValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(EmailApiConstants.RESOURCE_NAME);
 
-        final String smtpUsername = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.SMTP_USERNAME,element);
-        baseDataValidator.reset().parameter(EmailApiConstants.SMTP_USERNAME).value(smtpUsername).notBlank().notExceedingLengthOf(150);
+        final String smtpUsername = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.EMAIL_SMTP_USERNAME,element);
+        baseDataValidator.reset().parameter(EmailApiConstants.EMAIL_SMTP_USERNAME).value(smtpUsername).notBlank().notExceedingLengthOf(150);
 
 
-        final String smtpPassword = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.SMTP_PASSWORD,element);
-        baseDataValidator.reset().parameter(EmailApiConstants.SMTP_PASSWORD).value(smtpPassword).notBlank().notExceedingLengthOf(50);
+        final String smtpPassword = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.EMAIL_SMTP_PASSWORD,element);
+        baseDataValidator.reset().parameter(EmailApiConstants.EMAIL_SMTP_PASSWORD).value(smtpPassword).notBlank().notExceedingLengthOf(50);
 
-        final String smtpServer = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.SMTP_SERVER,element);
-        baseDataValidator.reset().parameter(EmailApiConstants.SMTP_SERVER).value(smtpServer).notBlank().notExceedingLengthOf(100);
+        final String smtpServer = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.EMAIL_SMTP_SERVER,element);
+        baseDataValidator.reset().parameter(EmailApiConstants.EMAIL_SMTP_SERVER).value(smtpServer).notBlank().notExceedingLengthOf(100);
 
-        final Long smtpPort = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.SMTP_PORT,element);
-        baseDataValidator.reset().parameter(EmailApiConstants.SMTP_PORT).value(smtpPort).notNull().integerGreaterThanZero();
+        final Long smtpPort = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.EMAIL_SMTP_PORT,element);
+        baseDataValidator.reset().parameter(EmailApiConstants.EMAIL_SMTP_PORT).value(smtpPort).notNull().integerGreaterThanZero();
 
         this.throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
-
-
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
