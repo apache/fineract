@@ -18,18 +18,20 @@ If you are interested in contributing to this project, but perhaps don't quite k
 
 Requirements
 ============
-* Java >= 1.8 (Oracle JVMs have been tested)
-* MySQL 5.5
+* Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
+* MySQL 5.7
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mysql-5.5 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.5
+    docker run --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7
 
 and stop and destroy it like this:
 
-    docker rm -f mysql-5.5
+    docker rm -f mysql-5.7
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistent instead of ephemeral.
+
+Tomcat v9 is only required if you wish to deploy the Fineract WAR to a separate external servlet container.  Note that you do not require to install Tomcat to develop Fineract, or to run it in production if you use the self-contained JAR, which transparently embeds a servlet container using Spring Boot.  (Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required.)
 
 
 Instructions how to run for local development
@@ -38,10 +40,10 @@ Instructions how to run for local development
 Run the following commands:
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
-1. `./gradlew tomcatRunWAR`
+1. `./gradlew bootRun`
 
 
-Instructions to download gradle wrapper
+Instructions to download Gradle wrapper
 ============
 The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
 but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
@@ -60,13 +62,23 @@ Instructions to run Apache RAT (Release Audit Tool)
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
+Instructions to build the JAR file
+============
+1. Extract the archive file to your local directory.
+2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
+3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
+
+
 Instructions to build a WAR file
 ============
 1. Extract the archive file to your local directory.
-2. Run `./gradlew clean war` or `./gradlew build` to build a deployable war file which will be created at build/libs directory.
+2. Run `./gradlew clean bootWar` to build a traditional WAR file which will be created at `build/libs` directory.  
+3. Deploy this WAR to your Tomcat v9 Servlet Container.
+
+We recommend using the JAR instead of the WAR file deployment, because it's much easier.
 
 
-Instructions to execute Integration tests
+Instructions to execute Integration Tests
 ============
 > Note that if this is the first time to access MySQL DB, then you may need to reset your password.
 
@@ -80,8 +92,9 @@ Instructions to run using Docker and docker-compose
 ===================================================
 
 It is possible to do a 'one-touch' installation of Fineract using containers (AKA "Docker").
-Fineract now packs the mifos community-app web ui in it's docker deploy.
-You can now run and test fineract with it a GUI directly from the combined docker builds.
+Fineract now packs the mifos community-app web UI in it's docker deploy.
+You can now run and test fineract with a GUI directly from the combined docker builds.
+This includes the database running in a container.
 
 As Prerequisites, you must have `docker` and `docker-compose` installed on your machine; see
 [Docker Install](https://docs.docker.com/install/) and
@@ -98,12 +111,13 @@ Now to run a new Fineract instance you can simply:
 1. `docker-compose up -d`
 1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
 1. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
+1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
 1. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
 1. login using default _username_ `mifos` and _password_ `password`
 
-The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).
+The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).  You could change that to use the pre-built container image instead of having to re-build it.
 
-https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continuously.
+https://hub.docker.com/r/apache/fineract has a pre-built container image of this project, built continuously.
 
 You must specify the MySQL tenants database JDBC URL by passing it to the `fineract` container via environment
 variables; please consult the [`docker-compose.yml`](docker-compose.yml) for exact details how to specify those.
@@ -180,7 +194,7 @@ The project uses Jacoco to measure unit tests code coverage, to generate a repor
 
 Generated reports can be found in build/code-coverage directory.
 
-Version
+Versions
 ============
 
 The latest stable release can be viewed on the develop branch: [Latest Release on Develop](https://github.com/apache/fineract/tree/develop "Latest Release").

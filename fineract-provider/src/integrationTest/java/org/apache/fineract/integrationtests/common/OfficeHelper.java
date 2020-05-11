@@ -61,7 +61,7 @@ public class OfficeHelper {
     }
 
     public Integer updateOffice(int id, String name, String openingDate) {
-        final HashMap map = new HashMap<>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("name", name);
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");

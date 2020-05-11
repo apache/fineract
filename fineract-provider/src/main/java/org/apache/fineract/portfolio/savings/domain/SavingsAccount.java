@@ -67,8 +67,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -1572,7 +1572,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         Long officeId = null;
         if (this.client != null) {
             officeId = this.client.officeId();
-        } else {
+        } else if (this.group != null) {
             officeId = this.group.officeId();
         }
         return officeId;
@@ -1582,7 +1582,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         Office office = null;
         if (this.client != null) {
             office = this.client.getOffice();
-        } else {
+        } else if (this.group != null) {
             office = this.group.getOffice();
         }
         return office;

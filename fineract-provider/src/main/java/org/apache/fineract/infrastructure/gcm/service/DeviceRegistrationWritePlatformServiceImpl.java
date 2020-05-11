@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.gcm.service;
 
 import javax.persistence.PersistenceException;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import org.apache.openjpa.jdbc.sql.BooleanRepresentationFactory;
 import org.apache.openjpa.jdbc.sql.MySQLDictionary;
 
+@SuppressWarnings("unchecked")
 public class MySQLDictionaryCustom extends MySQLDictionary {
 
         public MySQLDictionaryCustom(){

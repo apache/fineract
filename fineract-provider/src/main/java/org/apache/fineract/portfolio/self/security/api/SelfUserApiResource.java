@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;

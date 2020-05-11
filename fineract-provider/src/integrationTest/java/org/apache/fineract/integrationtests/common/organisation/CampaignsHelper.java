@@ -168,14 +168,14 @@ public class CampaignsHelper {
 
     private ArrayList<ReportData> getReports(String jsonAttributeToGetBack) {
         System.out.println("--------------------------------- GET REPORTS OPTIONS -------------------------------");
-        Assert.notNull(jsonAttributeToGetBack);
+        Assert.notNull(jsonAttributeToGetBack, "jsonAttributeToGetBack may not be null");
         final String templateUrl = SMS_CAMPAIGNS_URL + "/template?" + Utils.TENANT_IDENTIFIER;
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(templateUrl).andReturn()
                 .asString();
-        Assert.notNull(json);
+        Assert.notNull(json, "json");
         ArrayList<ReportData> reportsList = new ArrayList<>();
         String reportsString = new Gson().toJson(from(json).get(jsonAttributeToGetBack));
-        Assert.notNull(reportsString);
+        Assert.notNull(reportsString, "reportsString");
         final Gson gson = new Gson();
         final Type typeOfHashMap = new TypeToken<List<ReportData>>() {}.getType();
         reportsList = gson.fromJson(reportsString, typeOfHashMap);
@@ -190,7 +190,7 @@ public class CampaignsHelper {
                 if (reportName.equals(reportData.getReportName())) { return reportData.getReportId(); }
             }
         }
-        Assert.notNull(null);
+        Assert.notNull(null, "null");
         return null;
     }
 }

@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM openjdk:8 AS builder
+FROM openjdk:11 AS builder
 
 # COPY . fineract is slow e.g. when using Podman instead of Docker (because it doesn't honor .dockerignore and copies all of .git/** into the container..), so let's explicitly list only what we need:
 COPY fineract-provider/src/main fineract/fineract-provider/src/main/
@@ -37,9 +37,7 @@ RUN ./gradlew clean -x rat -x test war
 
 # =========================================
 
-FROM bitnami/tomcat:7.0.94 as fineract
-
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/jre
+FROM bitnami/tomcat:9.0 as fineract
 
 USER root
 RUN apt-get update -qq && apt-get install -y wget

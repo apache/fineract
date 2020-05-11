@@ -33,10 +33,10 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -475,13 +475,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         // PERMITTED datatables
         final String sql = "select if((exists (select 1 from x_registered_table where registered_table_name = ?)) = 1, 'true', 'false')";
         final String isRegisteredDataTable = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { name });
-        return new Boolean(isRegisteredDataTable);
+        return Boolean.valueOf(isRegisteredDataTable);
     }
 
     private void assertDataTableExists(final String datatableName) {
         final String sql = "select if((exists (select 1 from information_schema.tables where table_schema = schema() and table_name = ?)) = 1, 'true', 'false')";
         final String dataTableExistsString = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { datatableName });
-        final boolean dataTableExists = new Boolean(dataTableExistsString);
+        final boolean dataTableExists = Boolean.valueOf(dataTableExistsString);
         if (!dataTableExists) { throw new PlatformDataIntegrityException("error.msg.invalid.datatable",
                 "Invalid Data Table: " + datatableName, "name", datatableName); }
     }

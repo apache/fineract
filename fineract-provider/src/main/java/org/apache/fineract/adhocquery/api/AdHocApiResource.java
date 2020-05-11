@@ -37,7 +37,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;

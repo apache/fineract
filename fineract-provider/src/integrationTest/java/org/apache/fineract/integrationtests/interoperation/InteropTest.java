@@ -24,7 +24,7 @@ import static org.apache.fineract.integrationtests.interoperation.InteropHelper.
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.internal.path.ObjectConverter;
+import io.restassured.internal.common.path.ObjectConverter;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;

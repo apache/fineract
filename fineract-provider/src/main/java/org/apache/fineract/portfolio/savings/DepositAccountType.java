@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 /**

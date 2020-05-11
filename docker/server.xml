@@ -70,7 +70,7 @@
          Either JSSE or OpenSSL style configuration may be used regardless of
          the SSLImplementation selected. JSSE style configuration is used below.
     -->
-	<Connector protocol="org.apache.coyote.http11.Http11Protocol"
+	<Connector protocol="org.apache.coyote.http11.Http11NioProtocol"
     port="8443" maxThreads="200" scheme="https"
     secure="true" SSLEnabled="true"
     keystoreFile="/opt/bitnami/tomcat/tomcat.keystore"
@@ -108,8 +108,9 @@
     -->
 
     <!-- Define an AJP 1.3 Connector on port 8009 -->
-    <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
-
+    <!--
+    <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" secret="xyz123" />
+    -->
 
     <!-- An Engine represents the entry point (within Catalina) that processes
          every request.  The Engine implementation for Tomcat stand alone

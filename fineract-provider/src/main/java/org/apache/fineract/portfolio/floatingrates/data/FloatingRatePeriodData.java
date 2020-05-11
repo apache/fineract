@@ -20,9 +20,9 @@ package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import org.apache.commons.lang.builder.CompareToBuilder;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 
 public class FloatingRatePeriodData implements

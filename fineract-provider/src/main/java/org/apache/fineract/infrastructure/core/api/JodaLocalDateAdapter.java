@@ -27,15 +27,14 @@ import java.lang.reflect.Type;
 import org.joda.time.LocalDate;
 
 /**
- * Serializer for joda time {@link LocalDate} that returns date in array format
- * to match previous jackson functionality.
+ * Serializer for Joda Time {@link LocalDate} that returns the date in array format
+ * to match previous Jackson functionality.
  */
 public class JodaLocalDateAdapter implements JsonSerializer<LocalDate> {
 
-    @SuppressWarnings("unused")
     @Override
+    @SuppressWarnings("unused")
     public JsonElement serialize(final LocalDate src, final Type typeOfSrc, final JsonSerializationContext context) {
-
         JsonArray array = null;
         if (src != null) {
             array = new JsonArray();
@@ -43,7 +42,6 @@ public class JodaLocalDateAdapter implements JsonSerializer<LocalDate> {
             array.add(new JsonPrimitive(src.getMonthOfYear()));
             array.add(new JsonPrimitive(src.getDayOfMonth()));
         }
-
         return array;
     }
 }

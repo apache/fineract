@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.fineract.infrastructure.core.api.DateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaLocalDateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
@@ -36,16 +37,14 @@ import org.joda.time.MonthDay;
 import org.springframework.stereotype.Service;
 
 /**
- * Helper class for serialization of java objects into JSON using google-gson.
+ * Helper class for serialization of Java objects into JSON using Google's GSON.
  */
 @Service
 public final class GoogleGsonSerializerHelper {
 
     public Gson createGsonBuilder(final boolean prettyPrint) {
         final GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
+        registerTypeAdapters(builder);
         if (prettyPrint) {
             builder.setPrettyPrinting();
         }
@@ -53,13 +52,10 @@ public final class GoogleGsonSerializerHelper {
     }
 
     public Gson createGsonBuilderForPartialResponseFiltering(final boolean prettyPrint, final Set<String> responseParameters) {
-
         final ExclusionStrategy strategy = new ParameterListInclusionStrategy(responseParameters);
 
         final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
+        registerTypeAdapters(builder);
         if (prettyPrint) {
             builder.setPrettyPrinting();
         }
@@ -72,7 +68,6 @@ public final class GoogleGsonSerializerHelper {
         final Set<String> parameterNamesToSkip = new HashSet<>();
 
         if (!responseParameters.isEmpty()) {
-
             // strip out all known support parameters from expected response to
             // see if unsupported parameters requested for response.
             final Set<String> differentParametersDetectedSet = new HashSet<>(responseParameters);
@@ -88,9 +83,7 @@ public final class GoogleGsonSerializerHelper {
         final ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
 
         final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
+        registerTypeAdapters(builder);
         if (prettyPrint) {
             builder.setPrettyPrinting();
         }
@@ -103,5 +96,12 @@ public final class GoogleGsonSerializerHelper {
 
     public String serializedJsonFrom(final Gson serializer, final Object singleDataObject) {
         return serializer.toJson(singleDataObject);
+    }
+
+    public static void registerTypeAdapters(final GsonBuilder builder) {
+        builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
+        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
     }
 }

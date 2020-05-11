@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.reportmailingjob.helper;
 
 import java.net.InetAddress;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This utility provides methods to either convert an IPv4 address to its long format or a 32bit dotted format.

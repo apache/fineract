@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.property.RRule;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;

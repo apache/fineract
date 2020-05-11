@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -191,15 +193,15 @@ public class FundsIntegrationTest {
         List<FundsHelper> fhList = FundsResourceHandler.retrieveAllFunds(this.requestSpec, this.statusOkResponseSpec);
 
         Assert.assertNotNull(fhList);
-        Assert.assertThat(fhList.size(), greaterThanOrEqualTo(1));
-        Assert.assertThat(fhList, hasItem(fh));
+        assertThat(fhList.size(), greaterThanOrEqualTo(1));
+        assertThat(fhList, hasItem(fh));
     }
 
     @Test
     public void testRetrieveUnknownFund() {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, this.requestSpec, responseSpec);
-        HashMap<String, String> map = new Gson().fromJson(jsonData, HashMap.class);
+        HashMap<String, Object> map = new Gson().fromJson(jsonData, new TypeToken<HashMap<String, Object>>(){}.getType());
         assertEquals(map.get("userMessageGlobalisationCode"), "error.msg.resource.not.found");
     }
 

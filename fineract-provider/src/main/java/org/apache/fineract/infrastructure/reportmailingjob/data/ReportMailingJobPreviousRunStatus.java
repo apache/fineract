@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public enum ReportMailingJobPreviousRunStatus {
     INVALID(-1, "ReportMailingJobPreviousRunStatus.INVALID", "Invalid"),

@@ -228,10 +228,9 @@ public class Sender {
         if (responseBody == null) {
             return null;
         }
-        JsonParser jsonParser = new JsonParser();
         JsonObject jsonResponse;
         try {
-            jsonResponse = (JsonObject) jsonParser.parse(responseBody);
+            jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
             Result.Builder resultBuilder = new Result.Builder();
             if (jsonResponse.has("results")) {
                 // Handle response from message sent to specific device.
@@ -480,10 +479,9 @@ public class Sender {
             return null;
         }
 
-        JsonParser parser = new JsonParser();
         JsonObject jsonResponse;
         try {
-            jsonResponse = (JsonObject) parser.parse(responseBody);
+            jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
             int success = getNumber(responseMap, JSON_SUCCESS).intValue();
             int failure = getNumber(responseMap, JSON_FAILURE).intValue();
             int canonicalIds = getNumber(responseMap, JSON_CANONICAL_IDS)

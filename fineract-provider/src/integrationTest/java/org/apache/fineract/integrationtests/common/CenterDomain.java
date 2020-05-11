@@ -29,7 +29,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
         private Integer id;
         private String accountNo;
-        private HashMap status;
+        private HashMap<String, Object> status;
         private boolean active;
         private String name;
         private String externalId;
@@ -43,7 +43,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
                 final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
-            this.status = new HashMap();
+            this.status = new HashMap<String, Object>();
             this.status.put("id", statusid);
             this.status.put("code", statuscode);
             this.status.put("value", statusvalue);
@@ -67,7 +67,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     private Integer id;
     private String accountNo;
-    private HashMap status;
+    private HashMap<String, Object> status;
     private boolean active;
     private String name;
     private String externalId;
@@ -86,7 +86,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
             final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
-        this.status = new HashMap();
+        this.status = new HashMap<String, Object>();
         this.status.put("id", statusid);
         this.status.put("code", statuscode);
         this.status.put("value", statusvalue);

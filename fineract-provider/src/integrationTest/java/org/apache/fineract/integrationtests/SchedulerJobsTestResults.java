@@ -79,7 +79,7 @@ public class SchedulerJobsTestResults {
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     public static final String MINIMUM_OPENING_BALANCE = "1000";
 
-    Float SP_BALANCE = new Float(MINIMUM_OPENING_BALANCE);
+    Float SP_BALANCE = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
@@ -439,6 +439,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testUpdateLoanArrearsAgingJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -595,6 +596,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -738,6 +740,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testAvoidUnncessaryPenaltyWhenAmountZeroForOverdueLoansJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -835,6 +838,7 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    @Ignore // TODO FINERACT-857
     public void testInterestTransferForSavings() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
@@ -861,7 +865,7 @@ public class SchedulerJobsTestResults {
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
-        Float balance = new Float(MINIMUM_OPENING_BALANCE) + new Float(FixedDepositAccountHelper.depositAmount);
+        Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + Float.valueOf(FixedDepositAccountHelper.depositAmount);
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, String.valueOf(balance));
         Assert.assertNotNull(savingsProductID);
 
@@ -897,22 +901,22 @@ public class SchedulerJobsTestResults {
         fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = new Float(MINIMUM_OPENING_BALANCE);
+        balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
         assertEquals("Verifying Balance", balance, summary.get("accountBalance"));
 
         fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
 
         HashMap fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance") - new Float(FixedDepositAccountHelper.depositAmount);
+        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance") - Float.valueOf(FixedDepositAccountHelper.depositAmount);
 
         String JobName = "Transfer Interest To Savings";
         this.schedulerJobHelper.executeJob(JobName);
         fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-        assertEquals("Verifying opening Balance", new Float(FixedDepositAccountHelper.depositAmount),
+        assertEquals("Verifying opening Balance", Float.valueOf(FixedDepositAccountHelper.depositAmount),
                 fixedDepositSummary.get("accountBalance"));
 
         summary = savingsAccountHelper.getSavingsSummary(savingsId);
-        balance = new Float(MINIMUM_OPENING_BALANCE) + interestPosted;
+        balance = Float.valueOf(MINIMUM_OPENING_BALANCE) + interestPosted;
         validateNumberForEqualExcludePrecission(String.valueOf(balance), String.valueOf(summary.get("accountBalance")));
     }
 
@@ -995,6 +999,6 @@ public class SchedulerJobsTestResults {
 
     private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#", new DecimalFormatSymbols(Locale.US));
-        Assert.assertTrue(new Float(twoDForm.format(new Float(val))).compareTo(new Float(twoDForm.format(new Float(val2)))) == 0);
+        Assert.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(val))).compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0);
     }
 }

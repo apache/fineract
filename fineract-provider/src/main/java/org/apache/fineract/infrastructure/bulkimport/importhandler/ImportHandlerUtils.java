@@ -29,12 +29,16 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellReference;
 import org.joda.time.LocalDate;
 
 public class ImportHandlerUtils {
@@ -60,10 +64,10 @@ public class ImportHandlerUtils {
 
     public static Long readAsLong(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+        if (c == null || c.getCellType() == CellType.BLANK)
             return null;
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-        if(c.getCellType() == Cell.CELL_TYPE_FORMULA) {
+        if(c.getCellType() == CellType.FORMULA) {
             if(eval!=null) {
                 CellValue val = null;
                 try {
@@ -74,7 +78,7 @@ public class ImportHandlerUtils {
                 return ((Double)val.getNumberValue()).longValue();
             }
         }
-        else if (c.getCellType()==Cell.CELL_TYPE_NUMERIC){
+        else if (c.getCellType()==CellType.NUMERIC){
             return ((Double) c.getNumericCellValue()).longValue();
         }
         else {
@@ -87,10 +91,10 @@ public class ImportHandlerUtils {
     public static String readAsString(int colIndex, Row row) {
 
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+        if (c == null || c.getCellType() == CellType.BLANK)
             return null;
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-        if(c.getCellType() == Cell.CELL_TYPE_FORMULA) {
+        if(c.getCellType() == CellType.FORMULA) {
             if (eval!=null) {
                 CellValue val = null;
                 try {
@@ -112,13 +116,13 @@ public class ImportHandlerUtils {
             }else {
                 return null;
             }
-        }else if(c.getCellType()==Cell.CELL_TYPE_STRING) {
+        }else if(c.getCellType()==CellType.STRING) {
             String res = trimEmptyDecimalPortion(c.getStringCellValue().trim());
             return res.trim();
 
-        }else if(c.getCellType()==Cell.CELL_TYPE_NUMERIC) {
+        }else if(c.getCellType()==CellType.NUMERIC) {
             return ((Double) row.getCell(colIndex).getNumericCellValue()).intValue() + "";
-        }else if (c.getCellType()==Cell.CELL_TYPE_BOOLEAN){
+        }else if (c.getCellType()==CellType.BOOLEAN){
             return c.getBooleanCellValue()+"";
         }else {
             return null;
@@ -135,7 +139,7 @@ public class ImportHandlerUtils {
 
     public static LocalDate readAsDate(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if(c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+        if(c == null || c.getCellType() == CellType.BLANK)
             return null;
 
         LocalDate localDate=new LocalDate(c.getDateCellValue());
@@ -144,10 +148,10 @@ public class ImportHandlerUtils {
 
     public static Boolean readAsBoolean(int colIndex, Row row) {
             Cell c = row.getCell(colIndex);
-            if(c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+            if(c == null || c.getCellType() == CellType.BLANK)
                 return false;
             FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-            if(c.getCellType() == Cell.CELL_TYPE_FORMULA) {
+            if(c.getCellType() == CellType.FORMULA) {
                 if(eval!=null) {
                     CellValue val = null;
                     try {
@@ -158,7 +162,7 @@ public class ImportHandlerUtils {
                     return val.getBooleanValue();
                 }
                 return false;
-            }else if(c.getCellType()==Cell.CELL_TYPE_BOOLEAN)
+            }else if(c.getCellType()==CellType.BOOLEAN)
                 return c.getBooleanCellValue();
             else {
                 String booleanString = row.getCell(colIndex).getStringCellValue().trim();
@@ -171,10 +175,10 @@ public class ImportHandlerUtils {
 
     public static Integer readAsInt(int colIndex, Row row) {
             Cell c = row.getCell(colIndex);
-            if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+            if (c == null || c.getCellType() == CellType.BLANK)
                 return null;
             FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-            if(c.getCellType() == Cell.CELL_TYPE_FORMULA) {
+            if(c.getCellType() == CellType.FORMULA) {
                 if(eval!=null) {
                     CellValue val = null;
                     try {
@@ -185,7 +189,7 @@ public class ImportHandlerUtils {
                     return ((Double)val.getNumberValue()).intValue();
                 }
                 return null;
-            }else if (c.getCellType()==Cell.CELL_TYPE_NUMERIC) {
+            }else if (c.getCellType()==CellType.NUMERIC) {
                 return ((Double) c.getNumericCellValue()).intValue();
             }else {
                 return Integer.parseInt(row.getCell(colIndex).getStringCellValue());
@@ -194,10 +198,10 @@ public class ImportHandlerUtils {
 
     public static Double readAsDouble(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == Cell.CELL_TYPE_BLANK)
+        if (c == null || c.getCellType() == CellType.BLANK)
             return 0.0;
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-        if(c.getCellType() == Cell.CELL_TYPE_FORMULA) {
+        if(c.getCellType() == CellType.FORMULA) {
                 if (eval!=null) {
                     CellValue val = null;
                     try {
@@ -209,7 +213,7 @@ public class ImportHandlerUtils {
                 }else {
                     return 0.0;
                 }
-        } else if (c.getCellType()==Cell.CELL_TYPE_NUMERIC) {
+        } else if (c.getCellType()==CellType.NUMERIC) {
             return row.getCell(colIndex).getNumericCellValue();
         }else {
             return Double.parseDouble(row.getCell(colIndex).getStringCellValue());
@@ -222,9 +226,24 @@ public class ImportHandlerUtils {
     }
 
     public static CellStyle getCellStyle(Workbook workbook, IndexedColors color) {
+        CellReference cellReference = new CellReference("A1");
+        Sheet predefined = workbook.getSheet(color.toString());
+        // if we have already defined this style, return it and don't create another one
+        if (predefined != null) {
+            Row row = predefined.getRow(cellReference.getRow());
+            Cell cell = row.getCell(cellReference.getCol());
+            return cell.getCellStyle();
+        }
         CellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(color.getIndex());
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        Sheet cache = workbook.createSheet(color.toString());
+        workbook.setSheetVisibility(workbook.getSheetIndex(cache), SheetVisibility.VERY_HIDDEN);
+        Row row = cache.createRow(cellReference.getRow());
+        Cell cell = row.createCell(cellReference.getCol());
+        cell.setCellStyle(style);
+
         return style;
     }
 
@@ -283,20 +302,20 @@ public class ImportHandlerUtils {
             for (Row row : sheet) {
                 for (Cell cell : row) {
                     if(name!=null) {
-                        if (cell.getCellType() == Cell.CELL_TYPE_STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
+                        if (cell.getCellType() == CellType.STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
                             if (sheetName.equals(TemplatePopulateImportConstants.OFFICE_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME)||
                                     sheetName.equals(TemplatePopulateImportConstants.ROLES_SHEET_NAME)) {
-                                if (row.getCell(cell.getColumnIndex() - 1).getCellType() == Cell.CELL_TYPE_NUMERIC)
+                                if (row.getCell(cell.getColumnIndex() - 1).getCellType() == CellType.NUMERIC)
                                     return ((Double) row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).longValue();
                                 return 0L;
                             } else if (sheetName.equals(TemplatePopulateImportConstants.CLIENT_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.CENTER_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.GROUP_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.STAFF_SHEET_NAME))
-                                if (row.getCell(cell.getColumnIndex() + 1).getCellType() == Cell.CELL_TYPE_NUMERIC)
+                                if (row.getCell(cell.getColumnIndex() + 1).getCellType() == CellType.NUMERIC)
                                     return ((Double) row.getCell(cell.getColumnIndex() + 1).getNumericCellValue()).longValue();
                             return 0L;
                         }
@@ -310,7 +329,7 @@ public class ImportHandlerUtils {
                 for(int i = 0; i < 2; i++) {
                     if (name != null) {
                         Cell cell = row.getCell(i);
-                        if (cell.getCellType() == Cell.CELL_TYPE_STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
+                        if (cell.getCellType() == CellType.STRING && cell.getRichStringCellValue().getString().trim().equals(name)) {
                             return ((Double) row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).longValue();
                         }
                     }else {
@@ -328,7 +347,7 @@ public class ImportHandlerUtils {
             for (Row row : sheet) {
                 for (Cell cell : row) {
                     if (name!=null) {
-                        if (cell.getCellType() == Cell.CELL_TYPE_STRING
+                        if (cell.getCellType() == CellType.STRING
                                 && cell.getRichStringCellValue().getString().trim()
                                 .equals(name)) {
                             return row.getCell(cell.getColumnIndex() - 1)

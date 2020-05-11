@@ -17,48 +17,24 @@
  * under the License.
  */
 dependencies {
-        tomcat "org.apache.tomcat.embed:tomcat-embed-core",
-               "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
-        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
-            exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-        }
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-    providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
 
-    spotbugsPlugins 'jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar'
+	// Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
+	// Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
+	// We also (normally should have) no need to ever use 'compileOnly'.
 
-    compile ('org.springframework.boot:spring-boot-starter-data-jpa') {
-		exclude group: 'org.hibernate'
-    }
-
-    api(
-            'com.google.code.gson:gson',
-            'org.springframework:spring-jms',
-            'joda-time:joda-time',
-            'org.mnode.ical4j:ical4j',
-            'com.google.guava:guava',
-            'org.springframework:spring-context-support',
-            'org.springframework.security.oauth:spring-security-oauth2',
-            'com.sun.jersey:jersey-core',
-            'com.squareup.retrofit:retrofit',
-            'jakarta.jms:jakarta.jms-api',
-            'jakarta.management.j2ee:jakarta.management.j2ee-api'
-    )
-	api ('org.apache.openjpa:openjpa') {
-		exclude group: 'org.eclipse.persistence'
-		exclude group: 'org.apache.geronimo.specs'
-	}
-	api('org.quartz-scheduler:quartz') {
-		exclude group: 'com.zaxxer', module: 'HikariCP-java7'
-	}
-
+	// implementation dependencies are directly used (compiled against) in src/main (and src/test)
+	//
     implementation(
             //'ch.vorburger.mariaDB4j:mariaDB4j:2.4.0',
 
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
-            'org.springframework.boot:spring-boot-starter-actuator',
 
+            'org.springframework:spring-jms',
+            'org.springframework:spring-context-support',
             'org.springframework.security.oauth:spring-security-oauth2',
 
             'com.sun.jersey:jersey-servlet',
@@ -67,59 +43,87 @@ dependencies {
             'com.sun.jersey.contribs:jersey-spring',
             'com.sun.jersey.contribs:jersey-multipart',
 
+            'joda-time:joda-time',
+            'com.google.guava:guava',
+            'com.google.code.gson:gson',
+            'com.sun.jersey:jersey-core',
+            'com.squareup.retrofit:retrofit',
+            'jakarta.jms:jakarta.jms-api',
+            'jakarta.management.j2ee:jakarta.management.j2ee-api',
 
             'com.squareup.okhttp:okhttp',
             'com.squareup.okhttp:okhttp-urlconnection',
 
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
-
-            'org.drizzle.jdbc:drizzle-jdbc',
-
+            'org.apache.commons:commons-io',
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
             'org.apache.poi:poi-ooxml-schemas',
+            'org.apache.tika:tika-core',
 
-            'com.lowagie:itext',
-
+            'org.drizzle.jdbc:drizzle-jdbc',
             'com.googlecode.flyway:flyway-core',
 
-            'com.amazonaws:aws-java-sdk-s3',
             'net.sf.ehcache:ehcache',
+            'com.lowagie:itext',
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
-            'org.apache.tika:tika-core',
-            // Although fineract (at the time of writing) doesn't have any compile time dep. on this,
-            // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
-            'org.apache.httpcomponents:httpclient',
 
-            'org.apache.bval:org.apache.bval.bundle'
+             // JAX-B dependencies for JDK 9+
+             "jakarta.xml.bind:jakarta.xml.bind-api",
+             "org.dom4j:dom4j"
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
 		exclude group: 'javax.validation'
     }
     implementation ('org.apache.activemq:activemq-broker') {
-    	exclude group: 'org.apache.geronimo.specs'
+        exclude group: 'org.apache.geronimo.specs'
+    }
+    implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
+		exclude group: 'org.hibernate'
+    }
+	implementation ('org.apache.openjpa:openjpa') {
+		exclude group: 'org.eclipse.persistence'
+		exclude group: 'org.apache.geronimo.specs'
+	}
+    implementation ('org.quartz-scheduler:quartz') {
+        exclude group: 'com.zaxxer', module: 'HikariCP-java7'
+    }
+    implementation ('com.amazonaws:aws-java-sdk-s3') {
+		exclude group: 'commons-logging'
+    }
+    implementation ('org.mnode.ical4j:ical4j') {
+		exclude group: 'commons-logging'
     }
 
-    testCompile 'junit:junit',
+	// runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
+	runtimeOnly(
+            'org.apache.bval:org.apache.bval.bundle',
+            'org.springframework.boot:spring-boot-starter-actuator',
+
+            // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
+            // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
+            'org.apache.httpcomponents:httpclient',
+	)
+
+	// testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
+	// Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
+	//
+    testImplementation( 'junit:junit',
+            'org.junit.platform:junit-platform-runner', // FINERACT-943
             'org.mockito:mockito-core',
-            'io.github.classgraph:classgraph:4.8.43',
-            'com.google.code.gson:gson',
-            'org.springframework:spring-jms',
-            'joda-time:joda-time',
-            'org.mnode.ical4j:ical4j',
-            'com.google.guava:guava',
-            'org.apache.poi:poi-ooxml',
-            'org.springframework:spring-context-support',
-            'com.sun.jersey:jersey-core'
-    testCompile ('com.mockrunner:mockrunner-jms') {
-        exclude group: 'regexp'
-    }
-    testCompile ('io.rest-assured:rest-assured') {
+            'io.github.classgraph:classgraph',
+            'org.awaitility:awaitility'
+	)
+    testImplementation ('io.rest-assured:rest-assured') {
+        exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
     }
-    testCompile ('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation ('com.mockrunner:mockrunner-jms') {
+        exclude group: 'regexp'
+    }
+    testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
     }
 }

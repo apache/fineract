@@ -18,10 +18,11 @@
  */
 description = '''\
 Run as:
-gradle clean tomcatrunwar
-'''
+gradle clean bootRun'''
 
 project.ext.jerseyVersion = '1.19.4'
+ext["groovy.version"] = '3.0.3'
+
 
 buildscript {
     ext {
@@ -35,15 +36,15 @@ buildscript {
 
     dependencies {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
-        classpath 'com.bmuschko:gradle-tomcat-plugin:2.5',
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1',
             'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
-            'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-            'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE'
+            'org.zeroturnaround:gradle-jrebel-plugin:1.1.10',
+            'org.springframework.boot:spring-boot-gradle-plugin:2.2.7.RELEASE'
         // below
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-        classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
-        classpath "com.github.spotbugs:spotbugs-gradle-plugin:2.0.1"
+        classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.3.1'
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.8"
         // Use Guava version 23+ as a workaround to spotbug intergration.
         // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
         classpath 'com.google.guava:guava:28.1-jre'
@@ -60,7 +61,7 @@ apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'com.bmuschko.tomcat'
+apply plugin: 'com.bmuschko.cargo'
 apply plugin: 'project-report'
 apply plugin: 'java-library'
 apply plugin: 'openjpa'
@@ -82,33 +83,38 @@ dependencyManagement {
 
         dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
         dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
-        dependency 'com.squareup.retrofit:retrofit:1.6.1'
+        dependency 'com.squareup.retrofit:retrofit:1.9.0'
         dependency 'com.squareup.okhttp:okhttp:2.0.0'
         dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
         dependency 'com.google.code.gson:gson:+'
         dependency 'com.google.guava:guava:28.1-jre'
         dependency 'org.apache.commons:commons-email:1.5'
+        dependency 'org.apache.commons:commons-io:+'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
         dependency 'com.lowagie:itext:2.1.7'
         dependency 'com.lowagie:itext-rtf:2.1.7'
         dependency 'org.mnode.ical4j:ical4j:1.0.7'
         dependency 'com.googlecode.flyway:flyway-core:2.1.1'
         dependency 'org.quartz-scheduler:quartz:+'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.779'
         dependency 'net.sf.ehcache:ehcache:+'
         dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
         dependency 'com.jayway.jsonpath:json-path:0.9.1'
-        dependency 'org.apache.tika:tika-core:1.9'
+        dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:+'
-        dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
+        dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
+	dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
         dependency 'org.apache.activemq:activemq-broker:+'
-        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
+        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
-        dependency 'org.slf4j:slf4j-simple:1.7.30'
-        dependency 'com.mockrunner:mockrunner-jms:2.0.1'
+        dependency 'com.mockrunner:mockrunner-jms:2.0.4'
+        dependency 'io.github.classgraph:classgraph:4.8.78'
+        dependency 'org.dom4j:dom4j:2.1.0'
+        dependency 'nekohtml:nekohtml:1.9.6.2'
+		dependency 'org.awaitility:awaitility:4.0.2'
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
@@ -120,24 +126,24 @@ dependencyManagement {
             entry 'jersey-spring'
             entry 'jersey-multipart'
         }
-        dependencySet(group: 'org.apache.poi', version: '3.9') {
+        dependencySet(group: 'org.apache.poi', version: '4.1.2') {
             entry 'poi'
             entry 'poi-ooxml'
             entry 'poi-ooxml-schemas'
         }
-        dependencySet(group: 'org.apache.tomcat.embed', version: '7.0.94') {
-            entry 'tomcat-embed-core'
-            entry 'tomcat-embed-jasper'
-            entry 'tomcat-embed-logging-log4j'
+        dependencySet(group: 'io.rest-assured', version: '4.3.0')
+        {
+            entry 'rest-assured'
+            entry 'json-path'
+            entry 'xml-path'
         }
-
     }
 }
 
 /* define the valid syntax level for source files */
-sourceCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
 /* define binary compatibility version */
-targetCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_11
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
@@ -274,15 +280,23 @@ configurations {
 		exclude module: 'classworlds'
 	}
 	runtime
-	all*.exclude group: 'commons-logging'
 	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
-/* Pick up dependencies based on the environemnt, defaults to production */
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
+}
+
+apply from: 'dependencies.gradle'
+/* TODO https://issues.apache.org/jira/browse/FINERACT-939 (dev-dependencies.gradle has been removed, as totally broken)
+// Pick up dependencies based on the environment, defaults to production
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'
 }  else {
     apply from: 'dependencies.gradle'
 }
+*/
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
 if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
@@ -419,52 +433,51 @@ task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License)
 }
 licenseFormat.dependsOn licenseFormatBuildScripts
 
-tomcatRun {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
+configurations
+{
+  tomcat
 }
 
-tomcatRunWar {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
-    keystoreFile = file('src/main/resources/keystore.jks')
-    keystorePass = 'openmf'
+dependencies {
+  tomcat "org.apache.tomcat:tomcat:9.0.34@zip"
 }
 
-task tomcatRunWarAsDaemonForIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatRunWar) {
-    httpPort = 8080
-    httpsPort = 8443
-    stopPort = 8081
-    stopKey=   'stopKey'
-    enableSSL = true
-    keystoreFile = file('src/main/resources/keystore.jks')
-    keystorePass = 'openmf'
-    daemon = true
+cargo {
+  containerId "tomcat9x"
+
+  local {
+    installer {
+      installConfiguration = configurations.tomcat
+      downloadDir = file("$buildDir/download")
+      extractDir = file("$buildDir/tomcat")
+    }
+
+    containerProperties {
+      property 'cargo.tomcat.connector.keystoreFile', file('src/main/resources/keystore.jks')
+      property 'cargo.tomcat.connector.keystorePass', 'openmf'
+      property 'cargo.tomcat.httpSecure', true
+      property 'cargo.tomcat.connector.sslProtocol', 'TLS'
+      property 'cargo.tomcat.connector.clientAuth', false
+      property 'cargo.protocol', 'https'
+      property 'cargo.servlet.port', 8443
+    }
+  }
 }
 
-task tomcatStopAfterIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatStop) {
-    stopPort = 8081
-    stopKey = 'stopKey'
-}
+cargoRunLocal.dependsOn bootWar
+cargoStartLocal.dependsOn bootWar
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
 sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
-/* Exclude maria db and embedded tomcat related files for non dev builds */
+/* Exclude maria db related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {
         main {
             java {
-                exclude '**/Server*'
+                exclude '**/ServerWithMariaDB*'
                 exclude '**/MariaDB4j*'
-                exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
             }
         }
         test {
@@ -483,16 +496,14 @@ sourceSets {
 }
 
 configurations {
-    integrationTestCompile.extendsFrom testCompile
+    integrationTestCompile.extendsFrom testImplementation
     integrationTestRuntime.extendsFrom testRuntime
 }
 
 task integrationTest(type:Test) {
     description = "Run integration tests (located in src/integrationTest/java). Starts Tomcat in daemon mode before executing the tests (and stops it after)."
-    dependsOn war
-    dependsOn tomcatRunWarAsDaemonForIntegrationTest
-    tasks.findByName('tomcatRunWarAsDaemonForIntegrationTest').mustRunAfter 'war'
-    finalizedBy tomcatStopAfterIntegrationTest
+    dependsOn cargoStartLocal
+    finalizedBy cargoStopLocal
 
     testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
@@ -513,7 +524,6 @@ test {
 	}
 }
 
-import com.github.spotbugs.SpotBugsTask
 import groovy.sql.Sql
 
 repositories {
@@ -590,18 +600,41 @@ def qualifyVersionIfNecessary(version) {
 }
 
 springBoot {
-    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClassName = 'org.apache.fineract.ServerApplication'
 }
 
 bootWar {
-    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClassName = 'org.apache.fineract.ServerApplication'
 }
 
 // To generate an HTML report instead of XML
-tasks.withType(SpotBugsTask) {
-    reports.xml.enabled = false
-    reports.html.enabled = true
-    reportLevel = "high"
+spotbugs {
+    reportLevel = 'high'
+}
+// https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
+spotbugsMain {
+    reports {
+        html {
+            enabled = true
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+spotbugsTest {
+    reports {
+        html {
+            enabled = true
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+spotbugsIntegrationTest {
+    reports {
+        html {
+            enabled = true
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
 }
 
 gitProperties {

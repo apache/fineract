@@ -66,23 +66,23 @@ public class ProvisioningHelper {
         return provisioningEntryCreateJson;
     }
 
-    private static ArrayList addLoanProducts(ArrayList<Integer> loanProducts) {
-        ArrayList list = new ArrayList<>();
+    private static ArrayList<HashMap<String, Integer>> addLoanProducts(ArrayList<Integer> loanProducts) {
+        ArrayList<HashMap<String, Integer>> list = new ArrayList<>();
         for (int i = 0; i < loanProducts.size(); i++) {
-            HashMap map = new HashMap();
+            HashMap<String, Integer> map = new HashMap<>();
             map.put("id", loanProducts.get(i));
             list.add(map);
         }
         return list;
     }
 
-    public static ArrayList addProvisioningCategories(ArrayList categories, Account liability, Account expense) {
-        ArrayList list = new ArrayList();
+    public static ArrayList<HashMap<String, Object>> addProvisioningCategories(ArrayList categories, Account liability, Account expense) {
+        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
         int minStart = 0;
         int maxStart = 30;
 
         for (int i = 0; i < categories.size(); i++) {
-            HashMap map = new HashMap();
+            HashMap<String, Object> map = new HashMap<>();
             HashMap category = (HashMap) categories.get(i);
             map.put("categoryId", category.get("id"));
             map.put("categoryName", category.get("categoryName"));
@@ -92,7 +92,7 @@ public class ProvisioningHelper {
             } else {
                 map.put("maxAge", (i+1) * 30);
             }
-            map.put("provisioningPercentage", new Float((i + 1) * 5.5));
+            map.put("provisioningPercentage", Float.valueOf((float)((i + 1) * 5.5)));
             map.put("liabilityAccount", liability.getAccountID());
             map.put("expenseAccount", expense.getAccountID());
             list.add(map);

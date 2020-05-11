@@ -26,6 +26,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
@@ -51,7 +52,7 @@ public class StaffTest {
 
     @Test
     public void testStaffCreate() {
-        final HashMap response = StaffHelper.createStaffMap(requestSpec, responseSpec);
+        Map<String, Object> response = StaffHelper.createStaffMap(requestSpec, responseSpec);
 
         Assert.assertNotNull(response);
         Assert.assertEquals(response.get("officeId"), 1);
@@ -114,7 +115,7 @@ public class StaffTest {
 
     @Test
     public void testStaffFetch() {
-        final HashMap response = StaffHelper.getStaff(requestSpec, responseSpec, 1);
+        Map<String, Object> response = StaffHelper.getStaff(requestSpec, responseSpec, 1);
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.get("id"));
         Assert.assertEquals(response.get("id"), 1);
@@ -132,8 +133,8 @@ public class StaffTest {
 
     @Test
     public void testStaffListStatusActive() {
-        final List<HashMap> responseActive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
-        for(final HashMap staff : responseActive) {
+        List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
+        for(final Map<String, Object> staff : responseActive) {
             Assert.assertNotNull(staff.get("id"));
             Assert.assertEquals(staff.get("isActive"), true);
         }
@@ -141,15 +142,14 @@ public class StaffTest {
 
     @Test
     public void testStaffListStatusInactive() {
-        final List<HashMap> responseInactive = (List<HashMap>) StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
-
-        for(final HashMap staff : responseInactive) {
+        List<Map<String, Object>> responseInactive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
+        for(final Map<String, Object> staff : responseInactive) {
             Assert.assertNotNull(staff.get("id"));
             Assert.assertEquals(staff.get("isActive"), false);
         }
     }
 
-    @Test
+    @Test(expected = ClassCastException.class) // because "xyz" will return an error, not a List
     public void testStaffListFetchWrongState() {
         StaffHelper.getStaffListWithState(requestSpec, responseSpecForValidationError, "xyz");
     }
@@ -161,7 +161,7 @@ public class StaffTest {
 
     @Test
     public void testStaffUpdate() {
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
         final String firstname = Utils.randomNameGenerator("michael_", 10);
         final String lastname = Utils.randomNameGenerator("Doe_", 10);
         final String externalId = Utils.randomStringGenerator("EXT", 97);
@@ -172,8 +172,9 @@ public class StaffTest {
         map.put("externalId", externalId);
         map.put("mobileNo", mobileNo);
 
-        final HashMap response = (HashMap) StaffHelper.updateStaff(requestSpec, responseSpec, 1, map);
-        final HashMap changes = (HashMap)  response.get("changes");
+        Map<String, Object> response = StaffHelper.updateStaff(requestSpec, responseSpec, 1, map);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> changes = (Map<String, Object>) response.get("changes");
 
         Assert.assertEquals(1, response.get("resourceId"));
         Assert.assertEquals(firstname, changes.get("firstname"));

@@ -26,6 +26,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -60,6 +61,7 @@ import org.joda.time.Months;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
@@ -82,7 +84,6 @@ public class FixedDepositTest {
     private static final String BI_ANNUALLY = "6";
     private static final String ANNUALLY = "7";
     private static final String INTEREST_CALCULATION_USING_DAILY_BALANCE = "1";
-    private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
 
@@ -145,7 +146,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -224,10 +225,7 @@ public class FixedDepositTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
-        /***
-         * Preclose the FD account verify whether account is preClosed
-         */
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
@@ -284,7 +282,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -365,10 +363,7 @@ public class FixedDepositTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
-        /***
-         * Preclose the FD account verify whether account is preClosed
-         */
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
@@ -401,6 +396,7 @@ public class FixedDepositTest {
 
 
     @Test
+    @Ignore // TODO FINERACT-950
     public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
@@ -431,7 +427,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -502,7 +498,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
-        Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
+        accountSummary.get("totalInterestPosted");
         Assert.assertNull(accountSummary.get("totalWithholdTax"));
 
         /***
@@ -535,7 +531,7 @@ public class FixedDepositTest {
         final String chartToUse = "period";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = (float)6.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -544,7 +540,7 @@ public class FixedDepositTest {
         final String chartToUse = "period";
         final String depositAmount = "2000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = (float)6.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -553,7 +549,7 @@ public class FixedDepositTest {
         final String chartToUse = "period";
         final String depositAmount = "10000";
         final String depositPeriod = "18";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = (float)7.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -562,7 +558,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = (float)7.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -571,7 +567,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount";
         final String depositAmount = "5000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(5.0);
+        final Float interestRate = (float)5.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -580,7 +576,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount";
         final String depositAmount = "10000";
         final String depositPeriod = "26";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = (float)7.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -589,7 +585,7 @@ public class FixedDepositTest {
         final String chartToUse = "period_amount";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = (float)7.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -598,7 +594,7 @@ public class FixedDepositTest {
         final String chartToUse = "period_amount";
         final String depositAmount = "5000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = (float)6.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -607,7 +603,7 @@ public class FixedDepositTest {
         final String chartToUse = "period_amount";
         final String depositAmount = "10000";
         final String depositPeriod = "20";
-        final Float interestRate = new Float(9.0);
+        final Float interestRate = (float)9.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -616,7 +612,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount_period";
         final String depositAmount = "10000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(8.0);
+        final Float interestRate = (float)8.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -625,7 +621,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount_period";
         final String depositAmount = "5000";
         final String depositPeriod = "12";
-        final Float interestRate = new Float(6.0);
+        final Float interestRate = (float)6.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -634,7 +630,7 @@ public class FixedDepositTest {
         final String chartToUse = "amount_period";
         final String depositAmount = "10000";
         final String depositPeriod = "6";
-        final Float interestRate = new Float(7.0);
+        final Float interestRate = (float)7.0;
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
 
@@ -723,7 +719,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -820,7 +816,7 @@ public class FixedDepositTest {
          */
         Account financialAccount = getMappedLiabilityFinancialAccount();
 
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         /***
@@ -894,7 +890,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -958,7 +954,7 @@ public class FixedDepositTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
 
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         ArrayList<HashMap> errorResponse = (ArrayList<HashMap>) fixedDepositAccountHelperValidationError.prematureCloseForFixedDeposit(
@@ -985,7 +981,7 @@ public class FixedDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
         String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -995,9 +991,9 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositProductHelper.retrieveAllFixedDepositProducts(this.requestSpec,
+        this.fixedDepositProductHelper.retrieveAllFixedDepositProducts(this.requestSpec,
                 this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec,
+        this.fixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec,
                 this.responseSpec, fixedDepositProductId.toString());
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
@@ -1030,7 +1026,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1073,7 +1069,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String REJECTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1114,7 +1110,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String WITHDRAWN_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1153,7 +1149,7 @@ public class FixedDepositTest {
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1195,8 +1191,8 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1231,15 +1227,15 @@ public class FixedDepositTest {
         System.out.println("per day = " + perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        todaysDate.getActualMaximum(Calendar.DATE);
 
         principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
                 interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
     }
@@ -1265,8 +1261,8 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1279,7 +1275,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, MONTHLY, MONTHLY);
 
@@ -1305,14 +1301,14 @@ public class FixedDepositTest {
         System.out.println("per day = " + perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        todaysDate.getActualMaximum(Calendar.DATE);
 
         principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
                 interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
     }
@@ -1340,7 +1336,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1398,7 +1394,7 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         System.out.println("principal = " + principal);
 
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
@@ -1414,8 +1410,8 @@ public class FixedDepositTest {
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
 
-        principal = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1444,7 +1440,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1460,7 +1456,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, MONTHLY, MONTHLY);
 
@@ -1506,7 +1502,7 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         System.out.println("principal = " + principal);
 
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
@@ -1522,8 +1518,8 @@ public class FixedDepositTest {
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
 
-        principal = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1552,7 +1548,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1619,7 +1615,7 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         System.out.println("principal = " + principal);
 
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
@@ -1634,8 +1630,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -1664,7 +1660,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
         todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
@@ -1680,7 +1676,7 @@ public class FixedDepositTest {
                 TILL_PREMATURE_WITHDRAWAL);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 TILL_PREMATURE_WITHDRAWAL, INTEREST_CALCULATION_USING_DAILY_BALANCE, MONTHLY, MONTHLY);
 
@@ -1735,7 +1731,7 @@ public class FixedDepositTest {
         principal += interestPerMonth;
         System.out.println("principal = " + principal);
 
-        HashMap fixedDepositPrematureData = this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
+        this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId,
                 CLOSED_ON_DATE);
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
@@ -1750,8 +1746,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -1778,8 +1774,8 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1792,7 +1788,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, MONTHLY);
 
@@ -1819,15 +1815,15 @@ public class FixedDepositTest {
         System.out.println("per day = " + perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        todaysDate.getActualMaximum(Calendar.DATE);
 
         principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
                 interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = Float.valueOf(decimalFormat.format(principal));
+        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
 
@@ -1854,8 +1850,8 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         System.out.println("Submitted Date:" + SUBMITTED_ON_DATE);
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1869,7 +1865,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, MONTHLY);
 
@@ -1896,13 +1892,13 @@ public class FixedDepositTest {
         System.out.println("per day = " + perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        todaysDate.getActualMaximum(Calendar.DATE);
 
         principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
                 interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        principal = new BigDecimal(principal).setScale(0, BigDecimal.ROUND_FLOOR).floatValue();
-        maturityAmount = new BigDecimal(maturityAmount).setScale(0, BigDecimal.ROUND_FLOOR).floatValue();
+        principal = new BigDecimal(principal).setScale(0, RoundingMode.FLOOR).floatValue();
+        maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
 
@@ -1936,7 +1932,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -1949,7 +1945,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, ANNUALLY);
 
@@ -1985,8 +1981,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2020,7 +2016,7 @@ public class FixedDepositTest {
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -2033,7 +2029,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, DAILY, ANNUALLY);
 
@@ -2069,8 +2065,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2104,8 +2100,8 @@ public class FixedDepositTest {
         final String VALID_TO = null;
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -2118,7 +2114,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, BI_ANNUALLY, BI_ANNUALLY);
 
@@ -2151,8 +2147,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2186,8 +2182,8 @@ public class FixedDepositTest {
         final String VALID_TO = null;
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -2200,7 +2196,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, BI_ANNUALLY, BI_ANNUALLY);
 
@@ -2233,8 +2229,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2268,8 +2264,8 @@ public class FixedDepositTest {
         final String VALID_TO = null;
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -2282,7 +2278,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, QUARTERLY, QUARTERLY);
 
@@ -2315,8 +2311,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
     }
@@ -2349,8 +2345,8 @@ public class FixedDepositTest {
         final String VALID_TO = null;
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        dateFormat.format(todaysDate.getTime());
+        monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -2363,7 +2359,7 @@ public class FixedDepositTest {
                 WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
-        HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
+        this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
                 WHOLE_TERM, INTEREST_CALCULATION_USING_DAILY_BALANCE, QUARTERLY, QUARTERLY);
 
@@ -2396,8 +2392,8 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = new Float(decimalFormat.format(principal));
-        Float maturityAmount = new Float(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
+        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
+        Float maturityAmount = Float.valueOf(decimalFormat.format(fixedDepositAccountData.get("maturityAmount")));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
     }
@@ -2444,18 +2440,18 @@ public class FixedDepositTest {
         switch (chartToBePicked) {
             case "period":
                 fixedDepositProductHelper = fixedDepositProductHelper.withPeriodRangeChart();
-            break;
+                break;
             case "amount":
                 fixedDepositProductHelper = fixedDepositProductHelper.withAmountRangeChart();
-            break;
+                break;
             case "period_amount":
                 fixedDepositProductHelper = fixedDepositProductHelper.withPeriodAndAmountRangeChart();
-            break;
+                break;
             case "amount_period":
                 fixedDepositProductHelper = fixedDepositProductHelper.withAmountAndPeriodRangeChart();
-            break;
+                break;
             default:
-            break;
+                break;
         }
 
         final String fixedDepositProductJSON = fixedDepositProductHelper //

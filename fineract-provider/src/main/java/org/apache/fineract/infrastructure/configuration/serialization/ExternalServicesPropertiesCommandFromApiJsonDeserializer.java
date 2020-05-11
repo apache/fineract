@@ -22,7 +22,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.NOTIFICATION_JSON_INPUT_PARAMS;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.S3_JSON_INPUT_PARAMS;

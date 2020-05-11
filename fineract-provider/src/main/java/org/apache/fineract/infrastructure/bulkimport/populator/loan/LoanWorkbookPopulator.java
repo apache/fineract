@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
@@ -378,9 +379,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 
         CellStyle borderStyle = worksheet.getWorkbook().createCellStyle();
         CellStyle doubleBorderStyle = worksheet.getWorkbook().createCellStyle();
-        borderStyle.setBorderBottom(CellStyle.BORDER_THIN);
-        doubleBorderStyle.setBorderBottom(CellStyle.BORDER_THIN);
-        doubleBorderStyle.setBorderRight(CellStyle.BORDER_THICK);
+        borderStyle.setBorderBottom(BorderStyle.THIN);
+        doubleBorderStyle.setBorderBottom(BorderStyle.THIN);
+        doubleBorderStyle.setBorderRight(BorderStyle.THICK);
         for (int colNo = 0; colNo < 35; colNo++) {
             Cell cell = rowHeader.getCell(colNo);
             if (cell == null)
