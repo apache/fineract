@@ -41,7 +41,7 @@ import org.apache.fineract.infrastructure.core.domain.EmailDetail;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.EmailBackedPlatformEmailService;
+import org.apache.fineract.infrastructure.core.service.GenericPlatformEmailService;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
@@ -79,7 +79,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     private final ClientRepositoryWrapper clientRepository;
     private final PasswordValidationPolicyRepository passwordValidationPolicy;
     private final UserDomainService userDomainService;
-    private final EmailBackedPlatformEmailService emailBackedPlatformEmailService;
+    private final GenericPlatformEmailService genericPlatformEmailService;
     private final SmsMessageRepository smsMessageRepository;
     private SmsMessageScheduledJobService smsMessageScheduledJobService;
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
@@ -91,7 +91,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
             final FromJsonHelper fromApiJsonHelper,
             final SelfServiceRegistrationReadPlatformService selfServiceRegistrationReadPlatformService,
             final ClientRepositoryWrapper clientRepository, final PasswordValidationPolicyRepository passwordValidationPolicy,
-            final UserDomainService userDomainService, final EmailBackedPlatformEmailService emailBackedPlatformEmailService,
+            final UserDomainService userDomainService, final GenericPlatformEmailService genericPlatformEmailService,
             final SmsMessageRepository smsMessageRepository, SmsMessageScheduledJobService smsMessageScheduledJobService,
             final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService,
             final AppUserReadPlatformService appUserReadPlatformService,final RoleRepository roleRepository) {
@@ -101,7 +101,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
         this.clientRepository = clientRepository;
         this.passwordValidationPolicy = passwordValidationPolicy;
         this.userDomainService = userDomainService;
-        this.emailBackedPlatformEmailService = emailBackedPlatformEmailService;
+        this.genericPlatformEmailService = genericPlatformEmailService;
         this.smsMessageRepository = smsMessageRepository;
         this.smsMessageScheduledJobService = smsMessageScheduledJobService;
         this.smsCampaignDropdownReadPlatformService = smsCampaignDropdownReadPlatformService;
@@ -215,7 +215,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
 
         final EmailDetail emailDetail = new EmailDetail(subject, body, selfServiceRegistration.getEmail(),
                 selfServiceRegistration.getFirstName());
-        this.emailBackedPlatformEmailService.sendDefinedEmail(emailDetail);
+        this.genericPlatformEmailService.sendDefinedEmail(emailDetail);
     }
 
     private void throwExceptionIfValidationError(final List<ApiParameterError> dataValidationErrors, String accountNumber,

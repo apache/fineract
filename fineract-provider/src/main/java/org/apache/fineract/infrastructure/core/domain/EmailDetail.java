@@ -18,18 +18,32 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+
 public class EmailDetail {
 
     private final String subject;
     private final String body;
     private final String address;
     private final String contactName;
+    private final List<File> attachments;
 
     public EmailDetail(final String subject, final String body, final String address, final String contactName) {
         this.subject = subject;
         this.body = body;
         this.address = address;
         this.contactName = contactName;
+        this.attachments = Collections.<File>emptyList();
+    }
+
+    public EmailDetail(final String subject, final String body, final String address, final String contactName, final List<File> attachments ) {
+        this.subject = subject;
+        this.body = body;
+        this.address = address;
+        this.contactName = contactName;
+        this.attachments = attachments;
     }
 
     public String getSubject() {
@@ -46,5 +60,9 @@ public class EmailDetail {
 
     public String getAddress() {
         return this.address;
+    }
+
+    public List<File> getAttachments() {
+        return this.attachments;
     }
 }

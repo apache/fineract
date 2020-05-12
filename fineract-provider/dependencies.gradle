@@ -47,6 +47,7 @@ dependencies {
             'joda-time:joda-time',
             'com.google.code.gson:gson',
             'com.sun.jersey:jersey-core',
+            'com.sun.activation:jakarta.activation:1.2.2',
             'com.squareup.retrofit:retrofit',
             'jakarta.jms:jakarta.jms-api',
             'jakarta.management.j2ee:jakarta.management.j2ee-api',
@@ -54,7 +55,6 @@ dependencies {
             'com.squareup.okhttp:okhttp',
             'com.squareup.okhttp:okhttp-urlconnection',
 
-            'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
             'org.apache.commons:commons-io',
             'org.apache.poi:poi',
@@ -97,6 +97,10 @@ dependencies {
     }
     implementation ('org.mnode.ical4j:ical4j') {
 		exclude group: 'commons-logging'
+    }
+    implementation ('com.sun.mail:javax.mail:1.6.2') {
+        exclude group: 'javax.activation'
+        exclude group: 'junit'
     }
 
 	// runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
