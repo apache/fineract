@@ -158,6 +158,20 @@ repositories {
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 
+// If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+// set the classes directory to point to Eclipse's default build directory
+if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
+{
+    sourceSets.main.java.outputDir = new File(rootProject.projectDir, "bin/main")
+}
+
+eclipse 
+{
+    project {
+        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
+    }
+}
+
 openjpa {
     includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
     enhance {
