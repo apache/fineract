@@ -10,4 +10,4 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         # issue-message: 'Message that will be displayed on users'' first issue'
-        pr-message: 'Welcome to Apache Fineract!!  Have you read https://github.com/apache/fineract/#pull-requests?  Already subscribed to our mailing list by sending an (empty) email to dev-subscribe@fineract.apache.org?  Created your JIRA account on https://issues.apache.org/jira/projects/FINERACT/?  Played with our server at https://www.fineract.dev?  We're very excited to have you onboard contributing.'
+        pr-message: 'Welcome to Apache Fineract!!  Have you read https://github.com/apache/fineract/#pull-requests?  Already subscribed to our mailing list by sending an (empty) email to dev-subscribe@fineract.apache.org?  Created your JIRA account on https://issues.apache.org/jira/projects/FINERACT/?  Played with our server at https://www.fineract.dev?  We''re very excited to have you onboard contributing.'
