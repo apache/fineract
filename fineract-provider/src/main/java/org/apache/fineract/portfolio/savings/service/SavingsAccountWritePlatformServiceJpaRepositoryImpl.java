@@ -300,6 +300,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .withTransactionId(deposit.getId().toString())
                 .with(changes) //
                 .build();
 
@@ -349,6 +350,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .withTransactionId(withdrawal.getId().toString())
                 .with(changes)//
                 .build();
     }
