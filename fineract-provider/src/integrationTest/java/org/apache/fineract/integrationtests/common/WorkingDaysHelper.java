@@ -23,22 +23,23 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WorkingDaysHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
     private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
 
     public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out.println("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
+        LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
     }
 
     public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
         final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        System.out
-                .println("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
+        LOG.info("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDayWithWrongRecur(),
                 jsonAttributeToGetback);
     }
@@ -49,7 +50,7 @@ public class WorkingDaysHelper {
         map.put("locale", "en");
         map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
         map.put("extendTermForDailyRepayments", false);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 
@@ -59,7 +60,7 @@ public class WorkingDaysHelper {
         map.put("locale", "en");
         map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
         map.put("extendTermForDailyRepayments", false);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 

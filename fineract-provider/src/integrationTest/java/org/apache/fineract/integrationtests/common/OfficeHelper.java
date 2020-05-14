@@ -31,9 +31,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OfficeHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(OfficeHelper.class);
     private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -67,7 +69,7 @@ public class OfficeHelper {
         map.put("locale", "en");
         map.put("openingDate", openingDate);
 
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
 
         return Utils.performServerPut(requestSpec, responseSpec, OFFICE_URL
                 + "/" + id + "?" + Utils.TENANT_IDENTIFIER,
@@ -81,7 +83,7 @@ public class OfficeHelper {
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("openingDate", openingDate);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 

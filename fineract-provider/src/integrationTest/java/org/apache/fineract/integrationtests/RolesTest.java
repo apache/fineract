@@ -34,9 +34,11 @@ import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RolesTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(RolesTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
@@ -52,11 +54,11 @@ public class RolesTest {
     @Test
     public void testCreateRolesStatus() {
 
-        System.out.println("---------------------------------CREATING A ROLE---------------------------------------------");
+        LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
-        System.out.println("--------------------------------- Getting ROLE -------------------------------");
+        LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
 
@@ -66,15 +68,15 @@ public class RolesTest {
     @Test
     public void testDisableRolesStatus() {
 
-        System.out.println("---------------------------------CREATING A ROLE---------------------------------------------");
+        LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
-        System.out.println("--------------------------------- Getting ROLE -------------------------------");
+        LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
 
-        System.out.println("--------------------------------- DISABLING ROLE -------------------------------");
+        LOG.info("--------------------------------- DISABLING ROLE -------------------------------");
         final Integer disableRoleId = RolesHelper.disableRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(disableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
@@ -87,22 +89,22 @@ public class RolesTest {
     @Test
     public void testEnableRolesStatus() {
 
-        System.out.println("---------------------------------CREATING A ROLE---------------------------------------------");
+        LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
-        System.out.println("--------------------------------- Getting ROLE -------------------------------");
+        LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
 
-        System.out.println("--------------------------------- DISABLING ROLE -------------------------------");
+        LOG.info("--------------------------------- DISABLING ROLE -------------------------------");
         final Integer disableRoleId = RolesHelper.disableRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(disableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
         assertEquals((Boolean) role.get("disabled"), true);
 
-        System.out.println("--------------------------------- ENABLING ROLE -------------------------------");
+        LOG.info("--------------------------------- ENABLING ROLE -------------------------------");
         final Integer enableRoleId = RolesHelper.enableRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(enableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
@@ -115,15 +117,15 @@ public class RolesTest {
     @Test
     public void testDeleteRoleStatus() {
 
-        System.out.println("-------------------------------- CREATING A ROLE---------------------------------------------");
+        LOG.info("-------------------------------- CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(roleId);
 
-        System.out.println("--------------------------------- Getting ROLE -------------------------------");
+        LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
 
-        System.out.println("--------------------------------- DELETE ROLE -------------------------------");
+        LOG.info("--------------------------------- DELETE ROLE -------------------------------");
         final Integer deleteRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(deleteRoleId, roleId);
     }

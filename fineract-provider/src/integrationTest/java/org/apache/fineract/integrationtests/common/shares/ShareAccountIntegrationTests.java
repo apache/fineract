@@ -40,9 +40,11 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ShareAccountIntegrationTests {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ShareAccountIntegrationTests.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private ShareProductHelper shareProductHelper;
@@ -59,21 +61,21 @@ public class ShareAccountIntegrationTests {
     public void testCreateShareProduct() {
         // This method will check create share product, get share product,
         // update share product.
-        System.out.println("------------------------------CREATING NEW SHARE PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW SHARE PRODUCT ---------------------------------------");
         shareProductHelper = new ShareProductHelper();
         final Integer shareProductId = createShareProduct();
         Assert.assertNotNull(shareProductId);
-        System.out.println("------------------------------CREATING SHARE PRODUCT COMPLETE---------------------------------------");
+        LOG.info("------------------------------CREATING SHARE PRODUCT COMPLETE---------------------------------------");
 
-        System.out.println("------------------------------RETRIEVING SHARE PRODUCT---------------------------------------");
+        LOG.info("------------------------------RETRIEVING SHARE PRODUCT---------------------------------------");
         Map<String, Object> shareProductData = ShareProductTransactionHelper
                 .retrieveShareProduct(shareProductId, requestSpec, responseSpec);
         Assert.assertNotNull(shareProductData);
         shareProductHelper.verifyShareProduct(shareProductData);
 
-        System.out.println("------------------------------RETRIEVING SHARE PRODUCT COMPLETE---------------------------------------");
+        LOG.info("------------------------------RETRIEVING SHARE PRODUCT COMPLETE---------------------------------------");
 
-        System.out.println("------------------------------UPDATING SHARE PRODUCT---------------------------------------");
+        LOG.info("------------------------------UPDATING SHARE PRODUCT---------------------------------------");
 
         Map<String, Object> shareProductDataForUpdate = new HashMap<>();
 
@@ -90,7 +92,7 @@ public class ShareAccountIntegrationTests {
         String updatedSharesIssued = String.valueOf(updatedShareProductData.get("totalSharesIssued"));
         Assert.assertEquals("2000", updatedTotalShares);
         Assert.assertEquals("2000", updatedSharesIssued);
-        System.out.println("------------------------------UPDATING SHARE PRODUCT COMPLETE---------------------------------------");
+        LOG.info("------------------------------UPDATING SHARE PRODUCT COMPLETE---------------------------------------");
 
     }
 

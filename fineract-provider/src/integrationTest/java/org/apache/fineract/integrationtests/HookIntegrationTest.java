@@ -36,9 +36,11 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HookIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
@@ -77,7 +79,7 @@ public class HookIntegrationTest {
                     final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
                     Assert.assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
                             notificationOfficeId);
-                    System.out.println("Notification Office Id - " + notificationOfficeId);
+                    LOG.info("Notification Office Id - {}" , notificationOfficeId);
                     i = 6;
                 } catch (Exception e) {
                     TimeUnit.SECONDS.sleep(3);
@@ -102,13 +104,13 @@ public class HookIntegrationTest {
         Long hookId = this.hookHelper.createHook(payloadURL).longValue();
         Assert.assertNotNull(hookId);
         this.hookHelper.verifyHookCreatedOnServer(hookId);
-        System.out.println("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK-------------------------"+hookId);
+        LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}",hookId);
         this.hookHelper.updateHook(updateURL, hookId);
         this.hookHelper.verifyUpdateHook(updateURL, hookId);
-        System.out.println("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK-------------------------"+hookId);
+        LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}",hookId);
         this.hookHelper.deleteHook(hookId);
         this.hookHelper.verifyDeleteHook(hookId);
-        System.out.println("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK-------------------------"+hookId);
+        LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}",hookId);
 
     }
 }

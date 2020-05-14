@@ -35,10 +35,12 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class LoanDisbursalDateValidationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(LoanDisbursalDateValidationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -63,25 +65,25 @@ public class LoanDisbursalDateValidationTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
-                + clientID);
+        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}"
+                , clientID);
 
         // CREATE LOAN  PRODUCT
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
                 .withSyncExpectedWithDisbursementDate(true).build(null));
-        System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
-                + loanProductID);
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}"
+                , loanProductID);
 
         // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
-        System.out.println("-----------------------------------LOAN CREATED WITH LOANID-------------------------------------------------"
-                + loanID);
+        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}"
+                , loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(approveDate, loanID);
 
         // VALIDATE THE LOAN IS APPROVED

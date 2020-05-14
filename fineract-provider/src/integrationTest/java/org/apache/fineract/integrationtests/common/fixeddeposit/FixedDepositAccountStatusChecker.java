@@ -25,71 +25,78 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class FixedDepositAccountStatusChecker {
-
+    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositAccountStatusChecker.class);
     private static final String FIXED_DEPOSIT_ACCOUNT_URL = "/fineract-provider/api/v1/fixeddepositaccounts";
 
     public static void verifyFixedDepositIsApproved(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS APPROVED --------------------");
+        LOG.info("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS APPROVED --------------------");
         assertTrue("Error in Approving Fixed deposit application", getStatus(fixedDepositStatusHashMap, "approved"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositIsPending(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS PENDING --------------------");
-        assertTrue("FIXED DEPOSIT ACCOUNT IS NOT IN PENDING STATE", getStatus(fixedDepositStatusHashMap, "submittedAndPendingApproval"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("-------------------- VERIFYING FIXED DEPOSIT APPLICATION IS PENDING --------------------");
+        assertTrue("FIXED DEPOSIT ACCOUNT IS NOT IN PENDING STATE",
+                getStatus(fixedDepositStatusHashMap, "submittedAndPendingApproval"));
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositIsActive(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("----------------- VERIFYING FIXED DEPOSIT APPLICATION IS ACTIVE -----------------");
+        LOG.info("----------------- VERIFYING FIXED DEPOSIT APPLICATION IS ACTIVE -----------------");
         assertTrue("ERROR IN ACTIVATING THE FIXED DEPOSIT APPLICATION", getStatus(fixedDepositStatusHashMap, "active"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositIsRejected(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("-------------- VERIFYING FIXED DEPOSIT APPLICATION IS REJECTED ----------------");
-        assertTrue("ERROR IN REJECTING THE FIXED DEPOSIT APPLICATION", getStatus(fixedDepositStatusHashMap, "rejected"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("-------------- VERIFYING FIXED DEPOSIT APPLICATION IS REJECTED ----------------");
+        assertTrue("ERROR IN REJECTING THE FIXED DEPOSIT APPLICATION",
+                getStatus(fixedDepositStatusHashMap, "rejected"));
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositIsWithdrawn(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("---------------- VERIFYING FIXED DEPOSIT APPLICATION IS WITHDRAWN ----------------");
-        assertTrue("ERROR IN WITHDRAW  THE FIXED DEPOSIT APPLICATION", getStatus(fixedDepositStatusHashMap, "withdrawnByApplicant"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("---------------- VERIFYING FIXED DEPOSIT APPLICATION IS WITHDRAWN ----------------");
+        assertTrue("ERROR IN WITHDRAW  THE FIXED DEPOSIT APPLICATION",
+                getStatus(fixedDepositStatusHashMap, "withdrawnByApplicant"));
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositAccountIsClosed(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS CLOSED ---------------------");
+        LOG.info("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS CLOSED ---------------------");
         assertTrue("ERROR IN CLOSING THE FIXED DEPOSIT APPLICATION", getStatus(fixedDepositStatusHashMap, "closed"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositAccountIsNotActive(final HashMap fixedDepositStatusHashMap) {
-        System.out.println("------------------ VERIFYING FIXED DEPOSIT APPLICATION IS INACTIVE --------------------");
+        LOG.info("------------------ VERIFYING FIXED DEPOSIT APPLICATION IS INACTIVE --------------------");
         Assert.assertFalse(getStatus(fixedDepositStatusHashMap, "active"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
-    public static HashMap getStatusOfFixedDepositAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String fixedDepositAccountID) {
-        final String GET_STATUS_OF_FIXED_DEPOSIT_ACCOUNT_URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?"
-                + Utils.TENANT_IDENTIFIER;
+    public static HashMap getStatusOfFixedDepositAccount(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String fixedDepositAccountID) {
+        final String GET_STATUS_OF_FIXED_DEPOSIT_ACCOUNT_URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID
+                + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_STATUS_OF_FIXED_DEPOSIT_ACCOUNT_URL, "status");
     }
 
     public static void verifyFixedDepositAccountIsPrematureClosed(HashMap fixedDepositStatusHashMap) {
-        System.out.println("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS CLOSED ---------------------");
-        assertTrue("ERROR IN PREMATURELY CLOSING THE FIXED DEPOSIT ACCOUNT", getStatus(fixedDepositStatusHashMap, "prematureClosed"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS CLOSED ---------------------");
+        assertTrue("ERROR IN PREMATURELY CLOSING THE FIXED DEPOSIT ACCOUNT",
+                getStatus(fixedDepositStatusHashMap, "prematureClosed"));
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     public static void verifyFixedDepositAccountIsMatured(HashMap fixedDepositStatusHashMap) {
-        System.out.println("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS MATURED ---------------------");
-        assertTrue("ERROR IN MATURITY JOB OF THE FIXED DEPOSIT ACCOUNT", getStatus(fixedDepositStatusHashMap, "matured"));
-        System.out.println(fixedDepositStatusHashMap);
+        LOG.info("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS MATURED ---------------------");
+        assertTrue("ERROR IN MATURITY JOB OF THE FIXED DEPOSIT ACCOUNT",
+                getStatus(fixedDepositStatusHashMap, "matured"));
+        LOG.info("{}", fixedDepositStatusHashMap.toString());
     }
 
     private static boolean getStatus(final HashMap fixedDepositStatusMap, final String fixedDepositStatusString) {

@@ -20,9 +20,11 @@ package org.apache.fineract.integrationtests.common;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NotificationHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(NotificationHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -36,7 +38,7 @@ public class NotificationHelper {
     public static Object getNotifications(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
                                           final String jsonReturn) {
         final String GET_NOTIFICATIONS_URL = NOTIFICATION_API_URL;
-        System.out.println("-----------------------------GET NOTIFICATIONS-----------------------------------");
+        LOG.info("-----------------------------GET NOTIFICATIONS-----------------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_NOTIFICATIONS_URL, "");
     }
 }
