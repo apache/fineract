@@ -467,6 +467,8 @@ cargo {
 
 cargoRunLocal.dependsOn bootWar
 cargoStartLocal.dependsOn bootWar
+cargoStartLocal.mustRunAfter "integrationTestClasses"
+cargoStartLocal.mustRunAfter "enhance"
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
