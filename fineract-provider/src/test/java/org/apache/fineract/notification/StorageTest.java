@@ -38,6 +38,7 @@ import org.apache.fineract.notification.service.NotificationWritePlatformService
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -71,6 +72,7 @@ public class StorageTest {
     }
 
     @Test
+    @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-828
     public void testNotificationStorage() {
 
         Long userId = 1L;
