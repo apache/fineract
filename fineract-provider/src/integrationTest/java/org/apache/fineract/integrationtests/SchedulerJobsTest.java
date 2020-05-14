@@ -51,10 +51,13 @@ public class SchedulerJobsTest {
 
     @Test // FINERACT-926
     public void testDateFormat() {
-        // must start scheduler and make job active to have nextRunTime (which is a java.util.Date)
+        // must start scheduler and make job active to have nextRunTime (which is a
+        // java.util.Date)
         schedulerJobHelper.updateSchedulerStatus(true);
         schedulerJobHelper.updateSchedulerJob(1, "true");
-        String nextRunTimeText = await().until(() -> (String)schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"), nextRunTime -> nextRunTime != null);
+        String nextRunTimeText = await().until(
+                () -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
+                nextRunTime -> nextRunTime != null);
         DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
     }
 
@@ -77,7 +80,8 @@ public class SchedulerJobsTest {
 
     @Test
     public void testFlippingJobsActiveStatus() throws InterruptedException {
-        // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side effects
+        // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side
+        // effects
         schedulerJobHelper.updateSchedulerStatus(false);
 
         // For each retrieved scheduled job (by ID)...
@@ -119,13 +123,13 @@ public class SchedulerJobsTest {
                 Thread.sleep(500);
                 schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
                 assertNotNull(schedulerJob);
-                System.out.println("Job " + jobId +" is Still Running");
             }
             @SuppressWarnings({ "unchecked", "rawtypes" })
             List<Map> jobHistoryData = schedulerJobHelper.getSchedulerJobHistory(jobId);
 
             // Verifying the Status of the Recently executed Scheduler Job
-            assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
+            assertFalse("Job History is empty :(  Was it too slow? Failures in background job?",
+                    jobHistoryData.isEmpty());
             assertEquals("Verifying Last Scheduler Job Status", "success",
                     jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
         }

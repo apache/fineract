@@ -25,6 +25,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Exception with multiple root causes.
@@ -41,7 +43,7 @@ import java.util.List;
  * @author Michael Vorburger.ch <mike@vorburger.ch>
  */
 public class MultiException extends Exception {
-
+    private final static Logger LOG = LoggerFactory.getLogger(MultiException.class);
     private final List<Throwable> throwables;
 
     public MultiException(List<Throwable> problems) {
@@ -71,10 +73,10 @@ public class MultiException extends Exception {
 
     @Override
     public void printStackTrace() {
-        System.err.println(super.getMessage());
+        LOG.info("{}", super.getMessage());
         int i = 0;
         for (Throwable e : throwables) {
-            System.err.print(++i + ".");
+            LOG.info("{}.",++i);
             e.printStackTrace();
         }
     }

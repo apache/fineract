@@ -36,12 +36,15 @@ import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTe
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test the creation, approval and rejection of a loan reschedule request
  **/
 @SuppressWarnings({ "rawtypes" })
 public class LoanRescheduleRequestTest {
+    private final static Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
     private ResponseSpecification responseSpec;
     private ResponseSpecification generalResponseSpec;
     private RequestSpecification requestSpec;
@@ -93,7 +96,7 @@ public class LoanRescheduleRequestTest {
      * create a new loan product
      **/
     private void createLoanProductEntity() {
-        System.out.println("---------------------------------CREATING LOAN PRODUCT------------------------------------------");
+        LOG.info("---------------------------------CREATING LOAN PRODUCT------------------------------------------");
 
         final String loanProductJSON = new LoanProductTestBuilder()
                 .withPrincipal(loanPrincipalAmount)
@@ -103,14 +106,14 @@ public class LoanRescheduleRequestTest {
                 .build(null);
 
         this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-        System.out.println("Successfully created loan product  (ID: " + this.loanProductId + ")");
+        LOG.info("Successfully created loan product  (ID:{}) " , this.loanProductId);
     }
 
     /**
      * submit a new loan application, approve and disburse the loan
      **/
     private void createLoanEntity() {
-        System.out.println("---------------------------------NEW LOAN APPLICATION------------------------------------------");
+        LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
 
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
                 .withPrincipal(loanPrincipalAmount)
@@ -131,7 +134,7 @@ public class LoanRescheduleRequestTest {
 
         this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
-        System.out.println("Sucessfully created loan (ID: " + this.loanId + ")");
+        LOG.info("Sucessfully created loan (ID: {} )" , this.loanId);
 
         this.approveLoanApplication();
         this.disburseLoan();
@@ -144,7 +147,7 @@ public class LoanRescheduleRequestTest {
 
         if(this.loanId != null) {
             this.loanTransactionHelper.approveLoan(this.dateString, this.loanId);
-            System.out.println("Successfully approved loan (ID: " + this.loanId + ")");
+            LOG.info("Successfully approved loan (ID: {} )" , this.loanId);
         }
     }
 
@@ -155,7 +158,7 @@ public class LoanRescheduleRequestTest {
 
         if(this.loanId != null) {
             this.loanTransactionHelper.disburseLoan(this.dateString, this.loanId);
-            System.out.println("Successfully disbursed loan (ID: " + this.loanId + ")");
+            LOG.info("Successfully disbursed loan (ID: {} )" , this.loanId);
         }
     }
 
@@ -163,14 +166,14 @@ public class LoanRescheduleRequestTest {
      * create new loan reschedule request
      **/
     private void createLoanRescheduleRequest() {
-        System.out.println("---------------------------------CREATING LOAN RESCHEDULE REQUEST------------------------------------------");
+        LOG.info("---------------------------------CREATING LOAN RESCHEDULE REQUEST------------------------------------------");
 
         final String requestJSON = new LoanRescheduleRequestTestBuilder().build(this.loanId.toString());
 
         this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
         this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
 
-        System.out.println("Successfully created loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");
+        LOG.info("Successfully created loan reschedule request (ID: {} )" , this.loanRescheduleRequestId);
     }
 
     @Test
@@ -182,7 +185,7 @@ public class LoanRescheduleRequestTest {
     public void testRejectLoanRescheduleRequest() {
         this.createLoanRescheduleRequest();
 
-        System.out.println("-----------------------------REJECTING LOAN RESCHEDULE REQUEST--------------------------");
+        LOG.info("-----------------------------REJECTING LOAN RESCHEDULE REQUEST--------------------------");
 
         final String requestJSON = new LoanRescheduleRequestTestBuilder().getRejectLoanRescheduleRequestJSON();
         this.loanRescheduleRequestHelper.rejectLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
@@ -190,14 +193,14 @@ public class LoanRescheduleRequestTest {
         final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
         assertTrue((Boolean)response.get("rejected"));
 
-        System.out.println("Successfully rejected loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");
+        LOG.info("Successfully rejected loan reschedule request (ID: {} )" , this.loanRescheduleRequestId);
     }
 
     @Test
     public void testApproveLoanRescheduleRequest() {
         this.createLoanRescheduleRequest();
 
-        System.out.println("-----------------------------APPROVING LOAN RESCHEDULE REQUEST--------------------------");
+        LOG.info("-----------------------------APPROVING LOAN RESCHEDULE REQUEST--------------------------");
 
         final String requestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
         this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
@@ -212,6 +215,6 @@ public class LoanRescheduleRequestTest {
         assertEquals("NUMBER OF REPAYMENTS SHOULD BE 16, NOT 12", "12", numberOfRepayments.toString());
         assertEquals("TOTAL EXPECTED REPAYMENT MUST BE EQUAL TO 118000.0", "118000.0", totalExpectedRepayment.toString());
 
-        System.out.println("Successfully approved loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");
+        LOG.info("Successfully approved loan reschedule request (ID: {})" , this.loanRescheduleRequestId);
     }
 }

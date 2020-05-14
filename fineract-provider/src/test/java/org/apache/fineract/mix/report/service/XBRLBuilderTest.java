@@ -43,12 +43,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class XBRLBuilderTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
     @Mock
     private NamespaceReadPlatformServiceImpl readNamespaceService;
 
@@ -58,8 +60,8 @@ public class XBRLBuilderTest {
     @Before
     public void setUp() {
         this.readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
-        lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString())).thenReturn(
-                new NamespaceData(1l, "mockedprefix", "mockedurl"));
+        lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
+                .thenReturn(new NamespaceData(1l, "mockedprefix", "mockedurl"));
     }
 
     @Test
@@ -68,10 +70,12 @@ public class XBRLBuilderTest {
         final MixTaxonomyData data1 = Mockito.mock(MixTaxonomyData.class);
         when(data1.getName()).thenReturn("Assets");
         map.put(data1, new BigDecimal(10000));
-        final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
-        System.out.println(result);
-        NodeList nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
-            new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8))).getElementsByTagName("Assets");
+        final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"),
+                "USD");
+        LOG.info("{}", result);
+        NodeList nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                .parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8)))
+                .getElementsByTagName("Assets");
         assertNotNull(nodes);
         assertNotNull(nodes.item(0));
         assertEquals("Assets", nodes.item(0).getNodeName());

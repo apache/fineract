@@ -47,7 +47,13 @@
         <property name="fileExtensions" value="java"/>
     </module>
   -->
+   
     <module name="TreeWalker">
+    <module name="RegexpSinglelineJava">
+            <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
+            <property name="message" value="Line contains console output."/>
+            <property name="ignoreComments" value="false" />
+        </module>
         <module name="EqualsHashCode"/>
 
         <module name="RedundantImport"/>
@@ -83,12 +89,6 @@
             <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
             <property name="forbiddenImportsExcludesRegexp" value="" />
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
-        </module>
-
-        <module name="RegexpSinglelineJava">
-            <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
-            <property name="message" value="Line contains console output."/>
-            <property name="ignoreComments" value="false" />
         </module>
         <module name="RegexpSinglelineJava">
             <property name="format" value="\.printStackTrace?\("/>

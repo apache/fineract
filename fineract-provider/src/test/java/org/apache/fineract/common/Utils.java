@@ -30,7 +30,8 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -42,7 +43,7 @@ import org.apache.http.conn.HttpHostConnectException;
  */
 @SuppressWarnings("unchecked")
 public class Utils {
-
+    private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
     public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
 
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
@@ -56,7 +57,7 @@ public class Utils {
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
-            System.out.println("-----------------------------------LOGIN-----------------------------------------");
+            LOG.info("-----------------------------------LOGIN-----------------------------------------");
             final String json = RestAssured.post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
             return JsonPath.with(json).get("base64EncodedAuthenticationKey");

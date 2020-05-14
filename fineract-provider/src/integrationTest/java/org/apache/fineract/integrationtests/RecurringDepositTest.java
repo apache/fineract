@@ -62,10 +62,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
 public class RecurringDepositTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private RecurringDepositProductHelper recurringDepositProductHelper;
@@ -1420,7 +1422,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -1432,7 +1434,7 @@ public class RecurringDepositTest {
         decimalFormat.applyPattern(".");
         principal = Float.valueOf(decimalFormat.format(principal));
         maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
-        System.out.println(principal);
+        LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
     }
 
@@ -1505,7 +1507,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -1517,7 +1519,7 @@ public class RecurringDepositTest {
         decimalFormat.applyPattern(".");
         principal = Float.valueOf(decimalFormat.format(principal));
         maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
-        System.out.println(principal);
+        LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
     }
 
@@ -1588,7 +1590,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
@@ -1601,7 +1603,7 @@ public class RecurringDepositTest {
         principal += interestToBePosted;
 
         Float expectedBalanceAfter = Float.valueOf(decimalFormat.format(principal));
-        System.out.println(expectedBalanceAfter);
+        LOG.info("{}",expectedBalanceAfter.toString());
 
         Integer transactionIdForPostInterest = this.recurringDepositAccountHelper
                 .postInterestForRecurringDeposit(recurringDepositAccountId);
@@ -1696,7 +1698,7 @@ public class RecurringDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Calendar calendar = Calendar.getInstance();
@@ -1707,7 +1709,7 @@ public class RecurringDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
-        System.out.println(monthDayFormat.format(calendar.getTime()));
+        LOG.info("{}",monthDayFormat.format(calendar.getTime()));
 
         EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
@@ -1716,9 +1718,9 @@ public class RecurringDepositTest {
 
         currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        System.out.println("IPM = " + interestPerMonth);
+        LOG.info("IPM = {}" , interestPerMonth);
         principal += interestPerMonth;
-        System.out.println("principal = " + principal);
+        LOG.info("principal = {}" , principal);
 
         HashMap recurringDepositPrematureData = this.recurringDepositAccountHelper.calculatePrematureAmountForRecurringDeposit(
                 recurringDepositAccountId, CLOSED_ON_DATE);
@@ -1828,7 +1830,7 @@ public class RecurringDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Calendar calendar = Calendar.getInstance();
@@ -1839,7 +1841,7 @@ public class RecurringDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
-        System.out.println(monthDayFormat.format(calendar.getTime()));
+        LOG.info("{}",monthDayFormat.format(calendar.getTime()));
 
         EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
@@ -1848,9 +1850,9 @@ public class RecurringDepositTest {
 
         currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        System.out.println("IPM = " + interestPerMonth);
+        LOG.info("IPM = {}" , interestPerMonth);
         principal += interestPerMonth;
-        System.out.println("principal = " + principal);
+        LOG.info("principal = {}" , principal);
 
         HashMap recurringDepositPrematureData = this.recurringDepositAccountHelper.calculatePrematureAmountForRecurringDeposit(
                 recurringDepositAccountId, CLOSED_ON_DATE);
@@ -1967,7 +1969,7 @@ public class RecurringDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Calendar calendar = Calendar.getInstance();
@@ -1979,7 +1981,7 @@ public class RecurringDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
-        System.out.println(monthDayFormat.format(calendar.getTime()));
+        LOG.info("{}",monthDayFormat.format(calendar.getTime()));
 
         EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
         Integer transactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
@@ -1988,9 +1990,9 @@ public class RecurringDepositTest {
 
         currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        System.out.println("IPM = " + interestPerMonth);
+        LOG.info("IPM = {}" , interestPerMonth);
         principal += interestPerMonth;
-        System.out.println("principal = " + principal);
+        LOG.info("principal = {}" , principal);
 
         HashMap recurringDepositPrematureData = this.recurringDepositAccountHelper.calculatePrematureAmountForRecurringDeposit(
                 recurringDepositAccountId, CLOSED_ON_DATE);
@@ -2112,7 +2114,7 @@ public class RecurringDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Calendar calendar = Calendar.getInstance();
@@ -2124,7 +2126,7 @@ public class RecurringDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
-        System.out.println(monthDayFormat.format(calendar.getTime()));
+        LOG.info("{}",monthDayFormat.format(calendar.getTime()));
 
         EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(calendar.getTime());
         Integer newTransactionIdForDeposit = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
@@ -2133,9 +2135,9 @@ public class RecurringDepositTest {
 
         currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        System.out.println("IPM = " + interestPerMonth);
+        LOG.info("IPM = {}" , interestPerMonth);
         principal += interestPerMonth;
-        System.out.println("principal = " + principal);
+        LOG.info("principal = {}" , principal);
 
         HashMap recurringDepositPrematureData = this.recurringDepositAccountHelper.calculatePrematureAmountForRecurringDeposit(
                 recurringDepositAccountId, CLOSED_ON_DATE);
@@ -2227,7 +2229,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -2239,7 +2241,7 @@ public class RecurringDepositTest {
         decimalFormat.applyPattern(".");
         principal = Float.valueOf(decimalFormat.format(principal));
         maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
-        System.out.println(principal);
+        LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
 
     }
@@ -2312,7 +2314,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
@@ -2324,7 +2326,7 @@ public class RecurringDepositTest {
         decimalFormat.applyPattern(".");
         principal = Float.valueOf(decimalFormat.format(principal));
         maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
-        System.out.println(principal);
+        LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
 
     }
@@ -2355,7 +2357,7 @@ public class RecurringDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        System.out.println(dateFormat.format(todaysDate.getTime()));
+        LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2403,7 +2405,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
@@ -2446,7 +2448,7 @@ public class RecurringDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        System.out.println(dateFormat.format(todaysDate.getTime()));
+        LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2494,7 +2496,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
@@ -2536,7 +2538,7 @@ public class RecurringDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        System.out.println(dateFormat.format(todaysDate.getTime()));
+        LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2585,7 +2587,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
@@ -2627,7 +2629,7 @@ public class RecurringDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        System.out.println(dateFormat.format(todaysDate.getTime()));
+        LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2676,7 +2678,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
@@ -2719,7 +2721,7 @@ public class RecurringDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        System.out.println(dateFormat.format(todaysDate.getTime()));
+        LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2767,7 +2769,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
@@ -2810,7 +2812,7 @@ public class RecurringDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, (daysLeft + 1));
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        System.out.println(dateFormat.format(todaysDate.getTime()));
+        LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2858,7 +2860,7 @@ public class RecurringDepositTest {
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = (interestRate / 100);
         double perDay = (double) 1 / (daysInYear);
-        System.out.println("per day = " + perDay);
+        LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
@@ -3040,7 +3042,7 @@ public class RecurringDepositTest {
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             Account... accounts) {
-        System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -3053,7 +3055,7 @@ public class RecurringDepositTest {
 
     private Integer createRecurringDepositProductWithWithHoldTax(final String validFrom, final String validTo,final String taxGroupId, final String accountingRule,
             Account... accounts) {
-        System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -3068,7 +3070,7 @@ public class RecurringDepositTest {
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             final String chartToBePicked, Account... accounts) {
-        System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -3098,7 +3100,7 @@ public class RecurringDepositTest {
 
     private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
             final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
-        System.out.println("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
+        LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
                 .build(clientID, productID, penalInterestType);
@@ -3109,7 +3111,7 @@ public class RecurringDepositTest {
     private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
             final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate,
             final String depositAmount, final String depositPeriod) {
-        System.out.println("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
+        LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
                 .withDepositPeriod(depositPeriod).withMandatoryDepositAmount(depositAmount).build(clientID, productID, penalInterestType);
@@ -3119,7 +3121,7 @@ public class RecurringDepositTest {
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, final String accountingRule, Account... accounts) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         if (accountingRule.equals(CASH_BASED)) {
             savingsProductHelper = savingsProductHelper.withAccountingRuleAsCashBased(accounts);

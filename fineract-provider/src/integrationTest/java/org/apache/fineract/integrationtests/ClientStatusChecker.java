@@ -21,41 +21,49 @@ package org.apache.fineract.integrationtests;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientStatusChecker {
+    private final static Logger LOG = LoggerFactory.getLogger(ClientStatusChecker.class);
 
     public static void verifyClientIsActive(final HashMap<String, Object> clientStatusHashMap) {
         assertEquals((int) clientStatusHashMap.get("id"), 300);
     }
 
     public static void verifyClientClosed(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS CLOSED ------------------------------------");
+        LOG.info(
+                "\n-------------------------------------- VERIFYING CLIENT IS CLOSED ------------------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 600);
-        System.out.println("Client Status:" + clientStatusHashMap + "\n");
+        LOG.info("Client Status: {} \n", clientStatusHashMap);
     }
 
     public static void verifyClientPending(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS PENDING ------------------------------------");
+        LOG.info(
+                "\n-------------------------------------- VERIFYING CLIENT IS PENDING ------------------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 100);
-        System.out.println("Client Status:" + clientStatusHashMap + "\n");
+        LOG.info("Client Status: {} \n", clientStatusHashMap);
     }
 
     public static void verifyClientRejected(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS REJECTED ------------------------------------");
+        LOG.info(
+                "\n-------------------------------------- VERIFYING CLIENT IS REJECTED ------------------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 700);
-        System.out.println("Client Status:" + clientStatusHashMap + "\n");
+        LOG.info("Client Status: {} \n", clientStatusHashMap);
     }
 
     public static void verifyClientActiavted(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS ACTIVATED ------------------------------------");
+        LOG.info(
+                "\n-------------------------------------- VERIFYING CLIENT IS ACTIVATED ------------------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 300);
-        System.out.println("Client Status:" + clientStatusHashMap + "\n");
+        LOG.info("Client Status: {} \n", clientStatusHashMap);
     }
 
     public static void verifyClientWithdrawn(final HashMap<String, Object> clientStatusHashMap) {
-        System.out.println("\n-------------------------------------- VERIFYING CLIENT IS WITHDRAWN ------------------------------------");
+        LOG.info(
+                "\n-------------------------------------- VERIFYING CLIENT IS WITHDRAWN ------------------------------------");
         assertEquals((int) clientStatusHashMap.get("id"), 800);
-        System.out.println("Client Status:" + clientStatusHashMap + "\n");
+        LOG.info("Client Status: {} \n", clientStatusHashMap);
     }
 
 }
