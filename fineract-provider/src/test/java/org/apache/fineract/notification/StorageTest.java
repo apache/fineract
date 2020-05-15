@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.notification;
 
 import static org.junit.Assert.assertEquals;
@@ -72,7 +71,6 @@ public class StorageTest {
 
     @Test
     public void testNotificationStorage() {
-
         Long userId = 1L;
         String objectType = "CLIENT";
         Long objectIdentifier = 1L;
@@ -80,6 +78,7 @@ public class StorageTest {
         Long actor = 1L;
         String notificationContent = "A client was created";
         boolean isSystemGenerated = false;
+        String now = getCurrentDateTime();
 
         Notification notification = new Notification(
                 objectType,
@@ -88,20 +87,20 @@ public class StorageTest {
                 actor,
                 isSystemGenerated,
                 notificationContent,
-                getCurrentDateTime()
-        );
+                now
+                );
 
         AppUser appUser = new AppUser(null, new User("J.J.", "", true, true,
                 true, true, Collections.emptyList()),
                 null, "user@com", "John", "", null, false,
-                 false, null);
+                false, null);
 
         NotificationMapper notificationMapper = new NotificationMapper(
                 notification,
                 appUser,
                 false,
-                getCurrentDateTime()
-        );
+                now
+                );
 
         when(this.notificationGeneratorWritePlatformService.create(refEq(notification))).thenReturn(1L);
 
@@ -120,9 +119,9 @@ public class StorageTest {
                         actor,
                         notificationContent,
                         isSystemGenerated
-                );
+                        );
 
-        verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification));
+        verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification, "createdAt"));
         verify(this.notificationMapperWritePlatformService, times(1)).create(refEq(notificationMapper));
         verify(this.notificationGeneratorReadRepositoryWrapper, times(1)).findById(1L);
         assertEquals(actualGeneratedNotificationId, Long.valueOf(1));
