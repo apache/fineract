@@ -108,7 +108,7 @@ public class SchedulerJobsTest {
             Map<String, Object> schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
 
             // Executing Scheduler Job
-            schedulerJobHelper.runSchedulerJob(requestSpec, jobId.toString());
+            SchedulerJobHelper.runSchedulerJob(requestSpec, jobId.toString());
 
             // Retrieving Scheduler Job by ID
             schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
@@ -121,6 +121,7 @@ public class SchedulerJobsTest {
                 assertNotNull(schedulerJob);
                 System.out.println("Job " + jobId +" is Still Running");
             }
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             List<Map> jobHistoryData = schedulerJobHelper.getSchedulerJobHistory(jobId);
 
             // Verifying the Status of the Recently executed Scheduler Job
