@@ -575,20 +575,20 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Override
     @CronTarget(jobName = JobName.TRANSFER_INTEREST_TO_SAVINGS)
     public void transferInterestToSavings() throws JobExecutionException {
-        int errors = 0;
+        List<Throwable> errors = new ArrayList<>();
         Collection<AccountTransferDTO> accountTrasferData = this.depositAccountReadPlatformService.retrieveDataForInterestTransfer();
         for (AccountTransferDTO accountTransferDTO : accountTrasferData) {
             try {
                 this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             } catch (final PlatformApiDataValidationException e) {
                 LOG.error("Validation exception while trasfering Interest from {} to {}", accountTransferDTO.getFromAccountId(), accountTransferDTO.getToAccountId(), e);
-                ++errors;
+                errors.add(e);
             } catch (final InsufficientAccountBalanceException e) {
                 LOG.error("InsufficientAccountBalanceException while trasfering Interest from {} to {} ", accountTransferDTO.getFromAccountId(), accountTransferDTO.getToAccountId(), e);
-                ++errors;
+                errors.add(e);
             }
         }
-        if (errors > 0) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
     }
 
     @Override
