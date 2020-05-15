@@ -19,15 +19,15 @@ If you are interested in contributing to this project, but perhaps don't quite k
 Requirements
 ============
 * Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
-* MySQL 5.5
+* MySQL 5.7
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mysql-5.5 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.5
+    docker run --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7
 
 and stop and destroy it like this:
 
-    docker rm -f mysql-5.5
+    docker rm -f mysql-5.7
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistent instead of ephemeral.
 
@@ -274,7 +274,7 @@ Pull Requests
 If your PR is failing to pass our CI build due to a test failure, then:
 
 1. Understand if the failure is due to your PR or an unrelated unstable test.
-1. If you suspect it is because of a "flaky" test, and not due to a change in your PR, then please do not simply wait for an active maintainer to come and help you, but instead be a proactive contributor to the project - see next steps.
+1. If you suspect it is because of a "flaky" test, and not due to a change in your PR, then please do not simply wait for an active maintainer to come and help you, but instead be a proactive contributor to the project - see next steps.  Do understand that we may not review PRs that are not green - it is the contributor's (that's you!) responsability to get a proposed PR to pass the build, not primarily the maintainers.
 1. Search for the name of the failed test on https://issues.apache.org/jira/, e.g. for `AccountingScenarioIntegrationTest` you would find [FINERACT-899](https://issues.apache.org/jira/browse/FINERACT-899).
 1. If you happen to read in such bugs that tests were just recently fixed, or ignored, then rebase your PR to pick up that change.
 1. If you find previous comments "proving" that the same test has arbitrarily failed in at least 3 past PRs, then please do yourself raise a small separate new PR proposing to add an `@Ignore // TODO FINERACT-123` to the respective unstable test (e.g. [#774](https://github.com/apache/fineract/pull/774)) with the commit message mentioning said JIRA, as always.  (Please do NOT just `@Ignore` any existing tests mixed in as part of your larger PR.)
@@ -288,6 +288,8 @@ documents that we cannot accept huge "code dump" Pull Requests, with some relate
 Guideline for new Feature commits involving Refactoring: If you are submitting PR for a new Feature,
 and it involves refactoring, try to differentiate "new Feature code" with "Refactored" by placing
 them in different commits. This helps review to review your code faster.
+
+We have an automated Bot which marks pull requests as "stale" after a while, and ultimately automatically closes them.
 
 
 Releasing

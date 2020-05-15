@@ -51,7 +51,7 @@ public class Notification extends AbstractPersistableCustom {
     public Notification() {}
 
     public Notification(String objectType, Long objectIdentifier, String action, Long actorId, boolean isSystemGenerated,
-                        String notificationContent, String createdAt) {
+            String notificationContent, String createdAt) {
         this.objectType = objectType;
         this.objectIdentifier = objectIdentifier;
         this.action = action;
@@ -89,7 +89,7 @@ public class Notification extends AbstractPersistableCustom {
         return actorId;
     }
 
-    public void setActor(Long actor) {
+    public void setActor(Long actorId) {
         this.actorId = actorId;
     }
 
@@ -107,5 +107,12 @@ public class Notification extends AbstractPersistableCustom {
 
     public void setNotificationContent(String notificationContent) {
         this.notificationContent = notificationContent;
+    }
+
+    @Override
+    public String toString() {
+        return "Notification [objectType=" + this.objectType + ", objectIdentifier=" + this.objectIdentifier + ", action=" + this.action
+                + ", actorId=" + this.actorId + ", isSystemGenerated=" + this.isSystemGenerated + ", notificationContent="
+                + this.notificationContent + ", createdAt=" + this.createdAt + ", getId()=" + this.getId() + "]";
     }
 }

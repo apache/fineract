@@ -1,0 +1,18 @@
+name: Greetings
+
+on: [pull_request, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: |
+            Welcome to Apache Fineract!!
+            Have you read https://github.com/apache/fineract/#pull-requests?
+            Already subscribed to our mailing list, by sending an (empty) email to dev-subscribe@fineract.apache.org?
+            Created your JIRA account on https://issues.apache.org/jira/projects/FINERACT/?
+            Played with our server at https://www.fineract.dev?
+            We're very excited to have you onboard contributing.

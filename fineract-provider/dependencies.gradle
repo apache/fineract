@@ -19,7 +19,7 @@
 dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
+    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
 
 	// Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
 	// Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -63,7 +63,7 @@ dependencies {
             'org.apache.tika:tika-core',
 
             'org.drizzle.jdbc:drizzle-jdbc',
-            'com.googlecode.flyway:flyway-core',
+            'org.flywaydb:flyway-core',
 
             'net.sf.ehcache:ehcache',
             'com.lowagie:itext',
@@ -78,7 +78,7 @@ dependencies {
 		exclude group: 'javax.validation'
     }
     implementation ('org.apache.activemq:activemq-broker') {
-    	exclude group: 'org.apache.geronimo.specs'
+        exclude group: 'org.apache.geronimo.specs'
     }
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
 		exclude group: 'org.hibernate'
@@ -111,9 +111,10 @@ dependencies {
 	// Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
 	//
     testImplementation( 'junit:junit',
-    		'org.junit.platform:junit-platform-runner', // FINERACT-943
+            'org.junit.platform:junit-platform-runner', // FINERACT-943
             'org.mockito:mockito-core',
             'io.github.classgraph:classgraph',
+            'org.awaitility:awaitility'
 	)
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'

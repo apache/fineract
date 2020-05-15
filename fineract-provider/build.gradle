@@ -38,12 +38,12 @@ buildscript {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
         classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1',
             'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
-            'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
+            'org.zeroturnaround:gradle-jrebel-plugin:1.1.10',
             'org.springframework.boot:spring-boot-gradle-plugin:2.2.7.RELEASE'
         // below
         classpath 'org.apache.openjpa:openjpa:3.1.1' // when upgrading, also change OpenJPA version repeated below in dependencyManagement!
         classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-        classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
+        classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.3.1'
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.0.8"
         // Use Guava version 23+ as a workaround to spotbug intergration.
         // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
@@ -83,7 +83,7 @@ dependencyManagement {
 
         dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
         dependency "org.apache.openjpa:openjpa:3.1.1" // when upgrading, also change OpenJPA version repeated above in buildscript!
-        dependency 'com.squareup.retrofit:retrofit:1.6.1'
+        dependency 'com.squareup.retrofit:retrofit:1.9.0'
         dependency 'com.squareup.okhttp:okhttp:2.0.0'
         dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
         dependency 'com.google.code.gson:gson:+'
@@ -94,27 +94,27 @@ dependencyManagement {
         dependency 'com.lowagie:itext:2.1.7'
         dependency 'com.lowagie:itext-rtf:2.1.7'
         dependency 'org.mnode.ical4j:ical4j:1.0.7'
-        dependency 'com.googlecode.flyway:flyway-core:2.1.1'
+        dependency 'org.flywaydb:flyway-core:6.4.1'
         dependency 'org.quartz-scheduler:quartz:+'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.80'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.779'
         dependency 'net.sf.ehcache:ehcache:+'
         dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
         dependency 'com.jayway.jsonpath:json-path:0.9.1'
-        dependency 'org.apache.tika:tika-core:1.9'
+        dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:+'
-        dependency 'io.swagger:swagger-jersey-jaxrs:1.5.15'
+        dependency 'io.swagger:swagger-jersey-jaxrs:1.6.1'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-	dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+	    dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
         dependency 'org.apache.activemq:activemq-broker:+'
-        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
+        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.3'
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
         dependency 'com.mockrunner:mockrunner-jms:2.0.4'
-        dependency 'io.github.classgraph:classgraph:4.8.43'
+        dependency 'io.github.classgraph:classgraph:4.8.78'
         dependency 'org.dom4j:dom4j:2.1.0'
         dependency 'nekohtml:nekohtml:1.9.6.2'
-
+		dependency 'org.awaitility:awaitility:4.0.2'
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
@@ -288,12 +288,15 @@ tasks.withType(JavaCompile) {
     options.deprecation = true
 }
 
-/* Pick up dependencies based on the environemnt, defaults to production */
+apply from: 'dependencies.gradle'
+/* TODO https://issues.apache.org/jira/browse/FINERACT-939 (dev-dependencies.gradle has been removed, as totally broken)
+// Pick up dependencies based on the environment, defaults to production
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'
 }  else {
     apply from: 'dependencies.gradle'
 }
+*/
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
 if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
@@ -421,6 +424,7 @@ license {
         "**/package-info.java",
         "**/keystore.jks",
         "**/swagger-ui/**",
+        "**/api-docs/**",
     ])
     strictCheck true
 }
@@ -531,7 +535,7 @@ configurations {
 }
 dependencies {
     driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-    checkstyle 'com.puppycrawl.tools:checkstyle:8.28'
+    checkstyle 'com.puppycrawl.tools:checkstyle:8.32'
     checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.36.0'
 }
 
