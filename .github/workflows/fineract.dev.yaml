@@ -30,6 +30,6 @@ jobs:
 
       - run: gcloud components install beta
 
-      - run: JOBS=$(gcloud beta builds list --ongoing --format="value[terminator=' '](id)") && [ ! -z "$JOBS" ] && echo "Cancelling $JOBS..." && gcloud builds cancel $JOBS --no-user-output-enabled
+      - run: JOBS=$(gcloud beta builds list --ongoing --format="value[terminator=' '](id)") && [ ! -z "$JOBS" ] && echo "Cancelling $JOBS..." && gcloud builds cancel $JOBS --no-user-output-enabled || true
 
       - run: gcloud beta builds triggers run deploy-demo --branch master --format=none
