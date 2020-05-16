@@ -102,7 +102,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             office.generateHierarchy();
 
-            this.officeRepositoryWrapper.save(office);
+            this.officeRepositoryWrapper.save(office); // OK
 
             this.topicDomainService.createTopic(office);
 

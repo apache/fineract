@@ -70,9 +70,10 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     @Transactional
     @Override
     public void saveOrUpdate(final ScheduledJobDetail scheduledJobDetails) {
-        this.scheduledJobDetailsRepository.save(scheduledJobDetails);
+        this.scheduledJobDetailsRepository.save(scheduledJobDetails); // OK
     }
 
+    // OK
     @Transactional
     @Override
     public void saveOrUpdate(final ScheduledJobDetail scheduledJobDetails, final ScheduledJobRunHistory scheduledJobRunHistory) {
@@ -98,7 +99,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     @Override
     @Transactional
     public void updateSchedulerDetail(final SchedulerDetail schedulerDetail) {
-        this.schedulerDetailRepository.save(schedulerDetail);
+        this.schedulerDetailRepository.save(schedulerDetail); // OK
     }
 
     @Override
@@ -147,7 +148,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         } else if (!isStopExecution) {
             scheduledJobDetail.updateCurrentlyRunningStatus(true);
         }
-        this.scheduledJobDetailsRepository.save(scheduledJobDetail);
+        this.scheduledJobDetailsRepository.save(scheduledJobDetail); // OK
         return isStopExecution;
     }
 

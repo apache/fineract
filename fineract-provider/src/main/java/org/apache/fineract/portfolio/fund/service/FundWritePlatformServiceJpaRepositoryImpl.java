@@ -68,7 +68,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             final Fund fund = Fund.fromJson(command);
 
-            this.fundRepository.save(fund);
+            this.fundRepository.saveAndFlush(fund);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

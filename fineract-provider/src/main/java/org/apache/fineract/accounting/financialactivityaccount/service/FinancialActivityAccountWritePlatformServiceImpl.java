@@ -74,7 +74,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             FinancialActivityAccount financialActivityAccount = FinancialActivityAccount.createNew(glAccount, financialActivityId);
 
             validateFinancialActivityAndAccountMapping(financialActivityAccount);
-            this.financialActivityAccountRepository.save(financialActivityAccount);
+            this.financialActivityAccountRepository.saveAndFlush(financialActivityAccount);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(financialActivityAccount.getId()) //

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unused", "rawtypes" })
-public class CurrenciesTest {
+public class CurrenciesTest { // OK
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

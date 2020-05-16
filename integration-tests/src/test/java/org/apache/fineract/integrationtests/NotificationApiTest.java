@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NotificationApiTest {
+public class NotificationApiTest { // OK
 
     private static final Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
     private ResponseSpecification responseSpec;

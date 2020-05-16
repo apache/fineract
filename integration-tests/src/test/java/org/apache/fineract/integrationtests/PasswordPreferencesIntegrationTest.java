@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class PasswordPreferencesIntegrationTest {
+public class PasswordPreferencesIntegrationTest { // OK
 
     private static final Logger LOG = LoggerFactory.getLogger(PasswordPreferencesIntegrationTest.class);
     private ResponseSpecification responseSpec;

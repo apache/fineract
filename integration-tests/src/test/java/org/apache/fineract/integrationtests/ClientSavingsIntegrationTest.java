@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * Client Savings Integration Test for checking Savings Application.
  */
 @SuppressWarnings({ "rawtypes" })
-public class ClientSavingsIntegrationTest {
+public class ClientSavingsIntegrationTest { // NOK - EntityDatatablesCheck error.
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientSavingsIntegrationTest.class);
     public static final String DEPOSIT_AMOUNT = "2000";

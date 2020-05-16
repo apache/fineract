@@ -71,13 +71,13 @@ public class TopicTest {
 
         lenient().when(this.officeRepository.getOne(1L)).thenReturn(office);
         lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
-        when(this.roleRepository.save(role)).thenReturn(role);
+        when(this.roleRepository.save(role)).thenReturn(role); // OK
         when(this.topicWritePltfService.create(refEq(topic))).thenReturn(1L);
 
-        this.roleRepository.save(role);
+        this.roleRepository.save(role); // OK
         Long topicId = this.topicWritePltfService.create(topic);
 
-        verify(this.roleRepository, times(1)).save(role);
+        verify(this.roleRepository, times(1)).save(role); // OK
         verify(this.topicWritePltfService, times(1)).create(refEq(topic));
         assertEquals(topicId, Long.valueOf(1));
 

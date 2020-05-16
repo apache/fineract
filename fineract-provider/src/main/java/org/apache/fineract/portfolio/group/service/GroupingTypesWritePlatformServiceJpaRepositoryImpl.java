@@ -200,7 +200,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
-                this.groupRepository.save(newGroup);
+                this.groupRepository.saveAndFlush(newGroup);
                 // validate Group creation rules for Group
                 if (newGroup.isGroup()) {
                     validateGroupRulesBeforeActivation(newGroup);

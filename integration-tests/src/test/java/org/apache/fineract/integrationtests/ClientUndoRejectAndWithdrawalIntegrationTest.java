@@ -40,7 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unused" })
-public class ClientUndoRejectAndWithdrawalIntegrationTest {
+public class ClientUndoRejectAndWithdrawalIntegrationTest { // NOK - EntityDatatablesCheck error.
 
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
