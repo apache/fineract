@@ -28,4 +28,5 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - run: gcloud beta builds triggers run deploy-demo --branch master --format=none
+      - run: gcloud beta builds triggers run deploy-demo --branch master --format=none --quiet
+        # see https://github.com/GoogleCloudPlatform/github-actions/issues/106 re. use of --quiet
