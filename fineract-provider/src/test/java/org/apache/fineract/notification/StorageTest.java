@@ -122,7 +122,7 @@ public class StorageTest {
                         );
 
         verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification, "createdAt"));
-        verify(this.notificationMapperWritePlatformService, times(1)).create(refEq(notificationMapper));
+        verify(this.notificationMapperWritePlatformService, times(1)).create(refEq(notificationMapper, "createdAt"));
         verify(this.notificationGeneratorReadRepositoryWrapper, times(1)).findById(1L);
         assertEquals(actualGeneratedNotificationId, Long.valueOf(1));
     }
