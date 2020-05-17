@@ -268,7 +268,7 @@ public class LoanTransactionData {
             final PaymentDetailData paymentDetailData = null;
             final CurrencyData currency = null;
             final BigDecimal unrecognizedIncomePortion = null;
-            final BigDecimal principalPortion = null;;
+            final BigDecimal principalPortion = null;
             final BigDecimal interestPortion = null;
             final BigDecimal feeChargesPortion = null;
             final BigDecimal penaltyChargesPortion = null;

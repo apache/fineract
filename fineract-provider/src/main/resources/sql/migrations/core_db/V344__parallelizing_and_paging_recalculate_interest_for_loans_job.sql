@@ -18,10 +18,10 @@
 --
 
 CREATE TABLE IF NOT EXISTS `job_parameters` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `job_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `job_id` BIGINT NOT NULL,
   `parameter_name` VARCHAR(100) NOT NULL,
-  `parameter_value` INT(11) NOT NULL,
+  `parameter_value` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_job_id` (`job_id`),
   CONSTRAINT `FK_job_id` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)

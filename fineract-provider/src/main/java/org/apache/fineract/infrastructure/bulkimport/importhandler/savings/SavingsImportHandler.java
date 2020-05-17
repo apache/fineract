@@ -264,7 +264,7 @@ public class SavingsImportHandler implements ImportHandler {
 
                 if (progressLevel == 0) {
                     CommandProcessingResult result = importSavings(i,dateFormat);
-                    savingsId = result.getSavingsId();;
+                    savingsId = result.getSavingsId();
                     progressLevel = 1;
                 } else
                     savingsId = ImportHandlerUtils.readAsLong(SavingsConstants.SAVINGS_ID_COL, savingsSheet.getRow(savings.get(i).getRowIndex()));

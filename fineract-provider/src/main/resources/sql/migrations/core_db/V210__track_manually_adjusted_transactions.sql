@@ -18,4 +18,4 @@
 --
 
 Alter table m_loan_transaction
-Add column manually_adjusted_or_reversed tinyint(1) default 0;
+Add column manually_adjusted_or_reversed tinyint default 0;

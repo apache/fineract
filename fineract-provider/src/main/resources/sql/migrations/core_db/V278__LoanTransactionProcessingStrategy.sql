@@ -27,7 +27,7 @@ WHERE code='principal-interest-penalties-fees-order-strategy' ;
 UPDATE `ref_loan_transaction_processing_strategy` SET `name`='Interest, Principal, Penalties, Fees Order' 
 WHERE code='interest-principal-penalties-fees-order-strategy' ;
 
-ALTER TABLE `ref_loan_transaction_processing_strategy`ADD `sort_order` INT(4) ;
+ALTER TABLE `ref_loan_transaction_processing_strategy`ADD `sort_order` INT ;
 
 UPDATE `ref_loan_transaction_processing_strategy` SET `sort_order`=1 WHERE code='mifos-standard-strategy' ;
 UPDATE `ref_loan_transaction_processing_strategy` SET `sort_order`=2 WHERE code='rbi-india-strategy' ;

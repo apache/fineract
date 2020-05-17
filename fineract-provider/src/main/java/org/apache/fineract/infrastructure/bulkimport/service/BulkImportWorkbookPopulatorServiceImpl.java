@@ -490,7 +490,7 @@ private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
         if (officeId!=null) {
             String activeAccounts="sa.status_enum = 300";
             SearchParameters searchParameters = SearchParameters.from(activeAccounts, officeId, null, null, null);
-            savingsAccounts = savingsAccountReadPlatformService.retrieveAll(searchParameters).getPageItems();;
+            savingsAccounts = savingsAccountReadPlatformService.retrieveAll(searchParameters).getPageItems();
         }else {
             savingsAccounts= savingsAccountReadPlatformService.retrieveAll(null).getPageItems();
         }

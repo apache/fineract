@@ -18,15 +18,15 @@
 --
 
 ALTER TABLE `m_code_value`
-ADD COLUMN `code_score` INT(11) NULL AFTER `order_position`;
+ADD COLUMN `code_score` INT NULL AFTER `order_position`;
 
 
 CREATE TABLE IF NOT EXISTS `ppi_scores` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `score_from` int(11) NOT NULL,
-  `score_to` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `score_from` INT NOT NULL,
+  `score_to` INT NOT NULL,
   PRIMARY KEY (`id`)
-) COLLATE='utf8_general_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 
@@ -95,22 +95,22 @@ VALUES
 
 
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(100) NOT NULL,
   `name` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) COLLATE='utf8_general_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB ;
 
 
 
  CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `likelihood_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `likelihood_id` BIGINT NOT NULL,
   `ppi_name` varchar(250) NOT NULL,
-  `enabled` int(11) NOT NULL DEFAULT '100',
+  `enabled` INT NOT NULL DEFAULT '100',
   PRIMARY KEY (`id`)
-) COLLATE='utf8_general_ci'
+) COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 /**PPI permission**/

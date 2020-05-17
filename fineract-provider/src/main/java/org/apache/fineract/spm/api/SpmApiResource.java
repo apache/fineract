@@ -140,7 +140,7 @@ public class SpmApiResource {
     public void activateOrDeactivateSurvey(@PathParam("id") final Long id, @QueryParam("command") final String command) {
         this.securityContext.authenticatedUser();
         if(command != null && command.equalsIgnoreCase("activate")){
-            this.spmService.activateSurvey(id);;
+            this.spmService.activateSurvey(id);
         }else if(command != null && command.equalsIgnoreCase("deactivate")){
             this.spmService.deactivateSurvey(id);
         }else{

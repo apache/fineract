@@ -38,8 +38,8 @@ ALTER TABLE m_staff
 */
 
 ALTER TABLE m_client
-	ADD COLUMN `status_id` INT(5) NOT NULL  DEFAULT 300 AFTER `is_deleted` ;
+	ADD COLUMN `status_id` INT NOT NULL  DEFAULT 300 AFTER `is_deleted` ;
 
 
 ALTER TABLE m_group
-	ADD COLUMN `status_id` INT(5) NOT NULL  DEFAULT 300 AFTER `is_deleted` ;
+	ADD COLUMN `status_id` INT NOT NULL  DEFAULT 300 AFTER `is_deleted` ;

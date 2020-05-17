@@ -30,7 +30,7 @@ INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_tra
 
 -- add address table
 CREATE TABLE `m_address` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`street` VARCHAR(100) NULL DEFAULT NULL,
 	`address_line_1` VARCHAR(100) NULL DEFAULT NULL,
 	`address_line_2` VARCHAR(100) NULL DEFAULT NULL,
@@ -38,11 +38,11 @@ CREATE TABLE `m_address` (
 	`town_village` VARCHAR(100) NULL DEFAULT NULL,
 	`city` VARCHAR(100) NULL DEFAULT NULL,
 	`county_district` VARCHAR(100) NULL DEFAULT NULL,
-	`state_province_id` INT(11) NULL DEFAULT NULL,
-	`country_id` INT(11) NULL DEFAULT NULL,
+	`state_province_id` INT NULL DEFAULT NULL,
+	`country_id` INT NULL DEFAULT NULL,
 	`postal_code` VARCHAR(10) NULL DEFAULT NULL,
-	`latitude` DECIMAL(10,8) UNSIGNED NULL DEFAULT '0.00000000',
-	`longitude` DECIMAL(10,8) UNSIGNED NULL DEFAULT '0.00000000',
+	`latitude` DECIMAL(10,8) NULL DEFAULT '0.00000000',
+	`longitude` DECIMAL(10,8) NULL DEFAULT '0.00000000',
 	`created_by` VARCHAR(100) NULL DEFAULT NULL,
 	`created_on` DATE NULL DEFAULT NULL,
 	`updated_by` VARCHAR(100) NULL DEFAULT NULL,
@@ -60,11 +60,11 @@ AUTO_INCREMENT=1
 
 -- entity address table
 CREATE TABLE `m_client_address` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`client_id` BIGINT(20) NOT NULL DEFAULT '0',
-	`address_id` BIGINT(20) NOT NULL DEFAULT '0',
-	`address_type_id` INT(11) NOT NULL DEFAULT '0',
-	`is_active` TINYINT(4) NOT NULL DEFAULT '0',
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`client_id` BIGINT NOT NULL DEFAULT '0',
+	`address_id` BIGINT NOT NULL DEFAULT '0',
+	`address_type_id` INT NOT NULL DEFAULT '0',
+	`is_active` TINYINT NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
 	INDEX `addressIdFk` (`address_id`),
 	INDEX `address_codefk` (`address_type_id`),
@@ -79,12 +79,12 @@ AUTO_INCREMENT=1
 
 -- field configuration
 CREATE TABLE `m_field_configuration` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`entity` VARCHAR(100) NOT NULL,
 	`subentity` VARCHAR(100) NOT NULL,
 	`field` VARCHAR(100) NOT NULL,
-	`is_enabled` TINYINT(4) NOT NULL,
-	`is_mandatory` TINYINT(4) NOT NULL,
+	`is_enabled` TINYINT NOT NULL,
+	`is_mandatory` TINYINT NOT NULL,
 	`validation_regex` VARCHAR(50) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`)
 )

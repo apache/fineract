@@ -18,8 +18,8 @@
 --
 
 CREATE TABLE `m_loan_transaction_temp` (
-	`id` BIGINT(20) NOT NULL,
-	`loan_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL,
+	`loan_id` BIGINT NOT NULL,
 	`amount` DECIMAL(19,6) NOT NULL DEFAULT '0',
 	`transaction_date` DATE NOT NULL
 );

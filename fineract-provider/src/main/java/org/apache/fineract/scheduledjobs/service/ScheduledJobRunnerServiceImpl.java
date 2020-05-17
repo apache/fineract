@@ -21,6 +21,7 @@ package org.apache.fineract.scheduledjobs.service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -239,20 +240,20 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.PAY_DUE_SAVINGS_CHARGES)
     public void applyDueChargesForSavings() throws JobExecutionException {
         final Collection<SavingsAccountAnnualFeeData> chargesDueData = this.savingsAccountChargeReadPlatformService.retrieveChargesWithDue();
-        int numberOfErrors = 0;
+        List<Throwable> exceptions = new ArrayList<>();
         for (final SavingsAccountAnnualFeeData savingsAccountReference : chargesDueData) {
             try {
                 this.savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(), savingsAccountReference.getAccountId());
             } catch (final PlatformApiDataValidationException e) {
+                exceptions.add(e);
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
                     logger.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
-                    ++numberOfErrors;
                 }
             }
         }
         logger.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
-        if (numberOfErrors > 0) { throw new JobExecutionException(numberOfErrors); }
+        if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
     }
 
     @Transactional
@@ -372,7 +373,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @Override
     @CronTarget(jobName = JobName.POST_DIVIDENTS_FOR_SHARES)
     public void postDividends() throws JobExecutionException {
-        int numberOfErrors = 0;
+        List<Throwable> exceptions = new ArrayList<>();
         List<Map<String, Object>> dividendDetails = this.shareAccountDividendReadPlatformService.retriveDividendDetailsForPostDividents();
         for (Map<String, Object> dividendMap : dividendDetails) {
             Long id = null ;
@@ -388,19 +389,20 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             try {
                 this.shareAccountSchedularService.postDividend(id, savingsId);
             } catch (final PlatformApiDataValidationException e) {
+                exceptions.add(e);
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Post Dividends to savings failed due to ApiParameterError for Divident detail Id: {} and savings Id: {} with message: {}",
-                        new Object[] { id, savingsId, error.getDeveloperMessage(), e });
-                    ++numberOfErrors;
+                    logger.error(
+                            "Post Dividends to savings failed due to ApiParameterError for Divident detail Id: {} and savings Id: {} with message: {}",
+                            id, savingsId, error.getDeveloperMessage(), e);
                 }
             } catch (final Exception e) {
                 logger.error("Post Dividends to savings failed for Divident detail Id: {} and savings Id: {}", id, savingsId, e);
-                ++numberOfErrors;
+                exceptions.add(e);
             }
         }
 
-        if (numberOfErrors > 0) { throw new JobExecutionException(numberOfErrors); }
+        if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
     }
 
     @Override

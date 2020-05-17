@@ -18,28 +18,28 @@
 --
 
 CREATE TABLE `scheduled_email_campaign` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`campaign_name` VARCHAR(100) NOT NULL,
-	`campaign_type` INT(11) NOT NULL,
-	`businessRule_id` INT(11) NOT NULL,
+	`campaign_type` INT NOT NULL,
+	`businessRule_id` INT NOT NULL,
 	`param_value` TEXT NULL,
-	`status_enum` INT(11) NOT NULL,
+	`status_enum` INT NOT NULL,
 	`email_subject` VARCHAR(100) NOT NULL, 
 	`email_message` TEXT NOT NULL,
 	`email_attachment_file_format` VARCHAR(10) NOT NULL,
-	`stretchy_report_id` INT(11) NOT NULL,
+	`stretchy_report_id` INT NOT NULL,
 	`stretchy_report_param_map` TEXT NULL DEFAULT NULL,
 	`closedon_date` DATE NULL DEFAULT NULL,
-	`closedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`closedon_userid` BIGINT NULL DEFAULT NULL,
 	`submittedon_date` DATE NULL DEFAULT NULL,
-	`submittedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`submittedon_userid` BIGINT NULL DEFAULT NULL,
 	`approvedon_date` DATE NULL DEFAULT NULL,
-	`approvedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`approvedon_userid` BIGINT NULL DEFAULT NULL,
 	`recurrence` VARCHAR(100) NULL DEFAULT NULL,
 	`next_trigger_date` DATETIME NULL DEFAULT NULL,
 	`last_trigger_date` DATETIME NULL DEFAULT NULL,
 	`recurrence_start_date` DATETIME NULL DEFAULT NULL,
-	`is_visible` TINYINT(1) NULL DEFAULT '1',
+	`is_visible` tinyint NULL DEFAULT '1',
 	`previous_run_error_log` TEXT NULL DEFAULT NULL,
 	`previous_run_error_message` TEXT NULL DEFAULT NULL,
 	PRIMARY KEY (`id`),
@@ -47,12 +47,12 @@ CREATE TABLE `scheduled_email_campaign` (
 );
 
 CREATE TABLE IF NOT EXISTS scheduled_email_messages_outbound (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `group_id` bigint(20) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `staff_id` bigint(20) DEFAULT NULL,
-  `email_campaign_id` bigint(20) DEFAULT NULL,
-  `status_enum` int(5) NOT NULL DEFAULT '100',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `group_id` BIGINT DEFAULT NULL,
+  `client_id` BIGINT DEFAULT NULL,
+  `staff_id` BIGINT DEFAULT NULL,
+  `email_campaign_id` BIGINT DEFAULT NULL,
+  `status_enum` INT NOT NULL DEFAULT '100',
   `email_address` varchar(50) NOT NULL,
   `email_subject` varchar(50) NOT NULL,
   `message` text NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS scheduled_email_messages_outbound (
 );
 
 create table if not exists scheduled_email_configuration (
-id int primary key auto_increment,
+id INT primary key auto_increment,
 name varchar(50) not null,
 `value` varchar(200) null,
 constraint unique_name unique (name)

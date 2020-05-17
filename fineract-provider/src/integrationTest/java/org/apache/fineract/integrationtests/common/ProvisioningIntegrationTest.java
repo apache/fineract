@@ -44,10 +44,12 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ProvisioningIntegrationTest {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
     private static final String NONE = "1";
     private final static int LOANPRODUCTS_SIZE = 10;
 
@@ -84,7 +86,7 @@ public class ProvisioningIntegrationTest {
             loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
             LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
             LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-            System.out.println("-------------------------------DISBURSE LOAN-------------------------------------------");
+            LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             loans.add(loanID);
@@ -181,7 +183,7 @@ public class ProvisioningIntegrationTest {
     }
 
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
                 .withNumberOfRepayments("4") //
@@ -203,7 +205,7 @@ public class ProvisioningIntegrationTest {
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
             final String savingsId, String principal) {
-        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //

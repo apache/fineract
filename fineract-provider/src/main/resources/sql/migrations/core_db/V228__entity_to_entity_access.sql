@@ -42,12 +42,12 @@ values (
 
 -- Table where the actual restrictions will be stored
 CREATE TABLE `m_entity_to_entity_access` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`entity_type` VARCHAR(50) NOT NULL,
-	`entity_id` BIGINT(20) NOT NULL,
-	`access_type_code_value_id` INT(11) NOT NULL,
+	`entity_id` BIGINT NOT NULL,
+	`access_type_code_value_id` INT NOT NULL,
 	`second_entity_type` VARCHAR(50) NOT NULL,
-	`second_entity_id` BIGINT(20) NOT NULL,
+	`second_entity_id` BIGINT NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `IDX_OFFICE` (`entity_type`,`entity_id`),
 	UNIQUE KEY `id_uniq_m_entity_to_entity_access` (`entity_type`,`entity_id`,`access_type_code_value_id`,`second_entity_type`,`second_entity_id`),

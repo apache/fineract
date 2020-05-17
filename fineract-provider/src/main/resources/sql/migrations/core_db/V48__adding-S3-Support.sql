@@ -25,7 +25,7 @@ CREATE TABLE `c_external_service` (
 	`value` VARCHAR(250) NULL DEFAULT NULL,
 	UNIQUE INDEX `name` (`name`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 INSERT INTO c_external_service (name) VALUES ('s3_bucket_name');
@@ -36,17 +36,17 @@ INSERT INTO c_external_service (name) VALUES ('s3_secret_key');
 
 /*Image tables stores details of all images*/
 CREATE TABLE IF NOT EXISTS `m_image`(
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`location` varchar(500),
-	`storage_type_enum` SMALLINT(5),
+	`storage_type_enum` SMALLINT,
 	PRIMARY KEY (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 /*Client points to image table*/
 ALTER TABLE `m_client`
-	ADD COLUMN `image_id` BIGINT(20) NULL DEFAULT NULL AFTER `display_name`,
+	ADD COLUMN `image_id` BIGINT NULL DEFAULT NULL AFTER `display_name`,
 	ADD CONSTRAINT `FK_m_client_m_image` FOREIGN KEY (`image_id`) REFERENCES `m_image` (`id`);
 
 /*Move existing image locations to new table*/
@@ -68,7 +68,7 @@ while v_counter < num_of_clients do
 	DEALLOCATE PREPARE stmt1;
 
 	select ifnull(max(`id`),0) from m_image INTO curr_image;
-	SET @z = CONCAT('select id INTO @curr_client FROM m_client where image_key is not null limit  ', v_counter , ', ', 1);
+	SET @z = CONCAT('select id FROM m_client where image_key is not null limit INTO @curr_client ', v_counter , ', ', 1);
 	PREPARE stmt2 FROM @z;
 	EXECUTE stmt2;
 
@@ -93,5 +93,5 @@ ALTER TABLE `m_client` DROP COLUMN `image_key`;
 
 
 /*Add storage type for m_document table and update existing documents to file storage*/
-ALTER TABLE m_document ADD COLUMN storage_type_enum SMALLINT(5);
+ALTER TABLE m_document ADD COLUMN storage_type_enum SMALLINT;
 UPDATE m_document set storage_type_enum=1;

@@ -17,5 +17,5 @@
 -- under the License.
 --
 
-ALTER TABLE `m_product_loan` ADD COLUMN `is_equal_amortization` TINYINT(1) NOT NULL DEFAULT '0';
-ALTER TABLE `m_loan` ADD COLUMN `is_equal_amortization` TINYINT(1) NOT NULL DEFAULT '0';
+ALTER TABLE `m_product_loan` ADD COLUMN `is_equal_amortization` tinyint NOT NULL DEFAULT '0';
+ALTER TABLE `m_loan` ADD COLUMN `is_equal_amortization` tinyint NOT NULL DEFAULT '0';

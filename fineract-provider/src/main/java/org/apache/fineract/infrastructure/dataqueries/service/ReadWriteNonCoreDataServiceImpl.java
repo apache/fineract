@@ -588,10 +588,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sqlBuilder = sqlBuilder.append("CREATE TABLE `" + datatableName + "` (");
 
             if (multiRow) {
-                sqlBuilder = sqlBuilder.append("`id` BIGINT(20) NOT NULL AUTO_INCREMENT, ")
-                        .append("`" + fkColumnName + "` BIGINT(20) NOT NULL, ");
+                sqlBuilder = sqlBuilder.append("`id` BIGINT NOT NULL AUTO_INCREMENT, ")
+                        .append("`" + fkColumnName + "` BIGINT NOT NULL, ");
             } else {
-                sqlBuilder = sqlBuilder.append("`" + fkColumnName + "` BIGINT(20) NOT NULL, ");
+                sqlBuilder = sqlBuilder.append("`" + fkColumnName + "` BIGINT NOT NULL, ");
             }
 
             for (final JsonElement column : columns) {
@@ -614,7 +614,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
             sqlBuilder.append(constrainBuilder);
 
-            sqlBuilder = sqlBuilder.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+            sqlBuilder = sqlBuilder.append(") ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;");
             this.jdbcTemplate.execute(sqlBuilder.toString());
 
             registerDatatable(datatableName, apptableName);
@@ -906,14 +906,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     if (mapColumnNameDefinition.containsKey("id")) {
                         sqlBuilder = sqlBuilder.append("ALTER TABLE `" + datatableName + "` ").append("DROP KEY `fk_" + oldFKName + "`,")
                                 .append("DROP FOREIGN KEY `fk_" + oldConstraintName + "`,")
-                                .append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT(20) NOT NULL,")
+                                .append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT NOT NULL,")
                                 .append("ADD KEY `fk_" + newFKName + "` (`" + newFKName + "`),")
                                 .append("ADD CONSTRAINT `fk_" + newConstraintName + "` ").append("FOREIGN KEY (`" + newFKName + "`) ")
                                 .append("REFERENCES `" + actualAppTableName + "` (`id`)");
                     } else {
                         sqlBuilder = sqlBuilder.append("ALTER TABLE `" + datatableName + "` ")
                                 .append("DROP FOREIGN KEY `fk_" + oldConstraintName + "`,")
-                                .append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT(20) NOT NULL,")
+                                .append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT NOT NULL,")
                                 .append("ADD CONSTRAINT `fk_" + newConstraintName + "` ").append("FOREIGN KEY (`" + newFKName + "`) ")
                                 .append("REFERENCES `" + actualAppTableName + "` (`id`)");
                     }

@@ -18,10 +18,10 @@
 --
 
 CREATE TABLE IF NOT EXISTS `topic` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(100) NOT NULL,
-  `enabled` TINYINT(1) NULL,
-  `entity_id` BIGINT(20) NOT NULL,
+  `enabled` tinyint NULL,
+  `entity_id` BIGINT NOT NULL,
   `entity_type` TEXT NOT NULL,
   `member_type` TEXT NOT NULL,
   PRIMARY KEY (`id`),
@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS `topic` (
 )ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS `topic_subscriber` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `topic_id` BIGINT(20) NOT NULL,
-  `user_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `topic_id` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
   `subscription_date` DATE NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_topic_has_m_appuser_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`),

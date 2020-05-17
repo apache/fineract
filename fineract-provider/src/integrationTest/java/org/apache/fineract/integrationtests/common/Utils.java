@@ -61,7 +61,7 @@ public class Utils {
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
 
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
-    private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
+    private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -83,11 +83,13 @@ public class Utils {
                     logger.info("{} return HTTP 200, application is now ready for integration testing!", HEALTH_URL);
                     return;
                 } else {
-                    logger.info("{} returned HTTP {}, going to wait and retry (attempt {})", HEALTH_URL, healthHttpStatus, attempt++);
+                    logger.info("{} returned HTTP {}, going to wait and retry (attempt {})", HEALTH_URL,
+                            healthHttpStatus, attempt++);
                     sleep(3);
                 }
             } catch (Exception e) {
-                logger.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, e.getMessage(), attempt++);
+                logger.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, e.getMessage(),
+                        attempt++);
                 lastException = e;
                 sleep(3);
             }
@@ -97,7 +99,8 @@ public class Utils {
             logger.error("{} still not reachable, giving up", HEALTH_URL, lastException);
             throw new AssertionError(HEALTH_URL + " not reachable", lastException);
         } else {
-            logger.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL, response.prettyPrint());
+            logger.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL,
+                    response.prettyPrint());
             fail(HEALTH_URL + " returned " + response.prettyPrint());
         }
     }
@@ -115,10 +118,10 @@ public class Utils {
         awaitSpringBootActuatorHealthyUp();
         try {
             logger.info("Logging in, for integration test...");
-            System.out.println("-----------------------------------LOGIN-----------------------------------------");
+            // system.out.println("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.given().contentType(ContentType.JSON)
-                    .body("{\"username\":\"mifos\", \"password\":\"password\"}")
-                    .expect().log().ifError().when().post(LOGIN_URL).asString();
+                    .body("{\"username\":\"mifos\", \"password\":\"password\"}").expect().log().ifError().when()
+                    .post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
             String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
             assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
@@ -133,49 +136,59 @@ public class Utils {
         }
     }
 
-    public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        if (jsonAttributeToGetBack == null) { return (T) json; }
-        return (T) from(json).get(jsonAttributeToGetBack);
-    }
-
-    public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL){
-        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-    }
-
-    public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL){
-        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asByteArray();
-    }
-
-    public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
+    public static <T> T performServerGet(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String getURL, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL)
                 .andReturn().asString();
-        if (jsonAttributeToGetBack == null) { return (T) json; }
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
-    public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
-                .andReturn().asString();
-        return (T) from(json).get(jsonAttributeToGetBack);
-    }
-
-    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String deleteURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
+    public static String performGetTextResponse(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String getURL) {
+        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn()
                 .asString();
+    }
+
+    public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String getURL) {
+        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn()
+                .asByteArray();
+    }
+
+    public static <T> T performServerPost(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String postURL, final String jsonBodyToSend,
+            final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError()
+                .when().post(postURL).andReturn().asString();
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
-    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when()
+    public static <T> T performServerPut(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String putURL, final String jsonBodyToSend,
+            final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError()
+                .when().put(putURL).andReturn().asString();
+        return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerDelete(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String deleteURL, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when()
                 .delete(deleteURL).andReturn().asString();
+        return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerDelete(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String deleteURL, final String jsonBodyToSend,
+            final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError()
+                .when().delete(deleteURL).andReturn().asString();
         return (T) (jsonAttributeToGetBack == null ? json : from(json).get(jsonAttributeToGetBack));
     }
 
@@ -208,11 +221,12 @@ public class Utils {
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
-    public static Long randomNumberGenerator(final int expectedLength){
-        final String source="1234567890";
-        final int lengthofSource=source.length();
-        final Random random=new Random();
-        StringBuilder stringBuilder=new StringBuilder(expectedLength);
+
+    public static Long randomNumberGenerator(final int expectedLength) {
+        final String source = "1234567890";
+        final int lengthofSource = source.length();
+        final Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder(expectedLength);
         for (int i = 0; i < expectedLength; i++) {
             stringBuilder.append(source.charAt(random.nextInt(lengthofSource)));
         }
@@ -238,28 +252,20 @@ public class Utils {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
     }
 
-    public static String performServerTemplatePost(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
-            final String postURL,final String legalFormType,final File file,final String locale,final String dateFormat) {
+    public static String performServerTemplatePost(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String postURL, final String legalFormType, final File file,
+            final String locale, final String dateFormat) {
 
-        final String importDocumentId=given().spec(requestSpec)
-                .queryParam("legalFormType",legalFormType)
-                .multiPart("file",file)
-                .formParam("locale",locale)
-                .formParam("dateFormat",dateFormat)
-                .expect().spec(responseSpec).
-                log().ifError().when().post(postURL)
-                .andReturn().asString();
+        final String importDocumentId = given().spec(requestSpec).queryParam("legalFormType", legalFormType)
+                .multiPart("file", file).formParam("locale", locale).formParam("dateFormat", dateFormat).expect()
+                .spec(responseSpec).log().ifError().when().post(postURL).andReturn().asString();
         return importDocumentId;
     }
 
-    public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
-            final String getURL,final String importDocumentId){
-        final String templateLocation=given().spec(requestSpec).
-                queryParam("importDocumentId",importDocumentId)
-                .expect().spec(responseSpec)
-                .log().ifError().when().get(getURL)
-                .andReturn().asString();
-        return templateLocation.substring(1,templateLocation.length()-1);
+    public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String getURL, final String importDocumentId) {
+        final String templateLocation = given().spec(requestSpec).queryParam("importDocumentId", importDocumentId)
+                .expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
+        return templateLocation.substring(1, templateLocation.length() - 1);
     }
 }
-

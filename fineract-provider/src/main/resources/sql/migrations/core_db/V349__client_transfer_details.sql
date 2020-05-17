@@ -21,14 +21,14 @@ ALTER TABLE `m_client`
 	ADD COLUMN `proposed_transfer_date` DATE NULL DEFAULT NULL AFTER `email_address`;
 
 	CREATE TABLE `m_client_transfer_details` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`client_id` BIGINT(20) NOT NULL,
-	`from_office_id` BIGINT(20) NOT NULL,
-	`to_office_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`client_id` BIGINT NOT NULL,
+	`from_office_id` BIGINT NOT NULL,
+	`to_office_id` BIGINT NOT NULL,
 	`proposed_transfer_date` DATE NULL DEFAULT NULL,
-	`transfer_type` TINYINT(2) NOT NULL,
+	`transfer_type` TINYINT NOT NULL,
 	`submitted_on` DATE NOT NULL,
-	`submitted_by` BIGINT(20) NOT NULL,
+	`submitted_by` BIGINT NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_m_client_transfer_details_m_client` (`client_id`),
 	INDEX `FK_m_client_transfer_details_m_office` (`from_office_id`),

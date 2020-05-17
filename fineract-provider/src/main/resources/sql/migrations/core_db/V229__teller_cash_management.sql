@@ -18,15 +18,15 @@
 --
 
 CREATE TABLE `m_tellers` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`office_id` BIGINT(20) NOT NULL,
-	`debit_account_id` BIGINT(20),
-	`credit_account_id` BIGINT(20),
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`office_id` BIGINT NOT NULL,
+	`debit_account_id` BIGINT,
+	`credit_account_id` BIGINT,
 	`name` VARCHAR(50) NOT NULL,
 	`description` VARCHAR(100),
 	`valid_from` DATE,
 	`valid_to` DATE,
-	`state` SMALLINT(5),
+	`state` SMALLINT,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `m_tellers_name_unq` (`name`),
 	INDEX `IK_m_tellers_m_office` (`office_id`),
@@ -36,9 +36,9 @@ CREATE TABLE `m_tellers` (
 	);
 
 CREATE TABLE `m_cashiers` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`staff_id` BIGINT(20),
-	`teller_id` BIGINT(20),
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`staff_id` BIGINT,
+	`teller_id` BIGINT,
 	`description` VARCHAR(100),
 	`start_date` DATE,
 	`end_date` DATE,
@@ -53,14 +53,14 @@ CREATE TABLE `m_cashiers` (
 	); 
 		
 CREATE TABLE `m_cashier_transactions` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`cashier_id` BIGINT(20) NOT NULL,
-	`txn_type` SMALLINT(5)  NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`cashier_id` BIGINT NOT NULL,
+	`txn_type` SMALLINT  NOT NULL,
 	`txn_amount` DECIMAL (19,6)  NOT NULL,
 	`txn_date` DATE  NOT NULL,
 	`created_date` DATETIME  NOT NULL,
 	`entity_type` VARCHAR(50),
-	`entity_id` BIGINT(20),
+	`entity_id` BIGINT,
 	`txn_note` VARCHAR(200),
 	PRIMARY KEY (`id`),
 	INDEX `IK_m_teller_transactions_m_cashier` (`cashier_id`),

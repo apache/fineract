@@ -31,10 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 public class CurrencyHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(CurrencyHelper.class);
     private static final String CURRENCY_URL = "/fineract-provider/api/v1/currencies?" + Utils.TENANT_IDENTIFIER;
     private static final String CURRENCY_URL_SELECTED = CURRENCY_URL + "&fields=selectedCurrencyOptions";
 
@@ -59,19 +61,19 @@ public class CurrencyHelper {
         return getCurrencies(CURRENCY_URL_SELECTED, permittedCurrencyArraySelected);
     }
 
-
     private ArrayList<Currency> getCurrencies(final String getUrl, final List<String> permittedCurrencyArrays) {
-        System.out.println("--------------------------------- GET CURRENCY OPTIONS -------------------------------");
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when()
-                .get(getUrl).andReturn().asString();
+        LOG.info("--------------------------------- GET CURRENCY OPTIONS -------------------------------");
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getUrl)
+                .andReturn().asString();
         final Gson gson = new Gson();
         Assert.notNull(json, "json");
         final ArrayList<Currency> currencyList = new ArrayList<Currency>();
-        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() { }.getType();
+        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {
+        }.getType();
         final Map<String, List<Currency>> responseMap = gson.fromJson(json, typeOfHashMap);
-        for(Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
+        for (Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
             Assert.isTrue(permittedCurrencyArrays.contains(entry.getKey()), "permittedCurrencyArrays");
-            for(Currency currency : entry.getValue()) {
+            for (Currency currency : entry.getValue()) {
                 currencyList.add(currency);
             }
         }
@@ -79,13 +81,14 @@ public class CurrencyHelper {
     }
 
     public List<String> updateCurrencies(final List<String> currencies) {
-        System.out.println("--------------------------------- UPDATE CURRENCY OPTIONS -------------------------------");
-        final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log().ifError().when()
-                .put(CURRENCY_URL).andReturn().asString();
+        LOG.info("--------------------------------- UPDATE CURRENCY OPTIONS -------------------------------");
+        final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log()
+                .ifError().when().put(CURRENCY_URL).andReturn().asString();
         final Gson gson = new Gson();
         Assert.notNull(json, "json");
-        final Type typeOfHashMap = new TypeToken<Map<String,Map<String, List<String>>>>() { }.getType();
-        final Map<String,Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
+        final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {
+        }.getType();
+        final Map<String, Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
         return responseMap.get("changes").get("currencies");
     }
 

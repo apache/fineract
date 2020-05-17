@@ -25,8 +25,8 @@ ADD INDEX (  `last_time_password_updated` ) ;
 UPDATE  `m_appuser` SET  `last_time_password_updated` =  NOW() WHERE  `m_appuser`.`last_time_password_updated` ='1970-01-01';
 
 CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT NOT NULL,
   `password` varchar(255) NOT NULL,
   `removal_date` date NOT NULL,
   PRIMARY KEY (`id`)

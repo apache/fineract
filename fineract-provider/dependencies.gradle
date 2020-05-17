@@ -19,7 +19,7 @@
 dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.4.2@jar"
+    spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
 
 	// Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
 	// Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -63,7 +63,7 @@ dependencies {
             'org.apache.tika:tika-core',
 
             'org.drizzle.jdbc:drizzle-jdbc',
-            'com.googlecode.flyway:flyway-core',
+            'org.flywaydb:flyway-core',
 
             'net.sf.ehcache:ehcache',
             'com.lowagie:itext',

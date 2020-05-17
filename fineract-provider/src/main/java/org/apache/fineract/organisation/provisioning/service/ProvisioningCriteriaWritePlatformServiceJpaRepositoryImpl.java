@@ -100,7 +100,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
         if(this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryDataByCriteriaId(criteriaId) != null) {
             throw new ProvisioningCriteriaCannotBeDeletedException(criteriaId) ;
         }
-        this.provisioningCriteriaRepository.deleteById(criteriaId); ;
+        this.provisioningCriteriaRepository.deleteById(criteriaId);
         return new CommandProcessingResultBuilder().withEntityId(criteriaId).build();
     }
 

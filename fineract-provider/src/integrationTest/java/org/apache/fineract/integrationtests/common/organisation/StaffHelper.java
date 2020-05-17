@@ -26,9 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaffHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(StaffHelper.class);
     private static final String TRANSFER_STAFF_URL = "/fineract-provider/api/v1/groups";
 
     private static final String CREATE_STAFF_URL = "/fineract-provider/api/v1/staff";
@@ -46,7 +48,7 @@ public class StaffHelper {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("staffId", staffToTransferId);
         map.put("note", note);
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 
@@ -97,7 +99,7 @@ public class StaffHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("joiningDate", "20 September 2011") ;
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 
@@ -119,7 +121,7 @@ public class StaffHelper {
         if(fieldList.contains("mobileNo")) {
             map.put("mobileNo", "+123515198");
         }
-        System.out.println("map : " + map);
+        LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 }
