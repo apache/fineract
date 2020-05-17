@@ -29,14 +29,14 @@ CREATE TABLE `m_portfolio_account_associations` (
 	CONSTRAINT `linked_loan_fk` FOREIGN KEY (`linked_loan_account_id`) REFERENCES `m_loan` (`id`),
 	CONSTRAINT `linked_savings_fk` FOREIGN KEY (`linked_savings_account_id`) REFERENCES `m_savings_account` (`id`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 ALTER TABLE `m_charge`
-	ADD COLUMN `charge_payment_mode_enum` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `charge_calculation_enum`;
+	ADD COLUMN `charge_payment_mode_enum` SMALLINT NOT NULL DEFAULT '0' AFTER `charge_calculation_enum`;
 
 ALTER TABLE `m_loan_charge`
-	ADD COLUMN `charge_payment_mode_enum` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `charge_calculation_enum`;
+	ADD COLUMN `charge_payment_mode_enum` SMALLINT NOT NULL DEFAULT '0' AFTER `charge_calculation_enum`;
 
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_loan', 'PAY_LOANCHARGE', 'LOANCHARGE', 'PAY', 0);
 

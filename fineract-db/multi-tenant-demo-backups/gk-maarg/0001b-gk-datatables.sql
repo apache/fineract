@@ -19,7 +19,7 @@
 
 DROP TABLE IF EXISTS `risk_analysis`;
 CREATE TABLE `risk_analysis` (
-  `client_id` bigint(20) NOT NULL,
+  `client_id` BIGINT NOT NULL,
   `proposed_loan_amount` decimal(19,6) DEFAULT NULL,
   `assets_cash` decimal(19,6) DEFAULT NULL,
   `assets_bank_accounts` decimal(19,6) DEFAULT NULL,
@@ -55,4 +55,4 @@ CREATE TABLE `risk_analysis` (
   `fi_repayment_capacity` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`client_id`),
   CONSTRAINT `FK_risk_analysis_1` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;

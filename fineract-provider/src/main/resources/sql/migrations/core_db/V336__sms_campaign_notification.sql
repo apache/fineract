@@ -18,8 +18,8 @@
 --
 
 CREATE TABLE `client_device_registration` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`client_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`client_id` BIGINT NOT NULL,
 	`updatedon_date` DATETIME NOT NULL,
 	`registration_id` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`id`),
@@ -39,10 +39,10 @@ INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_
 );
 
 ALTER TABLE sms_campaign 
-MODIFY COLUMN provider_id BIGINT(20) NULL DEFAULT NULL,
-ADD COLUMN is_notification TINYINT(1) NULL DEFAULT '0'; 
+MODIFY COLUMN provider_id BIGINT NULL DEFAULT NULL,
+ADD COLUMN is_notification tinyint NULL DEFAULT '0'; 
 
 ALTER TABLE sms_messages_outbound 
 MODIFY COLUMN mobile_no VARCHAR(50) NULL DEFAULT NULL,
-ADD COLUMN is_notification TINYINT(1) NOT NULL DEFAULT '0'
+ADD COLUMN is_notification tinyint NOT NULL DEFAULT '0'
 

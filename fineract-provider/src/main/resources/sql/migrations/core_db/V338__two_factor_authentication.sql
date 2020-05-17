@@ -20,9 +20,9 @@
 -- Access Token Table
 
 CREATE TABLE `twofactor_access_token` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `token` varchar(32) NOT NULL,
-  `appuser_id` bigint(20) NOT NULL,
+  `appuser_id` BIGINT NOT NULL,
   `valid_from` datetime NOT NULL,
   `valid_to` datetime NOT NULL,
   `enabled` bit(1) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `twofactor_access_token` (
 -- Configuration
 
 CREATE TABLE `twofactor_configuration` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL,
   `value` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`id`),

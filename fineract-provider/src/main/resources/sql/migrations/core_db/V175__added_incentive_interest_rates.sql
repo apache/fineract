@@ -18,8 +18,8 @@
 --
 
 ALTER TABLE `m_client`
-	ADD COLUMN `client_type_cv_id` INT(11) NULL DEFAULT NULL AFTER `default_savings_account`,
-	ADD COLUMN `client_classification_cv_id` INT(11) NULL DEFAULT NULL AFTER `client_type_cv_id`,
+	ADD COLUMN `client_type_cv_id` INT NULL DEFAULT NULL AFTER `default_savings_account`,
+	ADD COLUMN `client_classification_cv_id` INT NULL DEFAULT NULL AFTER `client_type_cv_id`,
 	ADD CONSTRAINT `FK_m_client_type_m_code_value` FOREIGN KEY (`client_type_cv_id`) REFERENCES `m_code_value` (`id`),
 	ADD CONSTRAINT `FK_m_client_classification_m_code_value` FOREIGN KEY (`client_classification_cv_id`) REFERENCES `m_code_value` (`id`),
 	ADD CONSTRAINT `FK1_m_client_gender_m_code_value` FOREIGN KEY (`gender_cv_id`) REFERENCES `m_code_value` (`id`);
@@ -29,13 +29,13 @@ INSERT INTO `m_code` (`code_name`, `is_system_defined`) VALUES ('ClientClassific
 
 
 CREATE TABLE `m_interest_incentives` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`interest_rate_slab_id` BIGINT(20) NOT NULL,
-	`entiry_type` SMALLINT(2) NOT NULL,
-	`attribute_name` SMALLINT(2) NOT NULL,
-	`condition_type` SMALLINT(2) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`interest_rate_slab_id` BIGINT NOT NULL,
+	`entiry_type` SMALLINT NOT NULL,
+	`attribute_name` SMALLINT NOT NULL,
+	`condition_type` SMALLINT NOT NULL,
 	`attribute_value` VARCHAR(50) NOT NULL,
-	`incentive_type` SMALLINT(2) NOT NULL,
+	`incentive_type` SMALLINT NOT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_m_interest_incentives_m_interest_rate_slab` (`interest_rate_slab_id`),
@@ -44,13 +44,13 @@ CREATE TABLE `m_interest_incentives` (
 
 
 CREATE TABLE `m_savings_interest_incentives` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`deposit_account_interest_rate_slab_id` BIGINT(20) NOT NULL,
-	`entiry_type` SMALLINT(2) NOT NULL,
-	`attribute_name` SMALLINT(2) NOT NULL,
-	`condition_type` SMALLINT(2) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`deposit_account_interest_rate_slab_id` BIGINT NOT NULL,
+	`entiry_type` SMALLINT NOT NULL,
+	`attribute_name` SMALLINT NOT NULL,
+	`condition_type` SMALLINT NOT NULL,
 	`attribute_value` VARCHAR(50) NOT NULL,
-	`incentive_type` SMALLINT(2) NOT NULL,
+	`incentive_type` SMALLINT NOT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_m_savings_interest_incentives_m_savings_interest_rate_slab` (`deposit_account_interest_rate_slab_id`),

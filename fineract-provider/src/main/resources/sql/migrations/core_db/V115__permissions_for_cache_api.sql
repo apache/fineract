@@ -19,10 +19,10 @@
 
 DROP TABLE IF EXISTS `c_cache`;
 CREATE TABLE `c_cache` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cache_type_enum` tinyint(1) NOT NULL DEFAULT '1',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `cache_type_enum` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 INSERT INTO `c_cache`

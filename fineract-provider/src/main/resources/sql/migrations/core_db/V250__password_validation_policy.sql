@@ -19,12 +19,12 @@
 
 
 CREATE TABLE IF NOT EXISTS `m_password_validation_policy` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `regex` text NOT NULL,
   `description` text NOT NULL,
-  `active` tinyint(4) NOT NULL DEFAULT '0',
+  `active` TINYINT NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4 AUTO_INCREMENT=1 ;
 
 
 INSERT INTO `m_password_validation_policy` (

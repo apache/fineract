@@ -163,76 +163,76 @@ where mc.`code_name` = "YesNo";
 
 DROP TABLE IF EXISTS `client additional data`;
 CREATE TABLE `client additional data` (
-  `client_id` bigint(20) NOT NULL,
-  `Gender_cd` int(11) NOT NULL,
+  `client_id` BIGINT NOT NULL,
+  `Gender_cd` INT NOT NULL,
   `Date of Birth` date NOT NULL,
   `Home address` text NOT NULL,
   `Telephone number` varchar(20) NOT NULL,
   `Telephone number (2nd)` varchar(20) NOT NULL,
   `Email address` varchar(50) NOT NULL,
-  `EducationLevel_cd` int(11) NOT NULL,
-  `MaritalStatus_cd` int(11) NOT NULL,
-  `Number of children` int(11) NOT NULL,
+  `EducationLevel_cd` INT NOT NULL,
+  `MaritalStatus_cd` INT NOT NULL,
+  `Number of children` INT NOT NULL,
   `Citizenship` varchar(50) NOT NULL,
-  `PovertyStatus_cd` int(11) NOT NULL,
-  `YesNo_cd_Employed` int(11) NOT NULL,
-  `FieldOfEmployment_cd_Field of employment` int(11) DEFAULT NULL,
+  `PovertyStatus_cd` INT NOT NULL,
+  `YesNo_cd_Employed` INT NOT NULL,
+  `FieldOfEmployment_cd_Field of employment` INT DEFAULT NULL,
   `Employer name` varchar(50) DEFAULT NULL,
-  `Number of years` int(11) DEFAULT NULL,
+  `Number of years` INT DEFAULT NULL,
   `Monthly salary` decimal(19,6) DEFAULT NULL,
-  `YesNo_cd_Self employed` int(11) NOT NULL,
-  `FieldOfEmployment_cd_Field of self-employment` int(11) DEFAULT NULL,
+  `YesNo_cd_Self employed` INT NOT NULL,
+  `FieldOfEmployment_cd_Field of self-employment` INT DEFAULT NULL,
   `Business address` text,
-  `Number of employees` int(11) DEFAULT NULL,
+  `Number of employees` INT DEFAULT NULL,
   `Monthly salaries paid` decimal(19,6) DEFAULT NULL,
   `Monthly net income of business activity` decimal(19,6) DEFAULT NULL,
   `Monthly rent` decimal(19,6) DEFAULT NULL,
   `Other income generating activities` varchar(100) DEFAULT NULL,
-  `YesNo_cd_Bookkeeping` int(11) DEFAULT NULL,
-  `YesNo_cd_Loans with other institutions` int(11) NOT NULL,
+  `YesNo_cd_Bookkeeping` INT DEFAULT NULL,
+  `YesNo_cd_Loans with other institutions` INT NOT NULL,
   `From whom` varchar(100) DEFAULT NULL,
   `Amount` decimal(19,6) DEFAULT NULL,
   `Interest rate pa` decimal(19,6) DEFAULT NULL,
-  `Number of people depending on overal income` int(11) NOT NULL,
-  `YesNo_cd_Bank account` int(11) NOT NULL,
-  `YesNo_cd_Business plan provided` int(11) NOT NULL,
-  `YesNo_cd_Access to internet` int(11) DEFAULT NULL,
+  `Number of people depending on overal income` INT NOT NULL,
+  `YesNo_cd_Bank account` INT NOT NULL,
+  `YesNo_cd_Business plan provided` INT NOT NULL,
+  `YesNo_cd_Access to internet` INT DEFAULT NULL,
   `Introduced by` varchar(100) DEFAULT NULL,
   `Known to introducer since` varchar(100) NOT NULL,
   `Last visited by` varchar(100) DEFAULT NULL,
   `Last visited on` date NOT NULL,
   PRIMARY KEY (`client_id`),
   CONSTRAINT `FK_client_additional_data` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 DROP TABLE IF EXISTS `impact measurement`;
 CREATE TABLE `impact measurement` (
-  `loan_id` bigint(20) NOT NULL,
-  `YesNo_cd_RepaidOnSchedule` int(11) NOT NULL,
+  `loan_id` BIGINT NOT NULL,
+  `YesNo_cd_RepaidOnSchedule` INT NOT NULL,
   `ReasonNotRepaidOnSchedule` text DEFAULT NULL,
   `How was Loan Amount Invested` text NOT NULL,
   `Additional Income Generated` decimal(19,6) NOT NULL,
   `Additional Income Used For` text NOT NULL,
-  `YesNo_cd_NewJobsCreated` int(11) NOT NULL,
-  `Number of Jobs Created` bigint(20) DEFAULT NULL,
+  `YesNo_cd_NewJobsCreated` INT NOT NULL,
+  `Number of Jobs Created` BIGINT DEFAULT NULL,
   PRIMARY KEY (`loan_id`),
   CONSTRAINT `FK_impact measurement` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 DROP TABLE IF EXISTS `loan additional data`;
 CREATE TABLE `loan additional data` (
-  `loan_id` bigint(20) NOT NULL,
-  `PurposeOfLoan_cd` int(11) NOT NULL,
-  `CollateralType_cd` int(11) NOT NULL,
+  `loan_id` BIGINT NOT NULL,
+  `PurposeOfLoan_cd` INT NOT NULL,
+  `CollateralType_cd` INT NOT NULL,
   `Collateral notes` text NOT NULL,
-  `YesNo_cd_Guarantor` int(11) NOT NULL,
+  `YesNo_cd_Guarantor` INT NOT NULL,
   `Guarantor name` varchar(100) DEFAULT NULL,
   `Guarantor relation` varchar(100) DEFAULT NULL,
   `Guarantor address` varchar(100) DEFAULT NULL,
   `Guarantor telephone number` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`loan_id`),
   CONSTRAINT `FK_loan_additional_data` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- datatables mapping
 INSERT INTO `x_registered_table`

@@ -23,15 +23,15 @@ INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `c
 DROP TABLE IF EXISTS `mix_taxonomy`;
 
 CREATE TABLE `mix_taxonomy` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` INT unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
-  `namespace_id` int(11) DEFAULT NULL,
+  `namespace_id` INT DEFAULT NULL,
   `dimension` varchar(100) DEFAULT NULL,
-  `type` int(11) DEFAULT NULL,
+  `type` INT DEFAULT NULL,
   `description` varchar(1000) DEFAULT NULL,
-  `need_mapping` tinyint(1) DEFAULT NULL,
+  `need_mapping` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 LOCK TABLES `mix_taxonomy` WRITE;
 
@@ -92,13 +92,13 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `mix_taxonomy_mapping`;
 
 CREATE TABLE `mix_taxonomy_mapping` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` INT unsigned NOT NULL AUTO_INCREMENT,
   `identifier` varchar(50) NOT NULL DEFAULT '',
   `config` varchar(200) DEFAULT NULL,
   `last_update_date` datetime DEFAULT NULL,
   `currency` varchar(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 LOCK TABLES `mix_taxonomy_mapping` WRITE;
 
@@ -111,12 +111,12 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `mix_xbrl_namespace`;
 
 CREATE TABLE `mix_xbrl_namespace` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` INT unsigned NOT NULL AUTO_INCREMENT,
   `prefix` varchar(20) NOT NULL DEFAULT '',
   `url` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNQUE` (`prefix`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 LOCK TABLES `mix_xbrl_namespace` WRITE;
 
@@ -124,9 +124,9 @@ INSERT INTO `mix_xbrl_namespace` (`id`, `prefix`, `url`)
 VALUES
 	(1,'ifrs','http://xbrl.iasb.org/taxonomy/2009-04-01/ifrs'),
 	(2,'iso4217','http://www.xbrl.org/2003/iso4217'),
-	(3,'mix','http://www.themix.org/int/fr/ifrs/basi/YYYY-MM-DD/mx-cor'),
+	(3,'mix','http://www.themix.org/INT/fr/ifrs/basi/YYYY-MM-DD/mx-cor'),
 	(4,'xbrldi','http://xbrl.org/2006/xbrldi'),
 	(5,'xbrli','http://www.xbrl.org/2003/instance'),
 	(6,'link','http://www.xbrl.org/2003/linkbase'),
-	(7,'dc-all','http://www.themix.org/int/fr/ifrs/basi/2010-08-31/dc-all');
+	(7,'dc-all','http://www.themix.org/INT/fr/ifrs/basi/2010-08-31/dc-all');
 UNLOCK TABLES;

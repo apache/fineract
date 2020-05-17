@@ -18,26 +18,26 @@
 --
 
 CREATE TABLE `sms_campaign` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`campaign_name` VARCHAR(100) NOT NULL,
-	`campaign_type` INT(11) NOT NULL,
-	`campaign_trigger_type` INT(11) NOT NULL,
-	`report_id` INT(11) NOT NULL,
-	`provider_id` BIGINT(20) NOT NULL,
+	`campaign_type` INT NOT NULL,
+	`campaign_trigger_type` INT NOT NULL,
+	`report_id` INT NOT NULL,
+	`provider_id` BIGINT NOT NULL,
 	`param_value` TEXT NULL,
-	`status_enum` INT(11) NOT NULL,
+	`status_enum` INT NOT NULL,
 	`message` TEXT NOT NULL,
 	`submittedon_date` DATE NULL DEFAULT NULL,
-	`submittedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`submittedon_userid` BIGINT NULL DEFAULT NULL,
 	`approvedon_date` DATE NULL DEFAULT NULL,
-	`approvedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`approvedon_userid` BIGINT NULL DEFAULT NULL,
 	`closedon_date` DATE NULL DEFAULT NULL,
-	`closedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`closedon_userid` BIGINT NULL DEFAULT NULL,
 	`recurrence` VARCHAR(100) NULL DEFAULT NULL,
 	`next_trigger_date` DATETIME NULL DEFAULT NULL,
 	`last_trigger_date` DATETIME NULL DEFAULT NULL,
 	`recurrence_start_date` DATETIME NULL DEFAULT NULL,
-	`is_visible` TINYINT(1) NULL DEFAULT '1',
+	`is_visible` tinyint NULL DEFAULT '1',
 	PRIMARY KEY (`id`),
 	INDEX `report_id` (`report_id`),
 	CONSTRAINT `sms_campaign_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `stretchy_report` (`id`)
@@ -45,7 +45,7 @@ CREATE TABLE `sms_campaign` (
 
 
 ALTER TABLE `sms_messages_outbound`
-	ADD COLUMN `campaign_id` BIGINT(20) NOT NULL,
+	ADD COLUMN `campaign_id` BIGINT NOT NULL,
 	ADD COLUMN `external_id` VARCHAR(100) NULL DEFAULT NULL,
 	ADD COLUMN `submittedon_date` DATE NULL DEFAULT NULL,
 	ADD COLUMN `delivered_on_date` DATETIME NULL DEFAULT NULL,

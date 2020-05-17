@@ -18,16 +18,16 @@
 --
 
 CREATE TABLE IF NOT EXISTS `m_rate` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(250) NOT NULL,
   `percentage` decimal(10,2) NOT NULL,
-  `active` tinyint(1) DEFAULT '0',
-  `product_apply` smallint(5) NOT NULL,
+  `active` tinyint DEFAULT '0',
+  `product_apply` SMALLINT NOT NULL,
   `created_date` datetime NULL DEFAULT NULL,
-  `createdby_id` bigint(20) NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NULL DEFAULT NULL,
-  `approve_user` bigint(20) DEFAULT NULL,
+  `approve_user` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_M_RATE_CREATE_USER` (`createdby_id`),
   KEY `FK_M_RATE_APPROVE_USER` (`approve_user`),
@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS `m_rate` (
 
 
 CREATE TABLE IF NOT EXISTS `m_loan_rate` (
-  `loan_id` bigint(20) NOT NULL,
-  `rate_id` bigint(20) NOT NULL,
+  `loan_id` BIGINT NOT NULL,
+  `rate_id` BIGINT NOT NULL,
   PRIMARY KEY (`loan_id`,`rate_id`),
   KEY `FK_M_LOAN_RATE_RATE` (`rate_id`),
   CONSTRAINT `FK_M_LOAN_RATE_LOAN` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS `m_loan_rate` (
 
 
 CREATE TABLE IF NOT EXISTS `m_product_loan_rate` (
-  `product_loan_id` bigint(20) NOT NULL,
-  `rate_id` bigint(20) NOT NULL,
+  `product_loan_id` BIGINT NOT NULL,
+  `rate_id` BIGINT NOT NULL,
   PRIMARY KEY (`product_loan_id`,`rate_id`),
   KEY `FK_M_PRODUCT_LOAN_RATE_RATE` (`rate_id`),
   CONSTRAINT `FK_M_PRODUCT_LOAN_RATE_LOAN` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`),

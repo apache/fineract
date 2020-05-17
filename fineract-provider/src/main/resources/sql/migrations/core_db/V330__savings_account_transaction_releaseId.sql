@@ -38,7 +38,7 @@ INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `c
 
 --  modify `m_savings_account_transaction` 
 
-ALTER TABLE `m_savings_account_transaction` ADD COLUMN `release_id_of_hold_amount` BIGINT(20) NULL DEFAULT NULL;
+ALTER TABLE `m_savings_account_transaction` ADD COLUMN `release_id_of_hold_amount` BIGINT NULL DEFAULT NULL;
 
 --  modify `m_savings_account` 
 

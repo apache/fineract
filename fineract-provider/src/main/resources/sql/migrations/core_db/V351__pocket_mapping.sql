@@ -18,18 +18,18 @@
 --
 
 CREATE TABLE `m_pocket` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`app_user_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`app_user_id` BIGINT NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `app_user_id` (`app_user_id`),
 	CONSTRAINT `FK__m_appuser__pocket` FOREIGN KEY (`app_user_id`) REFERENCES `m_appuser` (`id`)
 );
 
 CREATE TABLE `m_pocket_accounts_mapping` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`pocket_id` BIGINT(20) NOT NULL,
-	`account_id` BIGINT(20) NOT NULL,
-	`account_type` INT(5) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`pocket_id` BIGINT NOT NULL,
+	`account_id` BIGINT NOT NULL,
+	`account_type` INT NOT NULL,
 	`account_number` VARCHAR(20) NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `unique_pocket_mapping` (`pocket_id`, `account_id`, `account_type`),
