@@ -462,12 +462,12 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getSubmittedOnDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
 
     }
 
     public LocalDate getClosureDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
     }
 
     public LocalDate getActivationLocalDate() {
@@ -503,11 +503,11 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getRecurrenceStartDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
     }
 
     public LocalDateTime getRecurrenceStartDateTime() {
-        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
     }
 
     public void setLastTriggerDate(Date lastTriggerDate) {
@@ -519,7 +519,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDateTime getNextTriggerDate() {
-        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.nextTriggerDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDateTime(this.nextTriggerDate), null);
 
     }
 
@@ -528,7 +528,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     public LocalDate getLastTriggerDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.lastTriggerDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.lastTriggerDate), null);
     }
 
     public void updateIsVisible(boolean isVisible) {

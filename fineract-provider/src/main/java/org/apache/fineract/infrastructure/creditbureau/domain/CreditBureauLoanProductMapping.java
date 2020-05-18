@@ -80,7 +80,7 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
              skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");
          }
 
-         if((Integer)command.integerValueOfParameterNamed("stalePeriod")!=null)
+         if(command.integerValueOfParameterNamed("stalePeriod")!=null)
          {
              stalePeriod = command.integerValueOfParameterNamed("stalePeriod");
          }

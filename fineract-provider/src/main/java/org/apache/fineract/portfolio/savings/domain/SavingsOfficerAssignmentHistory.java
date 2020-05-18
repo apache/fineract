@@ -111,7 +111,7 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate getEndDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
     }
 
 }

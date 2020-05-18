@@ -105,7 +105,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate getEndDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
     }
 
     public boolean isSameLoanOfficer(final Staff staff) {

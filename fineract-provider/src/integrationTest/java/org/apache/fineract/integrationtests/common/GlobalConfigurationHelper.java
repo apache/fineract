@@ -42,7 +42,7 @@ public class GlobalConfigurationHelper {
         final String GET_ALL_GLOBAL_CONFIG_URL = "/fineract-provider/api/v1/configurations?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING ALL GLOBAL CONFIGURATIONS -------------------------");
         final HashMap<String, ArrayList<HashMap>> response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_GLOBAL_CONFIG_URL, "");
-        return (ArrayList<HashMap>) response.get("globalConfiguration");
+        return  response.get("globalConfiguration");
     }
 
     public static HashMap getGlobalConfigurationById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

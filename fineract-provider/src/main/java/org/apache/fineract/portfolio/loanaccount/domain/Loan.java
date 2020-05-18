@@ -3903,7 +3903,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public LocalDate getSubmittedOnDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
 
     public LocalDate getApprovedOnDate() {

@@ -750,7 +750,7 @@ public final class Client extends AbstractPersistableCustom {
     }
 
     public LocalDate getSubmittedOnDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
 
     public LocalDate getActivationLocalDate() {
@@ -954,13 +954,13 @@ public final class Client extends AbstractPersistableCustom {
     }
 
     public LocalDate getClosureDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
     }
     public LocalDate getRejectedDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.rejectionDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.rejectionDate), null);
     }
     public LocalDate getWithdrawalDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.withdrawalDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.withdrawalDate), null);
     }
 
     public LocalDate getReopenedDate() {

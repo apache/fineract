@@ -564,7 +564,7 @@ public class GroupsApiResource {
 
               if(parentGSIMAccountNo==null && parentGSIMId!=null)
               {
-                   gsimContainer= (List<GSIMContainer>)this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
+                   gsimContainer= this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
               }
               else if(parentGSIMAccountNo !=null && parentGSIMId==null )
               {
