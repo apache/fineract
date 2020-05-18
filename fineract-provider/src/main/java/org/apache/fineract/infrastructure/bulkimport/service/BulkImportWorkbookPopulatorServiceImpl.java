@@ -467,7 +467,7 @@ private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
     }
 
     private List<GLAccountData> fetchGLAccounts() {
-        List<GLAccountData> glaccounts = (List<GLAccountData>) this.glAccountReadPlatformService.
+        List<GLAccountData> glaccounts = this.glAccountReadPlatformService.
                 retrieveAllGLAccounts(null, null, null,
                     null, null, null);
         return glaccounts;

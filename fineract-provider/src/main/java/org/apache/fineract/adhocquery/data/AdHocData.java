@@ -90,7 +90,7 @@ public class AdHocData {
     }
     public static AdHocData template() {
         List<EnumOptionData> reportRunFrequencies = Arrays.stream(ReportRunFrequency.values()).map(rrf -> new EnumOptionData(
-            (long) rrf.getValue(), rrf.getCode(), rrf.getCode()
+             rrf.getValue(), rrf.getCode(), rrf.getCode()
         )).collect(Collectors.toList());
 
         AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null, reportRunFrequencies, null, null, null);

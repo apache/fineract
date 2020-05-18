@@ -2356,7 +2356,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate getClosedOnDate() {
-        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closedOnDate), null);
+        return ObjectUtils.defaultIfNull(new LocalDate(this.closedOnDate), null);
     }
 
     public SavingsAccountSummary getSummary() {
