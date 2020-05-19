@@ -1235,7 +1235,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";
-        this.topicName = "topic_account_deposits";
+        this.topicName = "topic_account_deposits_and_withdrawals";
         this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "/transactions";
@@ -1245,6 +1245,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder savingsAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "SAVINGSACCOUNT";
+        this.topicName = "topic_account_deposits_and_withdrawals";
         this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "/transactions";
