@@ -231,7 +231,7 @@ public class ClientsApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateClient(clientId) //
                 .withJson(apiRequestBodyAsJson) //
-                .withSource(Optional.ofNullable(source).orElse(""))
+                .withSource(source)
                 .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

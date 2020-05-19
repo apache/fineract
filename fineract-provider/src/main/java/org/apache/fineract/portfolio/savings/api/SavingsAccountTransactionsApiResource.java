@@ -19,13 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import java.util.Collection;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -137,17 +131,17 @@ public class SavingsAccountTransactionsApiResource {
     @ApiOperation(value = "Create a Transaction", httpMethod = "POST", notes = "commandParam: deposit - withdrawal - postInterestAsOn")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "body", dataType = "SavingsAccountTransactionData", required = true, type = "body", dataTypeClass = SavingsAccountTransactionsApiResourceSwagger.PostTransactionRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsAccountTransactionsApiResourceSwagger.PostTransactionResponse.class) })
-    public String transaction(@PathParam("savingsId") @ApiParam(value = "savingsId") final Long savingsId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+    public String transaction(@HeaderParam("source") String source, @PathParam("savingsId") @ApiParam(value = "savingsId") final Long savingsId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
         @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         try {
             final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
             CommandProcessingResult result = null;
             if (is(commandParam, "deposit")) {
-                final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
+                final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).withSource(source).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             } else if (is(commandParam, "withdrawal")) {
-                final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
+                final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).withSource(source).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             } else if (is(commandParam, "postInterestAsOn")) {
                 final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
