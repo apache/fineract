@@ -47,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class SynchronousCommandProcessingService implements CommandProcessingService {
@@ -138,7 +139,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         logger.debug("source:" + wrapper.getSource());
         logger.debug("topicName:" + wrapper.getTopicName());
-        if (wrapper.getSource().isEmpty() && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase("")) {
+        if (wrapper.getSource() == null && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase("")) {
             publishKafkaEvent(wrapper, result);
         }
 
