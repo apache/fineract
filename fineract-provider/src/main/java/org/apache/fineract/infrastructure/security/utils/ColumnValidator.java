@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -37,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ColumnValidator {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -84,7 +86,7 @@ public class ColumnValidator {
                 columns.add(rs.getString("column_name"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Problem occurred in getTableColumns function",e);
         }
         return columns;
     }

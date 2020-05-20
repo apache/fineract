@@ -49,6 +49,7 @@
   -->
    
     <module name="TreeWalker">
+    <module name="SuppressWarningsHolder" />
     <module name="RegexpSinglelineJava">
             <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
             <property name="message" value="Line contains console output."/>
@@ -66,6 +67,11 @@
         </module>
            <module name="OneStatementPerLine"/>
            <module name="EmptyStatement"/>
+             <module name="RegexpSinglelineJava">
+            <property name="format" value="\.printStackTrace?\("/>
+            <property name="message" value="Line contains printStacktrace()."/>
+            <property name="ignoreComments" value="false" />
+        </module>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -90,11 +96,7 @@
             <property name="forbiddenImportsExcludesRegexp" value="" />
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
         </module>
-        <module name="RegexpSinglelineJava">
-            <property name="format" value="\.printStackTrace?\("/>
-            <property name="message" value="Line contains printStacktrace()."/>
-            <property name="ignoreComments" value="false" />
-        </module>
+      
         <module name="SuppressWarningsHolder" />
         <module name="OuterTypeFilename"/>
         <module name="IllegalTokenText">

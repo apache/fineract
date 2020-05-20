@@ -26,6 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobConfigurationData;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailService {
+    private final static Logger logger = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
     private final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService;
     private Collection<ReportMailingJobConfigurationData> reportMailingJobConfigurationDataCollection;
 
@@ -77,7 +80,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
 
         catch (MessagingException e) {
             // handle the exception
-            e.printStackTrace();
+            logger.error("Problem occurred in sendEmailWithAttachment function",e);
         }
     }
 

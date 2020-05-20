@@ -556,7 +556,7 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     @Ignore // TODO FINERACT-899
-    public void checkPeriodicAccrualAccountingFlow() {
+    public void checkPeriodicAccrualAccountingFlow() throws InterruptedException,ParseException {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
@@ -587,11 +587,8 @@ public class AccountingScenarioIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
 
         final String jobName = "Add Accrual Transactions";
-        try {
-            this.schedulerJobHelper.executeJob(jobName);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        this.schedulerJobHelper.executeJob(jobName);
 
         // MAKE 1
         LOG.info("Repayment 1 ......");
@@ -673,7 +670,7 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-899
-    public void checkPeriodicAccrualAccountingFlow_OVER_PAYMENT() {
+    public void checkPeriodicAccrualAccountingFlow_OVER_PAYMENT() throws InterruptedException,ParseException {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
@@ -704,11 +701,8 @@ public class AccountingScenarioIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
 
         final String jobName = "Add Accrual Transactions";
-        try {
-            this.schedulerJobHelper.executeJob(jobName);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        this.schedulerJobHelper.executeJob(jobName);
 
         // MAKE 1
         LOG.info("Repayment 1 ......");
@@ -732,7 +726,7 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     @Ignore // TODO https://issues.apache.org/jira/browse/FINERACT-899
-    public void checkPeriodicAccrualAccountingTillCurrentDateFlow() {
+    public void checkPeriodicAccrualAccountingTillCurrentDateFlow() throws InterruptedException,ParseException {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
@@ -793,11 +787,8 @@ public class AccountingScenarioIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
 
         final String jobName = "Add Periodic Accrual Transactions";
-        try {
-            this.schedulerJobHelper.executeJob(jobName);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        this.schedulerJobHelper.executeJob(jobName);
 
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
@@ -827,7 +818,7 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
-    public void checkPeriodicAccrualAccountingAPIFlow() {
+    public void checkPeriodicAccrualAccountingAPIFlow() throws ParseException{
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
@@ -1066,14 +1057,10 @@ public class AccountingScenarioIntegrationTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private LocalDate getDateAsLocalDate(String dateAsString) {
-        LocalDate date = null;
-        try {
-            DateFormat df = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-            date = new LocalDate(df.parse(dateAsString));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    private LocalDate getDateAsLocalDate(String dateAsString) throws ParseException{
+        DateFormat df = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        LocalDate date = new LocalDate(df.parse(dateAsString));
+
         return date;
     }
 

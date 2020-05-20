@@ -107,12 +107,14 @@ import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.service.RoleReadPlatformService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkbookPopulatorService {
-
+  private final static Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookPopulatorServiceImpl.class);
   private final PlatformSecurityContext context;
   private final OfficeReadPlatformService officeReadPlatformService;
   private final StaffReadPlatformService staffReadPlatformService;
@@ -260,7 +262,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     try {
       workbook.write(baos);
     } catch (IOException e) {
-      e.printStackTrace();
+        LOG.error("Problem occurred in buildResponse function",e);
     }
 
     final ResponseBuilder response = Response.ok(baos.toByteArray());

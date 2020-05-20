@@ -31,9 +31,12 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
+  private final static Logger LOG = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
   protected void writeInt(int colIndex, Row row, int value) {
       row.createCell(colIndex).setCellValue(value);
   }
@@ -154,7 +157,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                 }
             }
             } catch (ParseException e) {
-                e.printStackTrace();
+                LOG.error("Problem occurred in setClientAndGroupDateLookupTable function",e);
             }
     }
 
