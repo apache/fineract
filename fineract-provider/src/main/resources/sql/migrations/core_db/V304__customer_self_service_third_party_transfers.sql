@@ -26,13 +26,13 @@ CREATE TABLE `m_selfservice_beneficiaries_tpt` (
 	`office_id` BIGINT NOT NULL,
 	`client_id` BIGINT NOT NULL,
 	`account_id` BIGINT NOT NULL,
-	`account_type` SMALLINT(4) NOT NULL,
+	`account_type` SMALLINT NOT NULL,
 	`transfer_limit` BIGINT NULL DEFAULT 0,
 	`is_active` BIT(1) NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `name` (`name`, `app_user_id`, `is_active`)
 )
-COLLATE='utf8_general_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 

@@ -44,7 +44,6 @@ dependencies {
             'com.sun.jersey.contribs:jersey-multipart',
 
             'joda-time:joda-time',
-            'com.google.guava:guava',
             'com.google.code.gson:gson',
             'com.sun.jersey:jersey-core',
             'com.squareup.retrofit:retrofit',
@@ -119,9 +118,6 @@ dependencies {
     testImplementation ('io.rest-assured:rest-assured') {
         exclude group: 'commons-logging'
         exclude group: 'org.apache.sling'
-    }
-    testImplementation ('com.mockrunner:mockrunner-jms') {
-        exclude group: 'regexp'
     }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

@@ -86,7 +86,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         final CbConfigMapper rm = new CbConfigMapper();
         final String sql = "select " + rm.schema() + " where cbconfig.organisation_creditbureau_id= ?";
 
-        List<CreditBureauConfigurationData> config = (List<CreditBureauConfigurationData>) this.jdbcTemplate.query(sql,
+        List<CreditBureauConfigurationData> config =  this.jdbcTemplate.query(sql,
                 rm, new Object[] {id});
         Map<String, String> configuration = new HashMap<String, String>();
         for (CreditBureauConfigurationData data : config) {

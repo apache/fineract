@@ -22,9 +22,11 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CenterDomain implements Comparable<CenterDomain> {
-
+    private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
     public static class Builder {
 
         private Integer id;
@@ -147,7 +149,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         }
         if (externalId != null) map.put("externalId", externalId);
         if (groupMembers != null) map.put("groupMembers", groupMembers);
-        System.out.println(map);
+        LOG.info("{}",map.toString());
         return new Gson().toJson(map);
     }
 
@@ -240,6 +242,6 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     @Override
     public int compareTo(CenterDomain cd) {
-        return ((Integer) this.id).compareTo(cd.getId());
+        return ( this.id).compareTo(cd.getId());
     }
 }

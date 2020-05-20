@@ -91,7 +91,7 @@ left join r_enum_value am on am.enum_name = ""amortization_method_enum""
 left join m_code_value purp on purp.id = l.loanpurpose_cv_id
 left join m_currency cur on cur.code = l.currency_code
 where o.id = ${officeId}
-and (l.currency_code = ""${currencyId}"" or ""-1"" = ""${currencyId}"")
+and (l.currency_code = ""$\{currencyId}"" or ""-1"" = ""$\{currencyId}"")
 and (l.product_id = ""${loanProductId}"" or ""-1"" = ""${loanProductId}"")
 and (ifnull(l.loan_officer_id, -10) = ""${loanOfficerId}"" or ""-1"" = ""${loanOfficerId}"")
 and (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})

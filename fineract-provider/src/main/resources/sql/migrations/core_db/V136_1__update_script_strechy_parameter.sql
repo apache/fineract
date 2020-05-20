@@ -17,4 +17,4 @@
 -- under the License.
 --
 
-UPDATE stretchy_parameter SET `parameter_sql`='select p.id, p.`name`\r\nfrom m_product_loan p\r\nwhere (p.currency_code = \'${currencyId}\' or \'-1\'= \'${currencyId}\')\r\norder by 2' WHERE parameter_name='loanProductIdSelectAll';
+UPDATE stretchy_parameter SET `parameter_sql`='select p.id, p.`name`\r\nfrom m_product_loan p\r\nwhere (p.currency_code = \'$\{currencyId}\' or \'-1\'= \'$\{currencyId}\')\r\norder by 2' WHERE parameter_name='loanProductIdSelectAll';

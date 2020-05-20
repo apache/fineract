@@ -73,17 +73,17 @@ public class ProvisioningTransactionHelper {
     }
 
     public Map retrieveProvisioningEntry(final Integer provisioningEntry) {
-        String url = "/fineract-provider/api/v1/provisioningentries/"+provisioningEntry+"?"+Utils.TENANT_IDENTIFIER; ;
+        String url = "/fineract-provider/api/v1/provisioningentries/"+provisioningEntry+"?"+Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "") ;
     }
 
     public Map retrieveProvisioningEntries(final Integer provisioningEntry) {
-        String url = "/fineract-provider/api/v1/provisioningentries/entries?entryId="+provisioningEntry+"&"+Utils.TENANT_IDENTIFIER; ;
+        String url = "/fineract-provider/api/v1/provisioningentries/entries?entryId="+provisioningEntry+"&"+Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "") ;
     }
 
     public Map retrieveAllProvisioningEntries() {
-        String url = "/fineract-provider/api/v1/provisioningentries?dateFormat=dd MMMM yyyy"+"&"+"locale=en"+"&"+Utils.TENANT_IDENTIFIER; ;
+        String url = "/fineract-provider/api/v1/provisioningentries?dateFormat=dd MMMM yyyy"+"&"+"locale=en"+"&"+Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "") ;
     }
 

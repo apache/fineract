@@ -26,7 +26,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES UTF8MB4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -40,22 +40,22 @@
 
 DROP TABLE IF EXISTS `acc_gl_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `acc_gl_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
-  `parent_id` bigint(20) DEFAULT NULL,
+  `parent_id` BIGINT DEFAULT NULL,
   `gl_code` varchar(45) NOT NULL,
-  `disabled` tinyint(1) NOT NULL DEFAULT '0',
-  `manual_journal_entries_allowed` tinyint(1) NOT NULL DEFAULT '1',
-  `account_usage` tinyint(1) NOT NULL DEFAULT '2',
-  `classification_enum` smallint(5) NOT NULL,
+  `disabled` tinyint NOT NULL DEFAULT '0',
+  `manual_journal_entries_allowed` tinyint NOT NULL DEFAULT '1',
+  `account_usage` tinyint NOT NULL DEFAULT '2',
+  `classification_enum` SMALLINT NOT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `acc_gl_code` (`gl_code`),
   KEY `FK_ACC_0000000001` (`parent_id`),
   CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,14 +73,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `acc_gl_closure`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `acc_gl_closure` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `office_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `office_id` BIGINT NOT NULL,
   `closing_date` date NOT NULL,
-  `is_deleted` int(20) NOT NULL DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `is_deleted` INT NOT NULL DEFAULT '0',
+  `createdby_id` BIGINT DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   `comments` varchar(500) DEFAULT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE `acc_gl_closure` (
   CONSTRAINT `FK_acc_gl_closure_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_closure_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -110,23 +110,23 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `acc_gl_journal_entry`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `acc_gl_journal_entry` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_id` bigint(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `reversal_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_id` BIGINT NOT NULL,
+  `office_id` BIGINT NOT NULL,
+  `reversal_id` BIGINT DEFAULT NULL,
   `transaction_id` varchar(50) NOT NULL,
-  `reversed` tinyint(1) NOT NULL DEFAULT '0',
-  `portfolio_generated` tinyint(1) NOT NULL DEFAULT '0',
+  `reversed` tinyint NOT NULL DEFAULT '0',
+  `portfolio_generated` tinyint NOT NULL DEFAULT '0',
   `entry_date` date NOT NULL,
-  `type_enum` smallint(50) NOT NULL,
+  `type_enum` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
   `entity_type` varchar(50) DEFAULT NULL,
-  `entity_id` bigint(20) DEFAULT NULL,
-  `createdby_id` bigint(20) NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `entity_id` BIGINT DEFAULT NULL,
+  `createdby_id` BIGINT NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
@@ -140,7 +140,7 @@ CREATE TABLE `acc_gl_journal_entry` (
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,15 +158,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `acc_product_mapping`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `acc_product_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `gl_account_id` bigint(20) DEFAULT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
-  `product_type` smallint(5) DEFAULT NULL,
-  `financial_account_type` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `gl_account_id` BIGINT DEFAULT NULL,
+  `product_id` BIGINT DEFAULT NULL,
+  `product_type` SMALLINT DEFAULT NULL,
+  `financial_account_type` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,13 +184,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `c_configuration`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `c_configuration` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `enabled` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,19 +209,19 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `extra_client_details`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `extra_client_details` (
-  `client_id` bigint(20) NOT NULL,
+  `client_id` BIGINT NOT NULL,
   `Business Description` varchar(100) DEFAULT NULL,
-  `Years in Business` int(11) DEFAULT NULL,
-  `Gender_cd` int(11) DEFAULT NULL,
+  `Years in Business` INT DEFAULT NULL,
+  `Gender_cd` INT DEFAULT NULL,
   `Education_cv` varchar(60) DEFAULT NULL,
   `Next Visit` date DEFAULT NULL,
   `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
   `Comment` text,
   PRIMARY KEY (`client_id`),
   CONSTRAINT `FK_latam_extra_client_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -239,19 +239,19 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `extra_family_details`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `extra_family_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
   `Name` varchar(40) DEFAULT NULL,
   `Date of Birth` date DEFAULT NULL,
-  `Points Score` int(11) DEFAULT NULL,
-  `Education_cd_Highest` int(11) DEFAULT NULL,
+  `Points Score` INT DEFAULT NULL,
+  `Education_cd_Highest` INT DEFAULT NULL,
   `Other Notes` text,
   PRIMARY KEY (`id`),
   KEY `FK_Extra Family Details Data_1` (`client_id`),
   CONSTRAINT `FK_latam_family_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -269,19 +269,19 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `extra_loan_details`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `extra_loan_details` (
-  `loan_id` bigint(20) NOT NULL,
+  `loan_id` BIGINT NOT NULL,
   `Business Description` varchar(100) DEFAULT NULL,
-  `Years in Business` int(11) DEFAULT NULL,
-  `Gender_cd` int(11) DEFAULT NULL,
+  `Years in Business` INT DEFAULT NULL,
+  `Gender_cd` INT DEFAULT NULL,
   `Education_cv` varchar(60) DEFAULT NULL,
   `Next Visit` date DEFAULT NULL,
   `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
   `Comment` text,
   PRIMARY KEY (`loan_id`),
   CONSTRAINT `FK_latam_extra_loan_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -299,11 +299,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_appuser`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_appuser` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `office_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
+  `office_id` BIGINT DEFAULT NULL,
   `username` varchar(100) NOT NULL,
   `firstname` varchar(100) NOT NULL,
   `lastname` varchar(100) NOT NULL,
@@ -318,7 +318,7 @@ CREATE TABLE `m_appuser` (
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
   CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -337,16 +337,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_appuser_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_appuser_role` (
-  `appuser_id` bigint(20) NOT NULL,
-  `role_id` bigint(20) NOT NULL,
+  `appuser_id` BIGINT NOT NULL,
+  `role_id` BIGINT NOT NULL,
   PRIMARY KEY (`appuser_id`,`role_id`),
   KEY `FK7662CE59B4100309` (`appuser_id`),
   KEY `FK7662CE5915CEC7AB` (`role_id`),
   CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
   CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -365,21 +365,21 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_charge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `charge_applies_to_enum` smallint(5) NOT NULL,
-  `charge_time_enum` smallint(5) NOT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
+  `charge_applies_to_enum` SMALLINT NOT NULL,
+  `charge_time_enum` SMALLINT NOT NULL,
+  `charge_calculation_enum` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
-  `is_active` tinyint(1) NOT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_penalty` tinyint NOT NULL DEFAULT '0',
+  `is_active` tinyint NOT NULL,
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -397,11 +397,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_client`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_client` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
+  `office_id` BIGINT NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `middlename` varchar(50) DEFAULT NULL,
@@ -410,13 +410,13 @@ CREATE TABLE `m_client` (
   `display_name` varchar(100) NOT NULL,
   `image_key` varchar(500) DEFAULT NULL,
   `joined_date` date DEFAULT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `FKCE00CAB3E0DD567A` (`office_id`),
   CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -434,15 +434,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_client_identifier`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_client_identifier` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `document_type_id` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
+  `document_type_id` INT NOT NULL,
   `document_key` varchar(50) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -452,7 +452,7 @@ CREATE TABLE `m_client_identifier` (
   KEY `FK_m_client_document_m_code_value` (`document_type_id`),
   CONSTRAINT `FK_m_client_document_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FK_m_client_document_m_code_value` FOREIGN KEY (`document_type_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -470,14 +470,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_code`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_code` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `code_name` varchar(100) DEFAULT NULL,
-  `is_system_defined` tinyint(1) NOT NULL DEFAULT '0',
+  `is_system_defined` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -496,17 +496,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_code_value`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_code_value` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `code_id` int(11) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `code_id` INT NOT NULL,
   `code_value` varchar(100) DEFAULT NULL,
-  `order_position` int(11) NOT NULL DEFAULT '0',
+  `order_position` INT NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_value` (`code_id`,`code_value`),
   KEY `FKCFCEA42640BE071Z` (`code_id`),
   CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -525,17 +525,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_currency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_currency` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
-  `decimal_places` smallint(5) NOT NULL,
+  `decimal_places` SMALLINT NOT NULL,
   `display_symbol` varchar(10) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -554,21 +554,21 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_deposit_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_deposit_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `status_enum` smallint(5) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
+  `status_enum` SMALLINT NOT NULL DEFAULT '0',
   `external_id` varchar(100) DEFAULT NULL,
-  `client_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
+  `client_id` BIGINT NOT NULL,
+  `product_id` BIGINT NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
+  `currency_digits` SMALLINT NOT NULL,
   `deposit_amount` decimal(19,6) DEFAULT NULL,
   `maturity_nominal_interest_rate` decimal(19,6) NOT NULL,
-  `tenure_months` int(11) NOT NULL,
-  `interest_compounded_every` smallint(5) NOT NULL DEFAULT '1',
-  `interest_compounded_every_period_enum` smallint(5) NOT NULL DEFAULT '2',
+  `tenure_months` INT NOT NULL,
+  `interest_compounded_every` SMALLINT NOT NULL DEFAULT '1',
+  `interest_compounded_every_period_enum` SMALLINT NOT NULL DEFAULT '2',
   `projected_commencement_date` date NOT NULL,
   `actual_commencement_date` date DEFAULT NULL,
   `matures_on_date` datetime DEFAULT NULL,
@@ -576,27 +576,27 @@ CREATE TABLE `m_deposit_account` (
   `actual_interest_accrued` decimal(19,6) DEFAULT NULL,
   `projected_total_maturity_amount` decimal(19,6) NOT NULL,
   `actual_total_amount` decimal(19,6) DEFAULT NULL,
-  `is_compounding_interest_allowed` tinyint(1) NOT NULL DEFAULT '0',
+  `is_compounding_interest_allowed` tinyint NOT NULL DEFAULT '0',
   `interest_paid` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `is_interest_withdrawable` tinyint(1) NOT NULL DEFAULT '0',
+  `is_interest_withdrawable` tinyint NOT NULL DEFAULT '0',
   `available_interest` decimal(19,6) DEFAULT '0.000000',
   `interest_posted_amount` decimal(19,6) DEFAULT '0.000000',
   `last_interest_posted_date` date DEFAULT NULL,
   `next_interest_posting_date` date DEFAULT NULL,
-  `is_renewal_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `renewed_account_id` bigint(20) DEFAULT NULL,
-  `is_preclosure_allowed` tinyint(1) NOT NULL DEFAULT '0',
+  `is_renewal_allowed` tinyint NOT NULL DEFAULT '0',
+  `renewed_account_id` BIGINT DEFAULT NULL,
+  `is_preclosure_allowed` tinyint NOT NULL DEFAULT '0',
   `pre_closure_interest_rate` decimal(19,6) NOT NULL,
-  `is_lock_in_period_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `lock_in_period` bigint(20) DEFAULT NULL,
-  `lock_in_period_type` smallint(5) NOT NULL DEFAULT '2',
+  `is_lock_in_period_allowed` tinyint NOT NULL DEFAULT '0',
+  `lock_in_period` BIGINT DEFAULT NULL,
+  `lock_in_period_type` SMALLINT NOT NULL DEFAULT '2',
   `withdrawnon_date` datetime DEFAULT NULL,
   `rejectedon_date` datetime DEFAULT NULL,
   `closedon_date` datetime DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `deposit_acc_external_id` (`external_id`),
   KEY `FKKW0000000000001` (`client_id`),
@@ -605,7 +605,7 @@ CREATE TABLE `m_deposit_account` (
   CONSTRAINT `FKKW0000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKKW0000000000002` FOREIGN KEY (`product_id`) REFERENCES `m_product_deposit` (`id`),
   CONSTRAINT `FKKW0000000000003` FOREIGN KEY (`renewed_account_id`) REFERENCES `m_deposit_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -623,12 +623,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_deposit_account_transaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_deposit_account_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `deposit_account_id` bigint(20) NOT NULL,
-  `transaction_type_enum` smallint(5) NOT NULL,
-  `contra_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `deposit_account_id` BIGINT NOT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
+  `contra_id` BIGINT DEFAULT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `interest` decimal(19,6) NOT NULL,
@@ -638,7 +638,7 @@ CREATE TABLE `m_deposit_account_transaction` (
   KEY `FKKW00000000000006` (`contra_id`),
   CONSTRAINT `FKKW00000000000005` FOREIGN KEY (`deposit_account_id`) REFERENCES `m_deposit_account` (`id`),
   CONSTRAINT `FKKW00000000000006` FOREIGN KEY (`contra_id`) REFERENCES `m_deposit_account_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -656,19 +656,19 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_document`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_document` (
-  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `parent_entity_type` varchar(50) NOT NULL,
-  `parent_entity_id` int(20) NOT NULL DEFAULT '0',
+  `parent_entity_id` INT NOT NULL DEFAULT '0',
   `name` varchar(250) NOT NULL,
   `file_name` varchar(250) NOT NULL,
-  `size` int(20) DEFAULT '0',
+  `size` INT DEFAULT '0',
   `type` varchar(50) DEFAULT NULL,
   `description` varchar(1000) DEFAULT NULL,
   `location` varchar(500) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -686,15 +686,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_fund`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_fund` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fund_name_org` (`name`),
   UNIQUE KEY `fund_externalid_org` (`external_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -712,19 +712,19 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_group`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_group` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `office_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `office_id` BIGINT NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `office_id` (`office_id`),
   CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -742,15 +742,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_group_client`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_group_client` (
-  `group_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
+  `group_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
   PRIMARY KEY (`group_id`,`client_id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `m_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `m_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -768,12 +768,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_guarantor`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_guarantor` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `type_enum` smallint(5) NOT NULL,
-  `entity_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `type_enum` SMALLINT NOT NULL,
+  `entity_id` BIGINT DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `dob` date DEFAULT NULL,
@@ -789,7 +789,7 @@ CREATE TABLE `m_guarantor` (
   PRIMARY KEY (`id`),
   KEY `FK_m_guarantor_m_loan` (`loan_id`),
   CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -807,33 +807,33 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_loan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_loan` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
-  `fund_id` bigint(20) DEFAULT NULL,
-  `loan_officer_id` bigint(20) DEFAULT NULL,
-  `guarantor_id` bigint(20) DEFAULT NULL,
-  `loan_status_id` smallint(5) NOT NULL,
+  `client_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `product_id` BIGINT DEFAULT NULL,
+  `fund_id` BIGINT DEFAULT NULL,
+  `loan_officer_id` BIGINT DEFAULT NULL,
+  `guarantor_id` BIGINT DEFAULT NULL,
+  `loan_status_id` SMALLINT NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
+  `currency_digits` SMALLINT NOT NULL,
   `principal_amount` decimal(19,6) NOT NULL,
   `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
-  `interest_period_frequency_enum` smallint(5) NOT NULL,
+  `interest_period_frequency_enum` SMALLINT NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
-  `interest_method_enum` smallint(5) NOT NULL,
-  `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
-  `term_frequency` smallint(5) NOT NULL DEFAULT '0',
-  `term_period_frequency_enum` smallint(5) NOT NULL DEFAULT '2',
-  `repay_every` smallint(5) NOT NULL,
-  `repayment_period_frequency_enum` smallint(5) NOT NULL,
-  `number_of_repayments` smallint(5) NOT NULL,
-  `amortization_method_enum` smallint(5) NOT NULL,
+  `interest_method_enum` SMALLINT NOT NULL,
+  `interest_calculated_in_period_enum` SMALLINT NOT NULL DEFAULT '1',
+  `term_frequency` SMALLINT NOT NULL DEFAULT '0',
+  `term_period_frequency_enum` SMALLINT NOT NULL DEFAULT '2',
+  `repay_every` SMALLINT NOT NULL,
+  `repayment_period_frequency_enum` SMALLINT NOT NULL,
+  `number_of_repayments` SMALLINT NOT NULL,
+  `amortization_method_enum` SMALLINT NOT NULL,
   `total_charges_due_at_disbursement_derived` decimal(19,6) DEFAULT NULL,
   `submittedon_date` datetime DEFAULT NULL,
   `approvedon_date` datetime DEFAULT NULL,
@@ -848,11 +848,11 @@ CREATE TABLE `m_loan` (
   `rescheduledon_date` datetime DEFAULT NULL,
   `withdrawnon_date` datetime DEFAULT NULL,
   `writtenoffon_date` datetime DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
+  `loan_transaction_strategy_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `loan_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `loan_externalid_UNIQUE` (`external_id`),
@@ -870,7 +870,7 @@ CREATE TABLE `m_loan` (
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -888,15 +888,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_loan_charge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_loan_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
-  `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
-  `charge_time_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
+  `is_penalty` tinyint NOT NULL DEFAULT '0',
+  `charge_time_enum` SMALLINT NOT NULL,
   `due_for_collection_as_of_date` date DEFAULT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
+  `charge_calculation_enum` SMALLINT NOT NULL,
   `calculation_percentage` decimal(19,6) DEFAULT NULL,
   `calculation_on_amount` decimal(19,6) DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
@@ -904,13 +904,13 @@ CREATE TABLE `m_loan_charge` (
   `amount_waived_derived` decimal(19,6) DEFAULT NULL,
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
+  `is_paid_derived` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `charge_id` (`charge_id`),
   KEY `m_loan_charge_ibfk_2` (`loan_id`),
   CONSTRAINT `m_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -928,23 +928,23 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_loan_officer_assignment_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `loan_officer_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `loan_officer_id` BIGINT DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_m_loan_officer_assignment_history_0001` (`loan_id`),
   KEY `fk_m_loan_officer_assignment_history_0002` (`loan_officer_id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0001` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0002` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -962,13 +962,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_loan_repayment_schedule` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
   `fromdate` date DEFAULT NULL,
   `duedate` date NOT NULL,
-  `installment` smallint(5) NOT NULL,
+  `installment` SMALLINT NOT NULL,
   `principal_amount` decimal(19,6) DEFAULT NULL,
   `principal_completed_derived` decimal(19,6) DEFAULT NULL,
   `principal_writtenoff_derived` decimal(19,6) DEFAULT NULL,
@@ -984,15 +984,15 @@ CREATE TABLE `m_loan_repayment_schedule` (
   `penalty_charges_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `penalty_charges_waived_derived` decimal(19,6) DEFAULT NULL,
   `completed_derived` bit(1) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `interest_waived_derived` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK488B92AA40BE0710` (`loan_id`),
   CONSTRAINT `FK488B92AA40BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1010,18 +1010,18 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_loan_transaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_loan_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `transaction_type_enum` smallint(5) NOT NULL,
-  `contra_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
+  `contra_id` BIGINT DEFAULT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `principal_portion_derived` decimal(19,6) DEFAULT NULL,
   `interest_portion_derived` decimal(19,6) DEFAULT NULL,
   `fee_charges_portion_derived` decimal(19,6) DEFAULT NULL,
@@ -1031,7 +1031,7 @@ CREATE TABLE `m_loan_transaction` (
   KEY `FKCFCEA426FC69F3F1` (`contra_id`),
   CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `m_loan_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1049,20 +1049,20 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_note`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_note` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `loan_id` bigint(20) DEFAULT NULL,
-  `loan_transaction_id` bigint(20) DEFAULT NULL,
-  `deposit_account_id` bigint(20) DEFAULT NULL,
-  `saving_account_id` bigint(20) DEFAULT NULL,
-  `note_type_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
+  `loan_id` BIGINT DEFAULT NULL,
+  `loan_transaction_id` BIGINT DEFAULT NULL,
+  `deposit_account_id` BIGINT DEFAULT NULL,
+  `saving_account_id` BIGINT DEFAULT NULL,
+  `note_type_enum` SMALLINT NOT NULL,
   `note` varchar(1000) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK7C9708924D26803` (`loan_transaction_id`),
   KEY `FK7C97089541F0A56` (`createdby_id`),
@@ -1078,7 +1078,7 @@ CREATE TABLE `m_note` (
   CONSTRAINT `FK7C970897179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FK7C970898F889C3F` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_note_m_deposit_account` FOREIGN KEY (`deposit_account_id`) REFERENCES `m_deposit_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1096,10 +1096,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_office`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_office` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `parent_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `parent_id` BIGINT DEFAULT NULL,
   `hierarchy` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
@@ -1109,7 +1109,7 @@ CREATE TABLE `m_office` (
   UNIQUE KEY `externalid_org` (`external_id`),
   KEY `FK2291C477E2551DCC` (`parent_id`),
   CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1128,13 +1128,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_office_transaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_office_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `from_office_id` bigint(20) DEFAULT NULL,
-  `to_office_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `from_office_id` BIGINT DEFAULT NULL,
+  `to_office_id` BIGINT DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` int(11) NOT NULL,
+  `currency_digits` INT NOT NULL,
   `transaction_amount` decimal(19,6) NOT NULL,
   `transaction_date` date NOT NULL,
   `description` varchar(100) DEFAULT NULL,
@@ -1143,7 +1143,7 @@ CREATE TABLE `m_office_transaction` (
   KEY `FK1E37728B783C5C25` (`from_office_id`),
   CONSTRAINT `FK1E37728B783C5C25` FOREIGN KEY (`from_office_id`) REFERENCES `m_office` (`id`),
   CONSTRAINT `FK1E37728B93C6C1B6` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1161,16 +1161,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_organisation_currency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_organisation_currency` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
-  `decimal_places` smallint(5) NOT NULL,
+  `decimal_places` SMALLINT NOT NULL,
   `name` varchar(50) NOT NULL,
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1189,17 +1189,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_permission` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `grouping` varchar(45) DEFAULT NULL,
   `code` varchar(100) NOT NULL,
   `entity_name` varchar(100) DEFAULT NULL,
   `action_name` varchar(100) DEFAULT NULL,
-  `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
+  `can_maker_checker` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=237 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=237 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1218,23 +1218,23 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_portfolio_command_source`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_portfolio_command_source` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `action_name` varchar(50) NOT NULL,
   `entity_name` varchar(50) NOT NULL,
-  `office_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `loan_id` bigint(20) DEFAULT NULL,
+  `office_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `client_id` BIGINT DEFAULT NULL,
+  `loan_id` BIGINT DEFAULT NULL,
   `api_get_url` varchar(100) NOT NULL,
-  `resource_id` bigint(20) DEFAULT NULL,
+  `resource_id` BIGINT DEFAULT NULL,
   `command_as_json` text NOT NULL,
-  `maker_id` bigint(20) NOT NULL,
+  `maker_id` BIGINT NOT NULL,
   `made_on_date` datetime NOT NULL,
-  `checker_id` bigint(20) DEFAULT NULL,
+  `checker_id` BIGINT DEFAULT NULL,
   `checked_on_date` datetime DEFAULT NULL,
-  `processing_result_enum` smallint(5) NOT NULL,
+  `processing_result_enum` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_maker_m_appuser` (`maker_id`),
   KEY `FK_m_checker_m_appuser` (`checker_id`),
@@ -1249,7 +1249,7 @@ CREATE TABLE `m_portfolio_command_source` (
   KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1267,34 +1267,34 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_product_deposit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_product_deposit` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
   `external_id` varchar(100) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
+  `currency_digits` SMALLINT NOT NULL,
   `minimum_balance` decimal(19,6) DEFAULT NULL,
   `maximum_balance` decimal(19,6) DEFAULT NULL,
-  `tenure_months` int(11) NOT NULL,
-  `interest_compounded_every` smallint(5) NOT NULL DEFAULT '1',
-  `interest_compounded_every_period_enum` smallint(5) NOT NULL DEFAULT '2',
+  `tenure_months` INT NOT NULL,
+  `interest_compounded_every` SMALLINT NOT NULL DEFAULT '1',
+  `interest_compounded_every_period_enum` SMALLINT NOT NULL DEFAULT '2',
   `maturity_default_interest_rate` decimal(19,6) NOT NULL,
   `maturity_min_interest_rate` decimal(19,6) NOT NULL,
   `maturity_max_interest_rate` decimal(19,6) NOT NULL,
-  `is_compounding_interest_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `is_renewal_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `is_preclosure_allowed` tinyint(1) NOT NULL DEFAULT '0',
+  `is_compounding_interest_allowed` tinyint NOT NULL DEFAULT '0',
+  `is_renewal_allowed` tinyint NOT NULL DEFAULT '0',
+  `is_preclosure_allowed` tinyint NOT NULL DEFAULT '0',
   `pre_closure_interest_rate` decimal(19,6) NOT NULL,
-  `is_lock_in_period_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `lock_in_period` bigint(20) DEFAULT NULL,
-  `lock_in_period_type` smallint(5) NOT NULL DEFAULT '2',
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `is_lock_in_period_allowed` tinyint NOT NULL DEFAULT '0',
+  `lock_in_period` BIGINT DEFAULT NULL,
+  `lock_in_period_type` SMALLINT NOT NULL DEFAULT '2',
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_deposit_product` (`name`),
   UNIQUE KEY `externalid_deposit_product` (`external_id`),
@@ -1302,7 +1302,7 @@ CREATE TABLE `m_product_deposit` (
   KEY `FKJPW0000000000004` (`lastmodifiedby_id`),
   CONSTRAINT `FKJPX0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FKJPX0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1320,33 +1320,33 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_product_loan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_product_loan` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
+  `currency_digits` SMALLINT NOT NULL,
   `principal_amount` decimal(19,6) NOT NULL,
   `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `fund_id` bigint(20) DEFAULT NULL,
+  `fund_id` BIGINT DEFAULT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
-  `interest_period_frequency_enum` smallint(5) NOT NULL,
+  `interest_period_frequency_enum` SMALLINT NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
-  `interest_method_enum` smallint(5) NOT NULL,
-  `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
-  `repay_every` smallint(5) NOT NULL,
-  `repayment_period_frequency_enum` smallint(5) NOT NULL,
-  `number_of_repayments` smallint(5) NOT NULL,
-  `amortization_method_enum` smallint(5) NOT NULL,
-  `accounting_type` smallint(5) NOT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
+  `interest_method_enum` SMALLINT NOT NULL,
+  `interest_calculated_in_period_enum` SMALLINT NOT NULL DEFAULT '1',
+  `repay_every` SMALLINT NOT NULL,
+  `repayment_period_frequency_enum` SMALLINT NOT NULL,
+  `number_of_repayments` SMALLINT NOT NULL,
+  `amortization_method_enum` SMALLINT NOT NULL,
+  `accounting_type` SMALLINT NOT NULL,
+  `loan_transaction_strategy_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1364,15 +1364,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_product_loan_charge`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_product_loan_charge` (
-  `product_loan_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
+  `product_loan_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
   PRIMARY KEY (`product_loan_id`,`charge_id`),
   KEY `charge_id` (`charge_id`),
   CONSTRAINT `m_product_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1390,40 +1390,40 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_product_savings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_product_savings` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
   `currency_code` varchar(3) DEFAULT NULL,
-  `currency_digits` smallint(5) DEFAULT NULL,
+  `currency_digits` SMALLINT DEFAULT NULL,
   `interest_rate` decimal(19,6) DEFAULT NULL,
   `min_interest_rate` decimal(19,6) DEFAULT NULL,
   `max_interest_rate` decimal(19,6) DEFAULT NULL,
   `savings_deposit_amount` decimal(19,6) NOT NULL,
-  `savings_product_type` smallint(5) DEFAULT NULL,
-  `tenure_type` smallint(5) DEFAULT NULL,
-  `deposit_every` bigint(20) DEFAULT NULL,
-  `tenure` int(11) DEFAULT NULL,
-  `frequency` int(11) DEFAULT NULL,
-  `interest_type` smallint(5) DEFAULT NULL,
-  `interest_calculation_method` smallint(5) DEFAULT NULL,
+  `savings_product_type` SMALLINT DEFAULT NULL,
+  `tenure_type` SMALLINT DEFAULT NULL,
+  `deposit_every` BIGINT DEFAULT NULL,
+  `tenure` INT DEFAULT NULL,
+  `frequency` INT DEFAULT NULL,
+  `interest_type` SMALLINT DEFAULT NULL,
+  `interest_calculation_method` SMALLINT DEFAULT NULL,
   `min_bal_for_withdrawal` decimal(19,6) NOT NULL,
-  `is_partial_deposit_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `is_lock_in_period_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `lock_in_period` bigint(20) DEFAULT NULL,
-  `lock_in_period_type` smallint(5) NOT NULL DEFAULT '1',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `is_partial_deposit_allowed` tinyint NOT NULL DEFAULT '0',
+  `is_lock_in_period_allowed` tinyint NOT NULL DEFAULT '0',
+  `lock_in_period` BIGINT DEFAULT NULL,
+  `lock_in_period_type` SMALLINT NOT NULL DEFAULT '1',
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKJPW0000000000003` (`createdby_id`),
   KEY `FKJPW0000000000004` (`lastmodifiedby_id`),
   CONSTRAINT `FKJPW0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FKJPW0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1441,13 +1441,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_role` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1466,16 +1466,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_role_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_role_permission` (
-  `role_id` bigint(20) NOT NULL,
-  `permission_id` bigint(20) NOT NULL,
+  `role_id` BIGINT NOT NULL,
+  `permission_id` BIGINT NOT NULL,
   PRIMARY KEY (`role_id`,`permission_id`),
   KEY `FK8DEDB04815CEC7AB` (`role_id`),
   KEY `FK8DEDB048103B544B` (`permission_id`),
   CONSTRAINT `FK8DEDB048103B544B` FOREIGN KEY (`permission_id`) REFERENCES `m_permission` (`id`),
   CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1494,29 +1494,29 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_saving_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_saving_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `status_enum` smallint(5) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
+  `status_enum` SMALLINT NOT NULL DEFAULT '0',
   `external_id` varchar(100) DEFAULT NULL,
-  `client_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
+  `client_id` BIGINT NOT NULL,
+  `product_id` BIGINT NOT NULL,
   `deposit_amount_per_period` decimal(19,6) NOT NULL,
-  `savings_product_type` smallint(5) DEFAULT NULL,
+  `savings_product_type` SMALLINT DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
+  `currency_digits` SMALLINT NOT NULL,
   `total_deposit_amount` decimal(19,6) NOT NULL,
   `reccuring_nominal_interest_rate` decimal(19,6) NOT NULL,
   `regular_saving_nominal_interest_rate` decimal(19,6) NOT NULL,
-  `tenure` int(11) NOT NULL,
-  `tenure_type` smallint(5) DEFAULT NULL,
-  `deposit_every` bigint(20) DEFAULT NULL,
-  `frequency` int(11) DEFAULT NULL,
-  `interest_posting_every` int(11) DEFAULT NULL,
-  `interest_posting_frequency` int(11) DEFAULT NULL,
-  `interest_type` smallint(5) DEFAULT NULL,
-  `interest_calculation_method` smallint(5) DEFAULT NULL,
+  `tenure` INT NOT NULL,
+  `tenure_type` SMALLINT DEFAULT NULL,
+  `deposit_every` BIGINT DEFAULT NULL,
+  `frequency` INT DEFAULT NULL,
+  `interest_posting_every` INT DEFAULT NULL,
+  `interest_posting_frequency` INT DEFAULT NULL,
+  `interest_type` SMALLINT DEFAULT NULL,
+  `interest_calculation_method` SMALLINT DEFAULT NULL,
   `projected_commencement_date` date NOT NULL,
   `actual_commencement_date` date DEFAULT NULL,
   `matures_on_date` datetime DEFAULT NULL,
@@ -1524,29 +1524,29 @@ CREATE TABLE `m_saving_account` (
   `actual_interest_accrued` decimal(19,6) DEFAULT NULL,
   `projected_total_maturity_amount` decimal(19,6) NOT NULL,
   `actual_total_amount` decimal(19,6) DEFAULT NULL,
-  `is_preclosure_allowed` tinyint(1) NOT NULL DEFAULT '0',
+  `is_preclosure_allowed` tinyint NOT NULL DEFAULT '0',
   `pre_closure_interest_rate` decimal(19,6) NOT NULL,
   `outstanding_amount` decimal(19,6) NOT NULL,
   `interest_posted_amount` decimal(19,6) DEFAULT '0.000000',
   `last_interest_posted_date` date DEFAULT NULL,
   `next_interest_posting_date` date DEFAULT NULL,
-  `is_lock_in_period_allowed` tinyint(1) NOT NULL DEFAULT '0',
-  `lock_in_period` bigint(20) DEFAULT NULL,
-  `lock_in_period_type` smallint(5) NOT NULL DEFAULT '1',
+  `is_lock_in_period_allowed` tinyint NOT NULL DEFAULT '0',
+  `lock_in_period` BIGINT DEFAULT NULL,
+  `lock_in_period_type` SMALLINT NOT NULL DEFAULT '1',
   `withdrawnon_date` datetime DEFAULT NULL,
   `rejectedon_date` datetime DEFAULT NULL,
   `closedon_date` datetime DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `deposit_acc_external_id` (`external_id`),
   KEY `FKSA0000000000001` (`client_id`),
   KEY `FKSA0000000000002` (`product_id`),
   CONSTRAINT `FKSA0000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKSA0000000000002` FOREIGN KEY (`product_id`) REFERENCES `m_product_savings` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1564,24 +1564,24 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_saving_account_transaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_saving_account_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `saving_account_id` bigint(20) NOT NULL,
-  `transaction_type_enum` smallint(5) NOT NULL,
-  `contra_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `saving_account_id` BIGINT NOT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
+  `contra_id` BIGINT DEFAULT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKSAT0000000001` (`saving_account_id`),
   KEY `FKSAT0000000002` (`contra_id`),
   CONSTRAINT `FKSAT0000000001` FOREIGN KEY (`saving_account_id`) REFERENCES `m_saving_account` (`id`),
   CONSTRAINT `FKSAT0000000002` FOREIGN KEY (`contra_id`) REFERENCES `m_saving_account_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1599,25 +1599,25 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_saving_schedule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_saving_schedule` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `saving_account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `saving_account_id` BIGINT NOT NULL,
   `duedate` date NOT NULL,
-  `installment` smallint(5) NOT NULL,
+  `installment` SMALLINT NOT NULL,
   `deposit` decimal(21,4) NOT NULL,
   `payment_date` date DEFAULT NULL,
   `deposit_paid` decimal(21,4) DEFAULT NULL,
   `interest_accured` decimal(21,4) DEFAULT '0.0000',
   `completed_derived` bit(1) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKSS00000000001` (`saving_account_id`),
   CONSTRAINT `FKSS00000000001` FOREIGN KEY (`saving_account_id`) REFERENCES `m_saving_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1635,11 +1635,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `m_staff`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `m_staff` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `is_loan_officer` tinyint(1) NOT NULL DEFAULT '0',
-  `office_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `is_loan_officer` tinyint NOT NULL DEFAULT '0',
+  `office_id` BIGINT DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
@@ -1647,7 +1647,7 @@ CREATE TABLE `m_staff` (
   UNIQUE KEY `display_name` (`display_name`),
   KEY `FK_m_staff_m_office` (`office_id`),
   CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1665,16 +1665,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `r_enum_value`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `r_enum_value` (
   `enum_name` varchar(100) NOT NULL,
-  `enum_id` int(11) NOT NULL,
+  `enum_id` INT NOT NULL,
   `enum_message_property` varchar(100) NOT NULL,
   `enum_value` varchar(100) NOT NULL,
   PRIMARY KEY (`enum_name`,`enum_id`),
   UNIQUE KEY `enum_message_property` (`enum_name`,`enum_message_property`),
   UNIQUE KEY `enum_value` (`enum_name`,`enum_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1693,18 +1693,18 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `ref_loan_transaction_processing_strategy` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(100) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ltp_strategy_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1723,11 +1723,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `rpt_sequence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `rpt_sequence` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1745,9 +1745,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `stretchy_parameter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `stretchy_parameter` (
-  `parameter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `parameter_id` INT NOT NULL AUTO_INCREMENT,
   `parameter_name` varchar(45) NOT NULL,
   `parameter_variable` varchar(45) DEFAULT NULL,
   `parameter_label` varchar(45) NOT NULL,
@@ -1760,7 +1760,7 @@ CREATE TABLE `stretchy_parameter` (
   `parameter_sql` text,
   PRIMARY KEY (`parameter_id`),
   UNIQUE KEY `name_UNIQUE` (`parameter_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1779,20 +1779,20 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `stretchy_report`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `stretchy_report` (
-  `report_id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_id` INT NOT NULL AUTO_INCREMENT,
   `report_name` varchar(100) NOT NULL,
   `report_type` varchar(20) NOT NULL,
   `report_subtype` varchar(20) DEFAULT NULL,
   `report_category` varchar(45) DEFAULT NULL,
   `report_sql` text,
   `description` text,
-  `core_report` tinyint(1) DEFAULT '0',
-  `use_report` tinyint(1) DEFAULT '0',
+  `core_report` tinyint DEFAULT '0',
+  `use_report` tinyint DEFAULT '0',
   PRIMARY KEY (`report_id`),
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1801,7 +1801,7 @@ CREATE TABLE `stretchy_report` (
 
 LOCK TABLES `stretchy_report` WRITE;
 /*!40000 ALTER TABLE `stretchy_report` DISABLE KEYS */;
-INSERT INTO `stretchy_report` VALUES (1,'Client Listing','Table',NULL,'Client','select ounder.`name` as \"Office/Branch\", c.account_no as \"Client Account No.\",  \r\nc.display_name as \"Name\",  c.joined_date as \"Joined\", c.external_id as \"External Id\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\nwhere o.id = ${officeId}\r\nand c.is_deleted=0\r\norder by ounder.hierarchy, c.account_no','Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this report and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).',1,1),(2,'Client Loans Listing','Table',NULL,'Client','select ounder.`name` as \"Office/Branch\", c.account_no as \"Client Account No.\", \r\nc.display_name as \"Name\", \r\nlo.display_name as \"Loan Officer\", l.account_no as \"Loan Account No.\", l.external_id as \"External Id\", \r\np.name as Loan, st.enum_message_property as \"Status\",  \r\nf.`name` as Fund,\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount,\r\nl.arrearstolerance_amount as \"Arrears Tolerance Amount\",\r\nl.number_of_repayments as \"Expected No. Repayments\",\r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\nl.nominal_interest_rate_per_period as \"Nominal Interest Rate Per Period\",\r\n\r\nipf.enum_message_property as \"Interest Rate Frequency\",\r\nim.enum_message_property as \"Interest Method\",\r\nicp.enum_message_property as \"Interest Calculated in Period\",\r\nl.term_frequency as \"Term Frequency\",\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.repay_every as \"Repayment Frequency\",\r\nrf.enum_message_property as \"Repayment Frequency Period\",\r\nam.enum_message_property as \"Amortization\",\r\n\r\nl.total_charges_due_at_disbursement_derived as \"Total Charges Due At Disbursement\",\r\n\r\ndate( l.submittedon_date) as Submitted, date(l.approvedon_date) Approved, l.expected_disbursedon_date As \"Expected Disbursal\",\r\ndate(l.expected_firstrepaymenton_date) as \"Expected First Repayment\", date(l.interest_calculated_from_date) as \"Interest Calculated From\" ,\r\ndate(l.disbursedon_date) as Disbursed, date(l.expected_maturedon_date) \"Expected Maturity\",\r\ndate(l.maturedon_date) as \"Matured On\", date(l.closedon_date) as Closed,\r\ndate(l.rejectedon_date) as Rejected, date(l.rescheduledon_date) as Rescheduled, \r\ndate(l.withdrawnon_date) as Withdrawn, date(l.writtenoffon_date) \"Written Off\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\nleft join m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join r_enum_value st on st.enum_name = \"loan_status_id\" and st.enum_id = l.loan_status_id\r\nleft join r_enum_value ipf on ipf.enum_name = \"interest_period_frequency_enum\" and ipf.enum_id = l.interest_period_frequency_enum\r\nleft join r_enum_value im on im.enum_name = \"interest_method_enum\" and im.enum_id = l.interest_method_enum\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = l.term_period_frequency_enum\r\nleft join r_enum_value icp on icp.enum_name = \"interest_calculated_in_period_enum\" and icp.enum_id = l.interest_calculated_in_period_enum\r\nleft join r_enum_value rf on rf.enum_name = \"repayment_period_frequency_enum\" and rf.enum_id = l.repayment_period_frequency_enum\r\nleft join r_enum_value am on am.enum_name = \"amortization_method_enum\" and am.enum_id = l.amortization_method_enum\r\n\r\nleft join m_currency cur on cur.code = l.currency_code\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\norder by ounder.hierarchy, 2 , l.id','Individual Client Report\r\n\r\nPretty wide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  There is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).',1,1),(5,'Loans Awaiting Disbursal','Table',NULL,'Loan Portfolio','SELECT ounder.`name` as \"Office/Branch\", lo.display_name as \"Loan Officer\", c.display_name as \"Name\", \r\nl.account_no as \"Loan Account No.\", pl.`name` as \"Product\",  f.`name` as Fund,\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount as Principal,  \r\ndate(l.approvedon_date) \"Approved\", l.expected_disbursedon_date \"Expected Disbursal\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 200\r\norder by ounder.hierarchy, l.expected_disbursedon_date,  c.display_name','Individual Client Report',1,1),(6,'Loans Awaiting Disbursal Summary','Table',NULL,'Loan Portfolio','SELECT ounder.`name` as \"Office/Branch\",  pl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  f.`name` as Fund,\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`\r\norder by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`','Individual Client Report',1,1),(7,'Loans Awaiting Disbursal Summary by Month','Table',NULL,'Loan Portfolio','SELECT ounder.`name` as \"Office/Branch\",  pl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nyear(l.expected_disbursedon_date) as \"Year\", monthname(l.expected_disbursedon_date) as \"Month\",\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)\r\norder by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)','Individual Client Report',1,1),(10,'Active Loans Portfolio Status','Table',NULL,'Loan','select ounder.`name` as \"Office/Branch\", lo.display_name as \"Loan Officer\", c.display_name as \"Name\", \r\np.`name` as Loan, f.`name` as Fund, l.account_no as \"Loan Account No\",\r\nl.disbursedon_date as Disbursed, ifnull(cur.display_symbol, l.currency_code) as Currency,\r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Principal Outstanding\",\r\nsum(r.interest_amount - ifnull(r.interest_completed_derived, 0)) as \"Interest Outstanding\",\r\n\r\nif(datediff(curdate(), min(r.duedate)) < 0, 0, datediff(curdate(), min(r.duedate))) as \"Days Overdue\",   \r\nmin(r.installment) as \"First Overdue Installment\",\r\nmin(r.duedate) as \"First Overdue Installment Date\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Principal Overdue\",\r\nsum(if(r.duedate <= curdate(), \r\n        (ifnull(r.interest_amount, 0) - ifnull(r.interest_completed_derived, 0))\r\n            , 0)) as \"Interest Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\n                                        and r.completed_derived is false\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, p.`name`, l.currency_code, c.display_name,  l.account_no','Individual Client Report',1,1),(11,'Active Loans Summary per Branch','Table',NULL,'Loan Portfolio','select ounder.`name` as \"Office/Branch\", ifnull(cur.display_symbol, l.currency_code) as Currency,\r\ncount(distinct(c.id)) as \"No. of Clients\", count(distinct(l.id)) as \"No. of Active Loans\",\r\ncount(distinct(\r\n		  if(r.duedate <= curdate(), \r\n			    if(r.principal_amount - ifnull(r.principal_completed_derived, 0) > 0, l.id, null), null)\r\n			  )) as \"No. of Loans in Arrears\",\r\n\r\nsum(l.principal_amount) as \"Total Loans Disbursed\",\r\nsum(ifnull(r.principal_completed_derived, 0)) as \"Total Principal Repaid\",\r\nsum(ifnull(r.interest_completed_derived, 0)) as \"Total Interest Repaid\",\r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Total Principal Outstanding\",\r\nsum(ifnull(r.interest_amount, 0) - ifnull(r.interest_completed_derived, 0)) as \"Total Interest Outstanding\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Total Principal in Arrears\",\r\ncast(round(\r\n    (sum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) * 100) / \r\n            sum(r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 2) as char)\r\n            as \"Portfolio at Risk %\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand l.loan_status_id = 300\r\ngroup by ounder.hierarchy, l.currency_code\r\norder by ounder.hierarchy, l.currency_code',NULL,1,1),(15,'Portfolio at Risk','Table',NULL,'Loan Portfolio','select  ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Principal Outstanding\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Principal Overdue\",\r\n            \r\n    cast(round(\r\n    (sum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) * 100) / \r\n            sum(r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 2) as char)\r\n            as \"Portfolio at Risk %\"\r\n            \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\n                                        and r.completed_derived is false\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 300\r\ngroup by l.currency_code\r\norder by l.currency_code',NULL,1,1),(16,'Portfolio at Risk by Branch','Table',NULL,'Loan Portfolio','select  concat(substring(\"........................................\", 1, \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Principal Outstanding\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Principal Overdue\",\r\n            \r\n    cast(round(\r\n    (sum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) * 100) / \r\n            sum(r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 2) as char)\r\n            as \"Portfolio at Risk %\"\r\n            \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\n                                        and r.completed_derived is false\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"${currencyId}\" or \"-1\" = \"${currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.hierarchy, l.currency_code\r\norder by ounder.hierarchy, l.currency_code',NULL,1,1),(20,'Funds Disbursed Between Dates Summary','Table',NULL,'Fund','select ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office ounder \r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'${currencyId}\' or \'-1\' = \'${currencyId}\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\ngroup by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',NULL,1,1),(21,'Funds Disbursed Between Dates Summary by Office','Table',NULL,'Fund','select ounder.`name` as \"Office/Branch\", ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office o\r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand o.id = ${officeId}\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'${currencyId}\' or \'-1\' = \'${currencyId}\')\r\ngroup by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',NULL,1,1),(48,'Balance Sheet','Pentaho',NULL,'Accounting',NULL,'Balance Sheet',1,0),(49,'Income Statement','Pentaho',NULL,'Accounting',NULL,'Profit and Loss Statement',1,0),(50,'Trial Balance','Pentaho',NULL,'Accounting',NULL,'Trial Balance Report',1,0);
+INSERT INTO `stretchy_report` VALUES (1,'Client Listing','Table',NULL,'Client','select ounder.`name` as \"Office/Branch\", c.account_no as \"Client Account No.\",  \r\nc.display_name as \"Name\",  c.joined_date as \"Joined\", c.external_id as \"External Id\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\nwhere o.id = ${officeId}\r\nand c.is_deleted=0\r\norder by ounder.hierarchy, c.account_no','Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this report and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).',1,1),(2,'Client Loans Listing','Table',NULL,'Client','select ounder.`name` as \"Office/Branch\", c.account_no as \"Client Account No.\", \r\nc.display_name as \"Name\", \r\nlo.display_name as \"Loan Officer\", l.account_no as \"Loan Account No.\", l.external_id as \"External Id\", \r\np.name as Loan, st.enum_message_property as \"Status\",  \r\nf.`name` as Fund,\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount,\r\nl.arrearstolerance_amount as \"Arrears Tolerance Amount\",\r\nl.number_of_repayments as \"Expected No. Repayments\",\r\nl.annual_nominal_interest_rate as \" Annual Nominal Interest Rate\", \r\nl.nominal_interest_rate_per_period as \"Nominal Interest Rate Per Period\",\r\n\r\nipf.enum_message_property as \"Interest Rate Frequency\",\r\nim.enum_message_property as \"Interest Method\",\r\nicp.enum_message_property as \"Interest Calculated in Period\",\r\nl.term_frequency as \"Term Frequency\",\r\ntf.enum_message_property as \"Term Frequency Period\",\r\nl.repay_every as \"Repayment Frequency\",\r\nrf.enum_message_property as \"Repayment Frequency Period\",\r\nam.enum_message_property as \"Amortization\",\r\n\r\nl.total_charges_due_at_disbursement_derived as \"Total Charges Due At Disbursement\",\r\n\r\ndate( l.submittedon_date) as Submitted, date(l.approvedon_date) Approved, l.expected_disbursedon_date As \"Expected Disbursal\",\r\ndate(l.expected_firstrepaymenton_date) as \"Expected First Repayment\", date(l.interest_calculated_from_date) as \"Interest Calculated From\" ,\r\ndate(l.disbursedon_date) as Disbursed, date(l.expected_maturedon_date) \"Expected Maturity\",\r\ndate(l.maturedon_date) as \"Matured On\", date(l.closedon_date) as Closed,\r\ndate(l.rejectedon_date) as Rejected, date(l.rescheduledon_date) as Rescheduled, \r\ndate(l.withdrawnon_date) as Withdrawn, date(l.writtenoffon_date) \"Written Off\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\nleft join m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join r_enum_value st on st.enum_name = \"loan_status_id\" and st.enum_id = l.loan_status_id\r\nleft join r_enum_value ipf on ipf.enum_name = \"interest_period_frequency_enum\" and ipf.enum_id = l.interest_period_frequency_enum\r\nleft join r_enum_value im on im.enum_name = \"interest_method_enum\" and im.enum_id = l.interest_method_enum\r\nleft join r_enum_value tf on tf.enum_name = \"term_period_frequency_enum\" and tf.enum_id = l.term_period_frequency_enum\r\nleft join r_enum_value icp on icp.enum_name = \"interest_calculated_in_period_enum\" and icp.enum_id = l.interest_calculated_in_period_enum\r\nleft join r_enum_value rf on rf.enum_name = \"repayment_period_frequency_enum\" and rf.enum_id = l.repayment_period_frequency_enum\r\nleft join r_enum_value am on am.enum_name = \"amortization_method_enum\" and am.enum_id = l.amortization_method_enum\r\n\r\nleft join m_currency cur on cur.code = l.currency_code\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\norder by ounder.hierarchy, 2 , l.id','Individual Client Report\r\n\r\nPretty wide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  There is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).',1,1),(5,'Loans Awaiting Disbursal','Table',NULL,'Loan Portfolio','SELECT ounder.`name` as \"Office/Branch\", lo.display_name as \"Loan Officer\", c.display_name as \"Name\", \r\nl.account_no as \"Loan Account No.\", pl.`name` as \"Product\",  f.`name` as Fund,\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount as Principal,  \r\ndate(l.approvedon_date) \"Approved\", l.expected_disbursedon_date \"Expected Disbursal\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 200\r\norder by ounder.hierarchy, l.expected_disbursedon_date,  c.display_name','Individual Client Report',1,1),(6,'Loans Awaiting Disbursal Summary','Table',NULL,'Loan Portfolio','SELECT ounder.`name` as \"Office/Branch\",  pl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  f.`name` as Fund,\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`\r\norder by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`','Individual Client Report',1,1),(7,'Loans Awaiting Disbursal Summary by Month','Table',NULL,'Loan Portfolio','SELECT ounder.`name` as \"Office/Branch\",  pl.`name` as \"Product\", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nyear(l.expected_disbursedon_date) as \"Year\", monthname(l.expected_disbursedon_date) as \"Month\",\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)\r\norder by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)','Individual Client Report',1,1),(10,'Active Loans Portfolio Status','Table',NULL,'Loan','select ounder.`name` as \"Office/Branch\", lo.display_name as \"Loan Officer\", c.display_name as \"Name\", \r\np.`name` as Loan, f.`name` as Fund, l.account_no as \"Loan Account No\",\r\nl.disbursedon_date as Disbursed, ifnull(cur.display_symbol, l.currency_code) as Currency,\r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Principal Outstanding\",\r\nsum(r.interest_amount - ifnull(r.interest_completed_derived, 0)) as \"Interest Outstanding\",\r\n\r\nif(datediff(curdate(), min(r.duedate)) < 0, 0, datediff(curdate(), min(r.duedate))) as \"Days Overdue\",   \r\nmin(r.installment) as \"First Overdue Installment\",\r\nmin(r.duedate) as \"First Overdue Installment Date\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Principal Overdue\",\r\nsum(if(r.duedate <= curdate(), \r\n        (ifnull(r.interest_amount, 0) - ifnull(r.interest_completed_derived, 0))\r\n            , 0)) as \"Interest Overdue\"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\n                                        and r.completed_derived is false\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, p.`name`, l.currency_code, c.display_name,  l.account_no','Individual Client Report',1,1),(11,'Active Loans Summary per Branch','Table',NULL,'Loan Portfolio','select ounder.`name` as \"Office/Branch\", ifnull(cur.display_symbol, l.currency_code) as Currency,\r\ncount(distinct(c.id)) as \"No. of Clients\", count(distinct(l.id)) as \"No. of Active Loans\",\r\ncount(distinct(\r\n		  if(r.duedate <= curdate(), \r\n			    if(r.principal_amount - ifnull(r.principal_completed_derived, 0) > 0, l.id, null), null)\r\n			  )) as \"No. of Loans in Arrears\",\r\n\r\nsum(l.principal_amount) as \"Total Loans Disbursed\",\r\nsum(ifnull(r.principal_completed_derived, 0)) as \"Total Principal Repaid\",\r\nsum(ifnull(r.interest_completed_derived, 0)) as \"Total Interest Repaid\",\r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Total Principal Outstanding\",\r\nsum(ifnull(r.interest_amount, 0) - ifnull(r.interest_completed_derived, 0)) as \"Total Interest Outstanding\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Total Principal in Arrears\",\r\ncast(round(\r\n    (sum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) * 100) / \r\n            sum(r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 2) as char)\r\n            as \"Portfolio at Risk %\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand l.loan_status_id = 300\r\ngroup by ounder.hierarchy, l.currency_code\r\norder by ounder.hierarchy, l.currency_code',NULL,1,1),(15,'Portfolio at Risk','Table',NULL,'Loan Portfolio','select  ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Principal Outstanding\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Principal Overdue\",\r\n            \r\n    cast(round(\r\n    (sum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) * 100) / \r\n            sum(r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 2) as char)\r\n            as \"Portfolio at Risk %\"\r\n            \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\n                                        and r.completed_derived is false\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 300\r\ngroup by l.currency_code\r\norder by l.currency_code',NULL,1,1),(16,'Portfolio at Risk by Branch','Table',NULL,'Loan Portfolio','select  concat(substring(\"........................................\", 1, \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   ounder.`name`) as \"Office/Branch\",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(r.principal_amount - ifnull(r.principal_completed_derived, 0)) as \"Principal Outstanding\",\r\nsum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) as \"Principal Overdue\",\r\n            \r\n    cast(round(\r\n    (sum(if(r.duedate <= curdate(), \r\n        (r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 0)) * 100) / \r\n            sum(r.principal_amount - ifnull(r.principal_completed_derived, 0))\r\n            , 2) as char)\r\n            as \"Portfolio at Risk %\"\r\n            \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\n                                        and r.completed_derived is false\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = \"$\{currencyId}\" or \"-1\" = \"$\{currencyId}\")\r\nand (l.product_id = \"${loanProductId}\" or \"-1\" = \"${loanProductId}\")\r\nand (ifnull(l.loan_officer_id, -10) = \"${loanOfficerId}\" or \"-1\" = \"${loanOfficerId}\")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.hierarchy, l.currency_code\r\norder by ounder.hierarchy, l.currency_code',NULL,1,1),(20,'Funds Disbursed Between Dates Summary','Table',NULL,'Fund','select ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office ounder \r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\ngroup by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',NULL,1,1),(21,'Funds Disbursed Between Dates Summary by Office','Table',NULL,'Fund','select ounder.`name` as \"Office/Branch\", ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office o\r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand o.id = ${officeId}\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\ngroup by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)',NULL,1,1),(48,'Balance Sheet','Pentaho',NULL,'Accounting',NULL,'Balance Sheet',1,0),(49,'Income Statement','Pentaho',NULL,'Accounting',NULL,'Profit and Loss Statement',1,0),(50,'Trial Balance','Pentaho',NULL,'Accounting',NULL,'Trial Balance Report',1,0);
 /*!40000 ALTER TABLE `stretchy_report` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1811,14 +1811,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `stretchy_report_parameter` (
-  `report_id` int(11) NOT NULL,
-  `parameter_id` int(11) NOT NULL,
+  `report_id` INT NOT NULL,
+  `parameter_id` INT NOT NULL,
   `report_parameter_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`report_id`,`parameter_id`),
   UNIQUE KEY `report_id_name_UNIQUE` (`report_id`,`report_parameter_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1837,12 +1837,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `x_registered_table`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `x_registered_table` (
   `registered_table_name` varchar(50) NOT NULL,
   `application_table_name` varchar(50) NOT NULL,
   PRIMARY KEY (`registered_table_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

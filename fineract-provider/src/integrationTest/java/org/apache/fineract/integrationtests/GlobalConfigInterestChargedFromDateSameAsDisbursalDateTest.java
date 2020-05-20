@@ -73,7 +73,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
                                         .toString();
                         Integer updateConfigId = this.globalConfigurationHelper
                                         .updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                                                configId.toString(), newBooleanValue);;
+                                                configId.toString(), newBooleanValue);
                         Assert.assertNotNull(updateConfigId);
                         break;
                 }

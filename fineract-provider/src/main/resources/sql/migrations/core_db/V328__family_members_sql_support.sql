@@ -19,20 +19,20 @@
 
 
 CREATE TABLE `m_family_members` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
   `firstname` varchar(50) NOT NULL,
   `middlename` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `qualification` varchar(50) DEFAULT NULL,
-  `relationship_cv_id` int(11) NOT NULL,
-  `marital_status_cv_id` int(11) DEFAULT NULL,
-  `gender_cv_id` int(11) DEFAULT NULL,
+  `relationship_cv_id` INT NOT NULL,
+  `marital_status_cv_id` INT DEFAULT NULL,
+  `gender_cv_id` INT DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `age` int(11) DEFAULT NULL,
-  `profession_cv_id` int(11) DEFAULT NULL,
+  `age` INT DEFAULT NULL,
+  `profession_cv_id` INT DEFAULT NULL,
   `mobile_number` varchar(50) DEFAULT NULL,
-  `is_dependent` tinyint(4) DEFAULT NULL,
+  `is_dependent` TINYINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_family_members_client_id_m_client` (`client_id`),
   KEY `FK_m_family_members_relationship_m_code_value` (`relationship_cv_id`),
@@ -44,7 +44,7 @@ CREATE TABLE `m_family_members` (
   CONSTRAINT `FK_m_family_members_marital_status_m_code_value` FOREIGN KEY (`marital_status_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_family_members_profession_m_code_value` FOREIGN KEY (`profession_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_family_members_relationship_m_code_value` FOREIGN KEY (`relationship_cv_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 
 -- permissions

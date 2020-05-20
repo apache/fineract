@@ -25,9 +25,11 @@ import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CalendarHelper {
-
+    private final static Logger LOG = LoggerFactory.getLogger(CalendarHelper.class);
     private static final String BASE_URL = "/fineract-provider/api/v1/";
     private static final String PARENT_ENTITY_NAME = "groups/";
     private static final String ENITY_NAME = "/calendars";
@@ -37,11 +39,11 @@ public class CalendarHelper {
     public static Integer createMeetingCalendarForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
 
-        System.out.println("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
+        LOG.info("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
         final String CALENDAR_RESOURCE_URL = BASE_URL + PARENT_ENTITY_NAME + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
 
-        System.out.println(CALENDAR_RESOURCE_URL);
+        LOG.info("{}",CALENDAR_RESOURCE_URL);
 
         return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
@@ -51,11 +53,11 @@ public class CalendarHelper {
             final Integer groupId, String calendarID, final String startDate, final String frequency, final String interval,
             final String repeatsOnDay) {
 
-        System.out.println("---------------------------------UPDATING A MEETING CALENDAR FOR THE GROUP------------------------------");
+        LOG.info("---------------------------------UPDATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
         final String CALENDAR_RESOURCE_URL = BASE_URL + PARENT_ENTITY_NAME + groupId + ENITY_NAME + "/" + calendarID;
 
-        System.out.println(CALENDAR_RESOURCE_URL);
+        LOG.info("{}",CALENDAR_RESOURCE_URL);
         // TODO: check that resource id indeed exists in calendar update put.
         return Utils.performServerPut(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
@@ -74,13 +76,13 @@ public class CalendarHelper {
         map.put("title", Utils.randomNameGenerator("groups_CollectionMeeting", 4));
         map.put("typeId", "1");
         map.put("startDate", startDate);
-        System.out.println("map : " + map);
+        LOG.info("map : {}" , map);
         return new Gson().toJson(map);
     }
 
     public static void verifyCalendarCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupId, final Integer generatedCalendarId) {
-        System.out.println("------------------------------CHECK CALENDAR DETAILS------------------------------------\n");
+        LOG.info("------------------------------CHECK CALENDAR DETAILS------------------------------------\n");
         final String CLIENT_URL = "/fineract-provider/api/v1/groups/" + generatedGroupId + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         final String responseCalendarDetailsinJSON = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL,
                 "collectionMeetingCalendar");
@@ -91,11 +93,11 @@ public class CalendarHelper {
     public static Integer createMeetingForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
     final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
 
-        System.out.println("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
+        LOG.info("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
         final String CALENDAR_RESOURCE_URL = BASE_URL + Center_Entity + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
 
-        System.out.println(CALENDAR_RESOURCE_URL);
+        LOG.info("{}",CALENDAR_RESOURCE_URL);
 
         return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
                 getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
@@ -104,12 +106,12 @@ public class CalendarHelper {
     public static Integer updateMeetingCalendarForCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             Integer centerId, String calendarID, String oldDate, String startDate) {
 
-        System.out.println("---------------------------------UPADATING A MEETING CALENDAR FOR THE CENTER------------------------------");
+        LOG.info("---------------------------------UPADATING A MEETING CALENDAR FOR THE CENTER------------------------------");
 
         final String CALENDAR_RESOURCE_URL = BASE_URL + Center_Entity + centerId + ENITY_NAME + "/" + calendarID + "?"
                 + Utils.TENANT_IDENTIFIER;
 
-        System.out.println(CALENDAR_RESOURCE_URL);
+        LOG.info("{}",CALENDAR_RESOURCE_URL);
 
         return Utils.performServerPut(requestSpec, responseSpec, CALENDAR_RESOURCE_URL, getTestCalendarMeetingAsJSON(oldDate, startDate),
                 "resourceId");
@@ -123,7 +125,7 @@ public class CalendarHelper {
         map.put("newMeetingDate", startDate);
         map.put("presentMeetingDate", oldDate);
         map.put("reschedulebasedOnMeetingDates", "true");
-        System.out.println("map : " + map);
+        LOG.info("map : {}", map);
         return new Gson().toJson(map);
     }
 }

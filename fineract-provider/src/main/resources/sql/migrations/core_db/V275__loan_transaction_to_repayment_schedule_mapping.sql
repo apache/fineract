@@ -18,9 +18,9 @@
 --
 
 CREATE TABLE `m_loan_transaction_repayment_schedule_mapping` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`loan_transaction_id` BIGINT(20) NOT NULL,
-	`loan_repayment_schedule_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`loan_transaction_id` BIGINT NOT NULL,
+	`loan_repayment_schedule_id` BIGINT NOT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,
 	`principal_portion_derived` DECIMAL(19,6) NULL DEFAULT NULL,
 	`interest_portion_derived` DECIMAL(19,6) NULL DEFAULT NULL,

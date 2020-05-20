@@ -25,22 +25,22 @@
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES UTF8MB4 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Dumping structure for table fineract_default.acc_accounting_rule
 DROP TABLE IF EXISTS `acc_accounting_rule`;
 CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
-  `office_id` bigint(20) DEFAULT NULL,
-  `debit_account_id` bigint(20) DEFAULT NULL,
-  `allow_multiple_debits` tinyint(1) NOT NULL DEFAULT '0',
-  `credit_account_id` bigint(20) DEFAULT NULL,
-  `allow_multiple_credits` tinyint(1) NOT NULL DEFAULT '0',
+  `office_id` BIGINT DEFAULT NULL,
+  `debit_account_id` BIGINT DEFAULT NULL,
+  `allow_multiple_debits` tinyint NOT NULL DEFAULT '0',
+  `credit_account_id` BIGINT DEFAULT NULL,
+  `allow_multiple_credits` tinyint NOT NULL DEFAULT '0',
   `description` varchar(500) DEFAULT NULL,
-  `system_defined` tinyint(1) NOT NULL DEFAULT '0',
+  `system_defined` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `accounting_rule_name_unique` (`name`),
   KEY `FK_acc_accounting_rule_acc_gl_account_debit` (`debit_account_id`),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
   CONSTRAINT `FK_acc_accounting_rule_acc_gl_account_credit` FOREIGN KEY (`credit_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_acc_accounting_rule_acc_gl_account_debit` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_acc_accounting_rule_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_accounting_rule: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_accounting_rule` DISABLE KEYS */;
@@ -59,16 +59,16 @@ CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
 -- Dumping structure for table fineract_default.acc_gl_account
 DROP TABLE IF EXISTS `acc_gl_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
-  `parent_id` bigint(20) DEFAULT NULL,
+  `parent_id` BIGINT DEFAULT NULL,
   `hierarchy` varchar(50) DEFAULT NULL,
   `gl_code` varchar(45) NOT NULL,
-  `disabled` tinyint(1) NOT NULL DEFAULT '0',
-  `manual_journal_entries_allowed` tinyint(1) NOT NULL DEFAULT '1',
-  `account_usage` tinyint(1) NOT NULL DEFAULT '2',
-  `classification_enum` smallint(5) NOT NULL,
-  `tag_id` int(11) DEFAULT NULL,
+  `disabled` tinyint NOT NULL DEFAULT '0',
+  `manual_journal_entries_allowed` tinyint NOT NULL DEFAULT '1',
+  `account_usage` tinyint NOT NULL DEFAULT '2',
+  `classification_enum` SMALLINT NOT NULL,
+  `tag_id` INT DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `acc_gl_code` (`gl_code`),
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_account` (
   KEY `FKGLACC000000002` (`tag_id`),
   CONSTRAINT `FKGLACC000000002` FOREIGN KEY (`tag_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_gl_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_account` DISABLE KEYS */;
@@ -86,12 +86,12 @@ CREATE TABLE IF NOT EXISTS `acc_gl_account` (
 -- Dumping structure for table fineract_default.acc_gl_closure
 DROP TABLE IF EXISTS `acc_gl_closure`;
 CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `office_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `office_id` BIGINT NOT NULL,
   `closing_date` date NOT NULL,
-  `is_deleted` int(20) NOT NULL DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `is_deleted` INT NOT NULL DEFAULT '0',
+  `createdby_id` BIGINT DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   `comments` varchar(500) DEFAULT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
   CONSTRAINT `FK_acc_gl_closure_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_closure_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_gl_closure: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_closure` DISABLE KEYS */;
@@ -113,14 +113,14 @@ CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
 -- Dumping structure for table fineract_default.acc_gl_financial_activity_account
 DROP TABLE IF EXISTS `acc_gl_financial_activity_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `gl_account_id` bigint(20) NOT NULL DEFAULT '0',
-  `financial_activity_type` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `gl_account_id` BIGINT NOT NULL DEFAULT '0',
+  `financial_activity_type` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `financial_activity_type` (`financial_activity_type`),
   KEY `FK_office_mapping_acc_gl_account` (`gl_account_id`),
   CONSTRAINT `FK_office_mapping_acc_gl_account` FOREIGN KEY (`gl_account_id`) REFERENCES `acc_gl_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_gl_financial_activity_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_financial_activity_account` DISABLE KEYS */;
@@ -130,33 +130,33 @@ CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
 -- Dumping structure for table fineract_default.acc_gl_journal_entry
 DROP TABLE IF EXISTS `acc_gl_journal_entry`;
 CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_id` bigint(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `reversal_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_id` BIGINT NOT NULL,
+  `office_id` BIGINT NOT NULL,
+  `reversal_id` BIGINT DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
   `transaction_id` varchar(50) NOT NULL,
-  `loan_transaction_id` bigint(20) DEFAULT NULL,
-  `savings_transaction_id` bigint(20) DEFAULT NULL,
-  `client_transaction_id` bigint(20) DEFAULT NULL,
-  `reversed` tinyint(1) NOT NULL DEFAULT '0',
+  `loan_transaction_id` BIGINT DEFAULT NULL,
+  `savings_transaction_id` BIGINT DEFAULT NULL,
+  `client_transaction_id` BIGINT DEFAULT NULL,
+  `reversed` tinyint NOT NULL DEFAULT '0',
   `ref_num` varchar(100) DEFAULT NULL,
-  `manual_entry` tinyint(1) NOT NULL DEFAULT '0',
+  `manual_entry` tinyint NOT NULL DEFAULT '0',
   `entry_date` date NOT NULL,
-  `type_enum` smallint(5) NOT NULL,
+  `type_enum` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `entity_type_enum` smallint(5) DEFAULT NULL,
-  `entity_id` bigint(20) DEFAULT NULL,
-  `createdby_id` bigint(20) NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `entity_type_enum` SMALLINT DEFAULT NULL,
+  `entity_id` BIGINT DEFAULT NULL,
+  `createdby_id` BIGINT NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
   `lastmodified_date` datetime NOT NULL,
-  `is_running_balance_calculated` tinyint(4) NOT NULL DEFAULT '0',
+  `is_running_balance_calculated` TINYINT NOT NULL DEFAULT '0',
   `office_running_balance` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `organization_running_balance` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `payment_details_id` bigint(20) DEFAULT NULL,
-  `share_transaction_id` bigint(20) DEFAULT NULL,
+  `payment_details_id` BIGINT DEFAULT NULL,
+  `share_transaction_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_acc_gl_journal_entry_m_office` (`office_id`),
   KEY `FK_acc_gl_journal_entry_m_appuser` (`createdby_id`),
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   CONSTRAINT `FK_acc_gl_journal_entry_m_payment_detail` FOREIGN KEY (`payment_details_id`) REFERENCES `m_payment_detail` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_savings_account_transaction` FOREIGN KEY (`savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_share_account_transaction` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_gl_journal_entry: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_journal_entry` DISABLE KEYS */;
@@ -188,19 +188,19 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
 -- Dumping structure for table fineract_default.acc_product_mapping
 DROP TABLE IF EXISTS `acc_product_mapping`;
 CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `gl_account_id` bigint(20) DEFAULT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
-  `product_type` smallint(5) DEFAULT NULL,
-  `payment_type` int(11) DEFAULT NULL,
-  `charge_id` bigint(20) DEFAULT NULL,
-  `financial_account_type` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `gl_account_id` BIGINT DEFAULT NULL,
+  `product_id` BIGINT DEFAULT NULL,
+  `product_type` SMALLINT DEFAULT NULL,
+  `payment_type` INT DEFAULT NULL,
+  `charge_id` BIGINT DEFAULT NULL,
+  `financial_account_type` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_acc_product_mapping_m_charge` (`charge_id`),
   KEY `FK_acc_product_mapping_m_payment_type` (`payment_type`),
   CONSTRAINT `FK_acc_product_mapping_m_charge` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `FK_acc_product_mapping_m_payment_type` FOREIGN KEY (`payment_type`) REFERENCES `m_payment_type` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_product_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
@@ -210,17 +210,17 @@ CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
 -- Dumping structure for table fineract_default.acc_rule_tags
 DROP TABLE IF EXISTS `acc_rule_tags`;
 CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `acc_rule_id` bigint(20) NOT NULL,
-  `tag_id` int(11) NOT NULL,
-  `acc_type_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `acc_rule_id` BIGINT NOT NULL,
+  `tag_id` INT NOT NULL,
+  `acc_type_enum` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_ACCOUNT_RULE_TAGS` (`acc_rule_id`,`tag_id`,`acc_type_enum`),
   KEY `FK_acc_accounting_rule_id` (`acc_rule_id`),
   KEY `FK_m_code_value_id` (`tag_id`),
   CONSTRAINT `FK_acc_accounting_rule_id` FOREIGN KEY (`acc_rule_id`) REFERENCES `acc_accounting_rule` (`id`),
   CONSTRAINT `FK_m_code_value_id` FOREIGN KEY (`tag_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.acc_rule_tags: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_rule_tags` DISABLE KEYS */;
@@ -230,12 +230,12 @@ CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
 -- Dumping structure for table fineract_default.c_account_number_format
 DROP TABLE IF EXISTS `c_account_number_format`;
 CREATE TABLE IF NOT EXISTS `c_account_number_format` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_type_enum` smallint(1) NOT NULL,
-  `prefix_type_enum` smallint(2) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_type_enum` SMALLINT NOT NULL,
+  `prefix_type_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_type_enum` (`account_type_enum`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.c_account_number_format: ~0 rows (approximately)
 /*!40000 ALTER TABLE `c_account_number_format` DISABLE KEYS */;
@@ -245,10 +245,10 @@ CREATE TABLE IF NOT EXISTS `c_account_number_format` (
 -- Dumping structure for table fineract_default.c_cache
 DROP TABLE IF EXISTS `c_cache`;
 CREATE TABLE IF NOT EXISTS `c_cache` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cache_type_enum` tinyint(1) NOT NULL DEFAULT '1',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `cache_type_enum` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.c_cache: ~0 rows (approximately)
 /*!40000 ALTER TABLE `c_cache` DISABLE KEYS */;
@@ -260,16 +260,16 @@ INSERT INTO `c_cache` (`id`, `cache_type_enum`) VALUES
 -- Dumping structure for table fineract_default.c_configuration
 DROP TABLE IF EXISTS `c_configuration`;
 CREATE TABLE IF NOT EXISTS `c_configuration` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
-  `value` int(11) DEFAULT NULL,
+  `value` INT DEFAULT NULL,
   `date_value` date DEFAULT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT '0',
-  `is_trap_door` tinyint(1) NOT NULL DEFAULT '0',
+  `enabled` tinyint NOT NULL DEFAULT '0',
+  `is_trap_door` tinyint NOT NULL DEFAULT '0',
   `description` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.c_configuration: ~27 rows (approximately)
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
@@ -307,11 +307,11 @@ INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `
 -- Dumping structure for table fineract_default.c_external_service
 DROP TABLE IF EXISTS `c_external_service`;
 CREATE TABLE IF NOT EXISTS `c_external_service` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.c_external_service: ~3 rows (approximately)
 /*!40000 ALTER TABLE `c_external_service` DISABLE KEYS */;
@@ -327,10 +327,10 @@ DROP TABLE IF EXISTS `c_external_service_properties`;
 CREATE TABLE IF NOT EXISTS `c_external_service_properties` (
   `name` varchar(150) NOT NULL,
   `value` varchar(250) DEFAULT NULL,
-  `external_service_id` bigint(20) NOT NULL,
+  `external_service_id` BIGINT NOT NULL,
   KEY `FK_c_external_service_properties_c_external_service` (`external_service_id`),
   CONSTRAINT `FK_c_external_service_properties_c_external_service` FOREIGN KEY (`external_service_id`) REFERENCES `c_external_service` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.c_external_service_properties: ~12 rows (approximately)
 /*!40000 ALTER TABLE `c_external_service_properties` DISABLE KEYS */;
@@ -353,24 +353,24 @@ INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_
 -- Dumping structure for table fineract_default.job
 DROP TABLE IF EXISTS `job`;
 CREATE TABLE IF NOT EXISTS `job` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `display_name` varchar(100) NOT NULL,
   `cron_expression` varchar(20) CHARACTER SET latin1 NOT NULL,
   `create_time` datetime NOT NULL,
-  `task_priority` smallint(6) NOT NULL DEFAULT '5',
+  `task_priority` SMALLINT NOT NULL DEFAULT '5',
   `group_name` varchar(50) CHARACTER SET latin1 DEFAULT NULL,
   `previous_run_start_time` datetime DEFAULT NULL,
   `next_run_time` datetime DEFAULT NULL,
   `job_key` varchar(500) DEFAULT NULL,
   `initializing_errorlog` text,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `currently_running` tinyint(1) NOT NULL DEFAULT '0',
-  `updates_allowed` tinyint(1) NOT NULL DEFAULT '1',
-  `scheduler_group` smallint(2) NOT NULL DEFAULT '0',
-  `is_misfired` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `currently_running` tinyint NOT NULL DEFAULT '0',
+  `updates_allowed` tinyint NOT NULL DEFAULT '1',
+  `scheduler_group` SMALLINT NOT NULL DEFAULT '0',
+  `is_misfired` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.job: ~26 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
@@ -407,9 +407,9 @@ INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time
 -- Dumping structure for table fineract_default.job_run_history
 DROP TABLE IF EXISTS `job_run_history`;
 CREATE TABLE IF NOT EXISTS `job_run_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `job_id` bigint(20) NOT NULL,
-  `version` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `job_id` BIGINT NOT NULL,
+  `version` BIGINT NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
   `status` varchar(10) CHARACTER SET latin1 NOT NULL,
@@ -419,7 +419,7 @@ CREATE TABLE IF NOT EXISTS `job_run_history` (
   PRIMARY KEY (`id`),
   KEY `scheduledjobsFK` (`job_id`),
   CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.job_run_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `job_run_history` DISABLE KEYS */;
@@ -429,15 +429,15 @@ CREATE TABLE IF NOT EXISTS `job_run_history` (
 -- Dumping structure for table fineract_default.mix_taxonomy
 DROP TABLE IF EXISTS `mix_taxonomy`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` INT unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
-  `namespace_id` int(11) DEFAULT NULL,
+  `namespace_id` INT DEFAULT NULL,
   `dimension` varchar(100) DEFAULT NULL,
-  `type` int(11) DEFAULT NULL,
+  `type` INT DEFAULT NULL,
   `description` varchar(1000) DEFAULT NULL,
-  `need_mapping` tinyint(1) DEFAULT NULL,
+  `need_mapping` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.mix_taxonomy: ~48 rows (approximately)
 /*!40000 ALTER TABLE `mix_taxonomy` DISABLE KEYS */;
@@ -496,13 +496,13 @@ INSERT INTO `mix_taxonomy` (`id`, `name`, `namespace_id`, `dimension`, `type`, `
 -- Dumping structure for table fineract_default.mix_taxonomy_mapping
 DROP TABLE IF EXISTS `mix_taxonomy_mapping`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` INT unsigned NOT NULL AUTO_INCREMENT,
   `identifier` varchar(50) NOT NULL DEFAULT '',
   `config` varchar(200) DEFAULT NULL,
   `last_update_date` datetime DEFAULT NULL,
   `currency` varchar(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.mix_taxonomy_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `mix_taxonomy_mapping` DISABLE KEYS */;
@@ -514,39 +514,39 @@ INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_d
 -- Dumping structure for table fineract_default.mix_xbrl_namespace
 DROP TABLE IF EXISTS `mix_xbrl_namespace`;
 CREATE TABLE IF NOT EXISTS `mix_xbrl_namespace` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` INT unsigned NOT NULL AUTO_INCREMENT,
   `prefix` varchar(20) NOT NULL DEFAULT '',
   `url` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNQUE` (`prefix`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.mix_xbrl_namespace: ~7 rows (approximately)
 /*!40000 ALTER TABLE `mix_xbrl_namespace` DISABLE KEYS */;
 INSERT INTO `mix_xbrl_namespace` (`id`, `prefix`, `url`) VALUES
 	(1, 'ifrs', 'http://xbrl.iasb.org/taxonomy/2009-04-01/ifrs'),
 	(2, 'iso4217', 'http://www.xbrl.org/2003/iso4217'),
-	(3, 'mix', 'http://www.themix.org/int/fr/ifrs/basi/YYYY-MM-DD/mx-cor'),
+	(3, 'mix', 'http://www.themix.org/INT/fr/ifrs/basi/YYYY-MM-DD/mx-cor'),
 	(4, 'xbrldi', 'http://xbrl.org/2006/xbrldi'),
 	(5, 'xbrli', 'http://www.xbrl.org/2003/instance'),
 	(6, 'link', 'http://www.xbrl.org/2003/linkbase'),
-	(7, 'dc-all', 'http://www.themix.org/int/fr/ifrs/basi/2010-08-31/dc-all');
+	(7, 'dc-all', 'http://www.themix.org/INT/fr/ifrs/basi/2010-08-31/dc-all');
 /*!40000 ALTER TABLE `mix_xbrl_namespace` ENABLE KEYS */;
 
 
 -- Dumping structure for table fineract_default.m_account_transfer_details
 DROP TABLE IF EXISTS `m_account_transfer_details`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `from_office_id` bigint(20) NOT NULL,
-  `to_office_id` bigint(20) NOT NULL,
-  `from_client_id` bigint(20) DEFAULT NULL,
-  `to_client_id` bigint(20) DEFAULT NULL,
-  `from_savings_account_id` bigint(20) DEFAULT NULL,
-  `to_savings_account_id` bigint(20) DEFAULT NULL,
-  `from_loan_account_id` bigint(20) DEFAULT NULL,
-  `to_loan_account_id` bigint(20) DEFAULT NULL,
-  `transfer_type` smallint(2) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `from_office_id` BIGINT NOT NULL,
+  `to_office_id` BIGINT NOT NULL,
+  `from_client_id` BIGINT DEFAULT NULL,
+  `to_client_id` BIGINT DEFAULT NULL,
+  `from_savings_account_id` BIGINT DEFAULT NULL,
+  `to_savings_account_id` BIGINT DEFAULT NULL,
+  `from_loan_account_id` BIGINT DEFAULT NULL,
+  `to_loan_account_id` BIGINT DEFAULT NULL,
+  `transfer_type` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_account_transfer_details_from_office` (`from_office_id`),
   KEY `FK_m_account_transfer_details_to_office` (`to_office_id`),
@@ -564,7 +564,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
   CONSTRAINT `FK_m_account_transfer_details_to_loan_account` FOREIGN KEY (`to_loan_account_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FK_m_account_transfer_details_to_office` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`),
   CONSTRAINT `FK_m_account_transfer_details_to_savings_account` FOREIGN KEY (`to_savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_account_transfer_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_details` DISABLE KEYS */;
@@ -574,26 +574,26 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
 -- Dumping structure for table fineract_default.m_account_transfer_standing_instructions
 DROP TABLE IF EXISTS `m_account_transfer_standing_instructions`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(250) NOT NULL,
-  `account_transfer_details_id` bigint(20) NOT NULL,
-  `priority` tinyint(2) NOT NULL,
-  `status` tinyint(2) NOT NULL,
-  `instruction_type` tinyint(2) NOT NULL,
+  `account_transfer_details_id` BIGINT NOT NULL,
+  `priority` TINYINT NOT NULL,
+  `status` TINYINT NOT NULL,
+  `instruction_type` TINYINT NOT NULL,
   `amount` decimal(19,6) DEFAULT NULL,
   `valid_from` date NOT NULL,
   `valid_till` date DEFAULT NULL,
-  `recurrence_type` tinyint(1) NOT NULL,
-  `recurrence_frequency` smallint(5) DEFAULT NULL,
-  `recurrence_interval` smallint(5) DEFAULT NULL,
-  `recurrence_on_day` smallint(2) DEFAULT NULL,
-  `recurrence_on_month` smallint(2) DEFAULT NULL,
+  `recurrence_type` tinyint NOT NULL,
+  `recurrence_frequency` SMALLINT DEFAULT NULL,
+  `recurrence_interval` SMALLINT DEFAULT NULL,
+  `recurrence_on_day` SMALLINT DEFAULT NULL,
+  `recurrence_on_month` SMALLINT DEFAULT NULL,
   `last_run_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `FK_m_standing_instructions_account_transfer_details` (`account_transfer_details_id`),
   CONSTRAINT `FK_m_standing_instructions_account_transfer_details` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_account_transfer_standing_instructions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions` DISABLE KEYS */;
@@ -603,8 +603,8 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
 -- Dumping structure for table fineract_default.m_account_transfer_standing_instructions_history
 DROP TABLE IF EXISTS `m_account_transfer_standing_instructions_history`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `standing_instruction_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `standing_instruction_id` BIGINT NOT NULL,
   `status` varchar(20) NOT NULL,
   `execution_time` datetime NOT NULL,
   `amount` decimal(19,6) NOT NULL,
@@ -612,7 +612,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
   PRIMARY KEY (`id`),
   KEY `FK_m_account_transfer_standing_instructions_history` (`standing_instruction_id`),
   CONSTRAINT `FK_m_account_transfer_standing_instructions_m_history` FOREIGN KEY (`standing_instruction_id`) REFERENCES `m_account_transfer_standing_instructions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_account_transfer_standing_instructions_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions_history` DISABLE KEYS */;
@@ -622,17 +622,17 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
 -- Dumping structure for table fineract_default.m_account_transfer_transaction
 DROP TABLE IF EXISTS `m_account_transfer_transaction`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_transfer_details_id` bigint(20) NOT NULL,
-  `from_savings_transaction_id` bigint(20) DEFAULT NULL,
-  `from_loan_transaction_id` bigint(20) DEFAULT NULL,
-  `to_savings_transaction_id` bigint(20) DEFAULT NULL,
-  `to_loan_transaction_id` bigint(20) DEFAULT NULL,
-  `is_reversed` tinyint(1) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_transfer_details_id` BIGINT NOT NULL,
+  `from_savings_transaction_id` BIGINT DEFAULT NULL,
+  `from_loan_transaction_id` BIGINT DEFAULT NULL,
+  `to_savings_transaction_id` BIGINT DEFAULT NULL,
+  `to_loan_transaction_id` BIGINT DEFAULT NULL,
+  `is_reversed` tinyint NOT NULL,
   `transaction_date` date NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
   `description` varchar(200) NOT NULL,
   PRIMARY KEY (`id`),
@@ -646,7 +646,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
   CONSTRAINT `FK_m_account_transfer_transaction_from_m_savings_transaction` FOREIGN KEY (`from_savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`),
   CONSTRAINT `FK_m_account_transfer_transaction_to_m_loan_transaction` FOREIGN KEY (`to_loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`),
   CONSTRAINT `FK_m_account_transfer_transaction_to_m_savings_transaction` FOREIGN KEY (`to_savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_account_transfer_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_transaction` DISABLE KEYS */;
@@ -656,7 +656,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
 -- Dumping structure for table fineract_default.m_address
 DROP TABLE IF EXISTS `m_address`;
 CREATE TABLE IF NOT EXISTS `m_address` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `street` varchar(100) DEFAULT NULL,
   `address_line_1` varchar(100) DEFAULT NULL,
   `address_line_2` varchar(100) DEFAULT NULL,
@@ -664,11 +664,11 @@ CREATE TABLE IF NOT EXISTS `m_address` (
   `town_village` varchar(100) DEFAULT NULL,
   `city` varchar(100) DEFAULT NULL,
   `county_district` varchar(100) DEFAULT NULL,
-  `state_province_id` int(11) DEFAULT NULL,
-  `country_id` int(11) DEFAULT NULL,
+  `state_province_id` INT DEFAULT NULL,
+  `country_id` INT DEFAULT NULL,
   `postal_code` varchar(10) DEFAULT NULL,
-  `latitude` decimal(10,8) unsigned DEFAULT '0.00000000',
-  `longitude` decimal(10,8) unsigned DEFAULT '0.00000000',
+  `latitude` decimal(10,8) DEFAULT '0.00000000',
+  `longitude` decimal(10,8) DEFAULT '0.00000000',
   `created_by` varchar(100) DEFAULT NULL,
   `created_on` date DEFAULT NULL,
   `updated_by` varchar(100) DEFAULT NULL,
@@ -678,7 +678,7 @@ CREATE TABLE IF NOT EXISTS `m_address` (
   KEY `address_fields_codefk2` (`country_id`),
   CONSTRAINT `address_fields_codefk1` FOREIGN KEY (`state_province_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `address_fields_codefk2` FOREIGN KEY (`country_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_address: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_address` DISABLE KEYS */;
@@ -688,10 +688,10 @@ CREATE TABLE IF NOT EXISTS `m_address` (
 -- Dumping structure for table fineract_default.m_appuser
 DROP TABLE IF EXISTS `m_appuser`;
 CREATE TABLE IF NOT EXISTS `m_appuser` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `office_id` bigint(20) DEFAULT NULL,
-  `staff_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
+  `office_id` BIGINT DEFAULT NULL,
+  `staff_id` BIGINT DEFAULT NULL,
   `username` varchar(100) NOT NULL,
   `firstname` varchar(100) NOT NULL,
   `lastname` varchar(100) NOT NULL,
@@ -703,7 +703,7 @@ CREATE TABLE IF NOT EXISTS `m_appuser` (
   `nonexpired_credentials` bit(1) NOT NULL,
   `enabled` bit(1) NOT NULL,
   `last_time_password_updated` date NOT NULL,
-  `password_never_expires` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'define if the password, should be check for validity period or not',
+  `password_never_expires` TINYINT NOT NULL DEFAULT '0' COMMENT 'define if the password, should be check for validity period or not',
   `is_self_service_user` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_org` (`username`),
@@ -712,7 +712,7 @@ CREATE TABLE IF NOT EXISTS `m_appuser` (
   KEY `last_time_password_updated` (`last_time_password_updated`),
   CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
   CONSTRAINT `fk_m_appuser_002` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_appuser: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser` DISABLE KEYS */;
@@ -725,8 +725,8 @@ INSERT INTO `m_appuser` (`id`, `is_deleted`, `office_id`, `staff_id`, `username`
 -- Dumping structure for table fineract_default.m_appuser_previous_password
 DROP TABLE IF EXISTS `m_appuser_previous_password`;
 CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT NOT NULL,
   `password` varchar(255) NOT NULL,
   `removal_date` date NOT NULL,
   PRIMARY KEY (`id`),
@@ -742,14 +742,14 @@ CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
 -- Dumping structure for table fineract_default.m_appuser_role
 DROP TABLE IF EXISTS `m_appuser_role`;
 CREATE TABLE IF NOT EXISTS `m_appuser_role` (
-  `appuser_id` bigint(20) NOT NULL,
-  `role_id` bigint(20) NOT NULL,
+  `appuser_id` BIGINT NOT NULL,
+  `role_id` BIGINT NOT NULL,
   PRIMARY KEY (`appuser_id`,`role_id`),
   KEY `FK7662CE59B4100309` (`appuser_id`),
   KEY `FK7662CE5915CEC7AB` (`role_id`),
   CONSTRAINT `FK7662CE5915CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`),
   CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_appuser_role: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser_role` DISABLE KEYS */;
@@ -761,26 +761,26 @@ INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES
 -- Dumping structure for table fineract_default.m_calendar
 DROP TABLE IF EXISTS `m_calendar`;
 CREATE TABLE IF NOT EXISTS `m_calendar` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `title` varchar(70) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
   `location` varchar(50) DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `duration` smallint(6) DEFAULT NULL,
-  `calendar_type_enum` smallint(5) NOT NULL,
-  `repeating` tinyint(1) NOT NULL DEFAULT '0',
+  `duration` SMALLINT DEFAULT NULL,
+  `calendar_type_enum` SMALLINT NOT NULL,
+  `repeating` tinyint NOT NULL DEFAULT '0',
   `recurrence` varchar(100) DEFAULT NULL,
-  `remind_by_enum` smallint(5) DEFAULT NULL,
-  `first_reminder` smallint(11) DEFAULT NULL,
-  `second_reminder` smallint(11) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `remind_by_enum` SMALLINT DEFAULT NULL,
+  `first_reminder` smallint DEFAULT NULL,
+  `second_reminder` smallint DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   `meeting_time` time DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_calendar: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar` DISABLE KEYS */;
@@ -790,24 +790,24 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
 -- Dumping structure for table fineract_default.m_calendar_history
 DROP TABLE IF EXISTS `m_calendar_history`;
 CREATE TABLE IF NOT EXISTS `m_calendar_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `calendar_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `calendar_id` BIGINT NOT NULL,
   `title` varchar(70) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
   `location` varchar(50) DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `duration` smallint(6) DEFAULT NULL,
-  `calendar_type_enum` smallint(5) NOT NULL,
-  `repeating` tinyint(1) NOT NULL DEFAULT '0',
+  `duration` SMALLINT DEFAULT NULL,
+  `calendar_type_enum` SMALLINT NOT NULL,
+  `repeating` tinyint NOT NULL DEFAULT '0',
   `recurrence` varchar(100) DEFAULT NULL,
-  `remind_by_enum` smallint(5) DEFAULT NULL,
-  `first_reminder` smallint(11) DEFAULT NULL,
-  `second_reminder` smallint(11) DEFAULT NULL,
+  `remind_by_enum` SMALLINT DEFAULT NULL,
+  `first_reminder` smallint DEFAULT NULL,
+  `second_reminder` smallint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_calendar_m_calendar_history` (`calendar_id`),
   CONSTRAINT `FK_m_calendar_m_calendar_history` FOREIGN KEY (`calendar_id`) REFERENCES `m_calendar` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_calendar_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar_history` DISABLE KEYS */;
@@ -817,14 +817,14 @@ CREATE TABLE IF NOT EXISTS `m_calendar_history` (
 -- Dumping structure for table fineract_default.m_calendar_instance
 DROP TABLE IF EXISTS `m_calendar_instance`;
 CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `calendar_id` bigint(20) NOT NULL,
-  `entity_id` bigint(20) NOT NULL,
-  `entity_type_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `calendar_id` BIGINT NOT NULL,
+  `entity_id` BIGINT NOT NULL,
+  `entity_type_enum` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_calendar_m_calendar_instance` (`calendar_id`),
   CONSTRAINT `FK_m_calendar_m_calendar_instance` FOREIGN KEY (`calendar_id`) REFERENCES `m_calendar` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_calendar_instance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar_instance` DISABLE KEYS */;
@@ -834,21 +834,21 @@ CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
 -- Dumping structure for table fineract_default.m_cashiers
 DROP TABLE IF EXISTS `m_cashiers`;
 CREATE TABLE IF NOT EXISTS `m_cashiers` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `staff_id` bigint(20) DEFAULT NULL,
-  `teller_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `staff_id` BIGINT DEFAULT NULL,
+  `teller_id` BIGINT DEFAULT NULL,
   `description` varchar(100) DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `start_time` varchar(10) DEFAULT NULL,
   `end_time` varchar(10) DEFAULT NULL,
-  `full_day` tinyint(4) DEFAULT NULL,
+  `full_day` TINYINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `IK_m_cashiers_m_staff` (`staff_id`),
   KEY `IK_m_cashiers_m_teller` (`teller_id`),
   CONSTRAINT `FK_m_cashiers_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_m_cashiers_m_teller` FOREIGN KEY (`teller_id`) REFERENCES `m_tellers` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_cashiers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_cashiers` DISABLE KEYS */;
@@ -858,20 +858,20 @@ CREATE TABLE IF NOT EXISTS `m_cashiers` (
 -- Dumping structure for table fineract_default.m_cashier_transactions
 DROP TABLE IF EXISTS `m_cashier_transactions`;
 CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cashier_id` bigint(20) NOT NULL,
-  `txn_type` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `cashier_id` BIGINT NOT NULL,
+  `txn_type` SMALLINT NOT NULL,
   `txn_amount` decimal(19,6) NOT NULL,
   `txn_date` date NOT NULL,
   `created_date` datetime NOT NULL,
   `entity_type` varchar(50) DEFAULT NULL,
-  `entity_id` bigint(20) DEFAULT NULL,
+  `entity_id` BIGINT DEFAULT NULL,
   `txn_note` varchar(200) DEFAULT NULL,
   `currency_code` varchar(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `IK_m_teller_transactions_m_cashier` (`cashier_id`),
   CONSTRAINT `FK_m_teller_transactions_m_cashiers` FOREIGN KEY (`cashier_id`) REFERENCES `m_cashiers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_cashier_transactions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_cashier_transactions` DISABLE KEYS */;
@@ -881,32 +881,32 @@ CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
 -- Dumping structure for table fineract_default.m_charge
 DROP TABLE IF EXISTS `m_charge`;
 CREATE TABLE IF NOT EXISTS `m_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `charge_applies_to_enum` smallint(5) NOT NULL,
-  `charge_time_enum` smallint(5) NOT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
-  `charge_payment_mode_enum` smallint(5) DEFAULT NULL,
+  `charge_applies_to_enum` SMALLINT NOT NULL,
+  `charge_time_enum` SMALLINT NOT NULL,
+  `charge_calculation_enum` SMALLINT NOT NULL,
+  `charge_payment_mode_enum` SMALLINT DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `fee_on_day` smallint(5) DEFAULT NULL,
-  `fee_interval` smallint(5) DEFAULT NULL,
-  `fee_on_month` smallint(5) DEFAULT NULL,
-  `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
-  `is_active` tinyint(1) NOT NULL,
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  `fee_on_day` SMALLINT DEFAULT NULL,
+  `fee_interval` SMALLINT DEFAULT NULL,
+  `fee_on_month` SMALLINT DEFAULT NULL,
+  `is_penalty` tinyint NOT NULL DEFAULT '0',
+  `is_active` tinyint NOT NULL,
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
   `min_cap` decimal(19,6) DEFAULT NULL,
   `max_cap` decimal(19,6) DEFAULT NULL,
-  `fee_frequency` smallint(5) DEFAULT NULL,
-  `income_or_liability_account_id` bigint(20) DEFAULT NULL,
-  `tax_group_id` bigint(20) DEFAULT NULL,
+  `fee_frequency` SMALLINT DEFAULT NULL,
+  `income_or_liability_account_id` BIGINT DEFAULT NULL,
+  `tax_group_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `FK_m_charge_acc_gl_account` (`income_or_liability_account_id`),
   KEY `FK_m_charge_m_tax_group` (`tax_group_id`),
   CONSTRAINT `FK_m_charge_acc_gl_account` FOREIGN KEY (`income_or_liability_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_m_charge_m_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
@@ -916,48 +916,48 @@ CREATE TABLE IF NOT EXISTS `m_charge` (
 -- Dumping structure for table fineract_default.m_client
 DROP TABLE IF EXISTS `m_client`;
 CREATE TABLE IF NOT EXISTS `m_client` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `status_enum` int(5) NOT NULL DEFAULT '300',
-  `sub_status` int(11) DEFAULT NULL,
+  `status_enum` INT NOT NULL DEFAULT '300',
+  `sub_status` INT DEFAULT NULL,
   `activation_date` date DEFAULT NULL,
   `office_joining_date` date DEFAULT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `transfer_to_office_id` bigint(20) DEFAULT NULL,
-  `staff_id` bigint(20) DEFAULT NULL,
+  `office_id` BIGINT NOT NULL,
+  `transfer_to_office_id` BIGINT DEFAULT NULL,
+  `staff_id` BIGINT DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `middlename` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `fullname` varchar(100) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
   `mobile_no` varchar(50) DEFAULT NULL,
-  `gender_cv_id` int(11) DEFAULT NULL,
+  `gender_cv_id` INT DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `image_id` bigint(20) DEFAULT NULL,
-  `closure_reason_cv_id` int(11) DEFAULT NULL,
+  `image_id` BIGINT DEFAULT NULL,
+  `closure_reason_cv_id` INT DEFAULT NULL,
   `closedon_date` date DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_by` BIGINT DEFAULT NULL,
   `updated_on` date DEFAULT NULL,
   `submittedon_date` date DEFAULT NULL,
-  `submittedon_userid` bigint(20) DEFAULT NULL,
-  `activatedon_userid` bigint(20) DEFAULT NULL,
-  `closedon_userid` bigint(20) DEFAULT NULL,
-  `default_savings_product` bigint(20) DEFAULT NULL,
-  `default_savings_account` bigint(20) DEFAULT NULL,
-  `client_type_cv_id` int(11) DEFAULT NULL,
-  `client_classification_cv_id` int(11) DEFAULT NULL,
-  `reject_reason_cv_id` int(11) DEFAULT NULL,
+  `submittedon_userid` BIGINT DEFAULT NULL,
+  `activatedon_userid` BIGINT DEFAULT NULL,
+  `closedon_userid` BIGINT DEFAULT NULL,
+  `default_savings_product` BIGINT DEFAULT NULL,
+  `default_savings_account` BIGINT DEFAULT NULL,
+  `client_type_cv_id` INT DEFAULT NULL,
+  `client_classification_cv_id` INT DEFAULT NULL,
+  `reject_reason_cv_id` INT DEFAULT NULL,
   `rejectedon_date` date DEFAULT NULL,
-  `rejectedon_userid` bigint(20) DEFAULT NULL,
-  `withdraw_reason_cv_id` int(11) DEFAULT NULL,
+  `rejectedon_userid` BIGINT DEFAULT NULL,
+  `withdraw_reason_cv_id` INT DEFAULT NULL,
   `withdrawn_on_date` date DEFAULT NULL,
-  `withdraw_on_userid` bigint(20) DEFAULT NULL,
+  `withdraw_on_userid` BIGINT DEFAULT NULL,
   `reactivated_on_date` date DEFAULT NULL,
-  `reactivated_on_userid` bigint(20) DEFAULT NULL,
-  `legal_form_enum` int(5) DEFAULT NULL,
+  `reactivated_on_userid` BIGINT DEFAULT NULL,
+  `legal_form_enum` INT DEFAULT NULL,
   `reopened_on_date` date DEFAULT NULL,
-  `reopened_by_userid` bigint(20) DEFAULT NULL,
+  `reopened_by_userid` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `external_id` (`external_id`),
@@ -988,7 +988,7 @@ CREATE TABLE IF NOT EXISTS `m_client` (
   CONSTRAINT `FK_m_client_type_m_code_value` FOREIGN KEY (`client_type_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_client_type_m_code_value_withdraw` FOREIGN KEY (`withdraw_reason_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_client_type_mcode_value_reject` FOREIGN KEY (`reject_reason_cv_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
@@ -998,18 +998,18 @@ CREATE TABLE IF NOT EXISTS `m_client` (
 -- Dumping structure for table fineract_default.m_client_address
 DROP TABLE IF EXISTS `m_client_address`;
 CREATE TABLE IF NOT EXISTS `m_client_address` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL DEFAULT '0',
-  `address_id` bigint(20) NOT NULL DEFAULT '0',
-  `address_type_id` int(11) NOT NULL DEFAULT '0',
-  `is_active` tinyint(4) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL DEFAULT '0',
+  `address_id` BIGINT NOT NULL DEFAULT '0',
+  `address_type_id` INT NOT NULL DEFAULT '0',
+  `is_active` TINYINT NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `addressIdFk` (`address_id`),
   KEY `address_codefk` (`address_type_id`),
   KEY `clientaddressfk` (`client_id`),
   CONSTRAINT `address_codefk` FOREIGN KEY (`address_type_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `clientaddressfk` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_address: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_address` DISABLE KEYS */;
@@ -1019,16 +1019,16 @@ CREATE TABLE IF NOT EXISTS `m_client_address` (
 -- Dumping structure for table fineract_default.m_client_attendance
 DROP TABLE IF EXISTS `m_client_attendance`;
 CREATE TABLE IF NOT EXISTS `m_client_attendance` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL DEFAULT '0',
-  `meeting_id` bigint(20) NOT NULL,
-  `attendance_type_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL DEFAULT '0',
+  `meeting_id` BIGINT NOT NULL,
+  `attendance_type_enum` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_client_meeting_attendance` (`client_id`,`meeting_id`),
   KEY `FK_m_meeting_m_client_attendance` (`meeting_id`),
   CONSTRAINT `FK_m_client_m_client_attendance` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FK_m_meeting_m_client_attendance` FOREIGN KEY (`meeting_id`) REFERENCES `m_meeting` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_attendance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_attendance` DISABLE KEYS */;
@@ -1038,28 +1038,28 @@ CREATE TABLE IF NOT EXISTS `m_client_attendance` (
 -- Dumping structure for table fineract_default.m_client_charge
 DROP TABLE IF EXISTS `m_client_charge`;
 CREATE TABLE IF NOT EXISTS `m_client_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
-  `is_penalty` tinyint(1) NOT NULL,
-  `charge_time_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
+  `is_penalty` tinyint NOT NULL,
+  `charge_time_enum` SMALLINT NOT NULL,
   `charge_due_date` date DEFAULT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
+  `charge_calculation_enum` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `amount_paid_derived` decimal(19,6) DEFAULT NULL,
   `amount_waived_derived` decimal(19,6) DEFAULT NULL,
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL,
-  `is_paid_derived` tinyint(1) DEFAULT NULL,
-  `waived` tinyint(1) DEFAULT NULL,
-  `is_active` tinyint(1) DEFAULT NULL,
+  `is_paid_derived` tinyint DEFAULT NULL,
+  `waived` tinyint DEFAULT NULL,
+  `is_active` tinyint DEFAULT NULL,
   `inactivated_on_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_client_charge_m_client` (`client_id`),
   KEY `FK_m_client_charge_m_charge` (`charge_id`),
   CONSTRAINT `FK_m_client_charge_m_charge` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `FK_m_client_charge_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_charge` DISABLE KEYS */;
@@ -1069,16 +1069,16 @@ CREATE TABLE IF NOT EXISTS `m_client_charge` (
 -- Dumping structure for table fineract_default.m_client_charge_paid_by
 DROP TABLE IF EXISTS `m_client_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_transaction_id` bigint(20) NOT NULL,
-  `client_charge_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_transaction_id` BIGINT NOT NULL,
+  `client_charge_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_client_charge_paid_by_m_client_transaction` (`client_transaction_id`),
   KEY `FK_m_client_charge_paid_by_m_client_charge` (`client_charge_id`),
   CONSTRAINT `FK_m_client_charge_paid_by_m_client_charge` FOREIGN KEY (`client_charge_id`) REFERENCES `m_client_charge` (`id`),
   CONSTRAINT `FK_m_client_charge_paid_by_m_client_transaction` FOREIGN KEY (`client_transaction_id`) REFERENCES `m_client_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_charge_paid_by` DISABLE KEYS */;
@@ -1088,15 +1088,15 @@ CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
 -- Dumping structure for table fineract_default.m_client_identifier
 DROP TABLE IF EXISTS `m_client_identifier`;
 CREATE TABLE IF NOT EXISTS `m_client_identifier` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `document_type_id` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
+  `document_type_id` INT NOT NULL,
   `document_key` varchar(50) NOT NULL,
-  `status` int(5) NOT NULL DEFAULT '300',
-  `active` int(5) DEFAULT NULL,
+  `status` INT NOT NULL DEFAULT '300',
+  `active` INT DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1106,7 +1106,7 @@ CREATE TABLE IF NOT EXISTS `m_client_identifier` (
   KEY `FK_m_client_document_m_code_value` (`document_type_id`),
   CONSTRAINT `FK_m_client_document_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FK_m_client_document_m_code_value` FOREIGN KEY (`document_type_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_identifier: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_identifier` DISABLE KEYS */;
@@ -1116,18 +1116,18 @@ CREATE TABLE IF NOT EXISTS `m_client_identifier` (
 -- Dumping structure for table fineract_default.m_client_non_person
 DROP TABLE IF EXISTS `m_client_non_person`;
 CREATE TABLE IF NOT EXISTS `m_client_non_person` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `constitution_cv_id` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
+  `constitution_cv_id` INT NOT NULL,
   `incorp_no` varchar(50) DEFAULT NULL,
   `incorp_validity_till` datetime DEFAULT NULL,
-  `main_business_line_cv_id` int(11) DEFAULT NULL,
+  `main_business_line_cv_id` INT DEFAULT NULL,
   `remarks` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `client_id` (`client_id`),
   KEY `FK_client_id` (`client_id`),
   CONSTRAINT `FK_client_id` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_non_person: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_non_person` DISABLE KEYS */;
@@ -1137,25 +1137,25 @@ CREATE TABLE IF NOT EXISTS `m_client_non_person` (
 -- Dumping structure for table fineract_default.m_client_transaction
 DROP TABLE IF EXISTS `m_client_transaction`;
 CREATE TABLE IF NOT EXISTS `m_client_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT NOT NULL,
+  `office_id` BIGINT NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `payment_detail_id` bigint(20) DEFAULT NULL,
-  `is_reversed` tinyint(1) NOT NULL,
+  `payment_detail_id` BIGINT DEFAULT NULL,
+  `is_reversed` tinyint NOT NULL,
   `external_id` varchar(50) DEFAULT NULL,
   `transaction_date` date NOT NULL,
-  `transaction_type_enum` smallint(5) NOT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `created_date` datetime NOT NULL,
-  `appuser_id` bigint(20) NOT NULL,
+  `appuser_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `FK_m_client_transaction_m_client` (`client_id`),
   KEY `FK_m_client_transaction_m_appuser` (`appuser_id`),
   CONSTRAINT `FK_m_client_transaction_m_appuser` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_client_transaction_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_client_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_transaction` DISABLE KEYS */;
@@ -1165,12 +1165,12 @@ CREATE TABLE IF NOT EXISTS `m_client_transaction` (
 -- Dumping structure for table fineract_default.m_code
 DROP TABLE IF EXISTS `m_code`;
 CREATE TABLE IF NOT EXISTS `m_code` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `code_name` varchar(100) DEFAULT NULL,
-  `is_system_defined` tinyint(1) NOT NULL DEFAULT '0',
+  `is_system_defined` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_code: ~28 rows (approximately)
 /*!40000 ALTER TABLE `m_code` DISABLE KEYS */;
@@ -1209,19 +1209,19 @@ INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 -- Dumping structure for table fineract_default.m_code_value
 DROP TABLE IF EXISTS `m_code_value`;
 CREATE TABLE IF NOT EXISTS `m_code_value` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `code_id` int(11) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `code_id` INT NOT NULL,
   `code_value` varchar(100) DEFAULT NULL,
   `code_description` varchar(500) DEFAULT NULL,
-  `order_position` int(11) NOT NULL DEFAULT '0',
-  `code_score` int(11) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `is_mandatory` tinyint(1) NOT NULL DEFAULT '0',
+  `order_position` INT NOT NULL DEFAULT '0',
+  `code_score` INT DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `is_mandatory` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_value` (`code_id`,`code_value`),
   KEY `FKCFCEA42640BE071Z` (`code_id`),
   CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_code_value: ~13 rows (approximately)
 /*!40000 ALTER TABLE `m_code_value` DISABLE KEYS */;
@@ -1245,16 +1245,16 @@ INSERT INTO `m_code_value` (`id`, `code_id`, `code_value`, `code_description`, `
 -- Dumping structure for table fineract_default.m_currency
 DROP TABLE IF EXISTS `m_currency`;
 CREATE TABLE IF NOT EXISTS `m_currency` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
-  `decimal_places` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `decimal_places` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `display_symbol` varchar(10) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_currency: ~163 rows (approximately)
 /*!40000 ALTER TABLE `m_currency` DISABLE KEYS */;
@@ -1428,17 +1428,17 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 -- Dumping structure for table fineract_default.m_deposit_account_on_hold_transaction
 DROP TABLE IF EXISTS `m_deposit_account_on_hold_transaction`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `transaction_type_enum` smallint(1) NOT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
   `transaction_date` date NOT NULL,
-  `is_reversed` tinyint(1) NOT NULL DEFAULT '0',
+  `is_reversed` tinyint NOT NULL DEFAULT '0',
   `created_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_deposit_on_hold_transaction_m_savings_account` (`savings_account_id`),
   CONSTRAINT `FK_deposit_on_hold_transaction_m_savings_account` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_deposit_account_on_hold_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_on_hold_transaction` DISABLE KEYS */;
@@ -1448,19 +1448,19 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
 -- Dumping structure for table fineract_default.m_deposit_account_recurring_detail
 DROP TABLE IF EXISTS `m_deposit_account_recurring_detail`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL DEFAULT '0',
   `mandatory_recommended_deposit_amount` decimal(19,6) DEFAULT NULL,
-  `is_mandatory` tinyint(4) NOT NULL DEFAULT '0',
-  `allow_withdrawal` tinyint(4) NOT NULL DEFAULT '0',
-  `adjust_advance_towards_future_payments` tinyint(4) NOT NULL DEFAULT '1',
-  `is_calendar_inherited` tinyint(4) NOT NULL DEFAULT '0',
+  `is_mandatory` TINYINT NOT NULL DEFAULT '0',
+  `allow_withdrawal` TINYINT NOT NULL DEFAULT '0',
+  `adjust_advance_towards_future_payments` TINYINT NOT NULL DEFAULT '1',
+  `is_calendar_inherited` TINYINT NOT NULL DEFAULT '0',
   `total_overdue_amount` decimal(19,6) DEFAULT NULL,
-  `no_of_overdue_installments` int(11) DEFAULT NULL,
+  `no_of_overdue_installments` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKDARD00000000000001` (`savings_account_id`),
   CONSTRAINT `FKDARD00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_deposit_account_recurring_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_recurring_detail` DISABLE KEYS */;
@@ -1470,29 +1470,29 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
 -- Dumping structure for table fineract_default.m_deposit_account_term_and_preclosure
 DROP TABLE IF EXISTS `m_deposit_account_term_and_preclosure`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL DEFAULT '0',
-  `min_deposit_term` int(11) DEFAULT NULL,
-  `max_deposit_term` int(11) DEFAULT NULL,
-  `min_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `max_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `in_multiples_of_deposit_term` int(11) DEFAULT NULL,
-  `in_multiples_of_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `pre_closure_penal_applicable` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL DEFAULT '0',
+  `min_deposit_term` INT DEFAULT NULL,
+  `max_deposit_term` INT DEFAULT NULL,
+  `min_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `max_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `in_multiples_of_deposit_term` INT DEFAULT NULL,
+  `in_multiples_of_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `pre_closure_penal_applicable` SMALLINT DEFAULT NULL,
   `pre_closure_penal_interest` decimal(19,6) DEFAULT NULL,
-  `pre_closure_penal_interest_on_enum` smallint(5) DEFAULT NULL,
-  `deposit_period` int(11) DEFAULT NULL,
-  `deposit_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `pre_closure_penal_interest_on_enum` SMALLINT DEFAULT NULL,
+  `deposit_period` INT DEFAULT NULL,
+  `deposit_period_frequency_enum` SMALLINT DEFAULT NULL,
   `deposit_amount` decimal(19,6) DEFAULT NULL,
   `maturity_amount` decimal(19,6) DEFAULT NULL,
   `maturity_date` date DEFAULT NULL,
-  `on_account_closure_enum` smallint(5) DEFAULT NULL,
+  `on_account_closure_enum` SMALLINT DEFAULT NULL,
   `expected_firstdepositon_date` date DEFAULT NULL,
-  `transfer_interest_to_linked_account` tinyint(1) NOT NULL DEFAULT '0',
+  `transfer_interest_to_linked_account` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FKDATP00000000000001` (`savings_account_id`),
   CONSTRAINT `FKDATP00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_deposit_account_term_and_preclosure: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_term_and_preclosure` DISABLE KEYS */;
@@ -1502,13 +1502,13 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
 -- Dumping structure for table fineract_default.m_deposit_product_interest_rate_chart
 DROP TABLE IF EXISTS `m_deposit_product_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
-  `deposit_product_id` bigint(20) NOT NULL,
-  `interest_rate_chart_id` bigint(20) NOT NULL,
+  `deposit_product_id` BIGINT NOT NULL,
+  `interest_rate_chart_id` BIGINT NOT NULL,
   UNIQUE KEY `deposit_product_id_interest_rate_chart_id` (`deposit_product_id`,`interest_rate_chart_id`),
   KEY `FKDPIRC00000000000002` (`interest_rate_chart_id`),
   CONSTRAINT `FKDPIRC00000000000001` FOREIGN KEY (`deposit_product_id`) REFERENCES `m_savings_product` (`id`),
   CONSTRAINT `FKDPIRC00000000000002` FOREIGN KEY (`interest_rate_chart_id`) REFERENCES `m_interest_rate_chart` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_deposit_product_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_interest_rate_chart` DISABLE KEYS */;
@@ -1518,15 +1518,15 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
 -- Dumping structure for table fineract_default.m_deposit_product_recurring_detail
 DROP TABLE IF EXISTS `m_deposit_product_recurring_detail`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_product_id` bigint(20) NOT NULL DEFAULT '0',
-  `is_mandatory` tinyint(1) NOT NULL DEFAULT '1',
-  `allow_withdrawal` tinyint(1) NOT NULL DEFAULT '0',
-  `adjust_advance_towards_future_payments` tinyint(1) NOT NULL DEFAULT '1',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_product_id` BIGINT NOT NULL DEFAULT '0',
+  `is_mandatory` tinyint NOT NULL DEFAULT '1',
+  `allow_withdrawal` tinyint NOT NULL DEFAULT '0',
+  `adjust_advance_towards_future_payments` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `FKDPRD00000000000001` (`savings_product_id`),
   CONSTRAINT `FKDPRD00000000000001` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_deposit_product_recurring_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_recurring_detail` DISABLE KEYS */;
@@ -1536,24 +1536,24 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
 -- Dumping structure for table fineract_default.m_deposit_product_term_and_preclosure
 DROP TABLE IF EXISTS `m_deposit_product_term_and_preclosure`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_product_id` bigint(20) NOT NULL DEFAULT '0',
-  `min_deposit_term` int(11) DEFAULT NULL,
-  `max_deposit_term` int(11) DEFAULT NULL,
-  `min_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `max_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `in_multiples_of_deposit_term` int(11) DEFAULT NULL,
-  `in_multiples_of_deposit_term_type_enum` smallint(5) DEFAULT NULL,
-  `pre_closure_penal_applicable` smallint(5) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_product_id` BIGINT NOT NULL DEFAULT '0',
+  `min_deposit_term` INT DEFAULT NULL,
+  `max_deposit_term` INT DEFAULT NULL,
+  `min_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `max_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `in_multiples_of_deposit_term` INT DEFAULT NULL,
+  `in_multiples_of_deposit_term_type_enum` SMALLINT DEFAULT NULL,
+  `pre_closure_penal_applicable` SMALLINT DEFAULT NULL,
   `pre_closure_penal_interest` decimal(19,6) DEFAULT NULL,
-  `pre_closure_penal_interest_on_enum` smallint(5) DEFAULT NULL,
+  `pre_closure_penal_interest_on_enum` SMALLINT DEFAULT NULL,
   `min_deposit_amount` decimal(19,6) DEFAULT NULL,
   `max_deposit_amount` decimal(19,6) DEFAULT NULL,
   `deposit_amount` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKDPTP00000000000001` (`savings_product_id`),
   CONSTRAINT `FKDPTP00000000000001` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_deposit_product_term_and_preclosure: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_term_and_preclosure` DISABLE KEYS */;
@@ -1563,18 +1563,18 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
 -- Dumping structure for table fineract_default.m_document
 DROP TABLE IF EXISTS `m_document`;
 CREATE TABLE IF NOT EXISTS `m_document` (
-  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `parent_entity_type` varchar(50) NOT NULL,
-  `parent_entity_id` int(20) NOT NULL DEFAULT '0',
+  `parent_entity_id` INT NOT NULL DEFAULT '0',
   `name` varchar(250) NOT NULL,
   `file_name` varchar(250) NOT NULL,
-  `size` int(20) DEFAULT '0',
+  `size` INT DEFAULT '0',
   `type` varchar(500) DEFAULT NULL,
   `description` varchar(1000) DEFAULT NULL,
   `location` varchar(500) NOT NULL DEFAULT '0',
-  `storage_type_enum` smallint(5) DEFAULT NULL,
+  `storage_type_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_document: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_document` DISABLE KEYS */;
@@ -1584,18 +1584,18 @@ CREATE TABLE IF NOT EXISTS `m_document` (
 -- Dumping structure for table fineract_default.m_entity_datatable_check
 DROP TABLE IF EXISTS `m_entity_datatable_check`;
 CREATE TABLE IF NOT EXISTS `m_entity_datatable_check` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `application_table_name` varchar(200) NOT NULL,
   `x_registered_table_name` varchar(50) NOT NULL,
-  `status_enum` int(11) NOT NULL,
-  `system_defined` tinyint(4) NOT NULL DEFAULT '0',
-  `product_id` bigint(10) DEFAULT NULL,
+  `status_enum` INT NOT NULL,
+  `system_defined` TINYINT NOT NULL DEFAULT '0',
+  `product_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_entity_check` (`application_table_name`,`x_registered_table_name`,`status_enum`,`product_id`),
   KEY `x_registered_table_name` (`x_registered_table_name`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `m_entity_datatable_check_ibfk_1` FOREIGN KEY (`x_registered_table_name`) REFERENCES `x_registered_table` (`registered_table_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_entity_datatable_check: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_datatable_check` DISABLE KEYS */;
@@ -1605,13 +1605,13 @@ CREATE TABLE IF NOT EXISTS `m_entity_datatable_check` (
 -- Dumping structure for table fineract_default.m_entity_relation
 DROP TABLE IF EXISTS `m_entity_relation`;
 CREATE TABLE IF NOT EXISTS `m_entity_relation` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `from_entity_type` int(10) NOT NULL,
-  `to_entity_type` int(10) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `from_entity_type` INT NOT NULL,
+  `to_entity_type` INT NOT NULL,
   `code_name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `from_entity_type_to_entity_type_code_name` (`from_entity_type`,`to_entity_type`,`code_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_entity_relation: ~5 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_relation` DISABLE KEYS */;
@@ -1627,18 +1627,18 @@ INSERT INTO `m_entity_relation` (`id`, `from_entity_type`, `to_entity_type`, `co
 -- Dumping structure for table fineract_default.m_entity_to_entity_access
 DROP TABLE IF EXISTS `m_entity_to_entity_access`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `entity_type` varchar(50) NOT NULL,
-  `entity_id` bigint(20) NOT NULL,
-  `access_type_code_value_id` int(11) NOT NULL,
+  `entity_id` BIGINT NOT NULL,
+  `access_type_code_value_id` INT NOT NULL,
   `second_entity_type` varchar(50) NOT NULL,
-  `second_entity_id` bigint(20) NOT NULL,
+  `second_entity_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_uniq_m_entity_to_entity_access` (`entity_type`,`entity_id`,`access_type_code_value_id`,`second_entity_type`,`second_entity_id`),
   KEY `IDX_OFFICE` (`entity_type`,`entity_id`),
   KEY `FK_access_type_code_m_code_value` (`access_type_code_value_id`),
   CONSTRAINT `FK_access_type_code_m_code_value` FOREIGN KEY (`access_type_code_value_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_entity_to_entity_access: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_to_entity_access` DISABLE KEYS */;
@@ -1648,16 +1648,16 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
 -- Dumping structure for table fineract_default.m_entity_to_entity_mapping
 DROP TABLE IF EXISTS `m_entity_to_entity_mapping`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `rel_id` bigint(20) NOT NULL DEFAULT '0',
-  `from_id` bigint(20) NOT NULL DEFAULT '0',
-  `to_id` bigint(20) unsigned NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `rel_id` BIGINT NOT NULL DEFAULT '0',
+  `from_id` BIGINT NOT NULL DEFAULT '0',
+  `to_id` BIGINT unsigned NOT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `rel_id_from_id_to_id` (`rel_id`,`from_id`,`to_id`),
   CONSTRAINT `FK__rel_id_m_entity_relation_id` FOREIGN KEY (`rel_id`) REFERENCES `m_entity_relation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_entity_to_entity_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_to_entity_mapping` DISABLE KEYS */;
@@ -1667,15 +1667,15 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
 -- Dumping structure for table fineract_default.m_field_configuration
 DROP TABLE IF EXISTS `m_field_configuration`;
 CREATE TABLE IF NOT EXISTS `m_field_configuration` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `entity` varchar(100) NOT NULL,
   `subentity` varchar(100) NOT NULL,
   `field` varchar(100) NOT NULL,
-  `is_enabled` tinyint(4) NOT NULL,
-  `is_mandatory` tinyint(4) NOT NULL,
+  `is_enabled` TINYINT NOT NULL,
+  `is_mandatory` TINYINT NOT NULL,
   `validation_regex` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_field_configuration: ~18 rows (approximately)
 /*!40000 ALTER TABLE `m_field_configuration` DISABLE KEYS */;
@@ -1704,17 +1704,17 @@ INSERT INTO `m_field_configuration` (`id`, `entity`, `subentity`, `field`, `is_e
 -- Dumping structure for table fineract_default.m_floating_rates
 DROP TABLE IF EXISTS `m_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `is_base_lending_rate` bit(1) NOT NULL DEFAULT b'0',
   `is_active` bit(1) NOT NULL DEFAULT b'1',
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_floating_rates: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_floating_rates` DISABLE KEYS */;
@@ -1724,20 +1724,20 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates` (
 -- Dumping structure for table fineract_default.m_floating_rates_periods
 DROP TABLE IF EXISTS `m_floating_rates_periods`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `floating_rates_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `floating_rates_id` BIGINT NOT NULL,
   `from_date` datetime NOT NULL,
   `interest_rate` decimal(19,6) NOT NULL,
   `is_differential_to_base_lending_rate` bit(1) NOT NULL DEFAULT b'0',
   `is_active` bit(1) NOT NULL DEFAULT b'1',
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_mappings_m_floating_rates` (`floating_rates_id`),
   CONSTRAINT `FK_mappings_m_floating_rates` FOREIGN KEY (`floating_rates_id`) REFERENCES `m_floating_rates` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_floating_rates_periods: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_floating_rates_periods` DISABLE KEYS */;
@@ -1747,13 +1747,13 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
 -- Dumping structure for table fineract_default.m_fund
 DROP TABLE IF EXISTS `m_fund`;
 CREATE TABLE IF NOT EXISTS `m_fund` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fund_name_org` (`name`),
   UNIQUE KEY `fund_externalid_org` (`external_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_fund: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_fund` DISABLE KEYS */;
@@ -1763,22 +1763,22 @@ CREATE TABLE IF NOT EXISTS `m_fund` (
 -- Dumping structure for table fineract_default.m_group
 DROP TABLE IF EXISTS `m_group`;
 CREATE TABLE IF NOT EXISTS `m_group` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `external_id` varchar(100) DEFAULT NULL,
-  `status_enum` int(5) NOT NULL DEFAULT '300',
+  `status_enum` INT NOT NULL DEFAULT '300',
   `activation_date` date DEFAULT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `staff_id` bigint(20) DEFAULT NULL,
-  `parent_id` bigint(20) DEFAULT NULL,
-  `level_id` int(11) NOT NULL,
+  `office_id` BIGINT NOT NULL,
+  `staff_id` BIGINT DEFAULT NULL,
+  `parent_id` BIGINT DEFAULT NULL,
+  `level_id` INT NOT NULL,
   `display_name` varchar(100) NOT NULL,
   `hierarchy` varchar(100) DEFAULT NULL,
-  `closure_reason_cv_id` int(11) DEFAULT NULL,
+  `closure_reason_cv_id` INT DEFAULT NULL,
   `closedon_date` date DEFAULT NULL,
-  `activatedon_userid` bigint(20) DEFAULT NULL,
+  `activatedon_userid` BIGINT DEFAULT NULL,
   `submittedon_date` date DEFAULT NULL,
-  `submittedon_userid` bigint(20) DEFAULT NULL,
-  `closedon_userid` bigint(20) DEFAULT NULL,
+  `submittedon_userid` BIGINT DEFAULT NULL,
+  `closedon_userid` BIGINT DEFAULT NULL,
   `account_no` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`display_name`,`level_id`),
@@ -1794,7 +1794,7 @@ CREATE TABLE IF NOT EXISTS `m_group` (
   CONSTRAINT `FK_m_group_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `Parent_Id_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_group: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group` DISABLE KEYS */;
@@ -1804,13 +1804,13 @@ CREATE TABLE IF NOT EXISTS `m_group` (
 -- Dumping structure for table fineract_default.m_group_client
 DROP TABLE IF EXISTS `m_group_client`;
 CREATE TABLE IF NOT EXISTS `m_group_client` (
-  `group_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
+  `group_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
   PRIMARY KEY (`group_id`,`client_id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `m_group_client_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `m_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_group_client: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group_client` DISABLE KEYS */;
@@ -1820,16 +1820,16 @@ CREATE TABLE IF NOT EXISTS `m_group_client` (
 -- Dumping structure for table fineract_default.m_group_level
 DROP TABLE IF EXISTS `m_group_level`;
 CREATE TABLE IF NOT EXISTS `m_group_level` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_id` int(11) DEFAULT NULL,
-  `super_parent` tinyint(1) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `parent_id` INT DEFAULT NULL,
+  `super_parent` tinyint NOT NULL,
   `level_name` varchar(100) NOT NULL,
-  `recursable` tinyint(1) NOT NULL,
-  `can_have_clients` tinyint(1) NOT NULL,
+  `recursable` tinyint NOT NULL,
+  `can_have_clients` tinyint NOT NULL,
   PRIMARY KEY (`id`),
   KEY `Parent_levelId_reference` (`parent_id`),
   CONSTRAINT `Parent_levelId_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group_level` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_group_level: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_group_level` DISABLE KEYS */;
@@ -1842,10 +1842,10 @@ INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `r
 -- Dumping structure for table fineract_default.m_group_roles
 DROP TABLE IF EXISTS `m_group_roles`;
 CREATE TABLE IF NOT EXISTS `m_group_roles` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `role_cv_id` int(11) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `role_cv_id` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_GROUP_ROLES` (`client_id`,`group_id`,`role_cv_id`),
   KEY `FKGroupRoleClientId` (`client_id`),
@@ -1854,7 +1854,7 @@ CREATE TABLE IF NOT EXISTS `m_group_roles` (
   CONSTRAINT `FKGroupRoleClientId` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKGroupRoleGroupId` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FK_grouprole_m_codevalue` FOREIGN KEY (`role_cv_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_group_roles: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group_roles` DISABLE KEYS */;
@@ -1864,11 +1864,11 @@ CREATE TABLE IF NOT EXISTS `m_group_roles` (
 -- Dumping structure for table fineract_default.m_guarantor
 DROP TABLE IF EXISTS `m_guarantor`;
 CREATE TABLE IF NOT EXISTS `m_guarantor` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `client_reln_cv_id` int(11) DEFAULT NULL,
-  `type_enum` smallint(5) NOT NULL,
-  `entity_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `client_reln_cv_id` INT DEFAULT NULL,
+  `type_enum` SMALLINT NOT NULL,
+  `entity_id` BIGINT DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `dob` date DEFAULT NULL,
@@ -1881,13 +1881,13 @@ CREATE TABLE IF NOT EXISTS `m_guarantor` (
   `house_phone_number` varchar(20) DEFAULT NULL,
   `mobile_number` varchar(20) DEFAULT NULL,
   `comment` varchar(500) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_active` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `FK_m_guarantor_m_loan` (`loan_id`),
   KEY `FK_m_guarantor_m_code_value` (`client_reln_cv_id`),
   CONSTRAINT `FK_m_guarantor_m_code_value` FOREIGN KEY (`client_reln_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_guarantor: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_guarantor` DISABLE KEYS */;
@@ -1897,20 +1897,20 @@ CREATE TABLE IF NOT EXISTS `m_guarantor` (
 -- Dumping structure for table fineract_default.m_guarantor_funding_details
 DROP TABLE IF EXISTS `m_guarantor_funding_details`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `guarantor_id` bigint(20) NOT NULL,
-  `account_associations_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `guarantor_id` BIGINT NOT NULL,
+  `account_associations_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `amount_released_derived` decimal(19,6) DEFAULT NULL,
   `amount_remaining_derived` decimal(19,6) DEFAULT NULL,
   `amount_transfered_derived` decimal(19,6) DEFAULT NULL,
-  `status_enum` smallint(3) NOT NULL,
+  `status_enum` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_guarantor_fund_details_m_guarantor` (`guarantor_id`),
   KEY `FK_m_guarantor_fund_details_account_associations_id` (`account_associations_id`),
   CONSTRAINT `FK_m_guarantor_fund_details_account_associations_id` FOREIGN KEY (`account_associations_id`) REFERENCES `m_portfolio_account_associations` (`id`),
   CONSTRAINT `FK_m_guarantor_fund_details_m_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_guarantor` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_guarantor_funding_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_guarantor_funding_details` DISABLE KEYS */;
@@ -1920,11 +1920,11 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
 -- Dumping structure for table fineract_default.m_guarantor_transaction
 DROP TABLE IF EXISTS `m_guarantor_transaction`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `guarantor_fund_detail_id` bigint(20) NOT NULL,
-  `loan_transaction_id` bigint(20) DEFAULT NULL,
-  `deposit_on_hold_transaction_id` bigint(20) NOT NULL,
-  `is_reversed` tinyint(1) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `guarantor_fund_detail_id` BIGINT NOT NULL,
+  `loan_transaction_id` BIGINT DEFAULT NULL,
+  `deposit_on_hold_transaction_id` BIGINT NOT NULL,
+  `is_reversed` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FK_guarantor_transaction_m_deposit_account_on_hold_transaction` (`deposit_on_hold_transaction_id`),
   KEY `FK_guarantor_transaction_guarantor_fund_detail` (`guarantor_fund_detail_id`),
@@ -1932,7 +1932,7 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
   CONSTRAINT `FK_guarantor_transaction_guarantor_fund_detail` FOREIGN KEY (`guarantor_fund_detail_id`) REFERENCES `m_guarantor_funding_details` (`id`),
   CONSTRAINT `FK_guarantor_transaction_m_deposit_account_on_hold_transaction` FOREIGN KEY (`deposit_on_hold_transaction_id`) REFERENCES `m_deposit_account_on_hold_transaction` (`id`),
   CONSTRAINT `FK_guarantor_transaction_m_loan_transaction` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_guarantor_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_guarantor_transaction` DISABLE KEYS */;
@@ -1942,17 +1942,17 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
 -- Dumping structure for table fineract_default.m_holiday
 DROP TABLE IF EXISTS `m_holiday`;
 CREATE TABLE IF NOT EXISTS `m_holiday` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `from_date` datetime NOT NULL,
   `to_date` datetime NOT NULL,
   `repayments_rescheduled_to` datetime NOT NULL,
-  `status_enum` int(5) NOT NULL DEFAULT '100',
-  `processed` tinyint(1) NOT NULL DEFAULT '0',
+  `status_enum` INT NOT NULL DEFAULT '100',
+  `processed` tinyint NOT NULL DEFAULT '0',
   `description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `holiday_name` (`name`,`from_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_holiday: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_holiday` DISABLE KEYS */;
@@ -1962,14 +1962,14 @@ CREATE TABLE IF NOT EXISTS `m_holiday` (
 -- Dumping structure for table fineract_default.m_holiday_office
 DROP TABLE IF EXISTS `m_holiday_office`;
 CREATE TABLE IF NOT EXISTS `m_holiday_office` (
-  `holiday_id` bigint(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
+  `holiday_id` BIGINT NOT NULL,
+  `office_id` BIGINT NOT NULL,
   PRIMARY KEY (`holiday_id`,`office_id`),
   KEY `m_holiday_id_ibfk_1` (`holiday_id`),
   KEY `m_office_id_ibfk_2` (`office_id`),
   CONSTRAINT `m_holiday_id_ibfk_1` FOREIGN KEY (`holiday_id`) REFERENCES `m_holiday` (`id`),
   CONSTRAINT `m_office_id_ibfk_2` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_holiday_office: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_holiday_office` DISABLE KEYS */;
@@ -1979,21 +1979,21 @@ CREATE TABLE IF NOT EXISTS `m_holiday_office` (
 -- Dumping structure for table fineract_default.m_hook
 DROP TABLE IF EXISTS `m_hook`;
 CREATE TABLE IF NOT EXISTS `m_hook` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `template_id` smallint(6) NOT NULL,
-  `is_active` smallint(3) NOT NULL DEFAULT '1',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `template_id` SMALLINT NOT NULL,
+  `is_active` SMALLINT NOT NULL DEFAULT '1',
   `name` varchar(45) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `ugd_template_id` bigint(20) DEFAULT NULL,
+  `ugd_template_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_template_id_idx` (`template_id`),
   KEY `fk_ugd_template_id` (`ugd_template_id`),
   CONSTRAINT `fk_template_id` FOREIGN KEY (`template_id`) REFERENCES `m_hook_templates` (`id`),
   CONSTRAINT `fk_ugd_template_id` FOREIGN KEY (`ugd_template_id`) REFERENCES `m_template` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_hook: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook` DISABLE KEYS */;
@@ -2003,15 +2003,15 @@ CREATE TABLE IF NOT EXISTS `m_hook` (
 -- Dumping structure for table fineract_default.m_hook_configuration
 DROP TABLE IF EXISTS `m_hook_configuration`;
 CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `hook_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `hook_id` BIGINT DEFAULT NULL,
   `field_type` varchar(45) NOT NULL,
   `field_name` varchar(100) NOT NULL,
   `field_value` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_hook_id_idx` (`hook_id`),
   CONSTRAINT `fk_hook_id_cfg` FOREIGN KEY (`hook_id`) REFERENCES `m_hook` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_hook_configuration: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_configuration` DISABLE KEYS */;
@@ -2021,14 +2021,14 @@ CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
 -- Dumping structure for table fineract_default.m_hook_registered_events
 DROP TABLE IF EXISTS `m_hook_registered_events`;
 CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `hook_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `hook_id` BIGINT NOT NULL,
   `entity_name` varchar(45) NOT NULL,
   `action_name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_hook_id_idx` (`hook_id`),
   CONSTRAINT `fk_hook_idc` FOREIGN KEY (`hook_id`) REFERENCES `m_hook` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_hook_registered_events: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_registered_events` DISABLE KEYS */;
@@ -2038,16 +2038,16 @@ CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
 -- Dumping structure for table fineract_default.m_hook_schema
 DROP TABLE IF EXISTS `m_hook_schema`;
 CREATE TABLE IF NOT EXISTS `m_hook_schema` (
-  `id` smallint(6) NOT NULL AUTO_INCREMENT,
-  `hook_template_id` smallint(6) NOT NULL,
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
+  `hook_template_id` SMALLINT NOT NULL,
   `field_type` varchar(45) NOT NULL,
   `field_name` varchar(100) NOT NULL,
   `placeholder` varchar(100) DEFAULT NULL,
-  `optional` tinyint(3) NOT NULL DEFAULT '0',
+  `optional` TINYINT NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_hook_template_id_idx` (`hook_template_id`),
   CONSTRAINT `fk_hook_template_id` FOREIGN KEY (`hook_template_id`) REFERENCES `m_hook_templates` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_hook_schema: ~7 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_schema` DISABLE KEYS */;
@@ -2065,10 +2065,10 @@ INSERT INTO `m_hook_schema` (`id`, `hook_template_id`, `field_type`, `field_name
 -- Dumping structure for table fineract_default.m_hook_templates
 DROP TABLE IF EXISTS `m_hook_templates`;
 CREATE TABLE IF NOT EXISTS `m_hook_templates` (
-  `id` smallint(6) NOT NULL AUTO_INCREMENT,
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_hook_templates: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_templates` DISABLE KEYS */;
@@ -2081,11 +2081,11 @@ INSERT INTO `m_hook_templates` (`id`, `name`) VALUES
 -- Dumping structure for table fineract_default.m_image
 DROP TABLE IF EXISTS `m_image`;
 CREATE TABLE IF NOT EXISTS `m_image` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `location` varchar(500) DEFAULT NULL,
-  `storage_type_enum` smallint(5) DEFAULT NULL,
+  `storage_type_enum` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_image: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_image` DISABLE KEYS */;
@@ -2095,18 +2095,18 @@ CREATE TABLE IF NOT EXISTS `m_image` (
 -- Dumping structure for table fineract_default.m_interest_incentives
 DROP TABLE IF EXISTS `m_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `interest_rate_slab_id` bigint(20) NOT NULL,
-  `entiry_type` smallint(2) NOT NULL,
-  `attribute_name` smallint(2) NOT NULL,
-  `condition_type` smallint(2) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `interest_rate_slab_id` BIGINT NOT NULL,
+  `entiry_type` SMALLINT NOT NULL,
+  `attribute_name` SMALLINT NOT NULL,
+  `condition_type` SMALLINT NOT NULL,
   `attribute_value` varchar(50) NOT NULL,
-  `incentive_type` smallint(2) NOT NULL,
+  `incentive_type` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_interest_incentives_m_interest_rate_slab` (`interest_rate_slab_id`),
   CONSTRAINT `FK_m_interest_incentives_m_interest_rate_slab` FOREIGN KEY (`interest_rate_slab_id`) REFERENCES `m_interest_rate_slab` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_interest_incentives: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_incentives` DISABLE KEYS */;
@@ -2116,14 +2116,14 @@ CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
 -- Dumping structure for table fineract_default.m_interest_rate_chart
 DROP TABLE IF EXISTS `m_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL,
   `from_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `is_primary_grouping_by_amount` tinyint(1) NOT NULL DEFAULT '0',
+  `is_primary_grouping_by_amount` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_rate_chart` DISABLE KEYS */;
@@ -2133,12 +2133,12 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
 -- Dumping structure for table fineract_default.m_interest_rate_slab
 DROP TABLE IF EXISTS `m_interest_rate_slab`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `interest_rate_chart_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `interest_rate_chart_id` BIGINT NOT NULL,
   `description` varchar(200) DEFAULT NULL,
-  `period_type_enum` smallint(5) DEFAULT NULL,
-  `from_period` int(11) DEFAULT NULL,
-  `to_period` int(11) DEFAULT NULL,
+  `period_type_enum` SMALLINT DEFAULT NULL,
+  `from_period` INT DEFAULT NULL,
+  `to_period` INT DEFAULT NULL,
   `amount_range_from` decimal(19,6) DEFAULT NULL,
   `amount_range_to` decimal(19,6) DEFAULT NULL,
   `annual_interest_rate` decimal(19,6) NOT NULL,
@@ -2146,7 +2146,7 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
   PRIMARY KEY (`id`),
   KEY `FKIRS00000000000001` (`interest_rate_chart_id`),
   CONSTRAINT `FKIRS00000000000001` FOREIGN KEY (`interest_rate_chart_id`) REFERENCES `m_interest_rate_chart` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_interest_rate_slab: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_rate_slab` DISABLE KEYS */;
@@ -2156,20 +2156,20 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
 -- Dumping structure for table fineract_default.m_loan
 DROP TABLE IF EXISTS `m_loan`;
 CREATE TABLE IF NOT EXISTS `m_loan` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
-  `fund_id` bigint(20) DEFAULT NULL,
-  `loan_officer_id` bigint(20) DEFAULT NULL,
-  `loanpurpose_cv_id` int(11) DEFAULT NULL,
-  `loan_status_id` smallint(5) NOT NULL,
-  `loan_type_enum` smallint(5) NOT NULL,
+  `client_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `product_id` BIGINT DEFAULT NULL,
+  `fund_id` BIGINT DEFAULT NULL,
+  `loan_officer_id` BIGINT DEFAULT NULL,
+  `loanpurpose_cv_id` INT DEFAULT NULL,
+  `loan_status_id` SMALLINT NOT NULL,
+  `loan_type_enum` SMALLINT NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `principal_amount_proposed` decimal(19,6) NOT NULL,
   `principal_amount` decimal(19,6) NOT NULL,
   `approved_principal` decimal(19,6) NOT NULL,
@@ -2177,34 +2177,34 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   `is_floating_interest_rate` bit(1) DEFAULT b'0',
   `interest_rate_differential` decimal(19,6) DEFAULT '0.000000',
   `nominal_interest_rate_per_period` decimal(19,6) DEFAULT NULL,
-  `interest_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `interest_period_frequency_enum` SMALLINT DEFAULT NULL,
   `annual_nominal_interest_rate` decimal(19,6) DEFAULT NULL,
-  `interest_method_enum` smallint(5) NOT NULL,
-  `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
-  `allow_partial_period_interest_calcualtion` tinyint(1) NOT NULL DEFAULT '0',
-  `term_frequency` smallint(5) NOT NULL DEFAULT '0',
-  `term_period_frequency_enum` smallint(5) NOT NULL DEFAULT '2',
-  `repay_every` smallint(5) NOT NULL,
-  `repayment_period_frequency_enum` smallint(5) NOT NULL,
-  `number_of_repayments` smallint(5) NOT NULL,
-  `grace_on_principal_periods` smallint(5) DEFAULT NULL,
-  `recurring_moratorium_principal_periods` smallint(5) DEFAULT NULL,
-  `grace_on_interest_periods` smallint(5) DEFAULT NULL,
-  `grace_interest_free_periods` smallint(5) DEFAULT NULL,
-  `amortization_method_enum` smallint(5) NOT NULL,
+  `interest_method_enum` SMALLINT NOT NULL,
+  `interest_calculated_in_period_enum` SMALLINT NOT NULL DEFAULT '1',
+  `allow_partial_period_interest_calcualtion` tinyint NOT NULL DEFAULT '0',
+  `term_frequency` SMALLINT NOT NULL DEFAULT '0',
+  `term_period_frequency_enum` SMALLINT NOT NULL DEFAULT '2',
+  `repay_every` SMALLINT NOT NULL,
+  `repayment_period_frequency_enum` SMALLINT NOT NULL,
+  `number_of_repayments` SMALLINT NOT NULL,
+  `grace_on_principal_periods` SMALLINT DEFAULT NULL,
+  `recurring_moratorium_principal_periods` SMALLINT DEFAULT NULL,
+  `grace_on_interest_periods` SMALLINT DEFAULT NULL,
+  `grace_interest_free_periods` SMALLINT DEFAULT NULL,
+  `amortization_method_enum` SMALLINT NOT NULL,
   `submittedon_date` date DEFAULT NULL,
-  `submittedon_userid` bigint(20) DEFAULT NULL,
+  `submittedon_userid` BIGINT DEFAULT NULL,
   `approvedon_date` date DEFAULT NULL,
-  `approvedon_userid` bigint(20) DEFAULT NULL,
+  `approvedon_userid` BIGINT DEFAULT NULL,
   `expected_disbursedon_date` date DEFAULT NULL,
   `expected_firstrepaymenton_date` date DEFAULT NULL,
   `interest_calculated_from_date` date DEFAULT NULL,
   `disbursedon_date` date DEFAULT NULL,
-  `disbursedon_userid` bigint(20) DEFAULT NULL,
+  `disbursedon_userid` BIGINT DEFAULT NULL,
   `expected_maturedon_date` date DEFAULT NULL,
   `maturedon_date` date DEFAULT NULL,
   `closedon_date` date DEFAULT NULL,
-  `closedon_userid` bigint(20) DEFAULT NULL,
+  `closedon_userid` BIGINT DEFAULT NULL,
   `total_charges_due_at_disbursement_derived` decimal(19,6) DEFAULT NULL,
   `principal_disbursed_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `principal_repaid_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -2234,32 +2234,32 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   `total_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `total_overpaid_derived` decimal(19,6) DEFAULT NULL,
   `rejectedon_date` date DEFAULT NULL,
-  `rejectedon_userid` bigint(20) DEFAULT NULL,
+  `rejectedon_userid` BIGINT DEFAULT NULL,
   `rescheduledon_date` date DEFAULT NULL,
-  `rescheduledon_userid` bigint(20) DEFAULT NULL,
+  `rescheduledon_userid` BIGINT DEFAULT NULL,
   `withdrawnon_date` date DEFAULT NULL,
-  `withdrawnon_userid` bigint(20) DEFAULT NULL,
+  `withdrawnon_userid` BIGINT DEFAULT NULL,
   `writtenoffon_date` date DEFAULT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
-  `sync_disbursement_with_meeting` tinyint(1) DEFAULT NULL,
-  `loan_counter` smallint(6) DEFAULT NULL,
-  `loan_product_counter` smallint(6) DEFAULT NULL,
+  `loan_transaction_strategy_id` BIGINT DEFAULT NULL,
+  `sync_disbursement_with_meeting` tinyint DEFAULT NULL,
+  `loan_counter` SMALLINT DEFAULT NULL,
+  `loan_product_counter` SMALLINT DEFAULT NULL,
   `fixed_emi_amount` decimal(19,6) DEFAULT NULL,
   `max_outstanding_loan_balance` decimal(19,6) DEFAULT NULL,
-  `grace_on_arrears_ageing` smallint(5) DEFAULT NULL,
-  `is_npa` tinyint(1) NOT NULL DEFAULT '0',
+  `grace_on_arrears_ageing` SMALLINT DEFAULT NULL,
+  `is_npa` tinyint NOT NULL DEFAULT '0',
   `total_recovered_derived` decimal(19,6) DEFAULT NULL,
   `accrued_till` date DEFAULT NULL,
   `interest_recalcualated_on` date DEFAULT NULL,
-  `days_in_month_enum` smallint(5) NOT NULL DEFAULT '1',
-  `days_in_year_enum` smallint(5) NOT NULL DEFAULT '1',
-  `interest_recalculation_enabled` tinyint(4) NOT NULL DEFAULT '0',
+  `days_in_month_enum` SMALLINT NOT NULL DEFAULT '1',
+  `days_in_year_enum` SMALLINT NOT NULL DEFAULT '1',
+  `interest_recalculation_enabled` TINYINT NOT NULL DEFAULT '0',
   `guarantee_amount_derived` decimal(19,6) DEFAULT NULL,
-  `create_standing_instruction_at_disbursement` tinyint(1) DEFAULT NULL,
-  `version` int(15) NOT NULL DEFAULT '1',
-  `writeoff_reason_cv_id` int(11) DEFAULT NULL,
-  `loan_sub_status_id` smallint(5) DEFAULT NULL,
-  `is_topup` tinyint(1) NOT NULL DEFAULT '0',
+  `create_standing_instruction_at_disbursement` tinyint DEFAULT NULL,
+  `version` INT NOT NULL DEFAULT '1',
+  `writeoff_reason_cv_id` INT DEFAULT NULL,
+  `loan_sub_status_id` SMALLINT DEFAULT NULL,
+  `is_topup` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `loan_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `loan_externalid_UNIQUE` (`external_id`),
@@ -2292,7 +2292,7 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   CONSTRAINT `FK_withdrawnon_userid` FOREIGN KEY (`withdrawnon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_writeoffreason_m_loan_m_code_value` FOREIGN KEY (`writeoff_reason_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
@@ -2302,17 +2302,17 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
 -- Dumping structure for table fineract_default.m_loanproduct_provisioning_entry
 DROP TABLE IF EXISTS `m_loanproduct_provisioning_entry`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `history_id` bigint(20) NOT NULL,
-  `criteria_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `history_id` BIGINT NOT NULL,
+  `criteria_id` BIGINT NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
-  `category_id` bigint(20) NOT NULL,
-  `overdue_in_days` bigint(20) DEFAULT '0',
+  `office_id` BIGINT NOT NULL,
+  `product_id` BIGINT NOT NULL,
+  `category_id` BIGINT NOT NULL,
+  `overdue_in_days` BIGINT DEFAULT '0',
   `reseve_amount` decimal(20,6) DEFAULT '0.000000',
-  `liability_account` bigint(20) DEFAULT NULL,
-  `expense_account` bigint(20) DEFAULT NULL,
+  `liability_account` BIGINT DEFAULT NULL,
+  `expense_account` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `history_id` (`history_id`),
   KEY `criteria_id` (`criteria_id`),
@@ -2330,7 +2330,7 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
   CONSTRAINT `m_loanproduct_provisioning_entry_ibfk_6` FOREIGN KEY (`category_id`) REFERENCES `m_provision_category` (`id`),
   CONSTRAINT `m_loanproduct_provisioning_entry_ibfk_7` FOREIGN KEY (`liability_account`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `m_loanproduct_provisioning_entry_ibfk_8` FOREIGN KEY (`expense_account`) REFERENCES `acc_gl_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loanproduct_provisioning_entry: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_entry` DISABLE KEYS */;
@@ -2340,15 +2340,15 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
 -- Dumping structure for table fineract_default.m_loanproduct_provisioning_mapping
 DROP TABLE IF EXISTS `m_loanproduct_provisioning_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
-  `criteria_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `product_id` BIGINT NOT NULL,
+  `criteria_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_id` (`product_id`),
   KEY `criteria_id` (`criteria_id`),
   CONSTRAINT `m_loanproduct_provisioning_mapping_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
   CONSTRAINT `m_loanproduct_provisioning_mapping_ibfk_2` FOREIGN KEY (`criteria_id`) REFERENCES `m_provisioning_criteria` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loanproduct_provisioning_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_mapping` DISABLE KEYS */;
@@ -2358,7 +2358,7 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
 -- Dumping structure for table fineract_default.m_loan_arrears_aging
 DROP TABLE IF EXISTS `m_loan_arrears_aging`;
 CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
-  `loan_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL AUTO_INCREMENT,
   `principal_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -2367,7 +2367,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
   `overdue_since_date_derived` date DEFAULT NULL,
   PRIMARY KEY (`loan_id`),
   CONSTRAINT `m_loan_arrears_aging_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_arrears_aging: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_arrears_aging` DISABLE KEYS */;
@@ -2377,14 +2377,14 @@ CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
 -- Dumping structure for table fineract_default.m_loan_charge
 DROP TABLE IF EXISTS `m_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
-  `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
-  `charge_time_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
+  `is_penalty` tinyint NOT NULL DEFAULT '0',
+  `charge_time_enum` SMALLINT NOT NULL,
   `due_for_collection_as_of_date` date DEFAULT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
-  `charge_payment_mode_enum` smallint(5) NOT NULL DEFAULT '0',
+  `charge_calculation_enum` SMALLINT NOT NULL,
+  `charge_payment_mode_enum` SMALLINT NOT NULL DEFAULT '0',
   `calculation_percentage` decimal(19,6) DEFAULT NULL,
   `calculation_on_amount` decimal(19,6) DEFAULT NULL,
   `charge_amount_or_percentage` decimal(19,6) DEFAULT NULL,
@@ -2393,17 +2393,17 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge` (
   `amount_waived_derived` decimal(19,6) DEFAULT NULL,
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
-  `waived` tinyint(1) NOT NULL DEFAULT '0',
+  `is_paid_derived` tinyint NOT NULL DEFAULT '0',
+  `waived` tinyint NOT NULL DEFAULT '0',
   `min_cap` decimal(19,6) DEFAULT NULL,
   `max_cap` decimal(19,6) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_active` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `charge_id` (`charge_id`),
   KEY `m_loan_charge_ibfk_2` (`loan_id`),
   CONSTRAINT `m_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_charge` DISABLE KEYS */;
@@ -2413,17 +2413,17 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge` (
 -- Dumping structure for table fineract_default.m_loan_charge_paid_by
 DROP TABLE IF EXISTS `m_loan_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_transaction_id` bigint(20) NOT NULL,
-  `loan_charge_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_transaction_id` BIGINT NOT NULL,
+  `loan_charge_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `installment_number` smallint(5) DEFAULT NULL,
+  `installment_number` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK__m_loan_transaction` (`loan_transaction_id`),
   KEY `FK__m_loan_charge` (`loan_charge_id`),
   CONSTRAINT `FK__m_loan_charge` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
   CONSTRAINT `FK__m_loan_transaction` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_charge_paid_by` DISABLE KEYS */;
@@ -2433,9 +2433,9 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
 -- Dumping structure for table fineract_default.m_loan_collateral
 DROP TABLE IF EXISTS `m_loan_collateral`;
 CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `type_cv_id` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `type_cv_id` INT NOT NULL,
   `value` decimal(19,6) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -2443,7 +2443,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
   KEY `FK_collateral_code_value` (`type_cv_id`),
   CONSTRAINT `FK_collateral_code_value` FOREIGN KEY (`type_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_collateral_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_collateral: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_collateral` DISABLE KEYS */;
@@ -2453,15 +2453,15 @@ CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
 -- Dumping structure for table fineract_default.m_loan_disbursement_detail
 DROP TABLE IF EXISTS `m_loan_disbursement_detail`;
 CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
   `expected_disburse_date` datetime NOT NULL,
   `disbursedon_date` datetime DEFAULT NULL,
   `principal` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_loan_disbursement_detail_loan_id` (`loan_id`),
   CONSTRAINT `FK_loan_disbursement_detail_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_disbursement_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_disbursement_detail` DISABLE KEYS */;
@@ -2471,24 +2471,24 @@ CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
 -- Dumping structure for table fineract_default.m_loan_installment_charge
 DROP TABLE IF EXISTS `m_loan_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_charge_id` bigint(20) NOT NULL,
-  `loan_schedule_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_charge_id` BIGINT NOT NULL,
+  `loan_schedule_id` BIGINT NOT NULL,
   `due_date` date DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
   `amount_paid_derived` decimal(19,6) DEFAULT NULL,
   `amount_waived_derived` decimal(19,6) DEFAULT NULL,
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
-  `waived` tinyint(1) NOT NULL DEFAULT '0',
+  `is_paid_derived` tinyint NOT NULL DEFAULT '0',
+  `waived` tinyint NOT NULL DEFAULT '0',
   `amount_through_charge_payment` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_loan_charge_id_charge_schedule` (`loan_charge_id`),
   KEY `FK_loan_schedule_id_charge_schedule` (`loan_schedule_id`),
   CONSTRAINT `FK_loan_charge_id_charge_schedule` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
   CONSTRAINT `FK_loan_schedule_id_charge_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_installment_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_installment_charge` DISABLE KEYS */;
@@ -2498,14 +2498,14 @@ CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
 -- Dumping structure for table fineract_default.m_loan_interest_recalculation_additional_details
 DROP TABLE IF EXISTS `m_loan_interest_recalculation_additional_details`;
 CREATE TABLE IF NOT EXISTS `m_loan_interest_recalculation_additional_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_repayment_schedule_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_repayment_schedule_id` BIGINT NOT NULL,
   `effective_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_additional_details_repayment_schedule_id` (`loan_repayment_schedule_id`),
   CONSTRAINT `FK_additional_details_repayment_schedule_id` FOREIGN KEY (`loan_repayment_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_interest_recalculation_additional_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_interest_recalculation_additional_details` DISABLE KEYS */;
@@ -2515,21 +2515,21 @@ CREATE TABLE IF NOT EXISTS `m_loan_interest_recalculation_additional_details` (
 -- Dumping structure for table fineract_default.m_loan_officer_assignment_history
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `loan_officer_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `loan_officer_id` BIGINT DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_m_loan_officer_assignment_history_0001` (`loan_id`),
   KEY `fk_m_loan_officer_assignment_history_0002` (`loan_officer_id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0001` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0002` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_officer_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` DISABLE KEYS */;
@@ -2539,16 +2539,16 @@ CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
 -- Dumping structure for table fineract_default.m_loan_overdue_installment_charge
 DROP TABLE IF EXISTS `m_loan_overdue_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_charge_id` bigint(20) NOT NULL,
-  `loan_schedule_id` bigint(20) NOT NULL,
-  `frequency_number` int(10) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_charge_id` BIGINT NOT NULL,
+  `loan_schedule_id` BIGINT NOT NULL,
+  `frequency_number` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_loan_overdue_installment_charge_m_loan_charge` (`loan_charge_id`),
   KEY `FK_m_loan_overdue_installment_charge_m_loan_repayment_schedule` (`loan_schedule_id`),
   CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_charge` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
   CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_repayment_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_overdue_installment_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_overdue_installment_charge` DISABLE KEYS */;
@@ -2558,7 +2558,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
 -- Dumping structure for table fineract_default.m_loan_paid_in_advance
 DROP TABLE IF EXISTS `m_loan_paid_in_advance`;
 CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
-  `loan_id` bigint(20) NOT NULL,
+  `loan_id` BIGINT NOT NULL,
   `principal_in_advance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_in_advance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_in_advance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -2566,7 +2566,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
   `total_in_advance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   PRIMARY KEY (`loan_id`),
   CONSTRAINT `m_loan_paid_in_advance_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_paid_in_advance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_paid_in_advance` DISABLE KEYS */;
@@ -2576,22 +2576,22 @@ CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
 -- Dumping structure for table fineract_default.m_loan_recalculation_details
 DROP TABLE IF EXISTS `m_loan_recalculation_details`;
 CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `compound_type_enum` smallint(5) NOT NULL,
-  `reschedule_strategy_enum` smallint(5) NOT NULL,
-  `rest_frequency_type_enum` smallint(1) NOT NULL,
-  `rest_frequency_interval` smallint(3) NOT NULL DEFAULT '0',
-  `compounding_frequency_type_enum` smallint(1) DEFAULT NULL,
-  `compounding_frequency_interval` smallint(3) DEFAULT NULL,
-  `rest_frequency_nth_day_enum` int(5) DEFAULT NULL,
-  `rest_frequency_on_day` int(5) DEFAULT NULL,
-  `rest_frequency_weekday_enum` int(5) DEFAULT NULL,
-  `compounding_frequency_nth_day_enum` int(5) DEFAULT NULL,
-  `compounding_frequency_on_day` int(5) DEFAULT NULL,
-  `is_compounding_to_be_posted_as_transaction` tinyint(1) NOT NULL DEFAULT '0',
-  `compounding_frequency_weekday_enum` int(5) DEFAULT NULL,
-  `allow_compounding_on_eod` tinyint(1) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `compound_type_enum` SMALLINT NOT NULL,
+  `reschedule_strategy_enum` SMALLINT NOT NULL,
+  `rest_frequency_type_enum` SMALLINT NOT NULL,
+  `rest_frequency_interval` SMALLINT NOT NULL DEFAULT '0',
+  `compounding_frequency_type_enum` SMALLINT DEFAULT NULL,
+  `compounding_frequency_interval` SMALLINT DEFAULT NULL,
+  `rest_frequency_nth_day_enum` INT DEFAULT NULL,
+  `rest_frequency_on_day` INT DEFAULT NULL,
+  `rest_frequency_weekday_enum` INT DEFAULT NULL,
+  `compounding_frequency_nth_day_enum` INT DEFAULT NULL,
+  `compounding_frequency_on_day` INT DEFAULT NULL,
+  `is_compounding_to_be_posted_as_transaction` tinyint NOT NULL DEFAULT '0',
+  `compounding_frequency_weekday_enum` INT DEFAULT NULL,
+  `allow_compounding_on_eod` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FK_m_loan_m_loan_recalculation_details` (`loan_id`),
   CONSTRAINT `FK_m_loan_m_loan_recalculation_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
@@ -2605,11 +2605,11 @@ CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
 -- Dumping structure for table fineract_default.m_loan_repayment_schedule
 DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
   `fromdate` date DEFAULT NULL,
   `duedate` date NOT NULL,
-  `installment` smallint(5) NOT NULL,
+  `installment` SMALLINT NOT NULL,
   `principal_amount` decimal(19,6) DEFAULT NULL,
   `principal_completed_derived` decimal(19,6) DEFAULT NULL,
   `principal_writtenoff_derived` decimal(19,6) DEFAULT NULL,
@@ -2632,15 +2632,15 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
   `total_paid_late_derived` decimal(19,6) DEFAULT NULL,
   `completed_derived` bit(1) NOT NULL,
   `obligations_met_on_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `recalculated_interest_component` tinyint(1) NOT NULL DEFAULT '0',
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
+  `recalculated_interest_component` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FK488B92AA40BE0710` (`loan_id`),
   CONSTRAINT `FK488B92AA40BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_repayment_schedule: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` DISABLE KEYS */;
@@ -2650,27 +2650,27 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
 -- Dumping structure for table fineract_default.m_loan_repayment_schedule_history
 DROP TABLE IF EXISTS `m_loan_repayment_schedule_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `loan_reschedule_request_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `loan_reschedule_request_id` BIGINT DEFAULT NULL,
   `fromdate` date DEFAULT NULL,
   `duedate` date NOT NULL,
-  `installment` smallint(5) NOT NULL,
+  `installment` SMALLINT NOT NULL,
   `principal_amount` decimal(19,6) DEFAULT NULL,
   `interest_amount` decimal(19,6) DEFAULT NULL,
   `fee_charges_amount` decimal(19,6) DEFAULT NULL,
   `penalty_charges_amount` decimal(19,6) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `version` int(5) NOT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
+  `version` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `loan_id` (`loan_id`),
   KEY `loan_reschedule_request_id` (`loan_reschedule_request_id`),
   CONSTRAINT `m_loan_repayment_schedule_history_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `m_loan_repayment_schedule_history_ibfk_2` FOREIGN KEY (`loan_reschedule_request_id`) REFERENCES `m_loan_reschedule_request` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_repayment_schedule_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_repayment_schedule_history` DISABLE KEYS */;
@@ -2680,20 +2680,20 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
 -- Dumping structure for table fineract_default.m_loan_reschedule_request
 DROP TABLE IF EXISTS `m_loan_reschedule_request`;
 CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `status_enum` smallint(5) NOT NULL,
-  `reschedule_from_installment` smallint(5) NOT NULL COMMENT 'Rescheduling will start from this installment',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `status_enum` SMALLINT NOT NULL,
+  `reschedule_from_installment` SMALLINT NOT NULL COMMENT 'Rescheduling will start from this installment',
   `reschedule_from_date` date NOT NULL COMMENT 'Rescheduling will start from the installment with due date similar to this date.',
-  `recalculate_interest` tinyint(1) DEFAULT NULL COMMENT 'If set to 1, interest will be recalculated starting from the reschedule period.',
-  `reschedule_reason_cv_id` int(11) DEFAULT NULL COMMENT 'ID of code value of reason for rescheduling',
+  `recalculate_interest` tinyint DEFAULT NULL COMMENT 'If set to 1, interest will be recalculated starting from the reschedule period.',
+  `reschedule_reason_cv_id` INT DEFAULT NULL COMMENT 'ID of code value of reason for rescheduling',
   `reschedule_reason_comment` varchar(500) DEFAULT NULL COMMENT 'Text provided in addition to the reason code value',
   `submitted_on_date` date NOT NULL,
-  `submitted_by_user_id` bigint(20) NOT NULL,
+  `submitted_by_user_id` BIGINT NOT NULL,
   `approved_on_date` date DEFAULT NULL,
-  `approved_by_user_id` bigint(20) DEFAULT NULL,
+  `approved_by_user_id` BIGINT DEFAULT NULL,
   `rejected_on_date` date DEFAULT NULL,
-  `rejected_by_user_id` bigint(20) DEFAULT NULL,
+  `rejected_by_user_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `loan_id` (`loan_id`),
   KEY `reschedule_reason_cv_id` (`reschedule_reason_cv_id`),
@@ -2705,7 +2705,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
   CONSTRAINT `m_loan_reschedule_request_ibfk_3` FOREIGN KEY (`submitted_by_user_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_loan_reschedule_request_ibfk_4` FOREIGN KEY (`approved_by_user_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_loan_reschedule_request_ibfk_5` FOREIGN KEY (`rejected_by_user_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_reschedule_request: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_reschedule_request` DISABLE KEYS */;
@@ -2715,15 +2715,15 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
 -- Dumping structure for table fineract_default.m_loan_reschedule_request_term_variations_mapping
 DROP TABLE IF EXISTS `m_loan_reschedule_request_term_variations_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request_term_variations_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_reschedule_request_id` bigint(20) NOT NULL,
-  `loan_term_variations_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_reschedule_request_id` BIGINT NOT NULL,
+  `loan_term_variations_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK__m_loan_reschedule_request` (`loan_reschedule_request_id`),
   KEY `FK__m_loan_term_variations` (`loan_term_variations_id`),
   CONSTRAINT `FK__m_loan_reschedule_request` FOREIGN KEY (`loan_reschedule_request_id`) REFERENCES `m_loan_reschedule_request` (`id`),
   CONSTRAINT `FK__m_loan_term_variations` FOREIGN KEY (`loan_term_variations_id`) REFERENCES `m_loan_term_variations` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_reschedule_request_term_variations_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_reschedule_request_term_variations_mapping` DISABLE KEYS */;
@@ -2733,20 +2733,20 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request_term_variations_mapping` (
 -- Dumping structure for table fineract_default.m_loan_term_variations
 DROP TABLE IF EXISTS `m_loan_term_variations`;
 CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `term_type` smallint(2) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `term_type` SMALLINT NOT NULL,
   `applicable_date` date NOT NULL,
   `decimal_value` decimal(19,6) DEFAULT NULL,
   `date_value` date DEFAULT NULL,
-  `is_specific_to_installment` tinyint(4) NOT NULL DEFAULT '0',
-  `applied_on_loan_status` smallint(5) NOT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `parent_id` bigint(20) DEFAULT NULL,
+  `is_specific_to_installment` TINYINT NOT NULL DEFAULT '0',
+  `applied_on_loan_status` SMALLINT NOT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `parent_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_loan_id_m_loan_id` (`loan_id`),
   CONSTRAINT `FK_loan_id_m_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_term_variations: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_term_variations` DISABLE KEYS */;
@@ -2756,10 +2756,10 @@ CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
 -- Dumping structure for table fineract_default.m_loan_topup
 DROP TABLE IF EXISTS `m_loan_topup`;
 CREATE TABLE IF NOT EXISTS `m_loan_topup` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `closure_loan_id` bigint(20) NOT NULL,
-  `account_transfer_details_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `closure_loan_id` BIGINT NOT NULL,
+  `account_transfer_details_id` BIGINT DEFAULT NULL,
   `topup_amount` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `m_loan_topup_FK_loan_id` (`loan_id`),
@@ -2768,7 +2768,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_topup` (
   CONSTRAINT `m_loan_topup_FK_account_transfer_details_id` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`),
   CONSTRAINT `m_loan_topup_FK_closure_loan_id` FOREIGN KEY (`closure_loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `m_loan_topup_FK_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_topup: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_topup` DISABLE KEYS */;
@@ -2778,15 +2778,15 @@ CREATE TABLE IF NOT EXISTS `m_loan_topup` (
 -- Dumping structure for table fineract_default.m_loan_tranche_charges
 DROP TABLE IF EXISTS `m_loan_tranche_charges`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_loan_tranche_charges_m_loan` (`loan_id`),
   KEY `FK_m_loan_tranche_charges_m_charge` (`charge_id`),
   CONSTRAINT `FK_m_loan_tranche_charges_m_charge` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `FK_m_loan_tranche_charges_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_tranche_charges: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_tranche_charges` DISABLE KEYS */;
@@ -2796,15 +2796,15 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
 -- Dumping structure for table fineract_default.m_loan_tranche_disbursement_charge
 DROP TABLE IF EXISTS `m_loan_tranche_disbursement_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_charge_id` bigint(20) NOT NULL,
-  `disbursement_detail_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_charge_id` BIGINT NOT NULL,
+  `disbursement_detail_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_loan_tranche_disbursement_charge_m_loan_charge` (`loan_charge_id`),
   KEY `FK_m_loan_tranche_disbursement_charge_m_loan_disbursement_detail` (`disbursement_detail_id`),
   CONSTRAINT `FK_m_loan_tranche_disbursement_charge_m_loan_charge` FOREIGN KEY (`loan_charge_id`) REFERENCES `m_loan_charge` (`id`),
   CONSTRAINT `FK_m_loan_tranche_disbursement_charge_m_loan_disbursement_detail` FOREIGN KEY (`disbursement_detail_id`) REFERENCES `m_loan_disbursement_detail` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_tranche_disbursement_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_tranche_disbursement_charge` DISABLE KEYS */;
@@ -2814,13 +2814,13 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
 -- Dumping structure for table fineract_default.m_loan_transaction
 DROP TABLE IF EXISTS `m_loan_transaction`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_id` bigint(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `payment_detail_id` bigint(20) DEFAULT NULL,
-  `is_reversed` tinyint(1) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_id` BIGINT NOT NULL,
+  `office_id` BIGINT NOT NULL,
+  `payment_detail_id` BIGINT DEFAULT NULL,
+  `is_reversed` tinyint NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `transaction_type_enum` smallint(5) NOT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `principal_portion_derived` decimal(19,6) DEFAULT NULL,
@@ -2831,9 +2831,9 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
   `unrecognized_income_portion` decimal(19,6) DEFAULT NULL,
   `outstanding_loan_balance_derived` decimal(19,6) DEFAULT NULL,
   `submitted_on_date` date NOT NULL,
-  `manually_adjusted_or_reversed` tinyint(1) DEFAULT '0',
+  `manually_adjusted_or_reversed` tinyint DEFAULT '0',
   `created_date` datetime DEFAULT NULL,
-  `appuser_id` bigint(20) DEFAULT NULL,
+  `appuser_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `external_id_UNIQUE` (`external_id`),
   KEY `FKCFCEA42640BE0710` (`loan_id`),
@@ -2842,7 +2842,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
   CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FK_m_loan_transaction_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
   CONSTRAINT `FK_m_loan_transaction_m_payment_detail` FOREIGN KEY (`payment_detail_id`) REFERENCES `m_payment_detail` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_transaction` DISABLE KEYS */;
@@ -2852,9 +2852,9 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
 -- Dumping structure for table fineract_default.m_loan_transaction_repayment_schedule_mapping
 DROP TABLE IF EXISTS `m_loan_transaction_repayment_schedule_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_transaction_id` bigint(20) NOT NULL,
-  `loan_repayment_schedule_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_transaction_id` BIGINT NOT NULL,
+  `loan_repayment_schedule_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `principal_portion_derived` decimal(19,6) DEFAULT NULL,
   `interest_portion_derived` decimal(19,6) DEFAULT NULL,
@@ -2865,7 +2865,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
   KEY `FK_mappings_m_loan_repayment_schedule` (`loan_repayment_schedule_id`),
   CONSTRAINT `FK_mappings_m_loan_repayment_schedule` FOREIGN KEY (`loan_repayment_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`),
   CONSTRAINT `FK_mappings_m_loan_transaction` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_loan_transaction_repayment_schedule_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_transaction_repayment_schedule_mapping` DISABLE KEYS */;
@@ -2875,25 +2875,25 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
 -- Dumping structure for table fineract_default.m_mandatory_savings_schedule
 DROP TABLE IF EXISTS `m_mandatory_savings_schedule`;
 CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL,
   `fromdate` date DEFAULT NULL,
   `duedate` date NOT NULL,
-  `installment` smallint(5) NOT NULL,
+  `installment` SMALLINT NOT NULL,
   `deposit_amount` decimal(19,6) DEFAULT NULL,
   `deposit_amount_completed_derived` decimal(19,6) DEFAULT NULL,
   `total_paid_in_advance_derived` decimal(19,6) DEFAULT NULL,
   `total_paid_late_derived` decimal(19,6) DEFAULT NULL,
   `completed_derived` bit(1) NOT NULL,
   `obligations_met_on_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKMSS0000000001` (`savings_account_id`),
   CONSTRAINT `FKMSS0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_mandatory_savings_schedule: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_mandatory_savings_schedule` DISABLE KEYS */;
@@ -2903,8 +2903,8 @@ CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
 -- Dumping structure for table fineract_default.m_meeting
 DROP TABLE IF EXISTS `m_meeting`;
 CREATE TABLE IF NOT EXISTS `m_meeting` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `calendar_instance_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `calendar_instance_id` BIGINT NOT NULL,
   `meeting_date` date NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_calendar_instance_id_meeting_date` (`calendar_instance_id`,`meeting_date`),
@@ -2919,20 +2919,20 @@ CREATE TABLE IF NOT EXISTS `m_meeting` (
 -- Dumping structure for table fineract_default.m_note
 DROP TABLE IF EXISTS `m_note`;
 CREATE TABLE IF NOT EXISTS `m_note` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `loan_id` bigint(20) DEFAULT NULL,
-  `loan_transaction_id` bigint(20) DEFAULT NULL,
-  `savings_account_id` bigint(20) DEFAULT NULL,
-  `savings_account_transaction_id` bigint(20) DEFAULT NULL,
-  `share_account_id` bigint(20) DEFAULT NULL,
-  `note_type_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `client_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `loan_id` BIGINT DEFAULT NULL,
+  `loan_transaction_id` BIGINT DEFAULT NULL,
+  `savings_account_id` BIGINT DEFAULT NULL,
+  `savings_account_transaction_id` BIGINT DEFAULT NULL,
+  `share_account_id` BIGINT DEFAULT NULL,
+  `note_type_enum` SMALLINT NOT NULL,
   `note` varchar(1000) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK7C9708924D26803` (`loan_transaction_id`),
   KEY `FK7C97089541F0A56` (`createdby_id`),
@@ -2948,7 +2948,7 @@ CREATE TABLE IF NOT EXISTS `m_note` (
   CONSTRAINT `FK7C970898F889C3F` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_note_m_group` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FK_savings_account_id` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_note: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_note` DISABLE KEYS */;
@@ -2958,8 +2958,8 @@ CREATE TABLE IF NOT EXISTS `m_note` (
 -- Dumping structure for table fineract_default.m_office
 DROP TABLE IF EXISTS `m_office`;
 CREATE TABLE IF NOT EXISTS `m_office` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `parent_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `parent_id` BIGINT DEFAULT NULL,
   `hierarchy` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
@@ -2969,7 +2969,7 @@ CREATE TABLE IF NOT EXISTS `m_office` (
   UNIQUE KEY `externalid_org` (`external_id`),
   KEY `FK2291C477E2551DCC` (`parent_id`),
   CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_office: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_office` DISABLE KEYS */;
@@ -2981,11 +2981,11 @@ INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `
 -- Dumping structure for table fineract_default.m_office_transaction
 DROP TABLE IF EXISTS `m_office_transaction`;
 CREATE TABLE IF NOT EXISTS `m_office_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `from_office_id` bigint(20) DEFAULT NULL,
-  `to_office_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `from_office_id` BIGINT DEFAULT NULL,
+  `to_office_id` BIGINT DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` int(11) NOT NULL,
+  `currency_digits` INT NOT NULL,
   `transaction_amount` decimal(19,6) NOT NULL,
   `transaction_date` date NOT NULL,
   `description` varchar(100) DEFAULT NULL,
@@ -2994,7 +2994,7 @@ CREATE TABLE IF NOT EXISTS `m_office_transaction` (
   KEY `FK1E37728B783C5C25` (`from_office_id`),
   CONSTRAINT `FK1E37728B783C5C25` FOREIGN KEY (`from_office_id`) REFERENCES `m_office` (`id`),
   CONSTRAINT `FK1E37728B93C6C1B6` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_office_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_office_transaction` DISABLE KEYS */;
@@ -3004,15 +3004,15 @@ CREATE TABLE IF NOT EXISTS `m_office_transaction` (
 -- Dumping structure for table fineract_default.m_organisation_currency
 DROP TABLE IF EXISTS `m_organisation_currency`;
 CREATE TABLE IF NOT EXISTS `m_organisation_currency` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
-  `decimal_places` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `decimal_places` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_organisation_currency: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
@@ -3024,13 +3024,13 @@ INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `currency
 -- Dumping structure for table fineract_default.m_password_validation_policy
 DROP TABLE IF EXISTS `m_password_validation_policy`;
 CREATE TABLE IF NOT EXISTS `m_password_validation_policy` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `regex` text NOT NULL,
   `description` text NOT NULL,
-  `active` tinyint(4) NOT NULL DEFAULT '0',
+  `active` TINYINT NOT NULL DEFAULT '0',
   `key` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_password_validation_policy: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_password_validation_policy` DISABLE KEYS */;
@@ -3043,8 +3043,8 @@ INSERT INTO `m_password_validation_policy` (`id`, `regex`, `description`, `activ
 -- Dumping structure for table fineract_default.m_payment_detail
 DROP TABLE IF EXISTS `m_payment_detail`;
 CREATE TABLE IF NOT EXISTS `m_payment_detail` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `payment_type_id` int(11) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `payment_type_id` INT DEFAULT NULL,
   `account_number` varchar(100) DEFAULT NULL,
   `check_number` varchar(100) DEFAULT NULL,
   `receipt_number` varchar(100) DEFAULT NULL,
@@ -3053,7 +3053,7 @@ CREATE TABLE IF NOT EXISTS `m_payment_detail` (
   PRIMARY KEY (`id`),
   KEY `FK_m_payment_detail_m_payment_type` (`payment_type_id`),
   CONSTRAINT `FK_m_payment_detail_m_payment_type` FOREIGN KEY (`payment_type_id`) REFERENCES `m_payment_type` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_payment_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_payment_detail` DISABLE KEYS */;
@@ -3063,13 +3063,13 @@ CREATE TABLE IF NOT EXISTS `m_payment_detail` (
 -- Dumping structure for table fineract_default.m_payment_type
 DROP TABLE IF EXISTS `m_payment_type`;
 CREATE TABLE IF NOT EXISTS `m_payment_type` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `value` varchar(100) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `is_cash_payment` tinyint(1) DEFAULT '0',
-  `order_position` int(11) NOT NULL DEFAULT '0',
+  `is_cash_payment` tinyint DEFAULT '0',
+  `order_position` INT NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_payment_type: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_payment_type` DISABLE KEYS */;
@@ -3079,15 +3079,15 @@ CREATE TABLE IF NOT EXISTS `m_payment_type` (
 -- Dumping structure for table fineract_default.m_permission
 DROP TABLE IF EXISTS `m_permission`;
 CREATE TABLE IF NOT EXISTS `m_permission` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `grouping` varchar(45) DEFAULT NULL,
   `code` varchar(100) NOT NULL,
   `entity_name` varchar(100) DEFAULT NULL,
   `action_name` varchar(100) DEFAULT NULL,
-  `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
+  `can_maker_checker` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=767 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=767 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_permission: ~744 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
@@ -3842,13 +3842,13 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 -- Dumping structure for table fineract_default.m_portfolio_account_associations
 DROP TABLE IF EXISTS `m_portfolio_account_associations`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_account_id` bigint(20) DEFAULT NULL,
-  `savings_account_id` bigint(20) DEFAULT NULL,
-  `linked_loan_account_id` bigint(20) DEFAULT NULL,
-  `linked_savings_account_id` bigint(20) DEFAULT NULL,
-  `association_type_enum` smallint(1) NOT NULL DEFAULT '1',
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_account_id` BIGINT DEFAULT NULL,
+  `savings_account_id` BIGINT DEFAULT NULL,
+  `linked_loan_account_id` BIGINT DEFAULT NULL,
+  `linked_savings_account_id` BIGINT DEFAULT NULL,
+  `association_type_enum` SMALLINT NOT NULL DEFAULT '1',
+  `is_active` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `account_association_loan_fk` (`loan_account_id`),
   KEY `account_association_savings_fk` (`savings_account_id`),
@@ -3858,7 +3858,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
   CONSTRAINT `account_association_savings_fk` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`),
   CONSTRAINT `linked_loan_fk` FOREIGN KEY (`linked_loan_account_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `linked_savings_fk` FOREIGN KEY (`linked_savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_portfolio_account_associations: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_account_associations` DISABLE KEYS */;
@@ -3868,24 +3868,24 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
 -- Dumping structure for table fineract_default.m_portfolio_command_source
 DROP TABLE IF EXISTS `m_portfolio_command_source`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `action_name` varchar(50) NOT NULL,
   `entity_name` varchar(50) NOT NULL,
-  `office_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `loan_id` bigint(20) DEFAULT NULL,
-  `savings_account_id` bigint(20) DEFAULT NULL,
+  `office_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `client_id` BIGINT DEFAULT NULL,
+  `loan_id` BIGINT DEFAULT NULL,
+  `savings_account_id` BIGINT DEFAULT NULL,
   `api_get_url` varchar(100) NOT NULL,
-  `resource_id` bigint(20) DEFAULT NULL,
-  `subresource_id` bigint(20) DEFAULT NULL,
+  `resource_id` BIGINT DEFAULT NULL,
+  `subresource_id` BIGINT DEFAULT NULL,
   `command_as_json` text NOT NULL,
-  `maker_id` bigint(20) NOT NULL,
+  `maker_id` BIGINT NOT NULL,
   `made_on_date` datetime NOT NULL,
-  `checker_id` bigint(20) DEFAULT NULL,
+  `checker_id` BIGINT DEFAULT NULL,
   `checked_on_date` datetime DEFAULT NULL,
-  `processing_result_enum` smallint(5) NOT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
+  `processing_result_enum` SMALLINT NOT NULL,
+  `product_id` BIGINT DEFAULT NULL,
   `transaction_id` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_maker_m_appuser` (`maker_id`),
@@ -3901,7 +3901,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_portfolio_command_source: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
@@ -3911,61 +3911,61 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
 -- Dumping structure for table fineract_default.m_product_loan
 DROP TABLE IF EXISTS `m_product_loan`;
 CREATE TABLE IF NOT EXISTS `m_product_loan` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `short_name` varchar(4) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `principal_amount` decimal(19,6) DEFAULT NULL,
   `min_principal_amount` decimal(19,6) DEFAULT NULL,
   `max_principal_amount` decimal(19,6) DEFAULT NULL,
   `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
-  `fund_id` bigint(20) DEFAULT NULL,
+  `fund_id` BIGINT DEFAULT NULL,
   `is_linked_to_floating_interest_rates` bit(1) NOT NULL DEFAULT b'0',
   `allow_variabe_installments` bit(1) NOT NULL DEFAULT b'0',
   `nominal_interest_rate_per_period` decimal(19,6) DEFAULT NULL,
   `min_nominal_interest_rate_per_period` decimal(19,6) DEFAULT NULL,
   `max_nominal_interest_rate_per_period` decimal(19,6) DEFAULT NULL,
-  `interest_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `interest_period_frequency_enum` SMALLINT DEFAULT NULL,
   `annual_nominal_interest_rate` decimal(19,6) DEFAULT NULL,
-  `interest_method_enum` smallint(5) NOT NULL,
-  `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
-  `allow_partial_period_interest_calcualtion` tinyint(1) NOT NULL DEFAULT '0',
-  `repay_every` smallint(5) NOT NULL,
-  `repayment_period_frequency_enum` smallint(5) NOT NULL,
-  `number_of_repayments` smallint(5) NOT NULL,
-  `min_number_of_repayments` smallint(5) DEFAULT NULL,
-  `max_number_of_repayments` smallint(5) DEFAULT NULL,
-  `grace_on_principal_periods` smallint(5) DEFAULT NULL,
-  `recurring_moratorium_principal_periods` smallint(5) DEFAULT NULL,
-  `grace_on_interest_periods` smallint(5) DEFAULT NULL,
-  `grace_interest_free_periods` smallint(5) DEFAULT NULL,
-  `amortization_method_enum` smallint(5) NOT NULL,
-  `accounting_type` smallint(5) NOT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
+  `interest_method_enum` SMALLINT NOT NULL,
+  `interest_calculated_in_period_enum` SMALLINT NOT NULL DEFAULT '1',
+  `allow_partial_period_interest_calcualtion` tinyint NOT NULL DEFAULT '0',
+  `repay_every` SMALLINT NOT NULL,
+  `repayment_period_frequency_enum` SMALLINT NOT NULL,
+  `number_of_repayments` SMALLINT NOT NULL,
+  `min_number_of_repayments` SMALLINT DEFAULT NULL,
+  `max_number_of_repayments` SMALLINT DEFAULT NULL,
+  `grace_on_principal_periods` SMALLINT DEFAULT NULL,
+  `recurring_moratorium_principal_periods` SMALLINT DEFAULT NULL,
+  `grace_on_interest_periods` SMALLINT DEFAULT NULL,
+  `grace_interest_free_periods` SMALLINT DEFAULT NULL,
+  `amortization_method_enum` SMALLINT NOT NULL,
+  `accounting_type` SMALLINT NOT NULL,
+  `loan_transaction_strategy_id` BIGINT DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `include_in_borrower_cycle` tinyint(1) NOT NULL DEFAULT '0',
-  `use_borrower_cycle` tinyint(1) NOT NULL DEFAULT '0',
+  `include_in_borrower_cycle` tinyint NOT NULL DEFAULT '0',
+  `use_borrower_cycle` tinyint NOT NULL DEFAULT '0',
   `start_date` date DEFAULT NULL,
   `close_date` date DEFAULT NULL,
-  `allow_multiple_disbursals` tinyint(1) NOT NULL DEFAULT '0',
-  `max_disbursals` int(2) DEFAULT NULL,
+  `allow_multiple_disbursals` tinyint NOT NULL DEFAULT '0',
+  `max_disbursals` INT DEFAULT NULL,
   `max_outstanding_loan_balance` decimal(19,6) DEFAULT NULL,
-  `grace_on_arrears_ageing` smallint(5) DEFAULT NULL,
-  `overdue_days_for_npa` smallint(5) DEFAULT NULL,
-  `days_in_month_enum` smallint(5) NOT NULL DEFAULT '1',
-  `days_in_year_enum` smallint(5) NOT NULL DEFAULT '1',
-  `interest_recalculation_enabled` tinyint(4) NOT NULL DEFAULT '0',
-  `min_days_between_disbursal_and_first_repayment` int(3) DEFAULT NULL,
-  `hold_guarantee_funds` tinyint(1) NOT NULL DEFAULT '0',
+  `grace_on_arrears_ageing` SMALLINT DEFAULT NULL,
+  `overdue_days_for_npa` SMALLINT DEFAULT NULL,
+  `days_in_month_enum` SMALLINT NOT NULL DEFAULT '1',
+  `days_in_year_enum` SMALLINT NOT NULL DEFAULT '1',
+  `interest_recalculation_enabled` TINYINT NOT NULL DEFAULT '0',
+  `min_days_between_disbursal_and_first_repayment` INT DEFAULT NULL,
+  `hold_guarantee_funds` tinyint NOT NULL DEFAULT '0',
   `principal_threshold_for_last_installment` decimal(5,2) NOT NULL DEFAULT '50.00',
-  `account_moves_out_of_npa_only_on_arrears_completion` tinyint(1) NOT NULL DEFAULT '0',
-  `can_define_fixed_emi_amount` tinyint(1) NOT NULL DEFAULT '0',
+  `account_moves_out_of_npa_only_on_arrears_completion` tinyint NOT NULL DEFAULT '0',
+  `can_define_fixed_emi_amount` tinyint NOT NULL DEFAULT '0',
   `instalment_amount_in_multiples_of` decimal(19,6) DEFAULT NULL,
-  `can_use_for_topup` tinyint(1) NOT NULL DEFAULT '0',
-  `sync_expected_with_disbursement_date` tinyint(4) DEFAULT '0',
+  `can_use_for_topup` tinyint NOT NULL DEFAULT '0',
+  `sync_expected_with_disbursement_date` TINYINT DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_name` (`name`),
   UNIQUE KEY `unq_short_name` (`short_name`),
@@ -3974,7 +3974,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan` (
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
@@ -3984,13 +3984,13 @@ CREATE TABLE IF NOT EXISTS `m_product_loan` (
 -- Dumping structure for table fineract_default.m_product_loan_charge
 DROP TABLE IF EXISTS `m_product_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
-  `product_loan_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
+  `product_loan_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
   PRIMARY KEY (`product_loan_id`,`charge_id`),
   KEY `charge_id` (`charge_id`),
   CONSTRAINT `m_product_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_charge` DISABLE KEYS */;
@@ -4000,20 +4000,20 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
 -- Dumping structure for table fineract_default.m_product_loan_configurable_attributes
 DROP TABLE IF EXISTS `m_product_loan_configurable_attributes`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_product_id` bigint(20) NOT NULL,
-  `amortization_method_enum` tinyint(4) NOT NULL DEFAULT '1',
-  `interest_method_enum` tinyint(4) NOT NULL DEFAULT '1',
-  `loan_transaction_strategy_id` tinyint(4) NOT NULL DEFAULT '1',
-  `interest_calculated_in_period_enum` tinyint(4) NOT NULL DEFAULT '1',
-  `arrearstolerance_amount` tinyint(4) NOT NULL DEFAULT '1',
-  `repay_every` tinyint(4) NOT NULL DEFAULT '1',
-  `moratorium` tinyint(4) NOT NULL DEFAULT '1',
-  `grace_on_arrears_ageing` tinyint(4) NOT NULL DEFAULT '1',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_product_id` BIGINT NOT NULL,
+  `amortization_method_enum` TINYINT NOT NULL DEFAULT '1',
+  `interest_method_enum` TINYINT NOT NULL DEFAULT '1',
+  `loan_transaction_strategy_id` TINYINT NOT NULL DEFAULT '1',
+  `interest_calculated_in_period_enum` TINYINT NOT NULL DEFAULT '1',
+  `arrearstolerance_amount` TINYINT NOT NULL DEFAULT '1',
+  `repay_every` TINYINT NOT NULL DEFAULT '1',
+  `moratorium` TINYINT NOT NULL DEFAULT '1',
+  `grace_on_arrears_ageing` TINYINT NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `fk_m_product_loan_configurable_attributes_0001` (`loan_product_id`),
   CONSTRAINT `fk_m_product_loan_configurable_attributes_0001` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan_configurable_attributes: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_configurable_attributes` DISABLE KEYS */;
@@ -4023,9 +4023,9 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
 -- Dumping structure for table fineract_default.m_product_loan_floating_rates
 DROP TABLE IF EXISTS `m_product_loan_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_product_id` bigint(20) NOT NULL,
-  `floating_rates_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_product_id` BIGINT NOT NULL,
+  `floating_rates_id` BIGINT NOT NULL,
   `interest_rate_differential` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `min_differential_lending_rate` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `default_differential_lending_rate` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -4036,7 +4036,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
   KEY `FK_mappings_m_floating_rates_id` (`floating_rates_id`),
   CONSTRAINT `FK_mappings_m_floating_rates_id` FOREIGN KEY (`floating_rates_id`) REFERENCES `m_floating_rates` (`id`),
   CONSTRAINT `FK_mappings_m_product_loan_id` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan_floating_rates: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_floating_rates` DISABLE KEYS */;
@@ -4046,15 +4046,15 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
 -- Dumping structure for table fineract_default.m_product_loan_guarantee_details
 DROP TABLE IF EXISTS `m_product_loan_guarantee_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_product_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_product_id` BIGINT NOT NULL,
   `mandatory_guarantee` decimal(19,5) NOT NULL,
   `minimum_guarantee_from_own_funds` decimal(19,5) DEFAULT NULL,
   `minimum_guarantee_from_guarantor_funds` decimal(19,5) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_guarantee_details_loan_product` (`loan_product_id`),
   CONSTRAINT `FK_guarantee_details_loan_product` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan_guarantee_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_guarantee_details` DISABLE KEYS */;
@@ -4064,24 +4064,24 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
 -- Dumping structure for table fineract_default.m_product_loan_recalculation_details
 DROP TABLE IF EXISTS `m_product_loan_recalculation_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
-  `compound_type_enum` smallint(5) NOT NULL,
-  `reschedule_strategy_enum` smallint(5) NOT NULL,
-  `rest_frequency_type_enum` smallint(1) NOT NULL,
-  `rest_frequency_interval` smallint(3) NOT NULL DEFAULT '0',
-  `arrears_based_on_original_schedule` tinyint(1) NOT NULL DEFAULT '0',
-  `pre_close_interest_calculation_strategy` smallint(3) NOT NULL DEFAULT '1',
-  `compounding_frequency_type_enum` smallint(1) DEFAULT NULL,
-  `compounding_frequency_interval` smallint(3) DEFAULT NULL,
-  `rest_frequency_nth_day_enum` int(5) DEFAULT NULL,
-  `rest_frequency_on_day` int(5) DEFAULT NULL,
-  `rest_frequency_weekday_enum` int(5) DEFAULT NULL,
-  `compounding_frequency_nth_day_enum` int(5) DEFAULT NULL,
-  `compounding_frequency_on_day` int(5) DEFAULT NULL,
-  `compounding_frequency_weekday_enum` int(5) DEFAULT NULL,
-  `is_compounding_to_be_posted_as_transaction` tinyint(1) NOT NULL DEFAULT '0',
-  `allow_compounding_on_eod` tinyint(1) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `product_id` BIGINT NOT NULL,
+  `compound_type_enum` SMALLINT NOT NULL,
+  `reschedule_strategy_enum` SMALLINT NOT NULL,
+  `rest_frequency_type_enum` SMALLINT NOT NULL,
+  `rest_frequency_interval` SMALLINT NOT NULL DEFAULT '0',
+  `arrears_based_on_original_schedule` tinyint NOT NULL DEFAULT '0',
+  `pre_close_interest_calculation_strategy` SMALLINT NOT NULL DEFAULT '1',
+  `compounding_frequency_type_enum` SMALLINT DEFAULT NULL,
+  `compounding_frequency_interval` SMALLINT DEFAULT NULL,
+  `rest_frequency_nth_day_enum` INT DEFAULT NULL,
+  `rest_frequency_on_day` INT DEFAULT NULL,
+  `rest_frequency_weekday_enum` INT DEFAULT NULL,
+  `compounding_frequency_nth_day_enum` INT DEFAULT NULL,
+  `compounding_frequency_on_day` INT DEFAULT NULL,
+  `compounding_frequency_weekday_enum` INT DEFAULT NULL,
+  `is_compounding_to_be_posted_as_transaction` tinyint NOT NULL DEFAULT '0',
+  `allow_compounding_on_eod` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FK_m_product_loan_m_product_loan_recalculation_details` (`product_id`),
   CONSTRAINT `FK_m_product_loan_m_product_loan_recalculation_details` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`)
@@ -4095,14 +4095,14 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
 -- Dumping structure for table fineract_default.m_product_loan_variable_installment_config
 DROP TABLE IF EXISTS `m_product_loan_variable_installment_config`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_product_id` bigint(20) NOT NULL,
-  `minimum_gap` int(4) NOT NULL,
-  `maximum_gap` int(4) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_product_id` BIGINT NOT NULL,
+  `minimum_gap` INT NOT NULL,
+  `maximum_gap` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_mappings_m_variable_product_loan_id` (`loan_product_id`),
   CONSTRAINT `FK_mappings_m_variable_product_loan_id` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan_variable_installment_config: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_variable_installment_config` DISABLE KEYS */;
@@ -4112,18 +4112,18 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
 -- Dumping structure for table fineract_default.m_product_loan_variations_borrower_cycle
 DROP TABLE IF EXISTS `m_product_loan_variations_borrower_cycle`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `loan_product_id` bigint(20) NOT NULL DEFAULT '0',
-  `borrower_cycle_number` int(3) NOT NULL DEFAULT '0',
-  `value_condition` int(1) NOT NULL DEFAULT '0',
-  `param_type` int(1) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `loan_product_id` BIGINT NOT NULL DEFAULT '0',
+  `borrower_cycle_number` INT NOT NULL DEFAULT '0',
+  `value_condition` INT NOT NULL DEFAULT '0',
+  `param_type` INT NOT NULL DEFAULT '0',
   `default_value` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `max_value` decimal(19,6) DEFAULT NULL,
   `min_value` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `borrower_cycle_loan_product_FK` (`loan_product_id`),
   CONSTRAINT `borrower_cycle_loan_product_FK` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_loan_variations_borrower_cycle: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_variations_borrower_cycle` DISABLE KEYS */;
@@ -4133,15 +4133,15 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
 -- Dumping structure for table fineract_default.m_product_mix
 DROP TABLE IF EXISTS `m_product_mix`;
 CREATE TABLE IF NOT EXISTS `m_product_mix` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
-  `restricted_product_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `product_id` BIGINT NOT NULL,
+  `restricted_product_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_product_mix_product_id_to_m_product_loan` (`product_id`),
   KEY `FK_m_product_mix_restricted_product_id_to_m_product_loan` (`restricted_product_id`),
   CONSTRAINT `FK_m_product_mix_product_id_to_m_product_loan` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
   CONSTRAINT `FK_m_product_mix_restricted_product_id_to_m_product_loan` FOREIGN KEY (`restricted_product_id`) REFERENCES `m_product_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_product_mix: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_mix` DISABLE KEYS */;
@@ -4151,11 +4151,11 @@ CREATE TABLE IF NOT EXISTS `m_product_mix` (
 -- Dumping structure for table fineract_default.m_provisioning_criteria
 DROP TABLE IF EXISTS `m_provisioning_criteria`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `criteria_name` varchar(200) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `criteria_name` (`criteria_name`),
@@ -4163,7 +4163,7 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
   KEY `lastmodifiedby_id` (`lastmodifiedby_id`),
   CONSTRAINT `m_provisioning_criteria_ibfk_1` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_provisioning_criteria_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_provisioning_criteria: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_criteria` DISABLE KEYS */;
@@ -4173,14 +4173,14 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
 -- Dumping structure for table fineract_default.m_provisioning_criteria_definition
 DROP TABLE IF EXISTS `m_provisioning_criteria_definition`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `criteria_id` bigint(20) NOT NULL,
-  `category_id` bigint(20) NOT NULL,
-  `min_age` bigint(20) NOT NULL,
-  `max_age` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `criteria_id` BIGINT NOT NULL,
+  `category_id` BIGINT NOT NULL,
+  `min_age` BIGINT NOT NULL,
+  `max_age` BIGINT NOT NULL,
   `provision_percentage` decimal(5,2) NOT NULL,
-  `liability_account` bigint(20) DEFAULT NULL,
-  `expense_account` bigint(20) DEFAULT NULL,
+  `liability_account` BIGINT DEFAULT NULL,
+  `expense_account` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `criteria_id` (`criteria_id`),
   KEY `category_id` (`category_id`),
@@ -4190,7 +4190,7 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
   CONSTRAINT `m_provisioning_criteria_definition_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `m_provision_category` (`id`),
   CONSTRAINT `m_provisioning_criteria_definition_ibfk_3` FOREIGN KEY (`liability_account`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `m_provisioning_criteria_definition_ibfk_4` FOREIGN KEY (`expense_account`) REFERENCES `acc_gl_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_provisioning_criteria_definition: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_criteria_definition` DISABLE KEYS */;
@@ -4200,18 +4200,18 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
 -- Dumping structure for table fineract_default.m_provisioning_history
 DROP TABLE IF EXISTS `m_provisioning_history`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `journal_entry_created` bit(1) DEFAULT b'0',
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` date DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `createdby_id` (`createdby_id`),
   KEY `lastmodifiedby_id` (`lastmodifiedby_id`),
   CONSTRAINT `m_provisioning_history_ibfk_1` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_provisioning_history_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_provisioning_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_history` DISABLE KEYS */;
@@ -4221,12 +4221,12 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
 -- Dumping structure for table fineract_default.m_provision_category
 DROP TABLE IF EXISTS `m_provision_category`;
 CREATE TABLE IF NOT EXISTS `m_provision_category` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `category_name` varchar(100) NOT NULL,
   `description` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `category_name` (`category_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_provision_category: ~4 rows (approximately)
 /*!40000 ALTER TABLE `m_provision_category` DISABLE KEYS */;
@@ -4241,30 +4241,30 @@ INSERT INTO `m_provision_category` (`id`, `category_name`, `description`) VALUES
 -- Dumping structure for table fineract_default.m_report_mailing_job
 DROP TABLE IF EXISTS `m_report_mailing_job`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` text,
   `start_datetime` datetime NOT NULL,
   `recurrence` varchar(100) DEFAULT NULL,
   `created_date` date NOT NULL,
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `lastmodified_date` date DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `email_recipients` text NOT NULL,
   `email_subject` varchar(100) NOT NULL,
   `email_message` text NOT NULL,
   `email_attachment_file_format` varchar(10) NOT NULL,
-  `stretchy_report_id` int(11) NOT NULL,
+  `stretchy_report_id` INT NOT NULL,
   `stretchy_report_param_map` text,
   `previous_run_datetime` datetime DEFAULT NULL,
   `next_run_datetime` datetime DEFAULT NULL,
   `previous_run_status` varchar(10) DEFAULT NULL,
   `previous_run_error_log` text,
   `previous_run_error_message` text,
-  `number_of_runs` int(11) NOT NULL DEFAULT '0',
-  `is_active` tinyint(1) NOT NULL DEFAULT '0',
-  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `run_as_userid` bigint(20) NOT NULL,
+  `number_of_runs` INT NOT NULL DEFAULT '0',
+  `is_active` tinyint NOT NULL DEFAULT '0',
+  `is_deleted` tinyint NOT NULL DEFAULT '0',
+  `run_as_userid` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name` (`name`),
   KEY `createdby_id` (`createdby_id`),
@@ -4275,7 +4275,7 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job` (
   CONSTRAINT `m_report_mailing_job_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_report_mailing_job_ibfk_3` FOREIGN KEY (`stretchy_report_id`) REFERENCES `stretchy_report` (`id`),
   CONSTRAINT `m_report_mailing_job_ibfk_4` FOREIGN KEY (`run_as_userid`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_report_mailing_job: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job` DISABLE KEYS */;
@@ -4285,12 +4285,12 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job` (
 -- Dumping structure for table fineract_default.m_report_mailing_job_configuration
 DROP TABLE IF EXISTS `m_report_mailing_job_configuration`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job_configuration` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `value` varchar(200) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_report_mailing_job_configuration: ~4 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job_configuration` DISABLE KEYS */;
@@ -4305,8 +4305,8 @@ INSERT INTO `m_report_mailing_job_configuration` (`id`, `name`, `value`) VALUES
 -- Dumping structure for table fineract_default.m_report_mailing_job_run_history
 DROP TABLE IF EXISTS `m_report_mailing_job_run_history`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job_run_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `job_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `job_id` BIGINT NOT NULL,
   `start_datetime` datetime NOT NULL,
   `end_datetime` datetime NOT NULL,
   `status` varchar(10) NOT NULL,
@@ -4315,7 +4315,7 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job_run_history` (
   PRIMARY KEY (`id`),
   KEY `job_id` (`job_id`),
   CONSTRAINT `m_report_mailing_job_run_history_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `m_report_mailing_job` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_report_mailing_job_run_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job_run_history` DISABLE KEYS */;
@@ -4325,13 +4325,13 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job_run_history` (
 -- Dumping structure for table fineract_default.m_role
 DROP TABLE IF EXISTS `m_role`;
 CREATE TABLE IF NOT EXISTS `m_role` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
-  `is_disabled` tinyint(1) NOT NULL DEFAULT '0',
+  `is_disabled` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_role: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_role` DISABLE KEYS */;
@@ -4343,14 +4343,14 @@ INSERT INTO `m_role` (`id`, `name`, `description`, `is_disabled`) VALUES
 -- Dumping structure for table fineract_default.m_role_permission
 DROP TABLE IF EXISTS `m_role_permission`;
 CREATE TABLE IF NOT EXISTS `m_role_permission` (
-  `role_id` bigint(20) NOT NULL,
-  `permission_id` bigint(20) NOT NULL,
+  `role_id` BIGINT NOT NULL,
+  `permission_id` BIGINT NOT NULL,
   PRIMARY KEY (`role_id`,`permission_id`),
   KEY `FK8DEDB04815CEC7AB` (`role_id`),
   KEY `FK8DEDB048103B544B` (`permission_id`),
   CONSTRAINT `FK8DEDB048103B544B` FOREIGN KEY (`permission_id`) REFERENCES `m_permission` (`id`),
   CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_role_permission: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_role_permission` DISABLE KEYS */;
@@ -4362,42 +4362,42 @@ INSERT INTO `m_role_permission` (`role_id`, `permission_id`) VALUES
 -- Dumping structure for table fineract_default.m_savings_account
 DROP TABLE IF EXISTS `m_savings_account`;
 CREATE TABLE IF NOT EXISTS `m_savings_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `group_id` bigint(20) DEFAULT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
-  `field_officer_id` bigint(20) DEFAULT NULL,
-  `status_enum` smallint(5) NOT NULL DEFAULT '300',
-  `sub_status_enum` smallint(5) NOT NULL DEFAULT '0',
-  `account_type_enum` smallint(5) NOT NULL DEFAULT '1',
-  `deposit_type_enum` smallint(5) NOT NULL DEFAULT '100',
+  `client_id` BIGINT DEFAULT NULL,
+  `group_id` BIGINT DEFAULT NULL,
+  `product_id` BIGINT DEFAULT NULL,
+  `field_officer_id` BIGINT DEFAULT NULL,
+  `status_enum` SMALLINT NOT NULL DEFAULT '300',
+  `sub_status_enum` SMALLINT NOT NULL DEFAULT '0',
+  `account_type_enum` SMALLINT NOT NULL DEFAULT '1',
+  `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100',
   `submittedon_date` date NOT NULL,
-  `submittedon_userid` bigint(20) DEFAULT NULL,
+  `submittedon_userid` BIGINT DEFAULT NULL,
   `approvedon_date` date DEFAULT NULL,
-  `approvedon_userid` bigint(20) DEFAULT NULL,
+  `approvedon_userid` BIGINT DEFAULT NULL,
   `rejectedon_date` date DEFAULT NULL,
-  `rejectedon_userid` bigint(20) DEFAULT NULL,
+  `rejectedon_userid` BIGINT DEFAULT NULL,
   `withdrawnon_date` date DEFAULT NULL,
-  `withdrawnon_userid` bigint(20) DEFAULT NULL,
+  `withdrawnon_userid` BIGINT DEFAULT NULL,
   `activatedon_date` date DEFAULT NULL,
-  `activatedon_userid` bigint(20) DEFAULT NULL,
+  `activatedon_userid` BIGINT DEFAULT NULL,
   `closedon_date` date DEFAULT NULL,
-  `closedon_userid` bigint(20) DEFAULT NULL,
+  `closedon_userid` BIGINT DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `nominal_annual_interest_rate` decimal(19,6) NOT NULL,
-  `interest_compounding_period_enum` smallint(5) NOT NULL,
-  `interest_posting_period_enum` smallint(5) NOT NULL DEFAULT '4',
-  `interest_calculation_type_enum` smallint(5) NOT NULL,
-  `interest_calculation_days_in_year_type_enum` smallint(5) NOT NULL,
+  `interest_compounding_period_enum` SMALLINT NOT NULL,
+  `interest_posting_period_enum` SMALLINT NOT NULL DEFAULT '4',
+  `interest_calculation_type_enum` SMALLINT NOT NULL,
+  `interest_calculation_days_in_year_type_enum` SMALLINT NOT NULL,
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
-  `withdrawal_fee_for_transfer` tinyint(4) DEFAULT '1',
-  `allow_overdraft` tinyint(1) NOT NULL DEFAULT '0',
+  `lockin_period_frequency_enum` SMALLINT DEFAULT NULL,
+  `withdrawal_fee_for_transfer` TINYINT DEFAULT '1',
+  `allow_overdraft` tinyint NOT NULL DEFAULT '0',
   `overdraft_limit` decimal(19,6) DEFAULT NULL,
   `nominal_annual_interest_rate_overdraft` decimal(19,6) DEFAULT '0.000000',
   `min_overdraft_for_interest_calculation` decimal(19,6) DEFAULT '0.000000',
@@ -4414,13 +4414,13 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `total_withhold_tax_derived` decimal(19,6) DEFAULT NULL,
   `account_balance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `min_required_balance` decimal(19,6) DEFAULT NULL,
-  `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
+  `enforce_min_required_balance` tinyint NOT NULL DEFAULT '0',
   `min_balance_for_interest_calculation` decimal(19,6) DEFAULT NULL,
   `start_interest_calculation_date` date DEFAULT NULL,
   `on_hold_funds_derived` decimal(19,6) DEFAULT NULL,
-  `version` int(15) NOT NULL DEFAULT '1',
-  `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
-  `tax_group_id` bigint(20) DEFAULT NULL,
+  `version` INT NOT NULL DEFAULT '1',
+  `withhold_tax` TINYINT NOT NULL DEFAULT '0',
+  `tax_group_id` BIGINT DEFAULT NULL,
   `last_interest_calculation_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sa_account_no_UNIQUE` (`account_no`),
@@ -4433,7 +4433,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   CONSTRAINT `FKSA00000000000002` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FKSA00000000000003` FOREIGN KEY (`product_id`) REFERENCES `m_savings_product` (`id`),
   CONSTRAINT `FK_savings_account_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account` DISABLE KEYS */;
@@ -4443,16 +4443,16 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
 -- Dumping structure for table fineract_default.m_savings_account_charge
 DROP TABLE IF EXISTS `m_savings_account_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
-  `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
-  `charge_time_enum` smallint(5) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
+  `is_penalty` tinyint NOT NULL DEFAULT '0',
+  `charge_time_enum` SMALLINT NOT NULL,
   `charge_due_date` date DEFAULT NULL,
-  `fee_on_month` smallint(5) DEFAULT NULL,
-  `fee_on_day` smallint(5) DEFAULT NULL,
-  `fee_interval` smallint(5) DEFAULT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
+  `fee_on_month` SMALLINT DEFAULT NULL,
+  `fee_on_day` SMALLINT DEFAULT NULL,
+  `fee_interval` SMALLINT DEFAULT NULL,
+  `charge_calculation_enum` SMALLINT NOT NULL,
   `calculation_percentage` decimal(19,6) DEFAULT NULL,
   `calculation_on_amount` decimal(19,6) DEFAULT NULL,
   `amount` decimal(19,6) NOT NULL,
@@ -4460,16 +4460,16 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
   `amount_waived_derived` decimal(19,6) DEFAULT NULL,
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
-  `waived` tinyint(1) NOT NULL DEFAULT '0',
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_paid_derived` tinyint NOT NULL DEFAULT '0',
+  `waived` tinyint NOT NULL DEFAULT '0',
+  `is_active` tinyint NOT NULL DEFAULT '1',
   `inactivated_on_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `charge_id` (`charge_id`),
   KEY `m_savings_account_charge_ibfk_2` (`savings_account_id`),
   CONSTRAINT `m_savings_account_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_savings_account_charge_ibfk_2` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_charge` DISABLE KEYS */;
@@ -4479,16 +4479,16 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
 -- Dumping structure for table fineract_default.m_savings_account_charge_paid_by
 DROP TABLE IF EXISTS `m_savings_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_transaction_id` bigint(20) NOT NULL,
-  `savings_account_charge_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_transaction_id` BIGINT NOT NULL,
+  `savings_account_charge_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK__m_savings_account_transaction` (`savings_account_transaction_id`),
   KEY `FK__m_savings_account_charge` (`savings_account_charge_id`),
   CONSTRAINT `FK__m_savings_account_charge` FOREIGN KEY (`savings_account_charge_id`) REFERENCES `m_savings_account_charge` (`id`),
   CONSTRAINT `FK__m_savings_account_transaction` FOREIGN KEY (`savings_account_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_charge_paid_by` DISABLE KEYS */;
@@ -4498,17 +4498,17 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
 -- Dumping structure for table fineract_default.m_savings_account_interest_rate_chart
 DROP TABLE IF EXISTS `m_savings_account_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL,
   `from_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `is_primary_grouping_by_amount` tinyint(4) NOT NULL DEFAULT '0',
+  `is_primary_grouping_by_amount` TINYINT NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FKSAIRC00000000000001` (`savings_account_id`),
   CONSTRAINT `FKSAIRC00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_chart` DISABLE KEYS */;
@@ -4518,12 +4518,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
 -- Dumping structure for table fineract_default.m_savings_account_interest_rate_slab
 DROP TABLE IF EXISTS `m_savings_account_interest_rate_slab`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_interest_rate_chart_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_interest_rate_chart_id` BIGINT NOT NULL,
   `description` varchar(200) DEFAULT NULL,
-  `period_type_enum` smallint(5) DEFAULT NULL,
-  `from_period` int(11) DEFAULT NULL,
-  `to_period` int(11) DEFAULT NULL,
+  `period_type_enum` SMALLINT DEFAULT NULL,
+  `from_period` INT DEFAULT NULL,
+  `to_period` INT DEFAULT NULL,
   `amount_range_from` decimal(19,6) DEFAULT NULL,
   `amount_range_to` decimal(19,6) DEFAULT NULL,
   `annual_interest_rate` decimal(19,6) NOT NULL,
@@ -4531,7 +4531,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
   PRIMARY KEY (`id`),
   KEY `FKSAIRS00000000000001` (`savings_account_interest_rate_chart_id`),
   CONSTRAINT `FKSAIRS00000000000001` FOREIGN KEY (`savings_account_interest_rate_chart_id`) REFERENCES `m_savings_account_interest_rate_chart` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account_interest_rate_slab: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_slab` DISABLE KEYS */;
@@ -4541,22 +4541,22 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
 -- Dumping structure for table fineract_default.m_savings_account_transaction
 DROP TABLE IF EXISTS `m_savings_account_transaction`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_account_id` bigint(20) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `payment_detail_id` bigint(20) DEFAULT NULL,
-  `transaction_type_enum` smallint(5) NOT NULL,
-  `is_reversed` tinyint(1) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_account_id` BIGINT NOT NULL,
+  `office_id` BIGINT NOT NULL,
+  `payment_detail_id` BIGINT DEFAULT NULL,
+  `transaction_type_enum` SMALLINT NOT NULL,
+  `is_reversed` tinyint NOT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `overdraft_amount_derived` decimal(19,6) DEFAULT NULL,
   `balance_end_date_derived` date DEFAULT NULL,
-  `balance_number_of_days_derived` int(11) DEFAULT NULL,
+  `balance_number_of_days_derived` INT DEFAULT NULL,
   `running_balance_derived` decimal(19,6) DEFAULT NULL,
   `cumulative_balance_derived` decimal(19,6) DEFAULT NULL,
   `created_date` datetime NOT NULL,
-  `appuser_id` bigint(20) DEFAULT NULL,
-  `is_manual` tinyint(1) DEFAULT '0',
+  `appuser_id` BIGINT DEFAULT NULL,
+  `is_manual` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FKSAT0000000001` (`savings_account_id`),
   KEY `FK_m_savings_account_transaction_m_payment_detail` (`payment_detail_id`),
@@ -4564,7 +4564,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
   CONSTRAINT `FKSAT0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`),
   CONSTRAINT `FK_m_savings_account_transaction_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
   CONSTRAINT `FK_m_savings_account_transaction_m_payment_detail` FOREIGN KEY (`payment_detail_id`) REFERENCES `m_payment_detail` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_transaction` DISABLE KEYS */;
@@ -4574,16 +4574,16 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
 -- Dumping structure for table fineract_default.m_savings_account_transaction_tax_details
 DROP TABLE IF EXISTS `m_savings_account_transaction_tax_details`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `savings_transaction_id` bigint(20) NOT NULL,
-  `tax_component_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `savings_transaction_id` BIGINT NOT NULL,
+  `tax_component_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_savings_account_transaction_tax_details_savings_transaction` (`savings_transaction_id`),
   KEY `FK_savings_account_transaction_tax_details_tax_component` (`tax_component_id`),
   CONSTRAINT `FK_savings_account_transaction_tax_details_savings_transaction` FOREIGN KEY (`savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`),
   CONSTRAINT `FK_savings_account_transaction_tax_details_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_account_transaction_tax_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` DISABLE KEYS */;
@@ -4593,18 +4593,18 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
 -- Dumping structure for table fineract_default.m_savings_interest_incentives
 DROP TABLE IF EXISTS `m_savings_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `deposit_account_interest_rate_slab_id` bigint(20) NOT NULL,
-  `entiry_type` smallint(2) NOT NULL,
-  `attribute_name` smallint(2) NOT NULL,
-  `condition_type` smallint(2) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `deposit_account_interest_rate_slab_id` BIGINT NOT NULL,
+  `entiry_type` SMALLINT NOT NULL,
+  `attribute_name` SMALLINT NOT NULL,
+  `condition_type` SMALLINT NOT NULL,
   `attribute_value` varchar(50) NOT NULL,
-  `incentive_type` smallint(2) NOT NULL,
+  `incentive_type` SMALLINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_savings_interest_incentives_m_savings_interest_rate_slab` (`deposit_account_interest_rate_slab_id`),
   CONSTRAINT `FK_m_savings_interest_incentives_m_savings_interest_rate_slab` FOREIGN KEY (`deposit_account_interest_rate_slab_id`) REFERENCES `m_savings_account_interest_rate_slab` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_interest_incentives: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_interest_incentives` DISABLE KEYS */;
@@ -4614,21 +4614,21 @@ CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
 -- Dumping structure for table fineract_default.m_savings_officer_assignment_history
 DROP TABLE IF EXISTS `m_savings_officer_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_id` bigint(20) NOT NULL,
-  `savings_officer_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_id` BIGINT NOT NULL,
+  `savings_officer_id` BIGINT DEFAULT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_m_savings_officer_assignment_history_0001` (`account_id`),
   KEY `fk_m_savings_officer_assignment_history_0002` (`savings_officer_id`),
   CONSTRAINT `fk_m_savings_officer_assignment_history_0001` FOREIGN KEY (`account_id`) REFERENCES `m_savings_account` (`id`),
   CONSTRAINT `fk_m_savings_officer_assignment_history_0002` FOREIGN KEY (`savings_officer_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_officer_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_officer_assignment_history` DISABLE KEYS */;
@@ -4638,45 +4638,45 @@ CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
 -- Dumping structure for table fineract_default.m_savings_product
 DROP TABLE IF EXISTS `m_savings_product`;
 CREATE TABLE IF NOT EXISTS `m_savings_product` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `short_name` varchar(4) NOT NULL,
   `description` varchar(500) NOT NULL,
-  `deposit_type_enum` smallint(5) NOT NULL DEFAULT '100',
+  `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100',
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
   `nominal_annual_interest_rate` decimal(19,6) NOT NULL,
-  `interest_compounding_period_enum` smallint(5) NOT NULL,
-  `interest_posting_period_enum` smallint(5) NOT NULL DEFAULT '4',
-  `interest_calculation_type_enum` smallint(5) NOT NULL,
-  `interest_calculation_days_in_year_type_enum` smallint(5) NOT NULL,
+  `interest_compounding_period_enum` SMALLINT NOT NULL,
+  `interest_posting_period_enum` SMALLINT NOT NULL DEFAULT '4',
+  `interest_calculation_type_enum` SMALLINT NOT NULL,
+  `interest_calculation_days_in_year_type_enum` SMALLINT NOT NULL,
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
-  `accounting_type` smallint(5) NOT NULL,
+  `lockin_period_frequency_enum` SMALLINT DEFAULT NULL,
+  `accounting_type` SMALLINT NOT NULL,
   `withdrawal_fee_amount` decimal(19,6) DEFAULT NULL,
-  `withdrawal_fee_type_enum` smallint(5) DEFAULT NULL,
-  `withdrawal_fee_for_transfer` tinyint(4) DEFAULT '1',
-  `allow_overdraft` tinyint(1) NOT NULL DEFAULT '0',
+  `withdrawal_fee_type_enum` SMALLINT DEFAULT NULL,
+  `withdrawal_fee_for_transfer` TINYINT DEFAULT '1',
+  `allow_overdraft` tinyint NOT NULL DEFAULT '0',
   `overdraft_limit` decimal(19,6) DEFAULT NULL,
   `nominal_annual_interest_rate_overdraft` decimal(19,6) DEFAULT '0.000000',
   `min_overdraft_for_interest_calculation` decimal(19,6) DEFAULT '0.000000',
   `min_required_balance` decimal(19,6) DEFAULT NULL,
-  `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
+  `enforce_min_required_balance` tinyint NOT NULL DEFAULT '0',
   `min_balance_for_interest_calculation` decimal(19,6) DEFAULT NULL,
-  `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
-  `tax_group_id` bigint(20) DEFAULT NULL,
-  `is_dormancy_tracking_active` smallint(1) DEFAULT NULL,
-  `days_to_inactive` int(11) DEFAULT NULL,
-  `days_to_dormancy` int(11) DEFAULT NULL,
-  `days_to_escheat` int(11) DEFAULT NULL,
+  `withhold_tax` TINYINT NOT NULL DEFAULT '0',
+  `tax_group_id` BIGINT DEFAULT NULL,
+  `is_dormancy_tracking_active` SMALLINT DEFAULT NULL,
+  `days_to_inactive` INT DEFAULT NULL,
+  `days_to_dormancy` INT DEFAULT NULL,
+  `days_to_escheat` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sp_unq_name` (`name`),
   UNIQUE KEY `sp_unq_short_name` (`short_name`),
   KEY `FK_savings_product_tax_group` (`tax_group_id`),
   CONSTRAINT `FK_savings_product_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_product: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product` DISABLE KEYS */;
@@ -4686,13 +4686,13 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
 -- Dumping structure for table fineract_default.m_savings_product_charge
 DROP TABLE IF EXISTS `m_savings_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
-  `savings_product_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
+  `savings_product_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
   PRIMARY KEY (`savings_product_id`,`charge_id`),
   KEY `charge_id` (`charge_id`),
   CONSTRAINT `m_savings_product_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_savings_product_charge_ibfk_2` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_savings_product_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product_charge` DISABLE KEYS */;
@@ -4702,18 +4702,18 @@ CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
 -- Dumping structure for table fineract_default.m_selfservice_beneficiaries_tpt
 DROP TABLE IF EXISTS `m_selfservice_beneficiaries_tpt`;
 CREATE TABLE IF NOT EXISTS `m_selfservice_beneficiaries_tpt` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_user_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `app_user_id` BIGINT NOT NULL,
   `name` varchar(50) NOT NULL,
-  `office_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
-  `account_id` bigint(20) NOT NULL,
-  `account_type` smallint(4) NOT NULL,
-  `transfer_limit` bigint(20) DEFAULT '0',
+  `office_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
+  `account_id` BIGINT NOT NULL,
+  `account_type` SMALLINT NOT NULL,
+  `transfer_limit` BIGINT DEFAULT '0',
   `is_active` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`,`app_user_id`,`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_selfservice_beneficiaries_tpt: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_selfservice_beneficiaries_tpt` DISABLE KEYS */;
@@ -4723,15 +4723,15 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_beneficiaries_tpt` (
 -- Dumping structure for table fineract_default.m_selfservice_user_client_mapping
 DROP TABLE IF EXISTS `m_selfservice_user_client_mapping`;
 CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `appuser_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `appuser_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `appuser_id_client_id` (`appuser_id`,`client_id`),
   KEY `m_selfservice_client_id` (`client_id`),
   CONSTRAINT `m_selfservice_appuser_id` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_selfservice_client_id` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_selfservice_user_client_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` DISABLE KEYS */;
@@ -4741,35 +4741,35 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
 -- Dumping structure for table fineract_default.m_share_account
 DROP TABLE IF EXISTS `m_share_account`;
 CREATE TABLE IF NOT EXISTS `m_share_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `account_no` varchar(50) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
+  `product_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `status_enum` smallint(5) NOT NULL DEFAULT '300',
-  `total_approved_shares` bigint(20) DEFAULT NULL,
-  `total_pending_shares` bigint(20) DEFAULT NULL,
+  `status_enum` SMALLINT NOT NULL DEFAULT '300',
+  `total_approved_shares` BIGINT DEFAULT NULL,
+  `total_pending_shares` BIGINT DEFAULT NULL,
   `submitted_date` date NOT NULL,
-  `submitted_userid` bigint(20) DEFAULT NULL,
+  `submitted_userid` BIGINT DEFAULT NULL,
   `approved_date` date DEFAULT NULL,
-  `approved_userid` bigint(20) DEFAULT NULL,
+  `approved_userid` BIGINT DEFAULT NULL,
   `rejected_date` date DEFAULT NULL,
-  `rejected_userid` bigint(20) DEFAULT NULL,
+  `rejected_userid` BIGINT DEFAULT NULL,
   `activated_date` date DEFAULT NULL,
-  `activated_userid` bigint(20) DEFAULT NULL,
+  `activated_userid` BIGINT DEFAULT NULL,
   `closed_date` date DEFAULT NULL,
-  `closed_userid` bigint(20) DEFAULT NULL,
+  `closed_userid` BIGINT DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
-  `savings_account_id` bigint(20) NOT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
+  `savings_account_id` BIGINT NOT NULL,
   `minimum_active_period_frequency` decimal(19,6) DEFAULT NULL,
-  `minimum_active_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `minimum_active_period_frequency_enum` SMALLINT DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
-  `allow_dividends_inactive_clients` smallint(1) DEFAULT '0',
+  `lockin_period_frequency_enum` SMALLINT DEFAULT NULL,
+  `allow_dividends_inactive_clients` SMALLINT DEFAULT '0',
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `m_share_account_ibfk_1` (`product_id`),
@@ -4790,7 +4790,7 @@ CREATE TABLE IF NOT EXISTS `m_share_account` (
   CONSTRAINT `m_share_account_ibfk_7` FOREIGN KEY (`closed_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_share_account_ibfk_8` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_share_account_ibfk_9` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account` DISABLE KEYS */;
@@ -4800,12 +4800,12 @@ CREATE TABLE IF NOT EXISTS `m_share_account` (
 -- Dumping structure for table fineract_default.m_share_account_charge
 DROP TABLE IF EXISTS `m_share_account_charge`;
 CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
-  `charge_time_enum` smallint(5) NOT NULL,
-  `charge_calculation_enum` smallint(5) NOT NULL,
-  `charge_payment_mode_enum` smallint(5) NOT NULL DEFAULT '0',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
+  `charge_time_enum` SMALLINT NOT NULL,
+  `charge_calculation_enum` SMALLINT NOT NULL,
+  `charge_payment_mode_enum` SMALLINT NOT NULL DEFAULT '0',
   `calculation_percentage` decimal(19,6) DEFAULT NULL,
   `calculation_on_amount` decimal(19,6) DEFAULT NULL,
   `charge_amount_or_percentage` decimal(19,6) DEFAULT NULL,
@@ -4814,17 +4814,17 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
   `amount_waived_derived` decimal(19,6) DEFAULT NULL,
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
-  `waived` tinyint(1) NOT NULL DEFAULT '0',
+  `is_paid_derived` tinyint NOT NULL DEFAULT '0',
+  `waived` tinyint NOT NULL DEFAULT '0',
   `min_cap` decimal(19,6) DEFAULT NULL,
   `max_cap` decimal(19,6) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_active` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `charge_id` (`charge_id`),
   KEY `m_share_account_charge_ibfk_2` (`account_id`),
   CONSTRAINT `m_share_account_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_share_account_charge_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_account_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_charge` DISABLE KEYS */;
@@ -4834,16 +4834,16 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
 -- Dumping structure for table fineract_default.m_share_account_charge_paid_by
 DROP TABLE IF EXISTS `m_share_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `share_transaction_id` bigint(20) DEFAULT NULL,
-  `charge_transaction_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `share_transaction_id` BIGINT DEFAULT NULL,
+  `charge_transaction_id` BIGINT DEFAULT NULL,
   `amount` decimal(20,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `m_share_account_transactions_charge_mapping_ibfk1` (`share_transaction_id`),
   KEY `m_share_account_transactions_charge_mapping_ibfk2` (`charge_transaction_id`),
   CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk1` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`),
   CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk2` FOREIGN KEY (`charge_transaction_id`) REFERENCES `m_share_account_charge` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_account_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_charge_paid_by` DISABLE KEYS */;
@@ -4853,18 +4853,18 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
 -- Dumping structure for table fineract_default.m_share_account_dividend_details
 DROP TABLE IF EXISTS `m_share_account_dividend_details`;
 CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `dividend_pay_out_id` bigint(20) NOT NULL,
-  `account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `dividend_pay_out_id` BIGINT NOT NULL,
+  `account_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `status` smallint(3) NOT NULL,
-  `savings_transaction_id` bigint(20) DEFAULT NULL,
+  `status` SMALLINT NOT NULL,
+  `savings_transaction_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_share_account_dividend_details_dividend_pay_out_id` (`dividend_pay_out_id`),
   KEY `FK_m_share_account_dividend_details_account_id` (`account_id`),
   CONSTRAINT `FK_m_share_account_dividend_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`),
   CONSTRAINT `FK_m_share_account_dividend_details_dividend_pay_out_id` FOREIGN KEY (`dividend_pay_out_id`) REFERENCES `m_share_product_dividend_pay_out` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_account_dividend_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_dividend_details` DISABLE KEYS */;
@@ -4874,21 +4874,21 @@ CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
 -- Dumping structure for table fineract_default.m_share_account_transactions
 DROP TABLE IF EXISTS `m_share_account_transactions`;
 CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `account_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `account_id` BIGINT NOT NULL,
   `transaction_date` date DEFAULT NULL,
-  `total_shares` bigint(20) DEFAULT NULL,
+  `total_shares` BIGINT DEFAULT NULL,
   `unit_price` decimal(10,2) DEFAULT NULL,
   `amount` decimal(20,2) DEFAULT NULL,
   `charge_amount` decimal(20,2) DEFAULT NULL,
   `amount_paid` decimal(20,2) DEFAULT NULL,
-  `status_enum` smallint(5) NOT NULL DEFAULT '300',
-  `type_enum` smallint(5) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `status_enum` SMALLINT NOT NULL DEFAULT '300',
+  `type_enum` SMALLINT DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `m_share_account_purchased_shares_ibfk_1` (`account_id`),
   CONSTRAINT `m_share_account_purchased_shares_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_account_transactions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_transactions` DISABLE KEYS */;
@@ -4898,7 +4898,7 @@ CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
 -- Dumping structure for table fineract_default.m_share_product
 DROP TABLE IF EXISTS `m_share_product`;
 CREATE TABLE IF NOT EXISTS `m_share_product` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `short_name` varchar(4) NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
@@ -4906,33 +4906,33 @@ CREATE TABLE IF NOT EXISTS `m_share_product` (
   `start_date` datetime DEFAULT NULL,
   `end_date` datetime DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
-  `currency_digits` smallint(5) NOT NULL,
-  `currency_multiplesof` smallint(5) DEFAULT NULL,
-  `total_shares` bigint(20) NOT NULL,
-  `issued_shares` bigint(20) DEFAULT NULL,
-  `totalsubscribed_shares` bigint(20) DEFAULT NULL,
+  `currency_digits` SMALLINT NOT NULL,
+  `currency_multiplesof` SMALLINT DEFAULT NULL,
+  `total_shares` BIGINT NOT NULL,
+  `issued_shares` BIGINT DEFAULT NULL,
+  `totalsubscribed_shares` BIGINT DEFAULT NULL,
   `unit_price` decimal(10,2) NOT NULL,
   `capital_amount` decimal(20,2) NOT NULL,
-  `minimum_client_shares` bigint(20) DEFAULT NULL,
-  `nominal_client_shares` bigint(20) NOT NULL,
-  `maximum_client_shares` bigint(20) DEFAULT NULL,
+  `minimum_client_shares` BIGINT DEFAULT NULL,
+  `nominal_client_shares` BIGINT NOT NULL,
+  `maximum_client_shares` BIGINT DEFAULT NULL,
   `minimum_active_period_frequency` decimal(19,6) DEFAULT NULL,
-  `minimum_active_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `minimum_active_period_frequency_enum` SMALLINT DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
-  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
-  `allow_dividends_inactive_clients` smallint(1) DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `lockin_period_frequency_enum` SMALLINT DEFAULT NULL,
+  `allow_dividends_inactive_clients` SMALLINT DEFAULT '0',
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `accounting_type` smallint(2) NOT NULL,
+  `accounting_type` SMALLINT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `m_share_product_ibfk_1` (`createdby_id`),
   KEY `m_share_product_ibfk_2` (`lastmodifiedby_id`),
   CONSTRAINT `m_share_product_ibfk_1` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_share_product_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_product: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product` DISABLE KEYS */;
@@ -4942,13 +4942,13 @@ CREATE TABLE IF NOT EXISTS `m_share_product` (
 -- Dumping structure for table fineract_default.m_share_product_charge
 DROP TABLE IF EXISTS `m_share_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
-  `product_id` bigint(20) NOT NULL,
-  `charge_id` bigint(20) NOT NULL,
+  `product_id` BIGINT NOT NULL,
+  `charge_id` BIGINT NOT NULL,
   PRIMARY KEY (`product_id`,`charge_id`),
   KEY `m_share_product_charge_ibfk_1` (`charge_id`),
   CONSTRAINT `m_share_product_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_share_product_charge_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_product_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_charge` DISABLE KEYS */;
@@ -4958,15 +4958,15 @@ CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
 -- Dumping structure for table fineract_default.m_share_product_dividend_pay_out
 DROP TABLE IF EXISTS `m_share_product_dividend_pay_out`;
 CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `product_id` BIGINT NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `dividend_period_start_date` date NOT NULL,
   `dividend_period_end_date` date NOT NULL,
-  `status` smallint(3) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `status` SMALLINT NOT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_share_product_dividend_pay_out_product_id` (`product_id`),
@@ -4975,7 +4975,7 @@ CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
   CONSTRAINT `FK_m_share_product_dividend_pay_out_createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_share_product_dividend_pay_out_product_id` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_product_dividend_pay_out: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_dividend_pay_out` DISABLE KEYS */;
@@ -4985,14 +4985,14 @@ CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
 -- Dumping structure for table fineract_default.m_share_product_market_price
 DROP TABLE IF EXISTS `m_share_product_market_price`;
 CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `product_id` BIGINT NOT NULL,
   `from_date` date DEFAULT NULL,
   `share_value` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `m_share_product_market_price_ibfk_1` (`product_id`),
   CONSTRAINT `m_share_product_market_price_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_share_product_market_price: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_market_price` DISABLE KEYS */;
@@ -5002,19 +5002,19 @@ CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
 -- Dumping structure for table fineract_default.m_staff
 DROP TABLE IF EXISTS `m_staff`;
 CREATE TABLE IF NOT EXISTS `m_staff` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `is_loan_officer` tinyint(1) NOT NULL DEFAULT '0',
-  `office_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `is_loan_officer` tinyint NOT NULL DEFAULT '0',
+  `office_id` BIGINT DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `display_name` varchar(102) NOT NULL,
   `mobile_no` varchar(50) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `organisational_role_enum` smallint(6) DEFAULT NULL,
-  `organisational_role_parent_staff_id` bigint(20) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `organisational_role_enum` SMALLINT DEFAULT NULL,
+  `organisational_role_parent_staff_id` BIGINT DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1',
   `joining_date` date DEFAULT NULL,
-  `image_id` bigint(20) DEFAULT NULL,
+  `image_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `display_name` (`display_name`),
   UNIQUE KEY `external_id_UNIQUE` (`external_id`),
@@ -5023,7 +5023,7 @@ CREATE TABLE IF NOT EXISTS `m_staff` (
   KEY `FK_m_staff_m_image` (`image_id`),
   CONSTRAINT `FK_m_staff_m_image` FOREIGN KEY (`image_id`) REFERENCES `m_image` (`id`),
   CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_staff: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
@@ -5033,21 +5033,21 @@ CREATE TABLE IF NOT EXISTS `m_staff` (
 -- Dumping structure for table fineract_default.m_staff_assignment_history
 DROP TABLE IF EXISTS `m_staff_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `centre_id` bigint(20) DEFAULT NULL,
-  `staff_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `centre_id` BIGINT DEFAULT NULL,
+  `staff_id` BIGINT NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
+  `createdby_id` BIGINT DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodifiedby_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_staff_assignment_history_centre_id_m_group` (`centre_id`),
   KEY `FK_m_staff_assignment_history_m_staff` (`staff_id`),
   CONSTRAINT `FK_m_staff_assignment_history_centre_id_m_group` FOREIGN KEY (`centre_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FK_m_staff_assignment_history_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_staff_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_staff_assignment_history` DISABLE KEYS */;
@@ -5057,7 +5057,7 @@ CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
 -- Dumping structure for table fineract_default.m_surveys
 DROP TABLE IF EXISTS `m_surveys`;
 CREATE TABLE IF NOT EXISTS `m_surveys` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `a_key` varchar(32) NOT NULL,
   `a_name` varchar(255) NOT NULL,
   `description` varchar(4000) DEFAULT NULL,
@@ -5065,7 +5065,7 @@ CREATE TABLE IF NOT EXISTS `m_surveys` (
   `valid_from` datetime DEFAULT NULL,
   `valid_to` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_surveys: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_surveys` DISABLE KEYS */;
@@ -5075,16 +5075,16 @@ CREATE TABLE IF NOT EXISTS `m_surveys` (
 -- Dumping structure for table fineract_default.m_survey_components
 DROP TABLE IF EXISTS `m_survey_components`;
 CREATE TABLE IF NOT EXISTS `m_survey_components` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
   `a_key` varchar(32) NOT NULL,
   `a_text` varchar(255) NOT NULL,
   `description` varchar(4000) DEFAULT NULL,
-  `sequence_no` int(4) NOT NULL,
+  `sequence_no` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `survey_id` (`survey_id`),
   CONSTRAINT `m_survey_components_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_survey_components: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_components` DISABLE KEYS */;
@@ -5094,17 +5094,17 @@ CREATE TABLE IF NOT EXISTS `m_survey_components` (
 -- Dumping structure for table fineract_default.m_survey_lookup_tables
 DROP TABLE IF EXISTS `m_survey_lookup_tables`;
 CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
   `a_key` varchar(255) NOT NULL,
-  `description` int(4) DEFAULT NULL,
-  `value_from` int(4) NOT NULL,
-  `value_to` int(4) NOT NULL,
+  `description` INT DEFAULT NULL,
+  `value_from` INT NOT NULL,
+  `value_to` INT NOT NULL,
   `score` decimal(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `survey_id` (`survey_id`),
   CONSTRAINT `m_survey_lookup_tables_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_survey_lookup_tables: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_lookup_tables` DISABLE KEYS */;
@@ -5114,17 +5114,17 @@ CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
 -- Dumping structure for table fineract_default.m_survey_questions
 DROP TABLE IF EXISTS `m_survey_questions`;
 CREATE TABLE IF NOT EXISTS `m_survey_questions` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
   `component_key` varchar(32) DEFAULT NULL,
   `a_key` varchar(32) NOT NULL,
   `a_text` varchar(255) NOT NULL,
   `description` varchar(4000) DEFAULT NULL,
-  `sequence_no` int(4) NOT NULL,
+  `sequence_no` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `survey_id` (`survey_id`),
   CONSTRAINT `m_survey_questions_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_survey_questions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_questions` DISABLE KEYS */;
@@ -5134,15 +5134,15 @@ CREATE TABLE IF NOT EXISTS `m_survey_questions` (
 -- Dumping structure for table fineract_default.m_survey_responses
 DROP TABLE IF EXISTS `m_survey_responses`;
 CREATE TABLE IF NOT EXISTS `m_survey_responses` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `question_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `question_id` BIGINT NOT NULL,
   `a_text` varchar(255) NOT NULL,
-  `a_value` int(4) NOT NULL,
-  `sequence_no` int(4) NOT NULL,
+  `a_value` INT NOT NULL,
+  `sequence_no` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `question_id` (`question_id`),
   CONSTRAINT `m_survey_responses_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_survey_responses: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_responses` DISABLE KEYS */;
@@ -5152,14 +5152,14 @@ CREATE TABLE IF NOT EXISTS `m_survey_responses` (
 -- Dumping structure for table fineract_default.m_survey_scorecards
 DROP TABLE IF EXISTS `m_survey_scorecards`;
 CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` bigint(20) NOT NULL,
-  `question_id` bigint(20) NOT NULL,
-  `response_id` bigint(20) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
-  `client_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
+  `question_id` BIGINT NOT NULL,
+  `response_id` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
   `created_on` datetime DEFAULT NULL,
-  `a_value` int(4) NOT NULL,
+  `a_value` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `survey_id` (`survey_id`),
   KEY `question_id` (`question_id`),
@@ -5171,7 +5171,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   CONSTRAINT `m_survey_scorecards_ibfk_3` FOREIGN KEY (`response_id`) REFERENCES `m_survey_responses` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_5` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_survey_scorecards: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_scorecards` DISABLE KEYS */;
@@ -5181,17 +5181,17 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
 -- Dumping structure for table fineract_default.m_tax_component
 DROP TABLE IF EXISTS `m_tax_component`;
 CREATE TABLE IF NOT EXISTS `m_tax_component` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `percentage` decimal(19,6) NOT NULL,
-  `debit_account_type_enum` smallint(2) DEFAULT NULL,
-  `debit_account_id` bigint(20) DEFAULT NULL,
-  `credit_account_type_enum` smallint(2) DEFAULT NULL,
-  `credit_account_id` bigint(20) DEFAULT NULL,
+  `debit_account_type_enum` SMALLINT DEFAULT NULL,
+  `debit_account_id` BIGINT DEFAULT NULL,
+  `credit_account_type_enum` SMALLINT DEFAULT NULL,
+  `credit_account_id` BIGINT DEFAULT NULL,
   `start_date` date NOT NULL,
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_tax_component_debit_gl_account` (`debit_account_id`),
@@ -5202,7 +5202,7 @@ CREATE TABLE IF NOT EXISTS `m_tax_component` (
   CONSTRAINT `FK_tax_component_credit_gl_account` FOREIGN KEY (`credit_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_tax_component_debit_gl_account` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_tax_component_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_tax_component: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_component` DISABLE KEYS */;
@@ -5212,14 +5212,14 @@ CREATE TABLE IF NOT EXISTS `m_tax_component` (
 -- Dumping structure for table fineract_default.m_tax_component_history
 DROP TABLE IF EXISTS `m_tax_component_history`;
 CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `tax_component_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `tax_component_id` BIGINT NOT NULL,
   `percentage` decimal(19,6) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_tax_component_history_tax_component_id` (`tax_component_id`),
@@ -5228,7 +5228,7 @@ CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
   CONSTRAINT `FK_tax_component_history_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_tax_component_history_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_tax_component_history_tax_component_id` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_tax_component_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_component_history` DISABLE KEYS */;
@@ -5238,18 +5238,18 @@ CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
 -- Dumping structure for table fineract_default.m_tax_group
 DROP TABLE IF EXISTS `m_tax_group`;
 CREATE TABLE IF NOT EXISTS `m_tax_group` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_tax_group_createdby` (`createdby_id`),
   KEY `FK_tax_group_lastmodifiedby` (`lastmodifiedby_id`),
   CONSTRAINT `FK_tax_group_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_tax_group_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_tax_group: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_group` DISABLE KEYS */;
@@ -5259,14 +5259,14 @@ CREATE TABLE IF NOT EXISTS `m_tax_group` (
 -- Dumping structure for table fineract_default.m_tax_group_mappings
 DROP TABLE IF EXISTS `m_tax_group_mappings`;
 CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `tax_group_id` bigint(20) NOT NULL,
-  `tax_component_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `tax_group_id` BIGINT NOT NULL,
+  `tax_component_id` BIGINT NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) NOT NULL,
+  `createdby_id` BIGINT NOT NULL,
   `created_date` datetime NOT NULL,
-  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodifiedby_id` BIGINT NOT NULL,
   `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_tax_group_mappings_tax_group` (`tax_group_id`),
@@ -5277,7 +5277,7 @@ CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
   CONSTRAINT `FK_tax_group_mappings_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_tax_group_mappings_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`),
   CONSTRAINT `FK_tax_group_mappings_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_tax_group_mappings: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_group_mappings` DISABLE KEYS */;
@@ -5287,15 +5287,15 @@ CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
 -- Dumping structure for table fineract_default.m_tellers
 DROP TABLE IF EXISTS `m_tellers`;
 CREATE TABLE IF NOT EXISTS `m_tellers` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `office_id` bigint(20) NOT NULL,
-  `debit_account_id` bigint(20) DEFAULT NULL,
-  `credit_account_id` bigint(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `office_id` BIGINT NOT NULL,
+  `debit_account_id` BIGINT DEFAULT NULL,
+  `credit_account_id` BIGINT DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `description` varchar(100) DEFAULT NULL,
   `valid_from` date DEFAULT NULL,
   `valid_to` date DEFAULT NULL,
-  `state` smallint(5) DEFAULT NULL,
+  `state` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `m_tellers_name_unq` (`name`),
   KEY `IK_m_tellers_m_office` (`office_id`),
@@ -5304,7 +5304,7 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
   CONSTRAINT `FK_m_tellers_gl_account_credit_account_id` FOREIGN KEY (`credit_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_m_tellers_gl_account_debit_account_id` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_m_tellers_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_tellers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tellers` DISABLE KEYS */;
@@ -5314,14 +5314,14 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
 -- Dumping structure for table fineract_default.m_template
 DROP TABLE IF EXISTS `m_template`;
 CREATE TABLE IF NOT EXISTS `m_template` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `text` longtext CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `entity` int(11) DEFAULT NULL,
-  `type` int(11) DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `text` longtext CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entity` INT DEFAULT NULL,
+  `type` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_template: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_template` DISABLE KEYS */;
@@ -5331,12 +5331,12 @@ CREATE TABLE IF NOT EXISTS `m_template` (
 -- Dumping structure for table fineract_default.m_templatemappers
 DROP TABLE IF EXISTS `m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_templatemappers` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `mapperkey` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `mapperorder` int(11) DEFAULT NULL,
-  `mappervalue` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `mapperkey` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mapperorder` INT DEFAULT NULL,
+  `mappervalue` varchar(255) CHARACTER SET UTF8MB4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_templatemappers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_templatemappers` DISABLE KEYS */;
@@ -5346,12 +5346,12 @@ CREATE TABLE IF NOT EXISTS `m_templatemappers` (
 -- Dumping structure for table fineract_default.m_template_m_templatemappers
 DROP TABLE IF EXISTS `m_template_m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
-  `m_template_id` bigint(20) NOT NULL,
-  `mappers_id` bigint(20) NOT NULL,
+  `m_template_id` BIGINT NOT NULL,
+  `mappers_id` BIGINT NOT NULL,
   UNIQUE KEY `mappers_id` (`mappers_id`),
   KEY `mappers_id_2` (`mappers_id`),
   KEY `m_template_id` (`m_template_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_template_m_templatemappers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_template_m_templatemappers` DISABLE KEYS */;
@@ -5361,13 +5361,13 @@ CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
 -- Dumping structure for table fineract_default.m_working_days
 DROP TABLE IF EXISTS `m_working_days`;
 CREATE TABLE IF NOT EXISTS `m_working_days` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `recurrence` varchar(100) DEFAULT NULL,
-  `repayment_rescheduling_enum` smallint(5) DEFAULT NULL,
-  `extend_term_daily_repayments` tinyint(1) DEFAULT '0',
-  `extend_term_holiday_repayment` tinyint(1) NOT NULL DEFAULT '0',
+  `repayment_rescheduling_enum` SMALLINT DEFAULT NULL,
+  `extend_term_daily_repayments` tinyint DEFAULT '0',
+  `extend_term_holiday_repayment` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.m_working_days: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_working_days` DISABLE KEYS */;
@@ -5386,7 +5386,7 @@ CREATE TABLE IF NOT EXISTS `oauth_access_token` (
   `client_id` varchar(256) DEFAULT NULL,
   `authentication` blob,
   `refresh_token` varchar(256) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.oauth_access_token: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_access_token` DISABLE KEYS */;
@@ -5403,12 +5403,12 @@ CREATE TABLE IF NOT EXISTS `oauth_client_details` (
   `authorized_grant_types` varchar(256) DEFAULT NULL,
   `web_server_redirect_uri` varchar(256) DEFAULT NULL,
   `authorities` varchar(256) DEFAULT NULL,
-  `access_token_validity` int(11) DEFAULT NULL,
-  `refresh_token_validity` int(11) DEFAULT NULL,
+  `access_token_validity` INT DEFAULT NULL,
+  `refresh_token_validity` INT DEFAULT NULL,
   `additional_information` varchar(4096) DEFAULT NULL,
   `autoapprove` bit(1) DEFAULT NULL,
   PRIMARY KEY (`client_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.oauth_client_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_client_details` DISABLE KEYS */;
@@ -5423,7 +5423,7 @@ CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
   `token_id` varchar(256) DEFAULT NULL,
   `token` blob,
   `authentication` blob
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.oauth_refresh_token: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_refresh_token` DISABLE KEYS */;
@@ -5433,11 +5433,11 @@ CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
 -- Dumping structure for table fineract_default.ppi_likelihoods
 DROP TABLE IF EXISTS `ppi_likelihoods`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(100) NOT NULL,
   `name` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.ppi_likelihoods: ~0 rows (approximately)
 /*!40000 ALTER TABLE `ppi_likelihoods` DISABLE KEYS */;
@@ -5447,12 +5447,12 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
 -- Dumping structure for table fineract_default.ppi_likelihoods_ppi
 DROP TABLE IF EXISTS `ppi_likelihoods_ppi`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `likelihood_id` bigint(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `likelihood_id` BIGINT NOT NULL,
   `ppi_name` varchar(250) NOT NULL,
-  `enabled` int(11) NOT NULL DEFAULT '100',
+  `enabled` INT NOT NULL DEFAULT '100',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.ppi_likelihoods_ppi: ~0 rows (approximately)
 /*!40000 ALTER TABLE `ppi_likelihoods_ppi` DISABLE KEYS */;
@@ -5462,11 +5462,11 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
 -- Dumping structure for table fineract_default.ppi_scores
 DROP TABLE IF EXISTS `ppi_scores`;
 CREATE TABLE IF NOT EXISTS `ppi_scores` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `score_from` int(11) NOT NULL,
-  `score_to` int(11) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `score_from` INT NOT NULL,
+  `score_to` INT NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.ppi_scores: ~20 rows (approximately)
 /*!40000 ALTER TABLE `ppi_scores` DISABLE KEYS */;
@@ -5497,13 +5497,13 @@ INSERT INTO `ppi_scores` (`id`, `score_from`, `score_to`) VALUES
 -- Dumping structure for table fineract_default.ref_loan_transaction_processing_strategy
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 CREATE TABLE IF NOT EXISTS `ref_loan_transaction_processing_strategy` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `code` varchar(100) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `sort_order` int(4) DEFAULT NULL,
+  `sort_order` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ltp_strategy_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.ref_loan_transaction_processing_strategy: ~7 rows (approximately)
 /*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` DISABLE KEYS */;
@@ -5521,9 +5521,9 @@ INSERT INTO `ref_loan_transaction_processing_strategy` (`id`, `code`, `name`, `s
 -- Dumping structure for table fineract_default.rpt_sequence
 DROP TABLE IF EXISTS `rpt_sequence`;
 CREATE TABLE IF NOT EXISTS `rpt_sequence` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.rpt_sequence: ~0 rows (approximately)
 /*!40000 ALTER TABLE `rpt_sequence` DISABLE KEYS */;
@@ -5534,14 +5534,14 @@ CREATE TABLE IF NOT EXISTS `rpt_sequence` (
 DROP TABLE IF EXISTS `r_enum_value`;
 CREATE TABLE IF NOT EXISTS `r_enum_value` (
   `enum_name` varchar(100) NOT NULL,
-  `enum_id` int(11) NOT NULL,
+  `enum_id` INT NOT NULL,
   `enum_message_property` varchar(100) NOT NULL,
   `enum_value` varchar(100) NOT NULL,
-  `enum_type` tinyint(1) NOT NULL,
+  `enum_type` tinyint NOT NULL,
   PRIMARY KEY (`enum_name`,`enum_id`),
   UNIQUE KEY `enum_message_property` (`enum_name`,`enum_message_property`),
   UNIQUE KEY `enum_value` (`enum_name`,`enum_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.r_enum_value: ~159 rows (approximately)
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
@@ -5711,12 +5711,12 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
 -- Dumping structure for table fineract_default.scheduler_detail
 DROP TABLE IF EXISTS `scheduler_detail`;
 CREATE TABLE IF NOT EXISTS `scheduler_detail` (
-  `id` smallint(2) NOT NULL AUTO_INCREMENT,
-  `is_suspended` tinyint(1) NOT NULL DEFAULT '0',
-  `execute_misfired_jobs` tinyint(1) NOT NULL DEFAULT '1',
-  `reset_scheduler_on_bootup` tinyint(1) NOT NULL DEFAULT '1',
+  `id` SMALLINT NOT NULL AUTO_INCREMENT,
+  `is_suspended` tinyint NOT NULL DEFAULT '0',
+  `execute_misfired_jobs` tinyint NOT NULL DEFAULT '1',
+  `reset_scheduler_on_bootup` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.scheduler_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `scheduler_detail` DISABLE KEYS */;
@@ -5728,22 +5728,22 @@ INSERT INTO `scheduler_detail` (`id`, `is_suspended`, `execute_misfired_jobs`, `
 -- Dumping structure for table fineract_default.schema_version
 DROP TABLE IF EXISTS `schema_version`;
 CREATE TABLE IF NOT EXISTS `schema_version` (
-  `version_rank` int(11) NOT NULL,
-  `installed_rank` int(11) NOT NULL,
+  `version_rank` INT NOT NULL,
+  `installed_rank` INT NOT NULL,
   `version` varchar(50) NOT NULL,
   `description` varchar(200) NOT NULL,
   `type` varchar(20) NOT NULL,
   `script` varchar(1000) NOT NULL,
-  `checksum` int(11) DEFAULT NULL,
+  `checksum` INT DEFAULT NULL,
   `installed_by` varchar(100) NOT NULL,
   `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `execution_time` int(11) NOT NULL,
-  `success` tinyint(1) NOT NULL,
+  `execution_time` INT NOT NULL,
+  `success` tinyint NOT NULL,
   PRIMARY KEY (`version`),
   KEY `schema_version_vr_idx` (`version_rank`),
   KEY `schema_version_ir_idx` (`installed_rank`),
   KEY `schema_version_s_idx` (`success`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.schema_version: ~337 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
@@ -6091,30 +6091,30 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 -- Dumping structure for table fineract_default.sms_campaign
 DROP TABLE IF EXISTS `sms_campaign`;
 CREATE TABLE IF NOT EXISTS `sms_campaign` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `campaign_name` varchar(100) NOT NULL,
-  `campaign_type` int(11) NOT NULL,
-  `campaign_trigger_type` int(11) NOT NULL,
-  `report_id` int(11) NOT NULL,
-  `provider_id` bigint(20) NOT NULL,
+  `campaign_type` INT NOT NULL,
+  `campaign_trigger_type` INT NOT NULL,
+  `report_id` INT NOT NULL,
+  `provider_id` BIGINT NOT NULL,
   `param_value` text,
-  `status_enum` int(11) NOT NULL,
+  `status_enum` INT NOT NULL,
   `message` text NOT NULL,
   `submittedon_date` date DEFAULT NULL,
-  `submittedon_userid` bigint(20) DEFAULT NULL,
+  `submittedon_userid` BIGINT DEFAULT NULL,
   `approvedon_date` date DEFAULT NULL,
-  `approvedon_userid` bigint(20) DEFAULT NULL,
+  `approvedon_userid` BIGINT DEFAULT NULL,
   `closedon_date` date DEFAULT NULL,
-  `closedon_userid` bigint(20) DEFAULT NULL,
+  `closedon_userid` BIGINT DEFAULT NULL,
   `recurrence` varchar(100) DEFAULT NULL,
   `next_trigger_date` datetime DEFAULT NULL,
   `last_trigger_date` datetime DEFAULT NULL,
   `recurrence_start_date` datetime DEFAULT NULL,
-  `is_visible` tinyint(1) DEFAULT '1',
+  `is_visible` tinyint DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `report_id` (`report_id`),
   CONSTRAINT `sms_campaign_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `stretchy_report` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.sms_campaign: ~0 rows (approximately)
 /*!40000 ALTER TABLE `sms_campaign` DISABLE KEYS */;
@@ -6124,14 +6124,14 @@ CREATE TABLE IF NOT EXISTS `sms_campaign` (
 -- Dumping structure for table fineract_default.sms_messages_outbound
 DROP TABLE IF EXISTS `sms_messages_outbound`;
 CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `group_id` bigint(20) DEFAULT NULL,
-  `client_id` bigint(20) DEFAULT NULL,
-  `staff_id` bigint(20) DEFAULT NULL,
-  `status_enum` int(5) NOT NULL DEFAULT '100',
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `group_id` BIGINT DEFAULT NULL,
+  `client_id` BIGINT DEFAULT NULL,
+  `staff_id` BIGINT DEFAULT NULL,
+  `status_enum` INT NOT NULL DEFAULT '100',
   `mobile_no` varchar(50) NOT NULL,
   `message` varchar(1000) NOT NULL,
-  `campaign_id` bigint(20) NOT NULL,
+  `campaign_id` BIGINT NOT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `submittedon_date` date DEFAULT NULL,
   `delivered_on_date` datetime DEFAULT NULL,
@@ -6144,7 +6144,7 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
   CONSTRAINT `FKCLIENT00000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKGROUP000000001` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FKSTAFF000000001` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.sms_messages_outbound: ~0 rows (approximately)
 /*!40000 ALTER TABLE `sms_messages_outbound` DISABLE KEYS */;
@@ -6154,7 +6154,7 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
 -- Dumping structure for table fineract_default.stretchy_parameter
 DROP TABLE IF EXISTS `stretchy_parameter`;
 CREATE TABLE IF NOT EXISTS `stretchy_parameter` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `parameter_name` varchar(45) NOT NULL,
   `parameter_variable` varchar(45) DEFAULT NULL,
   `parameter_label` varchar(45) NOT NULL,
@@ -6165,12 +6165,12 @@ CREATE TABLE IF NOT EXISTS `stretchy_parameter` (
   `selectOne` varchar(1) DEFAULT NULL,
   `selectAll` varchar(1) DEFAULT NULL,
   `parameter_sql` text,
-  `parent_id` int(11) DEFAULT NULL,
+  `parent_id` INT DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`parameter_name`),
   KEY `fk_stretchy_parameter_001_idx` (`parent_id`),
   CONSTRAINT `fk_stretchy_parameter_001` FOREIGN KEY (`parent_id`) REFERENCES `stretchy_parameter` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1023 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1023 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.stretchy_parameter: ~32 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_parameter` DISABLE KEYS */;
@@ -6182,7 +6182,7 @@ INSERT INTO `stretchy_parameter` (`id`, `parameter_name`, `parameter_variable`, 
 	(6, 'loanOfficerIdSelectAll', 'loanOfficerId', 'Loan Officer', 'select', 'number', '0', NULL, NULL, 'Y', '(select lo.id, lo.display_name as `Name` \r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\njoin m_staff lo on lo.office_id = ounder.id\r\nwhere lo.is_loan_officer = true\r\nand o.id = ${officeId})\r\nunion all\r\n(select -10, \'-\')\r\norder by 2', 5),
 	(10, 'currencyIdSelectAll', 'currencyId', 'Currency', 'select', 'number', '0', NULL, NULL, 'Y', 'select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`', NULL),
 	(20, 'fundIdSelectAll', 'fundId', 'Fund', 'select', 'number', '0', NULL, NULL, 'Y', '(select id, `name`\r\nfrom m_fund)\r\nunion all\r\n(select -10, \'-\')\r\norder by 2', NULL),
-	(25, 'loanProductIdSelectAll', 'loanProductId', 'Product', 'select', 'number', '0', NULL, NULL, 'Y', 'select p.id, p.`name`\r\nfrom m_product_loan p\r\nwhere (p.currency_code = \'${currencyId}\' or \'-1\'= \'${currencyId}\')\r\norder by 2', 10),
+	(25, 'loanProductIdSelectAll', 'loanProductId', 'Product', 'select', 'number', '0', NULL, NULL, 'Y', 'select p.id, p.`name`\r\nfrom m_product_loan p\r\nwhere (p.currency_code = \'$\{currencyId}\' or \'-1\'= \'$\{currencyId}\')\r\norder by 2', 10),
 	(26, 'loanPurposeIdSelectAll', 'loanPurposeId', 'Loan Purpose', 'select', 'number', '0', NULL, NULL, 'Y', 'select -10 as id, \'-\' as code_value\r\nunion all\r\nselect * from (select v.id, v.code_value\r\nfrom m_code c\r\njoin m_code_value v on v.code_id = c.id\r\nwhere c.code_name = "loanPurpose"\r\norder by v.order_position)  x', NULL),
 	(100, 'parTypeSelect', 'parType', 'parType', 'select', 'number', '0', NULL, NULL, NULL, 'select * from\r\n(select 1 as id, "Principal Only" as `name` union all\r\nselect 2, "Principal + Interest" union all\r\nselect 3, "Principal + Interest + Fees" union all\r\nselect 4, "Principal + Interest + Fees + Penalties") x\r\norder by x.`id`', NULL),
 	(1001, 'FullReportList', NULL, 'n/a', 'n/a', 'n/a', 'n/a', 'Y', NULL, NULL, 'select  r.id as report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\nrp.id as parameter_id, rp.report_parameter_name, p.parameter_name\n  from stretchy_report r\n  left join stretchy_report_parameter rp on rp.report_id = r.id \n  left join stretchy_parameter p on p.id = rp.parameter_id\n  where r.use_report is true\n  and exists\n  ( select \'f\'\n  from m_appuser_role ur \n  join m_role r on r.id = ur.role_id\n  join m_role_permission rp on rp.role_id = r.id\n  join m_permission p on p.id = rp.permission_id\n  where ur.appuser_id = ${currentUserId}\n  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat("READ_", r.report_name)) )\n  order by r.report_category, r.report_name, rp.id', NULL),
@@ -6213,49 +6213,49 @@ INSERT INTO `stretchy_parameter` (`id`, `parameter_name`, `parameter_variable`, 
 -- Dumping structure for table fineract_default.stretchy_report
 DROP TABLE IF EXISTS `stretchy_report`;
 CREATE TABLE IF NOT EXISTS `stretchy_report` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `report_name` varchar(100) NOT NULL,
   `report_type` varchar(20) NOT NULL,
   `report_subtype` varchar(20) DEFAULT NULL,
   `report_category` varchar(45) DEFAULT NULL,
   `report_sql` text,
   `description` text,
-  `core_report` tinyint(1) DEFAULT '0',
-  `use_report` tinyint(1) DEFAULT '0',
+  `core_report` tinyint DEFAULT '0',
+  `use_report` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=188 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=188 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.stretchy_report: ~115 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_report` DISABLE KEYS */;
 INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subtype`, `report_category`, `report_sql`, `description`, `core_report`, `use_report`) VALUES
 	(1, 'Client Listing', 'Table', NULL, 'Client', 'select\nconcat(repeat("..",\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\n c.account_no as "Client Account No.",\nc.display_name as "Name",\nr.enum_message_property as "Status",\nc.activation_date as "Activation", c.external_id as "External Id"\nfrom m_office o\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\njoin m_client c on c.office_id = ounder.id\nleft join r_enum_value r on r.enum_name = \'status_enum\' and r.enum_id = c.status_enum\nwhere o.id = ${officeId}\norder by ounder.hierarchy, c.account_no', 'Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).', 1, 1),
-	(2, 'Client Loans Listing', 'Table', NULL, 'Client', 'select\nconcat(repeat("..",\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch", c.account_no as "Client Account No.",\nc.display_name as "Name",\nr.enum_message_property as "Client Status",\nlo.display_name as "Loan Officer", l.account_no as "Loan Account No.", l.external_id as "External Id", p.name as Loan, st.enum_message_property as "Status",\nf.`name` as Fund, purp.code_value as "Loan Purpose",\nifnull(cur.display_symbol, l.currency_code) as Currency,\nl.principal_amount, l.arrearstolerance_amount as "Arrears Tolerance Amount",\nl.number_of_repayments as "Expected No. Repayments",\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate",\nl.nominal_interest_rate_per_period as "Nominal Interest Rate Per Period",\nipf.enum_message_property as "Interest Rate Frequency",\nim.enum_message_property as "Interest Method",\nicp.enum_message_property as "Interest Calculated in Period",\nl.term_frequency as "Term Frequency",\ntf.enum_message_property as "Term Frequency Period",\nl.repay_every as "Repayment Frequency",\nrf.enum_message_property as "Repayment Frequency Period",\nam.enum_message_property as "Amortization",\nl.total_charges_due_at_disbursement_derived as "Total Charges Due At Disbursement",\ndate(l.submittedon_date) as Submitted, date(l.approvedon_date) Approved, l.expected_disbursedon_date As "Expected Disbursal",\ndate(l.expected_firstrepaymenton_date) as "Expected First Repayment",\ndate(l.interest_calculated_from_date) as "Interest Calculated From" ,\ndate(l.disbursedon_date) as Disbursed,\ndate(l.expected_maturedon_date) "Expected Maturity",\ndate(l.maturedon_date) as "Matured On", date(l.closedon_date) as Closed,\ndate(l.rejectedon_date) as Rejected, date(l.rescheduledon_date) as Rescheduled,\ndate(l.withdrawnon_date) as Withdrawn, date(l.writtenoffon_date) "Written Off"\nfrom m_office o\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\njoin m_client c on c.office_id = ounder.id\nleft join r_enum_value r on r.enum_name = \'status_enum\'\n and r.enum_id = c.status_enum\nleft join m_loan l on l.client_id = c.id\nleft join m_staff lo on lo.id = l.loan_officer_id\nleft join m_product_loan p on p.id = l.product_id\nleft join m_fund f on f.id = l.fund_id\nleft join r_enum_value st on st.enum_name = "loan_status_id" and st.enum_id = l.loan_status_id\nleft join r_enum_value ipf on ipf.enum_name = "interest_period_frequency_enum"\n and ipf.enum_id = l.interest_period_frequency_enum\nleft join r_enum_value im on im.enum_name = "interest_method_enum"\n and im.enum_id = l.interest_method_enum\nleft join r_enum_value tf on tf.enum_name = "term_period_frequency_enum"\n and tf.enum_id = l.term_period_frequency_enum\nleft join r_enum_value icp on icp.enum_name = "interest_calculated_in_period_enum"\n and icp.enum_id = l.interest_calculated_in_period_enum\nleft join r_enum_value rf on rf.enum_name = "repayment_period_frequency_enum"\n and rf.enum_id = l.repayment_period_frequency_enum\nleft join r_enum_value am on am.enum_name = "amortization_method_enum"\n and am.enum_id = l.amortization_method_enum\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\nleft join m_currency cur on cur.code = l.currency_code\nwhere o.id = ${officeId}\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\norder by ounder.hierarchy, 2 , l.id', 'Individual Client Report\r\n\r\nPretty \n\nwide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  \n\nThere is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).', 1, 1),
-	(5, 'Loans Awaiting Disbursal', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nc.account_no as "Client Account No", c.display_name as "Name", l.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund, ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount as Principal,  \r\nl.term_frequency as "Term Frequency",\n\n\r\ntf.enum_message_property as "Term Frequency Period",\r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate",\r\ndate(l.approvedon_date) "Approved",\r\ndatediff(l.expected_disbursedon_date, curdate()) as "Days to Disbursal",\r\ndate(l.expected_disbursedon_date) "Expected Disbursal",\r\npurp.code_value as "Loan Purpose",\r\n lo.display_name as "Loan Officer"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = "term_period_frequency_enum" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\norder by ounder.hierarchy, datediff(l.expected_disbursedon_date, curdate()),  c.account_no', 'Individual Client Report', 1, 1),
-	(6, 'Loans Awaiting Disbursal Summary', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\npl.`name` as "Product", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  f.`name` as Fund,\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`, ounder.name\r\norder by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`', 'Individual Client Report', 1, 1),
-	(7, 'Loans Awaiting Disbursal Summary by Month', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\npl.`name` as "Product", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nyear(l.expected_disbursedon_date) as "Year", \r\nmonthname(l.expected_disbursedon_date) as "Month",\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date), ounder.name, l.expected_disbursedon_date\r\norder by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)', 'Individual Client Report', 1, 1),
-	(8, 'Loans Pending Approval', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nc.account_no as "Client Account No.", c.display_name as "Client Name", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  pl.`name` as "Product", \r\nl.account_no as "Loan Account No.", \r\nl.principal_amount as "Loan Amount", \r\nl.term_frequency as "Term Frequency",\n\n\r\ntf.enum_message_property as "Term Frequency Period",\r\nl.annual_nominal_interest_rate as " Annual \n\nNominal Interest Rate", \r\ndatediff(curdate(), l.submittedon_date) "Days Pending Approval", \r\npurp.code_value as "Loan Purpose",\r\nlo.display_name as "Loan Officer"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = "term_period_frequency_enum" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 100 /*Submitted and awaiting approval */\r\norder by ounder.hierarchy, l.submittedon_date,  l.account_no', 'Individual Client Report', 1, 1),
-	(11, 'Active Loans - Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch", x.currency as Currency,\r\n x.client_count as "No. of Clients", x.active_loan_count as "No. Active Loans", x. loans_in_arrears_count as "No. of Loans in Arrears",\r\nx.principal as "Total Loans Disbursed", x.principal_repaid as "Principal Repaid", x.principal_outstanding as "Principal Outstanding", x.principal_overdue as "Principal Overdue",\r\nx.interest as "Total Interest", x.interest_repaid as "Interest Repaid", x.interest_outstanding as "Interest Outstanding", x.interest_overdue as "Interest Overdue",\r\nx.fees as "Total Fees", x.fees_repaid as "Fees Repaid", x.fees_outstanding as "Fees Outstanding", x.fees_overdue as "Fees Overdue",\r\nx.penalties as "Total Penalties", x.penalties_repaid as "Penalties Repaid", x.penalties_outstanding as "Penalties Outstanding", x.penalties_overdue as "Penalties Overdue",\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(if(laa.loan_id is not null,  l.id, null)  )) as loans_in_arrears_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(laa.principal_overdue_derived) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(laa.interest_overdue_derived) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(laa.fee_charges_overdue_derived) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(laa.penalty_charges_overdue_derived) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency', NULL, 1, 1),
-	(12, 'Active Loans - Details', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", \r\nc.display_name as "Client", l.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed Date", \r\ndate(l.expected_maturedon_date) as "Expected Matured On",\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.principal_outstanding_derived as "Principal Outstanding",\r\nlaa.principal_overdue_derived as "Principal Overdue",\r\n\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.interest_outstanding_derived as "Interest Outstanding",\r\nlaa.interest_overdue_derived as "Interest Overdue",\r\n\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.fee_charges_outstanding_derived  as "Fees Outstanding",\r\nlaa.fee_charges_overdue_derived as "Fees Overdue",\r\n\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nl.penalty_charges_outstanding_derived as "Penalties Outstanding",\r\npenalty_charges_overdue_derived as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
-	(13, 'Obligation Met Loans Details', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as "Client Account No.", c.display_name as "Client",\r\nl.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Amount", \r\nl.total_repayment_derived  as "Total Repaid", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed", \r\ndate(l.closedon_date) as "Closed",\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nlo.display_name as "Loan Officer"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n  when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n  else 1 = 1\r\n  end)\r\nand l.loan_status_id = 600\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
-	(14, 'Obligation Met Loans Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\ncount(distinct(c.id)) as "No. of Clients",\r\ncount(distinct(l.id)) as "No. of Loans",\r\nsum(l.principal_amount) as "Total Loan Amount", \r\nsum(l.principal_repaid_derived) as "Total Principal Repaid",\r\nsum(l.interest_repaid_derived) as "Total Interest Repaid",\r\nsum(l.fee_charges_repaid_derived) as "Total Fees Repaid",\r\nsum(l.penalty_charges_repaid_derived) as "Total Penalties Repaid",\r\nsum(l.interest_waived_derived) as "Total Interest Waived",\r\nsum(l.fee_charges_waived_derived) as "Total Fees Waived",\r\nsum(l.penalty_charges_waived_derived) as "Total Penalties Waived"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n  when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n  else 1 = 1\r\n  end)\r\nand l.loan_status_id = 600\r\ngroup by ounder.hierarchy, l.currency_code, ounder.name\r\norder by ounder.hierarchy, l.currency_code', 'Individual Client \n\nReport', 1, 1),
-	(15, 'Portfolio at Risk', 'Table', NULL, 'Loan', 'select x.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from \r\n(select  ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(l.principal_outstanding_derived) as "Principal Outstanding",\r\nsum(laa.principal_overdue_derived) as "Principal Overdue",\r\n\r\nsum(l.interest_outstanding_derived) as "Interest Outstanding",\r\nsum(laa.interest_overdue_derived) as "Interest Overdue",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as "Fees Outstanding",\r\nsum(laa.fee_charges_overdue_derived) as "Fees Overdue",\r\n\r\nsum(penalty_charges_outstanding_derived) as "Penalties Outstanding",\r\nsum(laa.penalty_charges_overdue_derived) as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.currency_code\r\norder by l.currency_code) x', 'Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)', 1, 1),
-	(16, 'Portfolio at Risk by Branch', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch",\r\nx.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n (case\r\n when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select  ounder.id as "branch", ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\n\r\nsum(l.principal_outstanding_derived) as "Principal Outstanding",\r\nsum(laa.principal_overdue_derived) as "Principal Overdue",\r\n\r\nsum(l.interest_outstanding_derived) as "Interest Outstanding",\r\nsum(laa.interest_overdue_derived) as "Interest Overdue",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as "Fees Outstanding",\r\nsum(laa.fee_charges_overdue_derived) as "Fees Overdue",\r\n\r\nsum(penalty_charges_outstanding_derived) as "Penalties Outstanding",\r\nsum(laa.penalty_charges_overdue_derived) as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency', 'Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)', 1, 1),
-	(20, 'Funds Disbursed Between Dates Summary', 'Table', NULL, 'Fund', 'select ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, \r\nround(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office ounder \r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'${currencyId}\' or \'-1\' = \'${currencyId}\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\ngroup by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)', NULL, 1, 1),
-	(21, 'Funds Disbursed Between Dates Summary by Office', 'Table', NULL, 'Fund', 'select \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\n \n\nifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office o\r\n\n\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c \n\non c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\n\n\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand o.id = ${officeId}\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand \n\n(l.currency_code = \'${currencyId}\' or \'-1\' = \'${currencyId}\')\r\ngroup by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, \n\nl.currency_code)\r\norder by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)', NULL, 1, 1),
+	(2, 'Client Loans Listing', 'Table', NULL, 'Client', 'select\nconcat(repeat("..",\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch", c.account_no as "Client Account No.",\nc.display_name as "Name",\nr.enum_message_property as "Client Status",\nlo.display_name as "Loan Officer", l.account_no as "Loan Account No.", l.external_id as "External Id", p.name as Loan, st.enum_message_property as "Status",\nf.`name` as Fund, purp.code_value as "Loan Purpose",\nifnull(cur.display_symbol, l.currency_code) as Currency,\nl.principal_amount, l.arrearstolerance_amount as "Arrears Tolerance Amount",\nl.number_of_repayments as "Expected No. Repayments",\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate",\nl.nominal_interest_rate_per_period as "Nominal Interest Rate Per Period",\nipf.enum_message_property as "Interest Rate Frequency",\nim.enum_message_property as "Interest Method",\nicp.enum_message_property as "Interest Calculated in Period",\nl.term_frequency as "Term Frequency",\ntf.enum_message_property as "Term Frequency Period",\nl.repay_every as "Repayment Frequency",\nrf.enum_message_property as "Repayment Frequency Period",\nam.enum_message_property as "Amortization",\nl.total_charges_due_at_disbursement_derived as "Total Charges Due At Disbursement",\ndate(l.submittedon_date) as Submitted, date(l.approvedon_date) Approved, l.expected_disbursedon_date As "Expected Disbursal",\ndate(l.expected_firstrepaymenton_date) as "Expected First Repayment",\ndate(l.interest_calculated_from_date) as "Interest Calculated From" ,\ndate(l.disbursedon_date) as Disbursed,\ndate(l.expected_maturedon_date) "Expected Maturity",\ndate(l.maturedon_date) as "Matured On", date(l.closedon_date) as Closed,\ndate(l.rejectedon_date) as Rejected, date(l.rescheduledon_date) as Rescheduled,\ndate(l.withdrawnon_date) as Withdrawn, date(l.writtenoffon_date) "Written Off"\nfrom m_office o\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\njoin m_client c on c.office_id = ounder.id\nleft join r_enum_value r on r.enum_name = \'status_enum\'\n and r.enum_id = c.status_enum\nleft join m_loan l on l.client_id = c.id\nleft join m_staff lo on lo.id = l.loan_officer_id\nleft join m_product_loan p on p.id = l.product_id\nleft join m_fund f on f.id = l.fund_id\nleft join r_enum_value st on st.enum_name = "loan_status_id" and st.enum_id = l.loan_status_id\nleft join r_enum_value ipf on ipf.enum_name = "interest_period_frequency_enum"\n and ipf.enum_id = l.interest_period_frequency_enum\nleft join r_enum_value im on im.enum_name = "interest_method_enum"\n and im.enum_id = l.interest_method_enum\nleft join r_enum_value tf on tf.enum_name = "term_period_frequency_enum"\n and tf.enum_id = l.term_period_frequency_enum\nleft join r_enum_value icp on icp.enum_name = "interest_calculated_in_period_enum"\n and icp.enum_id = l.interest_calculated_in_period_enum\nleft join r_enum_value rf on rf.enum_name = "repayment_period_frequency_enum"\n and rf.enum_id = l.repayment_period_frequency_enum\nleft join r_enum_value am on am.enum_name = "amortization_method_enum"\n and am.enum_id = l.amortization_method_enum\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\nleft join m_currency cur on cur.code = l.currency_code\nwhere o.id = ${officeId}\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\norder by ounder.hierarchy, 2 , l.id', 'Individual Client Report\r\n\r\nPretty \n\nwide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for larger ones.  \n\nThere is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t have that client browser/memory impact).', 1, 1),
+	(5, 'Loans Awaiting Disbursal', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nc.account_no as "Client Account No", c.display_name as "Name", l.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund, ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nl.principal_amount as Principal,  \r\nl.term_frequency as "Term Frequency",\n\n\r\ntf.enum_message_property as "Term Frequency Period",\r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate",\r\ndate(l.approvedon_date) "Approved",\r\ndatediff(l.expected_disbursedon_date, curdate()) as "Days to Disbursal",\r\ndate(l.expected_disbursedon_date) "Expected Disbursal",\r\npurp.code_value as "Loan Purpose",\r\n lo.display_name as "Loan Officer"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = "term_period_frequency_enum" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\norder by ounder.hierarchy, datediff(l.expected_disbursedon_date, curdate()),  c.account_no', 'Individual Client Report', 1, 1),
+	(6, 'Loans Awaiting Disbursal Summary', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\npl.`name` as "Product", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  f.`name` as Fund,\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`, ounder.name\r\norder by ounder.hierarchy, pl.`name`, l.currency_code,  f.`name`', 'Individual Client Report', 1, 1),
+	(7, 'Loans Awaiting Disbursal Summary by Month', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\npl.`name` as "Product", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nyear(l.expected_disbursedon_date) as "Year", \r\nmonthname(l.expected_disbursedon_date) as "Month",\r\nsum(l.principal_amount) as Principal\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 200\r\ngroup by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date), ounder.name, l.expected_disbursedon_date\r\norder by ounder.hierarchy, pl.`name`, l.currency_code, year(l.expected_disbursedon_date), month(l.expected_disbursedon_date)', 'Individual Client Report', 1, 1),
+	(8, 'Loans Pending Approval', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nc.account_no as "Client Account No.", c.display_name as "Client Name", \r\nifnull(cur.display_symbol, l.currency_code) as Currency,  pl.`name` as "Product", \r\nl.account_no as "Loan Account No.", \r\nl.principal_amount as "Loan Amount", \r\nl.term_frequency as "Term Frequency",\n\n\r\ntf.enum_message_property as "Term Frequency Period",\r\nl.annual_nominal_interest_rate as " Annual \n\nNominal Interest Rate", \r\ndatediff(curdate(), l.submittedon_date) "Days Pending Approval", \r\npurp.code_value as "Loan Purpose",\r\nlo.display_name as "Loan Officer"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join r_enum_value tf on tf.enum_name = "term_period_frequency_enum" and tf.enum_id = l.term_period_frequency_enum\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 100 /*Submitted and awaiting approval */\r\norder by ounder.hierarchy, l.submittedon_date,  l.account_no', 'Individual Client Report', 1, 1),
+	(11, 'Active Loans - Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch", x.currency as Currency,\r\n x.client_count as "No. of Clients", x.active_loan_count as "No. Active Loans", x. loans_in_arrears_count as "No. of Loans in Arrears",\r\nx.principal as "Total Loans Disbursed", x.principal_repaid as "Principal Repaid", x.principal_outstanding as "Principal Outstanding", x.principal_overdue as "Principal Overdue",\r\nx.interest as "Total Interest", x.interest_repaid as "Interest Repaid", x.interest_outstanding as "Interest Outstanding", x.interest_overdue as "Interest Overdue",\r\nx.fees as "Total Fees", x.fees_repaid as "Fees Repaid", x.fees_outstanding as "Fees Outstanding", x.fees_overdue as "Fees Overdue",\r\nx.penalties as "Total Penalties", x.penalties_repaid as "Penalties Repaid", x.penalties_outstanding as "Penalties Outstanding", x.penalties_overdue as "Penalties Overdue",\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(if(laa.loan_id is not null,  l.id, null)  )) as loans_in_arrears_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(laa.principal_overdue_derived) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(laa.interest_overdue_derived) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(laa.fee_charges_overdue_derived) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(laa.penalty_charges_overdue_derived) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency', NULL, 1, 1),
+	(12, 'Active Loans - Details', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", \r\nc.display_name as "Client", l.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed Date", \r\ndate(l.expected_maturedon_date) as "Expected Matured On",\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.principal_outstanding_derived as "Principal Outstanding",\r\nlaa.principal_overdue_derived as "Principal Overdue",\r\n\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.interest_outstanding_derived as "Interest Outstanding",\r\nlaa.interest_overdue_derived as "Interest Overdue",\r\n\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.fee_charges_outstanding_derived  as "Fees Outstanding",\r\nlaa.fee_charges_overdue_derived as "Fees Overdue",\r\n\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nl.penalty_charges_outstanding_derived as "Penalties Outstanding",\r\npenalty_charges_overdue_derived as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
+	(13, 'Obligation Met Loans Details', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as "Client Account No.", c.display_name as "Client",\r\nl.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Amount", \r\nl.total_repayment_derived  as "Total Repaid", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed", \r\ndate(l.closedon_date) as "Closed",\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nlo.display_name as "Loan Officer"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n  when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n  else 1 = 1\r\n  end)\r\nand l.loan_status_id = 600\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
+	(14, 'Obligation Met Loans Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\ncount(distinct(c.id)) as "No. of Clients",\r\ncount(distinct(l.id)) as "No. of Loans",\r\nsum(l.principal_amount) as "Total Loan Amount", \r\nsum(l.principal_repaid_derived) as "Total Principal Repaid",\r\nsum(l.interest_repaid_derived) as "Total Interest Repaid",\r\nsum(l.fee_charges_repaid_derived) as "Total Fees Repaid",\r\nsum(l.penalty_charges_repaid_derived) as "Total Penalties Repaid",\r\nsum(l.interest_waived_derived) as "Total Interest Waived",\r\nsum(l.fee_charges_waived_derived) as "Total Fees Waived",\r\nsum(l.penalty_charges_waived_derived) as "Total Penalties Waived"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand (case\r\n  when ${obligDateType} = 1 then\r\n    l.closedon_date between \'${startDate}\' and \'${endDate}\'\r\n when ${obligDateType} = 2 then\r\n    l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\n  else 1 = 1\r\n  end)\r\nand l.loan_status_id = 600\r\ngroup by ounder.hierarchy, l.currency_code, ounder.name\r\norder by ounder.hierarchy, l.currency_code', 'Individual Client \n\nReport', 1, 1),
+	(15, 'Portfolio at Risk', 'Table', NULL, 'Loan', 'select x.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from \r\n(select  ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\nsum(l.principal_outstanding_derived) as "Principal Outstanding",\r\nsum(laa.principal_overdue_derived) as "Principal Overdue",\r\n\r\nsum(l.interest_outstanding_derived) as "Interest Outstanding",\r\nsum(laa.interest_overdue_derived) as "Interest Overdue",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as "Fees Outstanding",\r\nsum(laa.fee_charges_overdue_derived) as "Fees Overdue",\r\n\r\nsum(penalty_charges_outstanding_derived) as "Penalties Outstanding",\r\nsum(laa.penalty_charges_overdue_derived) as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by l.currency_code\r\norder by l.currency_code) x', 'Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)', 1, 1),
+	(16, 'Portfolio at Risk by Branch', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch",\r\nx.Currency, x.`Principal Outstanding`, x.`Principal Overdue`, x.`Interest Outstanding`, x.`Interest Overdue`, \r\nx.`Fees Outstanding`, x.`Fees Overdue`, x.`Penalties Outstanding`, x.`Penalties Overdue`,\r\n\r\n (case\r\n when ${parType} = 1 then\r\n    cast(round((x.`Principal Overdue` * 100) / x.`Principal Outstanding`, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding`), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding`), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.`Principal Overdue` + x.`Interest Overdue` + x.`Fees Overdue` + x.`Penalties Overdue`) * 100) / (x.`Principal Outstanding` + x.`Interest Outstanding` + x.`Fees Outstanding` + x.`Penalties Overdue`), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select  ounder.id as "branch", ifnull(cur.display_symbol, l.currency_code) as Currency,  \r\n\r\nsum(l.principal_outstanding_derived) as "Principal Outstanding",\r\nsum(laa.principal_overdue_derived) as "Principal Overdue",\r\n\r\nsum(l.interest_outstanding_derived) as "Interest Outstanding",\r\nsum(laa.interest_overdue_derived) as "Interest Overdue",\r\n\r\nsum(l.fee_charges_outstanding_derived)  as "Fees Outstanding",\r\nsum(laa.fee_charges_overdue_derived) as "Fees Overdue",\r\n\r\nsum(penalty_charges_outstanding_derived) as "Penalties Outstanding",\r\nsum(laa.penalty_charges_overdue_derived) as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin  m_loan l on l.client_id = c.id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_code_value purp on purp.id = l.loanpurpose_cv_id\r\nleft join m_product_loan p on p.id = l.product_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency', 'Covers all loans.\r\n\r\nFor larger MFIs … we should add some derived fields on loan (or a 1:1 loan related table like mifos 2.x does)\r\nPrinciple, Interest, Fees, Penalties Outstanding and Overdue (possibly waived and written off too)', 1, 1),
+	(20, 'Funds Disbursed Between Dates Summary', 'Table', NULL, 'Fund', 'select ifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, \r\nround(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office ounder \r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\ngroup by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)\r\norder by ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)', NULL, 1, 1),
+	(21, 'Funds Disbursed Between Dates Summary by Office', 'Table', NULL, 'Fund', 'select \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\n \n\nifnull(f.`name`, \'-\') as Fund,  ifnull(cur.display_symbol, l.currency_code) as Currency, round(sum(l.principal_amount), 4) as disbursed_amount\r\nfrom m_office o\r\n\n\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c \n\non c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_currency cur on cur.`code` = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\n\n\nwhere disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand o.id = ${officeId}\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand \n\n(l.currency_code = \'$\{currencyId}\' or \'-1\' = \'$\{currencyId}\')\r\ngroup by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, \n\nl.currency_code)\r\norder by ounder.`name`,  ifnull(f.`name`, \'-\') , ifnull(cur.display_symbol, l.currency_code)', NULL, 1, 1),
 	(48, 'Balance Sheet', 'Pentaho', NULL, 'Accounting', NULL, 'Balance Sheet', 1, 1),
 	(49, 'Income Statement', 'Pentaho', NULL, 'Accounting', NULL, 'Profit and Loss Statement', 1, 1),
 	(50, 'Trial Balance', 'Pentaho', NULL, 'Accounting', NULL, 'Trial Balance Report', 1, 1),
-	(51, 'Written-Off Loans', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as "Client Account No.",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as "Loan Amount",\r\nifnull(lt.principal_portion_derived, 0) AS \'Written-Off Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Written-Off Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Written-Off Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Written-Off Penalties\',\r\nn.note AS \'Reason For Write-Off\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 6 /*write-off */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=601\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = "${currencyId}" or "-1" = "${currencyId}") \r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no', 'Individual Lending Report. Written Off Loans', 1, 1),
+	(51, 'Written-Off Loans', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as "Client Account No.",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as "Loan Amount",\r\nifnull(lt.principal_portion_derived, 0) AS \'Written-Off Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Written-Off Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Written-Off Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Written-Off Penalties\',\r\nn.note AS \'Reason For Write-Off\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 6 /*write-off */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=601\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}") \r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no', 'Individual Lending Report. Written Off Loans', 1, 1),
 	(52, 'Aging Detail', 'Table', NULL, 'Loan', '\r\nSELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nmc.account_no as "Client Account No.",\r\n  mc.display_name AS "Client Name",\r\n   ml.account_no AS "Account Number",\r\n  ml.principal_amount AS "Loan Amount",\r\n ml.principal_disbursed_derived AS "Original Principal",\r\n ml.interest_charged_derived AS "Original Interest",\r\n ml.principal_repaid_derived AS "Principal Paid",\r\n ml.interest_repaid_derived AS "Interest Paid",\r\n laa.principal_overdue_derived AS "Principal Overdue",\r\n laa.interest_overdue_derived AS "Interest Overdue",\r\nDATEDIFF(CURDATE(), laa.overdue_since_date_derived) as "Days in Arrears",\r\n\r\n  IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<7, \'<1\', \r\n  IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<8, \' 1\', \r\n  IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<15,  \'2\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<22, \' 3\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<29, \' 4\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<36, \' 5\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<43, \' 6\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<50, \' 7\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<57, \' 8\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<64, \' 9\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<71, \'10\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<78, \'11\', \r\n   IF(DATEDIFF(CURDATE(), laa.overdue_since_date_derived)<85, \'12\', \'12+\')))))))))))) )AS "Weeks In Arrears Band",\r\n\r\n   IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<31, \'0 - 30\', \r\n    IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<61, \'30 - 60\', \r\n   IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<91, \'60 - 90\', \r\n   IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<181, \'90 - 180\', \r\n   IF(DATEDIFF(CURDATE(),  laa.overdue_since_date_derived)<361, \'180 - 360\', \r\n         \'> 360\'))))) AS "Days in Arrears Band"\r\n\r\n FROM m_office mo \r\n    JOIN m_office ounder ON ounder.hierarchy like concat(mo.hierarchy, \'%\')\r\n          AND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n      INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n      INNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\n    INNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\n    left join m_currency cur on cur.code = ml.currency_code\r\n  WHERE ml.loan_status_id=300\r\n    AND mo.id=${officeId}\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no\r\n', 'Loan arrears aging (Weeks)', 1, 1),
-	(53, 'Aging Summary (Arrears in Weeks)', 'Table', NULL, 'Loan', 'SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Weeks In Arrears (Up To)\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n /* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n  (SELECT \'On Schedule\' period_no,1 pid UNION\r\n   SELECT \'1\',2 UNION\r\n    SELECT \'2\',3 UNION\r\n    SELECT \'3\',4 UNION\r\n    SELECT \'4\',5 UNION\r\n    SELECT \'5\',6 UNION\r\n    SELECT \'6\',7 UNION\r\n    SELECT \'7\',8 UNION\r\n    SELECT \'8\',9 UNION\r\n    SELECT \'9\',10 UNION\r\n   SELECT \'10\',11 UNION\r\n    SELECT \'11\',12 UNION\r\n    SELECT \'12\',13 UNION\r\n    SELECT \'12+\',14) pers,\r\n  (SELECT distinctrow moc.code, moc.name\r\n    FROM m_office mo2\r\n     INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n       LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n     INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n  WHERE ml2.loan_status_id=300 /* active */\r\n AND mo2.id=${officeId}\r\nAND (ml2.currency_code = "${currencyId}" or "-1" = "${currencyId}")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n    z.currency, z.arrPeriod, \r\n COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n  SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n  /*derived table just used to get arrPeriod value (was much slower to\r\n  duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n  (SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<8, \'1\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<15, \'2\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<22, \'3\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<29, \'4\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<36, \'5\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<43, \'6\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<50, \'7\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<57, \'8\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<64, \'9\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<71, \'10\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<78, \'11\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<85, \'12\',\r\n         \'12+\'))))))))))))) AS arrPeriod\r\n\r\n  FROM /* get the individual loan details */\r\n    (SELECT ml.id AS loanId, ml.currency_code as currency,\r\n        ml.principal_disbursed_derived as principal, \r\n        ml.interest_charged_derived as interest, \r\n        ml.principal_repaid_derived as prinPaid, \r\n        ml.interest_repaid_derived intPaid,\r\n\r\n         laa.principal_overdue_derived as prinOverdue,\r\n         laa.interest_overdue_derived as intOverdue,\r\n\r\n         IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n        \r\n      FROM m_office mo\r\n      INNER JOIN m_office ounder ON ounder.hierarchy \r\n       LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n      INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n      INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n       LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n    WHERE ml.loan_status_id=300 /* active */\r\n        AND mo.id=${officeId}\r\n     AND (ml.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\n      GROUP BY ml.id) x\r\n ) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid', 'Loan amount in arrears by branch', 1, 1),
-	(54, 'Rescheduled Loans', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as "Client Account No.",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as "Loan Amount",\r\nifnull(lt.principal_portion_derived, 0) AS \'Rescheduled Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Rescheduled Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Rescheduled Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Rescheduled Penalties\',\r\nn.note AS \'Reason For Rescheduling\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 7 /*marked for rescheduling */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=602\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no', 'Individual Lending Report. Rescheduled Loans.  The ability to reschedule (or mark that you have rescheduled the loan elsewhere) is a legacy of the older Mifos product.  Needed for migration.', 1, 1),
-	(55, 'Active Loans Passed Final Maturity', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", \r\nc.display_name as "Client", l.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed Date", \r\ndate(l.expected_maturedon_date) as "Expected Matured On",\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.principal_outstanding_derived as "Principal Outstanding",\r\nlaa.principal_overdue_derived as "Principal Overdue",\r\n\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.interest_outstanding_derived as "Interest Outstanding",\r\nlaa.interest_overdue_derived as "Interest Overdue",\r\n\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.fee_charges_outstanding_derived  as "Fees Outstanding",\r\nlaa.fee_charges_overdue_derived as "Fees Overdue",\r\n\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nl.penalty_charges_outstanding_derived as "Penalties Outstanding",\r\nlaa.penalty_charges_overdue_derived as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
-	(56, 'Active Loans Passed Final Maturity Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch", x.currency as Currency,\r\n x.client_count as "No. of Clients", x.active_loan_count as "No. Active Loans", x. arrears_loan_count as "No. of Loans in Arrears",\r\nx.principal as "Total Loans Disbursed", x.principal_repaid as "Principal Repaid", x.principal_outstanding as "Principal Outstanding", x.principal_overdue as "Principal Overdue",\r\nx.interest as "Total Interest", x.interest_repaid as "Interest Repaid", x.interest_outstanding as "Interest Outstanding", x.interest_overdue as "Interest Overdue",\r\nx.fees as "Total Fees", x.fees_repaid as "Fees Repaid", x.fees_outstanding as "Fees Outstanding", x.fees_overdue as "Fees Overdue",\r\nx.penalties as "Total Penalties", x.penalties_repaid as "Penalties Repaid", x.penalties_outstanding as "Penalties Outstanding", x.penalties_overdue as "Penalties Overdue",\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency', NULL, 1, 1),
-	(57, 'Active Loans in last installment', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(lastInstallment.`hierarchy`) - LENGTH(REPLACE(lastInstallment.`hierarchy`, \'.\', \'\')) - 1))), lastInstallment.branch) as "Office/Branch",\r\nlastInstallment.Currency,\r\nlastInstallment.`Loan Officer`, \r\nlastInstallment.`Client Account No`, lastInstallment.`Client`, \r\nlastInstallment.`Loan Account No`, lastInstallment.`Product`, \r\nlastInstallment.`Fund`,  lastInstallment.`Loan Amount`, \r\nlastInstallment.`Annual Nominal Interest Rate`, \r\nlastInstallment.`Disbursed`, lastInstallment.`Expected Matured On` ,\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.principal_outstanding_derived as "Principal Outstanding",\r\nlaa.principal_overdue_derived as "Principal Overdue",\r\n\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.interest_outstanding_derived as "Interest Outstanding",\r\nlaa.interest_overdue_derived as "Interest Overdue",\r\n\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.fee_charges_outstanding_derived  as "Fees Outstanding",\r\nlaa.fee_charges_overdue_derived as "Fees Overdue",\r\n\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nl.penalty_charges_outstanding_derived as "Penalties Outstanding",\r\nlaa.penalty_charges_overdue_derived as "Penalties Overdue"\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", c.account_no as "Client Account No",\r\nc.display_name as "Client", l.account_no as "Loan Account No", pl.`name` as "Product", \r\nf.`name` as Fund,  l.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as "Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed", date(l.expected_maturedon_date) as "Expected Matured On"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\norder by lastInstallment.hierarchy, lastInstallment.Currency, lastInstallment.`Client Account No`, lastInstallment.`Loan Account No`', 'Individual Client \n\nReport', 1, 1),
-	(58, 'Active Loans in last installment Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch", x.currency as Currency,\r\n x.client_count as "No. of Clients", x.active_loan_count as "No. Active Loans", x. arrears_loan_count as "No. of Loans in Arrears",\r\nx.principal as "Total Loans Disbursed", x.principal_repaid as "Principal Repaid", x.principal_outstanding as "Principal Outstanding", x.principal_overdue as "Principal Overdue",\r\nx.interest as "Total Interest", x.interest_repaid as "Interest Repaid", x.interest_outstanding as "Interest Outstanding", x.interest_overdue as "Interest Overdue",\r\nx.fees as "Total Fees", x.fees_repaid as "Fees Repaid", x.fees_outstanding as "Fees Outstanding", x.fees_overdue as "Fees Overdue",\r\nx.penalties as "Total Penalties", x.penalties_repaid as "Penalties Repaid", x.penalties_outstanding as "Penalties Outstanding", x.penalties_overdue as "Penalties Overdue",\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select lastInstallment.branchId as branchId,\r\nlastInstallment.Currency,\r\ncount(distinct(lastInstallment.clientId)) as client_count, \r\ncount(distinct(lastInstallment.loanId)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id as branchId, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", c.id as clientId, c.account_no as "Client Account No",\r\nc.display_name as "Client", l.account_no as "Loan Account No", pl.`name` as "Product", \r\nf.`name` as Fund,  l.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as "Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed", date(l.expected_maturedon_date) as "Expected Matured On"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\ngroup by lastInstallment.branchId, lastInstallment.Currency) x on x.branchId = mo.id\r\norder by mo.hierarchy, x.Currency', 'Individual Client \n\nReport', 1, 1),
-	(59, 'Active Loans by Disbursal Period', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as "Client Account No", c.display_name as "Client", l.account_no as "Loan Account No", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Principal Amount", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed Date", \r\n\r\nl.total_expected_repayment_derived as "Total Loan (P+I+F+Pen)",\r\nl.total_repayment_derived as "Total Repaid (P+I+F+Pen)",\r\nlo.display_name as "Loan Officer"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
-	(61, 'Aging Summary (Arrears in Months)', 'Table', NULL, 'Loan', 'SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Days In Arrears\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n /* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n  (SELECT \'On Schedule\' period_no,1 pid UNION\r\n   SELECT \'0 - 30\',2 UNION\r\n   SELECT \'30 - 60\',3 UNION\r\n    SELECT \'60 - 90\',4 UNION\r\n    SELECT \'90 - 180\',5 UNION\r\n   SELECT \'180 - 360\',6 UNION\r\n    SELECT \'> 360\',7 ) pers,\r\n  (SELECT distinctrow moc.code, moc.name\r\n    FROM m_office mo2\r\n     INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n       LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n     INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n  WHERE ml2.loan_status_id=300 /* active */\r\n AND mo2.id=${officeId}\r\nAND (ml2.currency_code = "${currencyId}" or "-1" = "${currencyId}")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n    z.currency, z.arrPeriod, \r\n COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n  SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n  /*derived table just used to get arrPeriod value (was much slower to\r\n  duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n  (SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<31, \'0 - 30\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<61, \'30 - 60\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<91, \'60 - 90\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<181, \'90 - 180\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<361, \'180 - 360\', \r\n        \'> 360\')))))) AS arrPeriod\r\n\r\n FROM /* get the individual loan details */\r\n    (SELECT ml.id AS loanId, ml.currency_code as currency,\r\n        ml.principal_disbursed_derived as principal, \r\n        ml.interest_charged_derived as interest, \r\n        ml.principal_repaid_derived as prinPaid, \r\n        ml.interest_repaid_derived intPaid,\r\n\r\n         laa.principal_overdue_derived as prinOverdue,\r\n         laa.interest_overdue_derived as intOverdue,\r\n\r\n         IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n        \r\n      FROM m_office mo\r\n      INNER JOIN m_office ounder ON ounder.hierarchy \r\n       LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n      INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n      INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n       LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n    WHERE ml.loan_status_id=300 /* active */\r\n        AND mo.id=${officeId}\r\n     AND (ml.currency_code = "${currencyId}" or "-1" = "${currencyId}")\r\n      GROUP BY ml.id) x\r\n ) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid', 'Loan amount in arrears by branch', 1, 1),
+	(53, 'Aging Summary (Arrears in Weeks)', 'Table', NULL, 'Loan', 'SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Weeks In Arrears (Up To)\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n /* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n  (SELECT \'On Schedule\' period_no,1 pid UNION\r\n   SELECT \'1\',2 UNION\r\n    SELECT \'2\',3 UNION\r\n    SELECT \'3\',4 UNION\r\n    SELECT \'4\',5 UNION\r\n    SELECT \'5\',6 UNION\r\n    SELECT \'6\',7 UNION\r\n    SELECT \'7\',8 UNION\r\n    SELECT \'8\',9 UNION\r\n    SELECT \'9\',10 UNION\r\n   SELECT \'10\',11 UNION\r\n    SELECT \'11\',12 UNION\r\n    SELECT \'12\',13 UNION\r\n    SELECT \'12+\',14) pers,\r\n  (SELECT distinctrow moc.code, moc.name\r\n    FROM m_office mo2\r\n     INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n       LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n     INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n  WHERE ml2.loan_status_id=300 /* active */\r\n AND mo2.id=${officeId}\r\nAND (ml2.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n    z.currency, z.arrPeriod, \r\n COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n  SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n  /*derived table just used to get arrPeriod value (was much slower to\r\n  duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n  (SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<8, \'1\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<15, \'2\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<22, \'3\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<29, \'4\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<36, \'5\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<43, \'6\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<50, \'7\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<57, \'8\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<64, \'9\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<71, \'10\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<78, \'11\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<85, \'12\',\r\n         \'12+\'))))))))))))) AS arrPeriod\r\n\r\n  FROM /* get the individual loan details */\r\n    (SELECT ml.id AS loanId, ml.currency_code as currency,\r\n        ml.principal_disbursed_derived as principal, \r\n        ml.interest_charged_derived as interest, \r\n        ml.principal_repaid_derived as prinPaid, \r\n        ml.interest_repaid_derived intPaid,\r\n\r\n         laa.principal_overdue_derived as prinOverdue,\r\n         laa.interest_overdue_derived as intOverdue,\r\n\r\n         IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n        \r\n      FROM m_office mo\r\n      INNER JOIN m_office ounder ON ounder.hierarchy \r\n       LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n      INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n      INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n       LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n    WHERE ml.loan_status_id=300 /* active */\r\n        AND mo.id=${officeId}\r\n     AND (ml.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\n      GROUP BY ml.id) x\r\n ) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid', 'Loan amount in arrears by branch', 1, 1),
+	(54, 'Rescheduled Loans', 'Table', NULL, 'Loan', 'SELECT \r\nconcat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, ml.currency_code) as Currency,  \r\nc.account_no as "Client Account No.",\r\nc.display_name AS \'Client Name\',\r\nml.account_no AS \'Loan Account No.\',\r\nmpl.name AS \'Product Name\',\r\nml.disbursedon_date AS \'Disbursed Date\',\r\nlt.transaction_date AS \'Written Off date\',\r\nml.principal_amount as "Loan Amount",\r\nifnull(lt.principal_portion_derived, 0) AS \'Rescheduled Principal\',\r\nifnull(lt.interest_portion_derived, 0) AS \'Rescheduled Interest\',\r\nifnull(lt.fee_charges_portion_derived,0) AS \'Rescheduled Fees\',\r\nifnull(lt.penalty_charges_portion_derived,0) AS \'Rescheduled Penalties\',\r\nn.note AS \'Reason For Rescheduling\',\r\nIFNULL(ms.display_name,\'-\') AS \'Loan Officer Name\'\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan ml ON ml.client_id = c.id\r\nJOIN m_product_loan mpl ON mpl.id=ml.product_id\r\nLEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\nJOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nLEFT JOIN m_note n ON n.loan_transaction_id = lt.id\r\nLEFT JOIN m_currency cur on cur.code = ml.currency_code\r\nWHERE lt.transaction_type_enum = 7 /*marked for rescheduling */\r\nAND lt.is_reversed is false \r\nAND ml.loan_status_id=602\r\nAND o.id=${officeId}\r\nAND (mpl.id=${loanProductId} OR ${loanProductId}=-1)\r\nAND lt.transaction_date BETWEEN \'${startDate}\' AND \'${endDate}\'\r\nAND (ml.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nORDER BY ounder.hierarchy, ifnull(cur.display_symbol, ml.currency_code), ml.account_no', 'Individual Lending Report. Rescheduled Loans.  The ability to reschedule (or mark that you have rescheduled the loan elsewhere) is a legacy of the older Mifos product.  Needed for migration.', 1, 1),
+	(55, 'Active Loans Passed Final Maturity', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", \r\nc.display_name as "Client", l.account_no as "Loan Account No.", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed Date", \r\ndate(l.expected_maturedon_date) as "Expected Matured On",\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.principal_outstanding_derived as "Principal Outstanding",\r\nlaa.principal_overdue_derived as "Principal Overdue",\r\n\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.interest_outstanding_derived as "Interest Outstanding",\r\nlaa.interest_overdue_derived as "Interest Overdue",\r\n\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.fee_charges_outstanding_derived  as "Fees Outstanding",\r\nlaa.fee_charges_overdue_derived as "Fees Overdue",\r\n\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nl.penalty_charges_outstanding_derived as "Penalties Outstanding",\r\nlaa.penalty_charges_overdue_derived as "Penalties Overdue"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
+	(56, 'Active Loans Passed Final Maturity Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch", x.currency as Currency,\r\n x.client_count as "No. of Clients", x.active_loan_count as "No. Active Loans", x. arrears_loan_count as "No. of Loans in Arrears",\r\nx.principal as "Total Loans Disbursed", x.principal_repaid as "Principal Repaid", x.principal_outstanding as "Principal Outstanding", x.principal_overdue as "Principal Overdue",\r\nx.interest as "Total Interest", x.interest_repaid as "Interest Repaid", x.interest_outstanding as "Interest Outstanding", x.interest_overdue as "Interest Overdue",\r\nx.fees as "Total Fees", x.fees_repaid as "Fees Repaid", x.fees_outstanding as "Fees Outstanding", x.fees_overdue as "Fees Overdue",\r\nx.penalties as "Total Penalties", x.penalties_repaid as "Penalties Repaid", x.penalties_outstanding as "Penalties Outstanding", x.penalties_overdue as "Penalties Overdue",\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select ounder.id as branch,\r\nifnull(cur.display_symbol, l.currency_code) as currency,\r\ncount(distinct(c.id)) as client_count, \r\ncount(distinct(l.id)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\n\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand l.expected_maturedon_date < curdate()\r\ngroup by ounder.id, l.currency_code) x on x.branch = mo.id\r\norder by mo.hierarchy, x.Currency', NULL, 1, 1),
+	(57, 'Active Loans in last installment', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(lastInstallment.`hierarchy`) - LENGTH(REPLACE(lastInstallment.`hierarchy`, \'.\', \'\')) - 1))), lastInstallment.branch) as "Office/Branch",\r\nlastInstallment.Currency,\r\nlastInstallment.`Loan Officer`, \r\nlastInstallment.`Client Account No`, lastInstallment.`Client`, \r\nlastInstallment.`Loan Account No`, lastInstallment.`Product`, \r\nlastInstallment.`Fund`,  lastInstallment.`Loan Amount`, \r\nlastInstallment.`Annual Nominal Interest Rate`, \r\nlastInstallment.`Disbursed`, lastInstallment.`Expected Matured On` ,\r\n\r\nl.principal_repaid_derived as "Principal Repaid",\r\nl.principal_outstanding_derived as "Principal Outstanding",\r\nlaa.principal_overdue_derived as "Principal Overdue",\r\n\r\nl.interest_repaid_derived as "Interest Repaid",\r\nl.interest_outstanding_derived as "Interest Outstanding",\r\nlaa.interest_overdue_derived as "Interest Overdue",\r\n\r\nl.fee_charges_repaid_derived as "Fees Repaid",\r\nl.fee_charges_outstanding_derived  as "Fees Outstanding",\r\nlaa.fee_charges_overdue_derived as "Fees Overdue",\r\n\r\nl.penalty_charges_repaid_derived as "Penalties Repaid",\r\nl.penalty_charges_outstanding_derived as "Penalties Outstanding",\r\nlaa.penalty_charges_overdue_derived as "Penalties Overdue"\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", c.account_no as "Client Account No",\r\nc.display_name as "Client", l.account_no as "Loan Account No", pl.`name` as "Product", \r\nf.`name` as Fund,  l.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as "Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed", date(l.expected_maturedon_date) as "Expected Matured On"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\norder by lastInstallment.hierarchy, lastInstallment.Currency, lastInstallment.`Client Account No`, lastInstallment.`Loan Account No`', 'Individual Client \n\nReport', 1, 1),
+	(58, 'Active Loans in last installment Summary', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(mo.`hierarchy`) - LENGTH(REPLACE(mo.`hierarchy`, \'.\', \'\')) - 1))), mo.`name`) as "Office/Branch", x.currency as Currency,\r\n x.client_count as "No. of Clients", x.active_loan_count as "No. Active Loans", x. arrears_loan_count as "No. of Loans in Arrears",\r\nx.principal as "Total Loans Disbursed", x.principal_repaid as "Principal Repaid", x.principal_outstanding as "Principal Outstanding", x.principal_overdue as "Principal Overdue",\r\nx.interest as "Total Interest", x.interest_repaid as "Interest Repaid", x.interest_outstanding as "Interest Outstanding", x.interest_overdue as "Interest Overdue",\r\nx.fees as "Total Fees", x.fees_repaid as "Fees Repaid", x.fees_outstanding as "Fees Outstanding", x.fees_overdue as "Fees Overdue",\r\nx.penalties as "Total Penalties", x.penalties_repaid as "Penalties Repaid", x.penalties_outstanding as "Penalties Outstanding", x.penalties_overdue as "Penalties Overdue",\r\n\r\n  (case\r\n when ${parType} = 1 then\r\n    cast(round((x.principal_overdue * 100) / x.principal_outstanding, 2) as char)\r\n when ${parType} = 2 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding), 2) as char)\r\n when ${parType} = 3 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding), 2) as char)\r\n when ${parType} = 4 then\r\n    cast(round(((x.principal_overdue + x.interest_overdue + x.fees_overdue + x.penalties_overdue) * 100) / (x.principal_outstanding + x.interest_outstanding + x.fees_outstanding + x.penalties_overdue), 2) as char)\r\n else "invalid PAR Type"\r\n end) as "Portfolio at Risk %"\r\n from m_office mo\r\njoin \r\n(select lastInstallment.branchId as branchId,\r\nlastInstallment.Currency,\r\ncount(distinct(lastInstallment.clientId)) as client_count, \r\ncount(distinct(lastInstallment.loanId)) as  active_loan_count,\r\ncount(distinct(laa.loan_id)  ) as arrears_loan_count,\r\n\r\nsum(l.principal_disbursed_derived) as principal,\r\nsum(l.principal_repaid_derived) as principal_repaid,\r\nsum(l.principal_outstanding_derived) as principal_outstanding,\r\nsum(ifnull(laa.principal_overdue_derived,0)) as principal_overdue,\r\n\r\nsum(l.interest_charged_derived) as interest,\r\nsum(l.interest_repaid_derived) as interest_repaid,\r\nsum(l.interest_outstanding_derived) as interest_outstanding,\r\nsum(ifnull(laa.interest_overdue_derived,0)) as interest_overdue,\r\n\r\nsum(l.fee_charges_charged_derived) as fees,\r\nsum(l.fee_charges_repaid_derived) as fees_repaid,\r\nsum(l.fee_charges_outstanding_derived)  as fees_outstanding,\r\nsum(ifnull(laa.fee_charges_overdue_derived,0)) as fees_overdue,\r\n\r\nsum(l.penalty_charges_charged_derived) as penalties,\r\nsum(l.penalty_charges_repaid_derived) as penalties_repaid,\r\nsum(l.penalty_charges_outstanding_derived) as penalties_outstanding,\r\nsum(ifnull(laa.penalty_charges_overdue_derived,0)) as penalties_overdue\r\n\r\nfrom \r\n(select l.id as loanId, l.number_of_repayments, min(r.installment), \r\nounder.id as branchId, ounder.hierarchy, ounder.`name` as branch, \r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nlo.display_name as "Loan Officer", c.id as clientId, c.account_no as "Client Account No",\r\nc.display_name as "Client", l.account_no as "Loan Account No", pl.`name` as "Product", \r\nf.`name` as Fund,  l.principal_amount as "Loan Amount", \r\nl.annual_nominal_interest_rate as "Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed", date(l.expected_maturedon_date) as "Expected Matured On"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_repayment_schedule r on r.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.loan_status_id = 300\r\nand r.completed_derived is false\r\nand r.duedate >= curdate()\r\ngroup by l.id\r\nhaving l.number_of_repayments = min(r.installment)) lastInstallment\r\njoin m_loan l on l.id = lastInstallment.loanId\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\ngroup by lastInstallment.branchId, lastInstallment.Currency) x on x.branchId = mo.id\r\norder by mo.hierarchy, x.Currency', 'Individual Client \n\nReport', 1, 1),
+	(59, 'Active Loans by Disbursal Period', 'Table', NULL, 'Loan', 'select concat(repeat("..",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\r\nifnull(cur.display_symbol, l.currency_code) as Currency,\r\nc.account_no as "Client Account No", c.display_name as "Client", l.account_no as "Loan Account No", pl.`name` as "Product", \r\nf.`name` as Fund,  \r\nl.principal_amount as "Loan Principal Amount", \r\nl.annual_nominal_interest_rate as " Annual Nominal Interest Rate", \r\ndate(l.disbursedon_date) as "Disbursed Date", \r\n\r\nl.total_expected_repayment_derived as "Total Loan (P+I+F+Pen)",\r\nl.total_repayment_derived as "Total Repaid (P+I+F+Pen)",\r\nlo.display_name as "Loan Officer"\r\n\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\r\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\njoin m_client c on c.office_id = ounder.id\r\njoin m_loan l on l.client_id = c.id\r\njoin m_product_loan pl on pl.id = l.product_id\r\nleft join m_staff lo on lo.id = l.loan_officer_id\r\nleft join m_currency cur on cur.code = l.currency_code\r\nleft join m_fund f on f.id = l.fund_id\r\nleft join m_loan_arrears_aging laa on laa.loan_id = l.id\r\nwhere o.id = ${officeId}\r\nand (l.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\nand (l.product_id = "${loanProductId}" or "-1" = "${loanProductId}")\r\nand (ifnull(l.loan_officer_id, -10) = "${loanOfficerId}" or "-1" = "${loanOfficerId}")\r\nand (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})\r\nand (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})\r\nand l.disbursedon_date between \'${startDate}\' and \'${endDate}\'\r\nand l.loan_status_id = 300\r\ngroup by l.id\r\norder by ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'Individual Client \n\nReport', 1, 1),
+	(61, 'Aging Summary (Arrears in Months)', 'Table', NULL, 'Loan', 'SELECT \r\n  IFNULL(periods.currencyName, periods.currency) as currency, \r\n  periods.period_no \'Days In Arrears\', \r\n  IFNULL(ars.loanId, 0) \'No Of Loans\', \r\n  IFNULL(ars.principal,0.0) \'Original Principal\', \r\n  IFNULL(ars.interest,0.0) \'Original Interest\', \r\n  IFNULL(ars.prinPaid,0.0) \'Principal Paid\', \r\n  IFNULL(ars.intPaid,0.0) \'Interest Paid\', \r\n  IFNULL(ars.prinOverdue,0.0) \'Principal Overdue\', \r\n  IFNULL(ars.intOverdue,0.0)\'Interest Overdue\'\r\nFROM \r\n /* full table of aging periods/currencies used combo to ensure each line represented */\r\n  (SELECT curs.code as currency, curs.name as currencyName, pers.* from\r\n  (SELECT \'On Schedule\' period_no,1 pid UNION\r\n   SELECT \'0 - 30\',2 UNION\r\n   SELECT \'30 - 60\',3 UNION\r\n    SELECT \'60 - 90\',4 UNION\r\n    SELECT \'90 - 180\',5 UNION\r\n   SELECT \'180 - 360\',6 UNION\r\n    SELECT \'> 360\',7 ) pers,\r\n  (SELECT distinctrow moc.code, moc.name\r\n    FROM m_office mo2\r\n     INNER JOIN m_office ounder2 ON ounder2.hierarchy \r\n       LIKE CONCAT(mo2.hierarchy, \'%\')\r\nAND ounder2.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n    INNER JOIN m_client mc2 ON mc2.office_id=ounder2.id\r\n     INNER JOIN m_loan ml2 ON ml2.client_id = mc2.id\r\n INNER JOIN m_organisation_currency moc ON moc.code = ml2.currency_code\r\n  WHERE ml2.loan_status_id=300 /* active */\r\n AND mo2.id=${officeId}\r\nAND (ml2.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")) curs) periods\r\n\r\n\r\nLEFT JOIN /* table of aging periods per currency with gaps if no applicable loans */\r\n(SELECT \r\n    z.currency, z.arrPeriod, \r\n COUNT(z.loanId) as loanId, SUM(z.principal) as principal, SUM(z.interest) as interest, \r\n SUM(z.prinPaid) as prinPaid, SUM(z.intPaid) as intPaid, \r\n  SUM(z.prinOverdue) as prinOverdue, SUM(z.intOverdue) as intOverdue\r\nFROM\r\n  /*derived table just used to get arrPeriod value (was much slower to\r\n  duplicate calc of minOverdueDate in inner query)\r\nmight not be now with derived fields but didn’t check */\r\n  (SELECT x.loanId, x.currency, x.principal, x.interest, x.prinPaid, x.intPaid, x.prinOverdue, x.intOverdue,\r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<1, \'On Schedule\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<31, \'0 - 30\', \r\n   IF(DATEDIFF(CURDATE(), minOverdueDate)<61, \'30 - 60\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<91, \'60 - 90\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<181, \'90 - 180\', \r\n    IF(DATEDIFF(CURDATE(), minOverdueDate)<361, \'180 - 360\', \r\n        \'> 360\')))))) AS arrPeriod\r\n\r\n FROM /* get the individual loan details */\r\n    (SELECT ml.id AS loanId, ml.currency_code as currency,\r\n        ml.principal_disbursed_derived as principal, \r\n        ml.interest_charged_derived as interest, \r\n        ml.principal_repaid_derived as prinPaid, \r\n        ml.interest_repaid_derived intPaid,\r\n\r\n         laa.principal_overdue_derived as prinOverdue,\r\n         laa.interest_overdue_derived as intOverdue,\r\n\r\n         IFNULL(laa.overdue_since_date_derived, curdate()) as minOverdueDate\r\n        \r\n      FROM m_office mo\r\n      INNER JOIN m_office ounder ON ounder.hierarchy \r\n       LIKE CONCAT(mo.hierarchy, \'%\')\r\nAND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n      INNER JOIN m_client mc ON mc.office_id=ounder.id\r\n      INNER JOIN m_loan ml ON ml.client_id = mc.id\r\n       LEFT JOIN m_loan_arrears_aging laa on laa.loan_id = ml.id\r\n    WHERE ml.loan_status_id=300 /* active */\r\n        AND mo.id=${officeId}\r\n     AND (ml.currency_code = "$\{currencyId}" or "-1" = "$\{currencyId}")\r\n      GROUP BY ml.id) x\r\n ) z \r\nGROUP BY z.currency, z.arrPeriod ) ars ON ars.arrPeriod=periods.period_no and ars.currency = periods.currency\r\nORDER BY periods.currency, periods.pid', 'Loan amount in arrears by branch', 1, 1),
 	(91, 'Loan Account Schedule', 'Pentaho', NULL, 'Loan', NULL, NULL, 1, 0),
 	(92, 'Branch Expected Cash Flow', 'Pentaho', NULL, 'Loan', NULL, NULL, 1, 1),
 	(93, 'Expected Payments By Date - Basic', 'Table', NULL, 'Loan', 'SELECT \r\n      ounder.name \'Office\', \r\n      IFNULL(ms.display_name,\'-\') \'Loan Officer\',\r\n    mc.account_no \'Client Account Number\',\r\n    mc.display_name \'Name\',\r\n   mp.name \'Product\',\r\n    ml.account_no \'Loan Account Number\',\r\n    mr.duedate \'Due Date\',\r\n    mr.installment \'Installment\',\r\n   cu.display_symbol \'Currency\',\r\n   mr.principal_amount- IFNULL(mr.principal_completed_derived,0) \'Principal Due\',\r\n    mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0) \'Interest Due\', \r\n   IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0) \'Fees Due\', \r\n    IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0) \'Penalty Due\',\r\n      (mr.principal_amount- IFNULL(mr.principal_completed_derived,0)) +\r\n       (mr.interest_amount- IFNULL(IFNULL(mr.interest_completed_derived,mr.interest_waived_derived),0)) + \r\n       (IFNULL(mr.fee_charges_amount,0)- IFNULL(IFNULL(mr.fee_charges_completed_derived,mr.fee_charges_waived_derived),0)) + \r\n       (IFNULL(mr.penalty_charges_amount,0)- IFNULL(IFNULL(mr.penalty_charges_completed_derived,mr.penalty_charges_waived_derived),0)) \'Total Due\', \r\n     mlaa.total_overdue_derived \'Total Overdue\'\r\n                    \r\n FROM m_office mo\r\n  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\n  \r\n  AND ounder.hierarchy like CONCAT(\'${currentUserHierarchy}\', \'%\')\r\n \r\n  LEFT JOIN m_client mc ON mc.office_id=ounder.id\r\n  LEFT JOIN m_loan ml ON ml.client_id=mc.id AND ml.loan_status_id=300\r\n  LEFT JOIN m_loan_arrears_aging mlaa ON mlaa.loan_id=ml.id\r\n  LEFT JOIN m_loan_repayment_schedule mr ON mr.loan_id=ml.id AND mr.completed_derived=0\r\n  LEFT JOIN m_product_loan mp ON mp.id=ml.product_id\r\n  LEFT JOIN m_staff ms ON ms.id=ml.loan_officer_id\r\n  LEFT JOIN m_currency cu ON cu.code=ml.currency_code\r\n WHERE mo.id=${officeId}\r\n AND (IFNULL(ml.loan_officer_id, -10) = "${loanOfficerId}" OR "-1" = "${loanOfficerId}")\r\n AND mr.duedate BETWEEN \'${startDate}\' AND \'${endDate}\'\r\n ORDER BY ounder.id,mr.duedate,ml.account_no', 'Test', 1, 1),
@@ -6350,9 +6350,9 @@ INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subty
 -- Dumping structure for table fineract_default.stretchy_report_parameter
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
 CREATE TABLE IF NOT EXISTS `stretchy_report_parameter` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `report_id` int(11) NOT NULL,
-  `parameter_id` int(11) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `report_id` INT NOT NULL,
+  `parameter_id` INT NOT NULL,
   `report_parameter_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `report_parameter_unique` (`report_id`,`parameter_id`),
@@ -6360,7 +6360,7 @@ CREATE TABLE IF NOT EXISTS `stretchy_report_parameter` (
   KEY `fk_report_parameter_002_idx` (`parameter_id`),
   CONSTRAINT `fk_report_parameter_001` FOREIGN KEY (`report_id`) REFERENCES `stretchy_report` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `fk_report_parameter_002` FOREIGN KEY (`parameter_id`) REFERENCES `stretchy_parameter` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=522 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=522 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.stretchy_report_parameter: ~415 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_report_parameter` DISABLE KEYS */;
@@ -6788,9 +6788,9 @@ DROP TABLE IF EXISTS `x_registered_table`;
 CREATE TABLE IF NOT EXISTS `x_registered_table` (
   `registered_table_name` varchar(50) NOT NULL,
   `application_table_name` varchar(50) NOT NULL,
-  `category` int(11) NOT NULL DEFAULT '100',
+  `category` INT NOT NULL DEFAULT '100',
   PRIMARY KEY (`registered_table_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.x_registered_table: ~0 rows (approximately)
 /*!40000 ALTER TABLE `x_registered_table` DISABLE KEYS */;
@@ -6801,11 +6801,11 @@ CREATE TABLE IF NOT EXISTS `x_registered_table` (
 DROP TABLE IF EXISTS `x_table_column_code_mappings`;
 CREATE TABLE IF NOT EXISTS `x_table_column_code_mappings` (
   `column_alias_name` varchar(50) NOT NULL,
-  `code_id` int(10) NOT NULL,
+  `code_id` INT NOT NULL,
   PRIMARY KEY (`column_alias_name`),
   KEY `FK_x_code_id` (`code_id`),
   CONSTRAINT `FK_x_code_id` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table fineract_default.x_table_column_code_mappings: ~0 rows (approximately)
 /*!40000 ALTER TABLE `x_table_column_code_mappings` DISABLE KEYS */;

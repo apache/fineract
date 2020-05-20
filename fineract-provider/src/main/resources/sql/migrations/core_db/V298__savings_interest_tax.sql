@@ -18,17 +18,17 @@
 --
 
 CREATE TABLE `m_tax_component` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(50) NOT NULL,
 	`percentage` DECIMAL(19,6) NOT NULL,
-	`debit_account_type_enum` SMALLINT(2) NULL DEFAULT NULL,
-	`debit_account_id` BIGINT(20) NULL DEFAULT NULL,
-	`credit_account_type_enum` SMALLINT(2) NULL DEFAULT NULL,
-	`credit_account_id` BIGINT(20) NULL DEFAULT NULL,
+	`debit_account_type_enum` SMALLINT NULL DEFAULT NULL,
+	`debit_account_id` BIGINT NULL DEFAULT NULL,
+	`credit_account_type_enum` SMALLINT NULL DEFAULT NULL,
+	`credit_account_id` BIGINT NULL DEFAULT NULL,
 	`start_date` DATE NOT NULL,
-	`createdby_id` BIGINT(20) NOT NULL,
+	`createdby_id` BIGINT NOT NULL,
 	`created_date` DATETIME NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
+	`lastmodifiedby_id` BIGINT NOT NULL,
 	`lastmodified_date` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_tax_component_debit_gl_account` (`debit_account_id`),
@@ -42,14 +42,14 @@ CREATE TABLE `m_tax_component` (
 );
 
 CREATE TABLE `m_tax_component_history` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`tax_component_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`tax_component_id` BIGINT NOT NULL,
 	`percentage` DECIMAL(19,6) NOT NULL,
 	`start_date` DATE NOT NULL,
 	`end_date` DATE NOT NULL,
-	`createdby_id` BIGINT(20) NOT NULL,
+	`createdby_id` BIGINT NOT NULL,
 	`created_date` DATETIME NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
+	`lastmodifiedby_id` BIGINT NOT NULL,
 	`lastmodified_date` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_tax_component_history_tax_component_id` (`tax_component_id`),
@@ -61,11 +61,11 @@ CREATE TABLE `m_tax_component_history` (
 );
 
 CREATE TABLE `m_tax_group` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(50) NOT NULL,
-	`createdby_id` BIGINT(20) NOT NULL,
+	`createdby_id` BIGINT NOT NULL,
 	`created_date` DATETIME NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
+	`lastmodifiedby_id` BIGINT NOT NULL,
 	`lastmodified_date` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_tax_group_createdby` (`createdby_id`),
@@ -75,14 +75,14 @@ CREATE TABLE `m_tax_group` (
 );
 
 CREATE TABLE `m_tax_group_mappings` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`tax_group_id` BIGINT(20) NOT NULL,
-	`tax_component_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`tax_group_id` BIGINT NOT NULL,
+	`tax_component_id` BIGINT NOT NULL,
 	`start_date` DATE NOT NULL,
 	`end_date` DATE NULL DEFAULT NULL,
-	`createdby_id` BIGINT(20) NOT NULL,
+	`createdby_id` BIGINT NOT NULL,
 	`created_date` DATETIME NOT NULL,
-	`lastmodifiedby_id` BIGINT(20) NOT NULL,
+	`lastmodifiedby_id` BIGINT NOT NULL,
 	`lastmodified_date` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_tax_group_mappings_tax_group` (`tax_group_id`),
@@ -96,7 +96,7 @@ CREATE TABLE `m_tax_group_mappings` (
 );
 
 ALTER TABLE `m_charge`
-	ADD COLUMN `tax_group_id` BIGINT(20) NULL DEFAULT NULL,
+	ADD COLUMN `tax_group_id` BIGINT NULL DEFAULT NULL,
 	ADD CONSTRAINT `FK_m_charge_m_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`);
 	
 ALTER TABLE `m_savings_product`
@@ -111,9 +111,9 @@ ALTER TABLE `m_savings_account`
 	ADD CONSTRAINT `FK_savings_account_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`);	
 	
 CREATE TABLE `m_savings_account_transaction_tax_details` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-	`savings_transaction_id` BIGINT(20) NOT NULL,
-	`tax_component_id` BIGINT(20) NOT NULL,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`savings_transaction_id` BIGINT NOT NULL,
+	`tax_component_id` BIGINT NOT NULL,
 	`amount` DECIMAL(19,6) NOT NULL,
 	PRIMARY KEY (`id`),
 	CONSTRAINT `FK_savings_account_transaction_tax_details_savings_transaction` FOREIGN KEY (`savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`),

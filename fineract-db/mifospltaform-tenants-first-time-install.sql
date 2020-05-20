@@ -26,7 +26,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES UTF8MB4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -40,24 +40,24 @@
 
 DROP TABLE IF EXISTS `schema_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `schema_version` (
-  `version_rank` int(11) NOT NULL,
-  `installed_rank` int(11) NOT NULL,
+  `version_rank` INT NOT NULL,
+  `installed_rank` INT NOT NULL,
   `version` varchar(50) NOT NULL,
   `description` varchar(200) NOT NULL,
   `type` varchar(20) NOT NULL,
   `script` varchar(1000) NOT NULL,
-  `checksum` int(11) DEFAULT NULL,
+  `checksum` INT DEFAULT NULL,
   `installed_by` varchar(100) NOT NULL,
   `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `execution_time` int(11) NOT NULL,
-  `success` tinyint(1) NOT NULL,
+  `execution_time` INT NOT NULL,
+  `success` tinyint NOT NULL,
   PRIMARY KEY (`version`),
   KEY `schema_version_vr_idx` (`version_rank`),
   KEY `schema_version_ir_idx` (`installed_rank`),
   KEY `schema_version_s_idx` (`success`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -77,14 +77,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tenants`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `tenants` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `identifier` varchar(100) NOT NULL,
   `name` varchar(100) NOT NULL,
   `schema_name` varchar(100) NOT NULL,
   `timezone_id` varchar(100) NOT NULL,
-  `country_id` int(11) DEFAULT NULL,
+  `country_id` INT DEFAULT NULL,
   `joined_date` date DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
@@ -92,22 +92,22 @@ CREATE TABLE `tenants` (
   `schema_server_port` varchar(10) NOT NULL DEFAULT '3306',
   `schema_username` varchar(100) NOT NULL DEFAULT 'root',
   `schema_password` varchar(100) NOT NULL DEFAULT 'mysql',
-  `auto_update` tinyint(1) NOT NULL DEFAULT '1',
-  `pool_initial_size` int(5) DEFAULT 5,
-  `pool_validation_interval` int(11) DEFAULT 30000,
-  `pool_remove_abandoned` tinyint(1) DEFAULT 1,
-  `pool_remove_abandoned_timeout` int(5) DEFAULT 60,
-  `pool_log_abandoned` tinyint(1) DEFAULT 1,
-  `pool_abandon_when_percentage_full` int(5) DEFAULT 50,
-  `pool_test_on_borrow` tinyint(1) DEFAULT 1,
-  `pool_max_active` int(5) DEFAULT 40,
-  `pool_min_idle` int(5) DEFAULT 20,
-  `pool_max_idle` int(5) DEFAULT 10,
-  `pool_suspect_timeout` int(5) DEFAULT 60,
-  `pool_time_between_eviction_runs_millis` int(11) DEFAULT 34000,
-  `pool_min_evictable_idle_time_millis` int(11) DEFAULT 60000,
+  `auto_update` tinyint NOT NULL DEFAULT '1',
+  `pool_initial_size` INT DEFAULT 5,
+  `pool_validation_interval` INT DEFAULT 30000,
+  `pool_remove_abandoned` tinyint DEFAULT 1,
+  `pool_remove_abandoned_timeout` INT DEFAULT 60,
+  `pool_log_abandoned` tinyint DEFAULT 1,
+  `pool_abandon_when_percentage_full` INT DEFAULT 50,
+  `pool_test_on_borrow` tinyint DEFAULT 1,
+  `pool_max_active` INT DEFAULT 40,
+  `pool_min_idle` INT DEFAULT 20,
+  `pool_max_idle` INT DEFAULT 10,
+  `pool_suspect_timeout` INT DEFAULT 60,
+  `pool_time_between_eviction_runs_millis` INT DEFAULT 34000,
+  `pool_min_evictable_idle_time_millis` INT DEFAULT 60000,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -127,14 +127,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `timezones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!40101 SET character_set_client = UTF8MB4 */;
 CREATE TABLE `timezones` (
-  `id` int(3) NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `country_code` varchar(2) NOT NULL,
   `timezonename` varchar(100) NOT NULL,
   `comments` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

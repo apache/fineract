@@ -129,7 +129,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         String password = command.stringValueOfParameterNamed("password");
         final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
 
-        if (sendPasswordToEmail.booleanValue()) {
+        if (sendPasswordToEmail) {
             password = new RandomPasswordGenerator(13).generate();
         }
 
@@ -309,14 +309,14 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         }
 
         if(this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)){
-                actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
-                Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients);
-                if(this.appUserClientMappings == null){
-                    this.appUserClientMappings = new HashSet<>();
-                }else{
-                    this.appUserClientMappings.retainAll(newClients);
-                }
-                this.appUserClientMappings.addAll(newClients);
+            actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
+            Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients);
+            if(this.appUserClientMappings == null){
+                this.appUserClientMappings = new HashSet<>();
+            }else{
+                this.appUserClientMappings.retainAll(newClients);
+            }
+            this.appUserClientMappings.addAll(newClients);
         }else if(!this.isSelfServiceUser && actualChanges.containsKey(AppUserConstants.IS_SELF_SERVICE_USER)){
             actualChanges.put(AppUserConstants.CLIENTS, new ArrayList<>());
             if(this.appUserClientMappings != null){
@@ -575,7 +575,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     public void validateHasPermissionTo(final String function) {
         if (hasNotPermissionTo(function)) {
             final String authorizationMessage = "User has no authority to: " + function;
-            logger.info("Unauthorized access: userId: {} action: {} allowed: {}", new Object[] { getId(), function, getAuthorities() });
+            logger.info("Unauthorized access: userId: {} action: {} allowed: {}", getId(), function, getAuthorities());
             throw new NoAuthorizationException(authorizationMessage);
         }
     }
@@ -663,4 +663,8 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return newAppUserClientMappings;
     }
 
+    @Override
+    public String toString() {
+        return "AppUser [username=" + this.username + ", getId()=" + this.getId() + "]";
+    }
 }

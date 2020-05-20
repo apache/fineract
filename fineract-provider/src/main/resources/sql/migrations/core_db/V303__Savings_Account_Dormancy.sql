@@ -18,13 +18,13 @@
 --
 
 ALTER TABLE `m_savings_product`
-ADD COLUMN `is_dormancy_tracking_active` SMALLINT(1) NULL,
-ADD COLUMN `days_to_inactive` INT(11) NULL,
-ADD COLUMN `days_to_dormancy` INT(11) NULL,
-ADD COLUMN `days_to_escheat` INT(11) NULL;
+ADD COLUMN `is_dormancy_tracking_active` SMALLINT NULL,
+ADD COLUMN `days_to_inactive` INT NULL,
+ADD COLUMN `days_to_dormancy` INT NULL,
+ADD COLUMN `days_to_escheat` INT NULL;
 
 ALTER TABLE `m_savings_account`
-ADD COLUMN `sub_status_enum` SMALLINT(5) NOT NULL DEFAULT '0' AFTER `status_enum`;
+ADD COLUMN `sub_status_enum` SMALLINT NOT NULL DEFAULT '0' AFTER `status_enum`;
 
 INSERT INTO `job` (`name`, `display_name`, `cron_expression`, `create_time`) VALUES ('Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', now());
 

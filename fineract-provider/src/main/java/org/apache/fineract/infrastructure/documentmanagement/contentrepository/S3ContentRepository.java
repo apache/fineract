@@ -20,9 +20,10 @@ package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -53,7 +54,8 @@ public class S3ContentRepository implements ContentRepository {
 
     public S3ContentRepository(final String bucketName, final String secretKey, final String accessKey) {
         this.s3BucketName = bucketName;
-        this.s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
+        this.s3Client = AmazonS3ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))).build();
     }
 
     @Override

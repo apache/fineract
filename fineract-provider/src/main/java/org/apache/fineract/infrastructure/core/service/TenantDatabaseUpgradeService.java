@@ -67,18 +67,20 @@ public class TenantDatabaseUpgradeService {
                 DriverDataSource source = new DriverDataSource(Thread.currentThread().getContextClassLoader(), driverConfig.getDriverClassName(), connectionProtocol, connection.getSchemaUsername(), connection.getSchemaPassword());
 
                 final Flyway flyway = Flyway.configure()
-                    .dataSource(source)
-                    .locations("sql/migrations/core_db")
-                    .outOfOrder(true)
-                    .placeholderReplacement(false)
-                    .load();
+                        .dataSource(source)
+                        .locations("sql/migrations/core_db")
+                        .outOfOrder(true)
+                        .placeholderReplacement(false)
+                        .configuration(Map.of(
+                                "flyway.table", "schema_version")) // FINERACT-979
+                        .load();
 
                 try {
                     flyway.repair();
                     flyway.migrate();
                 } catch (FlywayException e) {
                     String betterMessage = e.getMessage() + "; for Tenant DB URL: " + connectionProtocol + ", username: "
-                            + connection.getSchemaUsername();
+                        + connection.getSchemaUsername();
                     throw new FlywayException(betterMessage, e.getCause());
                 }
             }
@@ -97,15 +99,17 @@ public class TenantDatabaseUpgradeService {
         LOG.info("upgradeTenantDB: FINERACT_DEFAULT_TENANTDB_HOSTNAME = {}, FINERACT_DEFAULT_TENANTDB_PORT = {}", dbHostname, dbPort);
 
         final Flyway flyway = Flyway.configure()
-            .dataSource(tenantDataSource)
-            .locations("sql/migrations/list_db")
-            .outOfOrder(true)
-            .placeholders(Map.of( // FINERACT-773
-                "fineract_default_tenantdb_hostname", dbHostname,
-                "fineract_default_tenantdb_port",     dbPort,
-                "fineract_default_tenantdb_uid",      dbUid,
-                "fineract_default_tenantdb_pwd",      dbPwd))
-            .load();
+                .dataSource(tenantDataSource)
+                .locations("sql/migrations/list_db")
+                .outOfOrder(true)
+                .placeholders(Map.of( // FINERACT-773
+                        "fineract_default_tenantdb_hostname", dbHostname,
+                        "fineract_default_tenantdb_port",     dbPort,
+                        "fineract_default_tenantdb_uid",      dbUid,
+                        "fineract_default_tenantdb_pwd",      dbPwd))
+                .configuration(Map.of(
+                        "flyway.table", "schema_version")) // FINERACT-979
+                .load();
 
         flyway.repair();
         flyway.migrate();

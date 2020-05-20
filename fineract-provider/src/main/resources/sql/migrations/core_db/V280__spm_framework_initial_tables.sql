@@ -18,7 +18,7 @@
 --
 
 CREATE TABLE `m_surveys` (
-	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
 	`a_key` VARCHAR(32) NOT NULL,
 	`a_name` VARCHAR(255) NOT NULL,
 	`description` VARCHAR(4000) NULL,
@@ -29,59 +29,59 @@ CREATE TABLE `m_surveys` (
 );
 
 CREATE TABLE `m_survey_components` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
   `a_key` VARCHAR(32) NOT NULL,
   `a_text` VARCHAR(255) NOT NULL,
   `description` VARCHAR(4000) NULL,
-  `sequence_no` INT(4) NOT NULL,
+  `sequence_no` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
 );
 
 CREATE TABLE `m_survey_questions` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
   `component_key` VARCHAR(32) NULL,
   `a_key` VARCHAR(32) NOT NULL,
   `a_text` VARCHAR(255) NOT NULL,
   `description` VARCHAR(4000) NULL,
-  `sequence_no` INT(4) NOT NULL,
+  `sequence_no` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
 );
 
 CREATE TABLE `m_survey_responses` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `question_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `question_id` BIGINT NOT NULL,
   `a_text` VARCHAR(255) NOT NULL,
-  `a_value` INT(4) NOT NULL,
-  `sequence_no` INT(4) NOT NULL,
+  `a_value` INT NOT NULL,
+  `sequence_no` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`)
 );
 
 CREATE TABLE `m_survey_lookup_tables` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
   `a_key` VARCHAR(255) NOT NULL,
-  `description` INT(4) NULL,
-  `value_from` INT(4) NOT NULL,
-  `value_to` INT(4) NOT NULL,
+  `description` INT NULL,
+  `value_from` INT NOT NULL,
+  `value_to` INT NOT NULL,
   `score` DECIMAL(5, 2) NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
 );
 
 CREATE TABLE `m_survey_scorecards` (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `survey_id` BIGINT(20) NOT NULL,
-  `question_id` BIGINT(20) NOT NULL,
-  `response_id` BIGINT(20) NOT NULL,
-  `staff_id` BIGINT(20) NOT NULL,
-  `client_id` BIGINT(20) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT NOT NULL,
+  `question_id` BIGINT NOT NULL,
+  `response_id` BIGINT NOT NULL,
+  `staff_id` BIGINT NOT NULL,
+  `client_id` BIGINT NOT NULL,
   `created_on` DATETIME NULL DEFAULT NULL,
-  `a_value` INT(4) NOT NULL,
+  `a_value` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`),
   FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`),

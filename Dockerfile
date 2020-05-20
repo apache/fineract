@@ -17,23 +17,9 @@
 #
 FROM openjdk:11 AS builder
 
-# COPY . fineract is slow e.g. when using Podman instead of Docker (because it doesn't honor .dockerignore and copies all of .git/** into the container..), so let's explicitly list only what we need:
-COPY fineract-provider/src/main fineract/fineract-provider/src/main/
-COPY fineract-provider/config fineract/fineract-provider/config/
-COPY fineract-provider/gradle fineract/fineract-provider/gradle/
-COPY fineract-provider/properties fineract/fineract-provider/properties/
-COPY fineract-provider/[bd]*.gradle fineract/fineract-provider/
-COPY fineract-provider/gradle.properties fineract/fineract-provider/
-COPY fineract-provider/gradlew fineract/fineract-provider/
-COPY gradle* fineract/
-COPY settings.gradle fineract/
-COPY licenses fineract/licenses/
-COPY *LICENSE* fineract/
-COPY *NOTICE* fineract/
-
+COPY . fineract
 WORKDIR fineract
-# RUN find .
-RUN ./gradlew clean -x rat -x test war
+RUN ./gradlew --no-daemon -x rat -x test war
 
 # =========================================
 
