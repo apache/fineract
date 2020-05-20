@@ -129,7 +129,7 @@ public class ClasspathHellDuplicatesChecker {
                 || resourcePath.startsWith("META-INF/additional-spring")
                 || resourcePath.startsWith("META-INF/terracotta")
                 // Groovy is groovy
-                || resourcePath.startsWith("META-INF/groovy-release-info.properties")
+                || resourcePath.startsWith("META-INF/groovy")
                 // Something doesn't to be a perfectly clean in Maven Surefire:
                 || resourcePath.startsWith("META-INF/maven/")
                 || resourcePath.contains("surefire")
