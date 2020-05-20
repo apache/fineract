@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeInter
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
@@ -423,6 +424,8 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         }
     }
 
+
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_NONVIRTUAL") // https://issues.apache.org/jira/browse/FINERACT-987
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -465,6 +468,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
             actualChanges.put(amountParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
+
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case INVALID:
                 break;

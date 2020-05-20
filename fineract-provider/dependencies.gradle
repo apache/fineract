@@ -71,7 +71,9 @@ dependencies {
 
              // JAX-B dependencies for JDK 9+
              "jakarta.xml.bind:jakarta.xml.bind-api",
-             "org.dom4j:dom4j"
+             "org.dom4j:dom4j",
+
+             'com.github.spotbugs:spotbugs-annotations',
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
 		exclude group: 'javax.validation'
