@@ -46,11 +46,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GroupImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(GroupImportHandler.class);
     private List<GroupGeneralData> groups;
     private List<CalendarData> meetings;
     private Workbook workbook;
@@ -183,7 +186,7 @@ public class GroupImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 writeGroupErrorMessage(groupId,errorMessage,progressLevel,statusCell,errorReportCell,row);
             }

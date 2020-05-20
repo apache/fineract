@@ -55,6 +55,8 @@ import org.apache.tika.Tika;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.io.TikaInputStream;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -64,6 +66,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService {
+    private final static Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookServiceImpl.class);
     private final ApplicationContext applicationContext;
     private final PlatformSecurityContext securityContext;
     private final DocumentWritePlatformService documentWritePlatformService;
@@ -179,7 +182,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 throw new GeneralPlatformDomainRuleException("error.msg.null","One or more of the given parameters not found");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Problem occurred in importWorkbook function",e);
             throw new GeneralPlatformDomainRuleException("error.msg.io.exception","IO exception occured with "+fileDetail.getFileName()+" "+e.getMessage());
 
         }

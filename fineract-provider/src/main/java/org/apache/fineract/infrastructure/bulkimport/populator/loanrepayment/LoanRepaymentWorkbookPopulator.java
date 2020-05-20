@@ -47,8 +47,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
+    private final static Logger LOG = LoggerFactory.getLogger(LoanRepaymentWorkbookPopulator.class);
     private OfficeSheetPopulator officeSheetPopulator;
     private ClientSheetPopulator clientSheetPopulator;
     private ExtrasSheetPopulator extrasSheetPopulator;
@@ -247,7 +250,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 try {
                     date = inputFormat.parse(loan.getDisbursementDate().toString());
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    LOG.error("Problem occurred in populateLoansTable function",e);
                 }
                 writeDate(LoanRepaymentConstants.LOOKUP_LOAN_DISBURSEMENT_DATE_COL, row,
                         outputFormat.format(date), dateCellStyle,dateFormat);

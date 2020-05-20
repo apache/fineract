@@ -51,9 +51,11 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CalendarUtils {
-
+    private final static Logger LOG = LoggerFactory.getLogger(CalendarUtils.class);
     static {
         System.setProperty("net.fortuna.ical4j.timezone.date.floating", "true");
     }
@@ -114,7 +116,7 @@ public class CalendarUtils {
         try {
             formattedDate = new Date(seedDateStr, "yyyy-MM-dd");
         } catch (final ParseException e) {
-            e.printStackTrace();
+            LOG.error("Invalid date: {}" , seedDateStr, e);
         }
         return formattedDate;
     }
@@ -211,10 +213,10 @@ public class CalendarUtils {
             return recur;
         } catch (final ParseException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Problem occurred in getICalRecur function",e);
         } catch (final ValidationException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Problem occurred in getICalRecur function",e);
         }
 
         return null;

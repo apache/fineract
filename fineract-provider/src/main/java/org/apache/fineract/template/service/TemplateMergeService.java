@@ -166,7 +166,7 @@ public class TemplateMergeService {
                 try {
                     br.close();
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    logger.error("Problem occurred in getStringFromInputStream function",e);
                 }
             }
         }

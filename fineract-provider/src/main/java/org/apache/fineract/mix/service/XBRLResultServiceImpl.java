@@ -34,6 +34,8 @@ import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.exception.XBRLMappingInvalidException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -41,7 +43,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class XBRLResultServiceImpl implements XBRLResultService {
-
+    private final static Logger LOG = LoggerFactory.getLogger(XBRLResultServiceImpl.class);
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("JavaScript");
 
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;
@@ -176,7 +178,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 eval = value.floatValue();
             }
         } catch (final ScriptException e) {
-            e.printStackTrace();
+            LOG.error("Problem occurred in processMappingString function",e);
             throw new IllegalArgumentException(e.getMessage());
         }
 

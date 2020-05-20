@@ -46,11 +46,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
 @Service
 public class SavingsImportHandler implements ImportHandler {
 
+    private final static Logger LOG = LoggerFactory.getLogger(SavingsImportHandler.class);
     private Workbook workbook;
     private List<SavingsAccountData> savings;
     private List<SavingsApproval> approvalDates;
@@ -277,7 +282,7 @@ public class SavingsImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 writeSavingsErrorMessage(savingsId,errorMessage,progressLevel,statusCell,errorReportCell,row);
             }

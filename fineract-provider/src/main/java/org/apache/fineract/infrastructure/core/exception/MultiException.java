@@ -57,6 +57,7 @@ public class MultiException extends Exception {
     }
 
     @Override
+    @SuppressWarnings("RegexpSinglelineJava")
     public String getMessage() {
         int i = 0;
         StringBuilder sb = new StringBuilder(super.getMessage());
@@ -72,6 +73,7 @@ public class MultiException extends Exception {
     }
 
     @Override
+    @SuppressWarnings("RegexpSinglelineJava")
     public void printStackTrace() {
         LOG.info("{}", super.getMessage());
         int i = 0;
@@ -82,6 +84,7 @@ public class MultiException extends Exception {
     }
 
     @Override
+    @SuppressWarnings("RegexpSinglelineJava")
     public void printStackTrace(PrintStream s) {
         s.println(super.getMessage());
         int i = 0;
@@ -92,6 +95,7 @@ public class MultiException extends Exception {
     }
 
     @Override
+    @SuppressWarnings("RegexpSinglelineJava")
     public void printStackTrace(PrintWriter s) {
         s.println(super.getMessage());
         int i = 0;
