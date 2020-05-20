@@ -13,7 +13,7 @@ It's of course also possible to contribute with a "traditional" local developmen
 Community
 =========
 
-If you are interested in contributing to this project, but perhaps don't quite know how and where to get started, please [join our developer mailing list](http://fineract.apache.org/#contribute), listen into our conversations, chime into threads, and just send us a friendly "Hello!" introduction email; we're a friendly bunch, and look forward to hearing from you.
+If you are interested in contributing to this project, but perhaps don't quite know how and where to get started, please [join our developer mailing list](http://fineract.apache.org/#contribute), listen into our conversations, chime into threads, and just send us a "Hello!" introduction email; we're a friendly bunch, and look forward to hearing from you.
 
 
 Requirements
@@ -41,25 +41,6 @@ Run the following commands:
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew bootRun`
-
-
-Instructions to download Gradle wrapper
-============
-The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
-but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
-In that case, you need to download it using the commands below:
-
-    wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
-
-(or)
-
-    curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
-
-
-Instructions to run Apache RAT (Release Audit Tool)
-============
-1. Extract the archive file to your local directory.
-2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
 Instructions to build the JAR file
@@ -177,6 +158,25 @@ To shutdown and reset your cluster, run:
 We have [some open issues in JIRA with Kubernetes related enhancement ideas](https://jira.apache.org/jira/browse/FINERACT-783?jql=labels%20%3D%20kubernetes%20AND%20project%20%3D%20%22Apache%20Fineract%22%20) which you are welcome to contribute to.
 
 
+Instructions to download Gradle wrapper
+============
+The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
+but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
+In that case, you need to download it using the commands below:
+
+    wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
+(or)
+
+    curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
+
+Instructions to run Apache RAT (Release Audit Tool)
+============
+1. Extract the archive file to your local directory.
+2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
+
+
 Checkstyle
 ============
 
@@ -184,6 +184,7 @@ This project enforces its code conventions using [checkstyle.xml](fineract-provi
 We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
 File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
 You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it, for IntelliJ you can use [CheckStyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea).
+
 
 Code Coverage Reports
 ============
@@ -193,6 +194,7 @@ The project uses Jacoco to measure unit tests code coverage, to generate a repor
     `./gradlew clean build jacocoTestReport`
 
 Generated reports can be found in build/code-coverage directory.
+
 
 Versions
 ============
