@@ -25,6 +25,6 @@ public class AccountingConstantsTest {
 
  @Test
  public void testGetAllFinancialActivities() {
-  Assert.notEmpty(AccountingConstants.FINANCIAL_ACTIVITY.getAllFinancialActivities(), "static initialization of collection of all enums is broken");
+  Assert.notEmpty(AccountingConstants.FinancialActivity.getAllFinancialActivities(), "static initialization of collection of all enums is broken");
  }
 }

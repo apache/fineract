@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.common.service;
 
 import java.util.Map;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 
 /**
  * The interface to be implemented by classes that want to be informed when a
@@ -32,11 +32,11 @@ public interface BusinessEventListner {
     /**
      * Implement this method for notifications before executing Business Event
      */
-    public void businessEventToBeExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity);
+    public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity);
 
     /**
      * Implement this method for notifications after executing Business Event
      */
-    public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity);
+    public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity);
 
 }

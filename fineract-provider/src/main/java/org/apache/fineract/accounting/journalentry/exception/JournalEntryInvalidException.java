@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class JournalEntryInvalidException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons for invalid Journal Entry **/
-    public static enum GL_JOURNAL_ENTRY_INVALID_REASON {
+    public static enum GlJournalEntryInvalidReason {
         FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, GL_ACCOUNT_DISABLED, GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, INVALID_DEBIT_OR_CREDIT_ACCOUNTS;
 
         public String errorMessage() {
@@ -71,7 +71,7 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
         }
     }
 
-    public JournalEntryInvalidException(final GL_JOURNAL_ENTRY_INVALID_REASON reason, final Date date, final String accountName,
+    public JournalEntryInvalidException(final GlJournalEntryInvalidReason reason, final Date date, final String accountName,
             final String accountGLCode) {
         super(reason.errorCode(), reason.errorMessage(), date, accountName, accountGLCode);
     }

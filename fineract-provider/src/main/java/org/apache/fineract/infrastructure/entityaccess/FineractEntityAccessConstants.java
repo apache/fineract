@@ -27,7 +27,7 @@ public class FineractEntityAccessConstants {
     /***
      * Enum of all parameters passed in while creating/updating an entity access
      ***/
-    public static enum ENTITY_ACCESS_JSON_INPUT_PARAMS {
+    public static enum EntityAccessJSONinputParams {
         ENTITY_TYPE("entityType"),
         ENTITY_ID("entityId"),
         ENTITY_ACCESS_TYPE_ID("entityAccessTypeId"),
@@ -37,7 +37,7 @@ public class FineractEntityAccessConstants {
 
         private final String value;
 
-        private ENTITY_ACCESS_JSON_INPUT_PARAMS(final String value) {
+        private EntityAccessJSONinputParams(final String value) {
             this.value = value;
         }
 

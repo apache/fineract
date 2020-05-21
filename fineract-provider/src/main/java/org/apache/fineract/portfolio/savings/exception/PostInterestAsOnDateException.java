@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 
 public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleException{
-    public static enum PostInterestAsOnException_TYPE {
+    public static enum PostInterestAsOnExceptionType {
         FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, LAST_TRANSACTION_DATE;
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
@@ -53,7 +53,7 @@ public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleExc
     }
 
 
-    public PostInterestAsOnDateException(final PostInterestAsOnException_TYPE reason) {
+    public PostInterestAsOnDateException(final PostInterestAsOnExceptionType reason) {
         super(reason.errorCode(), reason.errorMessage());
     }
 

@@ -168,14 +168,14 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     }
 
     private static boolean checkValidEntityType(final String entityType) {
-        for (final DOCUMENT_MANAGEMENT_ENTITY entities : DOCUMENT_MANAGEMENT_ENTITY.values()) {
+        for (final DocumentManagementEntity entities : DocumentManagementEntity.values()) {
             if (entities.name().equalsIgnoreCase(entityType)) { return true; }
         }
         return false;
     }
 
     /*** Entities for document Management **/
-    public static enum DOCUMENT_MANAGEMENT_ENTITY {
+    public static enum DocumentManagementEntity {
         CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS,IMPORT;
 
         @Override

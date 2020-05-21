@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.ENTITY_TYPE_FOR_IMAGES;
+import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.EntityTypeForImages;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
@@ -64,9 +64,9 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
         public String schema(String entityType) {
             StringBuilder builder = new StringBuilder("image.id as id, image.location as location, image.storage_type_enum as storageType ");
-            if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equalsIgnoreCase(entityType)) {
+            if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
                 builder.append(" from m_image image , m_client client " + " where client.image_id = image.id and client.id=?");
-            } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equalsIgnoreCase(entityType)) {
+            } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
                 builder.append("from m_image image , m_staff staff " + " where staff.image_id = image.id and staff.id=?");
             }
             return builder.toString();
@@ -87,10 +87,10 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
         try {
             Object owner;
             String displayName = null;
-            if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equalsIgnoreCase(entityType)) {
+            if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
                 owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
                 displayName = ((Client) owner).getDisplayName();
-            } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equalsIgnoreCase(entityType)) {
+            } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
                 owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
                 displayName = ((Staff) owner).displayName();
             }

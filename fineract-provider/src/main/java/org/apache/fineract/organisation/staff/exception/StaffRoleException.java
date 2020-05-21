@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class StaffRoleException extends AbstractPlatformResourceNotFoundException {
 
-    public static enum STAFF_ROLE {
+    public static enum StaffRole {
         LOAN_OFFICER, BRANCH_MANAGER,SAVINGS_OFFICER;
 
         @Override
@@ -34,7 +34,7 @@ public class StaffRoleException extends AbstractPlatformResourceNotFoundExceptio
         }
     }
 
-    public StaffRoleException(final Long id, final STAFF_ROLE role) {
+    public StaffRoleException(final Long id, final StaffRole role) {
         super("error.msg.staff.id.invalid.role", "Staff with identifier " + id + " is not a " + role.toString(), id);
     }
 }

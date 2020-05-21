@@ -48,19 +48,19 @@ public class ExternalServicesConstants {
     public static final String NOTIFICATION_GCM_END_POINT = "gcm_end_point";
     public static final String NOTIFICATION_FCM_END_POINT = "fcm_end_point";
 
-    public static enum EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS {
+    public static enum ExternalservicePropertiesJSONinputParams {
         EXTERNAL_SERVICE_ID("external_service_id"), NAME("name"), VALUE("value");
 
         private final String value;
 
-        private EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS(final String value) {
+        private ExternalservicePropertiesJSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
 
         static {
-            for (final EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS type : EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS.values()) {
+            for (final ExternalservicePropertiesJSONinputParams type : ExternalservicePropertiesJSONinputParams.values()) {
                 values.add(type.value);
             }
         }
@@ -79,19 +79,19 @@ public class ExternalServicesConstants {
         }
     }
 
-    public static enum SMTP_JSON_INPUT_PARAMS {
+    public static enum SMTPJSONinputParams {
         USERNAME("username"), PASSWORD("password"), HOST("host"), PORT("port"), USETLS("useTLS"), FROM_EMAIL("fromEmail"), FROM_NAME("fromName");
 
         private final String value;
 
-        private SMTP_JSON_INPUT_PARAMS(final String value) {
+        private SMTPJSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
 
         static {
-            for (final SMTP_JSON_INPUT_PARAMS type : SMTP_JSON_INPUT_PARAMS.values()) {
+            for (final SMTPJSONinputParams type : SMTPJSONinputParams.values()) {
                 values.add(type.value);
             }
         }
@@ -110,19 +110,19 @@ public class ExternalServicesConstants {
         }
     }
 
-    public static enum SMS_JSON_INPUT_PARAMS {
+    public static enum SMSJSONinputParams {
         HASTNAME("host_name"), PORT("port_number"), END_POINT("end_point"), TENANT_APP_KEY("tenant_app_key");
 
         private final String value;
 
-        private SMS_JSON_INPUT_PARAMS(final String value) {
+        private SMSJSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
 
         static {
-            for (final SMS_JSON_INPUT_PARAMS type : SMS_JSON_INPUT_PARAMS.values()) {
+            for (final SMSJSONinputParams type : SMSJSONinputParams.values()) {
                 values.add(type.value);
             }
         }
@@ -141,19 +141,19 @@ public class ExternalServicesConstants {
         }
     }
 
-    public static enum S3_JSON_INPUT_PARAMS {
+    public static enum S3JSONinputParams {
         S3_ACCESS_KEY("s3_access_key"), S3_BUCKET_NAME("s3_bucket_name"), S3_SECRET_KEY("s3_secret_key");
 
         private final String value;
 
-        private S3_JSON_INPUT_PARAMS(final String value) {
+        private S3JSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
 
         static {
-            for (final S3_JSON_INPUT_PARAMS type : S3_JSON_INPUT_PARAMS.values()) {
+            for (final S3JSONinputParams type : S3JSONinputParams.values()) {
                 values.add(type.value);
             }
         }
@@ -172,19 +172,19 @@ public class ExternalServicesConstants {
         }
     }
 
-    public static enum NOTIFICATION_JSON_INPUT_PARAMS {
+    public static enum NotificationJSONinputParams {
         SERVER_KEY("server_key"), GCM_END_POINT("gcm_end_point"), FCM_END_POINT("fcm_end_point");
 
         private final String value;
 
-        private NOTIFICATION_JSON_INPUT_PARAMS(final String value) {
+        private NotificationJSONinputParams(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
 
         static {
-            for (final NOTIFICATION_JSON_INPUT_PARAMS type : NOTIFICATION_JSON_INPUT_PARAMS.values()) {
+            for (final NotificationJSONinputParams type : NotificationJSONinputParams.values()) {
                 values.add(type.value);
             }
         }

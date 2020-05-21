@@ -62,7 +62,7 @@ import org.apache.fineract.portfolio.transfer.data.TransfersDataValidator;
 import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalException;
 import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalOrOnHoldException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException;
-import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException.TRANSFER_NOT_SUPPORTED_REASON;
+import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException.TransferNotSupportedReason;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -131,11 +131,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final List<Client> clients = assembleListOfClients(jsonCommand);
 
         if (sourceGroupId.equals(destinationGroupId)) { throw new TransferNotSupportedException(
-                TRANSFER_NOT_SUPPORTED_REASON.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId, destinationGroupId); }
+                TransferNotSupportedReason.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId, destinationGroupId); }
 
         /*** Do not allow bulk client transfers across branches ***/
         if (!(sourceOffice.getId().equals(destinationGroup.getOffice().getId()))) { throw new TransferNotSupportedException(
-                TRANSFER_NOT_SUPPORTED_REASON.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId, destinationGroupId); }
+                TransferNotSupportedReason.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId, destinationGroupId); }
 
         for (final Client client : clients) {
             transferClientBetweenGroups(sourceGroup, client, destinationGroup, inheritDestinationGroupLoanOfficer, staff);
@@ -186,7 +186,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                             CalendarType.COLLECTION.getValue());
 
             if (destinationGroupCalendarInstance == null) { throw new TransferNotSupportedException(
-                    TRANSFER_NOT_SUPPORTED_REASON.DESTINATION_GROUP_HAS_NO_MEETING, destinationGroup.getId());
+                    TransferNotSupportedReason.DESTINATION_GROUP_HAS_NO_MEETING, destinationGroup.getId());
 
             }
             final Calendar sourceGroupCalendar = sourceGroupCalendarInstance.getCalendar();
@@ -198,7 +198,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
              ***/
             if (!(CalendarUtils.isFrequencySame(sourceGroupCalendar.getRecurrence(), destinationGroupCalendar.getRecurrence()) && CalendarUtils
                     .isIntervalSame(sourceGroupCalendar.getRecurrence(), destinationGroupCalendar.getRecurrence()))) { throw new TransferNotSupportedException(
-                    TRANSFER_NOT_SUPPORTED_REASON.DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, sourceGroup.getId(),
+                    TransferNotSupportedReason.DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, sourceGroup.getId(),
                     destinationGroup.getId()); }
 
             /** map all JLG loans for this client to the destinationGroup **/
@@ -450,7 +450,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.updateProposedTransferDate(null);
                 if (client.getGroups().size() == 1) {
                     if (destinationGroup == null) {
-                        throw new TransferNotSupportedException(TRANSFER_NOT_SUPPORTED_REASON.CLIENT_DESTINATION_GROUP_NOT_SPECIFIED,
+                        throw new TransferNotSupportedException(TransferNotSupportedReason.CLIENT_DESTINATION_GROUP_NOT_SPECIFIED,
                                 client.getId());
                     } else if (!destinationGroup.isActive()) { throw new GroupNotActiveException(destinationGroup.getId()); }
                     transferClientBetweenGroups(Iterables.get(client.getGroups(), 0), client, destinationGroup, true, staff);

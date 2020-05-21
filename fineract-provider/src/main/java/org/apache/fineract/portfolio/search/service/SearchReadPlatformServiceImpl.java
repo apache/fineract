@@ -243,17 +243,17 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             }
 
             if (StringUtils.isNotBlank(searchConditions.getLoanDateOption())) {
-                if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.APPROVAL_DATE.getValue())) {
+                if (searchConditions.getLoanDateOption().equals(SearchConstants.SearchLoanDate.APPROVAL_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanFromDate", searchConditions.getLoanFromDate().toDate());
                     params.addValue("loanToDate", searchConditions.getLoanToDate().toDate());
                     sql.append(" ( ml.approvedon_date between :loanFromDate and :loanToDate ) ");
-                } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.CREATED_DATE.getValue())) {
+                } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SearchLoanDate.CREATED_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanFromDate", searchConditions.getLoanFromDate().toDate());
                     params.addValue("loanToDate", searchConditions.getLoanToDate().toDate());
                     sql.append(" ( ml.submittedon_date between :loanFromDate and :loanToDate ) ");
-                } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.DISBURSAL_DATE.getValue())) {
+                } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SearchLoanDate.DISBURSAL_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanFromDate", searchConditions.getLoanFromDate().toDate());
                     params.addValue("loanToDate", searchConditions.getLoanToDate().toDate());
