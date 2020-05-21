@@ -591,6 +591,7 @@ bootWar {
 // To generate an HTML report instead of XML
 spotbugs {
     reportLevel = 'high'
+    showProgress = true
 }
 // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
 spotbugsMain {
