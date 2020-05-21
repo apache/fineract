@@ -33,8 +33,8 @@ public class CommandWrapper {
     private final Long savingsId;
     private final String actionName;
     private final String entityName;
-    private String topicName = "";
-    private String source = "";
+    private String topicName = EMPTY_TOPIC;
+    private String source = EMPTY_SOURCE;
     private final String taskPermissionName;
     private final Long entityId;
     private final Long subentityId;
@@ -44,6 +44,9 @@ public class CommandWrapper {
     private final Long productId;
     private final Long creditBureauId;
     private final Long organisationCreditBureauId;
+
+    public static final String EMPTY_SOURCE = "";
+    public static final String EMPTY_TOPIC = "";
 
     @SuppressWarnings("unused")
     private Long templateId;
