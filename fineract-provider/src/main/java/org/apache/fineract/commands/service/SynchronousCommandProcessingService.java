@@ -149,7 +149,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     private boolean shouldSendMessageToKafka(CommandWrapper wrapper) {
-        return wrapper.getSource() == null && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase("");
+        return wrapper.getSource() == null && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase(CommandWrapper.EMPTY_TOPIC);
     }
 
     @Transactional
