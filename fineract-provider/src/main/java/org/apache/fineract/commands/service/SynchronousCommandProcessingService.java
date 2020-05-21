@@ -139,13 +139,17 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         logger.debug("source:" + wrapper.getSource());
         logger.debug("topicName:" + wrapper.getTopicName());
-        if (wrapper.getSource() == null && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase("")) {
+        if (shouldSendMessageToKafka(wrapper)) {
             publishKafkaEvent(wrapper, result);
         }
 
         publishEvent(wrapper.entityName(), wrapper.actionName(), result);
 
         return result;
+    }
+
+    private boolean shouldSendMessageToKafka(CommandWrapper wrapper) {
+        return wrapper.getSource() == null && wrapper.getTopicName() != null && !wrapper.getTopicName().equalsIgnoreCase("");
     }
 
     @Transactional
