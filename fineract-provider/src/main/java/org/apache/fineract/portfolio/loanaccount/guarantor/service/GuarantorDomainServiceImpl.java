@@ -35,8 +35,8 @@ import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.service.BusinessEventListner;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -94,17 +94,17 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
     @PostConstruct
     public void addListners() {
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_APPROVED, new ValidateOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_UNDO_DISBURSAL,
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new ValidateOnBusinessEvent());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_DISBURSAL,
                 new ReverseAllFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_ADJUST_TRANSACTION,
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_ADJUST_TRANSACTION,
                 new AdjustFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT,
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT,
                 new ReleaseFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_UNDO_WRITTEN_OFF,
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF,
                 new ReverseFundsOnBusinessEvent());
     }
 
@@ -531,11 +531,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class ValidateOnBusinessEvent implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 validateGuarantorBusinessRules(loan);
@@ -546,11 +546,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class HoldFundsOnBusinessEvent implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 holdGuarantorFunds(loan);
@@ -561,11 +561,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class ReleaseFundsOnBusinessEvent implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
             if (entity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) entity;
                 if (releaseLoanIds.containsKey(loanTransaction.getLoan().getId())) {
@@ -580,11 +580,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class ReverseFundsOnBusinessEvent implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
             if (entity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) entity;
                 List<Long> reersedTransactions = new ArrayList<>(1);
@@ -597,18 +597,18 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class AdjustFundsOnBusinessEvent implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_ADJUSTED_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN_ADJUSTED_TRANSACTION);
             if (entity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) entity;
                 List<Long> reersedTransactions = new ArrayList<>(1);
                 reersedTransactions.add(loanTransaction.getId());
                 reverseTransaction(reersedTransactions);
             }
-            Object transactionentity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_TRANSACTION);
+            Object transactionentity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
             if (transactionentity != null && transactionentity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) transactionentity;
                 releaseGuarantorFunds(loanTransaction);
@@ -619,11 +619,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class ReverseAllFundsOnBusinessEvent implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 List<Long> reersedTransactions = new ArrayList<>(1);
@@ -636,11 +636,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class UndoAllFundTransactions implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 reverseAllFundTransaction(loan);
@@ -651,11 +651,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private class ReleaseAllFunds implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BUSINESS_ENTITY, Object> businessEventEntity) {}
+        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
             if (entity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) entity;
                 releaseAllGuarantors(loanTransaction);

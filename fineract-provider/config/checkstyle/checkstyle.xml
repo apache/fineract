@@ -71,6 +71,10 @@
             <property name="format" value="\.printStackTrace?\("/>
             <property name="message" value="Line contains printStacktrace()."/>
             <property name="ignoreComments" value="false" />
+            </module>
+        <module name="TypeName">
+            <message key="name.invalidPattern"
+             value="Type name ''{0}'' must match pattern ''{1}''."/>
         </module>
           <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
@@ -157,11 +161,6 @@
         <module name="SeparatorWrap">
             <property name="tokens" value="COMMA"/>
             <property name="option" value="EOL"/>
-        </module>
-      
-        <module name="TypeName">
-            <message key="name.invalidPattern"
-             value="Type name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="MemberName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>

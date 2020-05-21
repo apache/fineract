@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -411,9 +411,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             // Pass the journal entries
             FinancialActivityAccount mainVaultFinancialActivityAccount = this.financialActivityAccountRepositoryWrapper
-                    .findByFinancialActivityTypeWithNotFoundDetection(FINANCIAL_ACTIVITY.CASH_AT_MAINVAULT.getValue());
+                    .findByFinancialActivityTypeWithNotFoundDetection(FinancialActivity.CASH_AT_MAINVAULT.getValue());
             FinancialActivityAccount tellerCashFinancialActivityAccount = this.financialActivityAccountRepositoryWrapper
-                    .findByFinancialActivityTypeWithNotFoundDetection(FINANCIAL_ACTIVITY.CASH_AT_TELLER.getValue());
+                    .findByFinancialActivityTypeWithNotFoundDetection(FinancialActivity.CASH_AT_TELLER.getValue());
             GLAccount creditAccount = null;
             GLAccount debitAccount = null;
             if (txnType.equals(CashierTxnType.ALLOCATE)) {

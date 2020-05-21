@@ -21,8 +21,8 @@ package org.apache.fineract.accounting.producttoaccountmapping.service;
 import com.google.gson.JsonElement;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SHARES;
-import org.apache.fineract.accounting.common.AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS;
+import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
+import org.apache.fineract.accounting.common.AccountingConstants.SharesProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -124,23 +124,23 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             final AccountingRuleType accountingRuleType) {
         final Map<String, Object> changes = new HashMap<>();
 
-        final Long shareReferenceId = this.fromApiJsonHelper.extractLongNamed(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(),
+        final Long shareReferenceId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
                 element);
         final Long incomeFromFeeAccountId = this.fromApiJsonHelper.extractLongNamed(
-                SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), element);
-        final Long shareSuspenseId = this.fromApiJsonHelper.extractLongNamed(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue(),
+                SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), element);
+        final Long shareSuspenseId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
                 element);
-        final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(),
+        final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_EQUITY.getValue(),
                 element);
 
         switch (accountingRuleType) {
             case NONE:
             break;
             case CASH_BASED:
-                changes.put(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(), shareReferenceId);
-                changes.put(SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), incomeFromFeeAccountId);
-                changes.put(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue(), shareSuspenseId);
-                changes.put(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(), shareEquityId);
+                changes.put(SharesProductAccountingParams.SHARES_REFERENCE.getValue(), shareReferenceId);
+                changes.put(SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), incomeFromFeeAccountId);
+                changes.put(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(), shareSuspenseId);
+                changes.put(SharesProductAccountingParams.SHARES_EQUITY.getValue(), shareEquityId);
             break;
             case ACCRUAL_PERIODIC:
             break;
@@ -168,24 +168,24 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             break;
             case CASH_BASED:
                 // asset
-                mergeSharesToAssetAccountMappingChanges(element, SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(),
-                        sharesProductId, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(),
-                        CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.toString(), changes);
+                mergeSharesToAssetAccountMappingChanges(element, SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
+                        sharesProductId, CashAccountsForShares.SHARES_REFERENCE.getValue(),
+                        CashAccountsForShares.SHARES_REFERENCE.toString(), changes);
 
                 // income
-                mergeSharesToIncomeAccountMappingChanges(element, SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
-                        sharesProductId, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES.getValue(),
-                        CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES.toString(), changes);
+                mergeSharesToIncomeAccountMappingChanges(element, SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
+                        sharesProductId, CashAccountsForShares.INCOME_FROM_FEES.getValue(),
+                        CashAccountsForShares.INCOME_FROM_FEES.toString(), changes);
 
                 // liability
-                mergeSharesToLiabilityAccountMappingChanges(element, SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue(),
-                        sharesProductId, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
-                        CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.toString(), changes);
+                mergeSharesToLiabilityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
+                        sharesProductId, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
+                        CashAccountsForShares.SHARES_SUSPENSE.toString(), changes);
 
                 // equity
-                mergeSharesToEquityAccountMappingChanges(element, SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(),
-                        sharesProductId, CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(),
-                        CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.toString(), changes);
+                mergeSharesToEquityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_EQUITY.getValue(),
+                        sharesProductId, CashAccountsForShares.SHARES_EQUITY.getValue(),
+                        CashAccountsForShares.SHARES_EQUITY.toString(), changes);
             break;
             case ACCRUAL_PERIODIC:
             break;

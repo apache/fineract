@@ -45,7 +45,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
+import org.apache.fineract.infrastructure.codes.CodeConstants.CodevalueJSONinputParams;
 import org.apache.fineract.infrastructure.codes.data.CodeData;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -71,10 +71,10 @@ public class CodeValuesApiResource {
      * The set of parameters that are supported in response for {@link CodeData}
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(CODEVALUE_JSON_INPUT_PARAMS.CODEVALUE_ID.getValue(),
-                    CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
-                    CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue(),
-                    CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue()));
+            Arrays.asList(CodevalueJSONinputParams.CODEVALUE_ID.getValue(),
+                    CodevalueJSONinputParams.NAME.getValue(), CodevalueJSONinputParams.POSITION.getValue(),
+                    CodevalueJSONinputParams.IS_MANDATORY.getValue(),
+                    CodevalueJSONinputParams.DESCRIPTION.getValue()));
     private final String resourceNameForPermissions = "CODEVALUE";
 
     private final PlatformSecurityContext context;

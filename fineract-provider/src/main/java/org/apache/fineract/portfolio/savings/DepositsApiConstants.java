@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.savings;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.fineract.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
+import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
 
 public class DepositsApiConstants {
 
@@ -207,14 +207,14 @@ public class DepositsApiConstants {
             digitsAfterDecimalParamName, inMultiplesOfParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
-            accountingRuleParamName, chargesParamName, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(), chartsParamName,
+            accountingRuleParamName, chargesParamName, SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
+            SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(),
+            SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(),
+            SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
+            SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(),
+            SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(),
+            SavingProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
+            SavingProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(), chartsParamName,
             SavingsApiConstants.withHoldTaxParamName, SavingsApiConstants.taxGroupIdParamName));
 
     private static final Set<String> PRECLOSURE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(preClosurePenalApplicableParamName,

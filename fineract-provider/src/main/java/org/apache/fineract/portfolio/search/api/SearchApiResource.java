@@ -42,7 +42,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.portfolio.search.SearchConstants.SEARCH_RESPONSE_PARAMETERS;
+import org.apache.fineract.portfolio.search.SearchConstants.SearchResponseParameters;
 import org.apache.fineract.portfolio.search.data.AdHocQueryDataValidator;
 import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
 import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
@@ -62,7 +62,7 @@ import org.springframework.stereotype.Component;
 })
 public class SearchApiResource {
 
-    private final Set<String> searchResponseParameters = SEARCH_RESPONSE_PARAMETERS.getAllValues();
+    private final Set<String> searchResponseParameters = SearchResponseParameters.getAllValues();
 
     private final SearchReadPlatformService searchReadPlatformService;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;

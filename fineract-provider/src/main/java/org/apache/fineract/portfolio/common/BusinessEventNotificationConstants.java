@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class BusinessEventNotificationConstants {
 
-    public static enum BUSINESS_EVENTS {
+    public static enum BusinessEvents {
         LOAN_APPROVED("loan_approved"), LOAN_REJECTED("loan_reject"), LOAN_UNDO_APPROVAL("loan_undo_approval"), LOAN_UNDO_DISBURSAL(
                 "loan_undo_disbursal"), LOAN_UNDO_LASTDISBURSAL("loan_undo_lastdisbursal"), LOAN_UNDO_TRANSACTION("loan_undo_transaction"), LOAN_ADJUST_TRANSACTION(
                 "loan_adjust_transaction"), LOAN_MAKE_REPAYMENT("loan_repayment_transaction"), LOAN_WRITTEN_OFF("loan_writtenoff"), LOAN_UNDO_WRITTEN_OFF(
@@ -42,13 +42,13 @@ public class BusinessEventNotificationConstants {
 
         private final String value;
 
-        private BUSINESS_EVENTS(final String value) {
+        private BusinessEvents(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
         static {
-            for (final BUSINESS_EVENTS type : BUSINESS_EVENTS.values()) {
+            for (final BusinessEvents type : BusinessEvents.values()) {
                 values.add(type.value);
             }
         }
@@ -62,14 +62,14 @@ public class BusinessEventNotificationConstants {
         }
     }
 
-    public static enum BUSINESS_ENTITY {
+    public static enum BusinessEntity {
         LOAN("loan"), LOAN_TRANSACTION("loan_transaction"), LOAN_CHARGE("loan_charge"), LOAN_ADJUSTED_TRANSACTION(
         "loan_adjusted_transaction"), SAVING("saving"), CLIENT("client"), SAVINGS_TRANSACTION("Savings Transaction"), GROUP("group"),
         SHARE_ACCOUNT("share_account"), SHARE_PRODUCT("share_product"), DEPOSIT_ACCOUNT("deposit_account"), LOAN_PRODUCT("loan_product");
 
         private final String value;
 
-        private BUSINESS_ENTITY(final String value) {
+        private BusinessEntity(final String value) {
             this.value = value;
         }
 

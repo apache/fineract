@@ -71,7 +71,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
+import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -301,33 +301,33 @@ public class DepositProductDataValidator {
         if (isCashBasedAccounting(accountingRuleType)) {
 
             final Long savingsControlAccountId = fromApiJsonHelper.extractLongNamed(
-                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue())
+                    SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_CONTROL.getValue())
                     .value(savingsControlAccountId).notNull().integerGreaterThanZero();
 
             final Long savingsReferenceAccountId = fromApiJsonHelper.extractLongNamed(
-                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue())
+                    SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element);
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue())
                     .value(savingsReferenceAccountId).notNull().integerGreaterThanZero();
 
             final Long transfersInSuspenseAccountId = fromApiJsonHelper.extractLongNamed(
-                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue())
+                    SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue())
                     .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
 
             final Long interestOnSavingsAccountId = fromApiJsonHelper.extractLongNamed(
-                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue())
+                    SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue())
                     .value(interestOnSavingsAccountId).notNull().integerGreaterThanZero();
 
-            final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+            final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
                     element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
                     .notNull().integerGreaterThanZero();
 
             final Long incomeFromPenaltyId = fromApiJsonHelper.extractLongNamed(
-                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
+                    SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue())
                     .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
 
             validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
@@ -510,33 +510,33 @@ public class DepositProductDataValidator {
         }
 
         final Long savingsControlAccountId = fromApiJsonHelper.extractLongNamed(
-                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue()).value(savingsControlAccountId)
+                SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_CONTROL.getValue()).value(savingsControlAccountId)
                 .ignoreIfNull().integerGreaterThanZero();
 
         final Long savingsReferenceAccountId = fromApiJsonHelper.extractLongNamed(
-                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue())
+                SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), element);
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_REFERENCE.getValue())
                 .value(savingsReferenceAccountId).ignoreIfNull().integerGreaterThanZero();
 
         final Long transfersInSuspenseAccountId = fromApiJsonHelper.extractLongNamed(
-                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue())
+                SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue())
                 .value(transfersInSuspenseAccountId).ignoreIfNull().integerGreaterThanZero();
 
         final Long interestOnSavingsAccountId = fromApiJsonHelper.extractLongNamed(
-                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue())
+                SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue())
                 .value(interestOnSavingsAccountId).ignoreIfNull().integerGreaterThanZero();
 
-        final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+        final Long incomeFromFeeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
                 element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
                 .ignoreIfNull().integerGreaterThanZero();
 
         final Long incomeFromPenaltyId = fromApiJsonHelper.extractLongNamed(
-                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
+                SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), element);
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
                 .ignoreIfNull().integerGreaterThanZero();
 
         validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
@@ -615,27 +615,27 @@ public class DepositProductDataValidator {
      */
     private void validatePaymentChannelFundSourceMappings(final FromJsonHelper fromApiJsonHelper,
             final DataValidatorBuilder baseDataValidator, final JsonElement element) {
-        if (fromApiJsonHelper.parameterExists(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element)) {
+        if (fromApiJsonHelper.parameterExists(SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element)) {
             final JsonArray paymentChannelMappingArray = fromApiJsonHelper.extractJsonArrayNamed(
-                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
+                    SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
             if (paymentChannelMappingArray != null && paymentChannelMappingArray.size() > 0) {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = paymentChannelMappingArray.get(i).getAsJsonObject();
-                    final Long paymentTypeId = jsonObject.get(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.getValue()).getAsLong();
-                    final Long paymentSpecificFundAccountId = jsonObject.get(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue())
+                    final Long paymentTypeId = jsonObject.get(SavingProductAccountingParams.PAYMENT_TYPE.getValue()).getAsLong();
+                    final Long paymentSpecificFundAccountId = jsonObject.get(SavingProductAccountingParams.FUND_SOURCE.getValue())
                             .getAsLong();
                     baseDataValidator
                             .reset()
                             .parameter(
-                                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
-                                            + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.toString()).value(paymentTypeId).notNull()
+                                    SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
+                                            + SavingProductAccountingParams.PAYMENT_TYPE.toString()).value(paymentTypeId).notNull()
                             .integerGreaterThanZero();
                     baseDataValidator
                             .reset()
                             .parameter(
-                                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
-                                            + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue()).value(paymentSpecificFundAccountId)
+                                    SavingProductAccountingParams.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
+                                            + SavingProductAccountingParams.FUND_SOURCE.getValue()).value(paymentSpecificFundAccountId)
                             .notNull().integerGreaterThanZero();
                     i++;
                 } while (i < paymentChannelMappingArray.size());
@@ -654,9 +654,9 @@ public class DepositProductDataValidator {
             final DataValidatorBuilder baseDataValidator, final JsonElement element, final boolean isPenalty) {
         String parameterName;
         if (isPenalty) {
-            parameterName = SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
+            parameterName = SavingProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
         } else {
-            parameterName = SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue();
+            parameterName = SavingProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue();
         }
 
         if (fromApiJsonHelper.parameterExists(parameterName, element)) {
@@ -665,15 +665,15 @@ public class DepositProductDataValidator {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject();
-                    final Long chargeId = fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue(),
+                    final Long chargeId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.CHARGE_ID.getValue(),
                             jsonObject);
                     final Long incomeAccountId = fromApiJsonHelper.extractLongNamed(
-                            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue(), jsonObject);
+                            SavingProductAccountingParams.INCOME_ACCOUNT_ID.getValue(), jsonObject);
                     baseDataValidator.reset()
-                            .parameter(parameterName + "[" + i + "]." + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue())
+                            .parameter(parameterName + "[" + i + "]." + SavingProductAccountingParams.CHARGE_ID.getValue())
                             .value(chargeId).notNull().integerGreaterThanZero();
                     baseDataValidator.reset()
-                            .parameter(parameterName + "[" + i + "]." + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue())
+                            .parameter(parameterName + "[" + i + "]." + SavingProductAccountingParams.INCOME_ACCOUNT_ID.getValue())
                             .value(incomeAccountId).notNull().integerGreaterThanZero();
                     i++;
                 } while (i < chargeToIncomeAccountMappingArray.size());

@@ -36,8 +36,8 @@ import org.apache.fineract.notification.eventandlistener.SpringEventPublisher;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.service.BusinessEventListner;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -82,58 +82,58 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.CLIENTS_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CLIENTS_CREATE,
                 new ClientCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_APPROVE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_APPROVE,
                 new SavingsAccountApprovedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.CENTERS_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CENTERS_CREATE,
                 new CenterCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.GROUPS_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.GROUPS_CREATE,
                 new GroupCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_DEPOSIT,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_DEPOSIT,
                 new SavingsAccountDepositListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SHARE_PRODUCT_DIVIDENDS_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_PRODUCT_DIVIDENDS_CREATE,
                 new ShareProductDividendCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
                 new FixedDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
                 new RecurringDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_POST_INTEREST,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_POST_INTEREST,
                 new SavingsPostInterestListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_CREATE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CREATE,
                 new LoanCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_APPROVED,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED,
                 new LoanApprovedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_CLOSE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CLOSE,
                 new LoanClosedListener());
-        businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_CLOSE_AS_RESCHEDULE,
+        businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_CLOSE_AS_RESCHEDULE,
                 new LoanCloseAsRescheduledListener());
-         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT,
+         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT,
                  new LoanMakeRepaymentListener());
-         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_PRODUCT_CREATE,
+         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_PRODUCT_CREATE,
                  new LoanProductCreatedListener());
-         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_CREATE,
+         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_CREATE,
                  new SavingsAccountCreatedListener());
-         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_CLOSE,
+         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_CLOSE,
                  new SavingsAccountClosedListener());
-         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SHARE_ACCOUNT_CREATE,
+         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_ACCOUNT_CREATE,
                  new ShareAccountCreatedListener());
-         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SHARE_ACCOUNT_APPROVE,
+         businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SHARE_ACCOUNT_APPROVE,
                  new ShareAccountApprovedListener());
     }
 
     private abstract class NotificationBusinessEventAdapter implements BusinessEventListner {
         @Override
-        public void businessEventToBeExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventToBeExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
         }
     }
 
     private class ClientCreatedListener extends  NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             Client client;
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.CLIENT);
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.CLIENT);
             if (entity != null) {
                 client = (Client) entity;
                 buildNotification(
@@ -152,9 +152,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class CenterCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
             CommandProcessingResult commandProcessingResult;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.GROUP);
+            Object entity = businessEventEntity.get(BusinessEntity.GROUP);
             if (entity != null) {
                 commandProcessingResult = (CommandProcessingResult) entity;
                 buildNotification(
@@ -173,9 +173,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class GroupCreatedListener extends  NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
             CommandProcessingResult commandProcessingResult;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.GROUP);
+            Object entity = businessEventEntity.get(BusinessEntity.GROUP);
             if (entity != null) {
                 commandProcessingResult = (CommandProcessingResult) entity;
                 buildNotification(
@@ -194,9 +194,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class SavingsAccountDepositListener extends  NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             SavingsAccountTransaction savingsAccountTransaction;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SAVINGS_TRANSACTION);
+            Object entity = businessEventEntity.get(BusinessEntity.SAVINGS_TRANSACTION);
             if (entity != null) {
                 savingsAccountTransaction = (SavingsAccountTransaction) entity;
                 buildNotification(
@@ -215,9 +215,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class ShareProductDividendCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             Long shareProductId;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SHARE_PRODUCT);
+            Object entity = businessEventEntity.get(BusinessEntity.SHARE_PRODUCT);
             if (entity != null) {
                 shareProductId = (Long) entity;
                 buildNotification(
@@ -236,9 +236,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class FixedDepositAccountCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             FixedDepositAccount fixedDepositAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.DEPOSIT_ACCOUNT);
+            Object entity = businessEventEntity.get(BusinessEntity.DEPOSIT_ACCOUNT);
             if (entity != null) {
                 fixedDepositAccount = (FixedDepositAccount) entity;
                 buildNotification(
@@ -257,9 +257,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class RecurringDepositAccountCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             RecurringDepositAccount recurringDepositAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.DEPOSIT_ACCOUNT);
+            Object entity = businessEventEntity.get(BusinessEntity.DEPOSIT_ACCOUNT);
             if (entity != null) {
                 recurringDepositAccount = (RecurringDepositAccount) entity;
                 buildNotification(
@@ -278,9 +278,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class SavingsAccountApprovedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             SavingsAccount  savingsAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SAVING);
+            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
             if (entity != null) {
                 savingsAccount = (SavingsAccount) entity;
                 if (savingsAccount.depositAccountType().equals(DepositAccountType.FIXED_DEPOSIT)) {
@@ -324,9 +324,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class SavingsPostInterestListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             SavingsAccount savingsAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SAVING);
+            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
             if (entity != null) {
                 savingsAccount = (SavingsAccount) entity;
                 buildNotification(
@@ -345,9 +345,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class LoanCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             Loan loan;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity != null) {
                 loan = (Loan) entity;
                 buildNotification(
@@ -367,9 +367,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class LoanApprovedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             Loan loan;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity != null) {
                 loan = (Loan) entity;
                 buildNotification(
@@ -388,10 +388,10 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class LoanClosedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
 
             Loan loan;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity != null) {
                 loan = (Loan) entity;
                 buildNotification(
@@ -410,9 +410,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class LoanCloseAsRescheduledListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             Loan loan;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity != null) {
                 loan = (Loan) entity;
                 buildNotification(
@@ -431,9 +431,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class LoanMakeRepaymentListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             Loan loan;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity != null) {
                 loan = (Loan) entity;
                 buildNotification(
@@ -452,10 +452,10 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class LoanProductCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
 
             LoanProduct loanProduct;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_PRODUCT);
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN_PRODUCT);
             if (entity != null) {
                 loanProduct = (LoanProduct) entity;
                 buildNotification(
@@ -474,9 +474,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class SavingsAccountCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             SavingsAccount  savingsAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SAVING);
+            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
             if (entity != null) {
                 savingsAccount = (SavingsAccount) entity;
                 buildNotification(
@@ -495,9 +495,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class SavingsAccountClosedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             SavingsAccount  savingsAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SAVING);
+            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
             if (entity != null) {
                 savingsAccount = (SavingsAccount) entity;
                 buildNotification(
@@ -516,9 +516,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class ShareAccountCreatedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             ShareAccount shareAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SHARE_ACCOUNT);
+            Object entity = businessEventEntity.get(BusinessEntity.SHARE_ACCOUNT);
             if (entity != null) {
                 shareAccount = (ShareAccount) entity;
                 buildNotification(
@@ -537,9 +537,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private class ShareAccountApprovedListener extends NotificationBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             ShareAccount shareAccount;
-            Object entity = businessEventEntity.get(BUSINESS_ENTITY.SHARE_ACCOUNT);
+            Object entity = businessEventEntity.get(BusinessEntity.SHARE_ACCOUNT);
             if (entity != null) {
                 shareAccount = (ShareAccount) entity;
                 buildNotification(

@@ -27,7 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.exception.DuplicateFinancialActivityAccountFoundException;
 import org.apache.fineract.accounting.financialactivityaccount.exception.FinancialActivityAccountInvalidException;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -50,8 +50,8 @@ public class FinancialActivityAccountsTest {
     private RequestSpecification requestSpec;
     private AccountHelper accountHelper;
     private FinancialActivityAccountHelper financialActivityAccountHelper;
-    private final Integer assetTransferFinancialActivityId = FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue();
-    public static final Integer liabilityTransferFinancialActivityId = FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue();
+    private final Integer assetTransferFinancialActivityId = FinancialActivity.ASSET_TRANSFER.getValue();
+    public static final Integer liabilityTransferFinancialActivityId = FinancialActivity.LIABILITY_TRANSFER.getValue();
 
     @Before
     public void setup() {

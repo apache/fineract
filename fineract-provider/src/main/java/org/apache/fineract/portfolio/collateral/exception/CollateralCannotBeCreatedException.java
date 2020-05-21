@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class CollateralCannotBeCreatedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
-    public static enum LOAN_COLLATERAL_CANNOT_BE_CREATED_REASON {
+    public static enum LoanCollateralCannotBeCreatedReason {
         LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
         public String errorMessage() {
@@ -37,7 +37,7 @@ public class CollateralCannotBeCreatedException extends AbstractPlatformDomainRu
         }
     }
 
-    public CollateralCannotBeCreatedException(final LOAN_COLLATERAL_CANNOT_BE_CREATED_REASON reason, final Long loanId) {
+    public CollateralCannotBeCreatedException(final LoanCollateralCannotBeCreatedReason reason, final Long loanId) {
         super(reason.errorCode(), reason.errorMessage(), loanId);
     }
 }

@@ -48,7 +48,7 @@ public class ImageData {
     private final String entityDisplayName;
 
     private File file;
-    private ContentRepositoryUtils.IMAGE_FILE_EXTENSION fileExtension;
+    private ContentRepositoryUtils.ImageFileExtension fileExtension;
     private InputStream inputStream;
 
     public ImageData(final Long imageId, final String location, final Integer storageType, final String entityDisplayName) {
@@ -94,7 +94,7 @@ public class ImageData {
 
         int newWidth = (int) (src.getWidth() / scaleRatio);
         int newHeight = (int) (src.getHeight() / scaleRatio);
-        int colorModel = fileExtension == ContentRepositoryUtils.IMAGE_FILE_EXTENSION.JPEG ? BufferedImage.TYPE_INT_RGB
+        int colorModel = fileExtension == ContentRepositoryUtils.ImageFileExtension.JPEG ? BufferedImage.TYPE_INT_RGB
                 : BufferedImage.TYPE_INT_ARGB;
         BufferedImage target = new BufferedImage(newWidth, newHeight, colorModel);
         Graphics2D g = target.createGraphics();
@@ -135,12 +135,12 @@ public class ImageData {
     }
 
     private void setImageContentType(String filename) {
-        fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.JPEG;
+        fileExtension = ContentRepositoryUtils.ImageFileExtension.JPEG;
 
-        if (StringUtils.endsWith(filename.toLowerCase(), ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
-            fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF;
-        } else if (StringUtils.endsWith(filename, ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
-            fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG;
+        if (StringUtils.endsWith(filename.toLowerCase(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
+            fileExtension = ContentRepositoryUtils.ImageFileExtension.GIF;
+        } else if (StringUtils.endsWith(filename, ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
+            fileExtension = ContentRepositoryUtils.ImageFileExtension.PNG;
         }
     }
 
@@ -152,7 +152,7 @@ public class ImageData {
     }
 
     public String contentType() {
-        return ContentRepositoryUtils.IMAGE_MIME_TYPE.fromFileExtension(this.fileExtension).getValue();
+        return ContentRepositoryUtils.ImageMIMEtype.fromFileExtension(this.fileExtension).getValue();
     }
 
     public StorageType storageType() {

@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
+import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
@@ -125,7 +125,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             if (entityActivationDate != null) dateAsString = formatter.print(entityActivationDate);
 
             final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase() + ".activation.date";
-            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue()).value(dateAsString)
+            baseDataValidator.reset().parameter(CalendarSupportedParameters.START_DATE.getValue()).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode(errorMessage);
         }
 
@@ -244,7 +244,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         Map<String, Object> changes = null;
 
         final Boolean reschedulebasedOnMeetingDates = command
-                .booleanObjectValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.RESCHEDULE_BASED_ON_MEETING_DATES.getValue());
+                .booleanObjectValueOfParameterNamed(CalendarSupportedParameters.RESCHEDULE_BASED_ON_MEETING_DATES.getValue());
 
         /*
          * System allows to change the meeting date by two means,
@@ -269,8 +269,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
 
-            newMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.NEW_MEETING_DATE.getValue());
-            presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.PRESENT_MEETING_DATE.getValue());
+            newMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.NEW_MEETING_DATE.getValue());
+            presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.PRESENT_MEETING_DATE.getValue());
 
             /*
              * New meeting date proposed will become the new start date for the
@@ -287,7 +287,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             // update calendar history table only if there is a change in
             // calendar start date.
             if (reschedulebasedOnMeetingDates == null){
-            presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue());
+            presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
             }
             if (null != newMeetingDate) {
                 final Date endDate = presentMeetingDate.minusDays(1).toDate();

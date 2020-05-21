@@ -41,8 +41,8 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.service.BusinessEventListner;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -97,15 +97,15 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     @PostConstruct
     public void addListners() {
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_APPROVED, new SendSmsOnLoanApproved());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_REJECTED, new SendSmsOnLoanRejected());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT, new SendSmsOnLoanRepayment());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.CLIENTS_ACTIVATE, new ClientActivatedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.CLIENTS_REJECT, new ClientRejectedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_ACTIVATE, new SavingsAccountActivatedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_REJECT, new SavingsAccountRejectedListener());
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_DEPOSIT, new SavingsAccountTransactionListener(true));
-        this.businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SAVINGS_WITHDRAWAL, new SavingsAccountTransactionListener(false));
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_APPROVED, new SendSmsOnLoanApproved());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_REJECTED, new SendSmsOnLoanRejected());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.LOAN_MAKE_REPAYMENT, new SendSmsOnLoanRepayment());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CLIENTS_ACTIVATE, new ClientActivatedListener());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.CLIENTS_REJECT, new ClientRejectedListener());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_ACTIVATE, new SavingsAccountActivatedListener());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_REJECT, new SavingsAccountRejectedListener());
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_DEPOSIT, new SavingsAccountTransactionListener(true));
+        this.businessEventNotifierService.addBusinessEventPostListners(BusinessEvents.SAVINGS_WITHDRAWAL, new SavingsAccountTransactionListener(false));
     }
 
     private void notifyRejectedLoanOwner(Loan loan) {
@@ -392,7 +392,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private abstract class SmsBusinessEventAdapter implements BusinessEventListner {
 
         @Override
-        public void businessEventToBeExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
+        public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             //Nothing to do
         }
     }
@@ -400,8 +400,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class SendSmsOnLoanApproved extends SmsBusinessEventAdapter{
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 notifyAcceptedLoanOwner(loan);
@@ -412,8 +412,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class SendSmsOnLoanRejected extends SmsBusinessEventAdapter{
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 notifyRejectedLoanOwner(loan);
@@ -424,8 +424,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class SendSmsOnLoanRepayment extends SmsBusinessEventAdapter{
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.LOAN_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.LOAN_TRANSACTION);
             if (entity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) entity;
                 sendSmsForLoanRepayment(loanTransaction);
@@ -436,8 +436,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class ClientActivatedListener extends SmsBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.CLIENT);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.CLIENT);
             if(entity instanceof Client) {
                 notifyClientActivated((Client)entity);
             }
@@ -447,8 +447,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class ClientRejectedListener extends SmsBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.CLIENT);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.CLIENT);
             if(entity instanceof Client) {
                 notifyClientRejected((Client)entity);
             }
@@ -459,8 +459,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class SavingsAccountActivatedListener extends SmsBusinessEventAdapter{
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.SAVING);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.SAVING);
             if(entity instanceof SavingsAccount) {
                 notifySavingsAccountActivated((SavingsAccount)entity);
             }
@@ -471,8 +471,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private class SavingsAccountRejectedListener extends SmsBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.SAVING);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.SAVING);
             if(entity instanceof SavingsAccount) {
                 notifySavingsAccountRejected((SavingsAccount)entity);
             }
@@ -488,8 +488,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
 
         @Override
-        public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.SAVINGS_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.SAVINGS_TRANSACTION);
             if(entity instanceof SavingsAccountTransaction) {
                 sendSmsForSavingsTransaction((SavingsAccountTransaction)entity, this.isDeposit);
             }

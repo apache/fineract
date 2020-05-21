@@ -43,8 +43,8 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -108,8 +108,8 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
                     account.getPendingForApprovalSharePurchaseTransactions()));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SHARE_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.SHARE_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SHARE_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.SHARE_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -284,8 +284,8 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
             this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SHARE_ACCOUNT_APPROVE,
-                    constructEntityMap(BUSINESS_ENTITY.SHARE_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SHARE_ACCOUNT_APPROVE,
+                    constructEntityMap(BusinessEntity.SHARE_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -531,8 +531,8 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 "Unknown data integrity issue with resource.");
     }
 
-    private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BusinessEventNotificationConstants.BUSINESS_ENTITY entityEvent, Object entity) {
-        Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
+        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }

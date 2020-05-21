@@ -82,10 +82,10 @@ public class ShareProductDataSerializer {
             ShareProductApiConstants.minimumactiveperiodfordividends_paramname,
             ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname,
             ShareProductApiConstants.sharecapital_paramname, ShareProductApiConstants.accountingRuleParamName,
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue()));
+            AccountingConstants.SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
+            AccountingConstants.SharesProductAccountingParams.SHARES_EQUITY.getValue(),
+            AccountingConstants.SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
+            AccountingConstants.SharesProductAccountingParams.SHARES_SUSPENSE.getValue()));
 
     private static final Set<String> supportedParametersForDivident = new HashSet<>(Arrays.asList(
             ShareProductApiConstants.locale_paramname, ShareProductApiConstants.dateFormatParamName,

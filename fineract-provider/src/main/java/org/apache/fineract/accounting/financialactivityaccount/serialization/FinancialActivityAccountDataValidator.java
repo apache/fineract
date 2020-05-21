@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.api.FinancialActivityAccountsJsonInputParams;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -64,10 +64,10 @@ public final class FinancialActivityAccountDataValidator {
 
         final Integer financialActivityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(paramNameForFinancialActivity, element);
         baseDataValidator.reset().parameter(paramNameForFinancialActivity).value(financialActivityId).notNull().isOneOfTheseValues(
-                FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(),
-                FINANCIAL_ACTIVITY.CASH_AT_MAINVAULT.getValue(), FINANCIAL_ACTIVITY.CASH_AT_TELLER.getValue(),
-                FINANCIAL_ACTIVITY.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FINANCIAL_ACTIVITY.ASSET_FUND_SOURCE.getValue(),
-                FINANCIAL_ACTIVITY.PAYABLE_DIVIDENDS.getValue());
+                FinancialActivity.ASSET_TRANSFER.getValue(), FinancialActivity.LIABILITY_TRANSFER.getValue(),
+                FinancialActivity.CASH_AT_MAINVAULT.getValue(), FinancialActivity.CASH_AT_TELLER.getValue(),
+                FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FinancialActivity.ASSET_FUND_SOURCE.getValue(),
+                FinancialActivity.PAYABLE_DIVIDENDS.getValue());
 
         final Long glAccountId = this.fromApiJsonHelper.extractLongNamed(paramNameForGLAccount, element);
         baseDataValidator.reset().parameter(paramNameForGLAccount).value(glAccountId).notNull().integerGreaterThanZero();
@@ -92,9 +92,9 @@ public final class FinancialActivityAccountDataValidator {
             final Integer financialActivityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(paramNameForFinancialActivity,
                     element);
             baseDataValidator.reset().parameter(paramNameForFinancialActivity).value(financialActivityId).ignoreIfNull().isOneOfTheseValues(
-                    FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(),
-                    FINANCIAL_ACTIVITY.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FINANCIAL_ACTIVITY.ASSET_FUND_SOURCE.getValue(),
-                    FINANCIAL_ACTIVITY.PAYABLE_DIVIDENDS.getValue());
+                    FinancialActivity.ASSET_TRANSFER.getValue(), FinancialActivity.LIABILITY_TRANSFER.getValue(),
+                    FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FinancialActivity.ASSET_FUND_SOURCE.getValue(),
+                    FinancialActivity.PAYABLE_DIVIDENDS.getValue());
         }
 
         if (this.fromApiJsonHelper.parameterExists(paramNameForGLAccount, element)) {

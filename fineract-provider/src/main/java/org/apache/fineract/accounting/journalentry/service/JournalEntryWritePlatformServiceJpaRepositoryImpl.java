@@ -51,7 +51,7 @@ import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException;
-import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException.GL_JOURNAL_ENTRY_INVALID_REASON;
+import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException.GlJournalEntryInvalidReason;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryRuntimeException;
 import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
@@ -169,7 +169,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
                 if (accountingRule.getAccountToCredit() == null) {
                     if (journalEntryCommand.getCredits() == null) { throw new JournalEntryInvalidException(
-                            GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
+                            GlJournalEntryInvalidReason.NO_DEBITS_OR_CREDITS, null, null, null); }
                     if (journalEntryCommand.getDebits() != null) {
                         checkDebitOrCreditAccountsAreValid(accountingRule, journalEntryCommand.getCredits(),
                                 journalEntryCommand.getDebits());
@@ -188,7 +188,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
                 if (accountingRule.getAccountToDebit() == null) {
                     if (journalEntryCommand.getDebits() == null) { throw new JournalEntryInvalidException(
-                            GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
+                            GlJournalEntryInvalidReason.NO_DEBITS_OR_CREDITS, null, null, null); }
                     if (journalEntryCommand.getCredits() != null) {
                         checkDebitOrCreditAccountsAreValid(accountingRule, journalEntryCommand.getCredits(),
                                 journalEntryCommand.getDebits());
@@ -228,10 +228,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
          * should have only one entry and it must be same as existing account
          */
         if (creditOrDebits.length != 1) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
+                GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
         for (final SingleDebitOrCreditEntryCommand creditOrDebit : creditOrDebits) {
             if (!glaccount.getId().equals(creditOrDebit.getGlAccountId())) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
+                    GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
         }
     }
 
@@ -283,16 +283,16 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         BigDecimal debitsSum = BigDecimal.ZERO;
         for (final SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
             if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+                    GlJournalEntryInvalidReason.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
             creditsSum = creditsSum.add(creditEntryCommand.getAmount());
         }
         for (final SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
             if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+                    GlJournalEntryInvalidReason.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
             debitsSum = debitsSum.add(debitEntryCommand.getAmount());
         }
         if (creditsSum.compareTo(debitsSum) != 0) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
+                GlJournalEntryInvalidReason.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
     }
 
     private void validateGLAccountForTransaction(final GLAccount creditOrDebitAccountHead) {
@@ -301,10 +301,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
          * disabled
          **/
         if (creditOrDebitAccountHead.isDisabled()) {
-            throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_DISABLED, null,
+            throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.GL_ACCOUNT_DISABLED, null,
                     creditOrDebitAccountHead.getName(), creditOrDebitAccountHead.getGlCode());
         } else if (!creditOrDebitAccountHead.isManualEntriesAllowed()) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, null, creditOrDebitAccountHead.getName(),
+                GlJournalEntryInvalidReason.GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, null, creditOrDebitAccountHead.getName(),
                 creditOrDebitAccountHead.getGlCode()); }
     }
 
@@ -338,7 +338,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     || latestGLClosureByBranch.getClosingDate().equals(journalEntriesTransactionDate)) {
                 final String accountName = null;
                 final String accountGLCode = null;
-                throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED,
+                throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED,
                         latestGLClosureByBranch.getClosingDate(), accountName, accountGLCode);
             }
         }
@@ -578,13 +578,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final Date transactionDate = entryLocalDate.toDateTimeAtStartOfDay().toDate();
         // shouldn't be in the future
         final Date todaysDate = new Date();
-        if (transactionDate.after(todaysDate)) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE,
+        if (transactionDate.after(todaysDate)) { throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.FUTURE_DATE,
                 transactionDate, null, null); }
         // shouldn't be before an accounting closure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
             if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
+                    GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
         }
 
         /*** check if credits and debits are valid **/
@@ -593,7 +593,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         // atleast one debit or credit must be present
         if (credits == null || credits.length <= 0 || debits == null || debits.length <= 0) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
+                GlJournalEntryInvalidReason.NO_DEBITS_OR_CREDITS, null, null, null); }
 
         checkDebitAndCreditAmounts(credits, debits);
     }
