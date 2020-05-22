@@ -521,10 +521,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                           && fixedEmiAmount != null
                           && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
                               currentPeriodParams.setEmiAmountChanged(true);
-                          }
-                        }
-
+                         }
                     }
+                }
                     adjustCompoundedAmountWithPaidDetail(scheduleParams, lastRestDate, currentTransactions, loanApplicationTerms,
                             holidayDetailDTO);
                 }
@@ -638,15 +637,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduleParams.getReducePrincipal(),
                     scheduleParams.getTotalCumulativePrincipal().plus(currentPeriodParams.getPrincipalForThisPeriod())
                             .plus(currentPeriodParams.getEarlyPaidAmount()), scheduleParams.getPeriodNumber() + 1, mc));
-            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment())
-                if (fixedEmiAmount != null) {
-                  if (fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+                && fixedEmiAmount != null) 
+                  && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
                     currentPeriodParams.setEmiAmountChanged(true);
-                }
-            }
             currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
         }
-
+    }
         // update outstandingLoanBlance using current period
         // 'principalDue'
         scheduleParams.reduceOutstandingBalance(currentPeriodParams.getPrincipalForThisPeriod().minus(
