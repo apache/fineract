@@ -72,6 +72,11 @@
             <property name="message" value="Line contains printStacktrace()."/>
             <property name="ignoreComments" value="false" />
         </module>
+          <module name="PackageName">
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
+            <message key="name.invalidPattern"
+             value="Package name ''{0}'' must match pattern ''{1}''."/>
+        </module>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -153,11 +158,7 @@
             <property name="tokens" value="COMMA"/>
             <property name="option" value="EOL"/>
         </module>
-        <module name="PackageName">
-            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
-            <message key="name.invalidPattern"
-             value="Package name ''{0}'' must match pattern ''{1}''."/>
-        </module>
+      
         <module name="TypeName">
             <message key="name.invalidPattern"
              value="Type name ''{0}'' must match pattern ''{1}''."/>
