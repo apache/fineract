@@ -64,9 +64,13 @@ public class PaymentTypeData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
 
-        if (!(o instanceof PaymentTypeData)) return false;
+        if (!(o instanceof PaymentTypeData)) {
+            return false;
+        }
 
         PaymentTypeData that = (PaymentTypeData) o;
 

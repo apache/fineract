@@ -109,8 +109,9 @@ public class OfficeWorkbookPopulator extends AbstractWorkbookPopulator {
     private void setDefaults(final Sheet worksheet) {
             for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
                 Row row = worksheet.getRow(rowNo);
-                if (row == null)
+                if (row == null) {
                     row = worksheet.createRow(rowNo);
+                }
                 writeFormula(OfficeConstants.PARENT_OFFICE_ID_COL, row,
                         "IF(ISERROR(VLOOKUP($B"+(rowNo+1)+",$H$2:$I$"+(offices.size()+1)+",2,FALSE)),\"\",(VLOOKUP($B"+(rowNo+1)+",$H$2:$I$"+(offices.size()+1)+",2,FALSE)))");
             }

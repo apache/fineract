@@ -92,8 +92,9 @@ public class ClientEntityImportHandler implements ImportHandler {
         LocalDate incorportionDate=ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_DATE_COL,row);
         LocalDate incorporationTill=ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL,row);
         String mobileNo=null;
-        if (ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row)!=null)
-         mobileNo = ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row).toString();
+        if (ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row)!=null) {
+            mobileNo = ImportHandlerUtils.readAsLong(ClientEntityConstants.MOBILE_NO_COL, row).toString();
+        }
 
         String clientType=ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;
@@ -107,8 +108,9 @@ public class ClientEntityImportHandler implements ImportHandler {
         Long clientClassicationId = null;
         if (clientClassification!=null) {
             String clientClassificationAr[] =clientClassification.split("-");
-            if (clientClassificationAr[1] != null)
+            if (clientClassificationAr[1] != null) {
                 clientClassicationId = Long.parseLong(clientClassificationAr[1]);
+            }
         }
         String incorporationNo=ImportHandlerUtils.readAsString(ClientEntityConstants.INCOPORATION_NUMBER_COL,row);
 
@@ -116,15 +118,17 @@ public class ClientEntityImportHandler implements ImportHandler {
         Long mainBusinessId = null;
         if (mainBusinessLine!=null) {
             String mainBusinessLineAr[] = ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE, row).split("-");
-            if (mainBusinessLineAr[1] != null)
+            if (mainBusinessLineAr[1] != null) {
                 mainBusinessId = Long.parseLong(mainBusinessLineAr[1]);
+            }
         }
         String constitution= ImportHandlerUtils.readAsString(ClientEntityConstants.CONSTITUTION_COL,row);
         Long constitutionId = null;
         if (constitution!=null) {
             String constitutionAr[] = constitution.split("-");
-            if (constitutionAr[1] != null)
+            if (constitutionAr[1] != null) {
                 constitutionId = Long.parseLong(constitutionAr[1]);
+            }
         }
         String remarks = ImportHandlerUtils.readAsString(ClientEntityConstants.REMARKS_COL, row);
 
@@ -148,8 +152,9 @@ public class ClientEntityImportHandler implements ImportHandler {
             Long addressTypeId = null;
             if (addressType!=null) {
                 String addressTypeAr[] = addressType.split("-");
-                if (addressTypeAr[1] != null)
+                if (addressTypeAr[1] != null) {
                     addressTypeId = Long.parseLong(addressTypeAr[1]);
+                }
             }
             String street = ImportHandlerUtils.readAsString(ClientEntityConstants.STREET_COL, row);
             String addressLine1 = ImportHandlerUtils.readAsString(ClientEntityConstants.ADDRESS_LINE_1_COL, row);
@@ -164,15 +169,17 @@ public class ClientEntityImportHandler implements ImportHandler {
             Long stateProvinceId = null;
             if (stateProvince!=null) {
                 String stateProvinceAr[] = stateProvince.split("-");
-                if (stateProvinceAr[1] != null)
+                if (stateProvinceAr[1] != null) {
                     stateProvinceId = Long.parseLong(stateProvinceAr[1]);
+                }
             }
             String country= ImportHandlerUtils.readAsString(ClientEntityConstants.COUNTRY_COL, row);
             Long countryId = null;
             if (country!=null) {
                 String countryAr[] = country.split("-");
-                if (countryAr[1] != null)
+                if (countryAr[1] != null) {
                     countryId = Long.parseLong(countryAr[1]);
+                }
             }
             addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3,
                     city, postalCode, isActiveAddress, stateProvinceId, countryId);

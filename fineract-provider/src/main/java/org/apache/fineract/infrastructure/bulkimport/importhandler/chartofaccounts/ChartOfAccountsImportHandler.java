@@ -104,8 +104,9 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         }
         String glCode=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.GL_CODE_COL,row);
         Long tagId=null;
-        if(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row)!=null)
-            tagId=Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row));
+        if(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row)!=null) {
+            tagId = Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row));
+        }
         CodeValueData tagIdCodeValueData=new CodeValueData(tagId);
         String description=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.DESCRIPTION_COL,row);
         return GLAccountData.importInstance(accountName,parentId,glCode,manualEntriesAllowed,accountTypeEnum,

@@ -79,14 +79,17 @@ public class ClientNonPerson extends AbstractPersistableCustom {
 
     private ClientNonPerson(final Client client, final CodeValue constitution, final CodeValue mainBusinessLine, final String incorpNumber, final LocalDate incorpValidityTill, final String remarks)
     {
-        if(client != null)
+        if(client != null) {
             this.client = client;
+        }
 
-        if(constitution != null)
+        if(constitution != null) {
             this.constitution = constitution;
+        }
 
-        if(mainBusinessLine != null)
+        if(mainBusinessLine != null) {
             this.mainBusinessLine = mainBusinessLine;
+        }
 
         if (StringUtils.isNotBlank(incorpNumber)) {
             this.incorpNumber = incorpNumber.trim();

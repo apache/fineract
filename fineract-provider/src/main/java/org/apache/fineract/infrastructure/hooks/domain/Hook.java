@@ -76,7 +76,9 @@ public class Hook extends AbstractAuditableCustom {
             final Set<HookResource> events, final Template ugdTemplate) {
         final String displayName = command.stringValueOfParameterNamed(displayNameParamName);
         Boolean isActive = command.booleanObjectValueOfParameterNamed(isActiveParamName);
-        if (isActive == null) isActive = false;
+        if (isActive == null) {
+            isActive = false;
+        }
         return new Hook(template, displayName, isActive, config, events, ugdTemplate);
     }
 

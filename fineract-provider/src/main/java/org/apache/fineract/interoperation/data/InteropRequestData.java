@@ -159,8 +159,9 @@ public class InteropRequestData {
     }
 
     public static InteropRequestData validateAndParse(final DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
-        if (element == null)
+        if (element == null) {
             return null;
+        }
 
         String transactionCode = jsonHelper.extractStringNamed(PARAM_TRANSACTION_CODE, element);
         DataValidatorBuilder  dataValidatorCopy = dataValidator.reset().parameter(PARAM_TRANSACTION_CODE).value(transactionCode).notBlank();
@@ -196,8 +197,10 @@ public class InteropRequestData {
         if (extensionArray != null) {
             extensionList = new ArrayList<>(extensionArray.size());
             for (JsonElement jsonElement : extensionArray) {
-                if (jsonElement.isJsonObject())
-                    extensionList.add(ExtensionData.validateAndParse(dataValidator, jsonElement.getAsJsonObject(), jsonHelper));
+                if (jsonElement.isJsonObject()) {
+                    extensionList.add(
+                            ExtensionData.validateAndParse(dataValidator, jsonElement.getAsJsonObject(), jsonHelper));
+                }
             }
         }
 

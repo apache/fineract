@@ -109,12 +109,24 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
     public int hashCode() {
         int hash = 1;
 
-        if (this.name != null) hash += this.name.hashCode();
-        if (this.code != null) hash += this.code.hashCode();
-        if (this.decimalPlaces >= 0) hash += this.decimalPlaces;
-        if (this.displaySymbol != null) hash += this.displaySymbol.hashCode();
-        if (this.nameCode != null) hash += this.nameCode.hashCode();
-        if (this.displayLabel != null) hash += this.displayLabel.hashCode();
+        if (this.name != null) {
+            hash += this.name.hashCode();
+        }
+        if (this.code != null) {
+            hash += this.code.hashCode();
+        }
+        if (this.decimalPlaces >= 0) {
+            hash += this.decimalPlaces;
+        }
+        if (this.displaySymbol != null) {
+            hash += this.displaySymbol.hashCode();
+        }
+        if (this.nameCode != null) {
+            hash += this.nameCode.hashCode();
+        }
+        if (this.displayLabel != null) {
+            hash += this.displayLabel.hashCode();
+        }
 
         return hash;
     }
@@ -123,13 +135,17 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
     public boolean equals(Object obj) {
         if (obj == this) { return true; }
 
-        if (!(obj instanceof CurrencyDomain)) return false;
+        if (!(obj instanceof CurrencyDomain)) {
+            return false;
+        }
 
         CurrencyDomain cd = (CurrencyDomain) obj;
 
         if (this.name.equals(cd.name) && this.code.equals(cd.code) && this.decimalPlaces == cd.decimalPlaces
                 && this.displaySymbol.equals(cd.displaySymbol) && this.nameCode.equals(cd.nameCode)
-                && this.displayLabel.equals(cd.displayLabel)) return true;
+                && this.displayLabel.equals(cd.displayLabel)) {
+            return true;
+        }
         return false;
     }
 

@@ -104,27 +104,30 @@ public class FixedDepositImportHandler implements ImportHandler {
         LocalDate closedOnDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.CLOSED_ON_DATE, row);
         Long onAccountClosureId = ImportHandlerUtils.readAsLong(FixedDepositConstants.ON_ACCOUNT_CLOSURE_ID, row);
         Long toSavingsAccountId = ImportHandlerUtils.readAsLong(FixedDepositConstants.TO_SAVINGS_ACCOUNT_ID, row);
-        if (closedOnDate!=null)
-            return ClosingOfSavingsAccounts.importInstance(null, closedOnDate,onAccountClosureId,toSavingsAccountId, null,
-                    row.getRowNum(),locale,dateFormat);
-        else
+        if (closedOnDate!=null) {
+            return ClosingOfSavingsAccounts.importInstance(null, closedOnDate, onAccountClosureId, toSavingsAccountId,
+                    null, row.getRowNum(), locale, dateFormat);
+        } else {
             return null;
+        }
     }
 
     private SavingsActivation readSavingsActivation(Row row,String locale,String dateFormat) {
         LocalDate activationDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.ACTIVATION_DATE_COL, row);
-        if (activationDate!=null)
-            return SavingsActivation.importInstance(activationDate, row.getRowNum(),locale,dateFormat);
-        else
+        if (activationDate!=null) {
+            return SavingsActivation.importInstance(activationDate, row.getRowNum(), locale, dateFormat);
+        } else {
             return null;
+        }
     }
 
     private SavingsApproval readSavingsApproval(Row row,String locale,String dateFormat) {
         LocalDate approvalDate = ImportHandlerUtils.readAsDate(FixedDepositConstants.APPROVED_DATE_COL, row);
-        if (approvalDate!=null)
-            return SavingsApproval.importInstance(approvalDate, row.getRowNum(),locale,dateFormat);
-        else
+        if (approvalDate!=null) {
+            return SavingsApproval.importInstance(approvalDate, row.getRowNum(), locale, dateFormat);
+        } else {
             return null;
+        }
     }
 
     private FixedDepositAccountData readSavings(Row row,String locale,String dateFormat) {
@@ -138,16 +141,21 @@ public class FixedDepositImportHandler implements ImportHandler {
         Long interestCompoundingPeriodTypeId = null;
         EnumOptionData interestCompoundingPeriodTypeEnum=null;
         if (interestCompoundingPeriodType!=null) {
-            if (interestCompoundingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_DAILY))
+            if (interestCompoundingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_DAILY)) {
                 interestCompoundingPeriodTypeId = 1L;
-            else if (interestCompoundingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_MONTHLY))
+            } else if (interestCompoundingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_MONTHLY)) {
                 interestCompoundingPeriodTypeId = 4L;
-            else if (interestCompoundingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_QUARTERLY))
+            } else if (interestCompoundingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_QUARTERLY)) {
                 interestCompoundingPeriodTypeId = 5L;
-            else if (interestCompoundingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_SEMI_ANNUALLY))
+            } else if (interestCompoundingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_SEMI_ANNUALLY)) {
                 interestCompoundingPeriodTypeId = 6L;
-            else if (interestCompoundingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY))
+            } else if (interestCompoundingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY)) {
                 interestCompoundingPeriodTypeId = 7L;
+            }
              interestCompoundingPeriodTypeEnum = new EnumOptionData(interestCompoundingPeriodTypeId, null, null);
         }
         String interestPostingPeriodType = ImportHandlerUtils.readAsString(FixedDepositConstants.INTEREST_POSTING_PERIOD_COL, row);
@@ -155,34 +163,42 @@ public class FixedDepositImportHandler implements ImportHandler {
 
         EnumOptionData interestPostingPeriodTypeEnum=null;
         if (interestCompoundingPeriodType!=null) {
-            if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY))
+            if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY)) {
                 interestPostingPeriodTypeId = 4L;
-            else if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_QUARTERLY))
+            } else if (interestPostingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_QUARTERLY)) {
                 interestPostingPeriodTypeId = 5L;
-            else if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY))
+            } else if (interestPostingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY)) {
                 interestPostingPeriodTypeId = 7L;
-            else if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_BIANUALLY))
+            } else if (interestPostingPeriodType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_BIANUALLY)) {
                 interestPostingPeriodTypeId = 6L;
+            }
                 interestPostingPeriodTypeEnum = new EnumOptionData(interestPostingPeriodTypeId, null, null);
         }
         String interestCalculationType = ImportHandlerUtils.readAsString(FixedDepositConstants.INTEREST_CALCULATION_COL, row);
         EnumOptionData interestCalculationTypeEnum=null;
         if (interestCalculationType!=null) {
             Long interestCalculationTypeId = null;
-            if (interestCalculationType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_DAILY_BALANCE))
+            if (interestCalculationType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_DAILY_BALANCE)) {
                 interestCalculationTypeId = 1L;
-            else if (interestCalculationType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_AVG_BALANCE))
+            } else if (interestCalculationType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_AVG_BALANCE)) {
                 interestCalculationTypeId = 2L;
+            }
              interestCalculationTypeEnum = new EnumOptionData(interestCalculationTypeId, null, null);
         }
         String interestCalculationDaysInYearType = ImportHandlerUtils.readAsString(FixedDepositConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row);
         Long interestCalculationDaysInYearTypeId = null;
         EnumOptionData interestCalculationDaysInYearTypeEnum=null;
         if (interestCalculationDaysInYearType!=null) {
-            if (interestCalculationDaysInYearType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_360))
+            if (interestCalculationDaysInYearType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_360)) {
                 interestCalculationDaysInYearTypeId = 360L;
-            else if (interestCalculationDaysInYearType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_365))
+            } else if (interestCalculationDaysInYearType
+                    .equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_365)) {
                 interestCalculationDaysInYearTypeId = 365L;
+            }
              interestCalculationDaysInYearTypeEnum = new EnumOptionData(interestCalculationDaysInYearTypeId, null, null);
         }
         Integer lockinPeriodFrequency = ImportHandlerUtils.readAsInt(FixedDepositConstants.LOCKIN_PERIOD_COL, row);
@@ -191,14 +207,15 @@ public class FixedDepositImportHandler implements ImportHandler {
         Long lockinPeriodFrequencyTypeId =null;
         EnumOptionData lockinPeriodFrequencyTypeEnum=null;
         if (lockinPeriodFrequencyType!=null) {
-            if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_DAYS))
+            if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_DAYS)) {
                 lockinPeriodFrequencyTypeId = 0L;
-            else if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_WEEKS))
+            } else if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_WEEKS)) {
                 lockinPeriodFrequencyTypeId = 1L;
-            else if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_MONTHS))
+            } else if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_MONTHS)) {
                 lockinPeriodFrequencyTypeId = 2L;
-            else if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_YEARS))
+            } else if (lockinPeriodFrequencyType.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_YEARS)) {
                 lockinPeriodFrequencyTypeId = 3L;
+            }
              lockinPeriodFrequencyTypeEnum = new EnumOptionData(lockinPeriodFrequencyTypeId, null, null);
         }
         BigDecimal depositAmount=null;
@@ -210,14 +227,15 @@ public class FixedDepositImportHandler implements ImportHandler {
         String depositPeriodFrequency = ImportHandlerUtils.readAsString(FixedDepositConstants.DEPOSIT_PERIOD_FREQUENCY_COL, row);
         Long depositPeriodFrequencyId = null;
         if (depositPeriodFrequency!=null) {
-            if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_DAYS))
+            if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_DAYS)) {
                 depositPeriodFrequencyId = 0L;
-            else if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_WEEKS))
+            } else if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_WEEKS)) {
                 depositPeriodFrequencyId = 1L;
-            else if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_MONTHS))
+            } else if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_MONTHS)) {
                 depositPeriodFrequencyId = 2L;
-            else if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_YEARS))
+            } else if (depositPeriodFrequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_YEARS)) {
                 depositPeriodFrequencyId = 3L;
+            }
         }
         String externalId = ImportHandlerUtils.readAsString(FixedDepositConstants.EXTERNAL_ID_COL, row);
         String clientName = ImportHandlerUtils.readAsString(FixedDepositConstants.CLIENT_NAME_COL, row);
@@ -228,10 +246,12 @@ public class FixedDepositImportHandler implements ImportHandler {
         String charge2 = ImportHandlerUtils.readAsString(FixedDepositConstants.CHARGE_ID_2, row);
 
         if (charge1!=null) {
-            if (ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row)!=null)
-            charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row),
-                    BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row)),
-                    ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row)));
+            if (ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row)!=null) {
+                charges.add(new SavingsAccountChargeData(
+                        ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row),
+                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(FixedDepositConstants.CHARGE_AMOUNT_1, row)),
+                        ImportHandlerUtils.readAsDate(FixedDepositConstants.CHARGE_DUE_DATE_1, row)));
+            }
         }else {
             charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(FixedDepositConstants.CHARGE_ID_1, row),
                     null,
@@ -277,14 +297,22 @@ public class FixedDepositImportHandler implements ImportHandler {
                     CommandProcessingResult result= importSavings(i,dateFormat);
                     savingsId = result.getSavingsId();
                     progressLevel = 1;
-                } else
-                    savingsId = ImportHandlerUtils.readAsLong(FixedDepositConstants.SAVINGS_ID_COL, savingsSheet.getRow(savings.get(i).getRowIndex()));
+                } else {
+                    savingsId = ImportHandlerUtils.readAsLong(FixedDepositConstants.SAVINGS_ID_COL,
+                            savingsSheet.getRow(savings.get(i).getRowIndex()));
+                }
 
-                if (progressLevel <= 1) progressLevel = importSavingsApproval(savingsId, i,dateFormat);
+                if (progressLevel <= 1) {
+                    progressLevel = importSavingsApproval(savingsId, i, dateFormat);
+                }
 
-                if (progressLevel <= 2) progressLevel = importSavingsActivation(savingsId, i,dateFormat);
+                if (progressLevel <= 2) {
+                    progressLevel = importSavingsActivation(savingsId, i, dateFormat);
+                }
 
-                if (progressLevel <= 3) progressLevel = importSavingsClosing(savingsId, i,dateFormat);
+                if (progressLevel <= 3) {
+                    progressLevel = importSavingsClosing(savingsId, i, dateFormat);
+                }
 
                 successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
@@ -302,15 +330,19 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
     private void writeFixedDepositErrorMessage(Long savingsId,String errorMessage,int progressLevel,Cell statusCell,Cell errorReportCell,Row row){
         String status = "";
-        if (progressLevel == 0)
+        if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
-        else if (progressLevel == 1)
+        } else if (progressLevel == 1) {
             status = TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED;
-        else if (progressLevel == 2) status = TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED;
+        } else if (progressLevel == 2) {
+            status = TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED;
+        }
         statusCell.setCellValue(status);
         statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.RED));
 
-        if (progressLevel > 0) row.createCell(FixedDepositConstants.SAVINGS_ID_COL).setCellValue(savingsId);
+        if (progressLevel > 0) {
+            row.createCell(FixedDepositConstants.SAVINGS_ID_COL).setCellValue(savingsId);
+        }
         errorReportCell.setCellValue(errorMessage);
     }
 
@@ -340,8 +372,9 @@ public class FixedDepositImportHandler implements ImportHandler {
             JsonObject chargeJsonOb =chargesJsonElement.getAsJsonObject();
             chargeJsonOb.remove("penalty");
         }
-        if (chargesJsonAr.get(0).getAsJsonObject().toString().equals("{}"))
+        if (chargesJsonAr.get(0).getAsJsonObject().toString().equals("{}")) {
             savingsJsonob.remove("charges");
+        }
         String payload=savingsJsonob.toString();
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createFixedDepositAccount() //
@@ -380,11 +413,13 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     private int getProgressLevel(String status) {
-        if (status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED))
+        if (status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
-        else if (status.equals(TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED))
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED)) {
             return 1;
-        else if (status.equals(TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED)) return 2;
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED)) {
+            return 2;
+        }
         return 0;
     }
 

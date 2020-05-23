@@ -114,18 +114,24 @@ public class OfficeDomain {
     public int hashCode() {
         int hash = 1;
 
-        if (this.id > 0)
+        if (this.id > 0) {
             hash += this.id;
-        if (this.name != null)
+        }
+        if (this.name != null) {
             hash += this.name.hashCode();
-        if (this.nameDecorated != null)
+        }
+        if (this.nameDecorated != null) {
             hash += this.nameDecorated.hashCode();
-        if (this.externalId != null)
+        }
+        if (this.externalId != null) {
             hash += this.externalId.hashCode();
-        if (this.openingDate != null)
+        }
+        if (this.openingDate != null) {
             hash += this.openingDate.hashCode();
-        if (this.hierarchy != null)
+        }
+        if (this.hierarchy != null) {
             hash += this.hierarchy.hashCode();
+        }
 
         return hash;
     }
@@ -136,8 +142,9 @@ public class OfficeDomain {
             return true;
         }
 
-        if (!(obj instanceof OfficeDomain))
+        if (!(obj instanceof OfficeDomain)) {
             return false;
+        }
 
         OfficeDomain od = (OfficeDomain) obj;
 
@@ -145,8 +152,9 @@ public class OfficeDomain {
                 && this.nameDecorated.equals(od.getName())
                 && this.externalId.equals(od.getExternalId())
                 && this.openingDate.equals(od.getOpeningDate())
-                && this.hierarchy.equals(od.getHierarchy()))
+                && this.hierarchy.equals(od.getHierarchy())) {
             return true;
+        }
 
         return false;
     }

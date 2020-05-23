@@ -96,8 +96,9 @@ public class ClientPersonImportHandler implements ImportHandler {
             activationDate=submittedOn;
         }
         String mobileNo=null;
-        if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row)!=null)
+        if (ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row)!=null) {
             mobileNo = ImportHandlerUtils.readAsLong(ClientPersonConstants.MOBILE_NO_COL, row).toString();
+        }
         LocalDate dob = ImportHandlerUtils.readAsDate(ClientPersonConstants.DOB_COL, row);
 
         String clientType=ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_TYPE_COL, row);
@@ -112,15 +113,17 @@ public class ClientPersonImportHandler implements ImportHandler {
         Long genderId = null;
         if (gender!=null) {
             String genderAr[] = gender.split("-");
-            if (genderAr[1] != null)
+            if (genderAr[1] != null) {
                 genderId = Long.parseLong(genderAr[1]);
+            }
         }
         String clientClassification= ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_CLASSIFICATION_COL, row);
         Long clientClassicationId = null;
         if (clientClassification!=null) {
             String clientClassificationAr[] = clientClassification.split("-");
-            if (clientClassificationAr[1] != null)
+            if (clientClassificationAr[1] != null) {
                 clientClassicationId = Long.parseLong(clientClassificationAr[1]);
+            }
         }
         Boolean isStaff = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_STAFF_COL, row);
 
@@ -132,8 +135,9 @@ public class ClientPersonImportHandler implements ImportHandler {
             if (addressType!=null) {
                 String addressTypeAr[] = addressType.split("-");
 
-                if (addressTypeAr[1] != null)
+                if (addressTypeAr[1] != null) {
                     addressTypeId = Long.parseLong(addressTypeAr[1]);
+                }
             }
             String street = ImportHandlerUtils.readAsString(ClientPersonConstants.STREET_COL, row);
             String addressLine1 = ImportHandlerUtils.readAsString(ClientPersonConstants.ADDRESS_LINE_1_COL, row);
@@ -148,15 +152,17 @@ public class ClientPersonImportHandler implements ImportHandler {
             Long stateProvinceId = null;
             if (stateProvince!=null) {
                 String stateProvinceAr[] = stateProvince.split("-");
-                if (stateProvinceAr[1] != null)
+                if (stateProvinceAr[1] != null) {
                     stateProvinceId = Long.parseLong(stateProvinceAr[1]);
+                }
             }
             String country=ImportHandlerUtils.readAsString(ClientPersonConstants.COUNTRY_COL, row);
             Long countryId=null;
             if (country!=null) {
                 String countryAr[] = country.split("-");
-                if (countryAr[1] != null)
+                if (countryAr[1] != null) {
                     countryId = Long.parseLong(countryAr[1]);
+                }
             }
              addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3,
                     city, postalCode, isActiveAddress, stateProvinceId, countryId);

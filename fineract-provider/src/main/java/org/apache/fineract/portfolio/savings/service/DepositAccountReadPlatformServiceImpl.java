@@ -166,7 +166,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         this.context.authenticatedUser();
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-        if (depositAccountMapper == null) return null;
+        if (depositAccountMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ");
@@ -186,7 +188,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 depositAccountType.resourceName());
 
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-        if (depositAccountMapper == null) return null;
+        if (depositAccountMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -235,7 +239,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             this.context.authenticatedUser();
 
             final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-            if (depositAccountMapper == null) return null;
+            if (depositAccountMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");
@@ -256,7 +262,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             this.context.authenticatedUser();
 
             final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-            if (depositAccountMapper == null) return null;
+            if (depositAccountMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");

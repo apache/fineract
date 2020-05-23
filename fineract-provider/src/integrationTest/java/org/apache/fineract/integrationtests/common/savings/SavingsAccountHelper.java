@@ -189,8 +189,9 @@ public class SavingsAccountHelper {
     public HashMap approveSavingsOnDate(final Integer savingsID, final String approvalDate) {
         LOG.info("--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
         final String savingsOperationURL = createSavingsOperationURL(APPROVE_SAVINGS_COMMAND, savingsID);
-        if (approvalDate == null || approvalDate.equals(""))
+        if (approvalDate == null || approvalDate.equals("")) {
             return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), isBlock);
+        }
         return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), isBlock);
     }
 
@@ -752,8 +753,9 @@ public class SavingsAccountHelper {
         LOG.info("--------------------------------- APPROVING GSIM SAVINGS APPLICATION ------------------------------------");
         final String savingsOperationURL = createSavingsGsimOperationURL(APPROVE_SAVINGS_COMMAND, gsimID);
 
-        if (approvalDate == null || approvalDate.equals(""))
+        if (approvalDate == null || approvalDate.equals("")) {
             return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), isBlock);
+        }
         return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), isBlock);
     }
 

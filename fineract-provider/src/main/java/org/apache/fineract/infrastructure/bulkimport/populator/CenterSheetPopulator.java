@@ -91,8 +91,9 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
     private void setLayout(Sheet worksheet) {
         Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
         rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
-        for (int colIndex = 0; colIndex <= 10; colIndex++)
+        for (int colIndex = 0; colIndex <= 10; colIndex++) {
             worksheet.setColumnWidth(colIndex, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        }
         writeString(OFFICE_NAME_COL, rowHeader, "Office Names");
         writeString(CENTER_NAME_COL, rowHeader, "Center Names");
         writeString(CENTER_ID_COL, rowHeader, "Center ID");

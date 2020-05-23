@@ -172,7 +172,9 @@ public class ProvisioningIntegrationTest {
                     break ; //internal loop
                 }
             }
-            if(!found) Assert.fail("No Category found with Id:"+requestedCategoryId);
+            if(!found) {
+                Assert.fail("No Category found with Id:" + requestedCategoryId);
+            }
         }
     }
 

@@ -772,17 +772,19 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         if (isInAdvance(transactionDate)) {
                 Money mTotalPaidInAdvance = Money.of(currency,this.totalPaidInAdvance);
 
-                if(mTotalPaidInAdvance.isLessThan(amountDeductedInRepaymentPeriod) || mTotalPaidInAdvance.isEqualTo(amountDeductedInRepaymentPeriod))
-                        this.totalPaidInAdvance = Money.zero(currency).getAmount();
-                else
-                        this.totalPaidInAdvance = mTotalPaidInAdvance.minus(amountDeductedInRepaymentPeriod).getAmount();
+                if(mTotalPaidInAdvance.isLessThan(amountDeductedInRepaymentPeriod) || mTotalPaidInAdvance.isEqualTo(amountDeductedInRepaymentPeriod)) {
+                    this.totalPaidInAdvance = Money.zero(currency).getAmount();
+                } else {
+                    this.totalPaidInAdvance = mTotalPaidInAdvance.minus(amountDeductedInRepaymentPeriod).getAmount();
+                }
         } else if (isLatePayment(transactionDate)) {
                 Money mTotalPaidLate = Money.of(currency,this.totalPaidLate);
 
-                if(mTotalPaidLate.isLessThan(amountDeductedInRepaymentPeriod) || mTotalPaidLate.isEqualTo(amountDeductedInRepaymentPeriod))
-                        this.totalPaidLate =  Money.zero(currency).getAmount();
-                else
-                        this.totalPaidLate = mTotalPaidLate.minus(amountDeductedInRepaymentPeriod).getAmount();
+                if(mTotalPaidLate.isLessThan(amountDeductedInRepaymentPeriod) || mTotalPaidLate.isEqualTo(amountDeductedInRepaymentPeriod)) {
+                    this.totalPaidLate = Money.zero(currency).getAmount();
+                } else {
+                    this.totalPaidLate = mTotalPaidLate.minus(amountDeductedInRepaymentPeriod).getAmount();
+                }
         }
     }
 

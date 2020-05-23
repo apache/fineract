@@ -290,9 +290,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         if (onClosureType.isReinvest()) {
             BigDecimal reInvestAmount;
             if(onClosureType.isReinvestPrincipal())
-                reInvestAmount = account.getDepositAmount();
+                {
+                    reInvestAmount = account.getDepositAmount();
+                }
             else
-                reInvestAmount = account.getAccountBalance();
+                {
+                    reInvestAmount = account.getAccountBalance();
+                }
             FixedDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount);
             this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
@@ -371,9 +375,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         if (onClosureType.isReinvest()) {
             BigDecimal reInvestAmount;
             if(onClosureType.isReinvestPrincipal())
-                reInvestAmount = account.getDepositAmount();
+                {
+                    reInvestAmount = account.getDepositAmount();
+                }
             else
-                reInvestAmount = account.getAccountBalance();
+                {
+                    reInvestAmount = account.getAccountBalance();
+                }
             RecurringDepositAccount reinvestedDeposit = account.reInvest(reInvestAmount);
             depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             this.savingsAccountRepository.save(reinvestedDeposit);

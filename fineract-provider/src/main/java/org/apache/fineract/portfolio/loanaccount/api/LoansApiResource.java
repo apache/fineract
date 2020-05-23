@@ -557,8 +557,9 @@ public class LoansApiResource {
             if (!CollectionUtils.isEmpty(loanCalendarDatas)) {
                 calendarData = loanCalendarDatas.iterator().next();
             }
-            if(calendarData != null)
+            if(calendarData != null) {
                 loanBasicDetails = LoanAccountData.withLoanCalendarData(loanBasicDetails, calendarData);
+            }
         }
         Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService.retrieveLoanInterestRatePeriodData(loanBasicDetails);
         Collection<LoanTransactionData> loanRepayments = null;

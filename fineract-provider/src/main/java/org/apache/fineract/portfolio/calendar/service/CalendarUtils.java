@@ -267,16 +267,19 @@ public class CalendarUtils {
         } else if (recur.getFrequency().equals(Recur.Frequency.MONTHLY)) {
             NumberList nthDays = recur.getSetPosList();
             Integer nthDay = null;
-            if (!nthDays.isEmpty())
+            if (!nthDays.isEmpty()) {
                 nthDay = nthDays.get(0);
+            }
             NumberList monthDays = recur.getMonthDayList();
             Integer monthDay = null;
-            if (!monthDays.isEmpty())
+            if (!monthDays.isEmpty()) {
                 monthDay = monthDays.get(0);
+            }
             WeekDayList weekdays = recur.getDayList();
             WeekDay weekDay = null;
-            if (!weekdays.isEmpty())
-                weekDay =  weekdays.get(0);
+            if (!weekdays.isEmpty()) {
+                weekDay = weekdays.get(0);
+            }
             if (nthDay != null && weekDay != null) {
                 NthDayType nthDayType = NthDayType.fromInt(nthDay);
                 NthDayNameEnum nthDayName = NthDayNameEnum.from(nthDayType.toString());
@@ -459,7 +462,9 @@ public class CalendarUtils {
     public static CalendarWeekDaysType getRepeatsOnDay(final String recurringRule) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         final WeekDayList weekDays = recur.getDayList();
-        if (weekDays.isEmpty()) return CalendarWeekDaysType.INVALID;
+        if (weekDays.isEmpty()) {
+            return CalendarWeekDaysType.INVALID;
+        }
         // supports only one day
         WeekDay weekDay =  weekDays.get(0);
         return CalendarWeekDaysType.fromString(weekDay.getDay().name());
@@ -467,12 +472,17 @@ public class CalendarUtils {
     public static NthDayType getRepeatsOnNthDayOfMonth(final String recurringRule) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         NumberList monthDays = null;
-        if(recur.getDayList().isEmpty())
+        if(recur.getDayList().isEmpty()) {
             monthDays = recur.getMonthDayList();
-        else
+        } else {
             monthDays = recur.getSetPosList();
-        if (monthDays.isEmpty()) return NthDayType.INVALID;
-        if (!recur.getMonthDayList().isEmpty() && recur.getSetPosList().isEmpty()) return NthDayType.ONDAY;
+        }
+        if (monthDays.isEmpty()) {
+            return NthDayType.INVALID;
+        }
+        if (!recur.getMonthDayList().isEmpty() && recur.getSetPosList().isEmpty()) {
+            return NthDayType.ONDAY;
+        }
         Integer monthDay = monthDays.get(0);
         return NthDayType.fromInt(monthDay);
     }
