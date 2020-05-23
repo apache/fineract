@@ -1161,7 +1161,9 @@ public class Loan extends AbstractPersistableCustom {
 
             } else {
                 charge = fetchLoanChargesById(charge.getId());
-                if (charge != null) existingCharges.remove(charge.getId());
+                if (charge != null) {
+                    existingCharges.remove(charge.getId());
+                }
             }
             final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
             BigDecimal chargeAmt = BigDecimal.ZERO;
@@ -1174,8 +1176,10 @@ public class Loan extends AbstractPersistableCustom {
             } else {
                 chargeAmt = loanCharge.amountOrPercentage();
             }
-            if (charge != null)
-                charge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
+            if (charge != null) {
+                charge.update(chargeAmt, loanCharge.getDueLocalDate(), amount,
+                        fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
+            }
 
         }
 
@@ -1780,7 +1784,9 @@ public class Loan extends AbstractPersistableCustom {
         boolean removeAllChages = false;
         if (jsonCommand.parameterExists(LoanApiConstants.chargesParameterName)) {
             JsonArray chargesArray = jsonCommand.arrayOfParameterNamed(LoanApiConstants.chargesParameterName);
-            if (chargesArray.size() == 0) removeAllChages = true;
+            if (chargesArray.size() == 0) {
+                removeAllChages = true;
+            }
         }
 
         if (jsonCommand.parameterExists(LoanApiConstants.disbursementDataParameterName)) {
@@ -5681,8 +5687,12 @@ public class Loan extends AbstractPersistableCustom {
             nthDayType = CalendarUtils.getRepeatsOnNthDayOfMonth(loanCalendar.getRecurrence());
             CalendarWeekDaysType getRepeatsOnDay = CalendarUtils.getRepeatsOnDay(loanCalendar.getRecurrence());
             Integer getRepeatsOnDayValue = null;
-            if (getRepeatsOnDay != null) getRepeatsOnDayValue = getRepeatsOnDay.getValue();
-            if (getRepeatsOnDayValue != null) dayOfWeekType = DayOfWeekType.fromInt(getRepeatsOnDayValue);
+            if (getRepeatsOnDay != null) {
+                getRepeatsOnDayValue = getRepeatsOnDay.getValue();
+            }
+            if (getRepeatsOnDayValue != null) {
+                dayOfWeekType = DayOfWeekType.fromInt(getRepeatsOnDayValue);
+            }
         }
 
         final Integer numberOfRepayments = this.loanRepaymentScheduleDetail.getNumberOfRepayments();

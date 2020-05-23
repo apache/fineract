@@ -95,13 +95,15 @@ public class InteropQuoteRequestData extends InteropRequestData {
 
     public void normalizeAmounts(@NotNull MonetaryCurrency currency) {
         super.normalizeAmounts(currency);
-        if (fees != null)
+        if (fees != null) {
             fees.normalizeAmount(currency);
+        }
     }
 
     public static InteropQuoteRequestData validateAndParse(final DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
-        if (element == null)
+        if (element == null) {
             return null;
+        }
 
         jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 

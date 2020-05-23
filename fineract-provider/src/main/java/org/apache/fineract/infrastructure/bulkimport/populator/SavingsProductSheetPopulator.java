@@ -68,21 +68,26 @@ public class SavingsProductSheetPopulator extends AbstractWorkbookPopulator {
             writeString(INTEREST_POSTING_PERIOD_COL, row, product.getInterestPostingPeriodType().getValue());
             writeString(INTEREST_CALCULATION_COL, row, product.getInterestCalculationType().getValue());
             writeString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, product.getInterestCalculationDaysInYearType().getValue());
-            if(product.getMinRequiredOpeningBalance() != null)
+            if(product.getMinRequiredOpeningBalance() != null) {
                 writeBigDecimal(MIN_OPENING_BALANCE_COL, row, product.getMinRequiredOpeningBalance());
-            if(product.getLockinPeriodFrequency() != null)
+            }
+            if(product.getLockinPeriodFrequency() != null) {
                 writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
-            if(product.getLockinPeriodFrequencyType() != null)
+            }
+            if(product.getLockinPeriodFrequencyType() != null) {
                 writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
+            }
             CurrencyData currency = product.getCurrency();
             writeString(CURRENCY_COL, row, currency.code());
             writeInt(DECIMAL_PLACES_COL, row, currency.decimalPlaces());
-            if(currency.currencyInMultiplesOf() != null)
+            if(currency.currencyInMultiplesOf() != null) {
                 writeInt(IN_MULTIPLES_OF_COL, row, currency.currencyInMultiplesOf());
+            }
             writeBoolean(WITHDRAWAL_FEE_COL, row, product.isWithdrawalFeeForTransfers());
             writeBoolean(ALLOW_OVERDRAFT_COL, row,product.isAllowOverdraft());
-            if(product.getOverdraftLimit() != null)
+            if(product.getOverdraftLimit() != null) {
                 writeBigDecimal(OVERDRAFT_LIMIT_COL, row, product.getOverdraftLimit());
+            }
         }
         productSheet.protectSheet("");
     }

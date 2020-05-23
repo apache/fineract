@@ -101,11 +101,15 @@ public class JournalEntriesImportHandler implements ImportHandler {
                                 workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME), debitGLAcct);
 
                         BigDecimal creditAmt=null;
-                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row)!=null)
-                        creditAmt = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row));
+                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row)!=null) {
+                            creditAmt = BigDecimal.valueOf(
+                                    ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row));
+                        }
                         BigDecimal debitAmount=null;
-                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row)!=null)
-                        debitAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row));
+                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row)!=null) {
+                            debitAmount = BigDecimal.valueOf(
+                                    ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row));
+                        }
 
                         if (creditGLAcct!=null) {
 
@@ -138,8 +142,9 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
     private JournalEntryData readAddJournalEntries(Row row,String locale,String dateFormat) {
         LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row);
-        if (transactionDateCheck!=null)
+        if (transactionDateCheck!=null) {
             transactionDate = transactionDateCheck;
+        }
 
         String officeName = ImportHandlerUtils.readAsString(JournalEntryConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);

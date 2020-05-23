@@ -513,7 +513,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         && repaymentFrequencyNthDayType != null) {
                     final String title = "loan_schedule_" + newLoanApplication.getId();
                     LocalDate calendarStartDate = loanApplicationTerms.getRepaymentsStartingFromLocalDate();
-                    if (calendarStartDate == null) calendarStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+                    if (calendarStartDate == null) {
+                        calendarStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+                    }
                     final CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.MONTHLY;
                     final Integer frequency = loanApplicationTerms.getRepaymentEvery();
                     final Integer repeatsOnDay = loanApplicationTerms.getWeekDayType().getValue();
@@ -1095,7 +1097,9 @@ public void checkForProductMixRestrictions(final Loan loan) {
                                 final CalendarFrequencyType repaymentFrequencyType = CalendarFrequencyType.MONTHLY;
                                 final Integer interval = command.integerValueOfParameterNamed("repaymentEvery");
                                 LocalDate startDate = command.localDateValueOfParameterNamed("repaymentsStartingFromDate");
-                                if (startDate == null) startDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
+                                if (startDate == null) {
+                                    startDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
+                                }
                                 final Calendar newCalendar = Calendar.createRepeatingCalendar(title, startDate, typeId,
                                         repaymentFrequencyType, interval, (Integer) changes.get("repaymentFrequencyDayOfWeekType"),
                                         (Integer) changes.get("repaymentFrequencyNthDayType"));

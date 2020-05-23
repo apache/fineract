@@ -114,12 +114,14 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         int rowIndex;
         for(rowIndex = 1; rowIndex <= 11; rowIndex++) {
             Row row = centerSheet.getRow(rowIndex);
-            if(row == null)
+            if(row == null) {
                 row = centerSheet.createRow(rowIndex);
+            }
             writeInt(CenterConstants.LOOKUP_REPEAT_MONTHLY_COL, row, rowIndex);
         }
-        for(rowIndex = 1; rowIndex <= 3; rowIndex++)
+        for(rowIndex = 1; rowIndex <= 3; rowIndex++) {
             writeInt(CenterConstants.LOOKUP_REPEAT_NORMAL_COL, centerSheet.getRow(rowIndex), rowIndex);
+        }
 
         String[] days = new String[]{
                 TemplatePopulateImportConstants.MONDAY,
@@ -130,8 +132,9 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
                 TemplatePopulateImportConstants.SATURDAY,
                 TemplatePopulateImportConstants.SUNDAY};
 
-        for(rowIndex = 1; rowIndex <= 7; rowIndex++)
-            writeString(CenterConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, centerSheet.getRow(rowIndex), days[rowIndex-1]);
+        for(rowIndex = 1; rowIndex <= 7; rowIndex++) {
+            writeString(CenterConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, centerSheet.getRow(rowIndex), days[rowIndex - 1]);
+        }
 
     }
     private void setRules(Sheet worksheet,String dateFormat) {

@@ -70,8 +70,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
         Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
         rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
         worksheet.setColumnWidth(OFFICE_NAME_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        for (int colIndex = 1; colIndex <= 10; colIndex++)
+        for (int colIndex = 1; colIndex <= 10; colIndex++) {
             worksheet.setColumnWidth(colIndex, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        }
         writeString(OFFICE_NAME_COL, rowHeader, "Office Names");
         writeString(CLIENT_NAME_COL, rowHeader, "Client Names");
         writeString(CLIENT_ID_COL, rowHeader, "Client ID");
@@ -111,8 +112,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
             startIndex = rowIndex + 1;
             writeString(OFFICE_NAME_COL, row, office.name());
             ArrayList<String> clientList = new ArrayList<String>();
-            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(]", "_")))
+            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
                 clientList = officeToClients.get(office.name().trim().replaceAll("[ )(]", "_"));
+            }
             if (!clientList.isEmpty()) {
                 for (String clientName : clientList) {
                     writeString(CLIENT_NAME_COL, row, clientName);
@@ -120,8 +122,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
                     row = clientSheet.createRow(++rowIndex);
                 }
                 officeNameToBeginEndIndexesOfClients.put(officeIndex++, new Integer[] { startIndex, rowIndex });
-            } else
+            } else {
                 officeIndex++;
+            }
         }
     }
 

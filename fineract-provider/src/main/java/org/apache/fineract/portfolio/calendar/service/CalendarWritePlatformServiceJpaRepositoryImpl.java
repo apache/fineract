@@ -122,7 +122,9 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (entityActivationDate == null || newCalendar.getStartDateLocalDate().isBefore(entityActivationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
             String dateAsString = "";
-            if (entityActivationDate != null) dateAsString = formatter.print(entityActivationDate);
+            if (entityActivationDate != null) {
+                dateAsString = formatter.print(entityActivationDate);
+            }
 
             final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase() + ".activation.date";
             baseDataValidator.reset().parameter(CalendarSupportedParameters.START_DATE.getValue()).value(dateAsString)

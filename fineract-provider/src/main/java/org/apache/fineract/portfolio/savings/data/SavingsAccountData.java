@@ -734,14 +734,18 @@ public class SavingsAccountData implements Serializable {
 
     private SavingsAccountChargeData getWithdrawalFee() {
         for (SavingsAccountChargeData charge : this.charges()) {
-            if (charge.isWithdrawalFee()) return charge;
+            if (charge.isWithdrawalFee()) {
+                return charge;
+            }
         }
         return null;
     }
 
     private SavingsAccountChargeData getAnnualFee() {
         for (SavingsAccountChargeData charge : this.charges()) {
-            if (charge.isAnnualFee()) return charge;
+            if (charge.isAnnualFee()) {
+                return charge;
+            }
         }
         return null;
     }

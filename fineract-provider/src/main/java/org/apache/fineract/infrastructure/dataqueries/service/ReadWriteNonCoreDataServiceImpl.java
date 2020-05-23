@@ -322,7 +322,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private Integer getCategory(final JsonCommand command) {
         Integer category = command.integerValueOfParameterNamedDefaultToNullIfZero(DataTableApiConstant.categoryParamName);
-        if (category == null) category = DataTableApiConstant.CATEGORY_DEFAULT;
+        if (category == null) {
+            category = DataTableApiConstant.CATEGORY_DEFAULT;
+        }
         return category;
     }
 

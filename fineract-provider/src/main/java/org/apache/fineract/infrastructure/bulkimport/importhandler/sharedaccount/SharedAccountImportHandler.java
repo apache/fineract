@@ -129,8 +129,9 @@ public class SharedAccountImportHandler implements ImportHandler {
             Long chargeId=ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),chargeName);
 
             BigDecimal amount=null;
-            if(ImportHandlerUtils.readAsDouble(cellNo+1,row)!=null)
-            amount=BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(cellNo+1,row));
+            if(ImportHandlerUtils.readAsDouble(cellNo+1,row)!=null) {
+                amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(cellNo + 1, row));
+            }
 
             ShareAccountChargeData shareAccountChargeData=new ShareAccountChargeData(chargeId,amount);
             charges.add(shareAccountChargeData);

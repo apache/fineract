@@ -4540,8 +4540,9 @@ public class ClientLoanIntegrationTest {
             builder = builder.withAccountingRulePeriodicAccrual(accounts);
         }
 
-        if (isArrearsBasedOnOriginalSchedule)
-            builder = builder.withArrearsConfiguration();
+        if (isArrearsBasedOnOriginalSchedule) {
+                builder = builder.withArrearsConfiguration();
+        }
 
         final String loanProductJSON = builder.build(chargeId);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);

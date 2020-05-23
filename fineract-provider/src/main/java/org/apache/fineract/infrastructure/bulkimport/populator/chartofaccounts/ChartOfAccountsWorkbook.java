@@ -152,8 +152,9 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         try {
             for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
                 Row row = worksheet.getRow(rowNo);
-                if (row == null)
+                if (row == null) {
                     row = worksheet.createRow(rowNo);
+                }
                 writeFormula(ChartOfAcountsConstants.PARENT_ID_COL, row,
                         "IF(ISERROR(VLOOKUP($E"+(rowNo+1)+",$Q$2:$R$"+(glAccounts.size()+1)+",2,FALSE))," +
                                 "\"\",(VLOOKUP($E"+(rowNo+1)+",$Q$2:$R$"+(glAccounts.size()+1)+",2,FALSE)))");

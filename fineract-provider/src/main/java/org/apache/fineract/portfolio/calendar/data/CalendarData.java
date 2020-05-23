@@ -494,8 +494,10 @@ public class CalendarData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CalendarData)) return false;
+        if (this == o){ return true;}
+        if (!(o instanceof CalendarData)) {
+            return false;
+        }
         CalendarData that = (CalendarData) o;
         return Objects.equals(repeating, that.repeating) &&
                 Objects.equals(id, that.id) &&

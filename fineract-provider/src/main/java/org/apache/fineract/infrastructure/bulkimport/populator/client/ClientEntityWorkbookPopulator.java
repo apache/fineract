@@ -84,55 +84,62 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
         int rowIndex=0;
         for (CodeValueData clientTypeCodeValue:clientTypeCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_CLIENT_TYPES,row,clientTypeCodeValue.getName()+"-"+clientTypeCodeValue.getId());
         }
         rowIndex=0;
         for (CodeValueData clientClassificationCodeValue:clientClassificationCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_CLIENT_CLASSIFICATION,row,
                     clientClassificationCodeValue.getName()+"-"+clientClassificationCodeValue.getId());
         }
         rowIndex=0;
         for (CodeValueData constitutionCodeValue:constitutionCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_CONSTITUTION_COL,row,
                     constitutionCodeValue.getName()+"-"+constitutionCodeValue.getId());
         }
         rowIndex=0;
         for (CodeValueData mainBusinessCodeValue:mainBusinesslineCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_MAIN_BUSINESS_LINE,row,
                     mainBusinessCodeValue.getName()+"-"+mainBusinessCodeValue.getId());
         }
         rowIndex=0;
         for (CodeValueData addressTypeCodeValue:addressTypesCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_ADDRESS_TYPE,row,
                     addressTypeCodeValue.getName()+"-"+addressTypeCodeValue.getId());
         }
         rowIndex=0;
         for (CodeValueData stateCodeValue:stateProvinceCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_STATE_PROVINCE,row,
                     stateCodeValue.getName()+"-"+stateCodeValue.getId());
         }
         rowIndex=0;
         for (CodeValueData countryCodeValue: countryCodeValues) {
             Row row =clientSheet.getRow(++rowIndex);
-            if(row==null)
-                row=clientSheet.createRow(rowIndex);
+            if(row==null) {
+                    row = clientSheet.createRow(rowIndex);
+            }
             writeString(ClientEntityConstants.LOOKUP_COUNTRY,row,
                     countryCodeValue.getName()+"-"+countryCodeValue.getId());
         }

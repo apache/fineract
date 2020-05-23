@@ -337,7 +337,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isChargePayment()) {
                 feeAmount = feeCharges;
             }
-            if (unpaidCharge == null) break; // All are trache charges
+            if (unpaidCharge == null) {
+                break; // All are trache charges
+            }
             final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining, installmentNumber, feeAmount);
             if (!amountPaidTowardsCharge.isZero()) {
                 Set<LoanChargePaidBy> chargesPaidBies = loanTransaction.getLoanChargesPaid();
@@ -535,7 +537,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
             }
 
-            if (transactionAmountUnprocessed.isZero()) break;
+            if (transactionAmountUnprocessed.isZero()) {
+                break;
+            }
 
         }
 

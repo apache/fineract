@@ -56,9 +56,13 @@ public class EntityDataTableChecksTemplateData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
 
-        if (!(o instanceof EntityDataTableChecksTemplateData)) return false;
+        if (!(o instanceof EntityDataTableChecksTemplateData)) {
+            return false;
+        }
 
         EntityDataTableChecksTemplateData that = (EntityDataTableChecksTemplateData) o;
 

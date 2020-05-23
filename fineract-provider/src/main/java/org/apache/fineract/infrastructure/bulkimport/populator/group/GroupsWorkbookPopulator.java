@@ -121,12 +121,14 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         int rowIndex;
         for(rowIndex = 1; rowIndex <= 11; rowIndex++) {
             Row row = groupSheet.getRow(rowIndex);
-            if(row == null)
-                row = groupSheet.createRow(rowIndex);
+            if(row == null) {
+                    row = groupSheet.createRow(rowIndex);
+            }
             writeInt(GroupConstants.LOOKUP_REPEAT_MONTHLY_COL, row, rowIndex);
         }
-        for(rowIndex = 1; rowIndex <= 3; rowIndex++)
-            writeInt(GroupConstants.LOOKUP_REPEAT_NORMAL_COL, groupSheet.getRow(rowIndex), rowIndex);
+        for(rowIndex = 1; rowIndex <= 3; rowIndex++) {
+                writeInt(GroupConstants.LOOKUP_REPEAT_NORMAL_COL, groupSheet.getRow(rowIndex), rowIndex);
+        }
         String[] days = new String[]{
                 TemplatePopulateImportConstants.MONDAY,
                 TemplatePopulateImportConstants.TUESDAY,
@@ -135,8 +137,10 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 TemplatePopulateImportConstants.FRIDAY,
                 TemplatePopulateImportConstants.SATURDAY,
                 TemplatePopulateImportConstants.SUNDAY};
-        for(rowIndex = 1; rowIndex <= 7; rowIndex++)
-            writeString(GroupConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, groupSheet.getRow(rowIndex), days[rowIndex-1]);
+        for(rowIndex = 1; rowIndex <= 7; rowIndex++) {
+                writeString(GroupConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, groupSheet.getRow(rowIndex),
+                                days[rowIndex - 1]);
+        }
     }
 
     private void setRules(Sheet worksheet,String dateFormat){

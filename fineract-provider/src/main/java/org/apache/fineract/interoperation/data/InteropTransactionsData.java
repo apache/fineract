@@ -37,8 +37,9 @@ public class InteropTransactionsData extends CommandProcessingResult {
     }
 
     public static InteropTransactionsData build(SavingsAccount account, @NotNull Predicate<SavingsAccountTransaction> filter) {
-        if (account == null)
+        if (account == null) {
             return null;
+        }
 
         List<InteropTransactionData> trans = account.getTransactions().stream().filter(filter).sorted((t1, t2) -> {
             int i = t2.getDateOf().compareTo(t1.getDateOf());

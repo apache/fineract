@@ -81,46 +81,52 @@ public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
     int rowIndex=0;
     for (CodeValueData clientTypeCodeValue:clientTypeCodeValues) {
       Row row =clientSheet.getRow(++rowIndex);
-      if(row==null)
-        row=clientSheet.createRow(rowIndex);
+      if(row==null) {
+              row = clientSheet.createRow(rowIndex);
+      }
       writeString(ClientPersonConstants.LOOKUP_CLIENT_TYPES_COL,row,clientTypeCodeValue.getName()+
               "-"+clientTypeCodeValue.getId());
     }
     rowIndex=0;
     for (CodeValueData clientClassificationCodeValue:clientClassificationCodeValues) {
       Row row =clientSheet.getRow(++rowIndex);
-      if(row==null)
-        row=clientSheet.createRow(rowIndex);
+      if(row==null) {
+              row = clientSheet.createRow(rowIndex);
+      }
       writeString(ClientPersonConstants.LOOKUP_CLIENT_CLASSIFICATION_COL,row,
               clientClassificationCodeValue.getName()+"-"+clientClassificationCodeValue.getId());
     }
     rowIndex=0;
     for (CodeValueData genderCodeValue:genderCodeValues) {
       Row row =clientSheet.getRow(++rowIndex);
-      if(row==null)
-        row=clientSheet.createRow(rowIndex);
+      if(row==null) {
+              row = clientSheet.createRow(rowIndex);
+      }
       writeString(ClientPersonConstants.LOOKUP_GENDER_COL,row,genderCodeValue.getName()+"-"+genderCodeValue.getId());
     }
     rowIndex=0;
     for (CodeValueData addressTypeCodeValue:addressTypesCodeValues) {
       Row row =clientSheet.getRow(++rowIndex);
-      if(row==null)
-        row=clientSheet.createRow(rowIndex);
+      if(row==null) {
+              row = clientSheet.createRow(rowIndex);
+      }
       writeString(ClientPersonConstants.LOOKUP_ADDRESS_TYPE_COL,row,
               addressTypeCodeValue.getName()+"-"+addressTypeCodeValue.getId());
     }
     rowIndex=0;
     for (CodeValueData stateCodeValue:stateProvinceCodeValues) {
       Row row =clientSheet.getRow(++rowIndex);
-      if(row==null)
-        row=clientSheet.createRow(rowIndex);
+      if(row==null) {
+              row = clientSheet.createRow(rowIndex);
+      }
       writeString(ClientPersonConstants.LOOKUP_STATE_PROVINCE_COL,row,stateCodeValue.getName()+"-"+stateCodeValue.getId());
     }
     rowIndex=0;
     for (CodeValueData countryCodeValue: countryCodeValues) {
       Row row =clientSheet.getRow(++rowIndex);
-      if(row==null)
-        row=clientSheet.createRow(rowIndex);
+      if(row==null) {
+              row = clientSheet.createRow(rowIndex);
+      }
       writeString(ClientPersonConstants.LOOKUP_COUNTRY_COL,row,countryCodeValue.getName()+"-"+countryCodeValue.getId());
     }
 

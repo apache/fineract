@@ -96,11 +96,13 @@ public class UserImportHandler implements ImportHandler{
         List<Long> rolesIds=new ArrayList<>();
         for (int cellNo=UserConstants.ROLE_NAME_START_COL;cellNo<UserConstants.ROLE_NAME_END_COL;cellNo++){
             String roleName=ImportHandlerUtils.readAsString(cellNo,row);
-            if (roleName==null)
+            if (roleName==null) {
                 break;
+            }
             Long roleId=ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.ROLES_SHEET_NAME),roleName);
-            if (!rolesIds.contains(roleId))
-             rolesIds.add(roleId);
+            if (!rolesIds.contains(roleId)) {
+                rolesIds.add(roleId);
+            }
         }
         return AppUserData.importInstance(officeId,staffId,userName,firstName,lastName,email,
                 autoGenPw,overridepw,rolesIds,row.getRowNum());

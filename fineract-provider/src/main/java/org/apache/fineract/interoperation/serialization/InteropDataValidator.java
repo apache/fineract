@@ -93,8 +93,9 @@ public class InteropDataValidator {
 
     private JsonObject extractJsonObject(JsonCommand command) {
         String json = command.json();
-        if (StringUtils.isBlank(json))
+        if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
+        }
 
         final JsonElement element = jsonHelper.parse(json);
         return element.getAsJsonObject();

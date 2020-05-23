@@ -744,8 +744,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
 
             periodStartingBalance = transaction.getRunningBalance(this.currency);
-        } else
+        } else {
             periodStartingBalance = Money.zero(this.currency);
+        }
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
@@ -978,8 +979,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         LocalDate startInterestCalculationLocalDate = null;
         if (this.startInterestCalculationDate != null) {
             startInterestCalculationLocalDate = new LocalDate(this.startInterestCalculationDate);
-        } else
+        } else {
             startInterestCalculationLocalDate = getActivationLocalDate();
+        }
         return startInterestCalculationLocalDate;
     }
 
@@ -2532,14 +2534,18 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private boolean isWithDrawalFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee()) return true;
+            if (charge.isWithdrawalFee()) {
+                return true;
+            }
         }
         return false;
     }
 
     private boolean isAnnualFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isAnnualFee()) return true;
+            if (charge.isAnnualFee()) {
+                return true;
+            }
         }
         return false;
     }
@@ -2769,8 +2775,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean isTransactionAllowed(SavingsAccountTransactionType transactionType, LocalDate transactionDate) {
-        if (!isTransactionsAllowed())
+        if (!isTransactionsAllowed()) {
             return false;
+        }
 
         Client client = getClient();
         if (client != null && !client.isActive()) {
@@ -2781,12 +2788,15 @@ public class SavingsAccount extends AbstractPersistableCustom {
             return false;
         }
 
-        if (transactionDate == null)
+        if (transactionDate == null) {
             return true;
-        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate()))
+        }
+        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate())) {
             return false;
-        if (transactionType.isCredit())
+        }
+        if (transactionType.isCredit()) {
             return true;
+        }
         return !isAccountLocked(transactionDate);
     }
 

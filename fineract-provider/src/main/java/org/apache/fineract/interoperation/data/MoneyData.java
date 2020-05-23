@@ -59,14 +59,16 @@ public class MoneyData {
     }
 
     public void normalizeAmount(@NotNull MonetaryCurrency currency) {
-        if (!currency.getCode().equals(this.currency))
+        if (!currency.getCode().equals(this.currency)) {
             throw new UnsupportedOperationException("Internal error: Invalid currency " + currency.getCode());
+        }
         MathUtil.normalizeAmount(amount, currency);
     }
 
     public static MoneyData validateAndParse(DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
-        if (element == null)
+        if (element == null) {
             return null;
+        }
 
         jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 

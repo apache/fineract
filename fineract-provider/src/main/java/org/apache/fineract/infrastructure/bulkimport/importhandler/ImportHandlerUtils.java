@@ -64,8 +64,9 @@ public class ImportHandlerUtils {
 
     public static Long readAsLong(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK)
+        if (c == null || c.getCellType() == CellType.BLANK) {
             return null;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if(c.getCellType() == CellType.FORMULA) {
             if(eval!=null) {
@@ -91,8 +92,9 @@ public class ImportHandlerUtils {
     public static String readAsString(int colIndex, Row row) {
 
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK)
+        if (c == null || c.getCellType() == CellType.BLANK) {
             return null;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if(c.getCellType() == CellType.FORMULA) {
             if (eval!=null) {
@@ -131,16 +133,18 @@ public class ImportHandlerUtils {
 
 
     public static String trimEmptyDecimalPortion(String result) {
-        if(result != null && result.endsWith(".0"))
-            return    result.split("\\.")[0];
-        else
+        if(result != null && result.endsWith(".0")) {
+            return result.split("\\.")[0];
+        } else {
             return result;
+        }
     }
 
     public static LocalDate readAsDate(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if(c == null || c.getCellType() == CellType.BLANK)
+        if(c == null || c.getCellType() == CellType.BLANK) {
             return null;
+        }
 
         LocalDate localDate=new LocalDate(c.getDateCellValue());
         return localDate;
@@ -148,8 +152,9 @@ public class ImportHandlerUtils {
 
     public static Boolean readAsBoolean(int colIndex, Row row) {
             Cell c = row.getCell(colIndex);
-            if(c == null || c.getCellType() == CellType.BLANK)
+            if(c == null || c.getCellType() == CellType.BLANK) {
                 return false;
+            }
             FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if(c.getCellType() == CellType.FORMULA) {
                 if(eval!=null) {
@@ -162,21 +167,23 @@ public class ImportHandlerUtils {
                     return val.getBooleanValue();
                 }
                 return false;
-            }else if(c.getCellType()==CellType.BOOLEAN)
+            }else if(c.getCellType()==CellType.BOOLEAN) {
                 return c.getBooleanCellValue();
-            else {
+            } else {
                 String booleanString = row.getCell(colIndex).getStringCellValue().trim();
-                if (booleanString.equalsIgnoreCase("TRUE"))
+                if (booleanString.equalsIgnoreCase("TRUE")) {
                     return true;
-                else
+                } else {
                     return false;
+                }
             }
         }
 
     public static Integer readAsInt(int colIndex, Row row) {
             Cell c = row.getCell(colIndex);
-            if (c == null || c.getCellType() == CellType.BLANK)
+            if (c == null || c.getCellType() == CellType.BLANK) {
                 return null;
+            }
             FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
             if(c.getCellType() == CellType.FORMULA) {
                 if(eval!=null) {
@@ -198,8 +205,9 @@ public class ImportHandlerUtils {
 
     public static Double readAsDouble(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK)
+        if (c == null || c.getCellType() == CellType.BLANK) {
             return 0.0;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if(c.getCellType() == CellType.FORMULA) {
                 if (eval!=null) {
@@ -221,8 +229,9 @@ public class ImportHandlerUtils {
     }
 
     public static void writeString(int colIndex, Row row, String value) {
-        if(value!=null)
+        if(value!=null) {
             row.createCell(colIndex).setCellValue(value);
+        }
     }
 
     public static CellStyle getCellStyle(Workbook workbook, IndexedColors color) {
@@ -308,15 +317,20 @@ public class ImportHandlerUtils {
                                     sheetName.equals(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME) ||
                                     sheetName.equals(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME)||
                                     sheetName.equals(TemplatePopulateImportConstants.ROLES_SHEET_NAME)) {
-                                if (row.getCell(cell.getColumnIndex() - 1).getCellType() == CellType.NUMERIC)
-                                    return ((Double) row.getCell(cell.getColumnIndex() - 1).getNumericCellValue()).longValue();
+                                if (row.getCell(cell.getColumnIndex() - 1).getCellType() == CellType.NUMERIC) {
+                                    return ((Double) row.getCell(cell.getColumnIndex() - 1).getNumericCellValue())
+                                            .longValue();
+                                }
                                 return 0L;
-                            } else if (sheetName.equals(TemplatePopulateImportConstants.CLIENT_SHEET_NAME) ||
-                                    sheetName.equals(TemplatePopulateImportConstants.CENTER_SHEET_NAME) ||
-                                    sheetName.equals(TemplatePopulateImportConstants.GROUP_SHEET_NAME) ||
-                                    sheetName.equals(TemplatePopulateImportConstants.STAFF_SHEET_NAME))
-                                if (row.getCell(cell.getColumnIndex() + 1).getCellType() == CellType.NUMERIC)
-                                    return ((Double) row.getCell(cell.getColumnIndex() + 1).getNumericCellValue()).longValue();
+                            } else if (sheetName.equals(TemplatePopulateImportConstants.CLIENT_SHEET_NAME)
+                                    || sheetName.equals(TemplatePopulateImportConstants.CENTER_SHEET_NAME)
+                                    || sheetName.equals(TemplatePopulateImportConstants.GROUP_SHEET_NAME)
+                                    || sheetName.equals(TemplatePopulateImportConstants.STAFF_SHEET_NAME)) {
+                                if (row.getCell(cell.getColumnIndex() + 1).getCellType() == CellType.NUMERIC) {
+                                    return ((Double) row.getCell(cell.getColumnIndex() + 1).getNumericCellValue())
+                                            .longValue();
+                                }
+                            }
                             return 0L;
                         }
                     }else {
@@ -363,14 +377,15 @@ public class ImportHandlerUtils {
 
     public static String getFrequencyId(String frequency) {
         if (frequency!=null) {
-            if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_DAILY))
+            if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_DAILY)) {
                 frequency = "1";
-            else if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_WEEKLY))
+            } else if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_WEEKLY)) {
                 frequency = "2";
-            else if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_MONTHLY))
+            } else if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_MONTHLY)) {
                 frequency = "3";
-            else if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_YEARLY))
+            } else if (frequency.equalsIgnoreCase(TemplatePopulateImportConstants.FREQUENCY_YEARLY)) {
                 frequency = "4";
+            }
             return frequency;
         }else {
             return null;
@@ -379,21 +394,21 @@ public class ImportHandlerUtils {
 
     public static String getRepeatsOnDayId(String repeatsOnDay) {
         if (repeatsOnDay!=null) {
-            if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.MONDAY))
+            if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.MONDAY)) {
                 repeatsOnDay = "1";
-            else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.TUESDAY))
+            } else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.TUESDAY)) {
                 repeatsOnDay = "2";
-            else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.WEDNESDAY))
+            } else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.WEDNESDAY)) {
                 repeatsOnDay = "3";
-            else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.THURSDAY))
+            } else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.THURSDAY)) {
                 repeatsOnDay = "4";
-            else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.FRIDAY))
+            } else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.FRIDAY)) {
                 repeatsOnDay = "5";
-
-            else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.SATURDAY))
+            } else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.SATURDAY)) {
                 repeatsOnDay = "6";
-            else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.SUNDAY))
+            } else if (repeatsOnDay.equalsIgnoreCase(TemplatePopulateImportConstants.SUNDAY)) {
                 repeatsOnDay = "7";
+            }
             return repeatsOnDay;
         }else {
             return null;

@@ -147,8 +147,10 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                     .integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName);
             compoundingRecurrenceOnWeekday = command
                     .integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyWeekdayParamName);
-            if (!compoundingFrequencyType.isDaily())
-                allowCompoundingOnEod = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowCompoundingOnEodParamName);
+            if (!compoundingFrequencyType.isDaily()) {
+                allowCompoundingOnEod = command
+                        .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowCompoundingOnEodParamName);
+            }
         }
 
         Integer preCloseInterestCalculationStrategy = command

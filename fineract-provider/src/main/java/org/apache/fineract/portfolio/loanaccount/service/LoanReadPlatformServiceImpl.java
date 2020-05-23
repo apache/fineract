@@ -1569,7 +1569,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String loanChargeId = rs.getString("loanChargeId");
             BigDecimal chargeAmount = rs.getBigDecimal("chargeAmount");
             final BigDecimal waivedAmount = rs.getBigDecimal("waivedAmount");
-            if (chargeAmount != null && waivedAmount != null) chargeAmount = chargeAmount.subtract(waivedAmount);
+            if (chargeAmount != null && waivedAmount != null) {
+                chargeAmount = chargeAmount.subtract(waivedAmount);
+            }
             final DisbursementData disbursementData = new DisbursementData(id, expectedDisbursementdate, actualDisbursementdate, principal,
                     loanChargeId, chargeAmount, waivedAmount);
             return disbursementData;

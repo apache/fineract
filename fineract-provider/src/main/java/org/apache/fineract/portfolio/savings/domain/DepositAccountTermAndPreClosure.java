@@ -256,7 +256,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
     public Integer getActualDepositPeriod(final LocalDate interestPostingUpToDate, final SavingsPeriodFrequencyType periodFrequencyType) {
         LocalDate depositFromDate = getExpectedFirstDepositOnDate();
 
-        if (depositFromDate == null) depositFromDate = this.account.accountSubmittedOrActivationDate();
+        if (depositFromDate == null) {
+            depositFromDate = this.account.accountSubmittedOrActivationDate();
+        }
 
         Integer actualDepositPeriod = this.depositPeriod;
         if (depositFromDate == null || getMaturityLocalDate() == null || interestPostingUpToDate.isEqual(getMaturityLocalDate())) { return actualDepositPeriod; }

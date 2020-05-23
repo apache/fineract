@@ -46,11 +46,13 @@ public class PaymentTypeHelper {
             final Boolean isCashPayment, final Integer position) {
         HashMap hm = new HashMap();
         hm.put("name", name);
-        if (description != null)
+        if (description != null) {
             hm.put("description", description);
+        }
         hm.put("isCashPayment", isCashPayment);
-        if (position != null)
+        if (position != null) {
             hm.put("position", position);
+        }
 
         // system.out.println("------------------------CREATING PAYMENT
         // TYPE-------------------------" + hm);

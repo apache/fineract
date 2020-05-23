@@ -87,6 +87,7 @@
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
           <module name="UpperEll"/>
+          <module name="NeedBraces"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -126,7 +127,7 @@
             <property name="option" value="TEXT"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
         </module>
-        <module name="NeedBraces"/>
+      
         <module name="LeftCurly" />
         <module name="RightCurly">
             <property name="option" value="alone"/>

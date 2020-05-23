@@ -74,8 +74,9 @@ public class GuarantorImportHandler implements ImportHandler {
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
                 row = addGuarantorSheet.getRow(rowIndex);
-                if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL))
-                    guarantors.add(ReadGuarantor(row,locale,dateFormat));
+                if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL)) {
+                    guarantors.add(ReadGuarantor(row, locale, dateFormat));
+                }
 
         }
     }
@@ -90,10 +91,11 @@ public class GuarantorImportHandler implements ImportHandler {
 
         Integer guarantorTypeId = null;
         if (guarantorType!=null) {
-            if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_INTERNAL))
+            if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_INTERNAL)) {
                 guarantorTypeId = 1;
-            else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL))
+            } else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL)) {
                 guarantorTypeId = 3;
+            }
         }
         String clientName = ImportHandlerUtils.readAsString(GuarantorConstants.ENTITY_ID_COL, row);
         Long entityId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);

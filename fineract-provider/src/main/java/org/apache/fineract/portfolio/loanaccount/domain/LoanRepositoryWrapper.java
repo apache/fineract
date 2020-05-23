@@ -232,7 +232,9 @@ public class LoanRepositoryWrapper {
     @Transactional(readOnly=true)
     public Loan findNonClosedLoanThatBelongsToClient(@Param("loanId") Long loanId, @Param("clientId") Long clientId) {
         Loan loan = this.repository.findNonClosedLoanThatBelongsToClient(loanId, clientId) ;
-        if(loan != null) loan.initilizeTransactions();
+        if(loan != null) {
+            loan.initilizeTransactions();
+        }
         return loan ;
     }
 }

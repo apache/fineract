@@ -97,7 +97,9 @@ public class TrialBalance extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
         TrialBalance other = (TrialBalance) obj;
         return Objects.equals(other.officeId, officeId)
             && Objects.equals(other.glAccountId, glAccountId)

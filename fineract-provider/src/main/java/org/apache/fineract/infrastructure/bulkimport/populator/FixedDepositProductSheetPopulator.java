@@ -81,29 +81,42 @@ public class FixedDepositProductSheetPopulator extends AbstractWorkbookPopulator
                 writeInt(MIN_DEPOSIT_TERM_COL, row, product.getMinDepositTerm());
                 writeString(MIN_DEPOSIT_TERM_TYPE_COL, row, product.getMinDepositTermType().getValue());
 
-                if(product.getMinDepositAmount() != null)
+                if(product.getMinDepositAmount() != null) {
                     writeBigDecimal(MIN_DEPOSIT_COL, row, product.getMinDepositAmount());
-                if(product.getMaxDepositAmount() != null)
+                }
+                if(product.getMaxDepositAmount() != null) {
                     writeBigDecimal(MAX_DEPOSIT_COL, row, product.getMaxDepositAmount());
-                if(product.getDepositAmount() != null)
+                }
+                if(product.getDepositAmount() != null) {
                     writeBigDecimal(DEPOSIT_COL, row, product.getDepositAmount());
-                if(product.getMaxDepositTerm() != null)
+                }
+                if(product.getMaxDepositTerm() != null) {
                     writeInt(MAX_DEPOSIT_TERM_COL, row, product.getMaxDepositTerm());
-                if(product.getInMultiplesOfDepositTerm() != null)
+                }
+                if(product.getInMultiplesOfDepositTerm() != null) {
                     writeInt(IN_MULTIPLES_OF_DEPOSIT_TERM_COL, row, product.getInMultiplesOfDepositTerm());
-                if(product.getPreClosurePenalInterest() != null)
+                }
+                if(product.getPreClosurePenalInterest() != null) {
                     writeBigDecimal(PRECLOSURE_PENAL_INTEREST_COL, row, product.getPreClosurePenalInterest());
-                if(product.getMaxDepositTermType() != null)
+                }
+                if(product.getMaxDepositTermType() != null) {
                     writeString(MAX_DEPOSIT_TERM_TYPE_COL, row, product.getMaxDepositTermType().getValue());
-                if(product.getPreClosurePenalInterestOnType() != null)
-                    writeString(PRECLOSURE_INTEREST_TYPE_COL, row, product.getPreClosurePenalInterestOnType().getValue());
-                if(product.getInMultiplesOfDepositTermType() != null)
-                    writeString(IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE_COL, row, product.getInMultiplesOfDepositTermType().getValue());
+                }
+                if(product.getPreClosurePenalInterestOnType() != null) {
+                    writeString(PRECLOSURE_INTEREST_TYPE_COL, row,
+                            product.getPreClosurePenalInterestOnType().getValue());
+                }
+                if(product.getInMultiplesOfDepositTermType() != null) {
+                    writeString(IN_MULTIPLES_OF_DEPOSIT_TERM_TYPE_COL, row,
+                            product.getInMultiplesOfDepositTermType().getValue());
+                }
 
-                if(product.getLockinPeriodFrequency() != null)
+                if(product.getLockinPeriodFrequency() != null) {
                     writeInt(LOCKIN_PERIOD_COL, row, product.getLockinPeriodFrequency());
-                if(product.getLockinPeriodFrequencyType() != null)
+                }
+                if(product.getLockinPeriodFrequencyType() != null) {
                     writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
+                }
                 CurrencyData currency = product.getCurrency();
                 writeString(CURRENCY_COL, row, currency.code());
             }

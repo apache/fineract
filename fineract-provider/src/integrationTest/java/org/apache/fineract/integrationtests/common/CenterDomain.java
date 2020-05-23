@@ -123,10 +123,18 @@ public class CenterDomain implements Comparable<CenterDomain> {
             String officeName, String hierarchy, final int[] groupMembers) {
         // String ids = String.valueOf(id);
         final HashMap map = new HashMap<>();
-        if (id != null) map.put("id", id);
-        if (statusId != null) map.put("statusId", statusId);
-        if (statusCode != null) map.put("statusCode", statusCode);
-        if (statusValue != null) map.put("statusValue", statusValue);
+        if (id != null) {
+            map.put("id", id);
+        }
+        if (statusId != null) {
+            map.put("statusId", statusId);
+        }
+        if (statusCode != null) {
+            map.put("statusCode", statusCode);
+        }
+        if (statusValue != null) {
+            map.put("statusValue", statusValue);
+        }
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Center_Name_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -142,13 +150,18 @@ public class CenterDomain implements Comparable<CenterDomain> {
             map.put("activationDate", activationDate);
         } else {
             map.put("active", "false");
-            if (submittedDate == null)
+            if (submittedDate == null) {
                 map.put("submittedOnDate", DateUtils.getDateOfTenant());
-            else
+            } else {
                 map.put("submittedOnDate", submittedDate);
+            }
         }
-        if (externalId != null) map.put("externalId", externalId);
-        if (groupMembers != null) map.put("groupMembers", groupMembers);
+        if (externalId != null) {
+            map.put("externalId", externalId);
+        }
+        if (groupMembers != null) {
+            map.put("groupMembers", groupMembers);
+        }
         LOG.info("{}",map.toString());
         return new Gson().toJson(map);
     }
@@ -213,17 +226,35 @@ public class CenterDomain implements Comparable<CenterDomain> {
     public int hashCode() {
         int hash = 1;
 
-        if (this.id >= 0) hash += this.id;
-        if (this.status != null) {
-            if ((Double) this.status.get("id") >= 0) hash += (Double) this.status.get("id");
-            if ((String) this.status.get("code") != null) hash += this.status.get("code").hashCode();
-            if ((String) this.status.get("value") != null) hash += this.status.get("value").hashCode();
+        if (this.id >= 0) {
+            hash += this.id;
         }
-        if (this.name != null) hash += this.name.hashCode();
-        if (this.officeId >= 0) hash += this.officeId;
-        if (this.officeName != null) hash += this.officeName.hashCode();
-        if (this.hierarchy != null) hash += this.hierarchy.hashCode();
-        if (this.groupMembers != null) hash += this.groupMembers.hashCode();
+        if (this.status != null) {
+            if ((Double) this.status.get("id") >= 0) {
+                hash += (Double) this.status.get("id");
+            }
+            if ((String) this.status.get("code") != null) {
+                hash += this.status.get("code").hashCode();
+            }
+            if ((String) this.status.get("value") != null) {
+                hash += this.status.get("value").hashCode();
+            }
+        }
+        if (this.name != null) {
+            hash += this.name.hashCode();
+        }
+        if (this.officeId >= 0) {
+            hash += this.officeId;
+        }
+        if (this.officeName != null) {
+            hash += this.officeName.hashCode();
+        }
+        if (this.hierarchy != null) {
+            hash += this.hierarchy.hashCode();
+        }
+        if (this.groupMembers != null) {
+            hash += this.groupMembers.hashCode();
+        }
 
         return hash;
     }
@@ -232,11 +263,15 @@ public class CenterDomain implements Comparable<CenterDomain> {
     public boolean equals(Object obj) {
         if (obj == this) { return true; }
 
-        if (!(obj instanceof CenterDomain)) return false;
+        if (!(obj instanceof CenterDomain)) {
+            return false;
+        }
 
         CenterDomain cd = (CenterDomain) obj;
 
-        if (this.hashCode() == cd.hashCode()) return true;
+        if (this.hashCode() == cd.hashCode()) {
+            return true;
+        }
         return false;
     }
 
