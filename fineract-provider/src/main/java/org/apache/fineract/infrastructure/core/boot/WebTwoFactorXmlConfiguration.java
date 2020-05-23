@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 public class WebTwoFactorXmlConfiguration {
 
     @Bean
-    public FilterRegistrationBean twoFactorFilterBean(TwoFactorAuthenticationFilter filter) {
+    public FilterRegistrationBean<TwoFactorAuthenticationFilter> twoFactorFilterBean(TwoFactorAuthenticationFilter filter) {
         FilterRegistrationBean<TwoFactorAuthenticationFilter> registrationBean = new FilterRegistrationBean<TwoFactorAuthenticationFilter>(filter);
         registrationBean.setEnabled(false);
         return registrationBean;

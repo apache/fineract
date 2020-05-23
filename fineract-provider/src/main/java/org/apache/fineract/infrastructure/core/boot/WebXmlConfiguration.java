@@ -42,7 +42,7 @@ public class WebXmlConfiguration {
     private TenantAwareBasicAuthenticationFilter basicAuthenticationProcessingFilter;
 
     @Bean
-    public ServletRegistrationBean jersey() {
+    public ServletRegistrationBean<SpringServlet> jersey() {
         ServletRegistrationBean<SpringServlet> jerseyServletRegistration = new ServletRegistrationBean<SpringServlet>();
         jerseyServletRegistration.setServlet(new SpringServlet());
         jerseyServletRegistration.addUrlMappings("/api/v1/*");
@@ -59,7 +59,7 @@ public class WebXmlConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean filterRegistrationBean() {
+    public FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> filterRegistrationBean() {
         FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<TenantAwareBasicAuthenticationFilter>();
         filterRegistrationBean.setFilter(basicAuthenticationProcessingFilter);
         filterRegistrationBean.setEnabled(false);

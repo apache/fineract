@@ -6556,6 +6556,7 @@ public class Loan extends AbstractPersistableCustom {
         checkAndFetchLazyCollection(this.loanOfficerHistory);
     }
 
+    @SuppressWarnings("rawtypes")
     private void checkAndFetchLazyCollection(Collection lazyCollection){
         if (lazyCollection != null) {
             lazyCollection.size();

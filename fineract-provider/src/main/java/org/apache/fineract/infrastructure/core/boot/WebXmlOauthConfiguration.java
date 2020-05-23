@@ -36,7 +36,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 public class WebXmlOauthConfiguration {
 
     @Bean
-    public ServletRegistrationBean jersey() {
+    public ServletRegistrationBean<SpringServlet> jersey() {
         ServletRegistrationBean<SpringServlet> jerseyServletRegistration = new ServletRegistrationBean<SpringServlet>();
         jerseyServletRegistration.setServlet(new SpringServlet());
         jerseyServletRegistration.addUrlMappings("/api/v1/*");
@@ -53,7 +53,7 @@ public class WebXmlOauthConfiguration {
     }
 
     @Bean
-    public ServletRegistrationBean dispatcherRegistration(DispatcherServlet dispatcherServlet) {
+    public ServletRegistrationBean<DispatcherServlet> dispatcherRegistration(DispatcherServlet dispatcherServlet) {
         ServletRegistrationBean<DispatcherServlet> registrationBean = new ServletRegistrationBean<DispatcherServlet>(dispatcherServlet);
         registrationBean.addUrlMappings("/api/oauth/token");
         return registrationBean;

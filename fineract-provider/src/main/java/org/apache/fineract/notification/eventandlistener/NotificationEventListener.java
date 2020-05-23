@@ -37,6 +37,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressWarnings("rawtypes")
 public class NotificationEventListener implements SessionAwareMessageListener {
 
     private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
