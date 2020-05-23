@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -145,6 +147,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -164,7 +167,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository) {
+            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            final FromJsonHelper fromApiJsonHelper) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -188,6 +192,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.configurationDomainService = configurationDomainService;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Transactional
@@ -798,14 +803,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.depositAccountTransactionDataValidator.validateClosing(command, DepositAccountType.FIXED_DEPOSIT, isPreMatureClose);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+        final PaymentDetail
+                paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
         final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
-        this.depositAccountDomainService.handleFDAccountClosure(account, paymentDetail, user, command, DateUtils.getLocalDateOfTenant(),
-                changes);
+        this.depositAccountDomainService.handleFDAccountClosure(account, paymentDetail, user, command, DateUtils.getLocalDateOfTenant(), changes);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -1352,6 +1357,32 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (depositAccountType.isFixedDeposit()) {
             ((FixedDepositAccount) account).updateMaturityStatus(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            FixedDepositAccount fdAccount = ((FixedDepositAccount) account);
+            //handle maturity instructions
+
+            if(fdAccount.isMatured() && (fdAccount.isReinvestOnClosure() || fdAccount.isTransferToSavingsOnClosure())){
+                DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+                Map<String, Object> changes = new HashMap<>();
+                AppUser user = context.authenticatedUser();
+                Long toSavingsId = fdAccount.getTransferToSavingsAccountId();
+                this.depositAccountDomainService.handleFDAccountMaturityClosure(fdAccount, null, user,
+                        fdAccount.maturityDate(), fmt, fdAccount.maturityDate(),
+                        fdAccount.getOnAccountClosureId(), toSavingsId, "Apply maturity instructions", changes);
+
+                if(changes.get("reinvestedDepositId") != null) {
+                    Long reinvestedDepositId = (Long) changes.get("reinvestedDepositId");
+                    Money amountForDeposit = account.activateWithBalance();
+                    final FixedDepositAccount reinvestAccount = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(reinvestedDepositId,
+                            DepositAccountType.FIXED_DEPOSIT);
+                    Money activationChargeAmount = getActivationCharge(reinvestAccount);
+                    if(activationChargeAmount.isGreaterThanZero()){
+                        payActivationCharge(reinvestAccount, user);
+                        amountForDeposit  = amountForDeposit.plus(activationChargeAmount);
+                    }
+                    this.depositAccountDomainService.handleFDDeposit(reinvestAccount, fmt, fdAccount.maturityDate(),
+                            amountForDeposit.getAmount(), null);
+                }
+            }
         } else if (depositAccountType.isRecurringDeposit()) {
             ((RecurringDepositAccount) account).updateMaturityStatus(isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);

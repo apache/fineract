@@ -191,4 +191,9 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         }
 
     }
+    @Override
+    public PortfolioAccountData retriveSavingsAccount(final Long savingsId){
+        String accountNo = jdbcTemplate.queryForObject("select account_no from m_savings_account where id = ?", String.class, savingsId);
+        return PortfolioAccountData.lookup(savingsId, accountNo);
+    }
 }

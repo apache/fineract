@@ -259,6 +259,8 @@ public class FixedDepositAccount extends SavingsAccount {
         }
     }
 
+
+
     public LocalDate calculateMaturityDate() {
 
         final LocalDate startDate = accountSubmittedOrActivationDate();
@@ -487,6 +489,14 @@ public class FixedDepositAccount extends SavingsAccount {
         this.closedBy = currentUser;
         // this.summary.updateSummary(this.currency,
         // this.savingsAccountTransactionSummaryWrapper, this.transactions);
+    }
+
+    public void updateClosedStatus(){
+        this.status = SavingsAccountStatusType.CLOSED.getValue();
+    }
+
+    public void updateOnAccountClosureStatus(DepositAccountOnClosureType onClosureType){
+        this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
     }
 
     public void postMaturityInterest(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
@@ -756,6 +766,14 @@ public class FixedDepositAccount extends SavingsAccount {
         return this.accountTermAndPreClosure.isTransferToSavingsOnClosure();
     }
 
+    public Integer getOnAccountClosureId(){
+        return this.accountTermAndPreClosure.getOnAccountClosureType();
+    }
+
+    public Long getTransferToSavingsAccountId() {
+        return this.accountTermAndPreClosure.getTransferToSavingsAccountId();
+    }
+
     public FixedDepositAccount reInvest(BigDecimal depositAmount) {
 
         final DepositAccountTermAndPreClosure newAccountTermAndPreClosure = this.accountTermAndPreClosure.copy(depositAmount);
@@ -830,4 +848,16 @@ public class FixedDepositAccount extends SavingsAccount {
         super.loadLazyCollections();
         this.chart.getId() ;
     }
+
+    public BigDecimal getDepositAmount() {
+        return this.accountTermAndPreClosure.depositAmount();
+    }
+    @Override
+    public BigDecimal getAccountBalance() {
+        return this.summary.getAccountBalance(this.currency).getAmount();
+    }
+    public boolean isMatured(){
+        return SavingsAccountStatusType.MATURED.getValue().equals(this.status);
+    }
+
 }
