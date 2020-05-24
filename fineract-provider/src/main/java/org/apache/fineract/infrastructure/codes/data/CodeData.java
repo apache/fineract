@@ -25,23 +25,25 @@ import java.io.Serializable;
  */
 public class CodeData implements Serializable {
 
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final boolean systemDefined;
+  private final Long id;
 
-    public static CodeData instance(final Long id, final String name, final boolean systemDefined) {
-        return new CodeData(id, name, systemDefined);
-    }
+  @SuppressWarnings("unused")
+  private final String name;
 
-    private CodeData(final Long id, final String name, final boolean systemDefined) {
-        this.id = id;
-        this.name = name;
-        this.systemDefined = systemDefined;
-    }
+  @SuppressWarnings("unused")
+  private final boolean systemDefined;
 
-    public Long getCodeId() {
-        return this.id;
-    }
+  public static CodeData instance(final Long id, final String name, final boolean systemDefined) {
+    return new CodeData(id, name, systemDefined);
+  }
+
+  private CodeData(final Long id, final String name, final boolean systemDefined) {
+    this.id = id;
+    this.name = name;
+    this.systemDefined = systemDefined;
+  }
+
+  public Long getCodeId() {
+    return this.id;
+  }
 }

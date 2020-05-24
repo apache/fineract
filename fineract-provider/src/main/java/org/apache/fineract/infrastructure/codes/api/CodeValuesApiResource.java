@@ -62,115 +62,208 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Code Values"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Code Values", description = "Code and code values: Codes represent a specific category of data, their code values are a specific instance of that category.\n" + "\n" + "Codes are mostly system defined which means the code itself comes out of the box and cannot be modified however its code values can be. e.g. 'Customer Identifier', it defaults to a code value of 'Passport' but could be 'Drivers License, National Id' etc")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Code Values",
+          description =
+              "Code and code values: Codes represent a specific category of data, their code"
+                  + " values are a specific instance of that category.\n"
+                  + "\n"
+                  + "Codes are mostly system defined which means the code itself comes out of the"
+                  + " box and cannot be modified however its code values can be. e.g. 'Customer"
+                  + " Identifier', it defaults to a code value of 'Passport' but could be 'Drivers"
+                  + " License, National Id' etc")
+    })
 public class CodeValuesApiResource {
 
-    /**
-     * The set of parameters that are supported in response for {@link CodeData}
-     */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(CodevalueJSONinputParams.CODEVALUE_ID.getValue(),
-                    CodevalueJSONinputParams.NAME.getValue(), CodevalueJSONinputParams.POSITION.getValue(),
-                    CodevalueJSONinputParams.IS_MANDATORY.getValue(),
-                    CodevalueJSONinputParams.DESCRIPTION.getValue()));
-    private final String resourceNameForPermissions = "CODEVALUE";
+  /**
+   * The set of parameters that are supported in response for {@link CodeData}
+   */
+  private final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              CodevalueJSONinputParams.CODEVALUE_ID.getValue(),
+              CodevalueJSONinputParams.NAME.getValue(),
+              CodevalueJSONinputParams.POSITION.getValue(),
+              CodevalueJSONinputParams.IS_MANDATORY.getValue(),
+              CodevalueJSONinputParams.DESCRIPTION.getValue()));
 
-    private final PlatformSecurityContext context;
-    private final CodeValueReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final String resourceNameForPermissions = "CODEVALUE";
 
-    @Autowired
-    public CodeValuesApiResource(final PlatformSecurityContext context, final CodeValueReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+  private final PlatformSecurityContext context;
+  private final CodeValueReadPlatformService readPlatformService;
+  private final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Code Values", notes = "Returns the list of Code Values for a given Code\n" + "\n" + "Example Requests:\n" + "\n" + "codes/1/codevalues")
-    @ApiResponses({@ApiResponse(code = 200, message = "A List of Given response", response = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class, responseContainer = "list")})
-    public String retrieveAllCodeValues(@Context final UriInfo uriInfo, @PathParam("codeId") @ApiParam(value = "codeId") final Long codeId) {
+  @Autowired
+  public CodeValuesApiResource(
+      final PlatformSecurityContext context,
+      final CodeValueReadPlatformService readPlatformService,
+      final DefaultToApiJsonSerializer<CodeValueData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.readPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "List Code Values",
+      notes =
+          "Returns the list of Code Values for a given Code\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "codes/1/codevalues")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "A List of Given response",
+        response = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class,
+        responseContainer = "list")
+  })
+  public String retrieveAllCodeValues(
+      @Context final UriInfo uriInfo,
+      @PathParam("codeId") @ApiParam(value = "codeId") final Long codeId) {
 
-        final Collection<CodeValueData> codeValues = this.readPlatformService.retrieveAllCodeValues(codeId);
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codeValues, this.RESPONSE_DATA_PARAMETERS);
-    }
+    final Collection<CodeValueData> codeValues =
+        this.readPlatformService.retrieveAllCodeValues(codeId);
 
-    @GET
-    @Path("{codeValueId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Code Value", notes = "Returns the details of a Code Value\n" + "\n" + "Example Requests:\n" + "\n" + "codes/1/codevalues/1")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class)})
-    public String retrieveCodeValue(@Context final UriInfo uriInfo, @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId) {
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, codeValues, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+  @GET
+  @Path("{codeValueId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve a Code Value",
+      notes =
+          "Returns the details of a Code Value\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "codes/1/codevalues/1")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class)
+  })
+  public String retrieveCodeValue(
+      @Context final UriInfo uriInfo,
+      @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId) {
 
-        final CodeValueData codeValue = this.readPlatformService.retrieveCodeValue(codeValueId);
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codeValue, this.RESPONSE_DATA_PARAMETERS);
-    }
+    final CodeValueData codeValue = this.readPlatformService.retrieveCodeValue(codeValueId);
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a Code Value", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class)})
-    public String createCodeValue(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, codeValue, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCodeValue(codeId).withJson(apiRequestBodyAsJson).build();
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Create a Code Value", notes = "")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class)
+  })
+  public String createCodeValue(
+      @PathParam("codeId") @ApiParam(value = "codeId") final Long codeId,
+      @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().createCodeValue(codeId).withJson(apiRequestBodyAsJson).build();
 
-        return this.toApiJsonSerializer.serialize(result);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @PUT
-    @Path("{codeValueId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Code Value", notes = "Updates the details of a code value.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodeValuesApiResourceSwagger.PutCodeValuesDataRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.PutCodeValueDataResponse.class)})
-    public String updateCodeValue(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId,
-            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+  @PUT
+  @Path("{codeValueId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Update a Code Value", notes = "Updates the details of a code value.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = CodeValuesApiResourceSwagger.PutCodeValuesDataRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CodeValuesApiResourceSwagger.PutCodeValueDataResponse.class)
+  })
+  public String updateCodeValue(
+      @PathParam("codeId") @ApiParam(value = "codeId") final Long codeId,
+      @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId,
+      @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCodeValue(codeId, codeValueId)
-                .withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder()
+            .updateCodeValue(codeId, codeValueId)
+            .withJson(apiRequestBodyAsJson)
+            .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @DELETE
-    @Path("{codeValueId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete a Code Value", notes = "Deletes a code value")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.DeleteCodeValueDataResponse.class)})
-    public String deleteCodeValue(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId) {
+  @DELETE
+  @Path("{codeValueId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Delete a Code Value", notes = "Deletes a code value")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CodeValuesApiResourceSwagger.DeleteCodeValueDataResponse.class)
+  })
+  public String deleteCodeValue(
+      @PathParam("codeId") @ApiParam(value = "codeId") final Long codeId,
+      @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCodeValue(codeId, codeValueId).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().deleteCodeValue(codeId, codeValueId).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

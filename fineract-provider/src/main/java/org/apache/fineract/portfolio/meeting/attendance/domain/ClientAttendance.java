@@ -29,43 +29,49 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.meeting.domain.Meeting;
 
 @Entity
-@Table(name = "m_client_attendance", uniqueConstraints = { @UniqueConstraint(columnNames = { "client_id", "meeting_id" }, name = "unique_client_meeting_attendance") })
+@Table(
+    name = "m_client_attendance",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"client_id", "meeting_id"},
+          name = "unique_client_meeting_attendance")
+    })
 public class ClientAttendance extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+  @ManyToOne
+  @JoinColumn(name = "client_id", nullable = false)
+  private Client client;
 
-    @ManyToOne
-    @JoinColumn(name = "meeting_id", nullable = false)
-    private Meeting meeting;
+  @ManyToOne
+  @JoinColumn(name = "meeting_id", nullable = false)
+  private Meeting meeting;
 
-    @Column(name = "attendance_type_enum", nullable = false)
-    private Integer attendanceTypeId;
+  @Column(name = "attendance_type_enum", nullable = false)
+  private Integer attendanceTypeId;
 
-    protected ClientAttendance() {
+  protected ClientAttendance() {}
 
-    }
+  public static ClientAttendance createClientAttendance(
+      final Client client, final Meeting meeting, final Integer attendanceTypeId) {
+    return new ClientAttendance(client, meeting, attendanceTypeId);
+  }
 
-    public static ClientAttendance createClientAttendance(final Client client, final Meeting meeting, final Integer attendanceTypeId) {
-        return new ClientAttendance(client, meeting, attendanceTypeId);
-    }
+  private ClientAttendance(
+      final Client client, final Meeting meeting, final Integer attendanceTypeId) {
+    this.client = client;
+    this.meeting = meeting;
+    this.attendanceTypeId = attendanceTypeId;
+  }
 
-    private ClientAttendance(final Client client, final Meeting meeting, final Integer attendanceTypeId) {
-        this.client = client;
-        this.meeting = meeting;
-        this.attendanceTypeId = attendanceTypeId;
-    }
+  public Long clientId() {
+    return this.client.getId();
+  }
 
-    public Long clientId() {
-        return this.client.getId();
-    }
+  public void updateAttendanceTypeId(final Integer attendanceTypeId) {
+    this.attendanceTypeId = attendanceTypeId;
+  }
 
-    public void updateAttendanceTypeId(final Integer attendanceTypeId) {
-        this.attendanceTypeId = attendanceTypeId;
-    }
-
-    public Integer getAttendanceTypeId() {
-        return this.attendanceTypeId;
-    }
+  public Integer getAttendanceTypeId() {
+    return this.attendanceTypeId;
+  }
 }

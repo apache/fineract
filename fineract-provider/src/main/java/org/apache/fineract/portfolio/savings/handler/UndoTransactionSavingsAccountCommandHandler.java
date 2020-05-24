@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "UNDOTRANSACTION")
 public class UndoTransactionSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService writePlatformService;
+  private final SavingsAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public UndoTransactionSavingsAccountCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UndoTransactionSavingsAccountCommandHandler(
+      final SavingsAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.undoTransaction(command.getSavingsId(), transactionId, false);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    final Long transactionId = Long.valueOf(command.getTransactionId());
+    return this.writePlatformService.undoTransaction(command.getSavingsId(), transactionId, false);
+  }
 }

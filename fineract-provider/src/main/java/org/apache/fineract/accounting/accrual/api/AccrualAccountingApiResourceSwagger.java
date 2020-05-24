@@ -25,22 +25,26 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 24/7/17.
  */
 final class AccrualAccountingApiResourceSwagger {
-    private AccrualAccountingApiResourceSwagger() {
-        // don't allow to instantiate; use only for live API documentation
+  private AccrualAccountingApiResourceSwagger() {
+    // don't allow to instantiate; use only for live API documentation
+  }
+
+  @ApiModel(value = "runaccrualsRequest")
+  public static final class PostRunaccrualsRequest {
+    private PostRunaccrualsRequest() {
+      // don't allow to instantiate; use only for live API documentation
     }
 
-    @ApiModel(value = "runaccrualsRequest")
-    public static final class PostRunaccrualsRequest {
-        private PostRunaccrualsRequest() {
-            // don't allow to instantiate; use only for live API documentation
-        }
+    @ApiModelProperty(example = "en")
+    public String locale;
 
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "04 June 2014", notes = "which specifies periodic accruals should happen till the given Date", required = true)
-        public String tillDate;
-    }
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
 
+    @ApiModelProperty(
+        example = "04 June 2014",
+        notes = "which specifies periodic accruals should happen till the given Date",
+        required = true)
+    public String tillDate;
+  }
 }

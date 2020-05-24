@@ -31,16 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GUARANTOR", action = "DELETE")
 public class DeleteGuarantorCommandHandler implements NewCommandSourceHandler {
 
-    private final GuarantorWritePlatformService guarantorWritePlatformService;
+  private final GuarantorWritePlatformService guarantorWritePlatformService;
 
-    @Autowired
-    public DeleteGuarantorCommandHandler(final GuarantorWritePlatformService guarantorWritePlatformService) {
-        this.guarantorWritePlatformService = guarantorWritePlatformService;
-    }
+  @Autowired
+  public DeleteGuarantorCommandHandler(
+      final GuarantorWritePlatformService guarantorWritePlatformService) {
+    this.guarantorWritePlatformService = guarantorWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.guarantorWritePlatformService.removeGuarantor(command.getLoanId(), command.entityId(), command.subentityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.guarantorWritePlatformService.removeGuarantor(
+        command.getLoanId(), command.entityId(), command.subentityId());
+  }
 }

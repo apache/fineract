@@ -30,16 +30,15 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "RECOVERGUARANTEES")
 public class RecoverFromGuarantorCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public RecoverFromGuarantorCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public RecoverFromGuarantorCommandHandler(final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.recoverFromGuarantor(command.getLoanId());
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.writePlatformService.recoverFromGuarantor(command.getLoanId());
+  }
 }

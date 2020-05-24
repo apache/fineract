@@ -31,162 +31,180 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.ContentMa
 
 public class ContentRepositoryUtils {
 
-    private static final Random random = new Random();
+  private static final Random random = new Random();
 
-    public static enum ImageMIMEtype {
-        GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
+  public static enum ImageMIMEtype {
+    GIF("image/gif"),
+    JPEG("image/jpeg"),
+    PNG("image/png");
 
-        private final String value;
+    private final String value;
 
-        private ImageMIMEtype(final String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
-
-        public static ImageMIMEtype fromFileExtension(ImageFileExtension fileExtension) {
-            switch (fileExtension) {
-                case GIF:
-                    return ImageMIMEtype.GIF;
-                case JPG:
-                case JPEG:
-                    return ImageMIMEtype.JPEG;
-                case PNG:
-                    return ImageMIMEtype.PNG;
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
+    private ImageMIMEtype(final String value) {
+      this.value = value;
     }
 
-    public static enum ImageFileExtension {
-        GIF(".gif"), JPEG(".jpeg"), JPG(".jpg"), PNG(".png");
-
-        private final String value;
-
-        private ImageFileExtension(final String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
-
-        public String getValueWithoutDot() {
-            return this.value.substring(1);
-        }
-
-        public ImageFileExtension getFileExtension() {
-            switch (this) {
-                case GIF:
-                    return ImageFileExtension.GIF;
-                case JPEG:
-                    return ImageFileExtension.JPEG;
-                case PNG:
-                    return ImageFileExtension.PNG;
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
+    public String getValue() {
+      return this.value;
     }
 
-    public static enum ImageDataURIsuffix {
-        GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"), PNG(
-                "data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
+    public static ImageMIMEtype fromFileExtension(ImageFileExtension fileExtension) {
+      switch (fileExtension) {
+        case GIF:
+          return ImageMIMEtype.GIF;
+        case JPG:
+        case JPEG:
+          return ImageMIMEtype.JPEG;
+        case PNG:
+          return ImageMIMEtype.PNG;
+        default:
+          throw new IllegalArgumentException();
+      }
+    }
+  }
 
-        private final String value;
+  public static enum ImageFileExtension {
+    GIF(".gif"),
+    JPEG(".jpeg"),
+    JPG(".jpg"),
+    PNG(".png");
 
-        private ImageDataURIsuffix(final String value) {
-            this.value = value;
-        }
+    private final String value;
 
-        public String getValue() {
-            return this.value;
-        }
+    private ImageFileExtension(final String value) {
+      this.value = value;
     }
 
+    public String getValue() {
+      return this.value;
+    }
+
+    public String getValueWithoutDot() {
+      return this.value.substring(1);
+    }
+
+    public ImageFileExtension getFileExtension() {
+      switch (this) {
+        case GIF:
+          return ImageFileExtension.GIF;
+        case JPEG:
+          return ImageFileExtension.JPEG;
+        case PNG:
+          return ImageFileExtension.PNG;
+        default:
+          throw new IllegalArgumentException();
+      }
+    }
+  }
+
+  public static enum ImageDataURIsuffix {
+    GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"),
+    JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"),
+    PNG("data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
+
+    private final String value;
+
+    private ImageDataURIsuffix(final String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return this.value;
+    }
+  }
+
+  /**
+   * Validates that passed in Mime type maps to known image mime types
+   *
+   * @param mimeType
+   */
+  public static void validateImageMimeType(final String mimeType) {
+    if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue())
+        || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue())
+        || mimeType.equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) {
+      throw new ImageUploadException();
+    }
+  }
+
+  /**
+   * Extracts Image from a Data URL
+   *
+   * @param dataURL mimeType
+   */
+  public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
+    String fileExtension = "";
+    String base64EncodedString = null;
+    if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.GIF.getValue())) {
+      base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.GIF.getValue(), "");
+      fileExtension = ImageFileExtension.GIF.getValue();
+    } else if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.PNG.getValue())) {
+      base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.PNG.getValue(), "");
+      fileExtension = ImageFileExtension.PNG.getValue();
+    } else if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.JPEG.getValue())) {
+      base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.JPEG.getValue(), "");
+      fileExtension = ImageFileExtension.JPEG.getValue();
+    } else {
+      throw new ImageDataURLNotValidException();
+    }
+
+    return new Base64EncodedImage(base64EncodedString, fileExtension);
+  }
+
+  public static void validateFileSizeWithinPermissibleRange(
+      final Long fileSize, final String name) {
     /**
-     * Validates that passed in Mime type maps to known image mime types
-     *
-     * @param mimeType
-     */
-    public static void validateImageMimeType(final String mimeType) {
-        if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue()) || mimeType
-                .equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) { throw new ImageUploadException(); }
+     * Using Content-Length gives me size of the entire request, which is
+     * good enough for now for a fast fail as the length of the rest of the
+     * content i.e name and description while compared to the uploaded file
+     * size is negligible
+     **/
+    if (fileSize != null
+        && ((fileSize / (1024 * 1024)) > ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB)) {
+      throw new ContentManagementException(
+          name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB);
     }
+  }
 
-    /**
-     * Extracts Image from a Data URL
-     *
-     * @param dataURL mimeType
-     */
-    public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
-        String fileExtension = "";
-        String base64EncodedString = null;
-        if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.GIF.getValue())) {
-            base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.GIF.getValue(), "");
-            fileExtension = ImageFileExtension.GIF.getValue();
-        } else if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.PNG.getValue())) {
-            base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.PNG.getValue(), "");
-            fileExtension = ImageFileExtension.PNG.getValue();
-        } else if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.JPEG.getValue())) {
-            base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.JPEG.getValue(), "");
-            fileExtension = ImageFileExtension.JPEG.getValue();
-        } else {
-            throw new ImageDataURLNotValidException();
-        }
-
-        return new Base64EncodedImage(base64EncodedString, fileExtension);
+  public static void validateClientImageNotEmpty(final String imageFileName) {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    if (imageFileName == null) {
+      final StringBuilder validationErrorCode =
+          new StringBuilder("validation.msg.clientImage.cannot.be.blank");
+      final StringBuilder defaultEnglishMessage =
+          new StringBuilder("The parameter image cannot be blank.");
+      final ApiParameterError error =
+          ApiParameterError.parameterError(
+              validationErrorCode.toString(), defaultEnglishMessage.toString(), "image");
+      dataValidationErrors.add(error);
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
+  }
 
-    public static void validateFileSizeWithinPermissibleRange(final Long fileSize, final String name) {
-        /**
-         * Using Content-Length gives me size of the entire request, which is
-         * good enough for now for a fast fail as the length of the rest of the
-         * content i.e name and description while compared to the uploaded file
-         * size is negligible
-         **/
-        if (fileSize != null && ((fileSize / (1024 * 1024)) > ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB)) { throw new ContentManagementException(
-                name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB); }
+  /**
+   * Generate a random String
+   *
+   * @return
+   */
+  public static String generateRandomString() {
+    final String characters = "abcdefghijklmnopqrstuvwxyz123456789";
+    final int length = generateRandomNumber();
+    final char[] text = new char[length];
+    for (int i = 0; i < length; i++) {
+      text[i] = characters.charAt(random.nextInt(characters.length()));
     }
+    return new String(text);
+  }
 
-    public static void validateClientImageNotEmpty(final String imageFileName) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        if (imageFileName == null) {
-            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.clientImage.cannot.be.blank");
-            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter image cannot be blank.");
-            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
-                    defaultEnglishMessage.toString(), "image");
-            dataValidationErrors.add(error);
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
-        }
-    }
-
-    /**
-     * Generate a random String
-     *
-     * @return
-     */
-    public static String generateRandomString() {
-        final String characters = "abcdefghijklmnopqrstuvwxyz123456789";
-        final int length = generateRandomNumber();
-        final char[] text = new char[length];
-        for (int i = 0; i < length; i++) {
-            text[i] = characters.charAt(random.nextInt(characters.length()));
-        }
-        return new String(text);
-    }
-
-    /**
-     * Generate a random number between 5 to 16
-     *
-     * @return
-     */
-    public static int generateRandomNumber() {
-        final Random randomGenerator = new Random();
-        return randomGenerator.nextInt(11) + 5;
-    }
+  /**
+   * Generate a random number between 5 to 16
+   *
+   * @return
+   */
+  public static int generateRandomNumber() {
+    final Random randomGenerator = new Random();
+    return randomGenerator.nextInt(11) + 5;
+  }
 }

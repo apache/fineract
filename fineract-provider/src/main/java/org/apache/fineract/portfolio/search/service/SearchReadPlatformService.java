@@ -26,9 +26,10 @@ import org.apache.fineract.portfolio.search.data.SearchData;
 
 public interface SearchReadPlatformService {
 
-    Collection<SearchData> retriveMatchingData(SearchConditions searchConditions);
+  Collection<SearchData> retriveMatchingData(SearchConditions searchConditions);
 
-    AdHocSearchQueryData retrieveAdHocQueryTemplate();
+  AdHocSearchQueryData retrieveAdHocQueryTemplate();
 
-    Collection<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(AdHocQuerySearchConditions searchConditions);
+  Collection<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(
+      AdHocQuerySearchConditions searchConditions);
 }

@@ -28,101 +28,87 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * Created by sanyam on 28/7/17.
  */
 final class AccountNumberFormatsApiResourceSwagger {
-    private AccountNumberFormatsApiResourceSwagger() {
-        // this class is only for Swagger implementation for Live Documentation
+  private AccountNumberFormatsApiResourceSwagger() {
+    // this class is only for Swagger implementation for Live Documentation
+  }
+
+  @ApiModel(value = "GetAccountNumberFormatsResponse")
+  public static final class GetAccountNumberFormatsResponse {
+    private GetAccountNumberFormatsResponse() {}
+
+    //        public List<GetAccountNumberFormatsIdResponse> _;
+
+  }
+
+  @ApiModel(value = "GetAccountNumberFormatsIdResponse")
+  public static final class GetAccountNumberFormatsIdResponse {
+    private GetAccountNumberFormatsIdResponse() {}
+
+    @ApiModelProperty(example = "2")
+    public Long id;
+
+    public EnumOptionData accountType;
+
+    public EnumOptionData prefixType;
+  }
+
+  @ApiModel(value = "GetAccountNumberFormatsResponseTemplate")
+  public static final class GetAccountNumberFormatsResponseTemplate {
+    private GetAccountNumberFormatsResponseTemplate() {}
+
+    public List<EnumOptionData> accountTypeOptions;
+    public Map<String, List<EnumOptionData>> prefixTypeOptions;
+  }
+
+  @ApiModel(value = "PostAccountNumberFormatsRequest")
+  public static final class PostAccountNumberFormatsRequest {
+    private PostAccountNumberFormatsRequest() {}
+
+    @ApiModelProperty(example = "1")
+    public Long accountType;
+
+    @ApiModelProperty(example = "101")
+    public Long prefixType;
+  }
+
+  @ApiModel(value = "PostAccountNumberFormatsResponse")
+  public static final class PostAccountNumberFormatsResponse {
+    private PostAccountNumberFormatsResponse() {}
+
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "PutAccountNumberFormatsRequest")
+  public static final class PutAccountNumberFormatsRequest {
+    private PutAccountNumberFormatsRequest() {}
+
+    @ApiModelProperty(example = "1")
+    public Long prefixType;
+  }
+
+  @ApiModel(value = "PutAccountNumberFormatsResponse")
+  public static final class PutAccountNumberFormatsResponse {
+    private PutAccountNumberFormatsResponse() {}
+
+    public static final class PutAccountNumberFormatschangesSwagger {
+      private PutAccountNumberFormatschangesSwagger() {}
+
+      @ApiModelProperty(example = "OFFICE_NAME")
+      public Long prefixType;
     }
 
-    @ApiModel(value = "GetAccountNumberFormatsResponse")
-    public static final class GetAccountNumberFormatsResponse {
-        private GetAccountNumberFormatsResponse() {
+    @ApiModelProperty(example = "2")
+    public Long resourceId;
 
-        }
-//        public List<GetAccountNumberFormatsIdResponse> _;
+    public PutAccountNumberFormatschangesSwagger changes;
+  }
 
-    }
+  @ApiModel(value = "DeleteAccountNumberFormatsResponse")
+  public static final class DeleteAccountNumberFormatsResponse {
+    private DeleteAccountNumberFormatsResponse() {}
 
-    @ApiModel(value = "GetAccountNumberFormatsIdResponse")
-    public static final class GetAccountNumberFormatsIdResponse {
-        private GetAccountNumberFormatsIdResponse() {
-
-        }
-        @ApiModelProperty(example = "2")
-        public Long id;
-        public EnumOptionData accountType;
-
-        public EnumOptionData prefixType;
-
-    }
-
-    @ApiModel(value = "GetAccountNumberFormatsResponseTemplate")
-    public static final class GetAccountNumberFormatsResponseTemplate {
-        private GetAccountNumberFormatsResponseTemplate() {
-
-        }
-        public List<EnumOptionData> accountTypeOptions;
-        public Map<String, List<EnumOptionData>> prefixTypeOptions;
-
-    }
-
-    @ApiModel(value = "PostAccountNumberFormatsRequest")
-    public static final class PostAccountNumberFormatsRequest {
-        private PostAccountNumberFormatsRequest() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long accountType;
-        @ApiModelProperty(example = "101")
-        public Long prefixType;
-
-    }
-
-    @ApiModel(value = "PostAccountNumberFormatsResponse")
-    public static final class PostAccountNumberFormatsResponse {
-        private PostAccountNumberFormatsResponse() {
-
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-
-    }
-
-    @ApiModel(value = "PutAccountNumberFormatsRequest")
-    public static final class PutAccountNumberFormatsRequest {
-        private PutAccountNumberFormatsRequest() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long prefixType;
-
-    }
-
-    @ApiModel(value = "PutAccountNumberFormatsResponse")
-    public static final class PutAccountNumberFormatsResponse {
-        private PutAccountNumberFormatsResponse() {
-
-        }
-        public static final class PutAccountNumberFormatschangesSwagger {
-            private PutAccountNumberFormatschangesSwagger() {
-
-            }
-            @ApiModelProperty(example = "OFFICE_NAME")
-            public Long prefixType;
-        }
-
-        @ApiModelProperty(example = "2")
-        public Long resourceId;
-        public PutAccountNumberFormatschangesSwagger changes;
-
-    }
-
-    @ApiModel(value = "DeleteAccountNumberFormatsResponse")
-    public static final class DeleteAccountNumberFormatsResponse {
-        private DeleteAccountNumberFormatsResponse() {
-
-        }
-        @ApiModelProperty(example = "2")
-        public Long resourceId;
-
-    }
-
+    @ApiModelProperty(example = "2")
+    public Long resourceId;
+  }
 }

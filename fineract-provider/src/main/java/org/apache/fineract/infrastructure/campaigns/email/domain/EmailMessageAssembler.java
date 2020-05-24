@@ -35,57 +35,67 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailMessageAssembler {
 
-    private final EmailMessageRepository emailMessageRepository;
-    private final GroupRepositoryWrapper groupRepository;
-    private final ClientRepositoryWrapper clientRepository;
-    private final StaffRepositoryWrapper staffRepository;
-    private final FromJsonHelper fromApiJsonHelper;
+  private final EmailMessageRepository emailMessageRepository;
+  private final GroupRepositoryWrapper groupRepository;
+  private final ClientRepositoryWrapper clientRepository;
+  private final StaffRepositoryWrapper staffRepository;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public EmailMessageAssembler(final EmailMessageRepository emailMessageRepository, final GroupRepositoryWrapper groupRepositoryWrapper,
-                               final ClientRepositoryWrapper clientRepository, final StaffRepositoryWrapper staffRepository,
-                               final FromJsonHelper fromApiJsonHelper) {
-        this.emailMessageRepository = emailMessageRepository;
-        this.groupRepository = groupRepositoryWrapper;
-        this.clientRepository = clientRepository;
-        this.staffRepository = staffRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public EmailMessageAssembler(
+      final EmailMessageRepository emailMessageRepository,
+      final GroupRepositoryWrapper groupRepositoryWrapper,
+      final ClientRepositoryWrapper clientRepository,
+      final StaffRepositoryWrapper staffRepository,
+      final FromJsonHelper fromApiJsonHelper) {
+    this.emailMessageRepository = emailMessageRepository;
+    this.groupRepository = groupRepositoryWrapper;
+    this.clientRepository = clientRepository;
+    this.staffRepository = staffRepository;
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public EmailMessage assembleFromJson(final JsonCommand command) {
+
+    final JsonElement element = command.parsedJson();
+
+    String emailAddress = null;
+
+    Group group = null;
+    if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.groupIdParamName, element)) {
+      final Long groupId =
+          this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.groupIdParamName, element);
+      group = this.groupRepository.findOneWithNotFoundDetection(groupId);
     }
 
-    public EmailMessage assembleFromJson(final JsonCommand command) {
-
-        final JsonElement element = command.parsedJson();
-
-        String emailAddress = null;
-
-        Group group = null;
-        if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.groupIdParamName, element)) {
-            final Long groupId = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.groupIdParamName, element);
-            group = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        }
-
-        Client client = null;
-        if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.clientIdParamName, element)) {
-            final Long clientId = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.clientIdParamName, element);
-            client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            emailAddress = client.emailAddress();
-        }
-
-        Staff staff = null;
-        if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.staffIdParamName, element)) {
-            final Long staffId = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.staffIdParamName, element);
-            staff = this.staffRepository.findOneWithNotFoundDetection(staffId);
-            emailAddress = staff.emailAddress();
-        }
-
-        final String message = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.messageParamName, element);
-        final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.subjectParamName, element);
-
-        return EmailMessage.pendingEmail(group, client, staff,null,emailSubject, message,emailAddress,null);
+    Client client = null;
+    if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.clientIdParamName, element)) {
+      final Long clientId =
+          this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.clientIdParamName, element);
+      client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+      emailAddress = client.emailAddress();
     }
 
-    public EmailMessage assembleFromResourceId(final Long resourceId) {
-        return this.emailMessageRepository.findById(resourceId)
-                .orElseThrow(() -> new EmailNotFoundException(resourceId));
+    Staff staff = null;
+    if (this.fromApiJsonHelper.parameterExists(EmailApiConstants.staffIdParamName, element)) {
+      final Long staffId =
+          this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.staffIdParamName, element);
+      staff = this.staffRepository.findOneWithNotFoundDetection(staffId);
+      emailAddress = staff.emailAddress();
     }
+
+    final String message =
+        this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.messageParamName, element);
+    final String emailSubject =
+        this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.subjectParamName, element);
+
+    return EmailMessage.pendingEmail(
+        group, client, staff, null, emailSubject, message, emailAddress, null);
+  }
+
+  public EmailMessage assembleFromResourceId(final Long resourceId) {
+    return this.emailMessageRepository
+        .findById(resourceId)
+        .orElseThrow(() -> new EmailNotFoundException(resourceId));
+  }
 }

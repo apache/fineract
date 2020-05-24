@@ -34,52 +34,50 @@ import org.apache.fineract.portfolio.client.domain.Client;
 @Table(name = "client_device_registration")
 public class DeviceRegistration extends AbstractPersistableCustom {
 
-    @OneToOne
-    @JoinColumn(name = "client_id", nullable = false, unique = true)
-    private Client client;
+  @OneToOne
+  @JoinColumn(name = "client_id", nullable = false, unique = true)
+  private Client client;
 
-    @Column(name = "registration_id", nullable = false, unique = true)
-    private String registrationId;
+  @Column(name = "registration_id", nullable = false, unique = true)
+  private String registrationId;
 
-    @Column(name = "updatedon_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOnDate;
+  @Column(name = "updatedon_date", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date updatedOnDate;
 
-    private DeviceRegistration() {}
+  private DeviceRegistration() {}
 
-    private DeviceRegistration(final Client client, final String registrationId) {
-        this.client = client;
-        this.registrationId = registrationId;
-        this.updatedOnDate = DateUtils.getLocalDateTimeOfTenant().toDate();
-    }
+  private DeviceRegistration(final Client client, final String registrationId) {
+    this.client = client;
+    this.registrationId = registrationId;
+    this.updatedOnDate = DateUtils.getLocalDateTimeOfTenant().toDate();
+  }
 
-    public static DeviceRegistration instance(final Client client,
-            final String registrationId) {
-        return new DeviceRegistration(client, registrationId);
-    }
+  public static DeviceRegistration instance(final Client client, final String registrationId) {
+    return new DeviceRegistration(client, registrationId);
+  }
 
-    public Client getClient() {
-        return this.client;
-    }
+  public Client getClient() {
+    return this.client;
+  }
 
-    public void setClient(Client client) {
-        this.client = client;
-    }
+  public void setClient(Client client) {
+    this.client = client;
+  }
 
-    public String getRegistrationId() {
-        return this.registrationId;
-    }
+  public String getRegistrationId() {
+    return this.registrationId;
+  }
 
-    public void setRegistrationId(String registrationId) {
-        this.registrationId = registrationId;
-    }
+  public void setRegistrationId(String registrationId) {
+    this.registrationId = registrationId;
+  }
 
-    public Date getUpdatedOnDate() {
-        return this.updatedOnDate;
-    }
+  public Date getUpdatedOnDate() {
+    return this.updatedOnDate;
+  }
 
-    public void setUpdatedOnDate(Date updatedOnDate) {
-        this.updatedOnDate = updatedOnDate;
-    }
-
+  public void setUpdatedOnDate(Date updatedOnDate) {
+    this.updatedOnDate = updatedOnDate;
+  }
 }

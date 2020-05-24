@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class CalendarDateException extends AbstractPlatformDomainRuleException {
 
-    public CalendarDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.calendar." + postFix, defaultUserMessage, defaultUserMessageArgs);
-    }
+  public CalendarDateException(
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super("error.msg.calendar." + postFix, defaultUserMessage, defaultUserMessageArgs);
+  }
 }

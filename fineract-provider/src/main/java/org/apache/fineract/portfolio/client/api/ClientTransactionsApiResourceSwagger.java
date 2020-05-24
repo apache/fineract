@@ -28,105 +28,126 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/13/18.
  */
 final class ClientTransactionsApiResourceSwagger {
-    private ClientTransactionsApiResourceSwagger() {
-    }
+  private ClientTransactionsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetClientsClientIdTransactionsResponse")
-    public final static class GetClientsClientIdTransactionsResponse {
-        private GetClientsClientIdTransactionsResponse() {
-        }
+  @ApiModel(value = "GetClientsClientIdTransactionsResponse")
+  public static final class GetClientsClientIdTransactionsResponse {
+    private GetClientsClientIdTransactionsResponse() {}
 
-        final class GetClientsPageItems {
-            private GetClientsPageItems() {
-            }
+    final class GetClientsPageItems {
+      private GetClientsPageItems() {}
 
-            final class GetClientsClientIdTransactionsType {
-                private GetClientsClientIdTransactionsType() {
-                }
-
-                @ApiModelProperty(example = "1")
-                public Integer id;
-                @ApiModelProperty(example = "clientTransactionType.payCharge")
-                public String code;
-                @ApiModelProperty(example = "PAY_CHARGE")
-                public String value;
-            }
-
-            final class GetClientTransactionsCurrency {
-                private GetClientTransactionsCurrency() {
-                }
-
-                @ApiModelProperty(example = "USD")
-                public String code;
-                @ApiModelProperty(example = "US Dollar")
-                public String name;
-                @ApiModelProperty(example = "2")
-                public Integer decimalPlaces;
-                @ApiModelProperty(example = "$")
-                public String displaySymbol;
-                @ApiModelProperty(example = "currency.USD")
-                public String nameCode;
-                @ApiModelProperty(example = "US Dollar ($)")
-                public String displayLabel;
-            }
-
-            @ApiModelProperty(example = "226")
-            public Integer id;
-            @ApiModelProperty(example = "1")
-            public Integer officeId;
-            @ApiModelProperty(example = "Head Office")
-            public String officeName;
-            public GetClientsClientIdTransactionsType type;
-            @ApiModelProperty(example = "[2015, 9, 2]")
-            public LocalDate date;
-            public GetClientTransactionsCurrency currency;
-            @ApiModelProperty(example = "22")
-            public Double amount;
-            @ApiModelProperty(example = "[2015, 9, 2]")
-            public LocalDate submittedOnDate;
-            @ApiModelProperty(example = "false")
-            public Boolean reversed;
-        }
-
-        @ApiModelProperty(example = "20")
-        public Integer totalFilteredRecords;
-        public Set<GetClientsPageItems> pageItems;
-    }
-
-    @ApiModel(value = "GetClientsClientIdTransactionsTransactionIdResponse")
-    public final static class GetClientsClientIdTransactionsTransactionIdResponse {
-        private GetClientsClientIdTransactionsTransactionIdResponse() {
-        }
+      final class GetClientsClientIdTransactionsType {
+        private GetClientsClientIdTransactionsType() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        public GetClientsClientIdTransactionsResponse.GetClientsPageItems.GetClientsClientIdTransactionsType type;
-        @ApiModelProperty(example = "[2015, 8, 17]")
-        public LocalDate date;
-        public GetClientsClientIdTransactionsResponse.GetClientsPageItems.GetClientTransactionsCurrency currency;
-        @ApiModelProperty(example = "60.000000")
-        public BigDecimal amount;
-        @ApiModelProperty(example = "[2015, 8, 17]")
-        public LocalDate submittedOnDate;
-        @ApiModelProperty(example = "true")
-        public Boolean reversed;
+
+        @ApiModelProperty(example = "clientTransactionType.payCharge")
+        public String code;
+
+        @ApiModelProperty(example = "PAY_CHARGE")
+        public String value;
+      }
+
+      final class GetClientTransactionsCurrency {
+        private GetClientTransactionsCurrency() {}
+
+        @ApiModelProperty(example = "USD")
+        public String code;
+
+        @ApiModelProperty(example = "US Dollar")
+        public String name;
+
+        @ApiModelProperty(example = "2")
+        public Integer decimalPlaces;
+
+        @ApiModelProperty(example = "$")
+        public String displaySymbol;
+
+        @ApiModelProperty(example = "currency.USD")
+        public String nameCode;
+
+        @ApiModelProperty(example = "US Dollar ($)")
+        public String displayLabel;
+      }
+
+      @ApiModelProperty(example = "226")
+      public Integer id;
+
+      @ApiModelProperty(example = "1")
+      public Integer officeId;
+
+      @ApiModelProperty(example = "Head Office")
+      public String officeName;
+
+      public GetClientsClientIdTransactionsType type;
+
+      @ApiModelProperty(example = "[2015, 9, 2]")
+      public LocalDate date;
+
+      public GetClientTransactionsCurrency currency;
+
+      @ApiModelProperty(example = "22")
+      public Double amount;
+
+      @ApiModelProperty(example = "[2015, 9, 2]")
+      public LocalDate submittedOnDate;
+
+      @ApiModelProperty(example = "false")
+      public Boolean reversed;
     }
 
+    @ApiModelProperty(example = "20")
+    public Integer totalFilteredRecords;
 
-    @ApiModel(value = "PostClientsClientIdTransactionsTransactionIdResponse")
-    public final static class PostClientsClientIdTransactionsTransactionIdResponse {
-        private PostClientsClientIdTransactionsTransactionIdResponse() {
-        }
+    public Set<GetClientsPageItems> pageItems;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "189")
-        public Integer clientId;
-        @ApiModelProperty(example = "222")
-        public Integer resourceId;
-    }
+  @ApiModel(value = "GetClientsClientIdTransactionsTransactionIdResponse")
+  public static final class GetClientsClientIdTransactionsTransactionIdResponse {
+    private GetClientsClientIdTransactionsTransactionIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer id;
+
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+
+    public GetClientsClientIdTransactionsResponse.GetClientsPageItems
+            .GetClientsClientIdTransactionsType
+        type;
+
+    @ApiModelProperty(example = "[2015, 8, 17]")
+    public LocalDate date;
+
+    public GetClientsClientIdTransactionsResponse.GetClientsPageItems.GetClientTransactionsCurrency
+        currency;
+
+    @ApiModelProperty(example = "60.000000")
+    public BigDecimal amount;
+
+    @ApiModelProperty(example = "[2015, 8, 17]")
+    public LocalDate submittedOnDate;
+
+    @ApiModelProperty(example = "true")
+    public Boolean reversed;
+  }
+
+  @ApiModel(value = "PostClientsClientIdTransactionsTransactionIdResponse")
+  public static final class PostClientsClientIdTransactionsTransactionIdResponse {
+    private PostClientsClientIdTransactionsTransactionIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
+
+    @ApiModelProperty(example = "189")
+    public Integer clientId;
+
+    @ApiModelProperty(example = "222")
+    public Integer resourceId;
+  }
 }

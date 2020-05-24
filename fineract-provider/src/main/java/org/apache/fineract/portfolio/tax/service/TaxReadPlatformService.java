@@ -24,20 +24,19 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 
 public interface TaxReadPlatformService {
 
-    public TaxComponentData retrieveTaxComponentData(final Long id);
+  public TaxComponentData retrieveTaxComponentData(final Long id);
 
-    public TaxComponentData retrieveTaxComponentTemplate();
+  public TaxComponentData retrieveTaxComponentTemplate();
 
-    public TaxGroupData retrieveTaxGroupData(final Long id);
+  public TaxGroupData retrieveTaxGroupData(final Long id);
 
-    public TaxGroupData retrieveTaxGroupWithTemplate(final Long id);
+  public TaxGroupData retrieveTaxGroupWithTemplate(final Long id);
 
-    public TaxGroupData retrieveTaxGroupTemplate();
+  public TaxGroupData retrieveTaxGroupTemplate();
 
-    Collection<TaxComponentData> retrieveAllTaxComponents();
+  Collection<TaxComponentData> retrieveAllTaxComponents();
 
-    Collection<TaxGroupData> retrieveAllTaxGroups();
+  Collection<TaxGroupData> retrieveAllTaxGroups();
 
-    Collection<TaxGroupData> retrieveTaxGroupsForLookUp();
-
+  Collection<TaxGroupData> retrieveTaxGroupsForLookUp();
 }

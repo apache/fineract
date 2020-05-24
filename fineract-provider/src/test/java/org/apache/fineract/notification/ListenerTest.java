@@ -30,21 +30,21 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ListenerTest {
 
-    private Listener listener;
-    private Session session;
-    private TextMessage textMessageMock;
+  private Listener listener;
+  private Session session;
+  private TextMessage textMessageMock;
 
-    @Before
-    public void setUp() {
-        listener = new Listener();
-        session = Mockito.mock(Session.class);
-        textMessageMock = Mockito.mock(TextMessage.class);
-    }
+  @Before
+  public void setUp() {
+    listener = new Listener();
+    session = Mockito.mock(Session.class);
+    textMessageMock = Mockito.mock(TextMessage.class);
+  }
 
-    @Test
-    public void testListener() throws JMSException {
-        Mockito.when(textMessageMock.getText()).thenReturn("content");
-        listener.onMessage(textMessageMock, session);
-        Mockito.verify(textMessageMock).getText();
-    }
+  @Test
+  public void testListener() throws JMSException {
+    Mockito.when(textMessageMock.getText()).thenReturn("content");
+    listener.onMessage(textMessageMock, session);
+    Mockito.verify(textMessageMock).getText();
+  }
 }

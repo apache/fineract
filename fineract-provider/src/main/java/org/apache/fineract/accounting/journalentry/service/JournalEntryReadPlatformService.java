@@ -27,12 +27,21 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 
 public interface JournalEntryReadPlatformService {
 
-    JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId, JournalEntryAssociationParametersData associationParametersData);
+  JournalEntryData retrieveGLJournalEntryById(
+      long glJournalEntryId, JournalEntryAssociationParametersData associationParametersData);
 
-    Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries, Date fromDate,
-            Date toDate, String transactionId, Integer entityType, JournalEntryAssociationParametersData associationParametersData);
+  Page<JournalEntryData> retrieveAll(
+      SearchParameters searchParameters,
+      Long glAccountId,
+      Boolean onlyManualEntries,
+      Date fromDate,
+      Date toDate,
+      String transactionId,
+      Integer entityType,
+      JournalEntryAssociationParametersData associationParametersData);
 
-    OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId, String currencyCode);
+  OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId, String currencyCode);
 
-    Page<JournalEntryData> retrieveJournalEntriesByEntityId(String transactionId, Long entityId, Integer entityType) ;
+  Page<JournalEntryData> retrieveJournalEntriesByEntityId(
+      String transactionId, Long entityId, Integer entityType);
 }

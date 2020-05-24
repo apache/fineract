@@ -31,19 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PRODUCTMIX", action = "CREATE")
 public class CreateProductMixCommandHandler implements NewCommandSourceHandler {
 
-    private final ProductMixWritePlatformService productMixWritePlatformService;
+  private final ProductMixWritePlatformService productMixWritePlatformService;
 
-    @Autowired
-    public CreateProductMixCommandHandler(final ProductMixWritePlatformService productMixWritePlatformService) {
+  @Autowired
+  public CreateProductMixCommandHandler(
+      final ProductMixWritePlatformService productMixWritePlatformService) {
 
-        this.productMixWritePlatformService = productMixWritePlatformService;
-    }
+    this.productMixWritePlatformService = productMixWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.productMixWritePlatformService.createProductMix(command.getProductId(), command);
-    }
-
+    return this.productMixWritePlatformService.createProductMix(command.getProductId(), command);
+  }
 }

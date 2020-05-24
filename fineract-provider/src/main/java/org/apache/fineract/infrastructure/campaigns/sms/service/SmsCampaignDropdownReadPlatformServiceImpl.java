@@ -43,72 +43,80 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDropdownReadPlatformService {
+public class SmsCampaignDropdownReadPlatformServiceImpl
+    implements SmsCampaignDropdownReadPlatformService {
 
-    private final RestTemplate restTemplate;
+  private final RestTemplate restTemplate;
 
-    private final SmsConfigUtils smsConfigUtils ;
+  private final SmsConfigUtils smsConfigUtils;
 
-    @Autowired
-    public SmsCampaignDropdownReadPlatformServiceImpl(final SmsConfigUtils smsConfigUtils) {
-        this.restTemplate = new RestTemplate();
-        this.smsConfigUtils = smsConfigUtils ;
+  @Autowired
+  public SmsCampaignDropdownReadPlatformServiceImpl(final SmsConfigUtils smsConfigUtils) {
+    this.restTemplate = new RestTemplate();
+    this.smsConfigUtils = smsConfigUtils;
+  }
+
+  @Override
+  public Collection<EnumOptionData> retrieveCampaignTriggerTypes() {
+    final List<EnumOptionData> triggerTypeCodeValues =
+        Arrays.asList( //
+            SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.DIRECT), //
+            SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.SCHEDULE), //
+            SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.TRIGGERED) //
+            );
+
+    return triggerTypeCodeValues;
+  }
+
+  @Override
+  public Collection<SmsProviderData> retrieveSmsProviders() {
+    Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
+    String hostName = "";
+    try {
+      Map<String, Object> hostConfig =
+          this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
+      URI uri = (URI) hostConfig.get("uri");
+      hostName = uri.getHost();
+      HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
+      ResponseEntity<Collection<SmsProviderData>> responseOne =
+          restTemplate.exchange(
+              uri,
+              HttpMethod.GET,
+              entity,
+              new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
+      smsProviderOptions = responseOne.getBody();
+      if (!responseOne.getStatusCode().equals(HttpStatus.OK)) { }
+    } catch (Exception e) {
     }
+    return smsProviderOptions;
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveCampaignTriggerTypes() {
-        final List<EnumOptionData> triggerTypeCodeValues = Arrays.asList( //
-                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.DIRECT), //
-                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.SCHEDULE), //
-                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.TRIGGERED) //
-                );
+  @Override
+  public Collection<EnumOptionData> retrieveCampaignTypes() {
+    final List<EnumOptionData> campaignTypeCodeValues =
+        Arrays.asList( //
+            SmsCampaignEnumerations.smscampaignType(CampaignType.SMS) //
+            );
+    return campaignTypeCodeValues;
+  }
 
-        return triggerTypeCodeValues;
-    }
+  @Override
+  public Collection<EnumOptionData> retrieveMonths() {
+    Collection<EnumOptionData> monthsList = SmsCampaignEnumerations.calendarMonthType();
+    return monthsList;
+  }
 
-    @Override
-    public Collection<SmsProviderData> retrieveSmsProviders() {
-        Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
-        String hostName = "" ;
-        try {
-            Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
-            URI uri = (URI) hostConfig.get("uri");
-            hostName = uri.getHost() ;
-            HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
-            ResponseEntity<Collection<SmsProviderData>> responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
-                    new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
-            smsProviderOptions = responseOne.getBody();
-            if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
-            }
-        } catch (Exception e) {
-        }
-        return smsProviderOptions;
-    }
+  @Override
+  public Collection<EnumOptionData> retrieveWeeks() {
+    Collection<EnumOptionData> weeksList =
+        CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.values());
+    return weeksList;
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveCampaignTypes() {
-        final List<EnumOptionData> campaignTypeCodeValues = Arrays.asList( //
-                SmsCampaignEnumerations.smscampaignType(CampaignType.SMS)//
-                );
-        return campaignTypeCodeValues;
-    }
-
-    @Override
-    public Collection<EnumOptionData> retrieveMonths() {
-        Collection<EnumOptionData> monthsList = SmsCampaignEnumerations.calendarMonthType();
-        return monthsList;
-    }
-
-    @Override
-    public Collection<EnumOptionData> retrieveWeeks() {
-        Collection<EnumOptionData> weeksList = CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.values());
-        return weeksList;
-    }
-
-    @Override
-    public Collection<EnumOptionData> retrivePeriodFrequencyTypes() {
-        Collection<EnumOptionData> periodFrequencyTypes = SmsCampaignEnumerations
-                .calendarPeriodFrequencyTypes(PeriodFrequencyType.values());
-        return periodFrequencyTypes;
-    }
+  @Override
+  public Collection<EnumOptionData> retrivePeriodFrequencyTypes() {
+    Collection<EnumOptionData> periodFrequencyTypes =
+        SmsCampaignEnumerations.calendarPeriodFrequencyTypes(PeriodFrequencyType.values());
+    return periodFrequencyTypes;
+  }
 }

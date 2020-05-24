@@ -20,6 +20,5 @@ package org.apache.fineract.useradministration.api;
 
 public class AppUserApiConstant {
 
-    public static final int numberOfPreviousPasswords = 3;
-
+  public static final int numberOfPreviousPasswords = 3;
 }

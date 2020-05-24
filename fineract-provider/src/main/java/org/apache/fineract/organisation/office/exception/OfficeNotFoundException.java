@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class OfficeNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public OfficeNotFoundException(final Long id) {
-        super("error.msg.office.id.invalid", "Office with identifier " + id + " does not exist", id);
-    }
+  public OfficeNotFoundException(final Long id) {
+    super("error.msg.office.id.invalid", "Office with identifier " + id + " does not exist", id);
+  }
 }

@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 
 public class PasswordPreviouslyUsedException extends PlatformApiDataValidationException {
 
-    public PasswordPreviouslyUsedException() {
-        super("error.msg.password.already.used", "The submitted password has already been used in the past",null);
-    }
+  public PasswordPreviouslyUsedException() {
+    super(
+        "error.msg.password.already.used",
+        "The submitted password has already been used in the past",
+        null);
+  }
 }
-

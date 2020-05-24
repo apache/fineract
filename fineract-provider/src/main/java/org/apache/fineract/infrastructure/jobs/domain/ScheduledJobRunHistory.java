@@ -32,47 +32,51 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "job_run_history")
 public class ScheduledJobRunHistory extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "job_id")
-    private ScheduledJobDetail scheduledJobDetail;
+  @ManyToOne
+  @JoinColumn(name = "job_id")
+  private ScheduledJobDetail scheduledJobDetail;
 
-    @Column(name = "version")
-    private Long version;
+  @Column(name = "version")
+  private Long version;
 
-    @Column(name = "start_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startTime;
+  @Column(name = "start_time")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date startTime;
 
-    @Column(name = "end_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date endTime;
+  @Column(name = "end_time")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date endTime;
 
-    @Column(name = "status")
-    private String status;
+  @Column(name = "status")
+  private String status;
 
-    @Column(name = "error_message")
-    private String errorMessage;
+  @Column(name = "error_message")
+  private String errorMessage;
 
-    @Column(name = "trigger_type")
-    private String triggerType;
+  @Column(name = "trigger_type")
+  private String triggerType;
 
-    @Column(name = "error_log")
-    private String errorLog;
+  @Column(name = "error_log")
+  private String errorLog;
 
-    public ScheduledJobRunHistory() {
+  public ScheduledJobRunHistory() {}
 
-    }
-
-    public ScheduledJobRunHistory(final ScheduledJobDetail scheduledJobDetail, final Long version, final Date startTime,
-            final Date endTime, final String status, final String errorMessage, final String triggerType, final String errorLog) {
-        this.scheduledJobDetail = scheduledJobDetail;
-        this.version = version;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.status = status;
-        this.errorMessage = errorMessage;
-        this.triggerType = triggerType;
-        this.errorLog = errorLog;
-    }
-
+  public ScheduledJobRunHistory(
+      final ScheduledJobDetail scheduledJobDetail,
+      final Long version,
+      final Date startTime,
+      final Date endTime,
+      final String status,
+      final String errorMessage,
+      final String triggerType,
+      final String errorLog) {
+    this.scheduledJobDetail = scheduledJobDetail;
+    this.version = version;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.status = status;
+    this.errorMessage = errorMessage;
+    this.triggerType = triggerType;
+    this.errorLog = errorLog;
+  }
 }

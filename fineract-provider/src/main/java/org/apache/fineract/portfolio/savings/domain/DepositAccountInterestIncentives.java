@@ -30,34 +30,34 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives
 @Table(name = "m_savings_interest_incentives")
 public class DepositAccountInterestIncentives extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)
-    private DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs;
+  @ManyToOne
+  @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)
+  private DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs;
 
-    @Embedded
-    private InterestIncentivesFields interestIncentivesFields;
+  @Embedded private InterestIncentivesFields interestIncentivesFields;
 
-    protected DepositAccountInterestIncentives() {
+  protected DepositAccountInterestIncentives() {}
 
-    }
+  private DepositAccountInterestIncentives(
+      final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
+      final InterestIncentivesFields interestIncentivesFields) {
+    this.depositAccountInterestRateChartSlabs = depositAccountInterestRateChartSlabs;
+    this.interestIncentivesFields = interestIncentivesFields;
+  }
 
-    private DepositAccountInterestIncentives(final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
-            final InterestIncentivesFields interestIncentivesFields) {
-        this.depositAccountInterestRateChartSlabs = depositAccountInterestRateChartSlabs;
-        this.interestIncentivesFields = interestIncentivesFields;
-    }
+  public static DepositAccountInterestIncentives from(
+      final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
+      final InterestIncentivesFields interestIncentivesFields) {
+    return new DepositAccountInterestIncentives(
+        depositAccountInterestRateChartSlabs, interestIncentivesFields);
+  }
 
-    public static DepositAccountInterestIncentives from(final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
-            final InterestIncentivesFields interestIncentivesFields) {
-        return new DepositAccountInterestIncentives(depositAccountInterestRateChartSlabs, interestIncentivesFields);
-    }
+  public void updateDepositAccountInterestRateChartSlabs(
+      DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs) {
+    this.depositAccountInterestRateChartSlabs = depositAccountInterestRateChartSlabs;
+  }
 
-    public void updateDepositAccountInterestRateChartSlabs(DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs) {
-        this.depositAccountInterestRateChartSlabs = depositAccountInterestRateChartSlabs;
-    }
-
-    public InterestIncentivesFields interestIncentivesFields() {
-        return this.interestIncentivesFields;
-    }
-
+  public InterestIncentivesFields interestIncentivesFields() {
+    return this.interestIncentivesFields;
+  }
 }

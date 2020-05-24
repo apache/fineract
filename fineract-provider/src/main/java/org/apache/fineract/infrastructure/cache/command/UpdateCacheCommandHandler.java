@@ -47,40 +47,53 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CACHE", action = "UPDATE")
 public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
 
-    private final CacheWritePlatformService cacheService;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants
-            .cacheTypeParameter));
+  private final CacheWritePlatformService cacheService;
+  private static final Set<String> REQUEST_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList(CacheApiConstants.cacheTypeParameter));
 
-    @Autowired
-    public UpdateCacheCommandHandler(final CacheWritePlatformService cacheService) {
-        this.cacheService = cacheService;
+  @Autowired
+  public UpdateCacheCommandHandler(final CacheWritePlatformService cacheService) {
+    this.cacheService = cacheService;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+
+    final String json = command.json();
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    command.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
 
-        final String json = command.json();
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(CacheApiConstants.RESOURCE_NAME.toLowerCase());
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final int cacheTypeEnum =
+        command.integerValueSansLocaleOfParameterNamed(CacheApiConstants.cacheTypeParameter);
+    baseDataValidator
+        .reset()
+        .parameter(CacheApiConstants.cacheTypeParameter)
+        .value(Integer.valueOf(cacheTypeEnum))
+        .notNull()
+        .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3));
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        command.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(CacheApiConstants.RESOURCE_NAME.toLowerCase());
-
-        final int cacheTypeEnum = command.integerValueSansLocaleOfParameterNamed(CacheApiConstants.cacheTypeParameter);
-        baseDataValidator.reset().parameter(CacheApiConstants.cacheTypeParameter).value(Integer.valueOf(cacheTypeEnum)).notNull()
-                .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3));
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-
-        final CacheType cacheType = CacheType.fromInt(cacheTypeEnum);
-
-        final Map<String, Object> changes = this.cacheService.switchToCache(cacheType);
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
+
+    final CacheType cacheType = CacheType.fromInt(cacheTypeEnum);
+
+    final Map<String, Object> changes = this.cacheService.switchToCache(cacheType);
+
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .with(changes)
+        .build();
+  }
 }

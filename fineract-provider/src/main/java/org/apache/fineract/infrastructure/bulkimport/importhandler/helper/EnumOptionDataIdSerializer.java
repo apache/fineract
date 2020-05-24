@@ -26,8 +26,9 @@ import java.lang.reflect.Type;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class EnumOptionDataIdSerializer implements JsonSerializer<EnumOptionData> {
-    @Override
-    public JsonElement serialize(EnumOptionData src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.getId());
-    }
+  @Override
+  public JsonElement serialize(
+      EnumOptionData src, Type typeOfSrc, JsonSerializationContext context) {
+    return new JsonPrimitive(src.getId());
+  }
 }

@@ -31,62 +31,65 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
+  private final JdbcTemplate jdbcTemplate;
+  private final DataSource dataSource;
 
-    @Autowired
-    ReadLikelihoodServiceImpl(final RoutingDataSource dataSource) {
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+  @Autowired
+  ReadLikelihoodServiceImpl(final RoutingDataSource dataSource) {
+    this.dataSource = dataSource;
+    this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+  }
 
+  @Override
+  public List<LikelihoodData> retrieveAll(final String ppiName) {
+    final SqlRowSet likelihood = this._getLikelihood(ppiName);
+
+    List<LikelihoodData> likelihoodDatas = new ArrayList<>();
+
+    while (likelihood.next()) {
+      likelihoodDatas.add(
+          new LikelihoodData(
+              likelihood.getLong("id"),
+              likelihood.getString("name"),
+              likelihood.getString("code"),
+              likelihood.getLong("enabled")));
     }
 
-    @Override
-    public List<LikelihoodData> retrieveAll(final String ppiName) {
-        final SqlRowSet likelihood = this._getLikelihood(ppiName);
+    return likelihoodDatas;
+  }
 
-        List<LikelihoodData> likelihoodDatas = new ArrayList<>();
+  private SqlRowSet _getLikelihood(final String ppiName) {
+    String sql =
+        "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled "
+            + " FROM ppi_poverty_line pl "
+            + " JOIN ppi_likelihoods_ppi lkp on lkp.id = pl.likelihood_ppi_id "
+            + " JOIN ppi_likelihoods lkh on lkp.likelihood_id = lkh.id "
+            + " WHERE lkp.ppi_name = ? "
+            + " GROUP BY pl.likelihood_ppi_id ";
 
-        while (likelihood.next()) {
-            likelihoodDatas.add(new LikelihoodData(likelihood.getLong("id"), likelihood.getString("name"), likelihood.getString("code"),
-                    likelihood.getLong("enabled")
+    return this.jdbcTemplate.queryForRowSet(sql, new Object[] {ppiName});
+  }
 
-            ));
+  @Override
+  public LikelihoodData retrieve(final Long likelihoodId) {
+    final SqlRowSet likelihood = this._getLikelihood(likelihoodId);
 
-        }
+    likelihood.first();
 
-        return likelihoodDatas;
-    }
+    return new LikelihoodData(
+        likelihood.getLong("id"),
+        likelihood.getString("name"),
+        likelihood.getString("code"),
+        likelihood.getLong("enabled"));
+  }
 
-    private SqlRowSet _getLikelihood(final String ppiName) {
-        String sql = "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled " + " FROM ppi_poverty_line pl "
-                + " JOIN ppi_likelihoods_ppi lkp on lkp.id = pl.likelihood_ppi_id "
-                + " JOIN ppi_likelihoods lkh on lkp.likelihood_id = lkh.id " + " WHERE lkp.ppi_name = ? "
-                + " GROUP BY pl.likelihood_ppi_id ";
+  private SqlRowSet _getLikelihood(final Long likelihoodId) {
+    String sql =
+        "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled "
+            + " FROM ppi_likelihoods lkh "
+            + " JOIN ppi_likelihoods_ppi lkp on lkp.likelihood_id = lkh.id "
+            + " WHERE lkp.id = ? ";
 
-        return this.jdbcTemplate.queryForRowSet(sql, new Object[] { ppiName });
-
-    }
-
-    @Override
-    public LikelihoodData retrieve(final Long likelihoodId) {
-        final SqlRowSet likelihood = this._getLikelihood(likelihoodId);
-
-        likelihood.first();
-
-        return new LikelihoodData(likelihood.getLong("id"), likelihood.getString("name"), likelihood.getString("code"),
-                likelihood.getLong("enabled")
-
-        );
-
-    }
-
-    private SqlRowSet _getLikelihood(final Long likelihoodId) {
-        String sql = "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled " + " FROM ppi_likelihoods lkh "
-                + " JOIN ppi_likelihoods_ppi lkp on lkp.likelihood_id = lkh.id " + " WHERE lkp.id = ? ";
-
-        return this.jdbcTemplate.queryForRowSet(sql, new Object[] { likelihoodId });
-
-    }
-
+    return this.jdbcTemplate.queryForRowSet(sql, new Object[] {likelihoodId});
+  }
 }

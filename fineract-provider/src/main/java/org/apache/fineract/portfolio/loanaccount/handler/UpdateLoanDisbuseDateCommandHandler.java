@@ -29,17 +29,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UpdateLoanDisbuseDateCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateLoanDisbuseDateCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateLoanDisbuseDateCommandHandler(final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateDisbursementDateAndAmountForTranche(command.getLoanId(), command.entityId(), command);
-    }
+    return this.writePlatformService.updateDisbursementDateAndAmountForTranche(
+        command.getLoanId(), command.entityId(), command);
+  }
 }

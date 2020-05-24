@@ -36,30 +36,32 @@ import org.mockito.Mockito;
  */
 public class BatchBuilder {
 
-    // Verify a non-empty response by BatchApiResource.
-    @Test
-    public void batchApiTest() {
+  // Verify a non-empty response by BatchApiResource.
+  @Test
+  public void batchApiTest() {
 
-        // Mock a BatchRequest objects
-        final BatchRequest batchTest = Mockito.mock(BatchRequest.class);
+    // Mock a BatchRequest objects
+    final BatchRequest batchTest = Mockito.mock(BatchRequest.class);
 
-        // Mock a BatchApiService object
-        final BatchApiService serviceTest = Mockito.mock(BatchApiService.class);
+    // Mock a BatchApiService object
+    final BatchApiService serviceTest = Mockito.mock(BatchApiService.class);
 
-        // Mock a UriInfo object
-        final UriInfo uriInfo = Mockito.mock(UriInfo.class);
+    // Mock a UriInfo object
+    final UriInfo uriInfo = Mockito.mock(UriInfo.class);
 
-        final List<BatchRequest> requestList = new ArrayList<>();
-        requestList.add(batchTest);
+    final List<BatchRequest> requestList = new ArrayList<>();
+    requestList.add(batchTest);
 
-        // Call the BatchApiService using mocked objects
-        final List<BatchResponse> result = serviceTest.handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
+    // Call the BatchApiService using mocked objects
+    final List<BatchResponse> result =
+        serviceTest.handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
 
-        // Verifies whether handleBatchRequests() function of BatchApiService
-        // was called
-        Mockito.verify(serviceTest).handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
+    // Verifies whether handleBatchRequests() function of BatchApiService
+    // was called
+    Mockito.verify(serviceTest)
+        .handleBatchRequestsWithoutEnclosingTransaction(requestList, uriInfo);
 
-        // Verifies a non-empty response by the BatchApiResource
-        Assert.assertNotNull(result);
-    }
+    // Verifies a non-empty response by the BatchApiResource
+    Assert.assertNotNull(result);
+  }
 }

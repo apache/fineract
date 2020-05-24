@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class ChargeMustBePenaltyException extends AbstractPlatformDomainRuleException {
 
-    public ChargeMustBePenaltyException(final String name) {
-        super("error.msg.charge.must.be.penalty", "Charge '" + name + "' is invalid.", name, name);
-    }
+  public ChargeMustBePenaltyException(final String name) {
+    super("error.msg.charge.must.be.penalty", "Charge '" + name + "' is invalid.", name, name);
+  }
 }

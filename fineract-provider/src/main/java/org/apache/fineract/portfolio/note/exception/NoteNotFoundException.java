@@ -25,13 +25,20 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class NoteNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public NoteNotFoundException(final Long id) {
-        super("error.msg.note.id.invalid", "Note with identifier " + id + " does not exist", id);
-    }
+  public NoteNotFoundException(final Long id) {
+    super("error.msg.note.id.invalid", "Note with identifier " + id + " does not exist", id);
+  }
 
-    public NoteNotFoundException(final Long id, final Long resourceId, final String resource) {
-        super("error.msg." + resource + ".note.id.invalid", "Note with identifier " + id + " does not exist for " + resource
-                + " with identifier " + resourceId, id, resourceId);
-    }
-
+  public NoteNotFoundException(final Long id, final Long resourceId, final String resource) {
+    super(
+        "error.msg." + resource + ".note.id.invalid",
+        "Note with identifier "
+            + id
+            + " does not exist for "
+            + resource
+            + " with identifier "
+            + resourceId,
+        id,
+        resourceId);
+  }
 }

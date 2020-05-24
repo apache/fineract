@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface WorkingDaysWritePlatformService {
 
-    CommandProcessingResult updateWorkingDays(JsonCommand command);
+  CommandProcessingResult updateWorkingDays(JsonCommand command);
 }

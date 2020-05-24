@@ -54,77 +54,78 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class TwoFactorApiResource {
 
+  private final ToApiJsonSerializer<OTPMetadata> otpRequestSerializer;
+  private final ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer;
+  private final ToApiJsonSerializer<AccessTokenData> accessTokenSerializer;
+  private final DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
 
-    private final ToApiJsonSerializer<OTPMetadata> otpRequestSerializer;
-    private final ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer;
-    private final ToApiJsonSerializer<AccessTokenData> accessTokenSerializer;
-    private final DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
+  private final PlatformSecurityContext context;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final TwoFactorService twoFactorService;
 
-    private final PlatformSecurityContext context;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final TwoFactorService twoFactorService;
+  @Autowired
+  public TwoFactorApiResource(
+      ToApiJsonSerializer<OTPMetadata> otpRequestSerializer,
+      ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer,
+      ToApiJsonSerializer<AccessTokenData> accessTokenSerializer,
+      DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
+      PlatformSecurityContext context,
+      PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+      TwoFactorService twoFactorService) {
+    this.otpRequestSerializer = otpRequestSerializer;
+    this.otpDeliveryMethodSerializer = otpDeliveryMethodSerializer;
+    this.accessTokenSerializer = accessTokenSerializer;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.context = context;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.twoFactorService = twoFactorService;
+  }
 
+  @GET
+  @Produces({MediaType.APPLICATION_JSON})
+  public String getOTPDeliveryMethods(@Context final UriInfo uriInfo) {
+    AppUser user = context.authenticatedUser();
 
+    List<OTPDeliveryMethod> otpDeliveryMethods = twoFactorService.getDeliveryMethodsForUser(user);
+    return this.otpDeliveryMethodSerializer.serialize(otpDeliveryMethods);
+  }
 
-    @Autowired
-    public TwoFactorApiResource(ToApiJsonSerializer<OTPMetadata> otpRequestSerializer,
-                                ToApiJsonSerializer<OTPDeliveryMethod> otpDeliveryMethodSerializer,
-                                ToApiJsonSerializer<AccessTokenData> accessTokenSerializer,
-                                DefaultToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
-                                PlatformSecurityContext context,
-                                PortfolioCommandSourceWritePlatformService
-                                            commandsSourceWritePlatformService,
-                                TwoFactorService twoFactorService) {
-        this.otpRequestSerializer = otpRequestSerializer;
-        this.otpDeliveryMethodSerializer = otpDeliveryMethodSerializer;
-        this.accessTokenSerializer = accessTokenSerializer;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.context = context;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.twoFactorService = twoFactorService;
-    }
+  @POST
+  @Produces({MediaType.APPLICATION_JSON})
+  public String requestToken(
+      @QueryParam("deliveryMethod") final String deliveryMethod,
+      @QueryParam("extendedToken") @DefaultValue("false") boolean extendedAccessToken,
+      @Context final UriInfo uriInfo) {
+    final AppUser user = context.authenticatedUser();
 
+    final OTPRequest request =
+        twoFactorService.createNewOTPToken(user, deliveryMethod, extendedAccessToken);
+    return this.otpRequestSerializer.serialize(request.getMetadata());
+  }
 
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getOTPDeliveryMethods(@Context final UriInfo uriInfo) {
-        AppUser user = context.authenticatedUser();
+  @Path("validate")
+  @POST
+  @Produces({MediaType.APPLICATION_JSON})
+  public String validate(@QueryParam("token") final String token) {
+    final AppUser user = context.authenticatedUser();
 
-        List<OTPDeliveryMethod> otpDeliveryMethods = twoFactorService.getDeliveryMethodsForUser(user);
-        return this.otpDeliveryMethodSerializer.serialize(otpDeliveryMethods);
-    }
+    TFAccessToken accessToken = twoFactorService.createAccessTokenFromOTP(user, token);
 
-    @POST
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String requestToken(@QueryParam("deliveryMethod") final String deliveryMethod,
-                               @QueryParam("extendedToken") @DefaultValue("false") boolean extendedAccessToken,
-                               @Context final UriInfo uriInfo) {
-        final AppUser user = context.authenticatedUser();
+    return accessTokenSerializer.serialize(accessToken.toTokenData());
+  }
 
-        final OTPRequest request = twoFactorService.createNewOTPToken(user, deliveryMethod, extendedAccessToken);
-        return this.otpRequestSerializer.serialize(request.getMetadata());
-    }
+  @Path("invalidate")
+  @POST
+  @Produces({MediaType.APPLICATION_JSON})
+  public String updateConfiguration(final String apiRequestBodyAsJson) {
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder()
+            .invalidateTwoFactorAccessToken()
+            .withJson(apiRequestBodyAsJson)
+            .build();
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-    @Path("validate")
-    @POST
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String validate(@QueryParam("token") final String token) {
-        final AppUser user = context.authenticatedUser();
-
-        TFAccessToken accessToken = twoFactorService.createAccessTokenFromOTP(user, token);
-
-        return accessTokenSerializer.serialize(accessToken.toTokenData());
-    }
-
-    @Path("invalidate")
-    @POST
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateConfiguration(final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder()
-                .invalidateTwoFactorAccessToken().withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.
-                logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.service;
 
 import java.util.Collection;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 
-public interface ClientFamilyMembersReadPlatformService
-{
+public interface ClientFamilyMembersReadPlatformService {
 
-    Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId);
+  Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId);
 
-    ClientFamilyMembersData getClientFamilyMember(long id);
+  ClientFamilyMembersData getClientFamilyMember(long id);
 
-    ClientFamilyMembersData retrieveTemplate();
+  ClientFamilyMembersData retrieveTemplate();
 }

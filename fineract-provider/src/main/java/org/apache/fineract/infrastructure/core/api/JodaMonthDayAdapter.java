@@ -32,15 +32,16 @@ import org.joda.time.MonthDay;
  */
 public class JodaMonthDayAdapter implements JsonSerializer<MonthDay> {
 
-    @Override
-    @SuppressWarnings("unused")
-    public JsonElement serialize(final MonthDay src, final Type typeOfSrc, final JsonSerializationContext context) {
-        JsonArray array = null;
-        if (src != null) {
-            array = new JsonArray();
-            array.add(new JsonPrimitive(src.getMonthOfYear()));
-            array.add(new JsonPrimitive(src.getDayOfMonth()));
-        }
-        return array;
+  @Override
+  @SuppressWarnings("unused")
+  public JsonElement serialize(
+      final MonthDay src, final Type typeOfSrc, final JsonSerializationContext context) {
+    JsonArray array = null;
+    if (src != null) {
+      array = new JsonArray();
+      array.add(new JsonPrimitive(src.getMonthOfYear()));
+      array.add(new JsonPrimitive(src.getDayOfMonth()));
     }
+    return array;
+  }
 }

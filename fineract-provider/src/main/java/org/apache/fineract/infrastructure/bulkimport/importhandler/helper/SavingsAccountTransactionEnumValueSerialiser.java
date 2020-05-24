@@ -25,10 +25,12 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 
-public class SavingsAccountTransactionEnumValueSerialiser implements JsonSerializer<SavingsAccountTransactionEnumData> {
+public class SavingsAccountTransactionEnumValueSerialiser
+    implements JsonSerializer<SavingsAccountTransactionEnumData> {
 
-    @Override
-    public JsonElement serialize(SavingsAccountTransactionEnumData src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.getValue());
-    }
+  @Override
+  public JsonElement serialize(
+      SavingsAccountTransactionEnumData src, Type typeOfSrc, JsonSerializationContext context) {
+    return new JsonPrimitive(src.getValue());
+  }
 }

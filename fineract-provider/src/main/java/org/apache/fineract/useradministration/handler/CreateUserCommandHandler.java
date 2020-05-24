@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "USER", action = "CREATE")
 public class CreateUserCommandHandler implements NewCommandSourceHandler {
 
-    private final AppUserWritePlatformService writePlatformService;
+  private final AppUserWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateUserCommandHandler(final AppUserWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateUserCommandHandler(final AppUserWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createUser(command);
-    }
+    return this.writePlatformService.createUser(command);
+  }
 }

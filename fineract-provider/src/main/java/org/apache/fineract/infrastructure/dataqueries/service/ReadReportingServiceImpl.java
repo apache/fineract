@@ -67,479 +67,583 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReadReportingServiceImpl implements ReadReportingService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
-    private final static String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
+  private static final Logger logger = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
+  private static final String REPORT_NAME_REGEX_PATTERN =
+      "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
-    private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
-    private final PlatformSecurityContext context;
-    private final GenericDataService genericDataService;
-    private final ReportingProcessServiceProvider reportingProcessServiceProvider;
-    private final ColumnValidator columnValidator;
+  private final JdbcTemplate jdbcTemplate;
+  private final DataSource dataSource;
+  private final PlatformSecurityContext context;
+  private final GenericDataService genericDataService;
+  private final ReportingProcessServiceProvider reportingProcessServiceProvider;
+  private final ColumnValidator columnValidator;
 
-    @Autowired
-    public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final GenericDataService genericDataService, final ReportingProcessServiceProvider reportingProcessServiceProvider,
-            final ColumnValidator columnValidator) {
+  @Autowired
+  public ReadReportingServiceImpl(
+      final PlatformSecurityContext context,
+      final RoutingDataSource dataSource,
+      final GenericDataService genericDataService,
+      final ReportingProcessServiceProvider reportingProcessServiceProvider,
+      final ColumnValidator columnValidator) {
 
-        this.context = context;
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-        this.genericDataService = genericDataService;
-        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
-        this.columnValidator = columnValidator;
-    }
+    this.context = context;
+    this.dataSource = dataSource;
+    this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+    this.genericDataService = genericDataService;
+    this.reportingProcessServiceProvider = reportingProcessServiceProvider;
+    this.columnValidator = columnValidator;
+  }
 
-    @Override
-    public StreamingOutput retrieveReportCSV(final String name, final String type,
-            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+  @Override
+  public StreamingOutput retrieveReportCSV(
+      final String name,
+      final String type,
+      final Map<String, String> queryParams,
+      final boolean isSelfServiceUserReport) {
 
-        return new StreamingOutput() {
+    return new StreamingOutput() {
 
-            @Override
-            public void write(final OutputStream out) {
-                try {
-
-                    final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
-                    final StringBuilder sb = generateCsvFileBuffer(result);
-
-                    final InputStream in = new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
-
-                    final byte[] outputByte = new byte[4096];
-                    Integer readLen = in.read(outputByte, 0, 4096);
-
-                    while (readLen != -1) {
-                        out.write(outputByte, 0, readLen);
-                        readLen = in.read(outputByte, 0, 4096);
-                    }
-                    // in.close();
-                    // out.flush();
-                    // out.close();
-                } catch (final Exception e) {
-                    throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
-                }
-            }
-        };
-
-    }
-
-    private StringBuilder generateCsvFileBuffer(final GenericResultsetData result) {
-        final StringBuilder writer = new StringBuilder();
-
-        final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-        logger.info("NO. of Columns: {}", columnHeaders.size());
-        final Integer chSize = columnHeaders.size();
-        for (int i = 0; i < chSize; i++) {
-            writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
-            if (i < (chSize - 1)) {
-                writer.append(",");
-            }
-        }
-        writer.append('\n');
-
-        final List<ResultsetRowData> data = result.getData();
-        List<String> row;
-        Integer rSize;
-        // String currCol;
-        String currColType;
-        String currVal;
-        final String doubleQuote = "\"";
-        final String twoDoubleQuotes = doubleQuote + doubleQuote;
-        logger.info("NO. of Rows: {}", data.size());
-        for (int i = 0; i < data.size(); i++) {
-            row = data.get(i).getRow();
-            rSize = row.size();
-            for (int j = 0; j < rSize; j++) {
-                // currCol = columnHeaders.get(j).getColumnName();
-                currColType = columnHeaders.get(j).getColumnType();
-                currVal = row.get(j);
-                if (currVal != null) {
-                    if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
-                            || currColType.equals("SMALLINT") || currColType.equals("INT")) {
-                        writer.append(currVal);
-                    } else {
-                        writer.append('"' + this.genericDataService.replace(currVal, doubleQuote, twoDoubleQuotes) + '"');
-                    }
-
-                }
-                if (j < (rSize - 1)) {
-                    writer.append(",");
-                }
-            }
-            writer.append('\n');
-        }
-
-        return writer;
-    }
-
-    @Override
-    public GenericResultsetData retrieveGenericResultset(final String name, final String type,
-            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
-
-        final long startTime = System.currentTimeMillis();
-        logger.info("STARTING REPORT: {}   Type: {}", name, type);
-
-        final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
-
-        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
-
-        final long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
-        return result;
-    }
-
-    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
-
-        String sql = getSql(name, type);
-
-        final Set<String> keys = queryParams.keySet();
-        for (final String key : keys) {
-            final String pValue = queryParams.get(key);
-            // logger.info("({} : {})", key, pValue);
-            sql = this.genericDataService.replace(sql, key, pValue);
-        }
-
-        final AppUser currentUser = this.context.authenticatedUser();
-        // Allows sql query to restrict data by office hierarchy if required
-        sql = this.genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
-        // Allows sql query to restrict data by current user Id if required
-        // (typically used to return report lists containing only reports
-        // permitted to be run by the user
-        sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-
-        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
-                Integer.toString(isSelfServiceUserReport ? 1 : 0));
-
-        sql = this.genericDataService.wrapSQL(sql);
-
-        return sql;
-
-    }
-
-    private String getSql(final String name, final String type) {
-
-        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
-        validateReportName(name);
-
-        final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
-
-        // the return statement contains the exact sql required
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
-
-        if (rs.next() && rs.getString("the_sql") != null) { return rs.getString("the_sql"); }
-        throw new ReportNotFoundException(name);
-    }
-
-    @Override
-    public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
-
-        final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "' and self_service_user_report = ?";
-        validateReportName(reportName);
-        this.columnValidator.validateSqlInjection(sql, reportName);
-
-        final String sqlWrapped = this.genericDataService.wrapSQL(sql);
-
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object [] {isSelfServiceUserReport});
-
-        if (rs.next()) { return rs.getString("report_type"); }
-        throw new ReportNotFoundException(reportName);
-    }
-
-    @Override
-    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
-
-        final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
-        if (!new File(fileLocation).isDirectory()) {
-            new File(fileLocation).mkdirs();
-        }
-
-        final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
-
+      @Override
+      public void write(final OutputStream out) {
         try {
-            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport);
 
-            final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-            final List<ResultsetRowData> data = result.getData();
-            List<String> row;
+          final GenericResultsetData result =
+              retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
+          final StringBuilder sb = generateCsvFileBuffer(result);
 
-            logger.info("NO. of Columns: {}", columnHeaders.size());
-            final Integer chSize = columnHeaders.size();
+          final InputStream in =
+              new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
 
-            final Document document = new Document(PageSize.B0.rotate());
+          final byte[] outputByte = new byte[4096];
+          Integer readLen = in.read(outputByte, 0, 4096);
 
-            PdfWriter.getInstance(document, new FileOutputStream(new File(fileLocation + reportName + ".pdf")));
-            document.open();
-
-            final PdfPTable table = new PdfPTable(chSize);
-            table.setWidthPercentage(100);
-
-            for (int i = 0; i < chSize; i++) {
-
-                table.addCell(columnHeaders.get(i).getColumnName());
-
-            }
-            table.completeRow();
-
-            Integer rSize;
-            String currColType;
-            String currVal;
-            logger.info("NO. of Rows: {}", data.size());
-            for (int i = 0; i < data.size(); i++) {
-                row = data.get(i).getRow();
-                rSize = row.size();
-                for (int j = 0; j < rSize; j++) {
-                    currColType = columnHeaders.get(j).getColumnType();
-                    currVal = row.get(j);
-                    if (currVal != null) {
-                        if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
-                                || currColType.equals("SMALLINT") || currColType.equals("INT")) {
-
-                            table.addCell(currVal.toString());
-                        } else {
-                            table.addCell(currVal.toString());
-                        }
-                    }
-                }
-            }
-            table.completeRow();
-            document.add(table);
-            document.close();
-            return genaratePdf;
+          while (readLen != -1) {
+            out.write(outputByte, 0, readLen);
+            readLen = in.read(outputByte, 0, 4096);
+          }
+          // in.close();
+          // out.flush();
+          // out.close();
         } catch (final Exception e) {
-            logger.error("error.msg.reporting.error:", e);
-            throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+          throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
         }
+      }
+    };
+  }
+
+  private StringBuilder generateCsvFileBuffer(final GenericResultsetData result) {
+    final StringBuilder writer = new StringBuilder();
+
+    final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
+    logger.info("NO. of Columns: {}", columnHeaders.size());
+    final Integer chSize = columnHeaders.size();
+    for (int i = 0; i < chSize; i++) {
+      writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
+      if (i < (chSize - 1)) {
+        writer.append(",");
+      }
     }
+    writer.append('\n');
 
-    @Override
-    public ReportData retrieveReport(final Long id) {
-        final Collection<ReportData> reports = retrieveReports(id);
-
-        for (final ReportData report : reports) {
-            return report;
+    final List<ResultsetRowData> data = result.getData();
+    List<String> row;
+    Integer rSize;
+    // String currCol;
+    String currColType;
+    String currVal;
+    final String doubleQuote = "\"";
+    final String twoDoubleQuotes = doubleQuote + doubleQuote;
+    logger.info("NO. of Rows: {}", data.size());
+    for (int i = 0; i < data.size(); i++) {
+      row = data.get(i).getRow();
+      rSize = row.size();
+      for (int j = 0; j < rSize; j++) {
+        // currCol = columnHeaders.get(j).getColumnName();
+        currColType = columnHeaders.get(j).getColumnType();
+        currVal = row.get(j);
+        if (currVal != null) {
+          if (currColType.equals("DECIMAL")
+              || currColType.equals("DOUBLE")
+              || currColType.equals("BIGINT")
+              || currColType.equals("SMALLINT")
+              || currColType.equals("INT")) {
+            writer.append(currVal);
+          } else {
+            writer.append(
+                '"' + this.genericDataService.replace(currVal, doubleQuote, twoDoubleQuotes) + '"');
+          }
         }
-        return null;
+        if (j < (rSize - 1)) {
+          writer.append(",");
+        }
+      }
+      writer.append('\n');
     }
 
-    @Override
-    public Collection<ReportData> retrieveReportList() {
-        return retrieveReports(null);
+    return writer;
+  }
+
+  @Override
+  public GenericResultsetData retrieveGenericResultset(
+      final String name,
+      final String type,
+      final Map<String, String> queryParams,
+      final boolean isSelfServiceUserReport) {
+
+    final long startTime = System.currentTimeMillis();
+    logger.info("STARTING REPORT: {}   Type: {}", name, type);
+
+    final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
+
+    final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+
+    final long elapsed = System.currentTimeMillis() - startTime;
+    logger.info(
+        "FINISHING Report/Request Name: {} - {}     Elapsed Time: {}",
+        new Object[] {name, type, elapsed});
+    return result;
+  }
+
+  private String getSQLtoRun(
+      final String name,
+      final String type,
+      final Map<String, String> queryParams,
+      final boolean isSelfServiceUserReport) {
+
+    String sql = getSql(name, type);
+
+    final Set<String> keys = queryParams.keySet();
+    for (final String key : keys) {
+      final String pValue = queryParams.get(key);
+      // logger.info("({} : {})", key, pValue);
+      sql = this.genericDataService.replace(sql, key, pValue);
     }
 
-    private Collection<ReportData> retrieveReports(final Long id) {
+    final AppUser currentUser = this.context.authenticatedUser();
+    // Allows sql query to restrict data by office hierarchy if required
+    sql =
+        this.genericDataService.replace(
+            sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
+    // Allows sql query to restrict data by current user Id if required
+    // (typically used to return report lists containing only reports
+    // permitted to be run by the user
+    sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
 
-        final ReportParameterJoinMapper rm = new ReportParameterJoinMapper();
+    sql =
+        this.genericDataService.replace(
+            sql, "${isSelfServiceUser}", Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
-        final String sql = rm.schema(id);
+    sql = this.genericDataService.wrapSQL(sql);
 
-        final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm, new Object[] {});
+    return sql;
+  }
 
-        final Collection<ReportData> reportList = new ArrayList<>();
-        if (rpJoins == null || rpJoins.size() == 0) { return reportList; }
+  private String getSql(final String name, final String type) {
 
-        Collection<ReportParameterData> reportParameters = null;
+    final String inputSql =
+        "select "
+            + type
+            + "_sql as the_sql from stretchy_"
+            + type
+            + " where "
+            + type
+            + "_name = '"
+            + name
+            + "'";
+    validateReportName(name);
 
-        Long reportId = null;
-        String reportName = null;
-        String reportType = null;
-        String reportSubType = null;
-        String reportCategory = null;
-        String description = null;
-        Boolean coreReport = null;
-        Boolean useReport = null;
-        String reportSql = null;
+    final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
-        Long prevReportId = (long) -1234;
-        Boolean firstReport = true;
-        for (final ReportParameterJoinData rpJoin : rpJoins) {
+    // the return statement contains the exact sql required
+    final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
 
-            if (rpJoin.getReportId().equals(prevReportId)) {
-                // more than one parameter for report
-                if (reportParameters == null) {
-                    reportParameters = new ArrayList<>();
-                }
-                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
-                        .getReportParameterName(), rpJoin.getParameterName()));
+    if (rs.next() && rs.getString("the_sql") != null) {
+      return rs.getString("the_sql");
+    }
+    throw new ReportNotFoundException(name);
+  }
 
+  @Override
+  public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
+
+    final String sql =
+        "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '"
+            + reportName
+            + "' and self_service_user_report = ?";
+    validateReportName(reportName);
+    this.columnValidator.validateSqlInjection(sql, reportName);
+
+    final String sqlWrapped = this.genericDataService.wrapSQL(sql);
+
+    final SqlRowSet rs =
+        this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object[] {isSelfServiceUserReport});
+
+    if (rs.next()) {
+      return rs.getString("report_type");
+    }
+    throw new ReportNotFoundException(reportName);
+  }
+
+  @Override
+  public String retrieveReportPDF(
+      final String reportName,
+      final String type,
+      final Map<String, String> queryParams,
+      final boolean isSelfServiceUserReport) {
+
+    final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+    if (!new File(fileLocation).isDirectory()) {
+      new File(fileLocation).mkdirs();
+    }
+
+    final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
+
+    try {
+      final GenericResultsetData result =
+          retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport);
+
+      final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
+      final List<ResultsetRowData> data = result.getData();
+      List<String> row;
+
+      logger.info("NO. of Columns: {}", columnHeaders.size());
+      final Integer chSize = columnHeaders.size();
+
+      final Document document = new Document(PageSize.B0.rotate());
+
+      PdfWriter.getInstance(
+          document, new FileOutputStream(new File(fileLocation + reportName + ".pdf")));
+      document.open();
+
+      final PdfPTable table = new PdfPTable(chSize);
+      table.setWidthPercentage(100);
+
+      for (int i = 0; i < chSize; i++) {
+
+        table.addCell(columnHeaders.get(i).getColumnName());
+      }
+      table.completeRow();
+
+      Integer rSize;
+      String currColType;
+      String currVal;
+      logger.info("NO. of Rows: {}", data.size());
+      for (int i = 0; i < data.size(); i++) {
+        row = data.get(i).getRow();
+        rSize = row.size();
+        for (int j = 0; j < rSize; j++) {
+          currColType = columnHeaders.get(j).getColumnType();
+          currVal = row.get(j);
+          if (currVal != null) {
+            if (currColType.equals("DECIMAL")
+                || currColType.equals("DOUBLE")
+                || currColType.equals("BIGINT")
+                || currColType.equals("SMALLINT")
+                || currColType.equals("INT")) {
+
+              table.addCell(currVal.toString());
             } else {
-                if (firstReport) {
-                    firstReport = false;
-                } else {
-                    // write report entry
-                    reportList.add(new ReportData(reportId, reportName, reportType, reportSubType, reportCategory, description, reportSql,
-                            coreReport, useReport, reportParameters));
-                }
-
-                prevReportId = rpJoin.getReportId();
-
-                reportId = rpJoin.getReportId();
-                reportName = rpJoin.getReportName();
-                reportType = rpJoin.getReportType();
-                reportSubType = rpJoin.getReportSubType();
-                reportCategory = rpJoin.getReportCategory();
-                description = rpJoin.getDescription();
-                reportSql = rpJoin.getReportSql();
-                coreReport = rpJoin.getCoreReport();
-                useReport = rpJoin.getUseReport();
-
-                if (rpJoin.getReportParameterId() != null) {
-                    // report has at least one parameter
-                    reportParameters = new ArrayList<>();
-                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
-                            .getReportParameterName(), rpJoin.getParameterName()));
-                } else {
-                    reportParameters = null;
-                }
+              table.addCell(currVal.toString());
             }
-
+          }
         }
-        // write last report
-        reportList.add(new ReportData(reportId, reportName, reportType, reportSubType, reportCategory, description, reportSql, coreReport,
-                useReport, reportParameters));
+      }
+      table.completeRow();
+      document.add(table);
+      document.close();
+      return genaratePdf;
+    } catch (final Exception e) {
+      logger.error("error.msg.reporting.error:", e);
+      throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
+    }
+  }
 
-        return reportList;
+  @Override
+  public ReportData retrieveReport(final Long id) {
+    final Collection<ReportData> reports = retrieveReports(id);
+
+    for (final ReportData report : reports) {
+      return report;
+    }
+    return null;
+  }
+
+  @Override
+  public Collection<ReportData> retrieveReportList() {
+    return retrieveReports(null);
+  }
+
+  private Collection<ReportData> retrieveReports(final Long id) {
+
+    final ReportParameterJoinMapper rm = new ReportParameterJoinMapper();
+
+    final String sql = rm.schema(id);
+
+    final Collection<ReportParameterJoinData> rpJoins =
+        this.jdbcTemplate.query(sql, rm, new Object[] {});
+
+    final Collection<ReportData> reportList = new ArrayList<>();
+    if (rpJoins == null || rpJoins.size() == 0) {
+      return reportList;
+    }
+
+    Collection<ReportParameterData> reportParameters = null;
+
+    Long reportId = null;
+    String reportName = null;
+    String reportType = null;
+    String reportSubType = null;
+    String reportCategory = null;
+    String description = null;
+    Boolean coreReport = null;
+    Boolean useReport = null;
+    String reportSql = null;
+
+    Long prevReportId = (long) -1234;
+    Boolean firstReport = true;
+    for (final ReportParameterJoinData rpJoin : rpJoins) {
+
+      if (rpJoin.getReportId().equals(prevReportId)) {
+        // more than one parameter for report
+        if (reportParameters == null) {
+          reportParameters = new ArrayList<>();
+        }
+        reportParameters.add(
+            new ReportParameterData(
+                rpJoin.getReportParameterId(),
+                rpJoin.getParameterId(),
+                rpJoin.getReportParameterName(),
+                rpJoin.getParameterName()));
+
+      } else {
+        if (firstReport) {
+          firstReport = false;
+        } else {
+          // write report entry
+          reportList.add(
+              new ReportData(
+                  reportId,
+                  reportName,
+                  reportType,
+                  reportSubType,
+                  reportCategory,
+                  description,
+                  reportSql,
+                  coreReport,
+                  useReport,
+                  reportParameters));
+        }
+
+        prevReportId = rpJoin.getReportId();
+
+        reportId = rpJoin.getReportId();
+        reportName = rpJoin.getReportName();
+        reportType = rpJoin.getReportType();
+        reportSubType = rpJoin.getReportSubType();
+        reportCategory = rpJoin.getReportCategory();
+        description = rpJoin.getDescription();
+        reportSql = rpJoin.getReportSql();
+        coreReport = rpJoin.getCoreReport();
+        useReport = rpJoin.getUseReport();
+
+        if (rpJoin.getReportParameterId() != null) {
+          // report has at least one parameter
+          reportParameters = new ArrayList<>();
+          reportParameters.add(
+              new ReportParameterData(
+                  rpJoin.getReportParameterId(),
+                  rpJoin.getParameterId(),
+                  rpJoin.getReportParameterName(),
+                  rpJoin.getParameterName()));
+        } else {
+          reportParameters = null;
+        }
+      }
+    }
+    // write last report
+    reportList.add(
+        new ReportData(
+            reportId,
+            reportName,
+            reportType,
+            reportSubType,
+            reportCategory,
+            description,
+            reportSql,
+            coreReport,
+            useReport,
+            reportParameters));
+
+    return reportList;
+  }
+
+  @Override
+  public Collection<ReportParameterData> getAllowedParameters() {
+
+    final ReportParameterMapper rm = new ReportParameterMapper();
+    final String sql = rm.schema();
+    final Collection<ReportParameterData> parameters =
+        this.jdbcTemplate.query(sql, rm, new Object[] {});
+    return parameters;
+  }
+
+  @Override
+  public Collection<String> getAllowedReportTypes() {
+    final List<String> reportTypes = new ArrayList<>();
+    reportTypes.add("Table");
+    reportTypes.add("Chart");
+    reportTypes.addAll(this.reportingProcessServiceProvider.findAllReportingTypes());
+    return reportTypes;
+  }
+
+  private static final class ReportParameterJoinMapper
+      implements RowMapper<ReportParameterJoinData> {
+
+    public String schema(final Long reportId) {
+
+      String sql =
+          "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
+              + " r.report_subtype as reportSubType, r.report_category as reportCategory,"
+              + " r.description, r.core_report as coreReport, r.use_report as useReport,  rp.id as"
+              + " reportParameterId, rp.parameter_id as parameterId, rp.report_parameter_name as"
+              + " reportParameterName, p.parameter_name as parameterName";
+
+      if (reportId != null) {
+        sql += ", r.report_sql as reportSql ";
+      }
+
+      sql +=
+          " from stretchy_report r"
+              + " left join stretchy_report_parameter rp on rp.report_id = r.id"
+              + " left join stretchy_parameter p on p.id = rp.parameter_id";
+      if (reportId != null) {
+        sql += " where r.id = " + reportId;
+      } else {
+        sql += " order by r.id, rp.parameter_id";
+      }
+
+      return sql;
+
+      /*
+       * used to only return reports that the use can run as done in
+       * report UI but not necessary as there is a read_report permission
+       * which should give user access to look all reports +
+       * " where exists" + " (select 'f'" + " from m_appuser_role ur " +
+       * " join m_role r on r.id = ur.role_id" +
+       * " left join m_role_permission rp on rp.role_id = r.id" +
+       * " left join m_permission p on p.id = rp.permission_id" +
+       * " where ur.appuser_id = " + userId +
+       * " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) "
+       * ;
+       */
     }
 
     @Override
-    public Collection<ReportParameterData> getAllowedParameters() {
+    public ReportParameterJoinData mapRow(final ResultSet rs, final int rowNum)
+        throws SQLException {
 
-        final ReportParameterMapper rm = new ReportParameterMapper();
-        final String sql = rm.schema();
-        final Collection<ReportParameterData> parameters = this.jdbcTemplate.query(sql, rm, new Object[] {});
-        return parameters;
+      final Long reportId = rs.getLong("reportId");
+      final String reportName = rs.getString("reportName");
+      final String reportType = rs.getString("reportType");
+      final String reportSubType = rs.getString("reportSubType");
+      final String reportCategory = rs.getString("reportCategory");
+      final String description = rs.getString("description");
+      final Boolean coreReport = rs.getBoolean("coreReport");
+      final Boolean useReport = rs.getBoolean("useReport");
+
+      String reportSql;
+      // reportSql might not be on the select list of columns
+      try {
+        reportSql = rs.getString("reportSql");
+      } catch (final SQLException e) {
+        reportSql = null;
+      }
+
+      final Long reportParameterId = JdbcSupport.getLong(rs, "reportParameterId");
+      final Long parameterId = JdbcSupport.getLong(rs, "parameterId");
+      final String reportParameterName = rs.getString("reportParameterName");
+      final String parameterName = rs.getString("parameterName");
+
+      return new ReportParameterJoinData(
+          reportId,
+          reportName,
+          reportType,
+          reportSubType,
+          reportCategory,
+          description,
+          reportSql,
+          coreReport,
+          useReport,
+          reportParameterId,
+          parameterId,
+          reportParameterName,
+          parameterName);
+    }
+  }
+
+  private static final class ReportParameterMapper implements RowMapper<ReportParameterData> {
+
+    public String schema() {
+
+      return "select p.id as id, p.parameter_name as parameterName from stretchy_parameter p where"
+          + " ifnull(p.special,'') != 'Y' order by p.id";
     }
 
     @Override
-    public Collection<String> getAllowedReportTypes() {
-        final List<String> reportTypes = new ArrayList<>();
-        reportTypes.add("Table");
-        reportTypes.add("Chart");
-        reportTypes.addAll(this.reportingProcessServiceProvider.findAllReportingTypes());
-        return reportTypes;
+    public ReportParameterData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+      final Long id = rs.getLong("id");
+      final String parameterName = rs.getString("parameterName");
+
+      return new ReportParameterData(id, null, null, parameterName);
+    }
+  }
+
+  @Override
+  public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(
+      String name, String type, Map<String, String> queryParams) {
+    final long startTime = System.currentTimeMillis();
+    logger.info("STARTING REPORT: {}   Type: {}", name, type);
+
+    final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
+
+    final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+
+    final long elapsed = System.currentTimeMillis() - startTime;
+    logger.info(
+        "FINISHING Report/Request Name: {} - {}     Elapsed Time: {}",
+        new Object[] {name, type, elapsed});
+    return result;
+  }
+
+  @Override
+  public String sqlToRunForSmsEmailCampaign(
+      final String name, final String type, final Map<String, String> queryParams) {
+    String sql = getSql(name, type);
+
+    final Set<String> keys = queryParams.keySet();
+    for (String key : keys) {
+      final String pValue = queryParams.get(key);
+      // logger.info("(" + key + " : " + pValue + ")");
+      key = "${" + key + "}";
+      sql = this.genericDataService.replace(sql, key, pValue);
     }
 
-    private static final class ReportParameterJoinMapper implements RowMapper<ReportParameterJoinData> {
+    sql = this.genericDataService.wrapSQL(sql);
 
-        public String schema(final Long reportId) {
+    return sql;
+  }
 
-            String sql = "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
-                    + " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
-                    + " rp.id as reportParameterId, rp.parameter_id as parameterId, rp.report_parameter_name as reportParameterName, p.parameter_name as parameterName";
-
-            if (reportId != null) {
-                sql += ", r.report_sql as reportSql ";
-            }
-
-            sql += " from stretchy_report r" + " left join stretchy_report_parameter rp on rp.report_id = r.id"
-                    + " left join stretchy_parameter p on p.id = rp.parameter_id";
-            if (reportId != null) {
-                sql += " where r.id = " + reportId;
-            } else {
-                sql += " order by r.id, rp.parameter_id";
-            }
-
-            return sql;
-
-            /*
-             * used to only return reports that the use can run as done in
-             * report UI but not necessary as there is a read_report permission
-             * which should give user access to look all reports +
-             * " where exists" + " (select 'f'" + " from m_appuser_role ur " +
-             * " join m_role r on r.id = ur.role_id" +
-             * " left join m_role_permission rp on rp.role_id = r.id" +
-             * " left join m_permission p on p.id = rp.permission_id" +
-             * " where ur.appuser_id = " + userId +
-             * " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) "
-             * ;
-             */
-        }
-
-        @Override
-        public ReportParameterJoinData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-
-            final Long reportId = rs.getLong("reportId");
-            final String reportName = rs.getString("reportName");
-            final String reportType = rs.getString("reportType");
-            final String reportSubType = rs.getString("reportSubType");
-            final String reportCategory = rs.getString("reportCategory");
-            final String description = rs.getString("description");
-            final Boolean coreReport = rs.getBoolean("coreReport");
-            final Boolean useReport = rs.getBoolean("useReport");
-
-            String reportSql;
-            // reportSql might not be on the select list of columns
-            try {
-                reportSql = rs.getString("reportSql");
-            } catch (final SQLException e) {
-                reportSql = null;
-            }
-
-            final Long reportParameterId = JdbcSupport.getLong(rs, "reportParameterId");
-            final Long parameterId = JdbcSupport.getLong(rs, "parameterId");
-            final String reportParameterName = rs.getString("reportParameterName");
-            final String parameterName = rs.getString("parameterName");
-
-            return new ReportParameterJoinData(reportId, reportName, reportType, reportSubType, reportCategory, description, reportSql,
-                    coreReport, useReport, reportParameterId, parameterId, reportParameterName, parameterName);
-        }
-    }
-
-    private static final class ReportParameterMapper implements RowMapper<ReportParameterData> {
-
-        public String schema() {
-
-            return "select p.id as id, p.parameter_name as parameterName from stretchy_parameter p where ifnull(p.special,'') != 'Y' order by p.id";
-
-        }
-
-        @Override
-        public ReportParameterData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String parameterName = rs.getString("parameterName");
-
-            return new ReportParameterData(id, null, null, parameterName);
-        }
-    }
-
-    @Override
-    public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
-        final long startTime = System.currentTimeMillis();
-        logger.info("STARTING REPORT: {}   Type: {}", name, type);
-
-        final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
-
-        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
-
-        final long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
-        return result;
-    }
-
-    @Override
-    public String sqlToRunForSmsEmailCampaign(final String name, final String type, final Map<String, String> queryParams) {
-        String sql = getSql(name, type);
-
-        final Set<String> keys = queryParams.keySet();
-        for (String key : keys) {
-            final String pValue = queryParams.get(key);
-            // logger.info("(" + key + " : " + pValue + ")");
-            key = "${" + key + "}";
-            sql = this.genericDataService.replace(sql, key, pValue);
-        }
-
-        sql = this.genericDataService.wrapSQL(sql);
-
-        return sql;
-    }
-
-    @Override
-    public ByteArrayOutputStream generatePentahoReportAsOutputStream(final String reportName, final String outputTypeParam, final Map<String, String> queryParams,
-            final Locale locale, final AppUser runReportAsUser, final StringBuilder errorLog) {
-        //This complete implementation should be moved to Pentaho Report Service
-        /*
+  @Override
+  public ByteArrayOutputStream generatePentahoReportAsOutputStream(
+      final String reportName,
+      final String outputTypeParam,
+      final Map<String, String> queryParams,
+      final Locale locale,
+      final AppUser runReportAsUser,
+      final StringBuilder errorLog) {
+    // This complete implementation should be moved to Pentaho Report Service
+    /*
         String outputType = "HTML";
         if (StringUtils.isNotBlank(outputTypeParam)) {
             outputType = outputTypeParam;
@@ -612,13 +716,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
 
     */
-        return null ;
-    }
+    return null;
+  }
 
-    private void validateReportName(final String name) {
+  private void validateReportName(final String name) {
 
-        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
-            throw new SQLInjectionException();
-        }
+    if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
+      throw new SQLInjectionException();
     }
+  }
 }

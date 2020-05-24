@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
-public class PlatformServiceUnavailableException extends AbstractPlatformServiceUnavailableException {
+public class PlatformServiceUnavailableException
+    extends AbstractPlatformServiceUnavailableException {
 
-    public PlatformServiceUnavailableException(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public PlatformServiceUnavailableException(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+  }
 }

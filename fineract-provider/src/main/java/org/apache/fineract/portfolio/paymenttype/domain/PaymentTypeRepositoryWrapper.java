@@ -25,15 +25,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentTypeRepositoryWrapper {
 
-    private final PaymentTypeRepository repository;
+  private final PaymentTypeRepository repository;
 
-    @Autowired
-    public PaymentTypeRepositoryWrapper(final PaymentTypeRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public PaymentTypeRepositoryWrapper(final PaymentTypeRepository repository) {
+    this.repository = repository;
+  }
 
-    public PaymentType findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id).orElseThrow(() -> new PaymentTypeNotFoundException(id));
-    }
-
+  public PaymentType findOneWithNotFoundDetection(final Long id) {
+    return this.repository.findById(id).orElseThrow(() -> new PaymentTypeNotFoundException(id));
+  }
 }

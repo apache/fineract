@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "UNASSIGNSTAFF")
 public class UnassignClientStaffCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientWritePlatformService clientWritePlatformService;
+  private final ClientWritePlatformService clientWritePlatformService;
 
-    @Autowired
-    public UnassignClientStaffCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
-        this.clientWritePlatformService = clientWritePlatformService;
-    }
+  @Autowired
+  public UnassignClientStaffCommandHandler(
+      final ClientWritePlatformService clientWritePlatformService) {
+    this.clientWritePlatformService = clientWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.clientWritePlatformService.unassignClientStaff(command.entityId(), command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.clientWritePlatformService.unassignClientStaff(command.entityId(), command);
+  }
 }

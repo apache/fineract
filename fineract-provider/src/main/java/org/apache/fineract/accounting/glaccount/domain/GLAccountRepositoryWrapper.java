@@ -30,15 +30,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class GLAccountRepositoryWrapper {
 
-    private final GLAccountRepository repository;
+  private final GLAccountRepository repository;
 
-    @Autowired
-    public GLAccountRepositoryWrapper(final GLAccountRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public GLAccountRepositoryWrapper(final GLAccountRepository repository) {
+    this.repository = repository;
+  }
 
-    public GLAccount findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id).orElseThrow(() ->  new GLAccountNotFoundException(id));
-    }
-
+  public GLAccount findOneWithNotFoundDetection(final Long id) {
+    return this.repository.findById(id).orElseThrow(() -> new GLAccountNotFoundException(id));
+  }
 }

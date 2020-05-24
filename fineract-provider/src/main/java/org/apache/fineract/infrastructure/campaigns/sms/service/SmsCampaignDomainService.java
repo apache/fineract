@@ -21,5 +21,4 @@ package org.apache.fineract.infrastructure.campaigns.sms.service;
 /**
  * Created by Stefan on 4-7-2016.
  */
-public interface SmsCampaignDomainService {
-}
+public interface SmsCampaignDomainService {}

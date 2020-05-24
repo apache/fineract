@@ -32,40 +32,41 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_deposit_product_recurring_detail")
 public class DepositProductRecurringDetail extends AbstractPersistableCustom {
 
-    @Embedded
-    private DepositRecurringDetail recurringDetail;
+  @Embedded private DepositRecurringDetail recurringDetail;
 
-    @OneToOne
-    @JoinColumn(name = "savings_product_id", nullable = false)
-    private RecurringDepositProduct product;
+  @OneToOne
+  @JoinColumn(name = "savings_product_id", nullable = false)
+  private RecurringDepositProduct product;
 
-    protected DepositProductRecurringDetail() {
-        super();
+  protected DepositProductRecurringDetail() {
+    super();
+  }
+
+  public static DepositProductRecurringDetail createNew(
+      DepositRecurringDetail recurringDetail, SavingsProduct product) {
+
+    return new DepositProductRecurringDetail(recurringDetail, product);
+  }
+
+  private DepositProductRecurringDetail(
+      DepositRecurringDetail recurringDetail, SavingsProduct product) {
+    this.recurringDetail = recurringDetail;
+    this.product = (RecurringDepositProduct) product;
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
+    if (this.recurringDetail != null) {
+      actualChanges.putAll(this.recurringDetail.update(command));
     }
+    return actualChanges;
+  }
 
-    public static DepositProductRecurringDetail createNew(DepositRecurringDetail recurringDetail, SavingsProduct product) {
+  public DepositRecurringDetail recurringDetail() {
+    return this.recurringDetail;
+  }
 
-        return new DepositProductRecurringDetail(recurringDetail, product);
-    }
-
-    private DepositProductRecurringDetail(DepositRecurringDetail recurringDetail, SavingsProduct product) {
-        this.recurringDetail = recurringDetail;
-        this.product = (RecurringDepositProduct) product;
-    }
-
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
-        if (this.recurringDetail != null) {
-            actualChanges.putAll(this.recurringDetail.update(command));
-        }
-        return actualChanges;
-    }
-
-    public DepositRecurringDetail recurringDetail() {
-        return this.recurringDetail;
-    }
-
-    public void updateProductReference(final SavingsProduct product) {
-        this.product = (RecurringDepositProduct) product;
-    }
+  public void updateProductReference(final SavingsProduct product) {
+    this.product = (RecurringDepositProduct) product;
+  }
 }

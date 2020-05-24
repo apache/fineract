@@ -22,9 +22,10 @@ import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistration;
 
 public interface DeviceRegistrationWritePlatformService {
 
-    public DeviceRegistration registerDevice(final Long clientId, final String registrationId);
+  public DeviceRegistration registerDevice(final Long clientId, final String registrationId);
 
-    public DeviceRegistration updateDeviceRegistration(final Long id, final Long clientId, final String registrationId);
+  public DeviceRegistration updateDeviceRegistration(
+      final Long id, final Long clientId, final String registrationId);
 
-    public void deleteDeviceRegistration(final Long id);
+  public void deleteDeviceRegistration(final Long id);
 }

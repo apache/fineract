@@ -41,26 +41,33 @@ import org.springframework.stereotype.Component;
 @Profile("oauth")
 @Scope("singleton")
 @Api(tags = {"Self User Details"})
-@SwaggerDefinition(tags = {
-  @Tag(name = "Self User Details", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Self User Details", description = "")})
 public class SelfUserDetailsApiResource {
 
-    private final UserDetailsApiResource userDetailsApiResource;
+  private final UserDetailsApiResource userDetailsApiResource;
 
-    @Autowired
-    public SelfUserDetailsApiResource(
-            final UserDetailsApiResource userDetailsApiResource) {
-        this.userDetailsApiResource = userDetailsApiResource;
-    }
+  @Autowired
+  public SelfUserDetailsApiResource(final UserDetailsApiResource userDetailsApiResource) {
+    this.userDetailsApiResource = userDetailsApiResource;
+  }
 
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Fetch authenticated user details", httpMethod = "GET", notes = "Checks the Authentication and returns the set roles and permissions allowed\n\n" + "For more info visit this link - https://demo.mifos.io/api-docs/apiLive.htm#selfoauth")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class)})
-    public String fetchAuthenticatedUserData(
-            @QueryParam("access_token") @ApiParam(value = "äccess_token") final String accessToken) {
-        return this.userDetailsApiResource
-                .fetchAuthenticatedUserData(accessToken);
-    }
+  @GET
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Fetch authenticated user details",
+      httpMethod = "GET",
+      notes =
+          "Checks the Authentication and returns the set roles and permissions allowed\n\n"
+              + "For more info visit this link -"
+              + " https://demo.mifos.io/api-docs/apiLive.htm#selfoauth")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class)
+  })
+  public String fetchAuthenticatedUserData(
+      @QueryParam("access_token") @ApiParam(value = "äccess_token") final String accessToken) {
+    return this.userDetailsApiResource.fetchAuthenticatedUserData(accessToken);
+  }
 }

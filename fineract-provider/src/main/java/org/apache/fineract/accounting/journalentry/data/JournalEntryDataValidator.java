@@ -38,30 +38,41 @@ import org.springframework.stereotype.Component;
 @Component
 public class JournalEntryDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    private final Set<String> RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(JournalEntryJsonInputParams.OFFICE_ID.getValue()));
+  private final Set<String> RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList(JournalEntryJsonInputParams.OFFICE_ID.getValue()));
 
-    @Autowired
-    public JournalEntryDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public JournalEntryDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateForUpdateRunningbalance(final JsonCommand command) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, command.json(), RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("GLJournalEntry");
+
+    if (this.fromApiJsonHelper.parameterExists(
+        JournalEntryJsonInputParams.OFFICE_ID.getValue(), command.parsedJson())) {
+      final String officeId =
+          this.fromApiJsonHelper.extractStringNamed(
+              JournalEntryJsonInputParams.OFFICE_ID.getValue(), command.parsedJson());
+      baseDataValidator
+          .reset()
+          .parameter(JournalEntryJsonInputParams.OFFICE_ID.getValue())
+          .value(officeId)
+          .ignoreIfNull()
+          .longGreaterThanZero();
     }
-
-    public void validateForUpdateRunningbalance(final JsonCommand command) {
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, command.json(), RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("GLJournalEntry");
-
-        if (this.fromApiJsonHelper.parameterExists(JournalEntryJsonInputParams.OFFICE_ID.getValue(), command.parsedJson())) {
-            final String officeId = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue(),
-                    command.parsedJson());
-            baseDataValidator.reset().parameter(JournalEntryJsonInputParams.OFFICE_ID.getValue()).value(officeId).ignoreIfNull()
-                    .longGreaterThanZero();
-        }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
-
+  }
 }

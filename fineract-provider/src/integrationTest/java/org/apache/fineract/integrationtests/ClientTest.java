@@ -32,115 +32,114 @@ import org.junit.Test;
 
 public class ClientTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
+  private ClientHelper clientHelper;
 
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
-    }
+  @Test
+  public void testClientStatus() {
+    this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+    final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+    Assert.assertNotNull(clientId);
 
-    @Test
-    public void testClientStatus() {
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+    HashMap<String, Object> status =
+        ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+    ClientStatusChecker.verifyClientIsActive(status);
 
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
-        ClientStatusChecker.verifyClientIsActive(status);
+    HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
+    ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
-        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+    ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
-        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.rejectClient(clientId);
+    ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.rejectClient(clientId);
-        ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.activateClient(clientId);
+    ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.activateClient(clientId);
-        ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.closeClient(clientId);
+    ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.closeClient(clientId);
-        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+    ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
-        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
+    ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+  }
 
-        clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
-        ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+  @Test
+  public void testClientAsPersonStatus() {
 
-    }
+    this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+    final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
+    Assert.assertNotNull(clientId);
 
-    @Test
-    public void testClientAsPersonStatus() {
+    HashMap<String, Object> status =
+        ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+    ClientStatusChecker.verifyClientIsActive(status);
 
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+    HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
+    ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
-        ClientStatusChecker.verifyClientIsActive(status);
+    clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+    ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
-        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.rejectClient(clientId);
+    ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
-        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.activateClient(clientId);
+    ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.rejectClient(clientId);
-        ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.closeClient(clientId);
+    ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.activateClient(clientId);
-        ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+    ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.closeClient(clientId);
-        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
+    ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+  }
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
-        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+  @Test
+  public void testClientAsEntityStatus() {
 
-        clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
-        ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+    this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+    final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
+    Assert.assertNotNull(clientId);
 
-    }
+    HashMap<String, Object> status =
+        ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+    ClientStatusChecker.verifyClientIsActive(status);
 
-    @Test
-    public void testClientAsEntityStatus() {
+    HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
+    ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+    clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+    ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
-        ClientStatusChecker.verifyClientIsActive(status);
+    clientStatusHashMap = this.clientHelper.rejectClient(clientId);
+    ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
 
-        HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
-        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.activateClient(clientId);
+    ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
-        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.closeClient(clientId);
+    ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.rejectClient(clientId);
-        ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
+    clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+    ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.activateClient(clientId);
-        ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
-
-        clientStatusHashMap = this.clientHelper.closeClient(clientId);
-        ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
-
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
-        ClientStatusChecker.verifyClientPending(clientStatusHashMap);
-
-        clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
-        ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
-
-    }
-
+    clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
+    ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
+  }
 }

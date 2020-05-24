@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "APPROVALUNDO")
 public class LoanApplicationApprovalUndoCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanApplicationWritePlatformService writePlatformService;
+  private final LoanApplicationWritePlatformService writePlatformService;
 
-    @Autowired
-    public LoanApplicationApprovalUndoCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public LoanApplicationApprovalUndoCommandHandler(
+      final LoanApplicationWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.undoApplicationApproval(command.entityId(), command);
-    }
+    return this.writePlatformService.undoApplicationApproval(command.entityId(), command);
+  }
 }

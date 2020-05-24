@@ -29,18 +29,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "PREMATURECLOSE")
-public class PrematureCloseRecurringDepositAccountCommandHandler implements NewCommandSourceHandler {
+public class PrematureCloseRecurringDepositAccountCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public PrematureCloseRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public PrematureCloseRecurringDepositAccountCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.prematureCloseRDAccount(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.prematureCloseRDAccount(
+        command.entityId(), command);
+  }
 }

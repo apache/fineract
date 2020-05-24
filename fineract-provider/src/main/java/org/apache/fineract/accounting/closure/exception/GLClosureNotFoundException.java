@@ -26,7 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class GLClosureNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public GLClosureNotFoundException(final Long id) {
-        super("error.msg.glclosure.id.invalid", "Accounting Closure with identifier " + id + " does not exist", id);
-    }
+  public GLClosureNotFoundException(final Long id) {
+    super(
+        "error.msg.glclosure.id.invalid",
+        "Accounting Closure with identifier " + id + " does not exist",
+        id);
+  }
 }

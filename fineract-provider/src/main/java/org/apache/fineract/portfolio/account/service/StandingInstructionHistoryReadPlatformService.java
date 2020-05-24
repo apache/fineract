@@ -24,6 +24,5 @@ import org.apache.fineract.portfolio.account.data.StandingInstructionHistoryData
 
 public interface StandingInstructionHistoryReadPlatformService {
 
-    Page<StandingInstructionHistoryData> retrieveAll(StandingInstructionDTO standingInstructionDTO);
-
+  Page<StandingInstructionHistoryData> retrieveAll(StandingInstructionDTO standingInstructionDTO);
 }

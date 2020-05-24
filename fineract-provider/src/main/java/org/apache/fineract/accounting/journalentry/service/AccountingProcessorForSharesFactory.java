@@ -26,23 +26,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountingProcessorForSharesFactory {
 
-    private final ApplicationContext applicationContext;
+  private final ApplicationContext applicationContext;
 
-    @Autowired
-    public AccountingProcessorForSharesFactory(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+  @Autowired
+  public AccountingProcessorForSharesFactory(final ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+  }
+
+  public AccountingProcessorForShares determineProcessor(final SharesDTO sharesDTO) {
+
+    AccountingProcessorForShares accountingProcessorForShares = null;
+
+    if (sharesDTO.isCashBasedAccountingEnabled()) {
+      accountingProcessorForShares =
+          this.applicationContext.getBean(
+              "cashBasedAccountingProcessorForShares", AccountingProcessorForShares.class);
     }
 
-    public AccountingProcessorForShares determineProcessor(final SharesDTO sharesDTO) {
-
-        AccountingProcessorForShares accountingProcessorForShares = null;
-
-        if (sharesDTO.isCashBasedAccountingEnabled()) {
-            accountingProcessorForShares = this.applicationContext.getBean("cashBasedAccountingProcessorForShares",
-                    AccountingProcessorForShares.class);
-        }
-
-        return accountingProcessorForShares;
-    }
-
+    return accountingProcessorForShares;
+  }
 }

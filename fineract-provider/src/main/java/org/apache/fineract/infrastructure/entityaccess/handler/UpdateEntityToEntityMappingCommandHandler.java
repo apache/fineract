@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ENTITYMAPPING", action = "UPDATE")
 public class UpdateEntityToEntityMappingCommandHandler implements NewCommandSourceHandler {
 
-    private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
+  private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
 
-    @Autowired
-    public UpdateEntityToEntityMappingCommandHandler(final FineractEntityAccessWriteService fineractEntityAccessWriteService) {
-        this.fineractEntityAccessWriteService = fineractEntityAccessWriteService;
-    }
+  @Autowired
+  public UpdateEntityToEntityMappingCommandHandler(
+      final FineractEntityAccessWriteService fineractEntityAccessWriteService) {
+    this.fineractEntityAccessWriteService = fineractEntityAccessWriteService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.fineractEntityAccessWriteService.updateEntityToEntityMapping(command.entityId(),command);
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.fineractEntityAccessWriteService.updateEntityToEntityMapping(
+        command.entityId(), command);
+  }
 }

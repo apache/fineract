@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PROVISIONCRITERIA", action = "DELETE")
 public class DeleteProvisioningCriteriaRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService;
+  private final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService;
 
-    @Autowired
-    public DeleteProvisioningCriteriaRequestCommandHandler(final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
-        this.provisioningCriteriaWritePlatformService = provisioningCriteriaWritePlatformService;
-    }
+  @Autowired
+  public DeleteProvisioningCriteriaRequestCommandHandler(
+      final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
+    this.provisioningCriteriaWritePlatformService = provisioningCriteriaWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningCriteriaWritePlatformService.deleteProvisioningCriteria(jsonCommand.entityId()) ;
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.provisioningCriteriaWritePlatformService.deleteProvisioningCriteria(
+        jsonCommand.entityId());
+  }
 }

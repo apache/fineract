@@ -24,14 +24,15 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 public class PaymentTypeToGLAccountMapper implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final PaymentTypeData paymentType;
-    @SuppressWarnings("unused")
-    private final GLAccountData fundSourceAccount;
+  @SuppressWarnings("unused")
+  private final PaymentTypeData paymentType;
 
-    public PaymentTypeToGLAccountMapper(final PaymentTypeData paymentType, final GLAccountData fundSourceAccount) {
-        this.paymentType = paymentType;
-        this.fundSourceAccount = fundSourceAccount;
-    }
+  @SuppressWarnings("unused")
+  private final GLAccountData fundSourceAccount;
 
+  public PaymentTypeToGLAccountMapper(
+      final PaymentTypeData paymentType, final GLAccountData fundSourceAccount) {
+    this.paymentType = paymentType;
+    this.fundSourceAccount = fundSourceAccount;
+  }
 }

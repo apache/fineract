@@ -22,20 +22,19 @@ import java.io.Serializable;
 
 public class ExternalServicesPropertiesData implements Serializable {
 
-    private final String name;
-    private final String value;
+  private final String name;
+  private final String value;
 
-    public ExternalServicesPropertiesData(final String name, final String value) {
-        this.name = name;
-        this.value = value;
-    }
+  public ExternalServicesPropertiesData(final String name, final String value) {
+    this.name = name;
+    this.value = value;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getValue() {
-        return value;
-    }
-
+  public String getValue() {
+    return value;
+  }
 }

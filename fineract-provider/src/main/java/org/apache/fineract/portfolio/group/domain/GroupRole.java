@@ -35,55 +35,59 @@ import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 @Table(name = "m_group_roles")
 public class GroupRole extends AbstractPersistableCustom {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
-    private Group group;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "group_id")
+  private Group group;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id")
-    private Client client;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "client_id")
+  private Client client;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_cv_id")
-    private CodeValue role;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "role_cv_id")
+  private CodeValue role;
 
-    public GroupRole() {
-        // TODO Auto-generated constructor stub
+  public GroupRole() {
+    // TODO Auto-generated constructor stub
+  }
+
+  public static final GroupRole createGroupRole(
+      final Group group, final Client client, final CodeValue role) {
+    return new GroupRole(group, client, role);
+  }
+
+  public GroupRole(final Group group, final Client client, final CodeValue role) {
+    this.group = group;
+    this.client = client;
+    this.role = role;
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
+
+    if (command.isChangeInLongParameterNamed(
+        GroupingTypesApiConstants.clientIdParamName, this.client.getId())) {
+      final Long newValue =
+          command.longValueOfParameterNamed(GroupingTypesApiConstants.clientIdParamName);
+      actualChanges.put(GroupingTypesApiConstants.clientIdParamName, newValue);
     }
 
-    public static final GroupRole createGroupRole(final Group group, final Client client, final CodeValue role) {
-        return new GroupRole(group, client, role);
+    if (command.isChangeInLongParameterNamed(
+        GroupingTypesApiConstants.roleParamName, this.role.getId())) {
+      final Long newValue =
+          command.longValueOfParameterNamed(GroupingTypesApiConstants.roleParamName);
+      actualChanges.put(GroupingTypesApiConstants.roleParamName, newValue);
     }
 
-    public GroupRole(final Group group, final Client client, final CodeValue role) {
-        this.group = group;
-        this.client = client;
-        this.role = role;
-    }
+    return actualChanges;
+  }
 
-    public Map<String, Object> update(final JsonCommand command) {
+  public void updateRole(final CodeValue role) {
+    this.role = role;
+  }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
-
-        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.clientIdParamName, this.client.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.clientIdParamName);
-            actualChanges.put(GroupingTypesApiConstants.clientIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.roleParamName, this.role.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.roleParamName);
-            actualChanges.put(GroupingTypesApiConstants.roleParamName, newValue);
-        }
-
-        return actualChanges;
-    }
-
-    public void updateRole(final CodeValue role) {
-        this.role = role;
-    }
-
-    public void updateClient(final Client client) {
-        this.client = client;
-    }
-
+  public void updateClient(final Client client) {
+    this.client = client;
+  }
 }

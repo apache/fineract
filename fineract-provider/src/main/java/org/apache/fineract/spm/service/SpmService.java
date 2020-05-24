@@ -40,122 +40,134 @@ import org.springframework.stereotype.Service;
 @Service
 public class SpmService {
 
-    private final PlatformSecurityContext securityContext;
-    private final SurveyRepository surveyRepository;
-    private final SurveyValidator surveyValidator;
+  private final PlatformSecurityContext securityContext;
+  private final SurveyRepository surveyRepository;
+  private final SurveyValidator surveyValidator;
 
-    @Autowired
-    public SpmService(final PlatformSecurityContext securityContext,
-                      final SurveyRepository surveyRepository,
-                      final SurveyValidator surveyValidator) {
-        super();
-        this.securityContext = securityContext;
-        this.surveyRepository = surveyRepository;
-        this.surveyValidator = surveyValidator;
+  @Autowired
+  public SpmService(
+      final PlatformSecurityContext securityContext,
+      final SurveyRepository surveyRepository,
+      final SurveyValidator surveyValidator) {
+    super();
+    this.securityContext = securityContext;
+    this.surveyRepository = surveyRepository;
+    this.surveyValidator = surveyValidator;
+  }
+
+  public List<Survey> fetchValidSurveys() {
+    this.securityContext.authenticatedUser();
+
+    return this.surveyRepository.fetchActiveSurveys(new Date());
+  }
+
+  public List<Survey> fetchAllSurveys() {
+    this.securityContext.authenticatedUser();
+
+    return this.surveyRepository.fetchAllSurveys();
+  }
+
+  public Survey findById(final Long id) {
+    this.securityContext.authenticatedUser();
+    return this.surveyRepository.findById(id).orElseThrow(() -> new SurveyNotFoundException(id));
+  }
+
+  public Survey createSurvey(final Survey survey) {
+    this.securityContext.authenticatedUser();
+    this.surveyValidator.validate(survey);
+    final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), new Date());
+
+    if (previousSurvey != null) {
+      this.deactivateSurvey(previousSurvey.getId());
+    }
+    // set valid from to start of today
+    LocalDate validFrom = DateUtils.getLocalDateOfTenant();
+    // set valid to for 100 years
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(validFrom.toDate());
+    cal.add(Calendar.YEAR, 100);
+    survey.setValidFrom(validFrom.toDate());
+    survey.setValidTo(cal.getTime());
+    try {
+      this.surveyRepository.saveAndFlush(survey);
+    } catch (final EntityExistsException dve) {
+      handleDataIntegrityIssues(dve, dve, survey.getKey());
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
+    } catch (final JpaSystemException dve) {
+      handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
+    } catch (final PersistenceException dve) {
+      handleDataIntegrityIssues(dve, dve, survey.getKey());
+    }
+    return survey;
+  }
+
+  public Survey updateSurvey(final Survey survey) {
+    try {
+      this.surveyValidator.validate(survey);
+      this.surveyRepository.saveAndFlush(survey);
+    } catch (final EntityExistsException dve) {
+      handleDataIntegrityIssues(dve, dve, survey.getKey());
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
+    } catch (final JpaSystemException dve) {
+      handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
+    } catch (final PersistenceException dve) {
+      handleDataIntegrityIssues(dve, dve, survey.getKey());
+    }
+    return survey;
+  }
+
+  public void deactivateSurvey(final Long id) {
+    this.securityContext.authenticatedUser();
+
+    final Survey survey = findById(id);
+    final DateTime dateTime = getStartOfToday().minusMillis(1);
+    survey.setValidTo(dateTime.toDate());
+
+    this.surveyRepository.save(survey);
+  }
+
+  public void activateSurvey(final Long id) {
+    this.securityContext.authenticatedUser();
+
+    final Survey survey = findById(id);
+    LocalDate validFrom = DateUtils.getLocalDateOfTenant();
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(validFrom.toDate());
+    cal.add(Calendar.YEAR, 100);
+    survey.setValidFrom(validFrom.toDate());
+    survey.setValidTo(cal.getTime());
+
+    this.surveyRepository.save(survey);
+  }
+
+  public static DateTime getStartOfToday() {
+    return DateTime.now()
+        .withHourOfDay(0)
+        .withMinuteOfHour(0)
+        .withSecondOfMinute(0)
+        .withMillisOfSecond(0);
+  }
+
+  private void handleDataIntegrityIssues(
+      final Throwable realCause, final Exception dve, String key) {
+
+    if (realCause.getMessage().contains("m_survey_scorecards")) {
+      throw new PlatformDataIntegrityException(
+          "error.msg.survey.cannot.be.modified.as.used.in.client.survey",
+          "Survey can not be edited as it is already used in client survey",
+          "name",
+          key);
     }
 
-    public List<Survey> fetchValidSurveys() {
-        this.securityContext.authenticatedUser();
-
-        return this.surveyRepository.fetchActiveSurveys(new Date());
+    if (realCause.getMessage().contains("key")) {
+      throw new PlatformDataIntegrityException(
+          "error.msg.survey.duplicate.key", "Survey with key already exists", "name", key);
     }
 
-    public List<Survey> fetchAllSurveys() {
-        this.securityContext.authenticatedUser();
-
-        return this.surveyRepository.fetchAllSurveys();
-    }
-
-    public Survey findById(final Long id) {
-        this.securityContext.authenticatedUser();
-        return this.surveyRepository.findById(id).orElseThrow(() -> new SurveyNotFoundException(id));
-    }
-
-    public Survey createSurvey(final Survey survey) {
-        this.securityContext.authenticatedUser();
-        this.surveyValidator.validate(survey);
-        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), new Date());
-
-        if (previousSurvey != null) {
-            this.deactivateSurvey(previousSurvey.getId());
-        }
-        // set valid from to start of today
-        LocalDate validFrom = DateUtils.getLocalDateOfTenant() ;
-        // set valid to for 100 years
-        Calendar cal = Calendar.getInstance() ;
-        cal.setTime(validFrom.toDate());
-        cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(validFrom.toDate());
-        survey.setValidTo(cal.getTime());
-        try {
-            this.surveyRepository.saveAndFlush(survey);
-        } catch (final EntityExistsException dve) {
-            handleDataIntegrityIssues(dve, dve, survey.getKey());
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
-        } catch (final JpaSystemException dve) {
-            handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
-        } catch (final PersistenceException dve) {
-            handleDataIntegrityIssues(dve, dve, survey.getKey());
-        }
-        return survey ;
-    }
-
-    public Survey updateSurvey(final Survey survey) {
-        try {
-            this.surveyValidator.validate(survey);
-            this.surveyRepository.saveAndFlush(survey);
-        } catch (final EntityExistsException dve) {
-            handleDataIntegrityIssues(dve, dve, survey.getKey());
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
-        } catch (final JpaSystemException dve) {
-            handleDataIntegrityIssues(dve.getMostSpecificCause(), dve, survey.getKey());
-        } catch (final PersistenceException dve) {
-            handleDataIntegrityIssues(dve, dve, survey.getKey());
-        }
-        return survey;
-    }
-
-    public void deactivateSurvey(final Long id) {
-        this.securityContext.authenticatedUser();
-
-        final Survey survey = findById(id);
-        final DateTime dateTime = getStartOfToday().minusMillis(1);
-        survey.setValidTo(dateTime.toDate());
-
-        this.surveyRepository.save(survey);
-    }
-
-    public void activateSurvey(final Long id) {
-        this.securityContext.authenticatedUser();
-
-        final Survey survey = findById(id);
-        LocalDate validFrom = DateUtils.getLocalDateOfTenant() ;
-        Calendar cal = Calendar.getInstance() ;
-        cal.setTime(validFrom.toDate());
-        cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(validFrom.toDate());
-        survey.setValidTo(cal.getTime());
-
-        this.surveyRepository.save(survey);
-    }
-
-
-    public static DateTime getStartOfToday() {
-        return DateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
-    }
-
-    private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {
-
-        if (realCause.getMessage().contains("m_survey_scorecards")) { throw new PlatformDataIntegrityException(
-                "error.msg.survey.cannot.be.modified.as.used.in.client.survey",
-                "Survey can not be edited as it is already used in client survey", "name", key); }
-
-        if (realCause.getMessage().contains("key")) { throw new PlatformDataIntegrityException("error.msg.survey.duplicate.key",
-                "Survey with key already exists", "name", key); }
-
-        throw new PlatformDataIntegrityException("error.msg.survey.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource: " + realCause.getMessage());
-    }
+    throw new PlatformDataIntegrityException(
+        "error.msg.survey.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource: " + realCause.getMessage());
+  }
 }

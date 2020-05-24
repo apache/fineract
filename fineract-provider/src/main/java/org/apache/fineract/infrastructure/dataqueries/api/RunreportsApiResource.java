@@ -63,132 +63,205 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Run Reports"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Run Reports", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Run Reports", description = "")})
 public class RunreportsApiResource {
 
-    private final PlatformSecurityContext context;
-    private final ToApiJsonSerializer<ReportData> toApiJsonSerializer;
-    private final ReadReportingService readExtraDataAndReportingService;
-    private final GenericDataService genericDataService;
-    private final ReportingProcessServiceProvider reportingProcessServiceProvider;
+  private final PlatformSecurityContext context;
+  private final ToApiJsonSerializer<ReportData> toApiJsonSerializer;
+  private final ReadReportingService readExtraDataAndReportingService;
+  private final GenericDataService genericDataService;
+  private final ReportingProcessServiceProvider reportingProcessServiceProvider;
 
-    @Autowired
-    public RunreportsApiResource(final PlatformSecurityContext context, final ReadReportingService readExtraDataAndReportingService,
-            final GenericDataService genericDataService, final ToApiJsonSerializer<ReportData> toApiJsonSerializer,
-            final ReportingProcessServiceProvider reportingProcessServiceProvider) {
-        this.context = context;
-        this.readExtraDataAndReportingService = readExtraDataAndReportingService;
-        this.genericDataService = genericDataService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
+  @Autowired
+  public RunreportsApiResource(
+      final PlatformSecurityContext context,
+      final ReadReportingService readExtraDataAndReportingService,
+      final GenericDataService genericDataService,
+      final ToApiJsonSerializer<ReportData> toApiJsonSerializer,
+      final ReportingProcessServiceProvider reportingProcessServiceProvider) {
+    this.context = context;
+    this.readExtraDataAndReportingService = readExtraDataAndReportingService;
+    this.genericDataService = genericDataService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.reportingProcessServiceProvider = reportingProcessServiceProvider;
+  }
+
+  @GET
+  @Path("{reportName}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({
+    MediaType.APPLICATION_JSON,
+    "text/csv",
+    "application/vnd.ms-excel",
+    "application/pdf",
+    "text/html"
+  })
+  @ApiOperation(
+      value = "Running a Report",
+      notes =
+          "This resource allows you to run and receive output from pre-defined Apache Fineract"
+              + " reports.\n"
+              + "\n"
+              + "Reports can also be used to provide data for searching and workflow"
+              + " functionality.\n"
+              + "\n"
+              + "The default output is a JSON formatted \"Generic Resultset\". The Generic"
+              + " Resultset contains Column Heading as well as Data information. However, you can"
+              + " export to CSV format by simply adding \"&exportCSV=true\" to the end of your"
+              + " URL.\n"
+              + "\n"
+              + "If Pentaho reports have been pre-defined, they can also be run through this"
+              + " resource. Pentaho reports can return HTML, PDF or CSV formats.\n"
+              + "\n"
+              + "The Apache Fineract reference application uses a JQuery plugin called stretchy"
+              + " reporting which, itself, uses this reports resource to provide a pretty flexible"
+              + " reporting User Interface (UI).\n\n"
+              + "\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "runreports/Client%20Listing?R_officeId=1\n"
+              + "\n"
+              + "\n"
+              + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n"
+              + "\n"
+              + "\n"
+              + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n"
+              + "\n"
+              + "\n"
+              + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n"
+              + "\n"
+              + "\n"
+              + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n"
+              + "\n"
+              + "\n"
+              + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n"
+              + "\n"
+              + "\n"
+              + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n"
+              + "\n"
+              + "\n"
+              + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = RunreportsApiResourceSwagger.GetReportNameResponse.class)
+  })
+  public Response runReport(
+      @PathParam("reportName") @ApiParam(value = "reportName") final String reportName,
+      @Context final UriInfo uriInfo,
+      @DefaultValue("false")
+          @QueryParam("isSelfServiceUserReport")
+          @ApiParam(value = "isSelfServiceUserReport")
+          final boolean isSelfServiceUserReport) {
+
+    final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+
+    final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+    final boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
+    final boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
+    final boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
+
+    checkUserPermissionForReport(reportName, parameterType);
+
+    String parameterTypeValue = null;
+    if (!parameterType) {
+      parameterTypeValue = "report";
+      String reportType =
+          this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
+      ReportingProcessService reportingProcessService =
+          this.reportingProcessServiceProvider.findReportingProcessService(reportType);
+      if (reportingProcessService != null) {
+        return reportingProcessService.processRequest(reportName, queryParams);
+      }
+    } else {
+      parameterTypeValue = "parameter";
     }
 
-    @GET
-    @Path("{reportName}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
-    @ApiOperation(value = "Running a Report", notes = "This resource allows you to run and receive output from pre-defined Apache Fineract reports.\n" + "\n" + "Reports can also be used to provide data for searching and workflow functionality.\n" + "\n" + "The default output is a JSON formatted \"Generic Resultset\". The Generic Resultset contains Column Heading as well as Data information. However, you can export to CSV format by simply adding \"&exportCSV=true\" to the end of your URL.\n" + "\n" + "If Pentaho reports have been pre-defined, they can also be run through this resource. Pentaho reports can return HTML, PDF or CSV formats.\n" + "\n" + "The Apache Fineract reference application uses a JQuery plugin called stretchy reporting which, itself, uses this reports resource to provide a pretty flexible reporting User Interface (UI).\n\n" + "\n" +
-            "\n" + "Example Requests:\n" + "\n" + "runreports/Client%20Listing?R_officeId=1\n" + "\n" + "\n" + "runreports/Client%20Listing?R_officeId=1&exportCSV=true\n" + "\n" + "\n" + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true\n" + "\n" + "\n" + "runreports/OfficeIdSelectOne?R_officeId=1&parameterType=true&exportCSV=true\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1\n" + "\n" + "\n" + "runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = RunreportsApiResourceSwagger.GetReportNameResponse.class)})
-    public Response runReport(@PathParam("reportName") @ApiParam(value = "reportName") final String reportName,
-            @Context final UriInfo uriInfo,
-            @DefaultValue("false") @QueryParam("isSelfServiceUserReport") @ApiParam(value = "isSelfServiceUserReport") final boolean isSelfServiceUserReport) {
+    // PDF format
 
-        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    if (exportPdf) {
+      final Map<String, String> reportParams = getReportParams(queryParams);
+      final String pdfFileName =
+          this.readExtraDataAndReportingService.retrieveReportPDF(
+              reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
 
-        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        final boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
-        final boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
-        final boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
+      final File file = new File(pdfFileName);
 
-        checkUserPermissionForReport(reportName, parameterType);
+      final ResponseBuilder response = Response.ok(file);
+      response.header("Content-Disposition", "attachment; filename=\"" + pdfFileName + "\"");
+      response.header("content-Type", "application/pdf");
 
-        String parameterTypeValue = null;
-        if (!parameterType) {
-            parameterTypeValue = "report";
-            String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
-            ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
-            if (reportingProcessService != null) { return reportingProcessService.processRequest(reportName, queryParams); }
+      return response.build();
+    }
+
+    if (!exportCsv) {
+      final Map<String, String> reportParams = getReportParams(queryParams);
+
+      final GenericResultsetData result =
+          this.readExtraDataAndReportingService.retrieveGenericResultset(
+              reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
+
+      String json = "";
+      final boolean genericResultSetIsPassed =
+          ApiParameterHelper.genericResultSetPassed(uriInfo.getQueryParameters());
+      final boolean genericResultSet =
+          ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
+      if (genericResultSetIsPassed) {
+        if (genericResultSet) {
+          json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
         } else {
-            parameterTypeValue = "parameter";
+          json = this.genericDataService.generateJsonFromGenericResultsetData(result);
         }
+      } else {
+        json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+      }
 
-        // PDF format
-
-        if (exportPdf) {
-            final Map<String, String> reportParams = getReportParams(queryParams);
-            final String pdfFileName = this.readExtraDataAndReportingService
-                    .retrieveReportPDF(reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
-
-            final File file = new File(pdfFileName);
-
-            final ResponseBuilder response = Response.ok(file);
-            response.header("Content-Disposition", "attachment; filename=\"" + pdfFileName + "\"");
-            response.header("content-Type", "application/pdf");
-
-            return response.build();
-
-        }
-
-        if (!exportCsv) {
-            final Map<String, String> reportParams = getReportParams(queryParams);
-
-            final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName,
-                    parameterTypeValue, reportParams, isSelfServiceUserReport);
-
-            String json = "";
-            final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(uriInfo.getQueryParameters());
-            final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
-            if (genericResultSetIsPassed) {
-                if (genericResultSet) {
-                    json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-                } else {
-                    json = this.genericDataService.generateJsonFromGenericResultsetData(result);
-                }
-            } else {
-                json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-            }
-
-            return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
-        }
-
-        // CSV Export
-        final Map<String, String> reportParams = getReportParams(queryParams);
-        final StreamingOutput result = this.readExtraDataAndReportingService
-                .retrieveReportCSV(reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
-
-        return Response.ok().entity(result).type("text/csv")
-                .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
+      return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
     }
 
-    private void checkUserPermissionForReport(final String reportName, final boolean parameterType) {
+    // CSV Export
+    final Map<String, String> reportParams = getReportParams(queryParams);
+    final StreamingOutput result =
+        this.readExtraDataAndReportingService.retrieveReportCSV(
+            reportName, parameterTypeValue, reportParams, isSelfServiceUserReport);
 
-        // Anyone can run a 'report' that is simply getting possible parameter
-        // (dropdown listbox) values.
-        if (!parameterType) {
-            final AppUser currentUser = this.context.authenticatedUser();
-            if (currentUser.hasNotPermissionForReport(reportName)) { throw new NoAuthorizationException("Not authorised to run report: "
-                    + reportName); }
-        }
+    return Response.ok()
+        .entity(result)
+        .type("text/csv")
+        .header(
+            "Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv")
+        .build();
+  }
+
+  private void checkUserPermissionForReport(final String reportName, final boolean parameterType) {
+
+    // Anyone can run a 'report' that is simply getting possible parameter
+    // (dropdown listbox) values.
+    if (!parameterType) {
+      final AppUser currentUser = this.context.authenticatedUser();
+      if (currentUser.hasNotPermissionForReport(reportName)) {
+        throw new NoAuthorizationException("Not authorised to run report: " + reportName);
+      }
     }
+  }
 
-    private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams) {
+  private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams) {
 
-        final Map<String, String> reportParams = new HashMap<>();
-        final Set<String> keys = queryParams.keySet();
-        String pKey;
-        String pValue;
-        for (final String k : keys) {
+    final Map<String, String> reportParams = new HashMap<>();
+    final Set<String> keys = queryParams.keySet();
+    String pKey;
+    String pValue;
+    for (final String k : keys) {
 
-            if (k.startsWith("R_")) {
-                pKey = "${" + k.substring(2) + "}";
-                pValue = queryParams.get(k).get(0);
-                SQLInjectionValidator.validateSQLInput(pValue);
-                reportParams.put(pKey, pValue);
-            }
-        }
-        return reportParams;
+      if (k.startsWith("R_")) {
+        pKey = "${" + k.substring(2) + "}";
+        pValue = queryParams.get(k).get(0);
+        SQLInjectionValidator.validateSQLInput(pValue);
+        reportParams.put(pKey, pValue);
+      }
     }
+    return reportParams;
+  }
 }

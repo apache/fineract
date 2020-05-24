@@ -43,50 +43,59 @@ import org.springframework.stereotype.Component;
  * Implementation of {@link FromApiJsonDeserializer} for {@link NoteCommand} 's.
  */
 @Component
-public final class NoteCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<NoteCommand> {
+public final class NoteCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<NoteCommand> {
 
-    /**
-     * The parameters supported for this command.
-     */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("note"));
+  /**
+   * The parameters supported for this command.
+   */
+  private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("note"));
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public NoteCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public NoteCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  @Override
+  public NoteCommand commandFromApiJson(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public NoteCommand commandFromApiJson(final String json) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+    return new NoteCommand(note);
+  }
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-
-        return new NoteCommand(note);
+  public void validateNote(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateNote(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("note");
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("note");
+    final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+    baseDataValidator.reset().parameter("note").value(note).notBlank().notExceedingLengthOf(1000);
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notBlank().notExceedingLengthOf(1000);
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
+  }
 }

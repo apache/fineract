@@ -30,20 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "FIXEDDEPOSITACCOUNT", action = "APPROVALUNDO")
-public class FixedDepositAccountApplicationApprovalUndoCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositAccountApplicationApprovalUndoCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+  private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public FixedDepositAccountApplicationApprovalUndoCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public FixedDepositAccountApplicationApprovalUndoCommandHandler(
+      final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.undoApplicationApproval(command.entityId(), command,
-                DepositAccountType.FIXED_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.undoApplicationApproval(
+        command.entityId(), command, DepositAccountType.FIXED_DEPOSIT);
+  }
 }

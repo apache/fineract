@@ -37,9 +37,8 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
     this.offices = offices;
   }
 
-
   @Override
-  public void populate(final Workbook workbook,String dateFormat) {
+  public void populate(final Workbook workbook, String dateFormat) {
     int rowIndex = 1;
     Sheet officeSheet = workbook.createSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
     setLayout(officeSheet);
@@ -71,11 +70,10 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
   }
 
   public List<String> getOfficeNames() {
-         List<String> officeNames=new ArrayList<>();
-         for (OfficeData office : offices) {
-             officeNames.add(office.name());
-        }
-         return officeNames;
+    List<String> officeNames = new ArrayList<>();
+    for (OfficeData office : offices) {
+      officeNames.add(office.name());
+    }
+    return officeNames;
   }
-
 }

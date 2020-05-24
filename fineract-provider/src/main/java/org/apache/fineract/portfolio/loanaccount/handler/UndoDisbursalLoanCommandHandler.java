@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "DISBURSALUNDO")
 public class UndoDisbursalLoanCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public UndoDisbursalLoanCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UndoDisbursalLoanCommandHandler(final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.undoLoanDisbursal(command.entityId(), command);
-    }
+    return this.writePlatformService.undoLoanDisbursal(command.entityId(), command);
+  }
 }

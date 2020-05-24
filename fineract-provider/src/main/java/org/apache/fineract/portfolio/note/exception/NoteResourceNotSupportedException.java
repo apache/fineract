@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class NoteResourceNotSupportedException extends AbstractPlatformResourceNotFoundException {
 
-    public NoteResourceNotSupportedException(final String resource) {
-        super("error.msg.note.resource.not.supported", "Note does not support resource " + resource);
-    }
+  public NoteResourceNotSupportedException(final String resource) {
+    super("error.msg.note.resource.not.supported", "Note does not support resource " + resource);
+  }
 }

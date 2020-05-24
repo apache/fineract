@@ -27,14 +27,28 @@ import org.joda.time.format.DateTimeFormatter;
 
 public interface SavingsAccountDomainService {
 
-    SavingsAccountTransaction handleWithdrawal(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, SavingsTransactionBooleanValues transactionBooleanValues);
+  SavingsAccountTransaction handleWithdrawal(
+      SavingsAccount account,
+      DateTimeFormatter fmt,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      SavingsTransactionBooleanValues transactionBooleanValues);
 
-    SavingsAccountTransaction handleDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isAccountTransfer, boolean isRegularTransaction);
+  SavingsAccountTransaction handleDeposit(
+      SavingsAccount account,
+      DateTimeFormatter fmt,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      boolean isAccountTransfer,
+      boolean isRegularTransaction);
 
-    void postJournalEntries(SavingsAccount savingsAccount, Set<Long> existingTransactionIds, Set<Long> existingReversedTransactionIds);
+  void postJournalEntries(
+      SavingsAccount savingsAccount,
+      Set<Long> existingTransactionIds,
+      Set<Long> existingReversedTransactionIds);
 
-    SavingsAccountTransaction handleDividendPayout(SavingsAccount account, LocalDate transactionDate, BigDecimal transactionAmount);
-
+  SavingsAccountTransaction handleDividendPayout(
+      SavingsAccount account, LocalDate transactionDate, BigDecimal transactionAmount);
 }

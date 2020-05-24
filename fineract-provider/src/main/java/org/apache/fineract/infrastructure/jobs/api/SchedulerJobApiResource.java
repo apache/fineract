@@ -61,119 +61,195 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Path("/jobs")
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Component
 @Api(tags = {"MIFOSX-BATCH JOBS"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "MIFOSX-BATCH JOBS", description = "Batch jobs (also known as cron jobs on Unix-based systems) are a series of back-end jobs executed on a computer at a particular time defined in job's cron expression.\n\n At any point, you can view the list of batch jobs scheduled to run along with other details specific to each job. Manually you can execute the jobs at any point of time.\n\n The scheduler status can be either \"Active\" or \"Standby\". If the scheduler status is Active, it indicates that all batch jobs are running/ will run as per the specified schedule.If the scheduler status is Standby, it will ensure all scheduled batch runs are suspended.")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "MIFOSX-BATCH JOBS",
+          description =
+              "Batch jobs (also known as cron jobs on Unix-based systems) are a series of back-end"
+                  + " jobs executed on a computer at a particular time defined in job's cron"
+                  + " expression.\n\n"
+                  + " At any point, you can view the list of batch jobs scheduled to run along"
+                  + " with other details specific to each job. Manually you can execute the jobs"
+                  + " at any point of time.\n\n"
+                  + " The scheduler status can be either \"Active\" or \"Standby\". If the"
+                  + " scheduler status is Active, it indicates that all batch jobs are running/"
+                  + " will run as per the specified schedule.If the scheduler status is Standby,"
+                  + " it will ensure all scheduled batch runs are suspended.")
+    })
 public class SchedulerJobApiResource {
 
-    private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
-    private final JobRegisterService jobRegisterService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final ToApiJsonSerializer<JobDetailData> toApiJsonSerializer;
-    private final ToApiJsonSerializer<JobDetailHistoryData> jobHistoryToApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final PlatformSecurityContext context;
+  private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
+  private final JobRegisterService jobRegisterService;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final ToApiJsonSerializer<JobDetailData> toApiJsonSerializer;
+  private final ToApiJsonSerializer<JobDetailHistoryData> jobHistoryToApiJsonSerializer;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext context;
 
-    @Autowired
-    public SchedulerJobApiResource(final SchedulerJobRunnerReadService schedulerJobRunnerReadService,
-            final JobRegisterService jobRegisterService, final ToApiJsonSerializer<JobDetailData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final ToApiJsonSerializer<JobDetailHistoryData> jobHistoryToApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final PlatformSecurityContext context) {
-        this.schedulerJobRunnerReadService = schedulerJobRunnerReadService;
-        this.jobRegisterService = jobRegisterService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.jobHistoryToApiJsonSerializer = jobHistoryToApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.context = context;
+  @Autowired
+  public SchedulerJobApiResource(
+      final SchedulerJobRunnerReadService schedulerJobRunnerReadService,
+      final JobRegisterService jobRegisterService,
+      final ToApiJsonSerializer<JobDetailData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final ToApiJsonSerializer<JobDetailHistoryData> jobHistoryToApiJsonSerializer,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+      final PlatformSecurityContext context) {
+    this.schedulerJobRunnerReadService = schedulerJobRunnerReadService;
+    this.jobRegisterService = jobRegisterService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.jobHistoryToApiJsonSerializer = jobHistoryToApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.context = context;
+  }
+
+  @GET
+  @ApiOperation(
+      value = "Retrieve Scheduler Jobs",
+      notes = "Returns the list of jobs.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = SchedulerJobApiResourceSwagger.GetJobsResponse.class,
+        responseContainer = "list")
+  })
+  public String retrieveAll(@Context final UriInfo uriInfo) {
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
+    final List<JobDetailData> jobDetailDatas =
+        this.schedulerJobRunnerReadService.findAllJobDeatils();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(
+        settings, jobDetailDatas, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
+  }
+
+  @GET
+  @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
+  @ApiOperation(
+      value = "Retrieve a Job",
+      notes = "Returns the details of a Job.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs/5")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = SchedulerJobApiResourceSwagger.GetJobsResponse.class)
+  })
+  public String retrieveOne(
+      @PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
+      @Context final UriInfo uriInfo) {
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
+    final JobDetailData jobDetailData = this.schedulerJobRunnerReadService.retrieveOne(jobId);
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(
+        settings, jobDetailData, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
+  }
+
+  @GET
+  @Path("{" + SchedulerJobApiConstants.JOB_ID + "}/" + SchedulerJobApiConstants.JOB_RUN_HISTORY)
+  @ApiOperation(
+      value = "Retrieve Job Run History",
+      notes = "Example Requests:\n" + "\n" + "jobs/5/runhistory?offset=0&limit=200")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = SchedulerJobApiResourceSwagger.GetJobsJobIDJobRunHistoryResponse.class)
+  })
+  public String retrieveHistory(
+      @Context final UriInfo uriInfo,
+      @PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
+      @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+      @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+      @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+      @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
+    final SearchParameters searchParameters =
+        SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+    final Page<JobDetailHistoryData> jobhistoryDetailData =
+        this.schedulerJobRunnerReadService.retrieveJobHistory(jobId, searchParameters);
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.jobHistoryToApiJsonSerializer.serialize(
+        settings,
+        jobhistoryDetailData,
+        SchedulerJobApiConstants.JOB_HISTORY_RESPONSE_DATA_PARAMETERS);
+  }
+
+  @POST
+  @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
+  @ApiOperation(value = "Run a Job", notes = "Manually Execute Specific Job.")
+  @ApiResponses({@ApiResponse(code = 200, message = "POST: jobs/1?command=executeJob")})
+  public Response executeJob(
+      @PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
+      @QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command")
+          final String commandParam) {
+    // check the logged in user have permissions to execute scheduler jobs
+    final boolean hasNotPermission =
+        this.context
+            .authenticatedUser()
+            .hasNotPermissionForAnyOf("ALL_FUNCTIONS", "EXECUTEJOB_SCHEDULER");
+    if (hasNotPermission) {
+      final String authorizationMessage = "User has no authority to execute scheduler jobs";
+      throw new NoAuthorizationException(authorizationMessage);
     }
-
-    @GET
-    @ApiOperation(value = "Retrieve Scheduler Jobs", notes = "Returns the list of jobs.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerJobApiResourceSwagger.GetJobsResponse.class, responseContainer = "list")})
-    public String retrieveAll(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
-        final List<JobDetailData> jobDetailDatas = this.schedulerJobRunnerReadService.findAllJobDeatils();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, jobDetailDatas, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
+    Response response = Response.status(400).build();
+    if (is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
+      this.jobRegisterService.executeJob(jobId);
+      response = Response.status(202).build();
+    } else {
+      throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
     }
+    return response;
+  }
 
-    @GET
-    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
-    @ApiOperation(value = "Retrieve a Job", notes = "Returns the details of a Job.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs/5")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerJobApiResourceSwagger.GetJobsResponse.class)})
-    public String retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId, @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
-        final JobDetailData jobDetailData = this.schedulerJobRunnerReadService.retrieveOne(jobId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, jobDetailData, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
+  @PUT
+  @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
+  @ApiOperation(value = "Update a Job", notes = "Updates the details of a job.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class)
+  })
+  @ApiResponses({@ApiResponse(code = 200, message = "")})
+  public String updateJobDetail(
+      @PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
+      @ApiParam(hidden = true) final String jsonRequestBody) {
+
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .updateJobDetail(jobId) //
+            .withJson(jsonRequestBody) //
+            .build(); //
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    if (result.getChanges() != null
+        && (result.getChanges().containsKey(SchedulerJobApiConstants.jobActiveStatusParamName)
+            || result.getChanges().containsKey(SchedulerJobApiConstants.cronExpressionParamName))) {
+      this.jobRegisterService.rescheduleJob(jobId);
     }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @GET
-    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}/" + SchedulerJobApiConstants.JOB_RUN_HISTORY)
-    @ApiOperation(value = "Retrieve Job Run History", notes = "Example Requests:\n" + "\n" + "jobs/5/runhistory?offset=0&limit=200")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerJobApiResourceSwagger.GetJobsJobIDJobRunHistoryResponse.class)})
-    public String retrieveHistory(@Context final UriInfo uriInfo, @PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
-            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
-        this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
-        final Page<JobDetailHistoryData> jobhistoryDetailData = this.schedulerJobRunnerReadService.retrieveJobHistory(jobId,
-                searchParameters);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.jobHistoryToApiJsonSerializer.serialize(settings, jobhistoryDetailData,
-                SchedulerJobApiConstants.JOB_HISTORY_RESPONSE_DATA_PARAMETERS);
-    }
-
-    @POST
-    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
-    @ApiOperation(value = "Run a Job", notes = "Manually Execute Specific Job.")
-    @ApiResponses({@ApiResponse(code = 200, message = "POST: jobs/1?command=executeJob")})
-    public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
-            @QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command") final String commandParam) {
-        // check the logged in user have permissions to execute scheduler jobs
-        final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "EXECUTEJOB_SCHEDULER");
-        if (hasNotPermission) {
-            final String authorizationMessage = "User has no authority to execute scheduler jobs";
-            throw new NoAuthorizationException(authorizationMessage);
-        }
-        Response response = Response.status(400).build();
-        if (is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
-            this.jobRegisterService.executeJob(jobId);
-            response = Response.status(202).build();
-        } else {
-            throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
-        }
-        return response;
-    }
-
-    @PUT
-    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
-    @ApiOperation(value = "Update a Job", notes = "Updates the details of a job.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "")})
-    public String updateJobDetail(@PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId, @ApiParam(hidden = true) final String jsonRequestBody) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateJobDetail(jobId) //
-                .withJson(jsonRequestBody) //
-                .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        if (result.getChanges() != null
-                && (result.getChanges().containsKey(SchedulerJobApiConstants.jobActiveStatusParamName) || result.getChanges().containsKey(
-                        SchedulerJobApiConstants.cronExpressionParamName))) {
-            this.jobRegisterService.rescheduleJob(jobId);
-        }
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
+  private boolean is(final String commandParam, final String commandValue) {
+    return StringUtils.isNotBlank(commandParam)
+        && commandParam.trim().equalsIgnoreCase(commandValue);
+  }
 }

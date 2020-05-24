@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "STANDINGINSTRUCTION", action = "DELETE")
 public class DeleteStandingInstructionCommandHandler implements NewCommandSourceHandler {
 
-    private StandingInstructionWritePlatformService standingInstructionWritePlatformService;
+  private StandingInstructionWritePlatformService standingInstructionWritePlatformService;
 
-    @Autowired
-    public DeleteStandingInstructionCommandHandler(StandingInstructionWritePlatformService standingInstructionWritePlatformService) {
-        this.standingInstructionWritePlatformService = standingInstructionWritePlatformService;
-    }
+  @Autowired
+  public DeleteStandingInstructionCommandHandler(
+      StandingInstructionWritePlatformService standingInstructionWritePlatformService) {
+    this.standingInstructionWritePlatformService = standingInstructionWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.standingInstructionWritePlatformService.delete(command.entityId());
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.standingInstructionWritePlatformService.delete(command.entityId());
+  }
 }

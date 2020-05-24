@@ -22,8 +22,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class ExceedingTrancheCountException extends AbstractPlatformDomainRuleException {
 
-    public ExceedingTrancheCountException(final String entity, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg." + entity + ".exceeding.max.tranche.count", defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public ExceedingTrancheCountException(
+      final String entity,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg." + entity + ".exceeding.max.tranche.count",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

@@ -29,84 +29,138 @@ import org.joda.time.LocalDate;
 
 public class TaxComponentData implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final BigDecimal percentage;
-    @SuppressWarnings("unused")
-    private final EnumOptionData debitAccountType;
-    @SuppressWarnings("unused")
-    private final GLAccountData debitAccount;
-    @SuppressWarnings("unused")
-    private final EnumOptionData creditAccountType;
-    @SuppressWarnings("unused")
-    private final GLAccountData creditAccount;
-    @SuppressWarnings("unused")
-    private final LocalDate startDate;
-    @SuppressWarnings("unused")
-    private final Collection<TaxComponentHistoryData> taxComponentHistories;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    // template options
-    @SuppressWarnings("unused")
-    private final Map<String, List<GLAccountData>> glAccountOptions;
-    @SuppressWarnings("unused")
-    private final Collection<EnumOptionData> glAccountTypeOptions;
+  @SuppressWarnings("unused")
+  private final String name;
 
-    public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
-            final EnumOptionData debitAccountType, final GLAccountData debitAcount, final EnumOptionData creditAccountType,
-            final GLAccountData creditAcount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
-        final Map<String, List<GLAccountData>> glAccountOptions = null;
-        final Collection<EnumOptionData> glAccountTypeOptions = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
-    }
+  @SuppressWarnings("unused")
+  private final BigDecimal percentage;
 
-    public static TaxComponentData lookup(final Long id, final String name) {
-        final BigDecimal percentage = null;
-        final EnumOptionData debitAccountType = null;
-        final GLAccountData debitAcount = null;
-        final EnumOptionData creditAccountType = null;
-        final GLAccountData creditAcount = null;
-        final LocalDate startDate = null;
-        final Collection<TaxComponentHistoryData> taxComponentHistories = null;
-        final Map<String, List<GLAccountData>> glAccountOptions = null;
-        final Collection<EnumOptionData> glAccountTypeOptions = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
-    }
+  @SuppressWarnings("unused")
+  private final EnumOptionData debitAccountType;
 
-    public static TaxComponentData template(final Map<String, List<GLAccountData>> glAccountOptions,
-            final Collection<EnumOptionData> glAccountTypeOptions) {
-        final Long id = null;
-        final String name = null;
-        final BigDecimal percentage = null;
-        final EnumOptionData debitAccountType = null;
-        final GLAccountData debitAcount = null;
-        final EnumOptionData creditAccountType = null;
-        final GLAccountData creditAcount = null;
-        final LocalDate startDate = null;
-        final Collection<TaxComponentHistoryData> taxComponentHistories = null;
-        return new TaxComponentData(id, name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
-    }
+  @SuppressWarnings("unused")
+  private final GLAccountData debitAccount;
 
-    private TaxComponentData(final Long id, final String name, final BigDecimal percentage, final EnumOptionData debitAccountType,
-            final GLAccountData debitAcount, final EnumOptionData creditAccountType, final GLAccountData creditAcount,
-            final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories,
-            final Map<String, List<GLAccountData>> glAccountOptions, final Collection<EnumOptionData> glAccountTypeOptions) {
-        this.id = id;
-        this.percentage = percentage;
-        this.name = name;
-        this.debitAccountType = debitAccountType;
-        this.debitAccount = debitAcount;
-        this.creditAccountType = creditAccountType;
-        this.creditAccount = creditAcount;
-        this.startDate = startDate;
-        this.taxComponentHistories = taxComponentHistories;
-        this.glAccountOptions = glAccountOptions;
-        this.glAccountTypeOptions = glAccountTypeOptions;
-    }
+  @SuppressWarnings("unused")
+  private final EnumOptionData creditAccountType;
 
+  @SuppressWarnings("unused")
+  private final GLAccountData creditAccount;
+
+  @SuppressWarnings("unused")
+  private final LocalDate startDate;
+
+  @SuppressWarnings("unused")
+  private final Collection<TaxComponentHistoryData> taxComponentHistories;
+
+  // template options
+  @SuppressWarnings("unused")
+  private final Map<String, List<GLAccountData>> glAccountOptions;
+
+  @SuppressWarnings("unused")
+  private final Collection<EnumOptionData> glAccountTypeOptions;
+
+  public static TaxComponentData instance(
+      final Long id,
+      final String name,
+      final BigDecimal percentage,
+      final EnumOptionData debitAccountType,
+      final GLAccountData debitAcount,
+      final EnumOptionData creditAccountType,
+      final GLAccountData creditAcount,
+      final LocalDate startDate,
+      final Collection<TaxComponentHistoryData> taxComponentHistories) {
+    final Map<String, List<GLAccountData>> glAccountOptions = null;
+    final Collection<EnumOptionData> glAccountTypeOptions = null;
+    return new TaxComponentData(
+        id,
+        name,
+        percentage,
+        debitAccountType,
+        debitAcount,
+        creditAccountType,
+        creditAcount,
+        startDate,
+        taxComponentHistories,
+        glAccountOptions,
+        glAccountTypeOptions);
+  }
+
+  public static TaxComponentData lookup(final Long id, final String name) {
+    final BigDecimal percentage = null;
+    final EnumOptionData debitAccountType = null;
+    final GLAccountData debitAcount = null;
+    final EnumOptionData creditAccountType = null;
+    final GLAccountData creditAcount = null;
+    final LocalDate startDate = null;
+    final Collection<TaxComponentHistoryData> taxComponentHistories = null;
+    final Map<String, List<GLAccountData>> glAccountOptions = null;
+    final Collection<EnumOptionData> glAccountTypeOptions = null;
+    return new TaxComponentData(
+        id,
+        name,
+        percentage,
+        debitAccountType,
+        debitAcount,
+        creditAccountType,
+        creditAcount,
+        startDate,
+        taxComponentHistories,
+        glAccountOptions,
+        glAccountTypeOptions);
+  }
+
+  public static TaxComponentData template(
+      final Map<String, List<GLAccountData>> glAccountOptions,
+      final Collection<EnumOptionData> glAccountTypeOptions) {
+    final Long id = null;
+    final String name = null;
+    final BigDecimal percentage = null;
+    final EnumOptionData debitAccountType = null;
+    final GLAccountData debitAcount = null;
+    final EnumOptionData creditAccountType = null;
+    final GLAccountData creditAcount = null;
+    final LocalDate startDate = null;
+    final Collection<TaxComponentHistoryData> taxComponentHistories = null;
+    return new TaxComponentData(
+        id,
+        name,
+        percentage,
+        debitAccountType,
+        debitAcount,
+        creditAccountType,
+        creditAcount,
+        startDate,
+        taxComponentHistories,
+        glAccountOptions,
+        glAccountTypeOptions);
+  }
+
+  private TaxComponentData(
+      final Long id,
+      final String name,
+      final BigDecimal percentage,
+      final EnumOptionData debitAccountType,
+      final GLAccountData debitAcount,
+      final EnumOptionData creditAccountType,
+      final GLAccountData creditAcount,
+      final LocalDate startDate,
+      final Collection<TaxComponentHistoryData> taxComponentHistories,
+      final Map<String, List<GLAccountData>> glAccountOptions,
+      final Collection<EnumOptionData> glAccountTypeOptions) {
+    this.id = id;
+    this.percentage = percentage;
+    this.name = name;
+    this.debitAccountType = debitAccountType;
+    this.debitAccount = debitAcount;
+    this.creditAccountType = creditAccountType;
+    this.creditAccount = creditAcount;
+    this.startDate = startDate;
+    this.taxComponentHistories = taxComponentHistories;
+    this.glAccountOptions = glAccountOptions;
+    this.glAccountTypeOptions = glAccountTypeOptions;
+  }
 }

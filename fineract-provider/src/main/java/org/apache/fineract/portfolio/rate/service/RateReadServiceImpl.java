@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.rate.service;
 
 import java.math.BigDecimal;
@@ -57,7 +56,7 @@ public class RateReadServiceImpl implements RateReadService {
     this.context.authenticatedUser();
     final RateMapper rm = new RateMapper();
     final String sql = "select " + rm.rateSchema();
-    return this.jdbcTemplate.query(sql, rm, new Object[]{});
+    return this.jdbcTemplate.query(sql, rm, new Object[] {});
   }
 
   @Override
@@ -66,7 +65,8 @@ public class RateReadServiceImpl implements RateReadService {
       this.context.authenticatedUser();
       final RateMapper rm = new RateMapper();
       final String sql = "select " + rm.rateSchema() + " where r.id = ?";
-      final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{rateId});
+      final RateData selectedRate =
+          this.jdbcTemplate.queryForObject(sql, rm, new Object[] {rateId});
       return selectedRate;
 
     } catch (final EmptyResultDataAccessException e) {
@@ -80,7 +80,7 @@ public class RateReadServiceImpl implements RateReadService {
       this.context.authenticatedUser();
       final RateMapper rm = new RateMapper();
       final String sql = "select " + rm.rateSchema() + " where r.name = ?";
-      final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[]{name});
+      final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {name});
       return selectedRate;
 
     } catch (final EmptyResultDataAccessException e) {
@@ -93,29 +93,28 @@ public class RateReadServiceImpl implements RateReadService {
     this.context.authenticatedUser();
     final RateMapper rm = new RateMapper();
     final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{true, RateAppliesTo.LOAN.getValue()});
+    return this.jdbcTemplate.query(sql, rm, new Object[] {true, RateAppliesTo.LOAN.getValue()});
   }
 
   @Override
   public List<RateData> retrieveLoanRates(Long loanId) {
     final RateMapper rm = new RateMapper();
     final String sql = "select " + rm.loanRateSchema() + " where lr.loan_id = ?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{loanId});
+    return this.jdbcTemplate.query(sql, rm, new Object[] {loanId});
   }
 
   @Override
   public List<RateData> retrieveProductLoanRates(Long loanId) {
     final RateMapper rm = new RateMapper();
     final String sql = "select " + rm.productLoanRateSchema() + " where lr.product_loan_id = ?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{loanId});
+    return this.jdbcTemplate.query(sql, rm, new Object[] {loanId});
   }
 
   private static final class RateMapper implements RowMapper<RateData> {
 
-
     public String rateSchema() {
-      return " r.id as id, r.name as name, r.percentage as percentage, " +
-          "r.product_apply as productApply, r.active as active from m_rate r ";
+      return " r.id as id, r.name as name, r.percentage as percentage, "
+          + "r.product_apply as productApply, r.active as active from m_rate r ";
     }
 
     public String loanRateSchema() {
@@ -126,8 +125,7 @@ public class RateReadServiceImpl implements RateReadService {
       return rateSchema() + " join m_product_loan_rate lr on lr.rate_id = r.id";
     }
 
-    public RateMapper() {
-    }
+    public RateMapper() {}
 
     @Override
     public RateData mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -144,8 +142,8 @@ public class RateReadServiceImpl implements RateReadService {
       final Long id = rateResponse.getId();
       final String name = rateResponse.getName();
       final BigDecimal percentage = rateResponse.getPercentage();
-      final EnumOptionData productApply = RateEnumerations
-          .rateAppliesTo(rateResponse.getProductApply());
+      final EnumOptionData productApply =
+          RateEnumerations.rateAppliesTo(rateResponse.getProductApply());
       final boolean active = rateResponse.isActive();
       return RateData.instance(id, name, percentage, productApply, active);
     }

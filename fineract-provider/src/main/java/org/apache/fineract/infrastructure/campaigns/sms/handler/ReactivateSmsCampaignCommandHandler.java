@@ -31,15 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SMSCAMPAIGN", action = "REACTIVATE")
 public class ReactivateSmsCampaignCommandHandler implements NewCommandSourceHandler {
 
-    private final SmsCampaignWritePlatformService smsCampaignWritePlatformService;
+  private final SmsCampaignWritePlatformService smsCampaignWritePlatformService;
 
-    @Autowired
-    public ReactivateSmsCampaignCommandHandler(SmsCampaignWritePlatformService smsCampaignWritePlatformService) {
-        this.smsCampaignWritePlatformService = smsCampaignWritePlatformService;
-    }
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.smsCampaignWritePlatformService.reactivateSmsCampaign(command.entityId(),command);
-    }
+  @Autowired
+  public ReactivateSmsCampaignCommandHandler(
+      SmsCampaignWritePlatformService smsCampaignWritePlatformService) {
+    this.smsCampaignWritePlatformService = smsCampaignWritePlatformService;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.smsCampaignWritePlatformService.reactivateSmsCampaign(command.entityId(), command);
+  }
 }

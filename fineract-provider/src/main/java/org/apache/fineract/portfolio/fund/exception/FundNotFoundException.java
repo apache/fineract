@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class FundNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public FundNotFoundException(final Long id) {
-        super("error.msg.fund.id.invalid", "Fund with identifier " + id + " does not exist", id);
-    }
+  public FundNotFoundException(final Long id) {
+    super("error.msg.fund.id.invalid", "Fund with identifier " + id + " does not exist", id);
+  }
 }

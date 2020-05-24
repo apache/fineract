@@ -22,6 +22,5 @@ import org.apache.fineract.organisation.monetary.data.ApplicationCurrencyConfigu
 
 public interface OrganisationCurrencyReadPlatformService {
 
-    ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration();
-
+  ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration();
 }

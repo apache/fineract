@@ -24,102 +24,104 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
 public interface ChargeReadPlatformService {
 
-    Collection<ChargeData> retrieveAllCharges();
+  Collection<ChargeData> retrieveAllCharges();
 
-    Collection<ChargeData> retrieveAllChargesForCurrency(String currencyCode);
+  Collection<ChargeData> retrieveAllChargesForCurrency(String currencyCode);
 
-    ChargeData retrieveCharge(Long chargeId);
+  ChargeData retrieveCharge(Long chargeId);
 
-    ChargeData retrieveNewChargeDetails();
+  ChargeData retrieveNewChargeDetails();
 
-    /**
-     * Returns all charges that can be applied to Cients
-     *
-     * @return
-     */
-    Collection<ChargeData> retrieveAllChargesApplicableToClients();
+  /**
+   * Returns all charges that can be applied to Cients
+   *
+   * @return
+   */
+  Collection<ChargeData> retrieveAllChargesApplicableToClients();
 
-    /**
-     * Returns all Fees (excluding penalties) applicable for loans
-     *
-     * @return
-     */
-    Collection<ChargeData> retrieveLoanApplicableFees();
+  /**
+   * Returns all Fees (excluding penalties) applicable for loans
+   *
+   * @return
+   */
+  Collection<ChargeData> retrieveLoanApplicableFees();
 
-    /**
-     * Returns all charges applicable for a given loan account
-     *
-     * @param excludeChargeTimes
-     *            Excludes Given List of Charge Types from the response
-     * @return
-     */
-    Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes);
+  /**
+   * Returns all charges applicable for a given loan account
+   *
+   * @param excludeChargeTimes
+   *            Excludes Given List of Charge Types from the response
+   * @return
+   */
+  Collection<ChargeData> retrieveLoanAccountApplicableCharges(
+      final Long loanId, ChargeTimeType[] excludeChargeTimes);
 
-    /**
-     * Returns all charges applicable for a given loan product (filter based on
-     * Currency of Selected Loan Product)
-     *
-     * @param excludeChargeTimes
-     *            Excludes Given List of Charge Types from the response
-     * @return
-     */
-    Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes);
+  /**
+   * Returns all charges applicable for a given loan product (filter based on
+   * Currency of Selected Loan Product)
+   *
+   * @param excludeChargeTimes
+   *            Excludes Given List of Charge Types from the response
+   * @return
+   */
+  Collection<ChargeData> retrieveLoanProductApplicableCharges(
+      final Long loanProductId, ChargeTimeType[] excludeChargeTimes);
 
-    /**
-     * Returns all Penalties applicable for loans
-     *
-     * @return
-     */
-    Collection<ChargeData> retrieveLoanApplicablePenalties();
+  /**
+   * Returns all Penalties applicable for loans
+   *
+   * @return
+   */
+  Collection<ChargeData> retrieveLoanApplicablePenalties();
 
-    /**
-     * Returns all Charges associated with a given Loan Product
-     *
-     * @param loanProductId
-     * @return
-     */
-    Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId);
+  /**
+   * Returns all Charges associated with a given Loan Product
+   *
+   * @param loanProductId
+   * @return
+   */
+  Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId);
 
-    /**
-     * Returns all charges applicable for a given loan product
-     *
-     * @param loanProductId
-     * @param chargeTime
-     *            Filters based on the type of the charge to be returned
-     * @return
-     */
-    Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId, ChargeTimeType chargeTime);
+  /**
+   * Returns all charges applicable for a given loan product
+   *
+   * @param loanProductId
+   * @param chargeTime
+   *            Filters based on the type of the charge to be returned
+   * @return
+   */
+  Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId, ChargeTimeType chargeTime);
 
-    /**
-     * Returns all charges applicable for savings
-     *
-     * @param feeChargesOnly
-     * @return
-     */
-    Collection<ChargeData> retrieveSavingsProductApplicableCharges(boolean feeChargesOnly);
+  /**
+   * Returns all charges applicable for savings
+   *
+   * @param feeChargesOnly
+   * @return
+   */
+  Collection<ChargeData> retrieveSavingsProductApplicableCharges(boolean feeChargesOnly);
 
-    /**
-     * Returns all penalties applicable for savings
-     *
-     * @return
-     */
-    Collection<ChargeData> retrieveSavingsApplicablePenalties();
+  /**
+   * Returns all penalties applicable for savings
+   *
+   * @return
+   */
+  Collection<ChargeData> retrieveSavingsApplicablePenalties();
 
-    /**
-     * Returns all charges applicable for a given savings product
-     *
-     * @param savingsProductId
-     * @return
-     */
-    Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId);
+  /**
+   * Returns all charges applicable for a given savings product
+   *
+   * @param savingsProductId
+   * @return
+   */
+  Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId);
 
-    /** Retrieve savings account charges **/
-    Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
+  /** Retrieve savings account charges **/
+  Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
 
-    /**
-     * Returns charge definitions which are applicable for shares
-     */
-    Collection<ChargeData> retrieveSharesApplicableCharges();
+  /**
+   * Returns charge definitions which are applicable for shares
+   */
+  Collection<ChargeData> retrieveSharesApplicableCharges();
 
-    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) ;
+  public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId);
 }

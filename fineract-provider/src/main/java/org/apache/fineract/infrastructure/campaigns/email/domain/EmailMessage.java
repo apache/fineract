@@ -41,129 +41,181 @@ import org.joda.time.LocalDate;
 @Table(name = "scheduled_email_messages_outbound")
 public class EmailMessage extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = true)
-    private Group group;
+  @ManyToOne
+  @JoinColumn(name = "group_id", nullable = true)
+  private Group group;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id", nullable = true)
-    private Client client;
+  @ManyToOne
+  @JoinColumn(name = "client_id", nullable = true)
+  private Client client;
 
-    @ManyToOne
-    @JoinColumn(name = "staff_id", nullable = true)
-    private Staff staff;
+  @ManyToOne
+  @JoinColumn(name = "staff_id", nullable = true)
+  private Staff staff;
 
-    @ManyToOne
-    @JoinColumn(name = "email_campaign_id", nullable = true)
-    private EmailCampaign emailCampaign;
+  @ManyToOne
+  @JoinColumn(name = "email_campaign_id", nullable = true)
+  private EmailCampaign emailCampaign;
 
-    @Column(name = "status_enum", nullable = false)
-    private Integer statusType;
+  @Column(name = "status_enum", nullable = false)
+  private Integer statusType;
 
-    @Column(name = "email_address", nullable = false, length = 50)
-    private String emailAddress;
+  @Column(name = "email_address", nullable = false, length = 50)
+  private String emailAddress;
 
-    @Column(name = "email_subject", nullable = false, length = 50)
-    private String emailSubject;
+  @Column(name = "email_subject", nullable = false, length = 50)
+  private String emailSubject;
 
-    @Column(name = "message", nullable = false)
-    private String message;
+  @Column(name = "message", nullable = false)
+  private String message;
 
-    @Column(name = "campaign_name", nullable = true)
-    private String campaignName;
+  @Column(name = "campaign_name", nullable = true)
+  private String campaignName;
 
-    @Column(name = "submittedon_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date submittedOnDate;
+  @Column(name = "submittedon_date", nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date submittedOnDate;
 
-    @Column(name = "error_message")
-    private String errorMessage;
+  @Column(name = "error_message")
+  private String errorMessage;
 
+  public static EmailMessage pendingEmail(
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final EmailCampaign emailCampaign,
+      final String emailSubject,
+      final String message,
+      final String emailAddress,
+      final String campaignName) {
+    return new EmailMessage(
+        group,
+        client,
+        staff,
+        emailCampaign,
+        EmailMessageStatusType.PENDING,
+        emailSubject,
+        message,
+        emailAddress,
+        campaignName);
+  }
 
-    public static EmailMessage pendingEmail(final Group group, final Client client, final Staff staff,final EmailCampaign emailCampaign, final String emailSubject, final String message,
-                                        final String emailAddress, final String campaignName) {
-        return new EmailMessage(group, client, staff,emailCampaign,EmailMessageStatusType.PENDING, emailSubject, message, emailAddress,campaignName);
+  public static EmailMessage instance(
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final EmailCampaign emailCampaign,
+      final EmailMessageStatusType statusType,
+      final String emailSubject,
+      final String message,
+      final String sourceAddress,
+      final String emailAddress,
+      final String campaignName) {
+    return new EmailMessage(
+        group,
+        client,
+        staff,
+        emailCampaign,
+        statusType,
+        emailSubject,
+        message,
+        emailAddress,
+        campaignName);
+  }
+
+  protected EmailMessage() {
+    //
+  }
+
+  private EmailMessage(
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final EmailCampaign emailCampaign,
+      final EmailMessageStatusType statusType,
+      final String emailSubject,
+      final String message,
+      final String emailAddress,
+      final String campaignName) {
+    this.group = group;
+    this.client = client;
+    this.staff = staff;
+    this.emailCampaign = emailCampaign;
+    this.statusType = statusType.getValue();
+    this.emailAddress = emailAddress;
+    this.emailSubject = emailSubject;
+    this.message = message;
+    this.campaignName = campaignName;
+    this.submittedOnDate = LocalDate.now().toDate();
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+
+    if (command.isChangeInStringParameterNamed(EmailApiConstants.messageParamName, this.message)) {
+      final String newValue =
+          command.stringValueOfParameterNamed(EmailApiConstants.messageParamName);
+      actualChanges.put(EmailApiConstants.messageParamName, newValue);
+      this.message = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    public static EmailMessage instance(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign, final EmailMessageStatusType statusType,
-                                      final String emailSubject, final String message, final String sourceAddress, final String emailAddress, final String campaignName) {
-        return new EmailMessage(group, client, staff,emailCampaign, statusType, emailSubject, message, emailAddress, campaignName);
-    }
+    return actualChanges;
+  }
 
-    protected EmailMessage() {
-        //
-    }
+  public Group getGroup() {
+    return group;
+  }
 
-    private EmailMessage(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign, final EmailMessageStatusType statusType,
-            final String emailSubject, final String message, final String emailAddress, final String campaignName) {
-        this.group = group;
-        this.client = client;
-        this.staff = staff;
-        this.emailCampaign = emailCampaign;
-        this.statusType = statusType.getValue();
-        this.emailAddress = emailAddress;
-        this.emailSubject = emailSubject;
-        this.message = message;
-        this.campaignName = campaignName;
-        this.submittedOnDate = LocalDate.now().toDate();
-    }
+  public Client getClient() {
+    return client;
+  }
 
-    public Map<String, Object> update(final JsonCommand command) {
+  public Staff getStaff() {
+    return staff;
+  }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+  public Integer getStatusType() {
+    return statusType;
+  }
 
-        if (command.isChangeInStringParameterNamed(EmailApiConstants.messageParamName, this.message)) {
-            final String newValue = command.stringValueOfParameterNamed(EmailApiConstants.messageParamName);
-            actualChanges.put(EmailApiConstants.messageParamName, newValue);
-            this.message = StringUtils.defaultIfEmpty(newValue, null);
-        }
+  public String getEmailAddress() {
+    return this.emailAddress;
+  }
 
-        return actualChanges;
-    }
+  public String getEmailSubject() {
+    return emailSubject;
+  }
 
+  public String getMessage() {
+    return message;
+  }
 
-    public Group getGroup() {
-        return group;
-    }
+  public void setStatusType(final Integer statusType) {
+    this.statusType = statusType;
+  }
 
-    public Client getClient() {
-        return client;
-    }
+  public String getCampaignName() {
+    return this.campaignName;
+  }
 
-    public Staff getStaff() {
-        return staff;
-    }
+  public Date getSubmittedOnDate() {
+    return this.submittedOnDate;
+  }
 
-    public Integer getStatusType() {
-        return statusType;
-    }
+  public EmailCampaign getEmailCampaign() {
+    return this.emailCampaign;
+  }
 
+  public void updateErrorMessage(final String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
 
-    public String getEmailAddress() {return this.emailAddress;}
+  public boolean isPending() {
+    return EmailMessageStatusType.fromInt(this.statusType).isPending();
+  }
 
-    public String getEmailSubject() {return emailSubject; }
-
-    public String getMessage() {
-        return message;
-    }
-
-
-    public void setStatusType(final Integer statusType) {
-        this.statusType = statusType;
-    }
-
-    public String getCampaignName() {
-        return this.campaignName;
-    }
-
-    public Date getSubmittedOnDate() {
-        return this.submittedOnDate;
-    }
-
-    public EmailCampaign getEmailCampaign() {return this.emailCampaign;}
-
-    public void updateErrorMessage(final String errorMessage) {this.errorMessage = errorMessage;}
-
-    public boolean isPending(){ return EmailMessageStatusType.fromInt(this.statusType).isPending();}
-    public boolean isSent(){ return EmailMessageStatusType.fromInt(this.statusType).isSent();}
+  public boolean isSent() {
+    return EmailMessageStatusType.fromInt(this.statusType).isSent();
+  }
 }

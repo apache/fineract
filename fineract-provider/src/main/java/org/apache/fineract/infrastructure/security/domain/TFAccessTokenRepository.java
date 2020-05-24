@@ -24,8 +24,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 @Profile("twofactor")
-public interface TFAccessTokenRepository extends JpaRepository<TFAccessToken, Long>, JpaSpecificationExecutor<TFAccessToken> {
+public interface TFAccessTokenRepository
+    extends JpaRepository<TFAccessToken, Long>, JpaSpecificationExecutor<TFAccessToken> {
 
-    TFAccessToken findByUserAndToken(AppUser user, String token);
-
+  TFAccessToken findByUserAndToken(AppUser user, String token);
 }

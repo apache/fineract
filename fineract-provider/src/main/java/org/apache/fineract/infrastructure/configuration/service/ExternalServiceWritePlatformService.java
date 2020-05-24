@@ -23,6 +23,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface ExternalServiceWritePlatformService {
 
-    CommandProcessingResult updateExternalServicesProperties(String externalServiceName, JsonCommand command);
-
+  CommandProcessingResult updateExternalServicesProperties(
+      String externalServiceName, JsonCommand command);
 }

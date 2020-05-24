@@ -38,130 +38,138 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePlatformService {
 
-    private final ContentRepositoryFactory contentRepositoryFactory;
-    private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final ImageRepository imageRepository;
-    private final StaffRepositoryWrapper staffRepositoryWrapper;
+  private final ContentRepositoryFactory contentRepositoryFactory;
+  private final ClientRepositoryWrapper clientRepositoryWrapper;
+  private final ImageRepository imageRepository;
+  private final StaffRepositoryWrapper staffRepositoryWrapper;
 
-    @Autowired
-    public ImageWritePlatformServiceJpaRepositoryImpl(final ContentRepositoryFactory documentStoreFactory,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final ImageRepository imageRepository,
-            StaffRepositoryWrapper staffRepositoryWrapper) {
-        this.contentRepositoryFactory = documentStoreFactory;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.imageRepository = imageRepository;
-        this.staffRepositoryWrapper = staffRepositoryWrapper;
+  @Autowired
+  public ImageWritePlatformServiceJpaRepositoryImpl(
+      final ContentRepositoryFactory documentStoreFactory,
+      final ClientRepositoryWrapper clientRepositoryWrapper,
+      final ImageRepository imageRepository,
+      StaffRepositoryWrapper staffRepositoryWrapper) {
+    this.contentRepositoryFactory = documentStoreFactory;
+    this.clientRepositoryWrapper = clientRepositoryWrapper;
+    this.imageRepository = imageRepository;
+    this.staffRepositoryWrapper = staffRepositoryWrapper;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult saveOrUpdateImage(
+      String entityName,
+      final Long clientId,
+      final String imageName,
+      final InputStream inputStream,
+      final Long fileSize) {
+    Object owner = deletePreviousImage(entityName, clientId);
+
+    final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
+    final String imageLocation =
+        contentRepository.saveImage(inputStream, clientId, imageName, fileSize);
+    return updateImage(owner, imageLocation, contentRepository.getStorageType());
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult saveOrUpdateImage(
+      String entityName, final Long clientId, final Base64EncodedImage encodedImage) {
+    Object owner = deletePreviousImage(entityName, clientId);
+
+    final ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();
+    final String imageLocation = contenRepository.saveImage(encodedImage, clientId, "image");
+
+    return updateImage(owner, imageLocation, contenRepository.getStorageType());
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult deleteImage(String entityName, final Long clientId) {
+    Object owner = null;
+    Image image = null;
+    if (EntityTypeForImages.CLIENTS.toString().equals(entityName)) {
+      owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+      Client client = (Client) owner;
+      image = client.getImage();
+      client.setImage(null);
+      this.clientRepositoryWrapper.save(client);
+
+    } else if (EntityTypeForImages.STAFF.toString().equals(entityName)) {
+      owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+      Staff staff = (Staff) owner;
+      image = staff.getImage();
+      staff.setImage(null);
+      this.staffRepositoryWrapper.save(staff);
+    }
+    // delete image from the file system
+    if (image != null) {
+      final ContentRepository contentRepository =
+          this.contentRepositoryFactory.getRepository(StorageType.fromInt(image.getStorageType()));
+      contentRepository.deleteImage(clientId, image.getLocation());
+      this.imageRepository.delete(image);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final String imageName,
-            final InputStream inputStream, final Long fileSize) {
-        Object owner = deletePreviousImage(entityName, clientId);
+    return new CommandProcessingResult(clientId);
+  }
 
-        final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
-        final String imageLocation = contentRepository.saveImage(inputStream, clientId, imageName, fileSize);
-        return updateImage(owner, imageLocation, contentRepository.getStorageType());
+  /**
+   * @param entityName
+   * @param entityId
+   * @return
+   */
+  private Object deletePreviousImage(String entityName, final Long entityId) {
+    Object owner = null;
+    Image image = null;
+    if (EntityTypeForImages.CLIENTS.toString().equals(entityName)) {
+      Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
+      image = client.getImage();
+      owner = client;
+    } else if (EntityTypeForImages.STAFF.toString().equals(entityName)) {
+      Staff staff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
+      image = staff.getImage();
+      owner = staff;
+    }
+    if (image != null) {
+      final ContentRepository contentRepository =
+          this.contentRepositoryFactory.getRepository(StorageType.fromInt(image.getStorageType()));
+      contentRepository.deleteImage(entityId, image.getLocation());
+    }
+    return owner;
+  }
+
+  private CommandProcessingResult updateImage(
+      final Object owner, final String imageLocation, final StorageType storageType) {
+    Image image = null;
+    Long clientId = null;
+    if (owner instanceof Client) {
+      Client client = (Client) owner;
+      image = client.getImage();
+      clientId = client.getId();
+      image = createImage(image, imageLocation, storageType);
+      client.setImage(image);
+      this.clientRepositoryWrapper.save(client);
+    } else if (owner instanceof Staff) {
+      Staff staff = (Staff) owner;
+      image = staff.getImage();
+      clientId = staff.getId();
+      image = createImage(image, imageLocation, storageType);
+      staff.setImage(image);
+      this.staffRepositoryWrapper.save(staff);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final Base64EncodedImage encodedImage) {
-        Object owner = deletePreviousImage(entityName, clientId);
+    this.imageRepository.save(image);
+    return new CommandProcessingResult(clientId);
+  }
 
-        final ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();
-        final String imageLocation = contenRepository.saveImage(encodedImage, clientId, "image");
-
-        return updateImage(owner, imageLocation, contenRepository.getStorageType());
+  private Image createImage(
+      Image image, final String imageLocation, final StorageType storageType) {
+    if (image == null) {
+      image = new Image(imageLocation, storageType);
+    } else {
+      image.setLocation(imageLocation);
+      image.setStorageType(storageType.getValue());
     }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult deleteImage(String entityName, final Long clientId) {
-        Object owner = null;
-        Image image = null;
-        if (EntityTypeForImages.CLIENTS.toString().equals(entityName)) {
-            owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-            Client client = (Client) owner;
-            image = client.getImage();
-            client.setImage(null);
-            this.clientRepositoryWrapper.save(client);
-
-        } else if (EntityTypeForImages.STAFF.toString().equals(entityName)) {
-            owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-            Staff staff = (Staff) owner;
-            image = staff.getImage();
-            staff.setImage(null);
-            this.staffRepositoryWrapper.save(staff);
-
-        }
-        // delete image from the file system
-        if (image != null) {
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
-                    .getStorageType()));
-            contentRepository.deleteImage(clientId, image.getLocation());
-            this.imageRepository.delete(image);
-        }
-
-        return new CommandProcessingResult(clientId);
-    }
-
-    /**
-     * @param entityName
-     * @param entityId
-     * @return
-     */
-    private Object deletePreviousImage(String entityName, final Long entityId) {
-        Object owner = null;
-        Image image = null;
-        if (EntityTypeForImages.CLIENTS.toString().equals(entityName)) {
-            Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-            image = client.getImage();
-            owner = client;
-        } else if (EntityTypeForImages.STAFF.toString().equals(entityName)) {
-            Staff staff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-            image = staff.getImage();
-            owner = staff;
-        }
-        if (image != null) {
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
-                    .getStorageType()));
-            contentRepository.deleteImage(entityId, image.getLocation());
-        }
-        return owner;
-    }
-
-    private CommandProcessingResult updateImage(final Object owner, final String imageLocation, final StorageType storageType) {
-        Image image = null;
-        Long clientId = null;
-        if (owner instanceof Client) {
-            Client client = (Client) owner;
-            image = client.getImage();
-            clientId = client.getId();
-            image = createImage(image, imageLocation, storageType);
-            client.setImage(image);
-            this.clientRepositoryWrapper.save(client);
-        } else if (owner instanceof Staff) {
-            Staff staff = (Staff) owner;
-            image = staff.getImage();
-            clientId = staff.getId();
-            image = createImage(image, imageLocation, storageType);
-            staff.setImage(image);
-            this.staffRepositoryWrapper.save(staff);
-        }
-
-        this.imageRepository.save(image);
-        return new CommandProcessingResult(clientId);
-    }
-
-    private Image createImage(Image image, final String imageLocation, final StorageType storageType) {
-        if (image == null) {
-            image = new Image(imageLocation, storageType);
-        } else {
-            image.setLocation(imageLocation);
-            image.setStorageType(storageType.getValue());
-        }
-        return image;
-    }
-
+    return image;
+  }
 }

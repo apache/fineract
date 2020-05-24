@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.loanaccount.handler;
 
 import org.apache.fineract.commands.annotation.CommandType;
@@ -30,20 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GLIMLOAN", action = "UNDOAPPROVAL")
-public class UndoGLIMLoanApplicationApproval  implements NewCommandSourceHandler
-{
+public class UndoGLIMLoanApplicationApproval implements NewCommandSourceHandler {
 
-     private final LoanApplicationWritePlatformService writePlatformService;
+  private final LoanApplicationWritePlatformService writePlatformService;
 
-        @Autowired
-        public UndoGLIMLoanApplicationApproval(final LoanApplicationWritePlatformService writePlatformService) {
-            this.writePlatformService = writePlatformService;
-        }
+  @Autowired
+  public UndoGLIMLoanApplicationApproval(
+      final LoanApplicationWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-        @Transactional
-        @Override
-        public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-            return this.writePlatformService.undoGLIMLoanApplicationApproval(command.entityId(), command);
-        }
+    return this.writePlatformService.undoGLIMLoanApplicationApproval(command.entityId(), command);
+  }
 }

@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class ClientNotActiveException extends AbstractPlatformDomainRuleException {
 
-    public ClientNotActiveException(final Long clientId) {
-        super("error.msg.client.not.active.exception", "The Client with id `" + clientId + "` is not active", clientId);
-    }
-
+  public ClientNotActiveException(final Long clientId) {
+    super(
+        "error.msg.client.not.active.exception",
+        "The Client with id `" + clientId + "` is not active",
+        clientId);
+  }
 }

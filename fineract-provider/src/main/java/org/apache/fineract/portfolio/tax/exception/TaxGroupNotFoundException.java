@@ -22,7 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class TaxGroupNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public TaxGroupNotFoundException(final Long id) {
-        super("error.msg.tax.group.id.invalid", "tax group with identifier " + id + " does not exist", id);
-    }
+  public TaxGroupNotFoundException(final Long id) {
+    super(
+        "error.msg.tax.group.id.invalid",
+        "tax group with identifier " + id + " does not exist",
+        id);
+  }
 }

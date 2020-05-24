@@ -22,37 +22,40 @@ import org.joda.time.LocalDate;
 
 public class SavingsActivation {
 
-    private final transient Integer rowIndex;
+  private final transient Integer rowIndex;
 
-    private final LocalDate activatedOnDate;
+  private final LocalDate activatedOnDate;
 
-    private final String dateFormat;
+  private final String dateFormat;
 
-    private final String locale;
+  private final String locale;
 
-    public static SavingsActivation importInstance(LocalDate activatedOnDate, Integer rowIndex,String locale,String dateFormat){
-        return new SavingsActivation(activatedOnDate,rowIndex,locale,dateFormat);
-    }
-    private SavingsActivation(LocalDate activatedOnDate, Integer rowIndex,String locale,String dateFormat ) {
-        this.activatedOnDate = activatedOnDate;
-        this.rowIndex = rowIndex;
-        this.dateFormat = dateFormat;
-        this.locale = locale;
-    }
+  public static SavingsActivation importInstance(
+      LocalDate activatedOnDate, Integer rowIndex, String locale, String dateFormat) {
+    return new SavingsActivation(activatedOnDate, rowIndex, locale, dateFormat);
+  }
 
-    public LocalDate getActivatedOnDate() {
-        return activatedOnDate;
-    }
+  private SavingsActivation(
+      LocalDate activatedOnDate, Integer rowIndex, String locale, String dateFormat) {
+    this.activatedOnDate = activatedOnDate;
+    this.rowIndex = rowIndex;
+    this.dateFormat = dateFormat;
+    this.locale = locale;
+  }
 
-    public String getLocale() {
-        return locale;
-    }
+  public LocalDate getActivatedOnDate() {
+    return activatedOnDate;
+  }
 
-    public String getDateFormat() {
-        return dateFormat;
-    }
+  public String getLocale() {
+    return locale;
+  }
 
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
+  public String getDateFormat() {
+    return dateFormat;
+  }
+
+  public Integer getRowIndex() {
+    return rowIndex;
+  }
 }

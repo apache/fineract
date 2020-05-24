@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "BLOCKCREDIT")
 public class BlockCreditsToSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService writePlatformService;
+  private final SavingsAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public BlockCreditsToSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
-        this.writePlatformService = savingAccountWritePlatformService;
-    }
+  @Autowired
+  public BlockCreditsToSavingsAccountCommandHandler(
+      final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
+    this.writePlatformService = savingAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.blockCredits(command.getSavingsId());
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.writePlatformService.blockCredits(command.getSavingsId());
+  }
 }

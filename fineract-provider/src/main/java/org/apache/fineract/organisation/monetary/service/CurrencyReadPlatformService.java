@@ -23,9 +23,9 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 public interface CurrencyReadPlatformService {
 
-    Collection<CurrencyData> retrieveAllowedCurrencies();
+  Collection<CurrencyData> retrieveAllowedCurrencies();
 
-    Collection<CurrencyData> retrieveAllPlatformCurrencies();
+  Collection<CurrencyData> retrieveAllPlatformCurrencies();
 
-    CurrencyData retrieveCurrency(String code);
+  CurrencyData retrieveCurrency(String code);
 }

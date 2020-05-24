@@ -29,19 +29,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "UNDOTRANSACTION")
-public class UndoTransactionRecurringDepositAccountCommandHandler implements NewCommandSourceHandler {
+public class UndoTransactionRecurringDepositAccountCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public UndoTransactionRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public UndoTransactionRecurringDepositAccountCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.depositAccountWritePlatformService.undoRDTransaction(command.entityId(), transactionId, false);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    final Long transactionId = Long.valueOf(command.getTransactionId());
+    return this.depositAccountWritePlatformService.undoRDTransaction(
+        command.entityId(), transactionId, false);
+  }
 }

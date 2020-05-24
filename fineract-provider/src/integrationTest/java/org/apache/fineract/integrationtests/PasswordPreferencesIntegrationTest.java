@@ -35,44 +35,53 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PasswordPreferencesIntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(PasswordPreferencesIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ResponseSpecification generalResponseSpec;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(PasswordPreferencesIntegrationTest.class);
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
+  private ResponseSpecification generalResponseSpec;
 
-    @Before
-    public void setUp() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.generalResponseSpec = new ResponseSpecBuilder().build();
+  @Before
+  public void setUp() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    this.generalResponseSpec = new ResponseSpecBuilder().build();
+  }
 
-    }
+  @Test
+  public void updatePasswordPreferences() {
+    String validationPolicyId = "2";
+    PasswordPreferencesHelper.updatePasswordPreferences(
+        requestSpec, responseSpec, validationPolicyId);
+    this.validateIfThePasswordIsUpdated(validationPolicyId);
+  }
 
-    @Test
-    public void updatePasswordPreferences() {
-        String validationPolicyId = "2";
-        PasswordPreferencesHelper.updatePasswordPreferences(requestSpec, responseSpec, validationPolicyId);
-        this.validateIfThePasswordIsUpdated(validationPolicyId);
-    }
+  private void validateIfThePasswordIsUpdated(String validationPolicyId) {
+    Integer id = PasswordPreferencesHelper.getActivePasswordPreference(requestSpec, responseSpec);
+    assertEquals(validationPolicyId, id.toString());
+    LOG.info(
+        "---------------------------------PASSWORD PREFERENCE VALIDATED"
+            + " SUCCESSFULLY-----------------------------------------");
+  }
 
-    private void validateIfThePasswordIsUpdated(String validationPolicyId){
-        Integer id = PasswordPreferencesHelper.getActivePasswordPreference(requestSpec, responseSpec);
-        assertEquals(validationPolicyId, id.toString());
-        LOG.info("---------------------------------PASSWORD PREFERENCE VALIDATED SUCCESSFULLY-----------------------------------------");
-
-    }
-
-    @Test
-    public void updateWithInvalidPolicyId() {
-        String invalidValidationPolicyId = "2000";
-        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId,
+  @Test
+  public void updateWithInvalidPolicyId() {
+    String invalidValidationPolicyId = "2000";
+    final List<HashMap> error =
+        (List)
+            PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(
+                requestSpec,
+                generalResponseSpec,
+                invalidValidationPolicyId,
                 CommonConstants.RESPONSE_ERROR);
-        assertEquals("Password Validation Policy with identifier 2000 does not exist", "error.msg.password.validation.policy.id.invalid",
-                error.get(0).get("userMessageGlobalisationCode"));
-    }
-
+    assertEquals(
+        "Password Validation Policy with identifier 2000 does not exist",
+        "error.msg.password.validation.policy.id.invalid",
+        error.get(0).get("userMessageGlobalisationCode"));
+  }
 }

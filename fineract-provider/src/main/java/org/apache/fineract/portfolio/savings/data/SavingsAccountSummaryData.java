@@ -29,41 +29,52 @@ import org.joda.time.LocalDate;
 @SuppressWarnings("unused")
 public class SavingsAccountSummaryData implements Serializable {
 
-    private final CurrencyData currency;
-    private final BigDecimal totalDeposits;
-    private final BigDecimal totalWithdrawals;
-    private final BigDecimal totalWithdrawalFees;
-    private final BigDecimal totalAnnualFees;
-    private final BigDecimal totalInterestEarned;
-    private final BigDecimal totalInterestPosted;
-    private final BigDecimal accountBalance;
-    private final BigDecimal totalFeeCharge;
-    private final BigDecimal totalPenaltyCharge;
-    private final BigDecimal totalOverdraftInterestDerived;
-    private final BigDecimal totalWithholdTax;
-    private final BigDecimal interestNotPosted;
-    private final LocalDate lastInterestCalculationDate;
-    private final BigDecimal availableBalance;
+  private final CurrencyData currency;
+  private final BigDecimal totalDeposits;
+  private final BigDecimal totalWithdrawals;
+  private final BigDecimal totalWithdrawalFees;
+  private final BigDecimal totalAnnualFees;
+  private final BigDecimal totalInterestEarned;
+  private final BigDecimal totalInterestPosted;
+  private final BigDecimal accountBalance;
+  private final BigDecimal totalFeeCharge;
+  private final BigDecimal totalPenaltyCharge;
+  private final BigDecimal totalOverdraftInterestDerived;
+  private final BigDecimal totalWithholdTax;
+  private final BigDecimal interestNotPosted;
+  private final LocalDate lastInterestCalculationDate;
+  private final BigDecimal availableBalance;
 
-    public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
-            final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
-            final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
-            final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived,final BigDecimal totalWithholdTax,
-            final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate, final BigDecimal availableBalance) {
-        this.currency = currency;
-        this.totalDeposits = totalDeposits;
-        this.totalWithdrawals = totalWithdrawals;
-        this.totalWithdrawalFees = totalWithdrawalFees;
-        this.totalAnnualFees = totalAnnualFees;
-        this.totalInterestEarned = totalInterestEarned;
-        this.totalInterestPosted = totalInterestPosted;
-        this.accountBalance = accountBalance;
-        this.totalFeeCharge = totalFeeCharge;
-        this.totalPenaltyCharge = totalPenaltyCharge;
-        this.totalOverdraftInterestDerived = totalOverdraftInterestDerived;
-        this.totalWithholdTax = totalWithholdTax;
-        this.interestNotPosted = interestNotPosted;
-        this.lastInterestCalculationDate = lastInterestCalculationDate;
-        this.availableBalance = availableBalance;
-    }
+  public SavingsAccountSummaryData(
+      final CurrencyData currency,
+      final BigDecimal totalDeposits,
+      final BigDecimal totalWithdrawals,
+      final BigDecimal totalWithdrawalFees,
+      final BigDecimal totalAnnualFees,
+      final BigDecimal totalInterestEarned,
+      final BigDecimal totalInterestPosted,
+      final BigDecimal accountBalance,
+      final BigDecimal totalFeeCharge,
+      final BigDecimal totalPenaltyCharge,
+      final BigDecimal totalOverdraftInterestDerived,
+      final BigDecimal totalWithholdTax,
+      final BigDecimal interestNotPosted,
+      final LocalDate lastInterestCalculationDate,
+      final BigDecimal availableBalance) {
+    this.currency = currency;
+    this.totalDeposits = totalDeposits;
+    this.totalWithdrawals = totalWithdrawals;
+    this.totalWithdrawalFees = totalWithdrawalFees;
+    this.totalAnnualFees = totalAnnualFees;
+    this.totalInterestEarned = totalInterestEarned;
+    this.totalInterestPosted = totalInterestPosted;
+    this.accountBalance = accountBalance;
+    this.totalFeeCharge = totalFeeCharge;
+    this.totalPenaltyCharge = totalPenaltyCharge;
+    this.totalOverdraftInterestDerived = totalOverdraftInterestDerived;
+    this.totalWithholdTax = totalWithholdTax;
+    this.interestNotPosted = interestNotPosted;
+    this.lastInterestCalculationDate = lastInterestCalculationDate;
+    this.availableBalance = availableBalance;
+  }
 }

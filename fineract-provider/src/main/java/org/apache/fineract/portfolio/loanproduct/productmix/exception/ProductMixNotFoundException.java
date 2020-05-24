@@ -26,8 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class ProductMixNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ProductMixNotFoundException(final Long productId) {
-        super("error.msg.no.product.mixes.exists", "No product mixes are defined with the productId `" + productId + "`.", productId);
-    }
-
+  public ProductMixNotFoundException(final Long productId) {
+    super(
+        "error.msg.no.product.mixes.exists",
+        "No product mixes are defined with the productId `" + productId + "`.",
+        productId);
+  }
 }

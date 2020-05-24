@@ -31,17 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENTIDENTIFIER", action = "CREATE")
 public class CreateClientIdentifierCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
+  private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
 
-    @Autowired
-    public CreateClientIdentifierCommandHandler(final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
-        this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
-    }
+  @Autowired
+  public CreateClientIdentifierCommandHandler(
+      final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
+    this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.clientIdentifierWritePlatformService.addClientIdentifier(command.getClientId(), command);
-    }
+    return this.clientIdentifierWritePlatformService.addClientIdentifier(
+        command.getClientId(), command);
+  }
 }

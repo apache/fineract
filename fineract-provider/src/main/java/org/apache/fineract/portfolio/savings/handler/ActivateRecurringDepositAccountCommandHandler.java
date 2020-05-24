@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "ACTIVATE")
 public class ActivateRecurringDepositAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public ActivateRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public ActivateRecurringDepositAccountCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.activateRDAccount(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.activateRDAccount(command.entityId(), command);
+  }
 }

@@ -23,6 +23,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface AccrualAccountingWritePlatformService {
 
-    CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command);
-
+  CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command);
 }

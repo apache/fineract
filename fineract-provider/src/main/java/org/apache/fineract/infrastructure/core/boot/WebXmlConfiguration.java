@@ -38,32 +38,34 @@ import org.springframework.context.annotation.Profile;
 @Profile("basicauth")
 public class WebXmlConfiguration {
 
-    @Autowired
-    private TenantAwareBasicAuthenticationFilter basicAuthenticationProcessingFilter;
+  @Autowired private TenantAwareBasicAuthenticationFilter basicAuthenticationProcessingFilter;
 
-    @Bean
-    public ServletRegistrationBean jersey() {
-        ServletRegistrationBean<SpringServlet> jerseyServletRegistration = new ServletRegistrationBean<SpringServlet>();
-        jerseyServletRegistration.setServlet(new SpringServlet());
-        jerseyServletRegistration.addUrlMappings("/api/v1/*");
-        jerseyServletRegistration.setName("jersey-servlet");
-        jerseyServletRegistration.setLoadOnStartup(1);
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.api.json.POJOMappingFeature", "true");
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
-                ResponseCorsFilter.class.getName());
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
-        // debugging for development:
-        // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
-        // LoggingFilter.class.getName());
-        return jerseyServletRegistration;
-    }
+  @Bean
+  public ServletRegistrationBean jersey() {
+    ServletRegistrationBean<SpringServlet> jerseyServletRegistration =
+        new ServletRegistrationBean<SpringServlet>();
+    jerseyServletRegistration.setServlet(new SpringServlet());
+    jerseyServletRegistration.addUrlMappings("/api/v1/*");
+    jerseyServletRegistration.setName("jersey-servlet");
+    jerseyServletRegistration.setLoadOnStartup(1);
+    jerseyServletRegistration.addInitParameter(
+        "com.sun.jersey.api.json.POJOMappingFeature", "true");
+    jerseyServletRegistration.addInitParameter(
+        "com.sun.jersey.spi.container.ContainerResponseFilters",
+        ResponseCorsFilter.class.getName());
+    jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
+    // debugging for development:
+    // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
+    // LoggingFilter.class.getName());
+    return jerseyServletRegistration;
+  }
 
-    @Bean
-    public FilterRegistrationBean filterRegistrationBean() {
-        FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> filterRegistrationBean = new FilterRegistrationBean<TenantAwareBasicAuthenticationFilter>();
-        filterRegistrationBean.setFilter(basicAuthenticationProcessingFilter);
-        filterRegistrationBean.setEnabled(false);
-        return filterRegistrationBean;
-    }
-
+  @Bean
+  public FilterRegistrationBean filterRegistrationBean() {
+    FilterRegistrationBean<TenantAwareBasicAuthenticationFilter> filterRegistrationBean =
+        new FilterRegistrationBean<TenantAwareBasicAuthenticationFilter>();
+    filterRegistrationBean.setFilter(basicAuthenticationProcessingFilter);
+    filterRegistrationBean.setEnabled(false);
+    return filterRegistrationBean;
+  }
 }

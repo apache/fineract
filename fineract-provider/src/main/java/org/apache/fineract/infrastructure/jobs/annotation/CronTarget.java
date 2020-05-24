@@ -31,5 +31,5 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CronTarget {
 
-    JobName jobName();
+  JobName jobName();
 }

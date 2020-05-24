@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.codes.data.CodeData;
 
 public interface CodeReadPlatformService {
 
-    Collection<CodeData> retrieveAllCodes();
+  Collection<CodeData> retrieveAllCodes();
 
-    CodeData retrieveCode(Long codeId);
+  CodeData retrieveCode(Long codeId);
 
-    CodeData retriveCode(String codeName);
+  CodeData retriveCode(String codeName);
 }

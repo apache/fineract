@@ -23,5 +23,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface CodeRepository extends JpaRepository<Code, Long>, JpaSpecificationExecutor<Code> {
 
-    Code findOneByName(String name);
+  Code findOneByName(String name);
 }

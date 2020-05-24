@@ -23,6 +23,5 @@ import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauData;
 
 public interface CreditBureauReadPlatformService {
 
-    Collection<CreditBureauData> retrieveCreditBureau();
-
+  Collection<CreditBureauData> retrieveCreditBureau();
 }

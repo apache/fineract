@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.rate.service;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -32,17 +31,18 @@ public class RateEnumerations {
     EnumOptionData optionData = null;
     switch (type) {
       case LOAN:
-        optionData = new EnumOptionData(RateAppliesTo.LOAN.getValue().longValue(),
-            RateAppliesTo.LOAN.getCode(), "Loan");
+        optionData =
+            new EnumOptionData(
+                RateAppliesTo.LOAN.getValue().longValue(), RateAppliesTo.LOAN.getCode(), "Loan");
         break;
       default:
-        optionData = new EnumOptionData(RateAppliesTo.INVALID.getValue().longValue(),
-            RateAppliesTo.INVALID.getCode(),
-            "Invalid");
+        optionData =
+            new EnumOptionData(
+                RateAppliesTo.INVALID.getValue().longValue(),
+                RateAppliesTo.INVALID.getCode(),
+                "Invalid");
         break;
     }
     return optionData;
   }
-
-
 }

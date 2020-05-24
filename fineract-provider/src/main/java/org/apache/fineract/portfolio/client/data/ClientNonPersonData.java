@@ -28,45 +28,67 @@ import org.joda.time.LocalDate;
 @SuppressWarnings("unused")
 public class ClientNonPersonData implements Serializable {
 
-    private final CodeValueData constitution;
-    private final String incorpNumber;
-    private final LocalDate incorpValidityTillDate;
-    private final CodeValueData mainBusinessLine;
-    private final String remarks;
+  private final CodeValueData constitution;
+  private final String incorpNumber;
+  private final LocalDate incorpValidityTillDate;
+  private final CodeValueData mainBusinessLine;
+  private final String remarks;
 
-    //import fields
-    private Long mainBusinessLineId;
-    private Long constitutionId;
-    private String locale;
-    private String dateFormat;
+  // import fields
+  private Long mainBusinessLineId;
+  private Long constitutionId;
+  private String locale;
+  private String dateFormat;
 
-    public static ClientNonPersonData importInstance(String incorporationNo, LocalDate incorpValidityTillDate,
-            String remarks, Long mainBusinessLineId, Long constitutionId,String locale,String dateFormat){
-        return new ClientNonPersonData(incorporationNo,incorpValidityTillDate,remarks,
-                mainBusinessLineId,constitutionId,locale,dateFormat);
-    }
-    private ClientNonPersonData(String incorpNumber, LocalDate incorpValidityTillDate,
-            String remarks, Long mainBusinessLineId, Long constitutionId,String locale,String dateFormat) {
+  public static ClientNonPersonData importInstance(
+      String incorporationNo,
+      LocalDate incorpValidityTillDate,
+      String remarks,
+      Long mainBusinessLineId,
+      Long constitutionId,
+      String locale,
+      String dateFormat) {
+    return new ClientNonPersonData(
+        incorporationNo,
+        incorpValidityTillDate,
+        remarks,
+        mainBusinessLineId,
+        constitutionId,
+        locale,
+        dateFormat);
+  }
 
-        this.incorpNumber = incorpNumber;
-        this.incorpValidityTillDate = incorpValidityTillDate;
-        this.remarks = remarks;
-        this.mainBusinessLineId = mainBusinessLineId;
-        this.constitutionId = constitutionId;
-        this.dateFormat= dateFormat;
-        this.locale= locale;
-        this.constitution = null;
-        this.mainBusinessLine = null;
-    }
+  private ClientNonPersonData(
+      String incorpNumber,
+      LocalDate incorpValidityTillDate,
+      String remarks,
+      Long mainBusinessLineId,
+      Long constitutionId,
+      String locale,
+      String dateFormat) {
 
-    public ClientNonPersonData(CodeValueData constitution, String incorpNo, LocalDate incorpValidityTillDate,
-            CodeValueData mainBusinessLine, String remarks) {
-        super();
-        this.constitution = constitution;
-        this.incorpNumber = incorpNo;
-        this.incorpValidityTillDate = incorpValidityTillDate;
-        this.mainBusinessLine = mainBusinessLine;
-        this.remarks = remarks;
-    }
+    this.incorpNumber = incorpNumber;
+    this.incorpValidityTillDate = incorpValidityTillDate;
+    this.remarks = remarks;
+    this.mainBusinessLineId = mainBusinessLineId;
+    this.constitutionId = constitutionId;
+    this.dateFormat = dateFormat;
+    this.locale = locale;
+    this.constitution = null;
+    this.mainBusinessLine = null;
+  }
 
+  public ClientNonPersonData(
+      CodeValueData constitution,
+      String incorpNo,
+      LocalDate incorpValidityTillDate,
+      CodeValueData mainBusinessLine,
+      String remarks) {
+    super();
+    this.constitution = constitution;
+    this.incorpNumber = incorpNo;
+    this.incorpValidityTillDate = incorpValidityTillDate;
+    this.mainBusinessLine = mainBusinessLine;
+    this.remarks = remarks;
+  }
 }

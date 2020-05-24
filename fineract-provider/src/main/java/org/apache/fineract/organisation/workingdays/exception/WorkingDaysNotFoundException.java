@@ -25,8 +25,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class WorkingDaysNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public WorkingDaysNotFoundException() {
-        super("error.msg.working.days.not.configured", "Must configure the Working days for the organisation.");
-    }
-
+  public WorkingDaysNotFoundException() {
+    super(
+        "error.msg.working.days.not.configured",
+        "Must configure the Working days for the organisation.");
+  }
 }

@@ -33,14 +33,14 @@ import java.util.Date;
  */
 public class DateAdapter implements JsonSerializer<Date> {
 
-    private final static DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+  private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
-    @Override
-    @SuppressWarnings("unused")
-    public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
-        if (src == null) {
-            return null;
-        }
-        return new JsonPrimitive(formatter.format(src.toInstant()));
+  @Override
+  @SuppressWarnings("unused")
+  public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
+    if (src == null) {
+      return null;
     }
+    return new JsonPrimitive(formatter.format(src.toInstant()));
+  }
 }

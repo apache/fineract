@@ -41,64 +41,76 @@ import org.springframework.stereotype.Component;
  * {@link CollectionSheetBulkRepaymentCommand}'s.
  */
 @Component
-public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer extends
-        AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
+public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private final PaymentDetailAssembler paymentDetailAssembler;
+  private final FromJsonHelper fromApiJsonHelper;
+  private final PaymentDetailAssembler paymentDetailAssembler;
 
-    @Autowired
-    public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
-            final PaymentDetailAssembler paymentDetailAssembler) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.paymentDetailAssembler = paymentDetailAssembler;
+  @Autowired
+  public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(
+      final FromJsonHelper fromApiJsonHelper, final PaymentDetailAssembler paymentDetailAssembler) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+    this.paymentDetailAssembler = paymentDetailAssembler;
+  }
+
+  @Override
+  public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final PaymentDetail paymentDetail =
+        this.paymentDetailAssembler.fetchPaymentDetail(element.getAsJsonObject());
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final PaymentDetail paymentDetail = this.paymentDetailAssembler.fetchPaymentDetail(element.getAsJsonObject());
+    return commandFromApiJson(json, paymentDetail);
+  }
 
-        return commandFromApiJson(json, paymentDetail);
+  public CollectionSheetBulkRepaymentCommand commandFromApiJson(
+      final String json, final PaymentDetail paymentDetail) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json, final PaymentDetail paymentDetail) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final LocalDate transactionDate =
+        this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
 
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+    final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+    final JsonObject topLevelJsonElement = element.getAsJsonObject();
+    final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-        final JsonObject topLevelJsonElement = element.getAsJsonObject();
-        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+    SingleRepaymentCommand[] loanRepaymentTransactions = null;
 
-        SingleRepaymentCommand[] loanRepaymentTransactions = null;
+    if (element.isJsonObject()) {
+      if (topLevelJsonElement.has("bulkRepaymentTransactions")
+          && topLevelJsonElement.get("bulkRepaymentTransactions").isJsonArray()) {
+        final JsonArray array =
+            topLevelJsonElement.get("bulkRepaymentTransactions").getAsJsonArray();
+        loanRepaymentTransactions = new SingleRepaymentCommand[array.size()];
+        for (int i = 0; i < array.size(); i++) {
+          final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
 
-        if (element.isJsonObject()) {
-            if (topLevelJsonElement.has("bulkRepaymentTransactions") && topLevelJsonElement.get("bulkRepaymentTransactions").isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get("bulkRepaymentTransactions").getAsJsonArray();
-                loanRepaymentTransactions = new SingleRepaymentCommand[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-                    final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
-
-                    final Long loanId = this.fromApiJsonHelper.extractLongNamed("loanId", loanTransactionElement);
-                    final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount",
-                            loanTransactionElement, locale);
-                    PaymentDetail detail = paymentDetail;
-                    if (paymentDetail == null) {
-                        detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
-                    }
-                    if(transactionAmount != null && transactionAmount.intValue() > 0){
-                        loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
-                    }
-                }
-            }
+          final Long loanId =
+              this.fromApiJsonHelper.extractLongNamed("loanId", loanTransactionElement);
+          final BigDecimal transactionAmount =
+              this.fromApiJsonHelper.extractBigDecimalNamed(
+                  "transactionAmount", loanTransactionElement, locale);
+          PaymentDetail detail = paymentDetail;
+          if (paymentDetail == null) {
+            detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
+          }
+          if (transactionAmount != null && transactionAmount.intValue() > 0) {
+            loanRepaymentTransactions[i] =
+                new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
+          }
         }
-        return new CollectionSheetBulkRepaymentCommand(note, transactionDate, loanRepaymentTransactions);
+      }
     }
-
+    return new CollectionSheetBulkRepaymentCommand(
+        note, transactionDate, loanRepaymentTransactions);
+  }
 }

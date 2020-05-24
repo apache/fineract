@@ -60,89 +60,149 @@ import org.springframework.stereotype.Component;
 @Api(value = "Funds", description = "")
 public class FundsApiResource {
 
-    /**
-     * The set of parameters that are supported in response for {@link CodeData}
-     */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "externalId"));
+  /**
+   * The set of parameters that are supported in response for {@link CodeData}
+   */
+  private final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList("id", "name", "externalId"));
 
-    private final String resourceNameForPermissions = "FUND";
+  private final String resourceNameForPermissions = "FUND";
 
-    private final PlatformSecurityContext context;
-    private final FundReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<FundData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext context;
+  private final FundReadPlatformService readPlatformService;
+  private final DefaultToApiJsonSerializer<FundData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public FundsApiResource(final PlatformSecurityContext context, final FundReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<FundData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+  @Autowired
+  public FundsApiResource(
+      final PlatformSecurityContext context,
+      final FundReadPlatformService readPlatformService,
+      final DefaultToApiJsonSerializer<FundData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.readPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Funds", httpMethod = "GET", notes = "Returns the list of funds.\n" + "\n" + "Example Requests:\n" + "\n" + "funds")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.GetFundsResponse.class, responseContainer = "List")})
-    public String retrieveFunds(@Context final UriInfo uriInfo) {
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve Funds",
+      httpMethod = "GET",
+      notes = "Returns the list of funds.\n" + "\n" + "Example Requests:\n" + "\n" + "funds")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = FundsApiResourceSwagger.GetFundsResponse.class,
+        responseContainer = "List")
+  })
+  public String retrieveFunds(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
+    final Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, funds, this.RESPONSE_DATA_PARAMETERS);
-    }
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, funds, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a Fund", httpMethod = "POST", notes = "Creates a Fund")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FundsApiResourceSwagger.PostFundsRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.PostFundsResponse.class)})
-    public String createFund(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Create a Fund", httpMethod = "POST", notes = "Creates a Fund")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = FundsApiResourceSwagger.PostFundsRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = FundsApiResourceSwagger.PostFundsResponse.class)
+  })
+  public String createFund(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createFund().withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().createFund().withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @GET
-    @Path("{fundId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Fund", httpMethod = "GET", notes = "Returns the details of a Fund.\n" + "\n" + "Example Requests:\n" + "\n" + "funds/1")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.GetFundsResponse.class)})
-    public String retreiveFund(@PathParam("fundId") @ApiParam(value = "fundId") final Long fundId, @Context final UriInfo uriInfo) {
+  @GET
+  @Path("{fundId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve a Fund",
+      httpMethod = "GET",
+      notes = "Returns the details of a Fund.\n" + "\n" + "Example Requests:\n" + "\n" + "funds/1")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = FundsApiResourceSwagger.GetFundsResponse.class)
+  })
+  public String retreiveFund(
+      @PathParam("fundId") @ApiParam(value = "fundId") final Long fundId,
+      @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final FundData fund = this.readPlatformService.retrieveFund(fundId);
+    final FundData fund = this.readPlatformService.retrieveFund(fundId);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, fund, this.RESPONSE_DATA_PARAMETERS);
-    }
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, fund, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-    @PUT
-    @Path("{fundId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Fund", httpMethod = "PUT", notes = "Updates the details of a fund.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FundsApiResourceSwagger.PutFundsFundIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FundsApiResourceSwagger.PutFundsFundIdResponse.class)})
-    public String updateFund(@PathParam("fundId") @ApiParam(value = "fundId") final Long fundId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+  @PUT
+  @Path("{fundId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Update a Fund",
+      httpMethod = "PUT",
+      notes = "Updates the details of a fund.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = FundsApiResourceSwagger.PutFundsFundIdRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = FundsApiResourceSwagger.PutFundsFundIdResponse.class)
+  })
+  public String updateFund(
+      @PathParam("fundId") @ApiParam(value = "fundId") final Long fundId,
+      @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFund(fundId).withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().updateFund(fundId).withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

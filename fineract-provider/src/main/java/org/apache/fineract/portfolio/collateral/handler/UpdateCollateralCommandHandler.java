@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "COLLATERAL", action = "UPDATE")
 public class UpdateCollateralCommandHandler implements NewCommandSourceHandler {
 
-    private final CollateralWritePlatformService writePlatformService;
+  private final CollateralWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateCollateralCommandHandler(final CollateralWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateCollateralCommandHandler(final CollateralWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateCollateral(command.getLoanId(), command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.updateCollateral(
+        command.getLoanId(), command.entityId(), command);
+  }
 }

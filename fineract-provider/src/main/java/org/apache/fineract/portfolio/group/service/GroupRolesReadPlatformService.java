@@ -23,7 +23,7 @@ import org.apache.fineract.portfolio.group.data.GroupRoleData;
 
 public interface GroupRolesReadPlatformService {
 
-    Collection<GroupRoleData> retrieveGroupRoles(Long groupId);
+  Collection<GroupRoleData> retrieveGroupRoles(Long groupId);
 
-    GroupRoleData retrieveGroupRole(Long groupId, Long roleId);
+  GroupRoleData retrieveGroupRole(Long groupId, Long roleId);
 }

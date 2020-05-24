@@ -31,5 +31,4 @@ public interface RateRepository extends JpaRepository<Rate, Long>, JpaSpecificat
   Rate findByName(String name);
 
   List<Rate> findAllByActiveAndProductApply(boolean active, String productApply);
-
 }

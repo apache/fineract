@@ -60,163 +60,203 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {
 
-    private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
+  private final LoanTransactionProcessingStrategyRepository
+      loanTransactionProcessingStrategyRepository;
 
-    @Autowired
-    public LoanDropdownReadPlatformServiceImpl(final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
-        this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
+  @Autowired
+  public LoanDropdownReadPlatformServiceImpl(
+      final LoanTransactionProcessingStrategyRepository
+          loanTransactionProcessingStrategyRepository) {
+    this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
+
+    final List<EnumOptionData> allowedAmortizationMethods =
+        Arrays.asList(
+            amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS),
+            amortizationType(AmortizationMethod.EQUAL_PRINCIPAL));
+
+    return allowedAmortizationMethods;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveLoanInterestTypeOptions() {
+    final List<EnumOptionData> allowedRepaymentScheduleCalculationMethods =
+        Arrays.asList(
+            interestType(InterestMethod.FLAT), interestType(InterestMethod.DECLINING_BALANCE));
+
+    return allowedRepaymentScheduleCalculationMethods;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions() {
+
+    final List<EnumOptionData> allowedOptions =
+        Arrays.asList(
+            interestCalculationPeriodType(InterestCalculationPeriodMethod.DAILY),
+            interestCalculationPeriodType(
+                InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
+
+    return allowedOptions;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions() {
+    final List<EnumOptionData> loanTermFrequencyOptions =
+        Arrays.asList(
+            loanTermFrequencyType(PeriodFrequencyType.DAYS),
+            loanTermFrequencyType(PeriodFrequencyType.WEEKS),
+            loanTermFrequencyType(PeriodFrequencyType.MONTHS),
+            loanTermFrequencyType(PeriodFrequencyType.YEARS));
+    return loanTermFrequencyOptions;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions() {
+
+    final List<EnumOptionData> repaymentFrequencyOptions =
+        Arrays.asList(
+            repaymentFrequencyType(PeriodFrequencyType.DAYS),
+            repaymentFrequencyType(PeriodFrequencyType.WEEKS),
+            repaymentFrequencyType(PeriodFrequencyType.MONTHS));
+    return repaymentFrequencyOptions;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForNthDayOfMonth() {
+    final List<EnumOptionData> repaymentFrequencyOptions =
+        Arrays.asList(
+            repaymentFrequencyNthDayType(NthDayType.ONE),
+            repaymentFrequencyNthDayType(NthDayType.TWO),
+            repaymentFrequencyNthDayType(NthDayType.THREE),
+            repaymentFrequencyNthDayType(NthDayType.FOUR),
+            repaymentFrequencyNthDayType(NthDayType.LAST));
+    return repaymentFrequencyOptions;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForDaysOfWeek() {
+
+    final List<EnumOptionData> repaymentFrequencyOptions =
+        Arrays.asList(
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.SUNDAY),
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.MONDAY),
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.TUESDAY),
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.WEDNESDAY),
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.THURSDAY),
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.FRIDAY),
+            repaymentFrequencyDayOfWeekType(DayOfWeekType.SATURDAY));
+    return repaymentFrequencyOptions;
+  }
+
+  @Override
+  public List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions() {
+    // support for monthly and annual percentage rate (MPR) and (APR)
+    final List<EnumOptionData> interestRateFrequencyTypeOptions =
+        Arrays.asList(
+            interestRateFrequencyType(PeriodFrequencyType.MONTHS),
+            interestRateFrequencyType(PeriodFrequencyType.YEARS),
+            interestRateFrequencyType(PeriodFrequencyType.WHOLE_TERM));
+    return interestRateFrequencyTypeOptions;
+  }
+
+  @Override
+  public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
+
+    final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
+    Sort sort = Sort.by("sortOrder");
+    final List<LoanTransactionProcessingStrategy> strategies =
+        this.loanTransactionProcessingStrategyRepository.findAll(sort);
+    for (final LoanTransactionProcessingStrategy strategy : strategies) {
+      strategyOptions.add(strategy.toData());
     }
 
-    @Override
-    public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
+    return strategyOptions;
+  }
 
-        final List<EnumOptionData> allowedAmortizationMethods = Arrays.asList(amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS),
-                amortizationType(AmortizationMethod.EQUAL_PRINCIPAL));
+  @Override
+  public List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions() {
 
-        return allowedAmortizationMethods;
-    }
+    final List<EnumOptionData> repaymentFrequencyOptions =
+        Arrays.asList(
+            loanCycleValueConditionType(LoanProductValueConditionType.EQUAL),
+            loanCycleValueConditionType(LoanProductValueConditionType.GREATERTHAN));
+    return repaymentFrequencyOptions;
+  }
 
-    @Override
-    public List<EnumOptionData> retrieveLoanInterestTypeOptions() {
-        final List<EnumOptionData> allowedRepaymentScheduleCalculationMethods = Arrays.asList(interestType(InterestMethod.FLAT),
-                interestType(InterestMethod.DECLINING_BALANCE));
+  @Override
+  public List<EnumOptionData> retrieveInterestRecalculationCompoundingTypeOptions() {
 
-        return allowedRepaymentScheduleCalculationMethods;
-    }
+    final List<EnumOptionData> interestRecalculationCompoundingTypeOptions =
+        Arrays.asList(
+            interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.NONE),
+            interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.FEE),
+            interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST),
+            interestRecalculationCompoundingType(
+                InterestRecalculationCompoundingMethod.INTEREST_AND_FEE));
+    return interestRecalculationCompoundingTypeOptions;
+  }
 
-    @Override
-    public List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions() {
+  @Override
+  public List<EnumOptionData> retrieveInterestRecalculationNthDayTypeOptions() {
+    final List<EnumOptionData> interestRecalculationCompoundingNthDayTypeOptions =
+        Arrays.asList(
+            interestRecalculationCompoundingNthDayType(NthDayType.ONE),
+            interestRecalculationCompoundingNthDayType(NthDayType.TWO),
+            interestRecalculationCompoundingNthDayType(NthDayType.THREE),
+            interestRecalculationCompoundingNthDayType(NthDayType.FOUR),
+            interestRecalculationCompoundingNthDayType(NthDayType.LAST));
+    return interestRecalculationCompoundingNthDayTypeOptions;
+  }
 
-        final List<EnumOptionData> allowedOptions = Arrays.asList(interestCalculationPeriodType(InterestCalculationPeriodMethod.DAILY),
-                interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
+  @Override
+  public List<EnumOptionData> retrieveInterestRecalculationDayOfWeekTypeOptions() {
+    final List<EnumOptionData> interestRecalculationCompoundingNthDayTypeOptions =
+        Arrays.asList(
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.SUNDAY),
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.MONDAY),
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.TUESDAY),
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.WEDNESDAY),
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.THURSDAY),
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.FRIDAY),
+            interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.SATURDAY));
+    return interestRecalculationCompoundingNthDayTypeOptions;
+  }
 
-        return allowedOptions;
-    }
+  @Override
+  public List<EnumOptionData> retrieveRescheduleStrategyTypeOptions() {
 
-    @Override
-    public List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions() {
-        final List<EnumOptionData> loanTermFrequencyOptions = Arrays.asList(loanTermFrequencyType(PeriodFrequencyType.DAYS),
-                loanTermFrequencyType(PeriodFrequencyType.WEEKS), loanTermFrequencyType(PeriodFrequencyType.MONTHS),
-                loanTermFrequencyType(PeriodFrequencyType.YEARS));
-        return loanTermFrequencyOptions;
-    }
+    final List<EnumOptionData> rescheduleStrategyTypeOptions =
+        Arrays.asList(
+            rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT),
+            rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS),
+            rescheduleStrategyType(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS));
+    return rescheduleStrategyTypeOptions;
+  }
 
-    @Override
-    public List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions() {
+  @Override
+  public List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions() {
 
-        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyType(PeriodFrequencyType.DAYS),
-                repaymentFrequencyType(PeriodFrequencyType.WEEKS), repaymentFrequencyType(PeriodFrequencyType.MONTHS));
-        return repaymentFrequencyOptions;
-    }
+    final List<EnumOptionData> interestRecalculationFrequencyTypeOptions =
+        Arrays.asList(
+            interestRecalculationFrequencyType(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD),
+            interestRecalculationFrequencyType(RecalculationFrequencyType.DAILY),
+            interestRecalculationFrequencyType(RecalculationFrequencyType.WEEKLY),
+            interestRecalculationFrequencyType(RecalculationFrequencyType.MONTHLY));
+    return interestRecalculationFrequencyTypeOptions;
+  }
 
-    @Override
-    public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForNthDayOfMonth() {
-        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyNthDayType(NthDayType.ONE),
-                repaymentFrequencyNthDayType(NthDayType.TWO), repaymentFrequencyNthDayType(NthDayType.THREE),
-                repaymentFrequencyNthDayType(NthDayType.FOUR), repaymentFrequencyNthDayType(NthDayType.LAST));
-        return repaymentFrequencyOptions;
-    }
+  @Override
+  public List<EnumOptionData> retrivePreCloseInterestCalculationStrategyOptions() {
 
-    @Override
-    public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForDaysOfWeek() {
-
-        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyDayOfWeekType(DayOfWeekType.SUNDAY),
-                repaymentFrequencyDayOfWeekType(DayOfWeekType.MONDAY), repaymentFrequencyDayOfWeekType(DayOfWeekType.TUESDAY),
-                repaymentFrequencyDayOfWeekType(DayOfWeekType.WEDNESDAY), repaymentFrequencyDayOfWeekType(DayOfWeekType.THURSDAY),
-                repaymentFrequencyDayOfWeekType(DayOfWeekType.FRIDAY), repaymentFrequencyDayOfWeekType(DayOfWeekType.SATURDAY));
-        return repaymentFrequencyOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions() {
-        // support for monthly and annual percentage rate (MPR) and (APR)
-        final List<EnumOptionData> interestRateFrequencyTypeOptions = Arrays.asList(interestRateFrequencyType(PeriodFrequencyType.MONTHS),
-                  interestRateFrequencyType(PeriodFrequencyType.YEARS), interestRateFrequencyType(PeriodFrequencyType.WHOLE_TERM));
-        return interestRateFrequencyTypeOptions;
-    }
-
-    @Override
-    public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
-
-        final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
-        Sort sort = Sort.by("sortOrder");
-        final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll(sort);
-        for (final LoanTransactionProcessingStrategy strategy : strategies) {
-            strategyOptions.add(strategy.toData());
-        }
-
-        return strategyOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions() {
-
-        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(
-                loanCycleValueConditionType(LoanProductValueConditionType.EQUAL),
-                loanCycleValueConditionType(LoanProductValueConditionType.GREATERTHAN));
-        return repaymentFrequencyOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveInterestRecalculationCompoundingTypeOptions() {
-
-        final List<EnumOptionData> interestRecalculationCompoundingTypeOptions = Arrays.asList(
-                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.NONE),
-                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.FEE),
-                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST),
-                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE));
-        return interestRecalculationCompoundingTypeOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveInterestRecalculationNthDayTypeOptions() {
-        final List<EnumOptionData> interestRecalculationCompoundingNthDayTypeOptions = Arrays.asList(
-                interestRecalculationCompoundingNthDayType(NthDayType.ONE), interestRecalculationCompoundingNthDayType(NthDayType.TWO),
-                interestRecalculationCompoundingNthDayType(NthDayType.THREE), interestRecalculationCompoundingNthDayType(NthDayType.FOUR),
-                interestRecalculationCompoundingNthDayType(NthDayType.LAST));
-        return interestRecalculationCompoundingNthDayTypeOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveInterestRecalculationDayOfWeekTypeOptions() {
-        final List<EnumOptionData> interestRecalculationCompoundingNthDayTypeOptions = Arrays.asList(
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.SUNDAY),
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.MONDAY),
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.TUESDAY),
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.WEDNESDAY),
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.THURSDAY),
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.FRIDAY),
-                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.SATURDAY));
-        return interestRecalculationCompoundingNthDayTypeOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveRescheduleStrategyTypeOptions() {
-
-        final List<EnumOptionData> rescheduleStrategyTypeOptions = Arrays.asList(
-                rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT),
-                rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS),
-                rescheduleStrategyType(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS));
-        return rescheduleStrategyTypeOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions() {
-
-        final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = Arrays.asList(
-                interestRecalculationFrequencyType(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD),
-                interestRecalculationFrequencyType(RecalculationFrequencyType.DAILY),
-                interestRecalculationFrequencyType(RecalculationFrequencyType.WEEKLY),
-                interestRecalculationFrequencyType(RecalculationFrequencyType.MONTHLY));
-        return interestRecalculationFrequencyTypeOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrivePreCloseInterestCalculationStrategyOptions() {
-
-        final List<EnumOptionData> preCloseInterestCalculationStrategyOptions = Arrays.asList(
-                preCloseInterestCalculationStrategy(LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE),
-                preCloseInterestCalculationStrategy(LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE));
-        return preCloseInterestCalculationStrategyOptions;
-    }
+    final List<EnumOptionData> preCloseInterestCalculationStrategyOptions =
+        Arrays.asList(
+            preCloseInterestCalculationStrategy(
+                LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE),
+            preCloseInterestCalculationStrategy(
+                LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE));
+    return preCloseInterestCalculationStrategyOptions;
+  }
 }

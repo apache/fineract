@@ -25,28 +25,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupRoleRepositoryWrapper {
 
-    private final GroupRoleRepository repository;
+  private final GroupRoleRepository repository;
 
-    @Autowired
-    public GroupRoleRepositoryWrapper(final GroupRoleRepository rRepository) {
-        this.repository = rRepository;
-    }
+  @Autowired
+  public GroupRoleRepositoryWrapper(final GroupRoleRepository rRepository) {
+    this.repository = rRepository;
+  }
 
-    public GroupRole findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new GroupRoleNotFoundException(id));
-    }
+  public GroupRole findOneWithNotFoundDetection(final Long id) {
+    return this.repository.findById(id).orElseThrow(() -> new GroupRoleNotFoundException(id));
+  }
 
-    public void save(final GroupRole entity) {
-        this.repository.save(entity);
-    }
+  public void save(final GroupRole entity) {
+    this.repository.save(entity);
+  }
 
-    public void saveAndFlush(final GroupRole entity) {
-        this.repository.saveAndFlush(entity);
-    }
+  public void saveAndFlush(final GroupRole entity) {
+    this.repository.saveAndFlush(entity);
+  }
 
-    public void delete(final GroupRole entity) {
-        this.repository.delete(entity);
-    }
-
+  public void delete(final GroupRole entity) {
+    this.repository.delete(entity);
+  }
 }

@@ -35,99 +35,144 @@ import org.joda.time.LocalDate;
 
 public class InteropAccountData extends CommandProcessingResult {
 
-    @NotNull
-    private final String accountId;
-    @NotNull
-    private final String savingProductId;
-    @NotNull
-    private final String productName;
-    @NotNull
-    private final String shortProductName;
-    @NotNull
-    private final String currency;
-    @NotNull
-    private final BigDecimal accountBalance;
-    @NotNull
-    private final BigDecimal availableBalance;
-    @NotNull
-    private final SavingsAccountStatusType status;
-    private final SavingsAccountSubStatusEnum subStatus;
+  @NotNull private final String accountId;
+  @NotNull private final String savingProductId;
+  @NotNull private final String productName;
+  @NotNull private final String shortProductName;
+  @NotNull private final String currency;
+  @NotNull private final BigDecimal accountBalance;
+  @NotNull private final BigDecimal availableBalance;
+  @NotNull private final SavingsAccountStatusType status;
+  private final SavingsAccountSubStatusEnum subStatus;
 
-    private final AccountType accountType; //differentiate Individual, JLG or Group account
-    private final DepositAccountType depositType; //differentiate deposit accounts Savings, FD and RD accounts
-    @NotNull
-    private final LocalDate activatedOn;
-    private final LocalDate statusUpdateOn;
-    private final LocalDate withdrawnOn;
-    private final LocalDate balanceOn;
-    @NotNull
-    private List<InteropIdentifierData> identifiers;
+  private final AccountType accountType; // differentiate Individual, JLG or Group account
+  private final DepositAccountType
+      depositType; // differentiate deposit accounts Savings, FD and RD accounts
+  @NotNull private final LocalDate activatedOn;
+  private final LocalDate statusUpdateOn;
+  private final LocalDate withdrawnOn;
+  private final LocalDate balanceOn;
+  @NotNull private List<InteropIdentifierData> identifiers;
 
-    InteropAccountData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, String accountId,
-                       String productId, String productName, String shortProductName, String currency, BigDecimal accountBalance,
-                       BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
-                       AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn,
-                       LocalDate withdrawnOn, LocalDate balanceOn, List<InteropIdentifierData> identifiers) {
-        super(resourceId, officeId, commandId, changesOnly);
-        this.accountId = accountId;
-        this.savingProductId = productId;
-        this.productName = productName;
-        this.shortProductName = shortProductName;
-        this.currency = currency;
-        this.accountBalance = accountBalance;
-        this.availableBalance = availableBalance;
-        this.status = status;
-        this.subStatus = subStatus;
-        this.accountType = accountType;
-        this.depositType = depositType;
-        this.activatedOn = activatedOn;
-        this.statusUpdateOn = statusUpdateOn;
-        this.withdrawnOn = withdrawnOn;
-        this.balanceOn = balanceOn;
-        this.identifiers = identifiers;
+  InteropAccountData(
+      Long resourceId,
+      Long officeId,
+      Long commandId,
+      Map<String, Object> changesOnly,
+      String accountId,
+      String productId,
+      String productName,
+      String shortProductName,
+      String currency,
+      BigDecimal accountBalance,
+      BigDecimal availableBalance,
+      SavingsAccountStatusType status,
+      SavingsAccountSubStatusEnum subStatus,
+      AccountType accountType,
+      DepositAccountType depositType,
+      LocalDate activatedOn,
+      LocalDate statusUpdateOn,
+      LocalDate withdrawnOn,
+      LocalDate balanceOn,
+      List<InteropIdentifierData> identifiers) {
+    super(resourceId, officeId, commandId, changesOnly);
+    this.accountId = accountId;
+    this.savingProductId = productId;
+    this.productName = productName;
+    this.shortProductName = shortProductName;
+    this.currency = currency;
+    this.accountBalance = accountBalance;
+    this.availableBalance = availableBalance;
+    this.status = status;
+    this.subStatus = subStatus;
+    this.accountType = accountType;
+    this.depositType = depositType;
+    this.activatedOn = activatedOn;
+    this.statusUpdateOn = statusUpdateOn;
+    this.withdrawnOn = withdrawnOn;
+    this.balanceOn = balanceOn;
+    this.identifiers = identifiers;
+  }
+
+  InteropAccountData(
+      String accountId,
+      String productId,
+      String productName,
+      String shortProductName,
+      String currency,
+      BigDecimal accountBalance,
+      BigDecimal availableBalance,
+      SavingsAccountStatusType status,
+      SavingsAccountSubStatusEnum subStatus,
+      AccountType accountType,
+      DepositAccountType depositType,
+      LocalDate activatedOn,
+      LocalDate statusUpdateOn,
+      LocalDate withdrawnOn,
+      LocalDate balanceOn,
+      List<InteropIdentifierData> identifiers) {
+    this(
+        null,
+        null,
+        null,
+        null,
+        accountId,
+        productId,
+        productName,
+        shortProductName,
+        currency,
+        accountBalance,
+        availableBalance,
+        status,
+        subStatus,
+        accountType,
+        depositType,
+        activatedOn,
+        statusUpdateOn,
+        withdrawnOn,
+        balanceOn,
+        identifiers);
+  }
+
+  public static InteropAccountData build(SavingsAccount account) {
+    if (account == null) return null;
+
+    List<InteropIdentifierData> ids = new ArrayList<>();
+    for (InteropIdentifier identifier : account.getIdentifiers()) {
+      ids.add(InteropIdentifierData.build(identifier));
     }
 
-    InteropAccountData(String accountId, String productId, String productName, String shortProductName, String currency,
-                       BigDecimal accountBalance, BigDecimal availableBalance, SavingsAccountStatusType status, SavingsAccountSubStatusEnum subStatus,
-                       AccountType accountType, DepositAccountType depositType, LocalDate activatedOn, LocalDate statusUpdateOn,
-                       LocalDate withdrawnOn, LocalDate balanceOn, List<InteropIdentifierData> identifiers) {
-        this(null, null, null, null, accountId, productId, productName, shortProductName, currency, accountBalance,
-                availableBalance, status, subStatus, accountType, depositType, activatedOn, statusUpdateOn, withdrawnOn, balanceOn,
-                identifiers);
-    }
+    SavingsProduct product = account.savingsProduct();
+    SavingsAccountSubStatusEnum subStatus =
+        SavingsAccountSubStatusEnum.fromInt(account.getSubStatus());
 
-    public static InteropAccountData build(SavingsAccount account) {
-        if (account == null)
-            return null;
+    return new InteropAccountData(
+        account.getExternalId(),
+        product.getId().toString(),
+        product.getName(),
+        product.getShortName(),
+        account.getCurrency().getCode(),
+        account.getAccountBalance(),
+        account.getWithdrawableBalance(),
+        account.getStatus(),
+        subStatus,
+        account.getAccountType(),
+        account.depositAccountType(),
+        account.getActivationLocalDate(),
+        calcStatusUpdateOn(account),
+        account.getWithdrawnOnDate(),
+        account.retrieveLastTransactionDate(),
+        ids);
+  }
 
-        List<InteropIdentifierData> ids = new ArrayList<>();
-        for (InteropIdentifier identifier : account.getIdentifiers()) {
-            ids.add(InteropIdentifierData.build(identifier));
-        }
-
-        SavingsProduct product = account.savingsProduct();
-        SavingsAccountSubStatusEnum subStatus = SavingsAccountSubStatusEnum.fromInt(account.getSubStatus());
-
-        return new InteropAccountData(account.getExternalId(), product.getId().toString(), product.getName(),
-                product.getShortName(), account.getCurrency().getCode(), account.getAccountBalance(), account.getWithdrawableBalance(),
-                account.getStatus(), subStatus, account.getAccountType(), account.depositAccountType(), account.getActivationLocalDate(),
-                calcStatusUpdateOn(account), account.getWithdrawnOnDate(), account.retrieveLastTransactionDate(), ids);
-    }
-
-    private static LocalDate calcStatusUpdateOn(@NotNull SavingsAccount account) {
-        LocalDate date = account.getClosedOnDate();
-        if (date != null)
-            return date;
-        if ((date = account.getWithdrawnOnDate()) != null)
-            return date;
-        if ((date = account.getActivationLocalDate()) != null)
-            return date;
-        if ((date = account.getRejectedOnDate()) != null)
-            return date;
-        if ((date = account.getApprovedOnDate()) != null)
-            return date;
-        if ((date = account.getSubmittedOnDate()) != null)
-            return date;
-        return null;
-    }
+  private static LocalDate calcStatusUpdateOn(@NotNull SavingsAccount account) {
+    LocalDate date = account.getClosedOnDate();
+    if (date != null) return date;
+    if ((date = account.getWithdrawnOnDate()) != null) return date;
+    if ((date = account.getActivationLocalDate()) != null) return date;
+    if ((date = account.getRejectedOnDate()) != null) return date;
+    if ((date = account.getApprovedOnDate()) != null) return date;
+    if ((date = account.getSubmittedOnDate()) != null) return date;
+    return null;
+  }
 }

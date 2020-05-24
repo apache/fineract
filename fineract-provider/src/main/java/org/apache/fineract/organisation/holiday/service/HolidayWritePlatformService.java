@@ -23,12 +23,11 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface HolidayWritePlatformService {
 
-    CommandProcessingResult createHoliday(JsonCommand command);
+  CommandProcessingResult createHoliday(JsonCommand command);
 
-    CommandProcessingResult updateHoliday(JsonCommand command);
+  CommandProcessingResult updateHoliday(JsonCommand command);
 
-    CommandProcessingResult activateHoliday(final Long holidayId);
+  CommandProcessingResult activateHoliday(final Long holidayId);
 
-    CommandProcessingResult deleteHoliday(final Long holidayId);
-
+  CommandProcessingResult deleteHoliday(final Long holidayId);
 }

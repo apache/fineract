@@ -45,60 +45,51 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class TopicTest {
 
-    @Mock
-    private OfficeRepository officeRepository;
+  @Mock private OfficeRepository officeRepository;
 
-    @Mock
-    private RoleRepository roleRepository;
+  @Mock private RoleRepository roleRepository;
 
-    @Mock
-    private TopicWritePlatformService topicWritePltfService;
+  @Mock private TopicWritePlatformService topicWritePltfService;
 
-    @Mock
-    private TopicRepository topicRepository;
+  @Mock private TopicRepository topicRepository;
 
-    @Mock
-    private TopicSubscriberWritePlatformService topicSubscriberWritePltfService;
+  @Mock private TopicSubscriberWritePlatformService topicSubscriberWritePltfService;
 
-    @Mock
-    private AppUserRepository appUserRepository;
+  @Mock private AppUserRepository appUserRepository;
 
-    @Test
-    public void testTopicStorage() {
-        Office office = officeRepository.getOne(1L);
-        Role role = new Role("New Member_Type", "Testing topic creation");
-        Topic topic = topicRepository.getOne(1L);
+  @Test
+  public void testTopicStorage() {
+    Office office = officeRepository.getOne(1L);
+    Role role = new Role("New Member_Type", "Testing topic creation");
+    Topic topic = topicRepository.getOne(1L);
 
-        lenient().when(this.officeRepository.getOne(1L)).thenReturn(office);
-        lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
-        when(this.roleRepository.save(role)).thenReturn(role);
-        when(this.topicWritePltfService.create(refEq(topic))).thenReturn(1L);
+    lenient().when(this.officeRepository.getOne(1L)).thenReturn(office);
+    lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
+    when(this.roleRepository.save(role)).thenReturn(role);
+    when(this.topicWritePltfService.create(refEq(topic))).thenReturn(1L);
 
-        this.roleRepository.save(role);
-        Long topicId = this.topicWritePltfService.create(topic);
+    this.roleRepository.save(role);
+    Long topicId = this.topicWritePltfService.create(topic);
 
-        verify(this.roleRepository, times(1)).save(role);
-        verify(this.topicWritePltfService, times(1)).create(refEq(topic));
-        assertEquals(topicId, Long.valueOf(1));
+    verify(this.roleRepository, times(1)).save(role);
+    verify(this.topicWritePltfService, times(1)).create(refEq(topic));
+    assertEquals(topicId, Long.valueOf(1));
+  }
 
-    }
+  @Test
+  public void testTopicSubscriberStorage() {
+    AppUser user = appUserRepository.getOne(1L);
+    Topic topic = topicRepository.getOne(1L);
 
-    @Test
-    public void testTopicSubscriberStorage() {
-        AppUser user = appUserRepository.getOne(1L);
-        Topic topic = topicRepository.getOne(1L);
+    TopicSubscriber topicSubscriber = new TopicSubscriber(topic, user, new Date());
 
-        TopicSubscriber topicSubscriber = new TopicSubscriber(topic, user, new Date());
+    lenient().when(this.appUserRepository.getOne(1L)).thenReturn(user);
+    lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
+    when(this.topicSubscriberWritePltfService.create(refEq(topicSubscriber))).thenReturn(1L);
 
-        lenient().when(this.appUserRepository.getOne(1L)).thenReturn(user);
-        lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
-        when(this.topicSubscriberWritePltfService.create(refEq(topicSubscriber))).thenReturn(1L);
+    Long subscriberId = this.topicSubscriberWritePltfService.create(topicSubscriber);
 
-        Long subscriberId = this.topicSubscriberWritePltfService.create(topicSubscriber);
-
-        verify(this.topicSubscriberWritePltfService, times(1)).create(refEq(topicSubscriber));
-        assertEquals(subscriberId, Long.valueOf(1));
-
-    }
-
+    verify(this.topicSubscriberWritePltfService, times(1)).create(refEq(topicSubscriber));
+    assertEquals(subscriberId, Long.valueOf(1));
+  }
 }

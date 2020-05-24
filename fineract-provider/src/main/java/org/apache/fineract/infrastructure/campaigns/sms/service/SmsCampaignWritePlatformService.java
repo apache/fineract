@@ -31,28 +31,30 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 public interface SmsCampaignWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+  CommandProcessingResult create(JsonCommand command);
 
-    CommandProcessingResult update(Long resourceId, JsonCommand command);
+  CommandProcessingResult update(Long resourceId, JsonCommand command);
 
-    CommandProcessingResult delete(Long resourceId);
+  CommandProcessingResult delete(Long resourceId);
 
-    CommandProcessingResult activateSmsCampaign(Long campaignId, JsonCommand command);
+  CommandProcessingResult activateSmsCampaign(Long campaignId, JsonCommand command);
 
-    CommandProcessingResult closeSmsCampaign(Long campaignId, JsonCommand command);
+  CommandProcessingResult closeSmsCampaign(Long campaignId, JsonCommand command);
 
-    CommandProcessingResult reactivateSmsCampaign(Long campaignId, JsonCommand command);
+  CommandProcessingResult reactivateSmsCampaign(Long campaignId, JsonCommand command);
 
-    void insertDirectCampaignIntoSmsOutboundTable(Loan loan, SmsCampaign smsCampaign);
+  void insertDirectCampaignIntoSmsOutboundTable(Loan loan, SmsCampaign smsCampaign);
 
-    String compileSmsTemplate(String textMessageTemplate, String campaignName, Map<String, Object> smsParams);
+  String compileSmsTemplate(
+      String textMessageTemplate, String campaignName, Map<String, Object> smsParams);
 
-    CampaignPreviewData previewMessage(JsonQuery query);
+  CampaignPreviewData previewMessage(JsonQuery query);
 
-    public void storeTemplateMessageIntoSmsOutBoundTable() throws JobExecutionException;
+  public void storeTemplateMessageIntoSmsOutBoundTable() throws JobExecutionException;
 
-    public void insertDirectCampaignIntoSmsOutboundTable(final Client client, final SmsCampaign smsCampaign) ;
+  public void insertDirectCampaignIntoSmsOutboundTable(
+      final Client client, final SmsCampaign smsCampaign);
 
-    public void insertDirectCampaignIntoSmsOutboundTable(final SavingsAccount savingsAccount, final SmsCampaign smsCampaign) ;
-
+  public void insertDirectCampaignIntoSmsOutboundTable(
+      final SavingsAccount savingsAccount, final SmsCampaign smsCampaign);
 }

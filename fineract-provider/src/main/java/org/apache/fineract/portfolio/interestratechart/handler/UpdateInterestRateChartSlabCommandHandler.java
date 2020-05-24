@@ -30,16 +30,17 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "CHARTSLAB", action = "UPDATE")
 public class UpdateInterestRateChartSlabCommandHandler implements NewCommandSourceHandler {
 
-    private final InterestRateChartSlabWritePlatformService writePlatformService;
+  private final InterestRateChartSlabWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateInterestRateChartSlabCommandHandler(final InterestRateChartSlabWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateInterestRateChartSlabCommandHandler(
+      final InterestRateChartSlabWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        //command.subentityId();//returns chart id
-        return this.writePlatformService.update(command.entityId(), command.subentityId(), command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    // command.subentityId();//returns chart id
+    return this.writePlatformService.update(command.entityId(), command.subentityId(), command);
+  }
 }

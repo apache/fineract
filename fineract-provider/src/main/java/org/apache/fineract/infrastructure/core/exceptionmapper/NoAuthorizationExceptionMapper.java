@@ -40,12 +40,14 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class NoAuthorizationExceptionMapper implements ExceptionMapper<NoAuthorizationException> {
 
-    @Override
-    public Response toResponse(final NoAuthorizationException exception) {
-        // Status code 403 really reads as:
-        // "Authenticated - but not authorized":
-        final String defaultUserMessage = exception.getMessage();
-        return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized(defaultUserMessage))
-                .type(MediaType.APPLICATION_JSON).build();
-    }
+  @Override
+  public Response toResponse(final NoAuthorizationException exception) {
+    // Status code 403 really reads as:
+    // "Authenticated - but not authorized":
+    final String defaultUserMessage = exception.getMessage();
+    return Response.status(Status.FORBIDDEN)
+        .entity(ApiGlobalErrorResponse.unAuthorized(defaultUserMessage))
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

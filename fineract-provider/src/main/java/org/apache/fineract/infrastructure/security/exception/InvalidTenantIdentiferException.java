@@ -26,7 +26,7 @@ package org.apache.fineract.infrastructure.security.exception;
  */
 public class InvalidTenantIdentiferException extends RuntimeException {
 
-    public InvalidTenantIdentiferException(final String message) {
-        super(message);
-    }
+  public InvalidTenantIdentiferException(final String message) {
+    super(message);
+  }
 }

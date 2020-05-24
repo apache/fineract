@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "COLLECTIONSHEET", action = "SAVE")
 public class SaveIndividualCollectionSheetCommandHandler implements NewCommandSourceHandler {
 
-    private final CollectionSheetWritePlatformService collectionSheetWritePlatformService;
+  private final CollectionSheetWritePlatformService collectionSheetWritePlatformService;
 
-    @Autowired
-    public SaveIndividualCollectionSheetCommandHandler(final CollectionSheetWritePlatformService collectionSheetWritePlatformService) {
-        this.collectionSheetWritePlatformService = collectionSheetWritePlatformService;
-    }
+  @Autowired
+  public SaveIndividualCollectionSheetCommandHandler(
+      final CollectionSheetWritePlatformService collectionSheetWritePlatformService) {
+    this.collectionSheetWritePlatformService = collectionSheetWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.collectionSheetWritePlatformService.saveIndividualCollectionSheet(command);
-    }
-
+    return this.collectionSheetWritePlatformService.saveIndividualCollectionSheet(command);
+  }
 }

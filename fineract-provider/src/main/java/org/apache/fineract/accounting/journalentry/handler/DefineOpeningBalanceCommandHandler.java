@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "JOURNALENTRY", action = "DEFINEOPENINGBALANCE")
 public class DefineOpeningBalanceCommandHandler implements NewCommandSourceHandler {
 
-    private final JournalEntryWritePlatformService writePlatformService;
+  private final JournalEntryWritePlatformService writePlatformService;
 
-    @Autowired
-    public DefineOpeningBalanceCommandHandler(final JournalEntryWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DefineOpeningBalanceCommandHandler(
+      final JournalEntryWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.defineOpeningBalance(command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.writePlatformService.defineOpeningBalance(command);
+  }
 }

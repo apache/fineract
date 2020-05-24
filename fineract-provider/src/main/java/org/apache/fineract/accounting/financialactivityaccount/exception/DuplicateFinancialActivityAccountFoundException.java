@@ -24,16 +24,19 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * A {@link RuntimeException} thrown when product to GL account mapping are not
  * found.
  */
-public class DuplicateFinancialActivityAccountFoundException extends AbstractPlatformDomainRuleException {
+public class DuplicateFinancialActivityAccountFoundException
+    extends AbstractPlatformDomainRuleException {
 
-    private final static String errorCode = "error.msg.financialActivityAccount.exists";
+  private static final String errorCode = "error.msg.financialActivityAccount.exists";
 
-    public DuplicateFinancialActivityAccountFoundException(final Integer financialActivityType) {
-        super(errorCode, "Mapping for activity already exists " + financialActivityType, financialActivityType);
-    }
+  public DuplicateFinancialActivityAccountFoundException(final Integer financialActivityType) {
+    super(
+        errorCode,
+        "Mapping for activity already exists " + financialActivityType,
+        financialActivityType);
+  }
 
-    public static String getErrorcode() {
-        return errorCode;
-    }
-
+  public static String getErrorcode() {
+    return errorCode;
+  }
 }

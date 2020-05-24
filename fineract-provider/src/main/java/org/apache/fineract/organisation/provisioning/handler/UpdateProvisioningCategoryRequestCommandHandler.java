@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PROVISIONCATEGORY", action = "UPDATE")
 public class UpdateProvisioningCategoryRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
+  private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
 
-    @Autowired
-    public UpdateProvisioningCategoryRequestCommandHandler(ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
-        this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
-    }
+  @Autowired
+  public UpdateProvisioningCategoryRequestCommandHandler(
+      ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
+    this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningCategoryWritePlatformService.updateProvisioningCategory(jsonCommand.entityId(), jsonCommand);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.provisioningCategoryWritePlatformService.updateProvisioningCategory(
+        jsonCommand.entityId(), jsonCommand);
+  }
 }

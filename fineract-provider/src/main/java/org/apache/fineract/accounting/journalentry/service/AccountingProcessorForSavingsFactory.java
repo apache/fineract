@@ -26,28 +26,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountingProcessorForSavingsFactory {
 
-    private final ApplicationContext applicationContext;
+  private final ApplicationContext applicationContext;
 
-    @Autowired
-    public AccountingProcessorForSavingsFactory(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+  @Autowired
+  public AccountingProcessorForSavingsFactory(final ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+  }
+
+  /***
+   * Looks like overkill for now, but wanted to keep the savings side of
+   * accounting identical to that of Loans (would we need an Accrual based
+   * accounting in the future?)
+   ***/
+  public AccountingProcessorForSavings determineProcessor(final SavingsDTO savingsDTO) {
+
+    AccountingProcessorForSavings accountingProcessorForSavings = null;
+
+    if (savingsDTO.isCashBasedAccountingEnabled()) {
+      accountingProcessorForSavings =
+          this.applicationContext.getBean(
+              "cashBasedAccountingProcessorForSavings", AccountingProcessorForSavings.class);
     }
 
-    /***
-     * Looks like overkill for now, but wanted to keep the savings side of
-     * accounting identical to that of Loans (would we need an Accrual based
-     * accounting in the future?)
-     ***/
-    public AccountingProcessorForSavings determineProcessor(final SavingsDTO savingsDTO) {
-
-        AccountingProcessorForSavings accountingProcessorForSavings = null;
-
-        if (savingsDTO.isCashBasedAccountingEnabled()) {
-            accountingProcessorForSavings = this.applicationContext.getBean("cashBasedAccountingProcessorForSavings",
-                    AccountingProcessorForSavings.class);
-        }
-
-        return accountingProcessorForSavings;
-    }
-
+    return accountingProcessorForSavings;
+  }
 }

@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class JobNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public JobNotFoundException(final String identifier) {
-        super("error.msg.sheduler.job.id.invalid", "Job with identifier " + identifier + " does not exist", identifier);
-    }
+  public JobNotFoundException(final String identifier) {
+    super(
+        "error.msg.sheduler.job.id.invalid",
+        "Job with identifier " + identifier + " does not exist",
+        identifier);
+  }
 }

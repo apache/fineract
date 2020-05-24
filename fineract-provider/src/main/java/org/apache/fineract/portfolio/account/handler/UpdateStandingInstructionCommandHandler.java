@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "STANDINGINSTRUCTION", action = "UPDATE")
 public class UpdateStandingInstructionCommandHandler implements NewCommandSourceHandler {
 
-    private StandingInstructionWritePlatformService standingInstructionWritePlatformService;
+  private StandingInstructionWritePlatformService standingInstructionWritePlatformService;
 
-    @Autowired
-    public UpdateStandingInstructionCommandHandler(StandingInstructionWritePlatformService standingInstructionWritePlatformService) {
-        this.standingInstructionWritePlatformService = standingInstructionWritePlatformService;
-    }
+  @Autowired
+  public UpdateStandingInstructionCommandHandler(
+      StandingInstructionWritePlatformService standingInstructionWritePlatformService) {
+    this.standingInstructionWritePlatformService = standingInstructionWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.standingInstructionWritePlatformService.update(command.entityId(), command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.standingInstructionWritePlatformService.update(command.entityId(), command);
+  }
 }

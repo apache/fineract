@@ -24,11 +24,17 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * {@link AbstractPlatformDomainRuleException} thrown when currency mismatch
  * occurs
  */
-public class ShareAccountChargeWithoutMandatoryFieldException extends AbstractPlatformDomainRuleException {
+public class ShareAccountChargeWithoutMandatoryFieldException
+    extends AbstractPlatformDomainRuleException {
 
-    public ShareAccountChargeWithoutMandatoryFieldException(final String entity, final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg." + entity + "." + postFix + ".cannot.be.blank", defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public ShareAccountChargeWithoutMandatoryFieldException(
+      final String entity,
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg." + entity + "." + postFix + ".cannot.be.blank",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

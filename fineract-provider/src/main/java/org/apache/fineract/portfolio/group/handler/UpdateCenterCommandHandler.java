@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CENTER", action = "UPDATE")
 public class UpdateCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+  private final GroupingTypesWritePlatformService groupWritePlatformService;
 
-    @Autowired
-    public UpdateCenterCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public UpdateCenterCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.groupWritePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.groupWritePlatformService.updateCenter(command.entityId(), command);
-    }
+    return this.groupWritePlatformService.updateCenter(command.entityId(), command);
+  }
 }

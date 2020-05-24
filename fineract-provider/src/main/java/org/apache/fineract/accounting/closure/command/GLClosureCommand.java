@@ -31,46 +31,73 @@ import org.joda.time.LocalDate;
  */
 public class GLClosureCommand {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    private final Long officeId;
-    private final LocalDate closingDate;
-    private final String comments;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public GLClosureCommand(final Long id, final Long officeId, final LocalDate closingDate, final String comments) {
-        this.id = id;
-        this.officeId = officeId;
-        this.closingDate = closingDate;
-        this.comments = comments;
+  private final Long officeId;
+  private final LocalDate closingDate;
+  private final String comments;
+
+  public GLClosureCommand(
+      final Long id, final Long officeId, final LocalDate closingDate, final String comments) {
+    this.id = id;
+    this.officeId = officeId;
+    this.closingDate = closingDate;
+    this.comments = comments;
+  }
+
+  public void validateForCreate() {
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("GLClosure");
+
+    baseDataValidator
+        .reset()
+        .parameter(GLClosureJsonInputParams.CLOSING_DATE.getValue())
+        .value(this.closingDate)
+        .notBlank();
+    baseDataValidator
+        .reset()
+        .parameter(GLClosureJsonInputParams.OFFICE_ID.getValue())
+        .value(this.officeId)
+        .notNull()
+        .integerGreaterThanZero();
+    baseDataValidator
+        .reset()
+        .parameter(GLClosureJsonInputParams.COMMENTS.getValue())
+        .value(this.comments)
+        .ignoreIfNull()
+        .notExceedingLengthOf(500);
+
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
+  }
 
-    public void validateForCreate() {
+  public void validateForUpdate() {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("GLClosure");
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("GLClosure");
+    baseDataValidator
+        .reset()
+        .parameter(GLClosureJsonInputParams.COMMENTS.getValue())
+        .value(this.comments)
+        .ignoreIfNull()
+        .notExceedingLengthOf(500);
+    baseDataValidator.reset().anyOfNotNull(this.comments);
 
-        baseDataValidator.reset().parameter(GLClosureJsonInputParams.CLOSING_DATE.getValue()).value(this.closingDate).notBlank();
-        baseDataValidator.reset().parameter(GLClosureJsonInputParams.OFFICE_ID.getValue()).value(this.officeId).notNull()
-                .integerGreaterThanZero();
-        baseDataValidator.reset().parameter(GLClosureJsonInputParams.COMMENTS.getValue()).value(this.comments).ignoreIfNull()
-                .notExceedingLengthOf(500);
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
-
-    public void validateForUpdate() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("GLClosure");
-
-        baseDataValidator.reset().parameter(GLClosureJsonInputParams.COMMENTS.getValue()).value(this.comments).ignoreIfNull()
-                .notExceedingLengthOf(500);
-        baseDataValidator.reset().anyOfNotNull(this.comments);
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-    }
-
+  }
 }

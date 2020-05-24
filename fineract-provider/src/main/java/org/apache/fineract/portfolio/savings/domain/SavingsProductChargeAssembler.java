@@ -49,74 +49,97 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsProductChargeAssembler {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private final ChargeRepositoryWrapper chargeRepository;
-    private final SavingsAccountChargeRepository savingsAccountChargeRepository;
+  private final FromJsonHelper fromApiJsonHelper;
+  private final ChargeRepositoryWrapper chargeRepository;
+  private final SavingsAccountChargeRepository savingsAccountChargeRepository;
 
-    @Autowired
-    public SavingsProductChargeAssembler(final FromJsonHelper fromApiJsonHelper, final ChargeRepositoryWrapper chargeRepository,
-            final SavingsAccountChargeRepository savingsAccountChargeRepository) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.chargeRepository = chargeRepository;
-        this.savingsAccountChargeRepository = savingsAccountChargeRepository;
-    }
+  @Autowired
+  public SavingsProductChargeAssembler(
+      final FromJsonHelper fromApiJsonHelper,
+      final ChargeRepositoryWrapper chargeRepository,
+      final SavingsAccountChargeRepository savingsAccountChargeRepository) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+    this.chargeRepository = chargeRepository;
+    this.savingsAccountChargeRepository = savingsAccountChargeRepository;
+  }
 
-    public Set<SavingsAccountCharge> fromParsedJson(final JsonElement element) {
+  public Set<SavingsAccountCharge> fromParsedJson(final JsonElement element) {
 
-        final Set<SavingsAccountCharge> savingsAccountCharges = new HashSet<>();
+    final Set<SavingsAccountCharge> savingsAccountCharges = new HashSet<>();
 
-        if (element.isJsonObject()) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
-            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-            if (topLevelJsonElement.has(chargesParamName) && topLevelJsonElement.get(chargesParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(chargesParamName).getAsJsonArray();
-                for (int i = 0; i < array.size(); i++) {
+    if (element.isJsonObject()) {
+      final JsonObject topLevelJsonElement = element.getAsJsonObject();
+      final String dateFormat =
+          this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+      final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+      if (topLevelJsonElement.has(chargesParamName)
+          && topLevelJsonElement.get(chargesParamName).isJsonArray()) {
+        final JsonArray array = topLevelJsonElement.get(chargesParamName).getAsJsonArray();
+        for (int i = 0; i < array.size(); i++) {
 
-                    final JsonObject savingsChargeElement = array.get(i).getAsJsonObject();
+          final JsonObject savingsChargeElement = array.get(i).getAsJsonObject();
 
-                    final Long id = this.fromApiJsonHelper.extractLongNamed(idParamName, savingsChargeElement);
-                    final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
-                    final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
-                    final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed(chargeTimeTypeParamName,
-                            savingsChargeElement, locale);
-                    final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed(chargeCalculationTypeParamName,
-                            savingsChargeElement, locale);
-                    final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
-                            dateFormat, locale);
-                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper
-                            .extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement);
-                    final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement,
-                            locale);
+          final Long id =
+              this.fromApiJsonHelper.extractLongNamed(idParamName, savingsChargeElement);
+          final Long chargeId =
+              this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
+          final BigDecimal amount =
+              this.fromApiJsonHelper.extractBigDecimalNamed(
+                  amountParamName, savingsChargeElement, locale);
+          final Integer chargeTimeType =
+              this.fromApiJsonHelper.extractIntegerNamed(
+                  chargeTimeTypeParamName, savingsChargeElement, locale);
+          final Integer chargeCalculationType =
+              this.fromApiJsonHelper.extractIntegerNamed(
+                  chargeCalculationTypeParamName, savingsChargeElement, locale);
+          final LocalDate dueDate =
+              this.fromApiJsonHelper.extractLocalDateNamed(
+                  dueAsOfDateParamName, savingsChargeElement, dateFormat, locale);
+          final MonthDay feeOnMonthDay =
+              this.fromApiJsonHelper.extractMonthDayNamed(
+                  feeOnMonthDayParamName, savingsChargeElement);
+          final Integer feeInterval =
+              this.fromApiJsonHelper.extractIntegerNamed(
+                  feeIntervalParamName, savingsChargeElement, locale);
 
-                    if (id == null) {
-                        final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
-                        final ChargeTimeType chargeTime = null;
-                        if (chargeTimeType != null) {
-                            ChargeTimeType.fromInt(chargeTimeType);
-                        }
-                        final ChargeCalculationType chargeCalculation = null;
-                        if (chargeCalculationType != null) {
-                            ChargeCalculationType.fromInt(chargeCalculationType);
-                        }
-                        final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewWithoutSavingsAccount(
-                                chargeDefinition, amount, chargeTime, chargeCalculation, dueDate, true, feeOnMonthDay, feeInterval);
-                        savingsAccountCharges.add(savingsAccountCharge);
-                    } else {
-                        final Long savingsAccountChargeId = id;
-                        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
-                                .findById(savingsAccountChargeId)
-                                .orElseThrow(() -> new SavingsAccountChargeNotFoundException(savingsAccountChargeId));
-
-                        savingsAccountCharge.update(amount, dueDate, null, null);
-
-                        savingsAccountCharges.add(savingsAccountCharge);
-                    }
-                }
+          if (id == null) {
+            final Charge chargeDefinition =
+                this.chargeRepository.findOneWithNotFoundDetection(chargeId);
+            final ChargeTimeType chargeTime = null;
+            if (chargeTimeType != null) {
+              ChargeTimeType.fromInt(chargeTimeType);
             }
-        }
+            final ChargeCalculationType chargeCalculation = null;
+            if (chargeCalculationType != null) {
+              ChargeCalculationType.fromInt(chargeCalculationType);
+            }
+            final SavingsAccountCharge savingsAccountCharge =
+                SavingsAccountCharge.createNewWithoutSavingsAccount(
+                    chargeDefinition,
+                    amount,
+                    chargeTime,
+                    chargeCalculation,
+                    dueDate,
+                    true,
+                    feeOnMonthDay,
+                    feeInterval);
+            savingsAccountCharges.add(savingsAccountCharge);
+          } else {
+            final Long savingsAccountChargeId = id;
+            final SavingsAccountCharge savingsAccountCharge =
+                this.savingsAccountChargeRepository
+                    .findById(savingsAccountChargeId)
+                    .orElseThrow(
+                        () -> new SavingsAccountChargeNotFoundException(savingsAccountChargeId));
 
-        return savingsAccountCharges;
+            savingsAccountCharge.update(amount, dueDate, null, null);
+
+            savingsAccountCharges.add(savingsAccountCharge);
+          }
+        }
+      }
     }
 
+    return savingsAccountCharges;
+  }
 }

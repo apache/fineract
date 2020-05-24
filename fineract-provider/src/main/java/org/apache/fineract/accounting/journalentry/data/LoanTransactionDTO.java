@@ -25,119 +25,133 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 
 public class LoanTransactionDTO {
 
-    private final Long officeId;
+  private final Long officeId;
 
-    private final String transactionId;
-    private final Date transactionDate;
-    private final Long paymentTypeId;
-    private final LoanTransactionEnumData transactionType;
+  private final String transactionId;
+  private final Date transactionDate;
+  private final Long paymentTypeId;
+  private final LoanTransactionEnumData transactionType;
 
-    private final BigDecimal amount;
+  private final BigDecimal amount;
 
-    /*** Breakup of amounts in case of repayments **/
-    private final BigDecimal principal;
-    private final BigDecimal interest;
-    private final BigDecimal fees;
-    private final BigDecimal penalties;
-    private final BigDecimal overPayment;
+  /*** Breakup of amounts in case of repayments **/
+  private final BigDecimal principal;
 
-    /*** Boolean values determines if the transaction is reversed ***/
-    private final boolean reversed;
+  private final BigDecimal interest;
+  private final BigDecimal fees;
+  private final BigDecimal penalties;
+  private final BigDecimal overPayment;
 
-    /** Breakdowns of fees and penalties this Transaction pays **/
-    private final List<ChargePaymentDTO> penaltyPayments;
-    private final List<ChargePaymentDTO> feePayments;
+  /*** Boolean values determines if the transaction is reversed ***/
+  private final boolean reversed;
 
-    private final boolean isAccountTransfer;
+  /** Breakdowns of fees and penalties this Transaction pays **/
+  private final List<ChargePaymentDTO> penaltyPayments;
 
-    private boolean isLoanToLoanTransfer;
+  private final List<ChargePaymentDTO> feePayments;
 
-    public LoanTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
-            final LoanTransactionEnumData transactionType, final BigDecimal amount, final BigDecimal principal, final BigDecimal interest,
-            final BigDecimal fees, final BigDecimal penalties, final BigDecimal overPayment, final boolean reversed,
-            final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments, boolean isAccountTransfer) {
-        this.paymentTypeId = paymentTypeId;
-        this.transactionId = transactionId;
-        this.transactionDate = transactionDate;
-        this.amount = amount;
-        this.principal = principal;
-        this.interest = interest;
-        this.fees = fees;
-        this.penalties = penalties;
-        this.reversed = reversed;
-        this.transactionType = transactionType;
-        this.feePayments = feePayments;
-        this.penaltyPayments = penaltyPayments;
-        this.overPayment = overPayment;
-        this.officeId = officeId;
-        this.isAccountTransfer = isAccountTransfer;
-    }
+  private final boolean isAccountTransfer;
 
-    public Long getOfficeId() {
-        return this.officeId;
-    }
+  private boolean isLoanToLoanTransfer;
 
-    public String getTransactionId() {
-        return this.transactionId;
-    }
+  public LoanTransactionDTO(
+      final Long officeId,
+      final Long paymentTypeId,
+      final String transactionId,
+      final Date transactionDate,
+      final LoanTransactionEnumData transactionType,
+      final BigDecimal amount,
+      final BigDecimal principal,
+      final BigDecimal interest,
+      final BigDecimal fees,
+      final BigDecimal penalties,
+      final BigDecimal overPayment,
+      final boolean reversed,
+      final List<ChargePaymentDTO> feePayments,
+      final List<ChargePaymentDTO> penaltyPayments,
+      boolean isAccountTransfer) {
+    this.paymentTypeId = paymentTypeId;
+    this.transactionId = transactionId;
+    this.transactionDate = transactionDate;
+    this.amount = amount;
+    this.principal = principal;
+    this.interest = interest;
+    this.fees = fees;
+    this.penalties = penalties;
+    this.reversed = reversed;
+    this.transactionType = transactionType;
+    this.feePayments = feePayments;
+    this.penaltyPayments = penaltyPayments;
+    this.overPayment = overPayment;
+    this.officeId = officeId;
+    this.isAccountTransfer = isAccountTransfer;
+  }
 
-    public Date getTransactionDate() {
-        return this.transactionDate;
-    }
+  public Long getOfficeId() {
+    return this.officeId;
+  }
 
-    public LoanTransactionEnumData getTransactionType() {
-        return this.transactionType;
-    }
+  public String getTransactionId() {
+    return this.transactionId;
+  }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
+  public Date getTransactionDate() {
+    return this.transactionDate;
+  }
 
-    public BigDecimal getPrincipal() {
-        return this.principal;
-    }
+  public LoanTransactionEnumData getTransactionType() {
+    return this.transactionType;
+  }
 
-    public BigDecimal getInterest() {
-        return this.interest;
-    }
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
 
-    public BigDecimal getFees() {
-        return this.fees;
-    }
+  public BigDecimal getPrincipal() {
+    return this.principal;
+  }
 
-    public BigDecimal getPenalties() {
-        return this.penalties;
-    }
+  public BigDecimal getInterest() {
+    return this.interest;
+  }
 
-    public BigDecimal getOverPayment() {
-        return this.overPayment;
-    }
+  public BigDecimal getFees() {
+    return this.fees;
+  }
 
-    public boolean isReversed() {
-        return this.reversed;
-    }
+  public BigDecimal getPenalties() {
+    return this.penalties;
+  }
 
-    public Long getPaymentTypeId() {
-        return this.paymentTypeId;
-    }
+  public BigDecimal getOverPayment() {
+    return this.overPayment;
+  }
 
-    public List<ChargePaymentDTO> getPenaltyPayments() {
-        return this.penaltyPayments;
-    }
+  public boolean isReversed() {
+    return this.reversed;
+  }
 
-    public List<ChargePaymentDTO> getFeePayments() {
-        return this.feePayments;
-    }
+  public Long getPaymentTypeId() {
+    return this.paymentTypeId;
+  }
 
-    public boolean isAccountTransfer() {
-        return this.isAccountTransfer;
-    }
+  public List<ChargePaymentDTO> getPenaltyPayments() {
+    return this.penaltyPayments;
+  }
 
-        public void setIsLoanToLoanTransfer(boolean isLoanToLoanTransfer) {
-                this.isLoanToLoanTransfer = isLoanToLoanTransfer;
-        }
+  public List<ChargePaymentDTO> getFeePayments() {
+    return this.feePayments;
+  }
 
-        public boolean isLoanToLoanTransfer(){
-            return this.isLoanToLoanTransfer;
-        }
+  public boolean isAccountTransfer() {
+    return this.isAccountTransfer;
+  }
+
+  public void setIsLoanToLoanTransfer(boolean isLoanToLoanTransfer) {
+    this.isLoanToLoanTransfer = isLoanToLoanTransfer;
+  }
+
+  public boolean isLoanToLoanTransfer() {
+    return this.isLoanToLoanTransfer;
+  }
 }

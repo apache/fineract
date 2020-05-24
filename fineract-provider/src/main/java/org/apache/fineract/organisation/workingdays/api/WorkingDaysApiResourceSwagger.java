@@ -26,55 +26,54 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 /**
  * Created by sanyam on 19/8/17.
  */
-
 final class WorkingDaysApiResourceSwagger {
-    private WorkingDaysApiResourceSwagger() {
+  private WorkingDaysApiResourceSwagger() {}
 
-    }
+  @ApiModel(value = "GetWorkingDaysResponse")
+  public static final class GetWorkingDaysResponse {
+    private GetWorkingDaysResponse() {}
 
-    @ApiModel(value = "GetWorkingDaysResponse")
-    public static final class GetWorkingDaysResponse {
-        private GetWorkingDaysResponse() {
+    @ApiModelProperty(example = "1")
+    public Long id;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long id;
-        @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
-        public String recurrence;
-        public EnumOptionData repaymentRescheduleType;
-        @ApiModelProperty(example = "true")
-        public Boolean extendTermForDailyRepayments;
-    }
+    @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
+    public String recurrence;
 
-    @ApiModel(value = "GetWorkingDaysTemplateResponse")
-    public static final class GetWorkingDaysTemplateResponse {
-        private GetWorkingDaysTemplateResponse() {
+    public EnumOptionData repaymentRescheduleType;
 
-        }
-        public Collection<EnumOptionData> repaymentRescheduleOptions;
-    }
+    @ApiModelProperty(example = "true")
+    public Boolean extendTermForDailyRepayments;
+  }
 
-    @ApiModel(value = "PutWorkingDaysRequest")
-    public static final class PutWorkingDaysRequest {
-        private PutWorkingDaysRequest() {
+  @ApiModel(value = "GetWorkingDaysTemplateResponse")
+  public static final class GetWorkingDaysTemplateResponse {
+    private GetWorkingDaysTemplateResponse() {}
 
-        }
-        @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
-        public String recurrence;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "4")
-        public EnumOptionData repaymentRescheduleType;
-        @ApiModelProperty(example = "true")
-        public Boolean extendTermForDailyRepayments;
-    }
+    public Collection<EnumOptionData> repaymentRescheduleOptions;
+  }
 
-    @ApiModel(value = "PutWorkingDaysResponse")
-    public static final class PutWorkingDaysResponse {
-        private PutWorkingDaysResponse() {
+  @ApiModel(value = "PutWorkingDaysRequest")
+  public static final class PutWorkingDaysRequest {
+    private PutWorkingDaysRequest() {}
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR")
+    public String recurrence;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "4")
+    public EnumOptionData repaymentRescheduleType;
+
+    @ApiModelProperty(example = "true")
+    public Boolean extendTermForDailyRepayments;
+  }
+
+  @ApiModel(value = "PutWorkingDaysResponse")
+  public static final class PutWorkingDaysResponse {
+    private PutWorkingDaysResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 }

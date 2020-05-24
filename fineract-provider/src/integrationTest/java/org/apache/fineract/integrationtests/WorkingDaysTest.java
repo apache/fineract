@@ -34,35 +34,38 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class WorkingDaysTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ResponseSpecification generalResponseSpec;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
+  private ResponseSpecification generalResponseSpec;
 
-    @Before
-    public void setUp() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.generalResponseSpec = new ResponseSpecBuilder().build();
+  @Before
+  public void setUp() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    this.generalResponseSpec = new ResponseSpecBuilder().build();
+  }
 
-    }
+  @Test
+  public void updateWorkingDays() {
+    HashMap response = (HashMap) WorkingDaysHelper.updateWorkingDays(requestSpec, responseSpec);
+    Assert.assertNotNull(response.get("resourceId"));
+  }
 
-    @Test
-    public void updateWorkingDays() {
-        HashMap response = (HashMap) WorkingDaysHelper.updateWorkingDays(requestSpec, responseSpec);
-        Assert.assertNotNull(response.get("resourceId"));
-    }
-
-    @Test
-    public void updateWorkingDaysWithWrongRecurrencePattern() {
-        final List<HashMap> error = (List) WorkingDaysHelper.updateWorkingDaysWithWrongRecurrence(requestSpec, generalResponseSpec,
-                CommonConstants.RESPONSE_ERROR);
-        assertEquals("Verify wrong recurrence pattern error", "error.msg.recurring.rule.parsing.error",
-                error.get(0).get("userMessageGlobalisationCode"));
-    }
-
+  @Test
+  public void updateWorkingDaysWithWrongRecurrencePattern() {
+    final List<HashMap> error =
+        (List)
+            WorkingDaysHelper.updateWorkingDaysWithWrongRecurrence(
+                requestSpec, generalResponseSpec, CommonConstants.RESPONSE_ERROR);
+    assertEquals(
+        "Verify wrong recurrence pattern error",
+        "error.msg.recurring.rule.parsing.error",
+        error.get(0).get("userMessageGlobalisationCode"));
+  }
 }

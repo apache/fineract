@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ACCOUNTINGRULE", action = "DELETE")
 public class DeleteAccountingRuleCommandHandler implements NewCommandSourceHandler {
 
-    private final AccountingRuleWritePlatformService writePlatformService;
+  private final AccountingRuleWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteAccountingRuleCommandHandler(final AccountingRuleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteAccountingRuleCommandHandler(
+      final AccountingRuleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteAccountingRule(command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteAccountingRule(command.entityId());
+  }
 }

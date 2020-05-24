@@ -23,10 +23,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-abstract interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
+abstract interface ClientRepository
+    extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
 
-    public static final String FIND_CLIENT_BY_ACCOUNT_NUMBER = "select client from Client client where client.accountNumber = :accountNumber";
+  public static final String FIND_CLIENT_BY_ACCOUNT_NUMBER =
+      "select client from Client client where client.accountNumber = :accountNumber";
 
-    @Query(FIND_CLIENT_BY_ACCOUNT_NUMBER)
-    Client getClientByAccountNumber(@Param("accountNumber") String accountNumber);
+  @Query(FIND_CLIENT_BY_ACCOUNT_NUMBER)
+  Client getClientByAccountNumber(@Param("accountNumber") String accountNumber);
 }

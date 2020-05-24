@@ -26,41 +26,42 @@ import org.joda.time.LocalDate;
  */
 public class LoanApprovalData {
 
-    private final LocalDate approvalDate;
-    private final BigDecimal approvalAmount;
+  private final LocalDate approvalDate;
+  private final BigDecimal approvalAmount;
 
-    //import fields
-    private LocalDate approvedOnDate;
-    private String note;
-    private String dateFormat;
-    private String locale;
-    private transient Integer rowIndex;
+  // import fields
+  private LocalDate approvedOnDate;
+  private String note;
+  private String dateFormat;
+  private String locale;
+  private transient Integer rowIndex;
 
-    public static LoanApprovalData importInstance(LocalDate approvedOnDate, Integer rowIndex,
-            String locale,String dateFormat){
-        return new LoanApprovalData(approvedOnDate,rowIndex,locale,dateFormat);
-    }
-    private LoanApprovalData(LocalDate approvedOnDate, Integer rowIndex,String locale,String dateFormat) {
-        this.approvedOnDate = approvedOnDate;
-        this.rowIndex = rowIndex;
-        this.dateFormat=dateFormat;
-        this.locale= locale;
-        this.note="";
-        this.approvalAmount=null;
-        this.approvalDate=null;
-    }
+  public static LoanApprovalData importInstance(
+      LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
+    return new LoanApprovalData(approvedOnDate, rowIndex, locale, dateFormat);
+  }
 
-    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate) {
-        this.approvalDate = approvalDate;
-        this.approvalAmount = approvalAmount;
-    }
+  private LoanApprovalData(
+      LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
+    this.approvedOnDate = approvedOnDate;
+    this.rowIndex = rowIndex;
+    this.dateFormat = dateFormat;
+    this.locale = locale;
+    this.note = "";
+    this.approvalAmount = null;
+    this.approvalDate = null;
+  }
 
-    public LocalDate getApprovalDate() {
-        return this.approvalDate;
-    }
+  public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate) {
+    this.approvalDate = approvalDate;
+    this.approvalAmount = approvalAmount;
+  }
 
-    public BigDecimal getApprovalAmount() {
-        return this.approvalAmount;
-    }
+  public LocalDate getApprovalDate() {
+    return this.approvalDate;
+  }
 
+  public BigDecimal getApprovalAmount() {
+    return this.approvalAmount;
+  }
 }

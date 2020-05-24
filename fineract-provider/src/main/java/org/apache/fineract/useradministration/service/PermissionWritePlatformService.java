@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface PermissionWritePlatformService {
 
-    CommandProcessingResult updateMakerCheckerPermissions(JsonCommand command);
+  CommandProcessingResult updateMakerCheckerPermissions(JsonCommand command);
 }

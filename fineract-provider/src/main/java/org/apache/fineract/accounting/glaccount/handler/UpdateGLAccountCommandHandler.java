@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLACCOUNT", action = "UPDATE")
 public class UpdateGLAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final GLAccountWritePlatformService writePlatformService;
+  private final GLAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateGLAccountCommandHandler(final GLAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateGLAccountCommandHandler(final GLAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateGLAccount(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.updateGLAccount(command.entityId(), command);
+  }
 }

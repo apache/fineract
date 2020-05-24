@@ -25,24 +25,31 @@ import java.util.Collection;
  */
 public class RolePermissionsData {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final String description;
-    @SuppressWarnings("unused")
-    private final Boolean disabled;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    @SuppressWarnings("unused")
-    private final Collection<PermissionData> permissionUsageData;
+  @SuppressWarnings("unused")
+  private final String name;
 
-    public RolePermissionsData(final Long id, final String name, final String description, final Boolean disabled,
-            final Collection<PermissionData> permissionUsageData) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.disabled = disabled;
-        this.permissionUsageData = permissionUsageData;
-    }
+  @SuppressWarnings("unused")
+  private final String description;
+
+  @SuppressWarnings("unused")
+  private final Boolean disabled;
+
+  @SuppressWarnings("unused")
+  private final Collection<PermissionData> permissionUsageData;
+
+  public RolePermissionsData(
+      final Long id,
+      final String name,
+      final String description,
+      final Boolean disabled,
+      final Collection<PermissionData> permissionUsageData) {
+    this.id = id;
+    this.name = name;
+    this.description = description;
+    this.disabled = disabled;
+    this.permissionUsageData = permissionUsageData;
+  }
 }

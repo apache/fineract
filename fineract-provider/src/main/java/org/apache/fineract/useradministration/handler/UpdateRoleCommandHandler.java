@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ROLE", action = "UPDATE")
 public class UpdateRoleCommandHandler implements NewCommandSourceHandler {
 
-    private final RoleWritePlatformService writePlatformService;
+  private final RoleWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateRole(command.entityId(), command);
-    }
+    return this.writePlatformService.updateRole(command.entityId(), command);
+  }
 }

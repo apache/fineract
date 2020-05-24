@@ -22,21 +22,21 @@ import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
 public interface ScheduledJobRunnerService {
 
-    void updateLoanSummaryDetails();
+  void updateLoanSummaryDetails();
 
-    void updateLoanPaidInAdvance();
+  void updateLoanPaidInAdvance();
 
-    void applyAnnualFeeForSavings();
+  void applyAnnualFeeForSavings();
 
-    void applyDueChargesForSavings() throws JobExecutionException;
+  void applyDueChargesForSavings() throws JobExecutionException;
 
-    void updateNPA();
+  void updateNPA();
 
-    void updateMaturityDetailsOfDepositAccounts();
+  void updateMaturityDetailsOfDepositAccounts();
 
-    void generateRDSchedule();
+  void generateRDSchedule();
 
-    void postDividends() throws JobExecutionException;
+  void postDividends() throws JobExecutionException;
 
-    void updateTrialBalanceDetails()  throws JobExecutionException;
+  void updateTrialBalanceDetails() throws JobExecutionException;
 }

@@ -41,8 +41,8 @@ public class RatesTest {
   public void setup() {
     Utils.initializeRESTAssured();
     this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-    this.requestSpec.header("Authorization",
-        "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
     this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
   }
 
@@ -54,20 +54,20 @@ public class RatesTest {
     Assert.assertNotNull(allRatesData);
 
     // Testing Creation and Update of Loan Rate
-    final Integer loanRateId = RatesHelper.createRates(this.requestSpec, this.responseSpec,
-        RatesHelper.getLoanRateJSON());
+    final Integer loanRateId =
+        RatesHelper.createRates(this.requestSpec, this.responseSpec, RatesHelper.getLoanRateJSON());
     Assert.assertNotNull(loanRateId);
 
-    //Update Rate percentage
-    HashMap changes = RatesHelper.updateRates(this.requestSpec, this.responseSpec, loanRateId,
-        RatesHelper.getModifyRateJSON());
+    // Update Rate percentage
+    HashMap changes =
+        RatesHelper.updateRates(
+            this.requestSpec, this.responseSpec, loanRateId, RatesHelper.getModifyRateJSON());
 
-    HashMap rateDataAfterChanges = RatesHelper
-        .getRateById(this.requestSpec, this.responseSpec, loanRateId);
-    Assert.assertEquals("Verifying Rate after modification", rateDataAfterChanges.get("percentage"),
+    HashMap rateDataAfterChanges =
+        RatesHelper.getRateById(this.requestSpec, this.responseSpec, loanRateId);
+    Assert.assertEquals(
+        "Verifying Rate after modification",
+        rateDataAfterChanges.get("percentage"),
         changes.get("percentage"));
-
   }
-
-
 }

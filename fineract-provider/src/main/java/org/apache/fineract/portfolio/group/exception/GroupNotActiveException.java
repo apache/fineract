@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class GroupNotActiveException extends AbstractPlatformDomainRuleException {
 
-    public GroupNotActiveException(final Long groupId) {
-        super("error.msg.group.not.active.exception", "The Group with id `" + groupId + "` is not active", groupId);
-    }
-
+  public GroupNotActiveException(final Long groupId) {
+    super(
+        "error.msg.group.not.active.exception",
+        "The Group with id `" + groupId + "` is not active",
+        groupId);
+  }
 }

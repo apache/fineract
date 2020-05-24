@@ -34,16 +34,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = ENTITY_NAME_TRANSFER, action = ACTION_TRANSFER_PREPARE)
 public class PrepareInteropTransferHandler implements NewCommandSourceHandler {
 
-    private final InteropService interopService;
+  private final InteropService interopService;
 
-    @Autowired
-    public PrepareInteropTransferHandler(InteropService interopService) {
-        this.interopService = interopService;
-    }
+  @Autowired
+  public PrepareInteropTransferHandler(InteropService interopService) {
+    this.interopService = interopService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.interopService.prepareTransfer(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.interopService.prepareTransfer(command);
+  }
 }

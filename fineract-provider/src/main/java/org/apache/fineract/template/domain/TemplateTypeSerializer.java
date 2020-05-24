@@ -26,15 +26,18 @@ import org.codehaus.jackson.map.SerializerProvider;
 
 public class TemplateTypeSerializer extends JsonSerializer<TemplateType> {
 
-    @Override
-    public void serialize(final TemplateType value, final JsonGenerator generator, @SuppressWarnings("unused") final SerializerProvider provider)
-            throws IOException, JsonProcessingException {
+  @Override
+  public void serialize(
+      final TemplateType value,
+      final JsonGenerator generator,
+      @SuppressWarnings("unused") final SerializerProvider provider)
+      throws IOException, JsonProcessingException {
 
-        generator.writeStartObject();
-        generator.writeFieldName("id");
-        generator.writeNumber(value.getId());
-        generator.writeFieldName("name");
-        generator.writeString(value.getName());
-        generator.writeEndObject();
-    }
+    generator.writeStartObject();
+    generator.writeFieldName("id");
+    generator.writeNumber(value.getId());
+    generator.writeFieldName("name");
+    generator.writeString(value.getName());
+    generator.writeEndObject();
+  }
 }

@@ -27,17 +27,17 @@ import org.apache.fineract.template.domain.TemplateType;
 
 public interface TemplateDomainService {
 
-    List<Template> getAll();
+  List<Template> getAll();
 
-    List<Template> getAllByEntityAndType(TemplateEntity entity, TemplateType type);
+  List<Template> getAllByEntityAndType(TemplateEntity entity, TemplateType type);
 
-    Template findOneById(Long id);
+  Template findOneById(Long id);
 
-    Template updateTemplate(Template template);
+  Template updateTemplate(Template template);
 
-    CommandProcessingResult createTemplate(final JsonCommand command);
+  CommandProcessingResult createTemplate(final JsonCommand command);
 
-    CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command);
+  CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command);
 
-    CommandProcessingResult removeTemplate(final Long templateId);
+  CommandProcessingResult removeTemplate(final Long templateId);
 }

@@ -38,8 +38,8 @@ public class RateAssembler {
   private final RateRepositoryWrapper rateRepository;
 
   @Autowired
-  public RateAssembler(final FromJsonHelper fromApiJsonHelper,
-      final RateRepositoryWrapper rateRepository) {
+  public RateAssembler(
+      final FromJsonHelper fromApiJsonHelper, final RateRepositoryWrapper rateRepository) {
     this.fromApiJsonHelper = fromApiJsonHelper;
     this.rateRepository = rateRepository;
   }
@@ -52,11 +52,10 @@ public class RateAssembler {
       final JsonObject topLevelJsonElement = element.getAsJsonObject();
       final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-      if (topLevelJsonElement.has(LoanProductConstants.ratesParamName) && topLevelJsonElement
-          .get(LoanProductConstants.ratesParamName)
-          .isJsonArray()) {
-        final JsonArray array = topLevelJsonElement.get(LoanProductConstants.ratesParamName)
-            .getAsJsonArray();
+      if (topLevelJsonElement.has(LoanProductConstants.ratesParamName)
+          && topLevelJsonElement.get(LoanProductConstants.ratesParamName).isJsonArray()) {
+        final JsonArray array =
+            topLevelJsonElement.get(LoanProductConstants.ratesParamName).getAsJsonArray();
         List<Long> idList = new ArrayList<>();
 
         for (int i = 0; i < array.size(); i++) {
@@ -76,5 +75,4 @@ public class RateAssembler {
 
     return rateItems;
   }
-
 }

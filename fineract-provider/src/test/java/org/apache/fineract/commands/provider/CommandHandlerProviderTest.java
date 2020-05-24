@@ -39,27 +39,28 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
 public class CommandHandlerProviderTest {
 
-    @Autowired
-    private CommandHandlerProvider commandHandlerProvider;
+  @Autowired private CommandHandlerProvider commandHandlerProvider;
 
-    public CommandHandlerProviderTest() {
-        super();
-    }
+  public CommandHandlerProviderTest() {
+    super();
+  }
 
-    @Test
-    public void shouldRegisterHandler() {
-        final Long testCommandId = 815L;
+  @Test
+  public void shouldRegisterHandler() {
+    final Long testCommandId = 815L;
 
-        final NewCommandSourceHandler registeredHandler = this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
+    final NewCommandSourceHandler registeredHandler =
+        this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
 
-        final CommandProcessingResult result =
-                registeredHandler.processCommand(
-                        JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null,null,null));
-        assertEquals(testCommandId, result.commandId());
-    }
+    final CommandProcessingResult result =
+        registeredHandler.processCommand(
+            JsonCommand.fromExistingCommand(
+                testCommandId, null, null, null, null, null, null, null, null, null, null));
+    assertEquals(testCommandId, result.commandId());
+  }
 
-    @Test(expected = UnsupportedCommandException.class)
-    public void shouldThrowUnsupportedCommandException() {
-        this.commandHandlerProvider.getHandler("WHATEVER", "DOSOMETHING");
-    }
+  @Test(expected = UnsupportedCommandException.class)
+  public void shouldThrowUnsupportedCommandException() {
+    this.commandHandlerProvider.getHandler("WHATEVER", "DOSOMETHING");
+  }
 }

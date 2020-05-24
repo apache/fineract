@@ -36,7 +36,8 @@ public class RateRepositoryWrapper {
   }
 
   public Rate findOneWithNotFoundDetection(final Long rateId) {
-    final Rate rate = this.repository.findById(rateId).orElseThrow(() -> new RateNotFoundException(rateId));
+    final Rate rate =
+        this.repository.findById(rateId).orElseThrow(() -> new RateNotFoundException(rateId));
     return rate;
   }
 
@@ -47,8 +48,7 @@ public class RateRepositoryWrapper {
       for (Long rateId : rateIds) {
         Boolean found = false;
         for (Rate foundRate : foundRates) {
-          if (Objects.equals(foundRate.getId(),
-              rateId)) {
+          if (Objects.equals(foundRate.getId(), rateId)) {
             found = true;
             break;
           }
@@ -61,5 +61,4 @@ public class RateRepositoryWrapper {
     }
     return rates;
   }
-
 }

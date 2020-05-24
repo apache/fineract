@@ -23,10 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface SelfBeneficiariesTPTWritePlatformService {
 
-    CommandProcessingResult add(JsonCommand command);
+  CommandProcessingResult add(JsonCommand command);
 
-    CommandProcessingResult update(JsonCommand command);
+  CommandProcessingResult update(JsonCommand command);
 
-    CommandProcessingResult delete(JsonCommand command);
-
+  CommandProcessingResult delete(JsonCommand command);
 }

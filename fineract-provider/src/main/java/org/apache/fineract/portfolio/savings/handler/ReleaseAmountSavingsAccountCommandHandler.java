@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "RELEASEAMOUNT")
 public class ReleaseAmountSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService writePlatformService;
+  private final SavingsAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public ReleaseAmountSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
-        this.writePlatformService = savingAccountWritePlatformService;
-    }
+  @Autowired
+  public ReleaseAmountSavingsAccountCommandHandler(
+      final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
+    this.writePlatformService = savingAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.releaseAmount(command.getSavingsId(), transactionId);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    final Long transactionId = Long.valueOf(command.getTransactionId());
+    return this.writePlatformService.releaseAmount(command.getSavingsId(), transactionId);
+  }
 }

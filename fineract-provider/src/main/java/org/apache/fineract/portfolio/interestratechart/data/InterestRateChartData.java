@@ -29,178 +29,260 @@ import org.joda.time.LocalDate;
  */
 public class InterestRateChartData {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final LocalDate fromDate;
-    private final LocalDate endDate;
-    private final Long productId;
-    private final String productName;
-    private final boolean isPrimaryGroupingByAmount;
+  private final Long id;
+  private final String name;
+  private final String description;
+  private final LocalDate fromDate;
+  private final LocalDate endDate;
+  private final Long productId;
+  private final String productName;
+  private final boolean isPrimaryGroupingByAmount;
 
-    // associations
-    private Collection<InterestRateChartSlabData> chartSlabs;
+  // associations
+  private Collection<InterestRateChartSlabData> chartSlabs;
 
-    // template
-    private final Collection<EnumOptionData> periodTypes;
-    private final Collection<EnumOptionData> entityTypeOptions;
-    private final Collection<EnumOptionData> attributeNameOptions;
-    private final Collection<EnumOptionData> conditionTypeOptions;
-    private final Collection<EnumOptionData> incentiveTypeOptions;
-    private final Collection<CodeValueData> genderOptions;
-    private final Collection<CodeValueData> clientTypeOptions;
-    private final Collection<CodeValueData> clientClassificationOptions;
+  // template
+  private final Collection<EnumOptionData> periodTypes;
+  private final Collection<EnumOptionData> entityTypeOptions;
+  private final Collection<EnumOptionData> attributeNameOptions;
+  private final Collection<EnumOptionData> conditionTypeOptions;
+  private final Collection<EnumOptionData> incentiveTypeOptions;
+  private final Collection<CodeValueData> genderOptions;
+  private final Collection<CodeValueData> clientTypeOptions;
+  private final Collection<CodeValueData> clientClassificationOptions;
 
-    public static InterestRateChartData instance(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName) {
-        Collection<EnumOptionData> periodTypes = null;
-        Collection<InterestRateChartSlabData> chartSlabs = null;
-        final Collection<EnumOptionData> entityTypeOptions = null;
-        final Collection<EnumOptionData> attributeNameOptions = null;
-        final Collection<EnumOptionData> conditionTypeOptions = null;
-        final Collection<EnumOptionData> incentiveTypeOptions = null;
-        final Collection<CodeValueData> genderOptions = null;
-        final Collection<CodeValueData> clientTypeOptions = null;
-        final Collection<CodeValueData> clientClassificationOptions = null;
-        return new InterestRateChartData(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId,
-                savingsProductName, chartSlabs, periodTypes, entityTypeOptions, attributeNameOptions, conditionTypeOptions,
-                incentiveTypeOptions, genderOptions, clientTypeOptions, clientClassificationOptions);
+  public static InterestRateChartData instance(
+      Long id,
+      String name,
+      String description,
+      LocalDate fromDate,
+      LocalDate endDate,
+      boolean isPrimaryGroupingByAmount,
+      Long savingsProductId,
+      String savingsProductName) {
+    Collection<EnumOptionData> periodTypes = null;
+    Collection<InterestRateChartSlabData> chartSlabs = null;
+    final Collection<EnumOptionData> entityTypeOptions = null;
+    final Collection<EnumOptionData> attributeNameOptions = null;
+    final Collection<EnumOptionData> conditionTypeOptions = null;
+    final Collection<EnumOptionData> incentiveTypeOptions = null;
+    final Collection<CodeValueData> genderOptions = null;
+    final Collection<CodeValueData> clientTypeOptions = null;
+    final Collection<CodeValueData> clientClassificationOptions = null;
+    return new InterestRateChartData(
+        id,
+        name,
+        description,
+        fromDate,
+        endDate,
+        isPrimaryGroupingByAmount,
+        savingsProductId,
+        savingsProductName,
+        chartSlabs,
+        periodTypes,
+        entityTypeOptions,
+        attributeNameOptions,
+        conditionTypeOptions,
+        incentiveTypeOptions,
+        genderOptions,
+        clientTypeOptions,
+        clientClassificationOptions);
+  }
+
+  public static InterestRateChartData withSlabs(
+      InterestRateChartData interestRateChartData,
+      Collection<InterestRateChartSlabData> chartSlabs) {
+    return new InterestRateChartData(
+        interestRateChartData.id,
+        interestRateChartData.name,
+        interestRateChartData.description,
+        interestRateChartData.fromDate,
+        interestRateChartData.endDate,
+        interestRateChartData.isPrimaryGroupingByAmount,
+        interestRateChartData.productId,
+        interestRateChartData.productName,
+        chartSlabs,
+        interestRateChartData.periodTypes,
+        interestRateChartData.entityTypeOptions,
+        interestRateChartData.attributeNameOptions,
+        interestRateChartData.conditionTypeOptions,
+        interestRateChartData.incentiveTypeOptions,
+        interestRateChartData.genderOptions,
+        interestRateChartData.clientTypeOptions,
+        interestRateChartData.clientClassificationOptions);
+  }
+
+  public static InterestRateChartData withTemplate(
+      InterestRateChartData interestRateChartData,
+      Collection<EnumOptionData> periodTypes,
+      final Collection<EnumOptionData> entityTypeOptions,
+      final Collection<EnumOptionData> attributeNameOptions,
+      final Collection<EnumOptionData> conditionTypeOptions,
+      final Collection<EnumOptionData> incentiveTypeOptions,
+      final Collection<CodeValueData> genderOptions,
+      final Collection<CodeValueData> clientTypeOptions,
+      final Collection<CodeValueData> clientClassificationOptions) {
+    return new InterestRateChartData(
+        interestRateChartData.id,
+        interestRateChartData.name,
+        interestRateChartData.description,
+        interestRateChartData.fromDate,
+        interestRateChartData.endDate,
+        interestRateChartData.isPrimaryGroupingByAmount,
+        interestRateChartData.productId,
+        interestRateChartData.productName,
+        interestRateChartData.chartSlabs,
+        periodTypes,
+        entityTypeOptions,
+        attributeNameOptions,
+        conditionTypeOptions,
+        incentiveTypeOptions,
+        genderOptions,
+        clientTypeOptions,
+        clientClassificationOptions);
+  }
+
+  public static InterestRateChartData template(
+      Collection<EnumOptionData> periodTypes,
+      final Collection<EnumOptionData> entityTypeOptions,
+      final Collection<EnumOptionData> attributeNameOptions,
+      final Collection<EnumOptionData> conditionTypeOptions,
+      final Collection<EnumOptionData> incentiveTypeOptions,
+      final Collection<CodeValueData> genderOptions,
+      final Collection<CodeValueData> clientTypeOptions,
+      final Collection<CodeValueData> clientClassificationOptions) {
+    final Long id = null;
+    final String name = null;
+    final String description = null;
+    final LocalDate fromDate = null;
+    final LocalDate endDate = null;
+    final boolean isPrimaryGroupingByAmount = false;
+    final Long savingsProductId = null;
+    final String savingsProductName = null;
+    final Collection<InterestRateChartSlabData> chartSlabs = null;
+
+    return new InterestRateChartData(
+        id,
+        name,
+        description,
+        fromDate,
+        endDate,
+        isPrimaryGroupingByAmount,
+        savingsProductId,
+        savingsProductName,
+        chartSlabs,
+        periodTypes,
+        entityTypeOptions,
+        attributeNameOptions,
+        conditionTypeOptions,
+        incentiveTypeOptions,
+        genderOptions,
+        clientTypeOptions,
+        clientClassificationOptions);
+  }
+
+  private InterestRateChartData(
+      Long id,
+      String name,
+      String description,
+      LocalDate fromDate,
+      LocalDate endDate,
+      boolean isPrimaryGroupingByAmount,
+      Long savingsProductId,
+      String savingsProductName,
+      Collection<InterestRateChartSlabData> chartSlabs,
+      Collection<EnumOptionData> periodTypes,
+      final Collection<EnumOptionData> entityTypeOptions,
+      final Collection<EnumOptionData> attributeNameOptions,
+      final Collection<EnumOptionData> conditionTypeOptions,
+      final Collection<EnumOptionData> incentiveTypeOptions,
+      final Collection<CodeValueData> genderOptions,
+      final Collection<CodeValueData> clientTypeOptions,
+      final Collection<CodeValueData> clientClassificationOptions) {
+    this.id = id;
+    this.name = name;
+    this.description = description;
+    this.fromDate = fromDate;
+    this.endDate = endDate;
+    this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
+    this.chartSlabs = chartSlabs;
+    this.productId = savingsProductId;
+    this.productName = savingsProductName;
+    this.periodTypes = periodTypes;
+    this.attributeNameOptions = attributeNameOptions;
+    this.entityTypeOptions = entityTypeOptions;
+    this.conditionTypeOptions = conditionTypeOptions;
+    this.incentiveTypeOptions = incentiveTypeOptions;
+    this.genderOptions = genderOptions;
+    this.clientTypeOptions = clientTypeOptions;
+    this.clientClassificationOptions = clientClassificationOptions;
+  }
+
+  public void addChartSlab(final InterestRateChartSlabData chartSlab) {
+    if (this.chartSlabs == null) {
+      this.chartSlabs = new ArrayList<>();
     }
 
-    public static InterestRateChartData withSlabs(InterestRateChartData interestRateChartData, Collection<InterestRateChartSlabData> chartSlabs) {
-        return new InterestRateChartData(interestRateChartData.id, interestRateChartData.name, interestRateChartData.description,
-                interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.isPrimaryGroupingByAmount,
-                interestRateChartData.productId, interestRateChartData.productName, chartSlabs, interestRateChartData.periodTypes,
-                interestRateChartData.entityTypeOptions, interestRateChartData.attributeNameOptions,
-                interestRateChartData.conditionTypeOptions, interestRateChartData.incentiveTypeOptions,
-                interestRateChartData.genderOptions, interestRateChartData.clientTypeOptions,
-                interestRateChartData.clientClassificationOptions);
-    }
+    this.chartSlabs.add(chartSlab);
+  }
 
-    public static InterestRateChartData withTemplate(InterestRateChartData interestRateChartData, Collection<EnumOptionData> periodTypes,
-            final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
-            final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
-            final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
-            final Collection<CodeValueData> clientClassificationOptions) {
-        return new InterestRateChartData(interestRateChartData.id, interestRateChartData.name, interestRateChartData.description,
-                interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.isPrimaryGroupingByAmount,
-                interestRateChartData.productId, interestRateChartData.productName, interestRateChartData.chartSlabs, periodTypes,
-                entityTypeOptions, attributeNameOptions, conditionTypeOptions, incentiveTypeOptions, genderOptions, clientTypeOptions,
-                clientClassificationOptions);
-    }
+  public boolean isFromDateAfter(final LocalDate compareDate) {
+    return (compareDate == null) ? false : this.fromDate.isAfter(compareDate);
+  }
 
-    public static InterestRateChartData template(Collection<EnumOptionData> periodTypes,
-            final Collection<EnumOptionData> entityTypeOptions, final Collection<EnumOptionData> attributeNameOptions,
-            final Collection<EnumOptionData> conditionTypeOptions, final Collection<EnumOptionData> incentiveTypeOptions,
-            final Collection<CodeValueData> genderOptions, final Collection<CodeValueData> clientTypeOptions,
-            final Collection<CodeValueData> clientClassificationOptions) {
-        final Long id = null;
-        final String name = null;
-        final String description = null;
-        final LocalDate fromDate = null;
-        final LocalDate endDate = null;
-        final boolean isPrimaryGroupingByAmount = false;
-        final Long savingsProductId = null;
-        final String savingsProductName = null;
-        final Collection<InterestRateChartSlabData> chartSlabs = null;
+  public LocalDate endDate() {
+    return this.endDate;
+  }
 
-        return new InterestRateChartData(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId,
-                savingsProductName, chartSlabs, periodTypes, entityTypeOptions, attributeNameOptions, conditionTypeOptions,
-                incentiveTypeOptions, genderOptions, clientTypeOptions, clientClassificationOptions);
-    }
+  public LocalDate fromDate() {
+    return this.fromDate;
+  }
 
-    private InterestRateChartData(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName, Collection<InterestRateChartSlabData> chartSlabs,
-            Collection<EnumOptionData> periodTypes, final Collection<EnumOptionData> entityTypeOptions,
-            final Collection<EnumOptionData> attributeNameOptions, final Collection<EnumOptionData> conditionTypeOptions,
-            final Collection<EnumOptionData> incentiveTypeOptions, final Collection<CodeValueData> genderOptions,
-            final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.fromDate = fromDate;
-        this.endDate = endDate;
-        this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
-        this.chartSlabs = chartSlabs;
-        this.productId = savingsProductId;
-        this.productName = savingsProductName;
-        this.periodTypes = periodTypes;
-        this.attributeNameOptions = attributeNameOptions;
-        this.entityTypeOptions = entityTypeOptions;
-        this.conditionTypeOptions = conditionTypeOptions;
-        this.incentiveTypeOptions = incentiveTypeOptions;
-        this.genderOptions = genderOptions;
-        this.clientTypeOptions = clientTypeOptions;
-        this.clientClassificationOptions = clientClassificationOptions;
-    }
+  public String name() {
+    return this.name;
+  }
 
-    public void addChartSlab(final InterestRateChartSlabData chartSlab) {
-        if (this.chartSlabs == null) {
-            this.chartSlabs = new ArrayList<>();
-        }
+  public String description() {
+    return this.description;
+  }
 
-        this.chartSlabs.add(chartSlab);
-    }
+  public Collection<InterestRateChartSlabData> chartSlabs() {
+    return this.chartSlabs;
+  }
 
-    public boolean isFromDateAfter(final LocalDate compareDate) {
-        return (compareDate == null) ? false : this.fromDate.isAfter(compareDate);
-    }
+  public Collection<EnumOptionData> periodTypes() {
+    return this.periodTypes;
+  }
 
-    public LocalDate endDate() {
-        return this.endDate;
-    }
+  public Collection<EnumOptionData> entityTypeOptions() {
+    return this.entityTypeOptions;
+  }
 
-    public LocalDate fromDate() {
-        return this.fromDate;
-    }
+  public Collection<EnumOptionData> attributeNameOptions() {
+    return this.attributeNameOptions;
+  }
 
-    public String name() {
-        return this.name;
-    }
+  public Collection<EnumOptionData> conditionTypeOptions() {
+    return this.conditionTypeOptions;
+  }
 
-    public String description() {
-        return this.description;
-    }
+  public Collection<EnumOptionData> incentiveTypeOptions() {
+    return this.incentiveTypeOptions;
+  }
 
-    public Collection<InterestRateChartSlabData> chartSlabs() {
-        return this.chartSlabs;
-    }
+  public Collection<CodeValueData> genderOptions() {
+    return this.genderOptions;
+  }
 
-    public Collection<EnumOptionData> periodTypes() {
-        return this.periodTypes;
-    }
+  public Collection<CodeValueData> clientTypeOptions() {
+    return this.clientTypeOptions;
+  }
 
-    public Collection<EnumOptionData> entityTypeOptions() {
-        return this.entityTypeOptions;
-    }
+  public Collection<CodeValueData> clientClassificationOptions() {
+    return this.clientClassificationOptions;
+  }
 
-    public Collection<EnumOptionData> attributeNameOptions() {
-        return this.attributeNameOptions;
-    }
-
-    public Collection<EnumOptionData> conditionTypeOptions() {
-        return this.conditionTypeOptions;
-    }
-
-    public Collection<EnumOptionData> incentiveTypeOptions() {
-        return this.incentiveTypeOptions;
-    }
-
-    public Collection<CodeValueData> genderOptions() {
-        return this.genderOptions;
-    }
-
-    public Collection<CodeValueData> clientTypeOptions() {
-        return this.clientTypeOptions;
-    }
-
-    public Collection<CodeValueData> clientClassificationOptions() {
-        return this.clientClassificationOptions;
-    }
-
-
-    public boolean isPrimaryGroupingByAmount() {
-        return this.isPrimaryGroupingByAmount;
-    }
-
+  public boolean isPrimaryGroupingByAmount() {
+    return this.isPrimaryGroupingByAmount;
+  }
 }

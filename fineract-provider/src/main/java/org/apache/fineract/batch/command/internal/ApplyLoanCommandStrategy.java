@@ -46,43 +46,45 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplyLoanCommandStrategy implements CommandStrategy {
 
-    private final LoansApiResource loansApiResource;
+  private final LoansApiResource loansApiResource;
 
-    @Autowired
-    public ApplyLoanCommandStrategy(final LoansApiResource loansApiResource) {
-        this.loansApiResource = loansApiResource;
+  @Autowired
+  public ApplyLoanCommandStrategy(final LoansApiResource loansApiResource) {
+    this.loansApiResource = loansApiResource;
+  }
+
+  @Override
+  public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
+
+    final BatchResponse response = new BatchResponse();
+    final String responseBody;
+
+    response.setRequestId(request.getRequestId());
+    response.setHeaders(request.getHeaders());
+
+    // Try-catch blocks to map exceptions to appropriate status codes
+    try {
+
+      // Calls 'SubmitLoanFunction' function from 'LoansApiResource' to
+      // Apply Loan to an existing client
+      responseBody =
+          loansApiResource.calculateLoanScheduleOrSubmitLoanApplication(
+              null, null, request.getBody());
+
+      response.setStatusCode(200);
+      // Sets the body of the response after loan is successfully applied
+      response.setBody(responseBody);
+
+    } catch (RuntimeException e) {
+
+      // Gets an object of type ErrorInfo, containing information about
+      // raised exception
+      ErrorInfo ex = ErrorHandler.handler(e);
+
+      response.setStatusCode(ex.getStatusCode());
+      response.setBody(ex.getMessage());
     }
 
-    @Override
-    public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
-
-        final BatchResponse response = new BatchResponse();
-        final String responseBody;
-
-        response.setRequestId(request.getRequestId());
-        response.setHeaders(request.getHeaders());
-
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
-
-            // Calls 'SubmitLoanFunction' function from 'LoansApiResource' to
-            // Apply Loan to an existing client
-            responseBody = loansApiResource.calculateLoanScheduleOrSubmitLoanApplication(null, null, request.getBody());
-
-            response.setStatusCode(200);
-            // Sets the body of the response after loan is successfully applied
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
-
-        return response;
-    }
+    return response;
+  }
 }

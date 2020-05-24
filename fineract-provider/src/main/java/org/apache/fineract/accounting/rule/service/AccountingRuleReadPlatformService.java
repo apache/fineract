@@ -23,8 +23,8 @@ import org.apache.fineract.accounting.rule.data.AccountingRuleData;
 
 public interface AccountingRuleReadPlatformService {
 
-    List<AccountingRuleData> retrieveAllAccountingRules(String hierarchySearchString, boolean isAssociationParametersExists);
+  List<AccountingRuleData> retrieveAllAccountingRules(
+      String hierarchySearchString, boolean isAssociationParametersExists);
 
-    AccountingRuleData retrieveAccountingRuleById(Long accountingRuleId);
-
+  AccountingRuleData retrieveAccountingRuleById(Long accountingRuleId);
 }

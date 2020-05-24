@@ -37,99 +37,129 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "m_loan_repayment_schedule_history")
 public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_id")
-    private Loan loan;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "loan_id")
+  private Loan loan;
 
-    @OneToOne(optional = true)
-    @JoinColumn(name = "loan_reschedule_request_id")
-    private LoanRescheduleRequest loanRescheduleRequest;
+  @OneToOne(optional = true)
+  @JoinColumn(name = "loan_reschedule_request_id")
+  private LoanRescheduleRequest loanRescheduleRequest;
 
-    @Column(name = "installment", nullable = false)
-    private Integer installmentNumber;
+  @Column(name = "installment", nullable = false)
+  private Integer installmentNumber;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "fromdate", nullable = true)
-    private Date fromDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "fromdate", nullable = true)
+  private Date fromDate;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "duedate", nullable = false)
-    private Date dueDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "duedate", nullable = false)
+  private Date dueDate;
 
-    @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal principal;
+  @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal principal;
 
-    @Column(name = "interest_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal interestCharged;
+  @Column(name = "interest_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal interestCharged;
 
-    @Column(name = "fee_charges_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal feeChargesCharged;
+  @Column(name = "fee_charges_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal feeChargesCharged;
 
-    @Column(name = "penalty_charges_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal penaltyCharges;
+  @Column(name = "penalty_charges_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal penaltyCharges;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "created_date")
-    private Date createdOnDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "created_date")
+  private Date createdOnDate;
 
-    @ManyToOne
-    @JoinColumn(name = "createdby_id")
-    private AppUser createdByUser;
+  @ManyToOne
+  @JoinColumn(name = "createdby_id")
+  private AppUser createdByUser;
 
-    @ManyToOne
-    @JoinColumn(name = "lastmodifiedby_id")
-    private AppUser lastModifiedByUser;
+  @ManyToOne
+  @JoinColumn(name = "lastmodifiedby_id")
+  private AppUser lastModifiedByUser;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "lastmodified_date")
-    private Date lastModifiedOnDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "lastmodified_date")
+  private Date lastModifiedOnDate;
 
-    @Column(name = "version")
-    private Integer version;
+  @Column(name = "version")
+  private Integer version;
 
-    /**
-     * LoanRepaymentScheduleHistory constructor
-     **/
-    protected LoanRepaymentScheduleHistory() {}
+  /**
+   * LoanRepaymentScheduleHistory constructor
+   **/
+  protected LoanRepaymentScheduleHistory() {}
 
-    /**
-     * LoanRepaymentScheduleHistory constructor
-     **/
-    private LoanRepaymentScheduleHistory(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final Date fromDate, final Date dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
-            final Date createdOnDate, final AppUser createdByUser, final AppUser lastModifiedByUser, final Date lastModifiedOnDate,
-            final Integer version) {
+  /**
+   * LoanRepaymentScheduleHistory constructor
+   **/
+  private LoanRepaymentScheduleHistory(
+      final Loan loan,
+      final LoanRescheduleRequest loanRescheduleRequest,
+      final Integer installmentNumber,
+      final Date fromDate,
+      final Date dueDate,
+      final BigDecimal principal,
+      final BigDecimal interestCharged,
+      final BigDecimal feeChargesCharged,
+      final BigDecimal penaltyCharges,
+      final Date createdOnDate,
+      final AppUser createdByUser,
+      final AppUser lastModifiedByUser,
+      final Date lastModifiedOnDate,
+      final Integer version) {
 
-        this.loan = loan;
-        this.loanRescheduleRequest = loanRescheduleRequest;
-        this.installmentNumber = installmentNumber;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.principal = principal;
-        this.interestCharged = interestCharged;
-        this.feeChargesCharged = feeChargesCharged;
-        this.penaltyCharges = penaltyCharges;
-        this.createdOnDate = createdOnDate;
-        this.createdByUser = createdByUser;
-        this.lastModifiedByUser = lastModifiedByUser;
-        this.lastModifiedOnDate = lastModifiedOnDate;
-        this.version = version;
-    }
+    this.loan = loan;
+    this.loanRescheduleRequest = loanRescheduleRequest;
+    this.installmentNumber = installmentNumber;
+    this.fromDate = fromDate;
+    this.dueDate = dueDate;
+    this.principal = principal;
+    this.interestCharged = interestCharged;
+    this.feeChargesCharged = feeChargesCharged;
+    this.penaltyCharges = penaltyCharges;
+    this.createdOnDate = createdOnDate;
+    this.createdByUser = createdByUser;
+    this.lastModifiedByUser = lastModifiedByUser;
+    this.lastModifiedOnDate = lastModifiedOnDate;
+    this.version = version;
+  }
 
-    /**
-     * @return an instance of the LoanRepaymentScheduleHistory class
-     **/
-    public static LoanRepaymentScheduleHistory instance(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final Date fromDate, final Date dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
-            final Date createdOnDate, final AppUser createdByUser, final AppUser lastModifiedByUser, final Date lastModifiedOnDate,
-            final Integer version) {
+  /**
+   * @return an instance of the LoanRepaymentScheduleHistory class
+   **/
+  public static LoanRepaymentScheduleHistory instance(
+      final Loan loan,
+      final LoanRescheduleRequest loanRescheduleRequest,
+      final Integer installmentNumber,
+      final Date fromDate,
+      final Date dueDate,
+      final BigDecimal principal,
+      final BigDecimal interestCharged,
+      final BigDecimal feeChargesCharged,
+      final BigDecimal penaltyCharges,
+      final Date createdOnDate,
+      final AppUser createdByUser,
+      final AppUser lastModifiedByUser,
+      final Date lastModifiedOnDate,
+      final Integer version) {
 
-        return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, fromDate, dueDate, principal,
-                interestCharged, feeChargesCharged, penaltyCharges, createdOnDate, createdByUser, lastModifiedByUser, lastModifiedOnDate,
-                version);
-
-    }
-
+    return new LoanRepaymentScheduleHistory(
+        loan,
+        loanRescheduleRequest,
+        installmentNumber,
+        fromDate,
+        dueDate,
+        principal,
+        interestCharged,
+        feeChargesCharged,
+        penaltyCharges,
+        createdOnDate,
+        createdByUser,
+        lastModifiedByUser,
+        lastModifiedOnDate,
+        version);
+  }
 }

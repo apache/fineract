@@ -20,20 +20,22 @@ package org.apache.fineract.mix.data;
 
 public class NamespaceData {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String prefix;
-    private final String url;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public NamespaceData(final Long id, final String prefix, final String url) {
+  @SuppressWarnings("unused")
+  private final String prefix;
 
-        this.id = id;
-        this.prefix = prefix;
-        this.url = url;
-    }
+  private final String url;
 
-    public String url() {
-        return this.url;
-    }
+  public NamespaceData(final Long id, final String prefix, final String url) {
+
+    this.id = id;
+    this.prefix = prefix;
+    this.url = url;
+  }
+
+  public String url() {
+    return this.url;
+  }
 }

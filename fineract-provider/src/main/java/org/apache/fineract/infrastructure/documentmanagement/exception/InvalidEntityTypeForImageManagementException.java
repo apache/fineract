@@ -23,9 +23,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 /**
  * Runtime exception for invalid image types
  */
-public class InvalidEntityTypeForImageManagementException extends AbstractPlatformResourceNotFoundException {
+public class InvalidEntityTypeForImageManagementException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public InvalidEntityTypeForImageManagementException(String imageType) {
-        super("error.imagemanagement.entitytype.invalid", "Image Management is not support for the Entity Type: " + imageType);
-    }
+  public InvalidEntityTypeForImageManagementException(String imageType) {
+    super(
+        "error.imagemanagement.entitytype.invalid",
+        "Image Management is not support for the Entity Type: " + imageType);
+  }
 }

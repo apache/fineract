@@ -29,22 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by Cieyou on 3/12/14.
  */
-
 @Service
 public class RegisterSurveyCommandHandler implements NewCommandSourceHandler {
 
+  private final WriteSurveyService writePlatformService;
 
-    private final WriteSurveyService writePlatformService;
+  @Autowired
+  public RegisterSurveyCommandHandler(final WriteSurveyService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Autowired
-    public RegisterSurveyCommandHandler(final WriteSurveyService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.registerSurvey(command);
-    }
+    return this.writePlatformService.registerSurvey(command);
+  }
 }

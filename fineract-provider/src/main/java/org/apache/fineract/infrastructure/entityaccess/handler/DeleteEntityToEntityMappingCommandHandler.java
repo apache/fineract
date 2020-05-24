@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ENTITYMAPPING", action = "DELETE")
 public class DeleteEntityToEntityMappingCommandHandler implements NewCommandSourceHandler {
 
-    private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
+  private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
 
-    @Autowired
-    public DeleteEntityToEntityMappingCommandHandler(final FineractEntityAccessWriteService fineractEntityAccessWriteService) {
-        this.fineractEntityAccessWriteService = fineractEntityAccessWriteService;
-    }
+  @Autowired
+  public DeleteEntityToEntityMappingCommandHandler(
+      final FineractEntityAccessWriteService fineractEntityAccessWriteService) {
+    this.fineractEntityAccessWriteService = fineractEntityAccessWriteService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.fineractEntityAccessWriteService.deleteEntityToEntityMapping(command.entityId());
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.fineractEntityAccessWriteService.deleteEntityToEntityMapping(command.entityId());
+  }
 }

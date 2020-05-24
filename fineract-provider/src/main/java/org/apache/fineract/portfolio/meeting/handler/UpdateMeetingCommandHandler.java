@@ -31,18 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "MEETING", action = "UPDATE")
 public class UpdateMeetingCommandHandler implements NewCommandSourceHandler {
 
-    private final MeetingWritePlatformService writePlatformService;
+  private final MeetingWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateMeetingCommandHandler(final MeetingWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateMeetingCommandHandler(final MeetingWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateMeeting(command);
-    }
-
+    return this.writePlatformService.updateMeeting(command);
+  }
 }

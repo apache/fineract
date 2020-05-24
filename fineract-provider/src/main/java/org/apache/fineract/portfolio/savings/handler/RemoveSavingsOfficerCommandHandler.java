@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "REMOVESAVINGSOFFICER")
 public class RemoveSavingsOfficerCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService savingsWritePlatformService;
+  private final SavingsAccountWritePlatformService savingsWritePlatformService;
 
-    @Autowired
-    public RemoveSavingsOfficerCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
-        this.savingsWritePlatformService = savingAccountWritePlatformService;
-    }
+  @Autowired
+  public RemoveSavingsOfficerCommandHandler(
+      final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
+    this.savingsWritePlatformService = savingAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingsWritePlatformService.unassignFieldOfficer(command.entityId(), command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.savingsWritePlatformService.unassignFieldOfficer(command.entityId(), command);
+  }
 }

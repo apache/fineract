@@ -22,9 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class GroupNotExistsInCenterException extends AbstractPlatformDomainRuleException {
 
-    public GroupNotExistsInCenterException(final Long groupId, final Long centerId) {
-        super("error.msg.group.not.in.center", "Group with identifier " + groupId + " is not exists in Center with identifier " + centerId,
-                groupId, centerId);
-    }
-
+  public GroupNotExistsInCenterException(final Long groupId, final Long centerId) {
+    super(
+        "error.msg.group.not.in.center",
+        "Group with identifier " + groupId + " is not exists in Center with identifier " + centerId,
+        groupId,
+        centerId);
+  }
 }

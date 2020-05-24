@@ -43,97 +43,104 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SavingsAccountRepositoryWrapper {
 
+  private final SavingsAccountRepository repository;
 
-    private final SavingsAccountRepository repository;
+  @Autowired
+  public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository) {
+    this.repository = repository;
+  }
 
-    @Autowired
-    public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository) {
-        this.repository = repository;
+  @Transactional(readOnly = true)
+  public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
+    final SavingsAccount account =
+        this.repository
+            .findById(savingsId)
+            .orElseThrow(() -> new SavingsAccountNotFoundException(savingsId));
+    account.loadLazyCollections();
+    return account;
+  }
+
+  @Transactional(readOnly = true)
+  public SavingsAccount findOneWithNotFoundDetection(
+      final Long savingsId, final DepositAccountType depositAccountType) {
+    final SavingsAccount account =
+        this.repository.findByIdAndDepositAccountType(savingsId, depositAccountType.getValue());
+    if (account == null) {
+      throw new SavingsAccountNotFoundException(savingsId);
     }
+    account.loadLazyCollections();
+    return account;
+  }
 
-    @Transactional(readOnly=true)
-    public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
-        final SavingsAccount account = this.repository.findById(savingsId)
-                .orElseThrow(() -> new SavingsAccountNotFoundException(savingsId));
+  @Transactional(readOnly = true)
+  public List<SavingsAccount> findSavingAccountByClientId(@Param("clientId") Long clientId) {
+    List<SavingsAccount> accounts = this.repository.findSavingAccountByClientId(clientId);
+    loadLazyCollections(accounts);
+    return accounts;
+  }
+
+  @Transactional(readOnly = true)
+  public List<SavingsAccount> findSavingAccountByStatus(@Param("status") Integer status) {
+    List<SavingsAccount> accounts = this.repository.findSavingAccountByStatus(status);
+    loadLazyCollections(accounts);
+    return accounts;
+  }
+
+  @Transactional(readOnly = true)
+  public Page<SavingsAccount> findByStatus(Integer status, Pageable pageable) {
+    Page<SavingsAccount> accounts = this.repository.findByStatus(status, pageable);
+    loadLazyCollections(accounts);
+    return accounts;
+  }
+
+  // Root Entities are enough
+  public List<SavingsAccount> findByClientIdAndGroupId(
+      @Param("clientId") Long clientId, @Param("groupId") Long groupId) {
+    return this.repository.findByClientIdAndGroupId(clientId, groupId);
+  }
+
+  public boolean doNonClosedSavingAccountsExistForClient(@Param("clientId") Long clientId) {
+    return this.repository.doNonClosedSavingAccountsExistForClient(clientId);
+  }
+
+  // Root Entities are enough
+  public List<SavingsAccount> findByGroupId(@Param("groupId") Long groupId) {
+    return this.repository.findByGroupId(groupId);
+  }
+
+  public List<SavingsAccount> findByGsimId(@Param("gsimId") Long gsimId) {
+    return this.repository.findSavingAccountByGsimId(gsimId);
+  }
+
+  // Root Entity is enough
+  public SavingsAccount findNonClosedAccountByAccountNumber(
+      @Param("accountNumber") String accountNumber) {
+    return this.repository.findNonClosedAccountByAccountNumber(accountNumber);
+  }
+
+  public SavingsAccount save(final SavingsAccount account) {
+    return this.repository.save(account);
+  }
+
+  public void delete(final SavingsAccount account) {
+    this.repository.delete(account);
+  }
+
+  public SavingsAccount saveAndFlush(final SavingsAccount account) {
+    return this.repository.saveAndFlush(account);
+  }
+
+  private void loadLazyCollections(final List<SavingsAccount> accounts) {
+    if (accounts != null && accounts.size() > 0) {
+      for (SavingsAccount account : accounts) {
         account.loadLazyCollections();
-        return account;
+      }
     }
+  }
 
-    @Transactional(readOnly=true)
-    public SavingsAccount findOneWithNotFoundDetection(final Long savingsId, final DepositAccountType depositAccountType) {
-        final SavingsAccount account = this.repository.findByIdAndDepositAccountType(savingsId, depositAccountType.getValue());
-        if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }
-        account.loadLazyCollections();
-        return account;
+  private void loadLazyCollections(Page<SavingsAccount> accounts) {
+    for (SavingsAccount account : accounts) {
+      account.loadLazyCollections();
     }
-
-    @Transactional(readOnly=true)
-    public List<SavingsAccount> findSavingAccountByClientId(@Param("clientId") Long clientId) {
-        List<SavingsAccount> accounts = this.repository.findSavingAccountByClientId(clientId) ;
-        loadLazyCollections(accounts);
-        return accounts ;
-    }
-
-    @Transactional(readOnly=true)
-    public List<SavingsAccount> findSavingAccountByStatus(@Param("status") Integer status) {
-        List<SavingsAccount> accounts = this.repository.findSavingAccountByStatus(status) ;
-        loadLazyCollections(accounts);
-        return accounts ;
-    }
-
-    @Transactional(readOnly=true)
-    public Page<SavingsAccount> findByStatus(Integer status, Pageable pageable) {
-        Page<SavingsAccount> accounts = this.repository.findByStatus(status, pageable);
-        loadLazyCollections(accounts);
-        return accounts;
-    }
-
-    //Root Entities are enough
-    public List<SavingsAccount> findByClientIdAndGroupId(@Param("clientId") Long clientId, @Param("groupId") Long groupId) {
-        return this.repository.findByClientIdAndGroupId(clientId, groupId) ;
-    }
-
-    public boolean doNonClosedSavingAccountsExistForClient(@Param("clientId") Long clientId) {
-        return this.repository.doNonClosedSavingAccountsExistForClient(clientId) ;
-    }
-
-    //Root Entities are enough
-    public List<SavingsAccount> findByGroupId(@Param("groupId") Long groupId) {
-        return this.repository.findByGroupId(groupId) ;
-    }
-
-    public List<SavingsAccount> findByGsimId(@Param("gsimId") Long gsimId) {
-        return this.repository.findSavingAccountByGsimId(gsimId);
-    }
-
-    //Root Entity is enough
-    public SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber) {
-        return this.repository.findNonClosedAccountByAccountNumber(accountNumber) ;
-    }
-
-    public SavingsAccount save(final SavingsAccount account) {
-        return this.repository.save(account);
-    }
-
-    public void delete(final SavingsAccount account) {
-        this.repository.delete(account);
-    }
-
-    public SavingsAccount saveAndFlush(final SavingsAccount account) {
-        return this.repository.saveAndFlush(account);
-    }
-
-    private void loadLazyCollections(final List<SavingsAccount> accounts) {
-        if(accounts != null && accounts.size() >0) {
-            for(SavingsAccount account: accounts) {
-                account.loadLazyCollections();
-            }
-        }
-    }
-
-    private void loadLazyCollections(Page<SavingsAccount> accounts) {
-        for (SavingsAccount account : accounts) {
-            account.loadLazyCollections();
-        }
-    }
+  }
 }

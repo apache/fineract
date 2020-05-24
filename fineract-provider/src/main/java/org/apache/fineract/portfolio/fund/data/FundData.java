@@ -25,28 +25,30 @@ import java.io.Serializable;
  */
 public class FundData implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final String externalId;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public static FundData instance(final Long id, final String name, final String externalId) {
-        return new FundData(id, name, externalId);
-    }
+  @SuppressWarnings("unused")
+  private final String name;
 
-    private FundData(final Long id, final String name, final String externalId) {
-        this.id = id;
-        this.name = name;
-        this.externalId = externalId;
-    }
+  @SuppressWarnings("unused")
+  private final String externalId;
 
-    public String getName() {
-        return name;
-    }
+  public static FundData instance(final Long id, final String name, final String externalId) {
+    return new FundData(id, name, externalId);
+  }
 
-    public Long getId() {
-        return id;
-    }
+  private FundData(final Long id, final String name, final String externalId) {
+    this.id = id;
+    this.name = name;
+    this.externalId = externalId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Long getId() {
+    return id;
+  }
 }

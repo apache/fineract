@@ -26,7 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class AdHocNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public AdHocNotFoundException(final Long id) {
-        super("error.msg.adhocquery.adhoc.id.invalid", "Adhoc Record with identifier " + id + " does not exist", id);
-    }
+  public AdHocNotFoundException(final Long id) {
+    super(
+        "error.msg.adhocquery.adhoc.id.invalid",
+        "Adhoc Record with identifier " + id + " does not exist",
+        id);
+  }
 }

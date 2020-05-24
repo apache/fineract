@@ -37,16 +37,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrganisationCurrencyRepositoryWrapper {
 
-    private final OrganisationCurrencyRepository repository;
+  private final OrganisationCurrencyRepository repository;
 
-    @Autowired
-    public OrganisationCurrencyRepositoryWrapper(final OrganisationCurrencyRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public OrganisationCurrencyRepositoryWrapper(final OrganisationCurrencyRepository repository) {
+    this.repository = repository;
+  }
 
-    public OrganisationCurrency findOneWithNotFoundDetection(final String currencyCode) {
-        final OrganisationCurrency organisationCurrency = this.repository.findOneByCode(currencyCode);
-        if (organisationCurrency == null) { throw new OrganizationalCurrencyNotFoundException(currencyCode); }
-        return organisationCurrency;
+  public OrganisationCurrency findOneWithNotFoundDetection(final String currencyCode) {
+    final OrganisationCurrency organisationCurrency = this.repository.findOneByCode(currencyCode);
+    if (organisationCurrency == null) {
+      throw new OrganizationalCurrencyNotFoundException(currencyCode);
     }
+    return organisationCurrency;
+  }
 }

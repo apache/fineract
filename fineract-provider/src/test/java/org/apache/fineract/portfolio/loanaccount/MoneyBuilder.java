@@ -24,20 +24,20 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 public class MoneyBuilder {
 
-    private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
-    private BigDecimal newAmount = BigDecimal.ZERO;
+  private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
+  private BigDecimal newAmount = BigDecimal.ZERO;
 
-    public Money build() {
-        return Money.of(this.currencyDetail, this.newAmount);
-    }
+  public Money build() {
+    return Money.of(this.currencyDetail, this.newAmount);
+  }
 
-    public MoneyBuilder with(final MonetaryCurrency withDetail) {
-        this.currencyDetail = withDetail;
-        return this;
-    }
+  public MoneyBuilder with(final MonetaryCurrency withDetail) {
+    this.currencyDetail = withDetail;
+    return this;
+  }
 
-    public MoneyBuilder with(final String withAmount) {
-        this.newAmount = BigDecimal.valueOf(Double.valueOf(withAmount));
-        return this;
-    }
+  public MoneyBuilder with(final String withAmount) {
+    this.newAmount = BigDecimal.valueOf(Double.valueOf(withAmount));
+    return this;
+  }
 }

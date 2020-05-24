@@ -39,27 +39,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class InterestRateChartRepositoryWrapper {
 
-    private final InterestRateChartRepository repository;
+  private final InterestRateChartRepository repository;
 
-    @Autowired
-    public InterestRateChartRepositoryWrapper(final InterestRateChartRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public InterestRateChartRepositoryWrapper(final InterestRateChartRepository repository) {
+    this.repository = repository;
+  }
 
-    public InterestRateChart findOneWithNotFoundDetection(final Long intrestRateChartId) {
-        return this.repository.findById(intrestRateChartId)
-                .orElseThrow(() -> new InterestRateChartNotFoundException(intrestRateChartId));
-    }
+  public InterestRateChart findOneWithNotFoundDetection(final Long intrestRateChartId) {
+    return this.repository
+        .findById(intrestRateChartId)
+        .orElseThrow(() -> new InterestRateChartNotFoundException(intrestRateChartId));
+  }
 
-    public void save(final InterestRateChart interestRateChart) {
-        this.repository.save(interestRateChart);
-    }
+  public void save(final InterestRateChart interestRateChart) {
+    this.repository.save(interestRateChart);
+  }
 
-    public void delete(final InterestRateChart interestRateChart) {
-        this.repository.delete(interestRateChart);
-    }
+  public void delete(final InterestRateChart interestRateChart) {
+    this.repository.delete(interestRateChart);
+  }
 
-    public void saveAndFlush(final InterestRateChart interestRateChart) {
-        this.repository.saveAndFlush(interestRateChart);
-    }
+  public void saveAndFlush(final InterestRateChart interestRateChart) {
+    this.repository.saveAndFlush(interestRateChart);
+  }
 }

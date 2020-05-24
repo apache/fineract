@@ -50,56 +50,60 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CommandHandlerProvider implements ApplicationContextAware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandlerProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandlerProvider.class);
 
-    private ApplicationContext applicationContext;
-    private HashMap<String, String> registeredHandlers;
+  private ApplicationContext applicationContext;
+  private HashMap<String, String> registeredHandlers;
 
-    CommandHandlerProvider() {
-        super();
+  CommandHandlerProvider() {
+    super();
+  }
+
+  /**
+   * Returns a handler for the given entity and action.<br>
+   * <br>
+   * Throws an {@link UnsupportedCommandException} if no handler
+   * for the given entity, action combination can be found.
+   * @param entity the entity to lookup the handler, must be given.
+   * @param action the action to lookup the handler, must be given.
+   */
+  public NewCommandSourceHandler getHandler(final String entity, final String action) {
+    Preconditions.checkArgument(StringUtils.isNoneEmpty(entity), "An entity must be given!");
+    Preconditions.checkArgument(StringUtils.isNoneEmpty(action), "An action must be given!");
+
+    final String key = entity + "|" + action;
+    if (!this.registeredHandlers.containsKey(key)) {
+      throw new UnsupportedCommandException(key);
     }
+    return (NewCommandSourceHandler)
+        this.applicationContext.getBean(this.registeredHandlers.get(key));
+  }
 
-    /**
-     * Returns a handler for the given entity and action.<br>
-     * <br>
-     * Throws an {@link UnsupportedCommandException} if no handler
-     * for the given entity, action combination can be found.
-     * @param entity the entity to lookup the handler, must be given.
-     * @param action the action to lookup the handler, must be given.
-     */
-    public NewCommandSourceHandler getHandler (final String entity, final String action) {
-        Preconditions.checkArgument(StringUtils.isNoneEmpty(entity), "An entity must be given!");
-        Preconditions.checkArgument(StringUtils.isNoneEmpty(action), "An action must be given!");
+  private void initializeHandlerRegistry() {
+    if (this.registeredHandlers == null) {
+      this.registeredHandlers = new HashMap<>();
 
-        final String key =  entity + "|" + action;
-        if (!this.registeredHandlers.containsKey(key)) {
-            throw new UnsupportedCommandException(key);
+      final String[] commandHandlerBeans =
+          this.applicationContext.getBeanNamesForAnnotation(CommandType.class);
+      if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
+        for (final String commandHandlerName : commandHandlerBeans) {
+          LOGGER.info("Register command handler '{}' ...", commandHandlerName);
+          final CommandType commandType =
+              this.applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
+          try {
+            this.registeredHandlers.put(
+                commandType.entity() + "|" + commandType.action(), commandHandlerName);
+          } catch (final Throwable th) {
+            LOGGER.error("Unable to register command handler '{}'!", commandHandlerName, th);
+          }
         }
-        return (NewCommandSourceHandler)this.applicationContext.getBean(this.registeredHandlers.get(key));
+      }
     }
+  }
 
-    private void initializeHandlerRegistry() {
-        if (this.registeredHandlers == null) {
-            this.registeredHandlers = new HashMap<>();
-
-            final String[] commandHandlerBeans = this.applicationContext.getBeanNamesForAnnotation(CommandType.class);
-            if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
-                for (final String commandHandlerName : commandHandlerBeans) {
-                    LOGGER.info("Register command handler '{}' ...", commandHandlerName);
-                    final CommandType commandType = this.applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
-                    try {
-                        this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
-                    } catch (final Throwable th) {
-                        LOGGER.error("Unable to register command handler '{}'!", commandHandlerName, th);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-        this.initializeHandlerRegistry();
-    }
+  @Override
+  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    this.applicationContext = applicationContext;
+    this.initializeHandlerRegistry();
+  }
 }

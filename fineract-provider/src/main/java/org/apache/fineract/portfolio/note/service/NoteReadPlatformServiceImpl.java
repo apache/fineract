@@ -41,111 +41,130 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public NoteReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
+  @Autowired
+  public NoteReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
 
-    private static final class NoteMapper implements RowMapper<NoteData> {
+  private static final class NoteMapper implements RowMapper<NoteData> {
 
-        public String schema() {
-            return " select n.id as id, n.client_id as clientId, n.group_id as groupId, n.loan_id as loanId, n.loan_transaction_id as transactionId, "
-                    + " n.note_type_enum as noteTypeEnum, n.note as note, n.created_date as createdDate, n.createdby_id as createdById, "
-                    + " cb.username as createdBy, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById, mb.username as modifiedBy "
-                    + " from m_note n left join m_appuser cb on cb.id=n.createdby_id left join m_appuser mb on mb.id=n.lastmodifiedby_id ";
-        }
-
-        @Override
-        public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final Long groupId = JdbcSupport.getLong(rs, "groupId");
-            final Long loanId = JdbcSupport.getLong(rs, "loanId");
-            final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-            // final Long depositAccountId = JdbcSupport.getLong(rs,
-            // "depositAccountId");
-            // final Long savingAccountId = JdbcSupport.getLong(rs,
-            // "savingAccountId");
-            final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
-            final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
-            final String note = rs.getString("note");
-            final DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
-            final Long createdById = JdbcSupport.getLong(rs, "createdById");
-            final DateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
-            final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
-            final String createdByUsername = rs.getString("createdBy");
-            final String updatedByUsername = rs.getString("modifiedBy");
-            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
-                    createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
-        }
+    public String schema() {
+      return " select n.id as id, n.client_id as clientId, n.group_id as groupId, n.loan_id as"
+          + " loanId, n.loan_transaction_id as transactionId,  n.note_type_enum as"
+          + " noteTypeEnum, n.note as note, n.created_date as createdDate, n.createdby_id"
+          + " as createdById,  cb.username as createdBy, n.lastmodified_date as"
+          + " lastModifiedDate, n.lastmodifiedby_id as lastModifiedById, mb.username as"
+          + " modifiedBy  from m_note n left join m_appuser cb on cb.id=n.createdby_id left"
+          + " join m_appuser mb on mb.id=n.lastmodifiedby_id ";
     }
 
     @Override
-    public NoteData retrieveNote(final Long noteId, final Long resourceId, final Integer noteTypeId) {
-        final NoteType noteType = NoteType.fromInt(noteTypeId);
-        try {
-            final NoteMapper rm = new NoteMapper();
-            List<Object> paramList = new ArrayList<>(
-                    Arrays.asList(noteId, resourceId));
-            String conditionSql = getResourceCondition(noteType, paramList);
-            if (StringUtils.isNotBlank(conditionSql)) {
-                conditionSql = " and " + conditionSql;
-            }
+    public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        throws SQLException {
 
-            final String sql = rm.schema() + " where n.id = ? " + conditionSql + " order by n.created_date DESC";
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final Long clientId = JdbcSupport.getLong(rs, "clientId");
+      final Long groupId = JdbcSupport.getLong(rs, "groupId");
+      final Long loanId = JdbcSupport.getLong(rs, "loanId");
+      final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
+      // final Long depositAccountId = JdbcSupport.getLong(rs,
+      // "depositAccountId");
+      // final Long savingAccountId = JdbcSupport.getLong(rs,
+      // "savingAccountId");
+      final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
+      final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
+      final String note = rs.getString("note");
+      final DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
+      final Long createdById = JdbcSupport.getLong(rs, "createdById");
+      final DateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
+      final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
+      final String createdByUsername = rs.getString("createdBy");
+      final String updatedByUsername = rs.getString("modifiedBy");
+      return new NoteData(
+          id,
+          clientId,
+          groupId,
+          loanId,
+          transactionId,
+          null,
+          null,
+          noteType,
+          note,
+          createdDate,
+          createdById,
+          createdByUsername,
+          lastModifiedDate,
+          lastModifiedById,
+          updatedByUsername);
+    }
+  }
 
-            return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray());
-        } catch (final EmptyResultDataAccessException e) {
-            throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase());
-        }
+  @Override
+  public NoteData retrieveNote(final Long noteId, final Long resourceId, final Integer noteTypeId) {
+    final NoteType noteType = NoteType.fromInt(noteTypeId);
+    try {
+      final NoteMapper rm = new NoteMapper();
+      List<Object> paramList = new ArrayList<>(Arrays.asList(noteId, resourceId));
+      String conditionSql = getResourceCondition(noteType, paramList);
+      if (StringUtils.isNotBlank(conditionSql)) {
+        conditionSql = " and " + conditionSql;
+      }
+
+      final String sql =
+          rm.schema() + " where n.id = ? " + conditionSql + " order by n.created_date DESC";
+
+      return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray());
+    } catch (final EmptyResultDataAccessException e) {
+      throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase());
+    }
+  }
+
+  @Override
+  public Collection<NoteData> retrieveNotesByResource(
+      final Long resourceId, final Integer noteTypeId) {
+    final NoteType noteType = NoteType.fromInt(noteTypeId);
+    final NoteMapper rm = new NoteMapper();
+    List<Object> paramList = new ArrayList<>(Arrays.asList(resourceId));
+    final String conditionSql = getResourceCondition(noteType, paramList);
+
+    final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
+
+    return this.jdbcTemplate.query(sql, rm, paramList.toArray());
+  }
+
+  public static String getResourceCondition(final NoteType noteType, List<Object> paramList) {
+    String conditionSql = "";
+    switch (noteType) {
+      case CLIENT:
+        paramList.add(NoteType.CLIENT.getValue());
+        conditionSql = " n.client_id = ? and note_type_enum = ?";
+        break;
+      case LOAN:
+        paramList.add(NoteType.LOAN.getValue());
+        paramList.add(NoteType.LOAN_TRANSACTION.getValue());
+        conditionSql = " n.loan_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? )";
+        break;
+      case LOAN_TRANSACTION:
+        conditionSql = " n.loan_transaction_id = ? ";
+        break;
+      case SAVING_ACCOUNT:
+        paramList.add(NoteType.SAVING_ACCOUNT.getValue());
+        paramList.add(NoteType.SAVINGS_TRANSACTION.getValue());
+        conditionSql =
+            " n.saving_account_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? ) ";
+        break;
+      case SAVINGS_TRANSACTION:
+        conditionSql = " n.savings_account_transaction_id = ? ";
+        break;
+      case GROUP:
+        conditionSql = " n.group_id = ? ";
+        break;
+      default:
+        break;
     }
 
-    @Override
-    public Collection<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
-        final NoteType noteType = NoteType.fromInt(noteTypeId);
-        final NoteMapper rm = new NoteMapper();
-        List<Object> paramList = new ArrayList<>(
-                Arrays.asList(resourceId));
-        final String conditionSql = getResourceCondition(noteType, paramList);
-
-        final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
-
-        return this.jdbcTemplate.query(sql, rm, paramList.toArray());
-    }
-
-    public static String getResourceCondition(final NoteType noteType, List<Object> paramList) {
-        String conditionSql = "";
-        switch (noteType) {
-            case CLIENT:
-                paramList.add(NoteType.CLIENT.getValue());
-                conditionSql = " n.client_id = ? and note_type_enum = ?";
-            break;
-            case LOAN:
-                paramList.add(NoteType.LOAN.getValue());
-                paramList.add(NoteType.LOAN_TRANSACTION.getValue());
-                conditionSql = " n.loan_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? )";
-            break;
-            case LOAN_TRANSACTION:
-                conditionSql = " n.loan_transaction_id = ? ";
-            break;
-            case SAVING_ACCOUNT:
-                paramList.add(NoteType.SAVING_ACCOUNT.getValue());
-                paramList.add(NoteType.SAVINGS_TRANSACTION.getValue());
-                conditionSql = " n.saving_account_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? ) ";
-            break;
-            case SAVINGS_TRANSACTION:
-                conditionSql = " n.savings_account_transaction_id = ? " ;
-                break ;
-            case GROUP:
-                conditionSql = " n.group_id = ? ";
-            break;
-            default:
-            break;
-        }
-
-        return conditionSql;
-    }
+    return conditionSql;
+  }
 }

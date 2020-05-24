@@ -47,123 +47,154 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/entitytoentitymapping")
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Component
 @Scope("singleton")
-@Api(value = "DomainName/api/v1/entitytoentitymapping", description = "") // https://github.com/swagger-api/swagger-ui/issues/1655
+@Api(
+    value = "DomainName/api/v1/entitytoentitymapping",
+    description = "") // https://github.com/swagger-api/swagger-ui/issues/1655
 public class FineractEntityApiResource {
 
-    private final PlatformSecurityContext context;
-    private final FineractEntityAccessReadService readPlatformService;
-    private final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext context;
+  private final FineractEntityAccessReadService readPlatformService;
+  private final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer;
+  private final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData>
+      toApiJsonSerializerOfficeToLoanProducts;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public FineractEntityApiResource(final PlatformSecurityContext context, final FineractEntityAccessReadService readPlatformService,
-            final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializerOfficeToLoanProducts = toApiJsonSerializerOfficeToLoanProducts;
-    }
+  @Autowired
+  public FineractEntityApiResource(
+      final PlatformSecurityContext context,
+      final FineractEntityAccessReadService readPlatformService,
+      final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer,
+      final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData>
+          toApiJsonSerializerOfficeToLoanProducts,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.readPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.toApiJsonSerializerOfficeToLoanProducts = toApiJsonSerializerOfficeToLoanProducts;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(
+            FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<FineractEntityRelationData> entityMappings = this.readPlatformService.retrieveAllSupportedMappingTypes();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, entityMappings, FineractEntityApiResourceConstants.RESPONSE_DATA_PARAMETERS);
-    }
+    final Collection<FineractEntityRelationData> entityMappings =
+        this.readPlatformService.retrieveAllSupportedMappingTypes();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(
+        settings, entityMappings, FineractEntityApiResourceConstants.RESPONSE_DATA_PARAMETERS);
+  }
 
-    @GET
-    @Path("/{mapId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("mapId") final Long mapId, @Context final UriInfo uriInfo) {
+  @GET
+  @Path("/{mapId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveOne(@PathParam("mapId") final Long mapId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(
+            FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveOneMapping(mapId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerOfficeToLoanProducts.serialize(settings, entityToEntityMappings,
-                FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
-    }
+    final Collection<FineractEntityToEntityMappingData> entityToEntityMappings =
+        this.readPlatformService.retrieveOneMapping(mapId);
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializerOfficeToLoanProducts.serialize(
+        settings,
+        entityToEntityMappings,
+        FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
+  }
 
-    @GET
-    @Path("/{mapId}/{fromId}/{toId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getEntityToEntityMappings(@PathParam("mapId") final Long mapId, @PathParam("fromId") final Long fromId,
-            @PathParam("toId") final Long toId, @Context final UriInfo uriInfo) {
+  @GET
+  @Path("/{mapId}/{fromId}/{toId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String getEntityToEntityMappings(
+      @PathParam("mapId") final Long mapId,
+      @PathParam("fromId") final Long fromId,
+      @PathParam("toId") final Long toId,
+      @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(
+            FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveEntityToEntityMappings(
-                mapId, fromId, toId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerOfficeToLoanProducts.serialize(settings, entityToEntityMappings,
-                FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
-    }
+    final Collection<FineractEntityToEntityMappingData> entityToEntityMappings =
+        this.readPlatformService.retrieveEntityToEntityMappings(mapId, fromId, toId);
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializerOfficeToLoanProducts.serialize(
+        settings,
+        entityToEntityMappings,
+        FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
+  }
 
-    @POST
-    @Path("/{relId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createMap(@PathParam("relId") final Long relId, final String apiRequestBodyAsJson) {
+  @POST
+  @Path("/{relId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String createMap(@PathParam("relId") final Long relId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createMap(relId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .createMap(relId) //
+            .withJson(apiRequestBodyAsJson) //
+            .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    }
+  @PUT
+  @Path("/{mapId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String updateMap(@PathParam("mapId") final Long mapId, final String apiRequestBodyAsJson) {
 
-    @PUT
-    @Path("/{mapId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateMap(@PathParam("mapId") final Long mapId, final String apiRequestBodyAsJson) {
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .updateMap(mapId) //
+            .withJson(apiRequestBodyAsJson) //
+            .build(); //
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateMap(mapId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-        return this.toApiJsonSerializer.serialize(result);
+  @DELETE
+  @Path("{mapId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String delete(@PathParam("mapId") final Long mapId) {
 
-    }
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .deleteMap(mapId) //
+            .build(); //
 
-    @DELETE
-    @Path("{mapId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("mapId") final Long mapId) {
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteMap(mapId) //
-                .build(); //
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

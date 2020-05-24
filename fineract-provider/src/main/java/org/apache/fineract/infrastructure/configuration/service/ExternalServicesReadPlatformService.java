@@ -22,6 +22,5 @@ import org.apache.fineract.infrastructure.configuration.data.ExternalServicesDat
 
 public interface ExternalServicesReadPlatformService {
 
-    ExternalServicesData getExternalServiceDetailsByServiceName(String serviceName);
-
+  ExternalServicesData getExternalServiceDetailsByServiceName(String serviceName);
 }

@@ -39,55 +39,61 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "m_provisioning_history")
 public class ProvisioningEntry extends AbstractPersistableCustom {
 
-    @Column(name = "journal_entry_created")
-    private Boolean isJournalEntryCreated;
+  @Column(name = "journal_entry_created")
+  private Boolean isJournalEntryCreated;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch=FetchType.EAGER)
-    private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
+  @OneToMany(
+      cascade = CascadeType.ALL,
+      mappedBy = "entry",
+      orphanRemoval = true,
+      fetch = FetchType.EAGER)
+  private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
 
-    @OneToOne
-    @JoinColumn(name = "createdby_id")
-    private AppUser createdBy;
+  @OneToOne
+  @JoinColumn(name = "createdby_id")
+  private AppUser createdBy;
 
-    @Column(name = "created_date")
-    @Temporal(TemporalType.DATE)
-    private Date createdDate;
+  @Column(name = "created_date")
+  @Temporal(TemporalType.DATE)
+  private Date createdDate;
 
-    @OneToOne
-    @JoinColumn(name = "lastmodifiedby_id")
-    private AppUser lastModifiedBy;
+  @OneToOne
+  @JoinColumn(name = "lastmodifiedby_id")
+  private AppUser lastModifiedBy;
 
-    @Column(name = "lastmodified_date")
-    @Temporal(TemporalType.DATE)
-    private Date lastModifiedDate;
+  @Column(name = "lastmodified_date")
+  @Temporal(TemporalType.DATE)
+  private Date lastModifiedDate;
 
-    protected ProvisioningEntry() {
+  protected ProvisioningEntry() {}
 
-    }
+  public ProvisioningEntry(
+      AppUser createdBy,
+      Date createdDate,
+      AppUser lastModifiedBy,
+      Date lastModifiedDate,
+      Set<LoanProductProvisioningEntry> provisioningEntries) {
+    this.provisioningEntries = provisioningEntries;
+    this.createdBy = createdBy;
+    this.createdDate = createdDate;
+    this.lastModifiedBy = lastModifiedBy;
+    this.lastModifiedDate = lastModifiedDate;
+  }
 
-    public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate, Set<LoanProductProvisioningEntry> provisioningEntries ) {
-        this.provisioningEntries = provisioningEntries ;
-        this.createdBy = createdBy ;
-        this.createdDate = createdDate ;
-        this.lastModifiedBy = lastModifiedBy ;
-        this.lastModifiedDate = lastModifiedDate ;
-    }
+  public void setProvisioningEntries(Collection<LoanProductProvisioningEntry> provisioningEntries) {
+    if (this.provisioningEntries == null) this.provisioningEntries = new HashSet<>();
+    this.provisioningEntries.addAll(provisioningEntries);
+  }
 
-    public void setProvisioningEntries(Collection<LoanProductProvisioningEntry> provisioningEntries) {
-        if(this.provisioningEntries == null) this.provisioningEntries = new HashSet<>();
-        this.provisioningEntries.addAll(provisioningEntries) ;
-    }
+  public Collection<LoanProductProvisioningEntry> getLoanProductProvisioningEntries() {
+    return this.provisioningEntries;
+  }
 
-    public Collection<LoanProductProvisioningEntry> getLoanProductProvisioningEntries() {
-        return this.provisioningEntries ;
-    }
+  public void setJournalEntryCreated(Boolean bool) {
+    this.isJournalEntryCreated = bool;
+  }
 
-    public void setJournalEntryCreated(Boolean bool) {
-        this.isJournalEntryCreated = bool ;
-    }
-
-    public Date getCreatedDate() {
-        return this.createdDate ;
-    }
-
+  public Date getCreatedDate() {
+    return this.createdDate;
+  }
 }

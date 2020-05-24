@@ -25,34 +25,33 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 22/8/17.
  */
 final class PermissionsApiResourceSwagger {
-    private PermissionsApiResourceSwagger() {
+  private PermissionsApiResourceSwagger() {}
 
-    }
+  @ApiModel(value = "GetPermissionsResponse")
+  public static final class GetPermissionsResponse {
+    private GetPermissionsResponse() {}
 
-    @ApiModel(value = "GetPermissionsResponse")
-    public static final class GetPermissionsResponse {
-        private GetPermissionsResponse() {
+    @ApiModelProperty(example = "authorisation")
+    public String grouping;
 
-        }
-        @ApiModelProperty(example = "authorisation")
-        public String grouping;
-        @ApiModelProperty(example = "READ_PERMISSION")
-        public String code;
-        @ApiModelProperty(example = "PERMISSION")
-        public String entityName;
-        @ApiModelProperty(example = "READ")
-        public String actionName;
-        @ApiModelProperty(example = "true")
-        public Boolean selected;
-    }
+    @ApiModelProperty(example = "READ_PERMISSION")
+    public String code;
 
-    @ApiModel(value = "PutPermissionsRequest")
-    public static final class PutPermissionsRequest {
-        private PutPermissionsRequest() {
+    @ApiModelProperty(example = "PERMISSION")
+    public String entityName;
 
-        }
-        @ApiModelProperty(example = "\"CREATE_GUARANTOR\":true,\n" +
-                "    \"CREATE_CLIENT\":true")
-        public String permissions;
-    }
+    @ApiModelProperty(example = "READ")
+    public String actionName;
+
+    @ApiModelProperty(example = "true")
+    public Boolean selected;
+  }
+
+  @ApiModel(value = "PutPermissionsRequest")
+  public static final class PutPermissionsRequest {
+    private PutPermissionsRequest() {}
+
+    @ApiModelProperty(example = "\"CREATE_GUARANTOR\":true,\n" + "    \"CREATE_CLIENT\":true")
+    public String permissions;
+  }
 }

@@ -36,88 +36,110 @@ import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 @Table(name = "m_payment_detail")
 public final class PaymentDetail extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "payment_type_id", nullable = false)
-    private PaymentType paymentType;
+  @ManyToOne
+  @JoinColumn(name = "payment_type_id", nullable = false)
+  private PaymentType paymentType;
 
-    @Column(name = "account_number", length = 50)
-    private String accountNumber;
+  @Column(name = "account_number", length = 50)
+  private String accountNumber;
 
-    @Column(name = "check_number", length = 50)
-    private String checkNumber;
+  @Column(name = "check_number", length = 50)
+  private String checkNumber;
 
-    @Column(name = "routing_code", length = 50)
-    private String routingCode;
+  @Column(name = "routing_code", length = 50)
+  private String routingCode;
 
-    @Column(name = "receipt_number", length = 50)
-    private String receiptNumber;
+  @Column(name = "receipt_number", length = 50)
+  private String receiptNumber;
 
-    @Column(name = "bank_number", length = 50)
-    private String bankNumber;
+  @Column(name = "bank_number", length = 50)
+  private String bankNumber;
 
-    protected PaymentDetail() {
+  protected PaymentDetail() {}
 
+  public static PaymentDetail generatePaymentDetail(
+      final PaymentType paymentType, final JsonCommand command, final Map<String, Object> changes) {
+    final String accountNumber =
+        command.stringValueOfParameterNamed(PaymentDetailConstants.accountNumberParamName);
+    final String checkNumber =
+        command.stringValueOfParameterNamed(PaymentDetailConstants.checkNumberParamName);
+    final String routingCode =
+        command.stringValueOfParameterNamed(PaymentDetailConstants.routingCodeParamName);
+    final String receiptNumber =
+        command.stringValueOfParameterNamed(PaymentDetailConstants.receiptNumberParamName);
+    final String bankNumber =
+        command.stringValueOfParameterNamed(PaymentDetailConstants.bankNumberParamName);
+
+    if (StringUtils.isNotBlank(accountNumber)) {
+      changes.put(PaymentDetailConstants.accountNumberParamName, accountNumber);
     }
-
-    public static PaymentDetail generatePaymentDetail(final PaymentType paymentType, final JsonCommand command,
-            final Map<String, Object> changes) {
-        final String accountNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.accountNumberParamName);
-        final String checkNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.checkNumberParamName);
-        final String routingCode = command.stringValueOfParameterNamed(PaymentDetailConstants.routingCodeParamName);
-        final String receiptNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.receiptNumberParamName);
-        final String bankNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.bankNumberParamName);
-
-        if (StringUtils.isNotBlank(accountNumber)) {
-            changes.put(PaymentDetailConstants.accountNumberParamName, accountNumber);
-        }
-        if (StringUtils.isNotBlank(checkNumber)) {
-            changes.put(PaymentDetailConstants.checkNumberParamName, checkNumber);
-        }
-        if (StringUtils.isNotBlank(routingCode)) {
-            changes.put(PaymentDetailConstants.routingCodeParamName, routingCode);
-        }
-        if (StringUtils.isNotBlank(receiptNumber)) {
-            changes.put(PaymentDetailConstants.receiptNumberParamName, receiptNumber);
-        }
-        if (StringUtils.isNotBlank(bankNumber)) {
-            changes.put(PaymentDetailConstants.bankNumberParamName, bankNumber);
-        }
-        final PaymentDetail paymentDetail = new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
-                bankNumber);
-        return paymentDetail;
+    if (StringUtils.isNotBlank(checkNumber)) {
+      changes.put(PaymentDetailConstants.checkNumberParamName, checkNumber);
     }
-
-    public static PaymentDetail instance(final PaymentType paymentType, final String accountNumber, final String checkNumber,
-            final String routingCode, final String receiptNumber, final String bankNumber) {
-        return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+    if (StringUtils.isNotBlank(routingCode)) {
+      changes.put(PaymentDetailConstants.routingCodeParamName, routingCode);
     }
-
-    private PaymentDetail(final PaymentType paymentType, final String accountNumber, final String checkNumber, final String routingCode,
-            final String receiptNumber, final String bankNumber) {
-        this.paymentType = paymentType;
-        this.accountNumber = accountNumber;
-        this.checkNumber = checkNumber;
-        this.routingCode = routingCode;
-        this.receiptNumber = receiptNumber;
-        this.bankNumber = bankNumber;
+    if (StringUtils.isNotBlank(receiptNumber)) {
+      changes.put(PaymentDetailConstants.receiptNumberParamName, receiptNumber);
     }
-
-    public PaymentDetailData toData() {
-        final PaymentTypeData paymentTypeData = this.paymentType.toData();
-        final PaymentDetailData paymentDetailData = new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber,
-                this.routingCode, this.receiptNumber, this.bankNumber);
-        return paymentDetailData;
+    if (StringUtils.isNotBlank(bankNumber)) {
+      changes.put(PaymentDetailConstants.bankNumberParamName, bankNumber);
     }
+    final PaymentDetail paymentDetail =
+        new PaymentDetail(
+            paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+    return paymentDetail;
+  }
 
-    public PaymentType getPaymentType() {
-        return this.paymentType;
-    }
+  public static PaymentDetail instance(
+      final PaymentType paymentType,
+      final String accountNumber,
+      final String checkNumber,
+      final String routingCode,
+      final String receiptNumber,
+      final String bankNumber) {
+    return new PaymentDetail(
+        paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+  }
 
-    public String getReceiptNumber() {
-        return this.receiptNumber;
-    }
+  private PaymentDetail(
+      final PaymentType paymentType,
+      final String accountNumber,
+      final String checkNumber,
+      final String routingCode,
+      final String receiptNumber,
+      final String bankNumber) {
+    this.paymentType = paymentType;
+    this.accountNumber = accountNumber;
+    this.checkNumber = checkNumber;
+    this.routingCode = routingCode;
+    this.receiptNumber = receiptNumber;
+    this.bankNumber = bankNumber;
+  }
 
-    public String getRoutingCode() {
-        return routingCode;
-    }
+  public PaymentDetailData toData() {
+    final PaymentTypeData paymentTypeData = this.paymentType.toData();
+    final PaymentDetailData paymentDetailData =
+        new PaymentDetailData(
+            getId(),
+            paymentTypeData,
+            this.accountNumber,
+            this.checkNumber,
+            this.routingCode,
+            this.receiptNumber,
+            this.bankNumber);
+    return paymentDetailData;
+  }
+
+  public PaymentType getPaymentType() {
+    return this.paymentType;
+  }
+
+  public String getReceiptNumber() {
+    return this.receiptNumber;
+  }
+
+  public String getRoutingCode() {
+    return routingCode;
+  }
 }

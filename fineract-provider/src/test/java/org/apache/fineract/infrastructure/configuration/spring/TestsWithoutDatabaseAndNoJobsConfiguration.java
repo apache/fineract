@@ -33,37 +33,37 @@ import org.springframework.context.annotation.Bean;
  */
 public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicationConfiguration {
 
-    /**
-     * Override TenantDatabaseUpgradeService binding, because the real one has a @PostConstruct
-     * upgradeAllTenants() which accesses the database on start-up.
-     */
-    @Bean
-    public TenantDatabaseUpgradeService tenantDatabaseUpgradeService() {
-        return new TenantDatabaseUpgradeService(null, null) {
-            @Override
-            public void upgradeAllTenants() {
-                // NOOP
-            }
-        };
-    }
+  /**
+   * Override TenantDatabaseUpgradeService binding, because the real one has a @PostConstruct
+   * upgradeAllTenants() which accesses the database on start-up.
+   */
+  @Bean
+  public TenantDatabaseUpgradeService tenantDatabaseUpgradeService() {
+    return new TenantDatabaseUpgradeService(null, null) {
+      @Override
+      public void upgradeAllTenants() {
+        // NOOP
+      }
+    };
+  }
 
-    /**
-     * Override JobRegisterService binding, because the real
-     * JobRegisterServiceImpl has a @PostConstruct loadAllJobs() which accesses
-     * the database on start-up.
-     */
-    @Bean
-    public JobRegisterService jobRegisterServiceImpl() {
-        JobRegisterService mockJobRegisterService = Mockito.mock(JobRegisterService.class);
-        return mockJobRegisterService;
-    }
+  /**
+   * Override JobRegisterService binding, because the real
+   * JobRegisterServiceImpl has a @PostConstruct loadAllJobs() which accesses
+   * the database on start-up.
+   */
+  @Bean
+  public JobRegisterService jobRegisterServiceImpl() {
+    JobRegisterService mockJobRegisterService = Mockito.mock(JobRegisterService.class);
+    return mockJobRegisterService;
+  }
 
-    /**
-     * DataSource with Mockito RETURNS_MOCKS black magic.
-     */
-    @Bean
-    public DataSource hikariTenantDataSource() {
-        DataSource mockDataSource = Mockito.mock(DataSource.class, Mockito.RETURNS_MOCKS);
-        return mockDataSource;
-    }
+  /**
+   * DataSource with Mockito RETURNS_MOCKS black magic.
+   */
+  @Bean
+  public DataSource hikariTenantDataSource() {
+    DataSource mockDataSource = Mockito.mock(DataSource.class, Mockito.RETURNS_MOCKS);
+    return mockDataSource;
+  }
 }

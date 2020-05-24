@@ -36,53 +36,55 @@ import org.springframework.stereotype.Service;
 @Service
 public class GroupRolesReadPlatformServiceImpl implements GroupRolesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
+  private final JdbcTemplate jdbcTemplate;
+  private final PlatformSecurityContext context;
 
-    @Autowired
-    public GroupRolesReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
-        this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+  @Autowired
+  public GroupRolesReadPlatformServiceImpl(
+      final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    this.context = context;
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
+
+  @Override
+  public Collection<GroupRoleData> retrieveGroupRoles(final Long groupId) {
+    this.context.authenticatedUser();
+    final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
+    final String sql = "Select " + mapper.schema() + " where role.group_id=?";
+    return this.jdbcTemplate.query(sql, mapper, new Object[] {groupId});
+  }
+
+  @Override
+  public GroupRoleData retrieveGroupRole(final Long groupId, final Long roleId) {
+    try {
+      this.context.authenticatedUser();
+      final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
+      final String sql = "Select " + mapper.schema() + " where role.group_id=? and role.id=?";
+      return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {groupId, roleId});
+    } catch (final EmptyResultDataAccessException e) {
+      throw new GroupRoleNotFoundException(roleId);
+    }
+  }
+
+  private static final class GroupRolesDataMapper implements RowMapper<GroupRoleData> {
+
+    public final String schema() {
+      return " role.id AS id, role.client_id AS clientId, c.display_name as clientName,"
+          + " role.role_cv_id AS roleId, cv.code_value AS roleName from m_code_value cv"
+          + " join m_group_roles role on role.role_cv_id = cv.id left join m_client c on"
+          + " c.id = role.client_id ";
     }
 
     @Override
-    public Collection<GroupRoleData> retrieveGroupRoles(final Long groupId) {
-        this.context.authenticatedUser();
-        final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
-        final String sql = "Select " + mapper.schema() + " where role.group_id=?";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { groupId });
+    public GroupRoleData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        throws SQLException {
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final Long clientId = JdbcSupport.getLong(rs, "clientId");
+      final String clientName = rs.getString("clientName");
+      final Long roleId = JdbcSupport.getLong(rs, "roleId");
+      final String roleName = rs.getString("roleName");
+      final CodeValueData role = CodeValueData.instance(roleId, roleName);
+      return new GroupRoleData(id, role, clientId, clientName);
     }
-
-    @Override
-    public GroupRoleData retrieveGroupRole(final Long groupId, final Long roleId) {
-        try {
-            this.context.authenticatedUser();
-            final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
-            final String sql = "Select " + mapper.schema() + " where role.group_id=? and role.id=?";
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { groupId, roleId });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new GroupRoleNotFoundException(roleId);
-        }
-    }
-
-    private static final class GroupRolesDataMapper implements RowMapper<GroupRoleData> {
-
-        public final String schema() {
-            return " role.id AS id, role.client_id AS clientId, c.display_name as clientName, role.role_cv_id AS roleId, cv.code_value AS roleName"
-                    + " from m_code_value cv join m_group_roles role on role.role_cv_id = cv.id left join m_client c on c.id = role.client_id ";
-        }
-
-        @Override
-        public GroupRoleData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final String clientName = rs.getString("clientName");
-            final Long roleId = JdbcSupport.getLong(rs, "roleId");
-            final String roleName = rs.getString("roleName");
-            final CodeValueData role = CodeValueData.instance(roleId, roleName);
-            return new GroupRoleData(id, role, clientId, clientName);
-        }
-
-    }
-
+  }
 }

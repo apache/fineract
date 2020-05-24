@@ -20,21 +20,21 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 
 public class PreviewCampaignMessage {
 
-    @SuppressWarnings("unused")
-    private final String campaignMessage;
+  @SuppressWarnings("unused")
+  private final String campaignMessage;
 
-    private final Integer totalNumberOfMessages;
+  private final Integer totalNumberOfMessages;
 
-    public PreviewCampaignMessage(String campaignMessage, Integer totalNumberOfMessages) {
-        this.campaignMessage = campaignMessage;
-        this.totalNumberOfMessages = totalNumberOfMessages;
-    }
+  public PreviewCampaignMessage(String campaignMessage, Integer totalNumberOfMessages) {
+    this.campaignMessage = campaignMessage;
+    this.totalNumberOfMessages = totalNumberOfMessages;
+  }
 
-    public String getCampaignMessage() {
-        return campaignMessage;
-    }
+  public String getCampaignMessage() {
+    return campaignMessage;
+  }
 
-    public Integer getTotalNumberOfMessages() {
-        return totalNumberOfMessages;
-    }
+  public Integer getTotalNumberOfMessages() {
+    return totalNumberOfMessages;
+  }
 }

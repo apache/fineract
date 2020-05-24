@@ -28,95 +28,93 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "topic")
 public class Topic extends AbstractPersistableCustom {
 
-    @Column(name = "title", unique = true, nullable = false, length = 100)
-    private String title;
+  @Column(name = "title", unique = true, nullable = false, length = 100)
+  private String title;
 
-    @Column(name = "enabled", nullable = false)
-    private Boolean enabled;
+  @Column(name = "enabled", nullable = false)
+  private Boolean enabled;
 
-    @Column(name = "entity_id", nullable = false)
-    private Long entityId;
+  @Column(name = "entity_id", nullable = false)
+  private Long entityId;
 
-    @Column(name = "entity_type")
-    private String entityType;
+  @Column(name = "entity_type")
+  private String entityType;
 
-    @Column(name = "member_type")
-    private String memberType;
+  @Column(name = "member_type")
+  private String memberType;
 
-    public Topic() {
+  public Topic() {}
+
+  public Topic(String title, Boolean enabled, Long entityId, String entityType, String memberType) {
+    this.title = title.trim();
+    this.enabled = enabled;
+    this.entityId = entityId;
+    this.entityType = entityType.trim();
+    this.memberType = memberType.trim();
+  }
+
+  public static Topic fromJson(final JsonCommand command) {
+    String title = "";
+    Boolean enabled = null;
+    Long entityId = 0L;
+    String entityType = "";
+    String memberType = "";
+
+    if (command.hasParameter("title")) {
+      title = command.stringValueOfParameterNamed("title");
     }
-
-    public Topic(String title, Boolean enabled, Long entityId, String entityType, String memberType) {
-        this.title = title.trim();
-        this.enabled = enabled;
-        this.entityId = entityId;
-        this.entityType = entityType.trim();
-        this.memberType = memberType.trim();
+    if (command.hasParameter("enabled")) {
+      enabled = command.booleanPrimitiveValueOfParameterNamed("enabled");
     }
-
-    public static Topic fromJson(final JsonCommand command) {
-        String title = "";
-        Boolean enabled = null;
-        Long entityId = 0L;
-        String entityType = "";
-        String memberType = "";
-
-        if (command.hasParameter("title")) {
-            title = command.stringValueOfParameterNamed("title");
-        }
-        if (command.hasParameter("enabled")) {
-            enabled = command.booleanPrimitiveValueOfParameterNamed("enabled");
-        }
-        if (command.hasParameter("entityId")) {
-            entityId = command.longValueOfParameterNamed("entityId");
-        }
-        if (command.hasParameter("entityType")) {
-            entityType = command.stringValueOfParameterNamed("entityType");
-        }
-        if (command.hasParameter("memberType")) {
-            memberType = command.stringValueOfParameterNamed("memberType");
-        }
-        return new Topic(title, enabled, entityId, entityType, memberType);
+    if (command.hasParameter("entityId")) {
+      entityId = command.longValueOfParameterNamed("entityId");
     }
-
-    public String getTitle() {
-        return this.title;
+    if (command.hasParameter("entityType")) {
+      entityType = command.stringValueOfParameterNamed("entityType");
     }
-
-    public void setTitle(String title) {
-        this.title = title;
+    if (command.hasParameter("memberType")) {
+      memberType = command.stringValueOfParameterNamed("memberType");
     }
+    return new Topic(title, enabled, entityId, entityType, memberType);
+  }
 
-    public Boolean getEnabled() {
-        return this.enabled;
-    }
+  public String getTitle() {
+    return this.title;
+  }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public Long getEntityId() {
-        return this.entityId;
-    }
+  public Boolean getEnabled() {
+    return this.enabled;
+  }
 
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
-    }
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
+  }
 
-    public String getEntityType() {
-        return this.entityType;
-    }
+  public Long getEntityId() {
+    return this.entityId;
+  }
 
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
-    }
+  public void setEntityId(Long entityId) {
+    this.entityId = entityId;
+  }
 
-    public String getMemberType() {
-        return this.memberType;
-    }
+  public String getEntityType() {
+    return this.entityType;
+  }
 
-    public void setMemberType(String memberType) {
-        this.memberType = memberType;
-    }
+  public void setEntityType(String entityType) {
+    this.entityType = entityType;
+  }
 
+  public String getMemberType() {
+    return this.memberType;
+  }
+
+  public void setMemberType(String memberType) {
+    this.memberType = memberType;
+  }
 }

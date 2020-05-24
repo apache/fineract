@@ -90,526 +90,695 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanRescheduleRequestWritePlatformService {
+public class LoanRescheduleRequestWritePlatformServiceImpl
+    implements LoanRescheduleRequestWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
 
-    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
-    private final PlatformSecurityContext platformSecurityContext;
-    private final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator;
-    private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-    private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
-    private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
-    private final LoanTransactionRepository loanTransactionRepository;
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanAssembler loanAssembler;
-    private final LoanUtilService loanUtilService;
-    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
-    private final LoanScheduleGeneratorFactory loanScheduleFactory;
-    private final LoanSummaryWrapper loanSummaryWrapper;
-    private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-    private final LoanAccountDomainService loanAccountDomainService;
-    private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
+  private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+  private final PlatformSecurityContext platformSecurityContext;
+  private final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator;
+  private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
+  private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
+  private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
+  private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
+  private final LoanTransactionRepository loanTransactionRepository;
+  private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+  private final LoanRepositoryWrapper loanRepositoryWrapper;
+  private final LoanAssembler loanAssembler;
+  private final LoanUtilService loanUtilService;
+  private final LoanRepaymentScheduleTransactionProcessorFactory
+      loanRepaymentScheduleTransactionProcessorFactory;
+  private final LoanScheduleGeneratorFactory loanScheduleFactory;
+  private final LoanSummaryWrapper loanSummaryWrapper;
+  private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+  private final DefaultScheduledDateGenerator scheduledDateGenerator =
+      new DefaultScheduledDateGenerator();
+  private final LoanAccountDomainService loanAccountDomainService;
+  private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
 
-    /**
-     * LoanRescheduleRequestWritePlatformServiceImpl constructor
-     *
-     *
-     **/
-    @Autowired
-    public LoanRescheduleRequestWritePlatformServiceImpl(final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
-            final PlatformSecurityContext platformSecurityContext,
-            final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
-            final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
-            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
-            final LoanTransactionRepository loanTransactionRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
-            final LoanAssembler loanAssembler, final LoanUtilService loanUtilService,
-            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper,
-            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-            final LoanAccountDomainService loanAccountDomainService,
-            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
-        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
-        this.platformSecurityContext = platformSecurityContext;
-        this.loanRescheduleRequestDataValidator = loanRescheduleRequestDataValidator;
-        this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
-        this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
-        this.loanTransactionRepository = loanTransactionRepository;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.loanAssembler = loanAssembler;
-        this.loanUtilService = loanUtilService;
-        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
-        this.loanScheduleFactory = loanScheduleFactory;
-        this.loanSummaryWrapper = loanSummaryWrapper;
-        this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
-        this.loanAccountDomainService = loanAccountDomainService;
-        this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
+  /**
+   * LoanRescheduleRequestWritePlatformServiceImpl constructor
+   *
+   *
+   **/
+  @Autowired
+  public LoanRescheduleRequestWritePlatformServiceImpl(
+      final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
+      final PlatformSecurityContext platformSecurityContext,
+      final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
+      final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
+      final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+      final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
+      final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+      final LoanTransactionRepository loanTransactionRepository,
+      final JournalEntryWritePlatformService journalEntryWritePlatformService,
+      final LoanRepositoryWrapper loanRepositoryWrapper,
+      final LoanAssembler loanAssembler,
+      final LoanUtilService loanUtilService,
+      final LoanRepaymentScheduleTransactionProcessorFactory
+          loanRepaymentScheduleTransactionProcessorFactory,
+      final LoanScheduleGeneratorFactory loanScheduleFactory,
+      final LoanSummaryWrapper loanSummaryWrapper,
+      final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+      final LoanAccountDomainService loanAccountDomainService,
+      final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
+    this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
+    this.platformSecurityContext = platformSecurityContext;
+    this.loanRescheduleRequestDataValidator = loanRescheduleRequestDataValidator;
+    this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
+    this.applicationCurrencyRepository = applicationCurrencyRepository;
+    this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
+    this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
+    this.loanTransactionRepository = loanTransactionRepository;
+    this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+    this.loanRepositoryWrapper = loanRepositoryWrapper;
+    this.loanAssembler = loanAssembler;
+    this.loanUtilService = loanUtilService;
+    this.loanRepaymentScheduleTransactionProcessorFactory =
+        loanRepaymentScheduleTransactionProcessorFactory;
+    this.loanScheduleFactory = loanScheduleFactory;
+    this.loanSummaryWrapper = loanSummaryWrapper;
+    this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
+    this.loanAccountDomainService = loanAccountDomainService;
+    this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
+  }
+
+  /**
+   * create a new instance of the LoanRescheduleRequest object from the
+   * JsonCommand object and persist
+   *
+   * @return CommandProcessingResult object
+   **/
+  @Override
+  @Transactional
+  public CommandProcessingResult create(JsonCommand jsonCommand) {
+
+    try {
+      // get the loan id from the JsonCommand object
+      final Long loanId =
+          jsonCommand.longValueOfParameterNamed(RescheduleLoansApiConstants.loanIdParamName);
+
+      // use the loan id to get a Loan entity object
+      final Loan loan = this.loanAssembler.assembleFrom(loanId);
+
+      // validate the request in the JsonCommand object passed as
+      // parameter
+      this.loanRescheduleRequestDataValidator.validateForCreateAction(jsonCommand, loan);
+
+      // get the reschedule reason code value id from the JsonCommand
+      // object
+      final Long rescheduleReasonId =
+          jsonCommand.longValueOfParameterNamed(
+              RescheduleLoansApiConstants.rescheduleReasonIdParamName);
+
+      // use the reschedule reason code value id to get a CodeValue entity
+      // object
+      final CodeValue rescheduleReasonCodeValue =
+          this.codeValueRepositoryWrapper.findOneWithNotFoundDetection(rescheduleReasonId);
+
+      // get the grace on principal integer value from the JsonCommand
+      // object
+      final Integer graceOnPrincipal =
+          jsonCommand.integerValueOfParameterNamed(
+              RescheduleLoansApiConstants.graceOnPrincipalParamName);
+
+      // get the grace on interest integer value from the JsonCommand
+      // object
+      final Integer graceOnInterest =
+          jsonCommand.integerValueOfParameterNamed(
+              RescheduleLoansApiConstants.graceOnInterestParamName);
+
+      // get the extra terms to be added at the end of the new schedule
+      // from the JsonCommand object
+      final Integer extraTerms =
+          jsonCommand.integerValueOfParameterNamed(RescheduleLoansApiConstants.extraTermsParamName);
+
+      // get the new interest rate that would be applied to the new loan
+      // schedule
+      final BigDecimal interestRate =
+          jsonCommand.bigDecimalValueOfParameterNamed(
+              RescheduleLoansApiConstants.newInterestRateParamName);
+
+      // get the reschedule reason comment text from the JsonCommand
+      // object
+      final String rescheduleReasonComment =
+          jsonCommand.stringValueOfParameterNamed(
+              RescheduleLoansApiConstants.rescheduleReasonCommentParamName);
+
+      // get the recalculate interest option
+      final Boolean recalculateInterest =
+          jsonCommand.booleanObjectValueOfParameterNamed(
+              RescheduleLoansApiConstants.recalculateInterestParamName);
+
+      // initialize set the value to null
+      Date submittedOnDate = null;
+
+      // check if the parameter is in the JsonCommand object
+      if (jsonCommand.hasParameter(RescheduleLoansApiConstants.submittedOnDateParamName)) {
+        // create a LocalDate object from the "submittedOnDate" Date
+        // string
+        LocalDate localDate =
+            jsonCommand.localDateValueOfParameterNamed(
+                RescheduleLoansApiConstants.submittedOnDateParamName);
+
+        if (localDate != null) {
+          // update the value of the "submittedOnDate" variable
+          submittedOnDate = localDate.toDate();
+        }
+      }
+
+      // initially set the value to null
+      Date rescheduleFromDate = null;
+
+      // start point of the rescheduling exercise
+      Integer rescheduleFromInstallment = null;
+
+      // initially set the value to null
+      Date adjustedDueDate = null;
+
+      // check if the parameter is in the JsonCommand object
+      if (jsonCommand.hasParameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)) {
+        // create a LocalDate object from the "rescheduleFromDate" Date
+        // string
+        LocalDate localDate =
+            jsonCommand.localDateValueOfParameterNamed(
+                RescheduleLoansApiConstants.rescheduleFromDateParamName);
+
+        if (localDate != null) {
+          // get installment by due date
+          LoanRepaymentScheduleInstallment installment =
+              loan.getRepaymentScheduleInstallment(localDate);
+          rescheduleFromInstallment = installment.getInstallmentNumber();
+
+          // update the value of the "rescheduleFromDate" variable
+          rescheduleFromDate = localDate.toDate();
+        }
+      }
+
+      if (jsonCommand.hasParameter(RescheduleLoansApiConstants.adjustedDueDateParamName)) {
+        // create a LocalDate object from the "adjustedDueDate" Date
+        // string
+        LocalDate localDate =
+            jsonCommand.localDateValueOfParameterNamed(
+                RescheduleLoansApiConstants.adjustedDueDateParamName);
+
+        if (localDate != null) {
+          // update the value of the "adjustedDueDate"variable
+          adjustedDueDate = localDate.toDate();
+        }
+      }
+
+      final LoanRescheduleRequest loanRescheduleRequest =
+          LoanRescheduleRequest.instance(
+              loan,
+              LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
+              rescheduleFromInstallment,
+              rescheduleFromDate,
+              recalculateInterest,
+              rescheduleReasonCodeValue,
+              rescheduleReasonComment,
+              submittedOnDate,
+              this.platformSecurityContext.authenticatedUser(),
+              null,
+              null,
+              null,
+              null);
+
+      // update reschedule request to term variations mapping
+      List<LoanRescheduleRequestToTermVariationMapping>
+          loanRescheduleRequestToTermVariationMappings = new ArrayList<>();
+      final Boolean isActive = false;
+      final boolean isSpecificToInstallment = false;
+      BigDecimal decimalValue = null;
+      Date dueDate = null;
+      // create term variations for flat and declining balance loans
+      createLoanTermVariationsForRegularLoans(
+          loan,
+          graceOnPrincipal,
+          graceOnInterest,
+          extraTerms,
+          interestRate,
+          rescheduleFromDate,
+          adjustedDueDate,
+          loanRescheduleRequest,
+          loanRescheduleRequestToTermVariationMappings,
+          isActive,
+          isSpecificToInstallment,
+          decimalValue,
+          dueDate);
+
+      // create a new entry in the m_loan_reschedule_request table
+      this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
+      this.loanRepositoryWrapper.save(loan);
+
+      return new CommandProcessingResultBuilder()
+          .withCommandId(jsonCommand.commandId())
+          .withEntityId(loanRescheduleRequest.getId())
+          .withLoanId(loan.getId())
+          .withClientId(loan.getClientId())
+          .withOfficeId(loan.getOfficeId())
+          .withGroupId(loan.getGroupId())
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      // handle the data integrity violation
+      handleDataIntegrityViolation(dve);
+
+      // return an empty command processing result object
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  private void createLoanTermVariationsForRegularLoans(
+      final Loan loan,
+      final Integer graceOnPrincipal,
+      final Integer graceOnInterest,
+      final Integer extraTerms,
+      final BigDecimal interestRate,
+      Date rescheduleFromDate,
+      Date adjustedDueDate,
+      final LoanRescheduleRequest loanRescheduleRequest,
+      List<LoanRescheduleRequestToTermVariationMapping>
+          loanRescheduleRequestToTermVariationMappings,
+      final Boolean isActive,
+      final boolean isSpecificToInstallment,
+      BigDecimal decimalValue,
+      Date dueDate) {
+
+    if (rescheduleFromDate != null && adjustedDueDate != null) {
+      LoanTermVariations parent = null;
+      final Integer termType = LoanTermVariationType.DUE_DATE.getValue();
+      createLoanTermVariations(
+          termType,
+          loan,
+          rescheduleFromDate,
+          adjustedDueDate,
+          loanRescheduleRequestToTermVariationMappings,
+          isActive,
+          isSpecificToInstallment,
+          decimalValue,
+          parent);
     }
 
-    /**
-     * create a new instance of the LoanRescheduleRequest object from the
-     * JsonCommand object and persist
-     *
-     * @return CommandProcessingResult object
-     **/
-    @Override
-    @Transactional
-    public CommandProcessingResult create(JsonCommand jsonCommand) {
-
-        try {
-            // get the loan id from the JsonCommand object
-            final Long loanId = jsonCommand.longValueOfParameterNamed(RescheduleLoansApiConstants.loanIdParamName);
-
-            // use the loan id to get a Loan entity object
-            final Loan loan = this.loanAssembler.assembleFrom(loanId);
-
-            // validate the request in the JsonCommand object passed as
-            // parameter
-            this.loanRescheduleRequestDataValidator.validateForCreateAction(jsonCommand, loan);
-
-            // get the reschedule reason code value id from the JsonCommand
-            // object
-            final Long rescheduleReasonId = jsonCommand.longValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleReasonIdParamName);
-
-            // use the reschedule reason code value id to get a CodeValue entity
-            // object
-            final CodeValue rescheduleReasonCodeValue = this.codeValueRepositoryWrapper.findOneWithNotFoundDetection(rescheduleReasonId);
-
-            // get the grace on principal integer value from the JsonCommand
-            // object
-            final Integer graceOnPrincipal = jsonCommand
-                    .integerValueOfParameterNamed(RescheduleLoansApiConstants.graceOnPrincipalParamName);
-
-            // get the grace on interest integer value from the JsonCommand
-            // object
-            final Integer graceOnInterest = jsonCommand.integerValueOfParameterNamed(RescheduleLoansApiConstants.graceOnInterestParamName);
-
-            // get the extra terms to be added at the end of the new schedule
-            // from the JsonCommand object
-            final Integer extraTerms = jsonCommand.integerValueOfParameterNamed(RescheduleLoansApiConstants.extraTermsParamName);
-
-            // get the new interest rate that would be applied to the new loan
-            // schedule
-            final BigDecimal interestRate = jsonCommand
-                    .bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.newInterestRateParamName);
-
-            // get the reschedule reason comment text from the JsonCommand
-            // object
-            final String rescheduleReasonComment = jsonCommand
-                    .stringValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleReasonCommentParamName);
-
-            // get the recalculate interest option
-            final Boolean recalculateInterest = jsonCommand
-                    .booleanObjectValueOfParameterNamed(RescheduleLoansApiConstants.recalculateInterestParamName);
-
-            // initialize set the value to null
-            Date submittedOnDate = null;
-
-            // check if the parameter is in the JsonCommand object
-            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.submittedOnDateParamName)) {
-                // create a LocalDate object from the "submittedOnDate" Date
-                // string
-                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.submittedOnDateParamName);
-
-                if (localDate != null) {
-                    // update the value of the "submittedOnDate" variable
-                    submittedOnDate = localDate.toDate();
-                }
-            }
-
-            // initially set the value to null
-            Date rescheduleFromDate = null;
-
-            // start point of the rescheduling exercise
-            Integer rescheduleFromInstallment = null;
-
-            // initially set the value to null
-            Date adjustedDueDate = null;
-
-            // check if the parameter is in the JsonCommand object
-            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)) {
-                // create a LocalDate object from the "rescheduleFromDate" Date
-                // string
-                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.rescheduleFromDateParamName);
-
-                if (localDate != null) {
-                    // get installment by due date
-                    LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(localDate);
-                    rescheduleFromInstallment = installment.getInstallmentNumber();
-
-                    // update the value of the "rescheduleFromDate" variable
-                    rescheduleFromDate = localDate.toDate();
-                }
-            }
-
-            if (jsonCommand.hasParameter(RescheduleLoansApiConstants.adjustedDueDateParamName)) {
-                // create a LocalDate object from the "adjustedDueDate" Date
-                // string
-                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.adjustedDueDateParamName);
-
-                if (localDate != null) {
-                    // update the value of the "adjustedDueDate"variable
-                    adjustedDueDate = localDate.toDate();
-                }
-            }
-
-            final LoanRescheduleRequest loanRescheduleRequest = LoanRescheduleRequest.instance(loan,
-                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment, rescheduleFromDate,
-                    recalculateInterest, rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate,
-                    this.platformSecurityContext.authenticatedUser(), null, null, null, null);
-
-            // update reschedule request to term variations mapping
-            List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = new ArrayList<>();
-            final Boolean isActive = false;
-            final boolean isSpecificToInstallment = false;
-            BigDecimal decimalValue = null;
-            Date dueDate = null;
-            // create term variations for flat and declining balance loans
-            createLoanTermVariationsForRegularLoans(loan, graceOnPrincipal, graceOnInterest, extraTerms, interestRate, rescheduleFromDate,
-                    adjustedDueDate, loanRescheduleRequest, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, decimalValue, dueDate);
-
-            // create a new entry in the m_loan_reschedule_request table
-            this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
-            this.loanRepositoryWrapper.save(loan);
-
-            return new CommandProcessingResultBuilder()
-                    .withCommandId(jsonCommand.commandId())
-                    .withEntityId(loanRescheduleRequest.getId())
-                    .withLoanId(loan.getId())
-                    .withClientId(loan.getClientId())
-                    .withOfficeId(loan.getOfficeId())
-                    .withGroupId(loan.getGroupId())
-                    .build();
-        }
-
-        catch (final DataIntegrityViolationException dve) {
-            // handle the data integrity violation
-            handleDataIntegrityViolation(dve);
-
-            // return an empty command processing result object
-            return CommandProcessingResult.empty();
-        }
+    if (rescheduleFromDate != null && interestRate != null) {
+      LoanTermVariations parent = null;
+      final Integer termType = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue();
+      createLoanTermVariations(
+          termType,
+          loan,
+          rescheduleFromDate,
+          dueDate,
+          loanRescheduleRequestToTermVariationMappings,
+          isActive,
+          isSpecificToInstallment,
+          interestRate,
+          parent);
     }
 
-    private void createLoanTermVariationsForRegularLoans(final Loan loan, final Integer graceOnPrincipal, final Integer graceOnInterest,
-            final Integer extraTerms, final BigDecimal interestRate, Date rescheduleFromDate, Date adjustedDueDate,
-            final LoanRescheduleRequest loanRescheduleRequest,
-            List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
-            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate) {
+    if (rescheduleFromDate != null && graceOnPrincipal != null) {
+      final Integer termType = LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue();
+      LoanTermVariations parent = null;
+      parent =
+          createLoanTermVariations(
+              termType,
+              loan,
+              rescheduleFromDate,
+              dueDate,
+              loanRescheduleRequestToTermVariationMappings,
+              isActive,
+              isSpecificToInstallment,
+              BigDecimal.valueOf(graceOnPrincipal),
+              parent);
 
-        if (rescheduleFromDate != null && adjustedDueDate != null) {
-            LoanTermVariations parent = null;
-            final Integer termType = LoanTermVariationType.DUE_DATE.getValue();
-            createLoanTermVariations(termType, loan, rescheduleFromDate, adjustedDueDate, loanRescheduleRequestToTermVariationMappings,
-                    isActive, isSpecificToInstallment, decimalValue, parent);
-        }
-
-        if (rescheduleFromDate != null && interestRate != null) {
-            LoanTermVariations parent = null;
-            final Integer termType = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue();
-            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, interestRate, parent);
-        }
-
-        if (rescheduleFromDate != null && graceOnPrincipal != null) {
-            final Integer termType = LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue();
-            LoanTermVariations parent = null;
-            parent = createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings,
-                    isActive, isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), parent);
-
-            BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
-            createLoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(), loan, rescheduleFromDate, dueDate,
-                    loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, extraTermsBasedOnGracePeriods, parent);
-
-        }
-
-        if (rescheduleFromDate != null && graceOnInterest != null) {
-            LoanTermVariations parent = null;
-            final Integer termType = LoanTermVariationType.GRACE_ON_INTEREST.getValue();
-            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, BigDecimal.valueOf(graceOnInterest), parent);
-        }
-
-        if (rescheduleFromDate != null && extraTerms != null) {
-            LoanTermVariations parent = null;
-            final Integer termType = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue();
-            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
-                    isSpecificToInstallment, BigDecimal.valueOf(extraTerms), parent);
-        }
-        loanRescheduleRequest.updateLoanRescheduleRequestToTermVariationMappings(loanRescheduleRequestToTermVariationMappings);
+      BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
+      createLoanTermVariations(
+          LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(),
+          loan,
+          rescheduleFromDate,
+          dueDate,
+          loanRescheduleRequestToTermVariationMappings,
+          isActive,
+          isSpecificToInstallment,
+          extraTermsBasedOnGracePeriods,
+          parent);
     }
 
-    private LoanTermVariations createLoanTermVariations(final Integer termType, final Loan loan, Date rescheduleFromDate,
-            Date adjustedDueDate, List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings,
-            final Boolean isActive, final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent) {
-        LoanTermVariations loanTermVariation = new LoanTermVariations(termType, rescheduleFromDate, decimalValue, adjustedDueDate,
-                isSpecificToInstallment, loan, loan.status().getValue(), isActive, parent);
-        loanRescheduleRequestToTermVariationMappings.add(LoanRescheduleRequestToTermVariationMapping.createNew(loanTermVariation));
-        return loanTermVariation;
+    if (rescheduleFromDate != null && graceOnInterest != null) {
+      LoanTermVariations parent = null;
+      final Integer termType = LoanTermVariationType.GRACE_ON_INTEREST.getValue();
+      createLoanTermVariations(
+          termType,
+          loan,
+          rescheduleFromDate,
+          dueDate,
+          loanRescheduleRequestToTermVariationMappings,
+          isActive,
+          isSpecificToInstallment,
+          BigDecimal.valueOf(graceOnInterest),
+          parent);
     }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult approve(JsonCommand jsonCommand) {
+    if (rescheduleFromDate != null && extraTerms != null) {
+      LoanTermVariations parent = null;
+      final Integer termType = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue();
+      createLoanTermVariations(
+          termType,
+          loan,
+          rescheduleFromDate,
+          dueDate,
+          loanRescheduleRequestToTermVariationMappings,
+          isActive,
+          isSpecificToInstallment,
+          BigDecimal.valueOf(extraTerms),
+          parent);
+    }
+    loanRescheduleRequest.updateLoanRescheduleRequestToTermVariationMappings(
+        loanRescheduleRequestToTermVariationMappings);
+  }
 
-        try {
-            final Long loanRescheduleRequestId = jsonCommand.entityId();
+  private LoanTermVariations createLoanTermVariations(
+      final Integer termType,
+      final Loan loan,
+      Date rescheduleFromDate,
+      Date adjustedDueDate,
+      List<LoanRescheduleRequestToTermVariationMapping>
+          loanRescheduleRequestToTermVariationMappings,
+      final Boolean isActive,
+      final boolean isSpecificToInstallment,
+      final BigDecimal decimalValue,
+      LoanTermVariations parent) {
+    LoanTermVariations loanTermVariation =
+        new LoanTermVariations(
+            termType,
+            rescheduleFromDate,
+            decimalValue,
+            adjustedDueDate,
+            isSpecificToInstallment,
+            loan,
+            loan.status().getValue(),
+            isActive,
+            parent);
+    loanRescheduleRequestToTermVariationMappings.add(
+        LoanRescheduleRequestToTermVariationMapping.createNew(loanTermVariation));
+    return loanTermVariation;
+  }
 
-            final LoanRescheduleRequest loanRescheduleRequest = this.loanRescheduleRequestRepository.findById(loanRescheduleRequestId)
-                    .orElseThrow(() -> new LoanRescheduleRequestNotFoundException(loanRescheduleRequestId));
+  @Override
+  @Transactional
+  public CommandProcessingResult approve(JsonCommand jsonCommand) {
 
-            // validate the request in the JsonCommand object passed as
-            // parameter
-            this.loanRescheduleRequestDataValidator.validateForApproveAction(jsonCommand, loanRescheduleRequest);
+    try {
+      final Long loanRescheduleRequestId = jsonCommand.entityId();
 
-            final AppUser appUser = this.platformSecurityContext.authenticatedUser();
-            final Map<String, Object> changes = new LinkedHashMap<>();
+      final LoanRescheduleRequest loanRescheduleRequest =
+          this.loanRescheduleRequestRepository
+              .findById(loanRescheduleRequestId)
+              .orElseThrow(
+                  () -> new LoanRescheduleRequestNotFoundException(loanRescheduleRequestId));
 
-            LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
-                    jsonCommand.extractLocale());
+      // validate the request in the JsonCommand object passed as
+      // parameter
+      this.loanRescheduleRequestDataValidator.validateForApproveAction(
+          jsonCommand, loanRescheduleRequest);
 
-            changes.put("locale", jsonCommand.locale());
-            changes.put("dateFormat", jsonCommand.dateFormat());
-            changes.put("approvedOnDate", approvedOnDate.toString(dateTimeFormatter));
-            changes.put("approvedByUserId", appUser.getId());
+      final AppUser appUser = this.platformSecurityContext.authenticatedUser();
+      final Map<String, Object> changes = new LinkedHashMap<>();
 
-            Loan loan = loanRescheduleRequest.getLoan();
-            final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
-            final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
+      LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
+      final DateTimeFormatter dateTimeFormatter =
+          DateTimeFormat.forPattern(jsonCommand.dateFormat())
+              .withLocale(jsonCommand.extractLocale());
 
-            ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan,
-                    loanRescheduleRequest.getRescheduleFromDate());
+      changes.put("locale", jsonCommand.locale());
+      changes.put("dateFormat", jsonCommand.dateFormat());
+      changes.put("approvedOnDate", approvedOnDate.toString(dateTimeFormatter));
+      changes.put("approvedByUserId", appUser.getId());
 
-            Collection<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = this.loanScheduleHistoryWritePlatformService
-                    .createLoanScheduleArchive(loan.getRepaymentScheduleInstallments(), loan, loanRescheduleRequest);
+      Loan loan = loanRescheduleRequest.getLoan();
+      final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
+      final List<Long> existingReversedTransactionIds =
+          new ArrayList<>(loan.findExistingReversedTransactionIds());
 
-            final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+      ScheduleGeneratorDTO scheduleGeneratorDTO =
+          this.loanUtilService.buildScheduleGeneratorDTO(
+              loan, loanRescheduleRequest.getRescheduleFromDate());
 
-            LocalDate rescheduleFromDate = null;
-            Set<LoanTermVariations> activeLoanTermVariations = loan.getActiveLoanTermVariations();
-            LoanTermVariations dueDateVariationInCurrentRequest = loanRescheduleRequest.getDueDateTermVariationIfExists();
-            if (dueDateVariationInCurrentRequest != null && activeLoanTermVariations != null) {
-                LocalDate fromScheduleDate = dueDateVariationInCurrentRequest.fetchTermApplicaDate();
-                LocalDate currentScheduleDate = fromScheduleDate;
-                LocalDate modifiedScheduleDate = dueDateVariationInCurrentRequest.fetchDateValue();
-                Map<LocalDate, LocalDate> changeMap = new HashMap<>();
-                changeMap.put(currentScheduleDate, modifiedScheduleDate);
-                for (LoanTermVariations activeLoanTermVariation : activeLoanTermVariations) {
-                    if (activeLoanTermVariation.getTermType().isDueDateVariation()
-                            && activeLoanTermVariation.fetchDateValue().equals(dueDateVariationInCurrentRequest.fetchTermApplicaDate())) {
-                        activeLoanTermVariation.markAsInactive();
-                        rescheduleFromDate = activeLoanTermVariation.fetchTermApplicaDate();
-                        dueDateVariationInCurrentRequest.setTermApplicableFrom(rescheduleFromDate.toDate());
-                    } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
-                        while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
-                            currentScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(currentScheduleDate,
-                                    loanApplicationTerms, false);
-                            modifiedScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(modifiedScheduleDate,
-                                    loanApplicationTerms, false);
-                            changeMap.put(currentScheduleDate, modifiedScheduleDate);
-                        }
-                        if (changeMap.containsKey(activeLoanTermVariation.fetchTermApplicaDate())) {
-                            activeLoanTermVariation.setTermApplicableFrom(changeMap.get(activeLoanTermVariation.fetchTermApplicaDate())
-                                    .toDate());
-                        }
-                    }
-                }
+      Collection<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList =
+          this.loanScheduleHistoryWritePlatformService.createLoanScheduleArchive(
+              loan.getRepaymentScheduleInstallments(), loan, loanRescheduleRequest);
+
+      final LoanApplicationTerms loanApplicationTerms =
+          loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+
+      LocalDate rescheduleFromDate = null;
+      Set<LoanTermVariations> activeLoanTermVariations = loan.getActiveLoanTermVariations();
+      LoanTermVariations dueDateVariationInCurrentRequest =
+          loanRescheduleRequest.getDueDateTermVariationIfExists();
+      if (dueDateVariationInCurrentRequest != null && activeLoanTermVariations != null) {
+        LocalDate fromScheduleDate = dueDateVariationInCurrentRequest.fetchTermApplicaDate();
+        LocalDate currentScheduleDate = fromScheduleDate;
+        LocalDate modifiedScheduleDate = dueDateVariationInCurrentRequest.fetchDateValue();
+        Map<LocalDate, LocalDate> changeMap = new HashMap<>();
+        changeMap.put(currentScheduleDate, modifiedScheduleDate);
+        for (LoanTermVariations activeLoanTermVariation : activeLoanTermVariations) {
+          if (activeLoanTermVariation.getTermType().isDueDateVariation()
+              && activeLoanTermVariation
+                  .fetchDateValue()
+                  .equals(dueDateVariationInCurrentRequest.fetchTermApplicaDate())) {
+            activeLoanTermVariation.markAsInactive();
+            rescheduleFromDate = activeLoanTermVariation.fetchTermApplicaDate();
+            dueDateVariationInCurrentRequest.setTermApplicableFrom(rescheduleFromDate.toDate());
+          } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
+            while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
+              currentScheduleDate =
+                  this.scheduledDateGenerator.generateNextRepaymentDate(
+                      currentScheduleDate, loanApplicationTerms, false);
+              modifiedScheduleDate =
+                  this.scheduledDateGenerator.generateNextRepaymentDate(
+                      modifiedScheduleDate, loanApplicationTerms, false);
+              changeMap.put(currentScheduleDate, modifiedScheduleDate);
             }
-            if (rescheduleFromDate == null) {
-                rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
+            if (changeMap.containsKey(activeLoanTermVariation.fetchTermApplicaDate())) {
+              activeLoanTermVariation.setTermApplicableFrom(
+                  changeMap.get(activeLoanTermVariation.fetchTermApplicaDate()).toDate());
             }
-            for (LoanRescheduleRequestToTermVariationMapping mapping : loanRescheduleRequest
-                    .getLoanRescheduleRequestToTermVariationMappings()) {
-                mapping.getLoanTermVariations().updateIsActive(true);
-            }
-            BigDecimal annualNominalInterestRate = null;
-            List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
-            loan.constructLoanTermVariations(scheduleGeneratorDTO.getFloatingRateDTO(), annualNominalInterestRate, loanTermVariations);
-            loanApplicationTerms.getLoanTermVariations().setExceptionData(loanTermVariations);
-
-            /*for (LoanTermVariationsData loanTermVariation : loanApplicationTerms.getLoanTermVariations().getDueDateVariation()) {
-                if (rescheduleFromDate.isBefore(loanTermVariation.getTermApplicableFrom())) {
-                    LocalDate applicableDate = this.scheduledDateGenerator.generateNextRepaymentDate(rescheduleFromDate,
-                            loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
-                    if (loanTermVariation.getTermApplicableFrom().equals(applicableDate)) {
-                        LocalDate adjustedDate = this.scheduledDateGenerator.generateNextRepaymentDate(adjustedApplicableDate,
-                                loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
-                        loanTermVariation.setApplicableFromDate(adjustedDate);
-                    }
-                }
-            }*/
-
-            final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-            final MathContext mathContext = new MathContext(8, roundingMode);
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.loanRepaymentScheduleTransactionProcessorFactory
-                    .determineProcessor(loan.transactionProcessingStrategy());
-            final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-            final LoanLifecycleStateMachine loanLifecycleStateMachine = null;
-            loan.setHelpers(loanLifecycleStateMachine, this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
-            final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms,
-                    loan, loanApplicationTerms.getHolidayDetailDTO(),
-                    loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
-
-            loan.updateLoanSchedule(loanSchedule.getInstallments(), appUser);
-            loan.recalculateAllCharges();
-            ChangedTransactionDetail changedTransactionDetail =  loan.processTransactions();
-
-            for (LoanRepaymentScheduleHistory loanRepaymentScheduleHistory : loanRepaymentScheduleHistoryList) {
-                this.loanRepaymentScheduleHistoryRepository.save(loanRepaymentScheduleHistory);
-            }
-
-            loan.updateRescheduledByUser(appUser);
-            loan.updateRescheduledOnDate(new LocalDate());
-
-            // update the status of the request
-            loanRescheduleRequest.approve(appUser, approvedOnDate);
-
-            // update the loan object
-            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
-
-            if (changedTransactionDetail != null) {
-                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                    this.loanTransactionRepository.save(mapEntry.getValue());
-                    // update loan with references to the newly created
-                    // transactions
-                    loan.addLoanTransaction(mapEntry.getValue());
-                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
-                }
-            }
-            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
-            this.loanAccountDomainService.recalculateAccruals(loan, true);
-
-            return new CommandProcessingResultBuilder()
-                    .withCommandId(jsonCommand.commandId())
-                    .withEntityId(loanRescheduleRequestId)
-                    .withLoanId(loanRescheduleRequest.getLoan().getId())
-                    .with(changes)
-                    .withClientId(loan.getClientId())
-                    .withOfficeId(loan.getOfficeId())
-                    .withGroupId(loan.getGroupId())
-                    .build();
+          }
         }
+      }
+      if (rescheduleFromDate == null) {
+        rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
+      }
+      for (LoanRescheduleRequestToTermVariationMapping mapping :
+          loanRescheduleRequest.getLoanRescheduleRequestToTermVariationMappings()) {
+        mapping.getLoanTermVariations().updateIsActive(true);
+      }
+      BigDecimal annualNominalInterestRate = null;
+      List<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
+      loan.constructLoanTermVariations(
+          scheduleGeneratorDTO.getFloatingRateDTO(), annualNominalInterestRate, loanTermVariations);
+      loanApplicationTerms.getLoanTermVariations().setExceptionData(loanTermVariations);
 
-        catch (final DataIntegrityViolationException dve) {
-            // handle the data integrity violation
-            handleDataIntegrityViolation(dve);
+      /*for (LoanTermVariationsData loanTermVariation : loanApplicationTerms.getLoanTermVariations().getDueDateVariation()) {
+          if (rescheduleFromDate.isBefore(loanTermVariation.getTermApplicableFrom())) {
+              LocalDate applicableDate = this.scheduledDateGenerator.generateNextRepaymentDate(rescheduleFromDate,
+                      loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
+              if (loanTermVariation.getTermApplicableFrom().equals(applicableDate)) {
+                  LocalDate adjustedDate = this.scheduledDateGenerator.generateNextRepaymentDate(adjustedApplicableDate,
+                          loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
+                  loanTermVariation.setApplicableFromDate(adjustedDate);
+              }
+          }
+      }*/
 
-            // return an empty command processing result object
-            return CommandProcessingResult.empty();
+      final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
+      final MathContext mathContext = new MathContext(8, roundingMode);
+      final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor =
+          this.loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(
+              loan.transactionProcessingStrategy());
+      final LoanScheduleGenerator loanScheduleGenerator =
+          this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
+      final LoanLifecycleStateMachine loanLifecycleStateMachine = null;
+      loan.setHelpers(
+          loanLifecycleStateMachine,
+          this.loanSummaryWrapper,
+          this.loanRepaymentScheduleTransactionProcessorFactory);
+      final LoanScheduleDTO loanSchedule =
+          loanScheduleGenerator.rescheduleNextInstallments(
+              mathContext,
+              loanApplicationTerms,
+              loan,
+              loanApplicationTerms.getHolidayDetailDTO(),
+              loanRepaymentScheduleTransactionProcessor,
+              rescheduleFromDate);
+
+      loan.updateLoanSchedule(loanSchedule.getInstallments(), appUser);
+      loan.recalculateAllCharges();
+      ChangedTransactionDetail changedTransactionDetail = loan.processTransactions();
+
+      for (LoanRepaymentScheduleHistory loanRepaymentScheduleHistory :
+          loanRepaymentScheduleHistoryList) {
+        this.loanRepaymentScheduleHistoryRepository.save(loanRepaymentScheduleHistory);
+      }
+
+      loan.updateRescheduledByUser(appUser);
+      loan.updateRescheduledOnDate(new LocalDate());
+
+      // update the status of the request
+      loanRescheduleRequest.approve(appUser, approvedOnDate);
+
+      // update the loan object
+      saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+
+      if (changedTransactionDetail != null) {
+        for (final Map.Entry<Long, LoanTransaction> mapEntry :
+            changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+          this.loanTransactionRepository.save(mapEntry.getValue());
+          // update loan with references to the newly created
+          // transactions
+          loan.addLoanTransaction(mapEntry.getValue());
+          this.accountTransfersWritePlatformService.updateLoanTransaction(
+              mapEntry.getKey(), mapEntry.getValue());
         }
-    }
+      }
+      postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
-    private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
-        try {
-            List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
-            for (LoanRepaymentScheduleInstallment installment : installments) {
-                if (installment.getId() == null) {
-                    this.repaymentScheduleInstallmentRepository.save(installment);
-                }
-            }
-            this.loanRepositoryWrapper.saveAndFlush(loan);
-        } catch (final DataIntegrityViolationException e) {
-            final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-            }
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                    "Validation errors exist.", dataValidationErrors); }
+      this.loanAccountDomainService.recalculateAccruals(loan, true);
+
+      return new CommandProcessingResultBuilder()
+          .withCommandId(jsonCommand.commandId())
+          .withEntityId(loanRescheduleRequestId)
+          .withLoanId(loanRescheduleRequest.getLoan().getId())
+          .with(changes)
+          .withClientId(loan.getClientId())
+          .withOfficeId(loan.getOfficeId())
+          .withGroupId(loan.getGroupId())
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      // handle the data integrity violation
+      handleDataIntegrityViolation(dve);
+
+      // return an empty command processing result object
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
+    try {
+      List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+      for (LoanRepaymentScheduleInstallment installment : installments) {
+        if (installment.getId() == null) {
+          this.repaymentScheduleInstallmentRepository.save(installment);
         }
+      }
+      this.loanRepositoryWrapper.saveAndFlush(loan);
+    } catch (final DataIntegrityViolationException e) {
+      final Throwable realCause = e.getCause();
+      final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+      final DataValidatorBuilder baseDataValidator =
+          new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+      if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+        baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+      }
+      if (!dataValidationErrors.isEmpty()) {
+        throw new PlatformApiDataValidationException(
+            "validation.msg.validation.errors.exist",
+            "Validation errors exist.",
+            dataValidationErrors);
+      }
     }
+  }
 
-    private void postJournalEntries(Loan loan, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds) {
-        final MonetaryCurrency currency = loan.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-        boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
-        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
-    }
+  private void postJournalEntries(
+      Loan loan, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds) {
+    final MonetaryCurrency currency = loan.getCurrency();
+    final ApplicationCurrency applicationCurrency =
+        this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+    boolean isAccountTransfer = false;
+    final Map<String, Object> accountingBridgeData =
+        loan.deriveAccountingBridgeData(
+            applicationCurrency.toData(),
+            existingTransactionIds,
+            existingReversedTransactionIds,
+            isAccountTransfer);
+    this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult reject(JsonCommand jsonCommand) {
+  @Override
+  @Transactional
+  public CommandProcessingResult reject(JsonCommand jsonCommand) {
 
-        try {
-            final Long loanRescheduleRequestId = jsonCommand.entityId();
+    try {
+      final Long loanRescheduleRequestId = jsonCommand.entityId();
 
-            final LoanRescheduleRequest loanRescheduleRequest = loanRescheduleRequestRepository.findById(loanRescheduleRequestId)
-                    .orElseThrow(() -> new LoanRescheduleRequestNotFoundException(loanRescheduleRequestId));
+      final LoanRescheduleRequest loanRescheduleRequest =
+          loanRescheduleRequestRepository
+              .findById(loanRescheduleRequestId)
+              .orElseThrow(
+                  () -> new LoanRescheduleRequestNotFoundException(loanRescheduleRequestId));
 
-            // validate the request in the JsonCommand object passed as
-            // parameter
-            this.loanRescheduleRequestDataValidator.validateForRejectAction(jsonCommand, loanRescheduleRequest);
+      // validate the request in the JsonCommand object passed as
+      // parameter
+      this.loanRescheduleRequestDataValidator.validateForRejectAction(
+          jsonCommand, loanRescheduleRequest);
 
-            final AppUser appUser = this.platformSecurityContext.authenticatedUser();
-            final Map<String, Object> changes = new LinkedHashMap<>();
+      final AppUser appUser = this.platformSecurityContext.authenticatedUser();
+      final Map<String, Object> changes = new LinkedHashMap<>();
 
-            LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
-                    jsonCommand.extractLocale());
+      LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
+      final DateTimeFormatter dateTimeFormatter =
+          DateTimeFormat.forPattern(jsonCommand.dateFormat())
+              .withLocale(jsonCommand.extractLocale());
 
-            changes.put("locale", jsonCommand.locale());
-            changes.put("dateFormat", jsonCommand.dateFormat());
-            changes.put("rejectedOnDate", rejectedOnDate.toString(dateTimeFormatter));
-            changes.put("rejectedByUserId", appUser.getId());
+      changes.put("locale", jsonCommand.locale());
+      changes.put("dateFormat", jsonCommand.dateFormat());
+      changes.put("rejectedOnDate", rejectedOnDate.toString(dateTimeFormatter));
+      changes.put("rejectedByUserId", appUser.getId());
 
-            if (!changes.isEmpty()) {
-                loanRescheduleRequest.reject(appUser, rejectedOnDate);
-                Set<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = loanRescheduleRequest
-                        .getLoanRescheduleRequestToTermVariationMappings();
-                for (LoanRescheduleRequestToTermVariationMapping loanRescheduleRequestToTermVariationMapping : loanRescheduleRequestToTermVariationMappings) {
-                    loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().markAsInactive();
-                }
-            }
-
-            return new CommandProcessingResultBuilder()
-                    .withCommandId(jsonCommand.commandId())
-                    .withEntityId(loanRescheduleRequestId)
-                    .withLoanId(loanRescheduleRequest.getLoan().getId())
-                    .with(changes)
-                    .withClientId(loanRescheduleRequest.getLoan().getClientId())
-                    .withOfficeId(loanRescheduleRequest.getLoan().getOfficeId())
-                    .withGroupId(loanRescheduleRequest.getLoan().getGroupId())
-                    .build();
+      if (!changes.isEmpty()) {
+        loanRescheduleRequest.reject(appUser, rejectedOnDate);
+        Set<LoanRescheduleRequestToTermVariationMapping>
+            loanRescheduleRequestToTermVariationMappings =
+                loanRescheduleRequest.getLoanRescheduleRequestToTermVariationMappings();
+        for (LoanRescheduleRequestToTermVariationMapping
+            loanRescheduleRequestToTermVariationMapping :
+                loanRescheduleRequestToTermVariationMappings) {
+          loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().markAsInactive();
         }
+      }
 
-        catch (final DataIntegrityViolationException dve) {
-            // handle the data integrity violation
-            handleDataIntegrityViolation(dve);
+      return new CommandProcessingResultBuilder()
+          .withCommandId(jsonCommand.commandId())
+          .withEntityId(loanRescheduleRequestId)
+          .withLoanId(loanRescheduleRequest.getLoan().getId())
+          .with(changes)
+          .withClientId(loanRescheduleRequest.getLoan().getClientId())
+          .withOfficeId(loanRescheduleRequest.getLoan().getOfficeId())
+          .withGroupId(loanRescheduleRequest.getLoan().getGroupId())
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      // handle the data integrity violation
+      handleDataIntegrityViolation(dve);
 
-            // return an empty command processing result object
-            return CommandProcessingResult.empty();
-        }
+      // return an empty command processing result object
+      return CommandProcessingResult.empty();
     }
+  }
 
-    /**
-     * handles the data integrity violation exception for loan reschedule write
-     * services
-     *
-     * @param dve
-     *            data integrity violation exception
-     *
-     **/
-    private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
+  /**
+   * handles the data integrity violation exception for loan reschedule write
+   * services
+   *
+   * @param dve
+   *            data integrity violation exception
+   *
+   **/
+  private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
 
-        logger.error("Error occured.", dve);
+    logger.error("Error occured.", dve);
 
-        throw new PlatformDataIntegrityException("error.msg.loan.reschedule.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
+    throw new PlatformDataIntegrityException(
+        "error.msg.loan.reschedule.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource.");
+  }
 }

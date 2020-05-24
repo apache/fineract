@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.notification.api;
 
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
@@ -47,54 +46,57 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Notification"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Notification", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Notification", description = "")})
 public class NotificationApiResource {
 
-    private final PlatformSecurityContext context;
-    private final NotificationReadPlatformService notificationReadPlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
+  private final PlatformSecurityContext context;
+  private final NotificationReadPlatformService notificationReadPlatformService;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
 
-    @Autowired
-    public NotificationApiResource(PlatformSecurityContext context,
-                                   NotificationReadPlatformService notificationReadPlatformService,
-                                   ApiRequestParameterHelper apiRequestParameterHelper,
-                                   ToApiJsonSerializer<NotificationData> toApiJsonSerializer) {
-        this.context = context;
-        this.notificationReadPlatformService = notificationReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
+  @Autowired
+  public NotificationApiResource(
+      PlatformSecurityContext context,
+      NotificationReadPlatformService notificationReadPlatformService,
+      ApiRequestParameterHelper apiRequestParameterHelper,
+      ToApiJsonSerializer<NotificationData> toApiJsonSerializer) {
+    this.context = context;
+    this.notificationReadPlatformService = notificationReadPlatformService;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+  }
+
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String getAllNotifications(
+      @Context final UriInfo uriInfo,
+      @QueryParam("orderBy") final String orderBy,
+      @QueryParam("limit") final Integer limit,
+      @QueryParam("offset") final Integer offset,
+      @QueryParam("sortOrder") final String sortOrder,
+      @QueryParam("isRead") final boolean isRead) {
+
+    this.context.authenticatedUser();
+    final Page<NotificationData> notificationData;
+    final SearchParameters searchParameters =
+        SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+    if (!isRead) {
+      notificationData =
+          this.notificationReadPlatformService.getAllUnreadNotifications(searchParameters);
+    } else {
+      notificationData = this.notificationReadPlatformService.getAllNotifications(searchParameters);
     }
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, notificationData);
+  }
 
-    @GET
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public String getAllNotifications(@Context final UriInfo uriInfo, @QueryParam("orderBy") final String orderBy,
-                                            @QueryParam("limit") final Integer limit,
-                                            @QueryParam("offset") final Integer offset,
-                                            @QueryParam("sortOrder") final String sortOrder,
-                                            @QueryParam("isRead") final boolean isRead) {
-
-        this.context.authenticatedUser();
-        final Page<NotificationData> notificationData;
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
-        if (!isRead) {
-            notificationData = this.notificationReadPlatformService.getAllUnreadNotifications(searchParameters);
-        } else {
-            notificationData = this.notificationReadPlatformService.getAllNotifications(searchParameters);
-        }
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-                .process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, notificationData);
-    }
-
-    @PUT
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    public void update() {
-        this.context.authenticatedUser();
-        this.notificationReadPlatformService.updateNotificationReadStatus();
-    }
+  @PUT
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public void update() {
+    this.context.authenticatedUser();
+    this.notificationReadPlatformService.updateNotificationReadStatus();
+  }
 }

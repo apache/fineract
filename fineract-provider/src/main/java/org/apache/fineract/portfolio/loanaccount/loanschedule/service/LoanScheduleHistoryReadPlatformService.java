@@ -25,8 +25,10 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 
 public interface LoanScheduleHistoryReadPlatformService {
 
-    Integer fetchCurrentVersionNumber(Long loanId);
+  Integer fetchCurrentVersionNumber(Long loanId);
 
-    LoanScheduleData retrieveRepaymentArchiveSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
-            Collection<DisbursementData> disbursementData);
+  LoanScheduleData retrieveRepaymentArchiveSchedule(
+      Long loanId,
+      RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData,
+      Collection<DisbursementData> disbursementData);
 }

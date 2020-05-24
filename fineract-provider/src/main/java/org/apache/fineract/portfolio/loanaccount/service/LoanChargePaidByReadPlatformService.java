@@ -23,5 +23,5 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 
 public interface LoanChargePaidByReadPlatformService {
 
-    List<LoanChargePaidByData> getLoanChargesPaidByTransactionId(Long id);
+  List<LoanChargePaidByData> getLoanChargesPaidByTransactionId(Long id);
 }

@@ -25,5 +25,5 @@ import org.springframework.security.core.context.SecurityContext;
  * user exists within the platform {@link SecurityContext}.
  */
 public class UnAuthenticatedUserException extends RuntimeException {
-    // no added behaviour
+  // no added behaviour
 }

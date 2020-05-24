@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "MEETING", action = "DELETE")
 public class DeleteMeetingCommandHandler implements NewCommandSourceHandler {
 
-    private final MeetingWritePlatformService writePlatformService;
+  private final MeetingWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteMeetingCommandHandler(final MeetingWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteMeetingCommandHandler(final MeetingWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteMeeting(command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteMeeting(command.entityId());
+  }
 }

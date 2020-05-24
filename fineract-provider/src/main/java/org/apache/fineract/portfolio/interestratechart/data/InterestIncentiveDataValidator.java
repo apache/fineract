@@ -56,126 +56,199 @@ import org.springframework.stereotype.Component;
 @Component
 public class InterestIncentiveDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    private static final Set<String> INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
-                    conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
+  private static final Set<String> INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              InterestIncentiveApiConstants.idParamName,
+              entityTypeParamName,
+              attributeNameParamName,
+              conditionTypeParamName,
+              attributeValueParamName,
+              incentiveTypeparamName,
+              amountParamName));
 
-    private static final Set<String> INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
-                    conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
+  private static final Set<String> INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              InterestIncentiveApiConstants.idParamName,
+              entityTypeParamName,
+              attributeNameParamName,
+              conditionTypeParamName,
+              attributeValueParamName,
+              incentiveTypeparamName,
+              amountParamName));
 
-    @Autowired
-    public InterestIncentiveDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public InterestIncentiveDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateCreate(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final JsonObject objectElement = element.getAsJsonObject();
+    final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(objectElement);
+    validateIncentiveCreate(element, baseDataValidator, locale);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final JsonObject objectElement = element.getAsJsonObject();
-        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(objectElement);
-        validateIncentiveCreate(element, baseDataValidator, locale);
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validateIncentiveCreate(
+      final JsonElement element,
+      final DataValidatorBuilder baseDataValidator,
+      final Locale locale) {
+
+    Integer entityType =
+        this.fromApiJsonHelper.extractIntegerNamed(entityTypeParamName, element, locale);
+    baseDataValidator
+        .reset()
+        .parameter(entityTypeParamName)
+        .value(entityType)
+        .notNull()
+        .isOneOfTheseValues(InterestIncentiveEntityType.integerValues());
+
+    Integer attributeName =
+        this.fromApiJsonHelper.extractIntegerNamed(attributeNameParamName, element, locale);
+    baseDataValidator
+        .reset()
+        .parameter(attributeNameParamName)
+        .value(attributeName)
+        .notNull()
+        .isOneOfTheseValues(InterestIncentiveAttributeName.integerValues());
+
+    Integer conditionType =
+        this.fromApiJsonHelper.extractIntegerNamed(conditionTypeParamName, element, locale);
+    baseDataValidator
+        .reset()
+        .parameter(conditionTypeParamName)
+        .value(conditionType)
+        .notNull()
+        .isOneOfTheseValues(ConditionType.integerValues());
+
+    final String attributeValue =
+        this.fromApiJsonHelper.extractStringNamed(attributeValueParamName, element);
+    baseDataValidator.reset().parameter(attributeValueParamName).value(attributeValue).notNull();
+
+    Integer incentiveType =
+        this.fromApiJsonHelper.extractIntegerNamed(incentiveTypeparamName, element, locale);
+    baseDataValidator
+        .reset()
+        .parameter(incentiveTypeparamName)
+        .value(incentiveType)
+        .notNull()
+        .isOneOfTheseValues(InterestIncentiveType.integerValues());
+
+    final BigDecimal amount =
+        this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, element, locale);
+    baseDataValidator.reset().parameter(amountParamName).value(amount).notNull();
+  }
+
+  public void validateUpdate(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateIncentiveCreate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS);
 
-        Integer entityType = this.fromApiJsonHelper.extractIntegerNamed(entityTypeParamName, element, locale);
-        baseDataValidator.reset().parameter(entityTypeParamName).value(entityType).notNull()
-                .isOneOfTheseValues(InterestIncentiveEntityType.integerValues());
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
 
-        Integer attributeName = this.fromApiJsonHelper.extractIntegerNamed(attributeNameParamName, element, locale);
-        baseDataValidator.reset().parameter(attributeNameParamName).value(attributeName).notNull()
-                .isOneOfTheseValues(InterestIncentiveAttributeName.integerValues());
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final JsonObject objectElement = element.getAsJsonObject();
+    final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(objectElement);
+    validateIncentiveUpdate(element, baseDataValidator, locale);
 
-        Integer conditionType = this.fromApiJsonHelper.extractIntegerNamed(conditionTypeParamName, element, locale);
-        baseDataValidator.reset().parameter(conditionTypeParamName).value(conditionType).notNull()
-                .isOneOfTheseValues(ConditionType.integerValues());
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final String attributeValue = this.fromApiJsonHelper.extractStringNamed(attributeValueParamName, element);
-        baseDataValidator.reset().parameter(attributeValueParamName).value(attributeValue).notNull();
+  public void validateIncentiveUpdate(
+      final JsonElement element,
+      final DataValidatorBuilder baseDataValidator,
+      final Locale locale) {
 
-        Integer incentiveType = this.fromApiJsonHelper.extractIntegerNamed(incentiveTypeparamName, element, locale);
-        baseDataValidator.reset().parameter(incentiveTypeparamName).value(incentiveType).notNull()
-                .isOneOfTheseValues(InterestIncentiveType.integerValues());
-
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, element, locale);
-        baseDataValidator.reset().parameter(amountParamName).value(amount).notNull();
-
+    if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
+      final String description =
+          this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
+      baseDataValidator.reset().parameter(descriptionParamName).value(description).notNull();
     }
 
-    public void validateUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final JsonObject objectElement = element.getAsJsonObject();
-        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(objectElement);
-        validateIncentiveUpdate(element, baseDataValidator, locale);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(entityTypeParamName, element)) {
+      Integer entityType =
+          this.fromApiJsonHelper.extractIntegerNamed(entityTypeParamName, element, locale);
+      baseDataValidator
+          .reset()
+          .parameter(entityTypeParamName)
+          .value(entityType)
+          .notNull()
+          .isOneOfTheseValues(InterestIncentiveEntityType.integerValues());
     }
 
-    public void validateIncentiveUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale) {
-
-        if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
-            baseDataValidator.reset().parameter(descriptionParamName).value(description).notNull();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(entityTypeParamName, element)) {
-            Integer entityType = this.fromApiJsonHelper.extractIntegerNamed(entityTypeParamName, element, locale);
-            baseDataValidator.reset().parameter(entityTypeParamName).value(entityType).notNull()
-                    .isOneOfTheseValues(InterestIncentiveEntityType.integerValues());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(attributeNameParamName, element)) {
-            Integer attributeName = this.fromApiJsonHelper.extractIntegerNamed(attributeNameParamName, element, locale);
-            baseDataValidator.reset().parameter(attributeNameParamName).value(attributeName).notNull()
-                    .isOneOfTheseValues(InterestIncentiveAttributeName.integerValues());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(conditionTypeParamName, element)) {
-            Integer conditionType = this.fromApiJsonHelper.extractIntegerNamed(conditionTypeParamName, element, locale);
-            baseDataValidator.reset().parameter(conditionTypeParamName).value(conditionType).notNull()
-                    .isOneOfTheseValues(ConditionType.integerValues());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(attributeValueParamName, element)) {
-            final String attributeValue = this.fromApiJsonHelper.extractStringNamed(attributeValueParamName, element);
-            baseDataValidator.reset().parameter(attributeValueParamName).value(attributeValue).notNull();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(incentiveTypeparamName, element)) {
-            Integer incentiveType = this.fromApiJsonHelper.extractIntegerNamed(incentiveTypeparamName, element, locale);
-            baseDataValidator.reset().parameter(incentiveTypeparamName).value(incentiveType).notNull()
-                    .isOneOfTheseValues(InterestIncentiveType.integerValues());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(amountParamName, element)) {
-            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, element, locale);
-            baseDataValidator.reset().parameter(amountParamName).value(amount).notNull();
-        }
-
+    if (this.fromApiJsonHelper.parameterExists(attributeNameParamName, element)) {
+      Integer attributeName =
+          this.fromApiJsonHelper.extractIntegerNamed(attributeNameParamName, element, locale);
+      baseDataValidator
+          .reset()
+          .parameter(attributeNameParamName)
+          .value(attributeName)
+          .notNull()
+          .isOneOfTheseValues(InterestIncentiveAttributeName.integerValues());
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (this.fromApiJsonHelper.parameterExists(conditionTypeParamName, element)) {
+      Integer conditionType =
+          this.fromApiJsonHelper.extractIntegerNamed(conditionTypeParamName, element, locale);
+      baseDataValidator
+          .reset()
+          .parameter(conditionTypeParamName)
+          .value(conditionType)
+          .notNull()
+          .isOneOfTheseValues(ConditionType.integerValues());
     }
 
+    if (this.fromApiJsonHelper.parameterExists(attributeValueParamName, element)) {
+      final String attributeValue =
+          this.fromApiJsonHelper.extractStringNamed(attributeValueParamName, element);
+      baseDataValidator.reset().parameter(attributeValueParamName).value(attributeValue).notNull();
+    }
+
+    if (this.fromApiJsonHelper.parameterExists(incentiveTypeparamName, element)) {
+      Integer incentiveType =
+          this.fromApiJsonHelper.extractIntegerNamed(incentiveTypeparamName, element, locale);
+      baseDataValidator
+          .reset()
+          .parameter(incentiveTypeparamName)
+          .value(incentiveType)
+          .notNull()
+          .isOneOfTheseValues(InterestIncentiveType.integerValues());
+    }
+
+    if (this.fromApiJsonHelper.parameterExists(amountParamName, element)) {
+      final BigDecimal amount =
+          this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, element, locale);
+      baseDataValidator.reset().parameter(amountParamName).value(amount).notNull();
+    }
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
 }

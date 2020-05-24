@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.handler;
 
 import org.apache.fineract.commands.annotation.CommandType;
@@ -31,17 +30,18 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "FAMILYMEMBERS", action = "DELETE")
 public class DeleteClientFamilyMemberCommandHandler implements NewCommandSourceHandler {
 
-private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
+  private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
 
-    @Autowired
-    public DeleteClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
-    {
-        this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
-    }
+  @Autowired
+  public DeleteClientFamilyMemberCommandHandler(
+      final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService) {
+    this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
 
-        return this.clientFamilyMembersWritePlatformService.deleteFamilyMember(command.entityId(), command);
-    }
+    return this.clientFamilyMembersWritePlatformService.deleteFamilyMember(
+        command.entityId(), command);
+  }
 }

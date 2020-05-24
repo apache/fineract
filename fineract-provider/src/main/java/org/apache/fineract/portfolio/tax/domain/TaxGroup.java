@@ -41,74 +41,75 @@ import org.apache.fineract.portfolio.tax.exception.TaxMappingNotFoundException;
 @Table(name = "m_tax_group")
 public class TaxGroup extends AbstractAuditableCustom {
 
-    @Column(name = "name", length = 100)
-    private String name;
+  @Column(name = "name", length = 100)
+  private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "tax_group_id", referencedColumnName = "id", nullable = false)
-    private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "tax_group_id", referencedColumnName = "id", nullable = false)
+  private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
-    protected TaxGroup() {
+  protected TaxGroup() {}
 
+  private TaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {
+    this.name = name;
+    this.taxGroupMappings = taxGroupMappings;
+  }
+
+  public static TaxGroup createTaxGroup(
+      final String name, final Set<TaxGroupMappings> taxGroupMappings) {
+    return new TaxGroup(name, taxGroupMappings);
+  }
+
+  public Map<String, Object> update(
+      final JsonCommand command, final Set<TaxGroupMappings> taxGroupMappings) {
+    final Map<String, Object> changes = new HashMap<>();
+
+    if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
+      final String newValue = command.stringValueOfParameterNamed(TaxApiConstants.nameParamName);
+      changes.put(TaxApiConstants.nameParamName, newValue);
+      this.name = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    private TaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {
-        this.name = name;
-        this.taxGroupMappings = taxGroupMappings;
+    List<Long> taxComponentList = new ArrayList<>();
+    final List<Map<String, Object>> modifications = new ArrayList<>();
+
+    for (TaxGroupMappings groupMappings : taxGroupMappings) {
+      TaxGroupMappings mappings = findOneBy(groupMappings);
+      if (mappings == null) {
+        this.taxGroupMappings.add(groupMappings);
+        taxComponentList.add(groupMappings.getTaxComponent().getId());
+      } else {
+        mappings.update(groupMappings.getEndDate(), modifications);
+      }
     }
 
-    public static TaxGroup createTaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {
-        return new TaxGroup(name, taxGroupMappings);
+    if (!taxComponentList.isEmpty()) {
+      changes.put("addComponents", taxComponentList);
+    }
+    if (!modifications.isEmpty()) {
+      changes.put("modifiedComponents", modifications);
     }
 
-    public Map<String, Object> update(final JsonCommand command, final Set<TaxGroupMappings> taxGroupMappings) {
-        final Map<String, Object> changes = new HashMap<>();
+    return changes;
+  }
 
-        if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(TaxApiConstants.nameParamName);
-            changes.put(TaxApiConstants.nameParamName, newValue);
-            this.name = StringUtils.defaultIfEmpty(newValue, null);
+  public TaxGroupMappings findOneBy(final TaxGroupMappings groupMapping) {
+    if (groupMapping.getId() != null) {
+      for (TaxGroupMappings groupMappings : this.taxGroupMappings) {
+        if (groupMappings.getId().equals(groupMapping.getId())) {
+          return groupMappings;
         }
-
-        List<Long> taxComponentList = new ArrayList<>();
-        final List<Map<String, Object>> modifications = new ArrayList<>();
-
-        for (TaxGroupMappings groupMappings : taxGroupMappings) {
-            TaxGroupMappings mappings = findOneBy(groupMappings);
-            if (mappings == null) {
-                this.taxGroupMappings.add(groupMappings);
-                taxComponentList.add(groupMappings.getTaxComponent().getId());
-            } else {
-                mappings.update(groupMappings.getEndDate(), modifications);
-            }
-        }
-
-        if (!taxComponentList.isEmpty()) {
-            changes.put("addComponents", taxComponentList);
-        }
-        if (!modifications.isEmpty()) {
-            changes.put("modifiedComponents", modifications);
-        }
-
-        return changes;
+      }
+      throw new TaxMappingNotFoundException(groupMapping.getId());
     }
+    return null;
+  }
 
-    public TaxGroupMappings findOneBy(final TaxGroupMappings groupMapping) {
-        if (groupMapping.getId() != null) {
-            for (TaxGroupMappings groupMappings : this.taxGroupMappings) {
-                if (groupMappings.getId().equals(groupMapping.getId())) { return groupMappings; }
-            }
-            throw new TaxMappingNotFoundException(groupMapping.getId());
-        }
-        return null;
-    }
+  public Set<TaxGroupMappings> getTaxGroupMappings() {
+    return this.taxGroupMappings;
+  }
 
-    public Set<TaxGroupMappings> getTaxGroupMappings() {
-        return this.taxGroupMappings;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
+  public String getName() {
+    return this.name;
+  }
 }

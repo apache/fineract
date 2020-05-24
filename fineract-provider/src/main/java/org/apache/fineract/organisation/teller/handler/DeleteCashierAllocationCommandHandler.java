@@ -37,22 +37,23 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "TELLER", action = "DELETECASHIERALLOCATION")
 public class DeleteCashierAllocationCommandHandler implements NewCommandSourceHandler {
 
-    private final TellerWritePlatformService writePlatformService;
+  private final TellerWritePlatformService writePlatformService;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param writePlatformService the {@code CashierWritePlatformService} used to access the backend
-     */
-    @Autowired
-    public DeleteCashierAllocationCommandHandler(final TellerWritePlatformService writePlatformService) {
-        super();
-        this.writePlatformService = writePlatformService;
-    }
+  /**
+   * Creates a new instance.
+   *
+   * @param writePlatformService the {@code CashierWritePlatformService} used to access the backend
+   */
+  @Autowired
+  public DeleteCashierAllocationCommandHandler(
+      final TellerWritePlatformService writePlatformService) {
+    super();
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteCashierAllocation(command.entityId(),
-                command.subentityId(), command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteCashierAllocation(
+        command.entityId(), command.subentityId(), command);
+  }
 }

@@ -23,11 +23,11 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface InterestIncentiveDropdownReadPlatformService {
 
-    Collection<EnumOptionData> retrieveEntityTypeOptions();
+  Collection<EnumOptionData> retrieveEntityTypeOptions();
 
-    Collection<EnumOptionData> retrieveAttributeNameOptions();
+  Collection<EnumOptionData> retrieveAttributeNameOptions();
 
-    Collection<EnumOptionData> retrieveConditionTypeOptions();
+  Collection<EnumOptionData> retrieveConditionTypeOptions();
 
-    Collection<EnumOptionData> retrieveIncentiveTypeOptions();
+  Collection<EnumOptionData> retrieveIncentiveTypeOptions();
 }

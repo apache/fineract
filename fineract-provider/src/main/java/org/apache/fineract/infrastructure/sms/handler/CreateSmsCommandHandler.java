@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SMS", action = "CREATE")
 public class CreateSmsCommandHandler implements NewCommandSourceHandler {
 
-    private final SmsWritePlatformService writePlatformService;
+  private final SmsWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateSmsCommandHandler(final SmsWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateSmsCommandHandler(final SmsWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.create(command);
-    }
+    return this.writePlatformService.create(command);
+  }
 }

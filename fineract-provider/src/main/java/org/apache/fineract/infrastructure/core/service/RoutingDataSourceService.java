@@ -26,5 +26,5 @@ import javax.sql.DataSource;
  */
 public interface RoutingDataSourceService {
 
-    DataSource retrieveDataSource();
+  DataSource retrieveDataSource();
 }

@@ -36,65 +36,90 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 public class CurrencyHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(CurrencyHelper.class);
-    private static final String CURRENCY_URL = "/fineract-provider/api/v1/currencies?" + Utils.TENANT_IDENTIFIER;
-    private static final String CURRENCY_URL_SELECTED = CURRENCY_URL + "&fields=selectedCurrencyOptions";
+  private static final Logger LOG = LoggerFactory.getLogger(CurrencyHelper.class);
+  private static final String CURRENCY_URL =
+      "/fineract-provider/api/v1/currencies?" + Utils.TENANT_IDENTIFIER;
+  private static final String CURRENCY_URL_SELECTED =
+      CURRENCY_URL + "&fields=selectedCurrencyOptions";
 
-    private static final List<String> permittedCurrencyArray = Arrays.asList("currencyOptions",
-            "selectedCurrencyOptions");
+  private static final List<String> permittedCurrencyArray =
+      Arrays.asList("currencyOptions", "selectedCurrencyOptions");
 
-    private static final List<String> permittedCurrencyArraySelected = Arrays.asList("selectedCurrencyOptions");
+  private static final List<String> permittedCurrencyArraySelected =
+      Arrays.asList("selectedCurrencyOptions");
 
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification responseSpec;
+  private final RequestSpecification requestSpec;
+  private final ResponseSpecification responseSpec;
 
-    public CurrencyHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        this.requestSpec = requestSpec;
-        this.responseSpec = responseSpec;
+  public CurrencyHelper(
+      final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    this.requestSpec = requestSpec;
+    this.responseSpec = responseSpec;
+  }
+
+  public ArrayList<Currency> getPermittedCurrencies() {
+    return getCurrencies(CURRENCY_URL, permittedCurrencyArray);
+  }
+
+  public ArrayList<Currency> getSelectedCurrencies() {
+    return getCurrencies(CURRENCY_URL_SELECTED, permittedCurrencyArraySelected);
+  }
+
+  private ArrayList<Currency> getCurrencies(
+      final String getUrl, final List<String> permittedCurrencyArrays) {
+    LOG.info(
+        "--------------------------------- GET CURRENCY OPTIONS -------------------------------");
+    final String json =
+        given()
+            .spec(requestSpec)
+            .expect()
+            .spec(responseSpec)
+            .log()
+            .ifError()
+            .when()
+            .get(getUrl)
+            .andReturn()
+            .asString();
+    final Gson gson = new Gson();
+    Assert.notNull(json, "json");
+    final ArrayList<Currency> currencyList = new ArrayList<Currency>();
+    final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {}.getType();
+    final Map<String, List<Currency>> responseMap = gson.fromJson(json, typeOfHashMap);
+    for (Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
+      Assert.isTrue(permittedCurrencyArrays.contains(entry.getKey()), "permittedCurrencyArrays");
+      for (Currency currency : entry.getValue()) {
+        currencyList.add(currency);
+      }
     }
+    return currencyList;
+  }
 
-    public ArrayList<Currency> getPermittedCurrencies() {
-        return getCurrencies(CURRENCY_URL, permittedCurrencyArray);
-    }
+  public List<String> updateCurrencies(final List<String> currencies) {
+    LOG.info(
+        "--------------------------------- UPDATE CURRENCY OPTIONS"
+            + " -------------------------------");
+    final String json =
+        given()
+            .spec(requestSpec)
+            .body(getUpdateJSON(currencies))
+            .expect()
+            .spec(responseSpec)
+            .log()
+            .ifError()
+            .when()
+            .put(CURRENCY_URL)
+            .andReturn()
+            .asString();
+    final Gson gson = new Gson();
+    Assert.notNull(json, "json");
+    final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {}.getType();
+    final Map<String, Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
+    return responseMap.get("changes").get("currencies");
+  }
 
-    public ArrayList<Currency> getSelectedCurrencies() {
-        return getCurrencies(CURRENCY_URL_SELECTED, permittedCurrencyArraySelected);
-    }
-
-    private ArrayList<Currency> getCurrencies(final String getUrl, final List<String> permittedCurrencyArrays) {
-        LOG.info("--------------------------------- GET CURRENCY OPTIONS -------------------------------");
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getUrl)
-                .andReturn().asString();
-        final Gson gson = new Gson();
-        Assert.notNull(json, "json");
-        final ArrayList<Currency> currencyList = new ArrayList<Currency>();
-        final Type typeOfHashMap = new TypeToken<Map<String, List<Currency>>>() {
-        }.getType();
-        final Map<String, List<Currency>> responseMap = gson.fromJson(json, typeOfHashMap);
-        for (Map.Entry<String, List<Currency>> entry : responseMap.entrySet()) {
-            Assert.isTrue(permittedCurrencyArrays.contains(entry.getKey()), "permittedCurrencyArrays");
-            for (Currency currency : entry.getValue()) {
-                currencyList.add(currency);
-            }
-        }
-        return currencyList;
-    }
-
-    public List<String> updateCurrencies(final List<String> currencies) {
-        LOG.info("--------------------------------- UPDATE CURRENCY OPTIONS -------------------------------");
-        final String json = given().spec(requestSpec).body(getUpdateJSON(currencies)).expect().spec(responseSpec).log()
-                .ifError().when().put(CURRENCY_URL).andReturn().asString();
-        final Gson gson = new Gson();
-        Assert.notNull(json, "json");
-        final Type typeOfHashMap = new TypeToken<Map<String, Map<String, List<String>>>>() {
-        }.getType();
-        final Map<String, Map<String, List<String>>> responseMap = gson.fromJson(json, typeOfHashMap);
-        return responseMap.get("changes").get("currencies");
-    }
-
-    private String getUpdateJSON(final List<String> currencies) {
-        final HashMap<String, List<String>> map = new HashMap<>();
-        map.put("currencies", currencies);
-        return new Gson().toJson(map);
-    }
+  private String getUpdateJSON(final List<String> currencies) {
+    final HashMap<String, List<String>> map = new HashMap<>();
+    map.put("currencies", currencies);
+    return new Gson().toJson(map);
+  }
 }

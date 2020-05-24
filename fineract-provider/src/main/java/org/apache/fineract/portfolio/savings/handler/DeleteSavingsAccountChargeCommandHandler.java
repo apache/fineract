@@ -31,17 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNTCHARGE", action = "DELETE")
 public class DeleteSavingsAccountChargeCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService writePlatformService;
+  private final SavingsAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteSavingsAccountChargeCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteSavingsAccountChargeCommandHandler(
+      final SavingsAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteSavingsAccountCharge(command.getSavingsId(), command.entityId(), command);
-    }
+    return this.writePlatformService.deleteSavingsAccountCharge(
+        command.getSavingsId(), command.entityId(), command);
+  }
 }

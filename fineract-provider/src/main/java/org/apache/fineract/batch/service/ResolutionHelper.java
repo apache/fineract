@@ -43,191 +43,194 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResolutionHelper {
 
-    /**
-     * Provides a Node like object for the request tree.
-     *
-     * @author Rishabh shukla
-     *
-     */
-    public class BatchRequestNode {
+  /**
+   * Provides a Node like object for the request tree.
+   *
+   * @author Rishabh shukla
+   *
+   */
+  public class BatchRequestNode {
 
-        private BatchRequest request;
-        private final List<BatchRequestNode> childRequests = new ArrayList<>();
+    private BatchRequest request;
+    private final List<BatchRequestNode> childRequests = new ArrayList<>();
 
-        public BatchRequestNode() {
-            super();
-        }
-
-        public BatchRequest getRequest() {
-            return this.request;
-        }
-
-        public void setRequest(BatchRequest request) {
-            this.request = request;
-        }
-
-        public List<BatchRequestNode> getChildRequests() {
-            return this.childRequests;
-        }
-
-        public void addChildRequest(final BatchRequestNode batchRequest) {
-            this.childRequests.add(batchRequest);
-        }
-
+    public BatchRequestNode() {
+      super();
     }
 
-    private FromJsonHelper fromJsonHelper;
-
-    @Autowired
-    public ResolutionHelper(final FromJsonHelper fromJsonHelper) {
-        this.fromJsonHelper = fromJsonHelper;
+    public BatchRequest getRequest() {
+      return this.request;
     }
 
-    /**
-     * Returns a map containing requests that are divided in accordance of
-     * dependency relations among them. Each different list is identified with a
-     * "Key" which is the "requestId" of the request at topmost level in
-     * dependency hierarchy of that particular list.
-     *
-     * @param batchRequests
-     * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
-     */
-    public List<BatchRequestNode> getDependingRequests(final List<BatchRequest> batchRequests) {
-        final List<BatchRequestNode> rootRequests = new ArrayList<>();
-
-        for (BatchRequest batchRequest : batchRequests) {
-            if (batchRequest.getReference() == null) {
-                final BatchRequestNode node = new BatchRequestNode();
-                node.setRequest(batchRequest);
-                rootRequests.add(node);
-            } else {
-                this.addDependingRequest(batchRequest, rootRequests);
-            }
-        }
-
-        return rootRequests;
+    public void setRequest(BatchRequest request) {
+      this.request = request;
     }
 
-    private void addDependingRequest(final BatchRequest batchRequest, final List<BatchRequestNode> parentRequests) {
-        for (BatchRequestNode batchRequestNode : parentRequests) {
-            if (batchRequestNode.getRequest().getRequestId().equals(batchRequest.getReference())) {
-                final BatchRequestNode dependingRequest = new BatchRequestNode();
-                dependingRequest.setRequest(batchRequest);
-                batchRequestNode.addChildRequest(dependingRequest);
-            } else {
-                addDependingRequest(batchRequest, batchRequestNode.getChildRequests());
-            }
-        }
+    public List<BatchRequestNode> getChildRequests() {
+      return this.childRequests;
     }
 
-    /**
-     * Returns a BatchRequest after dependency resolution. It takes a request
-     * and the response of the request it is dependent upon as its arguments and
-     * change the body or relativeUrl of the request according to parent
-     * Request.
-     *
-     * @param request
-     * @param parentResponse
-     * @return BatchRequest
-     */
-    public BatchRequest resoluteRequest(final BatchRequest request, final BatchResponse parentResponse) {
+    public void addChildRequest(final BatchRequestNode batchRequest) {
+      this.childRequests.add(batchRequest);
+    }
+  }
 
-        // Create a duplicate request
-        final BatchRequest br = request;
+  private FromJsonHelper fromJsonHelper;
 
-        final ReadContext responseCtx = JsonPath.parse(parentResponse.getBody());
+  @Autowired
+  public ResolutionHelper(final FromJsonHelper fromJsonHelper) {
+    this.fromJsonHelper = fromJsonHelper;
+  }
 
-        // Gets the body from current Request as a JsonObject
-        final JsonObject jsonRequestBody = this.fromJsonHelper.parse(request.getBody()).getAsJsonObject();
+  /**
+   * Returns a map containing requests that are divided in accordance of
+   * dependency relations among them. Each different list is identified with a
+   * "Key" which is the "requestId" of the request at topmost level in
+   * dependency hierarchy of that particular list.
+   *
+   * @param batchRequests
+   * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
+   */
+  public List<BatchRequestNode> getDependingRequests(final List<BatchRequest> batchRequests) {
+    final List<BatchRequestNode> rootRequests = new ArrayList<>();
 
-        JsonObject jsonResultBody = new JsonObject();
-
-        // Iterate through each element in the requestBody to find dependent
-        // parameter
-        for (Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
-            final String key = element.getKey();
-            final JsonElement value = resolveDependentVariables(element, responseCtx);
-            jsonResultBody.add(key, value);
-        }
-
-        // Set the body after dependency resolution
-        br.setBody(jsonResultBody.toString());
-
-        // Also check the relativeUrl for any dependency resolution
-        String relativeUrl = request.getRelativeUrl();
-
-        if (relativeUrl.contains("$.")) {
-
-            String queryParams = "";
-            if(relativeUrl.contains("?")) {
-                queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
-                relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
-            }
-
-            final String[] parameters = relativeUrl.split("/");
-
-            for (String parameter : parameters) {
-                if (parameter.contains("$.")) {
-                    final String resParamValue = responseCtx.read(parameter).toString();
-                    relativeUrl = relativeUrl.replace(parameter, resParamValue);
-                    br.setRelativeUrl(relativeUrl+queryParams);
-                }
-            }
-        }
-
-        return br;
+    for (BatchRequest batchRequest : batchRequests) {
+      if (batchRequest.getReference() == null) {
+        final BatchRequestNode node = new BatchRequestNode();
+        node.setRequest(batchRequest);
+        rootRequests.add(node);
+      } else {
+        this.addDependingRequest(batchRequest, rootRequests);
+      }
     }
 
-    private JsonElement resolveDependentVariables(final Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
-        JsonElement value = null;
+    return rootRequests;
+  }
 
-        final JsonElement element = entryElement.getValue();
+  private void addDependingRequest(
+      final BatchRequest batchRequest, final List<BatchRequestNode> parentRequests) {
+    for (BatchRequestNode batchRequestNode : parentRequests) {
+      if (batchRequestNode.getRequest().getRequestId().equals(batchRequest.getReference())) {
+        final BatchRequestNode dependingRequest = new BatchRequestNode();
+        dependingRequest.setRequest(batchRequest);
+        batchRequestNode.addChildRequest(dependingRequest);
+      } else {
+        addDependingRequest(batchRequest, batchRequestNode.getChildRequests());
+      }
+    }
+  }
 
-        if (element.isJsonObject()) {
-            final JsonObject jsObject = element.getAsJsonObject();
-            value = processJsonObject(jsObject, responseCtx);
-        } else if (element.isJsonArray()) {
-            final JsonArray jsElementArray = element.getAsJsonArray();
-            value = processJsonArray(jsElementArray, responseCtx);
-        } else {
-            value = resolveDependentVariable(element, responseCtx);
-        }
-        return value;
+  /**
+   * Returns a BatchRequest after dependency resolution. It takes a request
+   * and the response of the request it is dependent upon as its arguments and
+   * change the body or relativeUrl of the request according to parent
+   * Request.
+   *
+   * @param request
+   * @param parentResponse
+   * @return BatchRequest
+   */
+  public BatchRequest resoluteRequest(
+      final BatchRequest request, final BatchResponse parentResponse) {
+
+    // Create a duplicate request
+    final BatchRequest br = request;
+
+    final ReadContext responseCtx = JsonPath.parse(parentResponse.getBody());
+
+    // Gets the body from current Request as a JsonObject
+    final JsonObject jsonRequestBody =
+        this.fromJsonHelper.parse(request.getBody()).getAsJsonObject();
+
+    JsonObject jsonResultBody = new JsonObject();
+
+    // Iterate through each element in the requestBody to find dependent
+    // parameter
+    for (Entry<String, JsonElement> element : jsonRequestBody.entrySet()) {
+      final String key = element.getKey();
+      final JsonElement value = resolveDependentVariables(element, responseCtx);
+      jsonResultBody.add(key, value);
     }
 
-    private JsonElement processJsonObject(final JsonObject jsObject, final ReadContext responseCtx) {
-        JsonObject valueObj = new JsonObject();
-        for (Entry<String, JsonElement> element : jsObject.entrySet()) {
-            final String key = element.getKey();
-            final JsonElement value = resolveDependentVariable(element.getValue(), responseCtx);
-            valueObj.add(key, value);
+    // Set the body after dependency resolution
+    br.setBody(jsonResultBody.toString());
+
+    // Also check the relativeUrl for any dependency resolution
+    String relativeUrl = request.getRelativeUrl();
+
+    if (relativeUrl.contains("$.")) {
+
+      String queryParams = "";
+      if (relativeUrl.contains("?")) {
+        queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
+        relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
+      }
+
+      final String[] parameters = relativeUrl.split("/");
+
+      for (String parameter : parameters) {
+        if (parameter.contains("$.")) {
+          final String resParamValue = responseCtx.read(parameter).toString();
+          relativeUrl = relativeUrl.replace(parameter, resParamValue);
+          br.setRelativeUrl(relativeUrl + queryParams);
         }
-        return valueObj;
+      }
     }
 
-    private JsonArray processJsonArray(final JsonArray elementArray, final ReadContext responseCtx) {
+    return br;
+  }
 
-        JsonArray valueArr = new JsonArray();
+  private JsonElement resolveDependentVariables(
+      final Entry<String, JsonElement> entryElement, final ReadContext responseCtx) {
+    JsonElement value = null;
 
-        for (JsonElement element : elementArray) {
-            if (element.isJsonObject()) {
-                final JsonObject jsObject = element.getAsJsonObject();
-                valueArr.add(processJsonObject(jsObject, responseCtx));
-            }
-        }
+    final JsonElement element = entryElement.getValue();
 
-        return valueArr;
+    if (element.isJsonObject()) {
+      final JsonObject jsObject = element.getAsJsonObject();
+      value = processJsonObject(jsObject, responseCtx);
+    } else if (element.isJsonArray()) {
+      final JsonArray jsElementArray = element.getAsJsonArray();
+      value = processJsonArray(jsElementArray, responseCtx);
+    } else {
+      value = resolveDependentVariable(element, responseCtx);
+    }
+    return value;
+  }
+
+  private JsonElement processJsonObject(final JsonObject jsObject, final ReadContext responseCtx) {
+    JsonObject valueObj = new JsonObject();
+    for (Entry<String, JsonElement> element : jsObject.entrySet()) {
+      final String key = element.getKey();
+      final JsonElement value = resolveDependentVariable(element.getValue(), responseCtx);
+      valueObj.add(key, value);
+    }
+    return valueObj;
+  }
+
+  private JsonArray processJsonArray(final JsonArray elementArray, final ReadContext responseCtx) {
+
+    JsonArray valueArr = new JsonArray();
+
+    for (JsonElement element : elementArray) {
+      if (element.isJsonObject()) {
+        final JsonObject jsObject = element.getAsJsonObject();
+        valueArr.add(processJsonObject(jsObject, responseCtx));
+      }
     }
 
-    private JsonElement resolveDependentVariable(final JsonElement element, final ReadContext responseCtx) {
-        JsonElement value = element;
-        String paramVal = element.getAsString();
-        if (paramVal.contains("$.")) {
-            // Get the value of the parameter from parent response
-            final String resParamValue = responseCtx.read(paramVal).toString();
-            value = this.fromJsonHelper.parse(resParamValue);
-        }
-        return value;
-    }
+    return valueArr;
+  }
 
+  private JsonElement resolveDependentVariable(
+      final JsonElement element, final ReadContext responseCtx) {
+    JsonElement value = element;
+    String paramVal = element.getAsString();
+    if (paramVal.contains("$.")) {
+      // Get the value of the parameter from parent response
+      final String resParamValue = responseCtx.read(paramVal).toString();
+      value = this.fromJsonHelper.parse(resParamValue);
+    }
+    return value;
+  }
 }

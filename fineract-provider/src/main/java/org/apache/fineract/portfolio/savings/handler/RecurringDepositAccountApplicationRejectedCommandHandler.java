@@ -30,19 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "REJECT")
-public class RecurringDepositAccountApplicationRejectedCommandHandler implements NewCommandSourceHandler {
+public class RecurringDepositAccountApplicationRejectedCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+  private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public RecurringDepositAccountApplicationRejectedCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public RecurringDepositAccountApplicationRejectedCommandHandler(
+      final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.rejectApplication(command.entityId(), command, DepositAccountType.RECURRING_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.rejectApplication(
+        command.entityId(), command, DepositAccountType.RECURRING_DEPOSIT);
+  }
 }

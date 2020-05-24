@@ -24,11 +24,11 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 public interface NoteWritePlatformService {
 
-    CommandProcessingResult createNote(JsonCommand command);
+  CommandProcessingResult createNote(JsonCommand command);
 
-    CommandProcessingResult updateNote(JsonCommand command);
+  CommandProcessingResult updateNote(JsonCommand command);
 
-    CommandProcessingResult deleteNote(JsonCommand command);
+  CommandProcessingResult deleteNote(JsonCommand command);
 
-    void createAndPersistClientNote(Client client, JsonCommand command);
+  void createAndPersistClientNote(Client client, JsonCommand command);
 }

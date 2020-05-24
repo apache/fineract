@@ -25,19 +25,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppUserRepositoryWrapper {
 
-    private final AppUserRepository appUserRepository ;
+  private final AppUserRepository appUserRepository;
 
-    @Autowired
-    public AppUserRepositoryWrapper(final AppUserRepository appUserRepository) {
-        this.appUserRepository = appUserRepository ;
-    }
+  @Autowired
+  public AppUserRepositoryWrapper(final AppUserRepository appUserRepository) {
+    this.appUserRepository = appUserRepository;
+  }
 
-    public AppUser fetchSystemUser() {
-        String userName = "system" ;
-        AppUser user = this.appUserRepository.findAppUserByName(userName);
-        if(user == null) {
-            throw new UserNotFoundException(userName) ;
-        }
-        return user ;
+  public AppUser fetchSystemUser() {
+    String userName = "system";
+    AppUser user = this.appUserRepository.findAppUserByName(userName);
+    if (user == null) {
+      throw new UserNotFoundException(userName);
     }
+    return user;
+  }
 }

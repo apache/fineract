@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "DELETE")
 public class LoanApplicationDeletionCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanApplicationWritePlatformService writePlatformService;
+  private final LoanApplicationWritePlatformService writePlatformService;
 
-    @Autowired
-    public LoanApplicationDeletionCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public LoanApplicationDeletionCommandHandler(
+      final LoanApplicationWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteApplication(command.entityId());
-    }
+    return this.writePlatformService.deleteApplication(command.entityId());
+  }
 }

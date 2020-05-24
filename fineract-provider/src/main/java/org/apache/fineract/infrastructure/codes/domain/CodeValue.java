@@ -33,116 +33,139 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
+@Table(
+    name = "m_code_value",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"code_id", "code_value"},
+          name = "code_value_duplicate")
+    })
 public class CodeValue extends AbstractPersistableCustom {
 
-    @Column(name = "code_value", length = 100)
-    private String label;
+  @Column(name = "code_value", length = 100)
+  private String label;
 
-    @Column(name = "order_position")
-    private int position;
+  @Column(name = "order_position")
+  private int position;
 
-    @Column(name = "code_description")
-    private String description;
+  @Column(name = "code_description")
+  private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "code_id", nullable = false)
-    private Code code;
+  @ManyToOne
+  @JoinColumn(name = "code_id", nullable = false)
+  private Code code;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+  @Column(name = "is_active")
+  private boolean isActive;
 
-    @Column(name = "is_mandatory")
-    private boolean mandatory;
+  @Column(name = "is_mandatory")
+  private boolean mandatory;
 
-    public static CodeValue createNew(final Code code, final String label, final int position, final String description,
-            final boolean isActive, final boolean mandatory) {
-        return new CodeValue(code, label, position, description, isActive, mandatory);
+  public static CodeValue createNew(
+      final Code code,
+      final String label,
+      final int position,
+      final String description,
+      final boolean isActive,
+      final boolean mandatory) {
+    return new CodeValue(code, label, position, description, isActive, mandatory);
+  }
+
+  protected CodeValue() {
+    //
+  }
+
+  private CodeValue(
+      final Code code,
+      final String label,
+      final int position,
+      final String description,
+      final boolean isActive,
+      final boolean mandatory) {
+    this.code = code;
+    this.label = StringUtils.defaultIfEmpty(label, null);
+    this.position = position;
+    this.description = description;
+    this.isActive = isActive;
+    this.mandatory = mandatory;
+  }
+
+  public String label() {
+    return this.label;
+  }
+
+  public int position() {
+    return this.position;
+  }
+
+  public static CodeValue fromJson(final Code code, final JsonCommand command) {
+
+    final String label =
+        command.stringValueOfParameterNamed(CodevalueJSONinputParams.NAME.getValue());
+    Integer position =
+        command.integerValueSansLocaleOfParameterNamed(
+            CodevalueJSONinputParams.POSITION.getValue());
+    String description =
+        command.stringValueOfParameterNamed(CodevalueJSONinputParams.DESCRIPTION.getValue());
+    Boolean isActiveObj =
+        command.booleanObjectValueOfParameterNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue());
+    boolean isActive = true;
+    if (isActiveObj != null) {
+      isActive = isActiveObj;
+    }
+    if (position == null) {
+      position = Integer.valueOf(0);
     }
 
-    protected CodeValue() {
-        //
+    Boolean mandatory =
+        command.booleanPrimitiveValueOfParameterNamed(
+            CodevalueJSONinputParams.IS_MANDATORY.getValue());
+
+    // if the "mandatory" Boolean object is null, then set it to false by default
+    if (mandatory == null) {
+      mandatory = false;
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description,
-            final boolean isActive, final boolean mandatory) {
-        this.code = code;
-        this.label = StringUtils.defaultIfEmpty(label, null);
-        this.position = position;
-        this.description = description;
-        this.isActive = isActive;
-        this.mandatory = mandatory;
+    return new CodeValue(code, label, position.intValue(), description, isActive, mandatory);
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
+
+    final String labelParamName = CodevalueJSONinputParams.NAME.getValue();
+    if (command.isChangeInStringParameterNamed(labelParamName, this.label)) {
+      final String newValue = command.stringValueOfParameterNamed(labelParamName);
+      actualChanges.put(labelParamName, newValue);
+      this.label = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    public String label() {
-        return this.label;
+    final String decriptionParamName = CodevalueJSONinputParams.DESCRIPTION.getValue();
+    if (command.isChangeInStringParameterNamed(decriptionParamName, this.description)) {
+      final String newValue = command.stringValueOfParameterNamed(decriptionParamName);
+      actualChanges.put(decriptionParamName, newValue);
+      this.description = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    public int position() {
-        return this.position;
+    final String positionParamName = CodevalueJSONinputParams.POSITION.getValue();
+    if (command.isChangeInIntegerSansLocaleParameterNamed(positionParamName, this.position)) {
+      final Integer newValue = command.integerValueSansLocaleOfParameterNamed(positionParamName);
+      actualChanges.put(positionParamName, newValue);
+      this.position = newValue.intValue();
     }
 
-    public static CodeValue fromJson(final Code code, final JsonCommand command) {
-
-        final String label = command.stringValueOfParameterNamed(CodevalueJSONinputParams.NAME.getValue());
-        Integer position = command.integerValueSansLocaleOfParameterNamed(CodevalueJSONinputParams.POSITION.getValue());
-        String description = command.stringValueOfParameterNamed(CodevalueJSONinputParams.DESCRIPTION.getValue());
-        Boolean isActiveObj = command.booleanObjectValueOfParameterNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue());
-        boolean isActive = true;
-        if (isActiveObj != null) {
-            isActive = isActiveObj;
-        }
-        if (position == null) {
-            position = Integer.valueOf(0);
-        }
-
-        Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(
-                CodevalueJSONinputParams.IS_MANDATORY.getValue());
-
-        // if the "mandatory" Boolean object is null, then set it to false by default
-        if (mandatory == null) {
-            mandatory = false;
-        }
-
-        return new CodeValue(code, label, position.intValue(), description, isActive, mandatory);
+    final String isActiveParamName = CodevalueJSONinputParams.IS_ACTIVE.getValue();
+    if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
+      final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
+      actualChanges.put(isActiveParamName, newValue);
+      this.isActive = newValue.booleanValue();
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    return actualChanges;
+  }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
-
-        final String labelParamName = CodevalueJSONinputParams.NAME.getValue();
-        if (command.isChangeInStringParameterNamed(labelParamName, this.label)) {
-            final String newValue = command.stringValueOfParameterNamed(labelParamName);
-            actualChanges.put(labelParamName, newValue);
-            this.label = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String decriptionParamName = CodevalueJSONinputParams.DESCRIPTION.getValue();
-        if (command.isChangeInStringParameterNamed(decriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(decriptionParamName);
-            actualChanges.put(decriptionParamName, newValue);
-            this.description = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String positionParamName = CodevalueJSONinputParams.POSITION.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(positionParamName, this.position)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(positionParamName);
-            actualChanges.put(positionParamName, newValue);
-            this.position = newValue.intValue();
-        }
-
-        final String isActiveParamName = CodevalueJSONinputParams.IS_ACTIVE.getValue();
-        if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
-            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
-            actualChanges.put(isActiveParamName, newValue);
-            this.isActive = newValue.booleanValue();
-        }
-
-        return actualChanges;
-    }
-
-    public CodeValueData toData() {
-        return CodeValueData.instance(getId(), this.label, this.position, this.isActive, this.mandatory);
-    }
+  public CodeValueData toData() {
+    return CodeValueData.instance(
+        getId(), this.label, this.position, this.isActive, this.mandatory);
+  }
 }

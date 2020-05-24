@@ -28,22 +28,37 @@ import org.joda.time.LocalDate;
 
 public interface AccountTransfersReadPlatformService {
 
-    AccountTransferData retrieveTemplate(Long fromOfficeId, Long fromClientId, Long fromAccountId, Integer fromAccountType,
-            Long toOfficeId, Long toClientId, Long toAccountId, Integer toAccountType);
+  AccountTransferData retrieveTemplate(
+      Long fromOfficeId,
+      Long fromClientId,
+      Long fromAccountId,
+      Integer fromAccountType,
+      Long toOfficeId,
+      Long toClientId,
+      Long toAccountId,
+      Integer toAccountType);
 
-    Page<AccountTransferData> retrieveAll(SearchParameters searchParameters, Long accountDetailId);
+  Page<AccountTransferData> retrieveAll(SearchParameters searchParameters, Long accountDetailId);
 
-    AccountTransferData retrieveOne(Long transferId);
+  AccountTransferData retrieveOne(Long transferId);
 
-    boolean isAccountTransfer(Long transactionId, PortfolioAccountType accountType);
+  boolean isAccountTransfer(Long transactionId, PortfolioAccountType accountType);
 
-    Page<AccountTransferData> retrieveByStandingInstruction(Long id, SearchParameters searchParameters);
+  Page<AccountTransferData> retrieveByStandingInstruction(
+      Long id, SearchParameters searchParameters);
 
-    Collection<Long> fetchPostInterestTransactionIds(Long accountId);
+  Collection<Long> fetchPostInterestTransactionIds(Long accountId);
 
-    AccountTransferData retrieveRefundByTransferTemplate(Long fromOfficeId, Long fromClientId, Long fromAccountId, Integer fromAccountType,
-            Long toOfficeId, Long toClientId, Long toAccountId, Integer toAccountType);
+  AccountTransferData retrieveRefundByTransferTemplate(
+      Long fromOfficeId,
+      Long fromClientId,
+      Long fromAccountId,
+      Integer fromAccountType,
+      Long toOfficeId,
+      Long toClientId,
+      Long toAccountId,
+      Integer toAccountType);
 
-    BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType,
-            LocalDate transactionDate);
+  BigDecimal getTotalTransactionAmount(
+      Long accountId, Integer accountType, LocalDate transactionDate);
 }

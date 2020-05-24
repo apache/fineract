@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class DatatableSystemErrorException extends AbstractPlatformDomainRuleException {
 
-    public DatatableSystemErrorException(final String msg) {
-        super("error.msg.datatable.system.error", msg, msg);
-    }
+  public DatatableSystemErrorException(final String msg) {
+    super("error.msg.datatable.system.error", msg, msg);
+  }
 }

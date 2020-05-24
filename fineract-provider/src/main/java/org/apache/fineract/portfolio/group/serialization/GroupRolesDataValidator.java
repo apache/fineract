@@ -41,70 +41,107 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroupRolesDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> GROUP_ROLES_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(GroupingTypesApiConstants.roleParamName, GroupingTypesApiConstants.clientIdParamName));
+  private final FromJsonHelper fromApiJsonHelper;
+  private static final Set<String> GROUP_ROLES_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              GroupingTypesApiConstants.roleParamName,
+              GroupingTypesApiConstants.clientIdParamName));
 
-    @Autowired
-    public GroupRolesDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public GroupRolesDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  public void validateForCreateGroupRole(final JsonCommand command) {
+
+    final String json = command.json();
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, GROUP_ROLES_REQUEST_DATA_PARAMETERS);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(GroupingTypesApiConstants.GROUP_ROLE_RESOURCE_NAME);
+
+    final JsonElement element = command.parsedJson();
+
+    final Long roleId =
+        this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.roleParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(GroupingTypesApiConstants.roleParamName)
+        .value(roleId)
+        .notNull()
+        .longGreaterThanZero();
+
+    final Long clientId =
+        this.fromApiJsonHelper.extractLongNamed(
+            GroupingTypesApiConstants.clientIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(GroupingTypesApiConstants.clientIdParamName)
+        .value(clientId)
+        .notNull()
+        .longGreaterThanZero();
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  public void validateForUpdateRole(final JsonCommand command) {
+    final String json = command.json();
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForCreateGroupRole(final JsonCommand command) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, GROUP_ROLES_REQUEST_DATA_PARAMETERS);
 
-        final String json = command.json();
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(GroupingTypesApiConstants.GROUP_ROLE_RESOURCE_NAME);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, GROUP_ROLES_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = command.parsedJson();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final Long roleId =
+        this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.roleParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(GroupingTypesApiConstants.roleParamName)
+        .value(roleId)
+        .ignoreIfNull()
+        .notBlank()
+        .longGreaterThanZero();
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(GroupingTypesApiConstants.GROUP_ROLE_RESOURCE_NAME);
+    final Long clientId =
+        this.fromApiJsonHelper.extractLongNamed(
+            GroupingTypesApiConstants.clientIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(GroupingTypesApiConstants.clientIdParamName)
+        .value(clientId)
+        .ignoreIfNull()
+        .notBlank()
+        .longGreaterThanZero();
 
-        final JsonElement element = command.parsedJson();
-
-        final Long roleId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.roleParamName, element);
-        baseDataValidator.reset().parameter(GroupingTypesApiConstants.roleParamName).value(roleId).notNull().longGreaterThanZero();
-
-        final Long clientId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.clientIdParamName, element);
-        baseDataValidator.reset().parameter(GroupingTypesApiConstants.clientIdParamName).value(clientId).notNull().longGreaterThanZero();
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
-    public void validateForUpdateRole(final JsonCommand command) {
-        final String json = command.json();
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, GROUP_ROLES_REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(GroupingTypesApiConstants.GROUP_ROLE_RESOURCE_NAME);
-
-        final JsonElement element = command.parsedJson();
-
-        final Long roleId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.roleParamName, element);
-        baseDataValidator.reset().parameter(GroupingTypesApiConstants.roleParamName).value(roleId).ignoreIfNull().notBlank()
-                .longGreaterThanZero();
-
-        final Long clientId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.clientIdParamName, element);
-        baseDataValidator.reset().parameter(GroupingTypesApiConstants.clientIdParamName).value(clientId).ignoreIfNull().notBlank()
-                .longGreaterThanZero();
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 }

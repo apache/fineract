@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLCLOSURE", action = "DELETE")
 public class DeleteGLClosureCommandHandler implements NewCommandSourceHandler {
 
-    private final GLClosureWritePlatformService closureWritePlatformService;
+  private final GLClosureWritePlatformService closureWritePlatformService;
 
-    @Autowired
-    public DeleteGLClosureCommandHandler(final GLClosureWritePlatformService guarantorWritePlatformService) {
-        this.closureWritePlatformService = guarantorWritePlatformService;
-    }
+  @Autowired
+  public DeleteGLClosureCommandHandler(
+      final GLClosureWritePlatformService guarantorWritePlatformService) {
+    this.closureWritePlatformService = guarantorWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.closureWritePlatformService.deleteGLClosure(command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.closureWritePlatformService.deleteGLClosure(command.entityId());
+  }
 }

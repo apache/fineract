@@ -20,48 +20,55 @@ package org.apache.fineract.mix.data;
 
 public class MixTaxonomyData {
 
-    public static final Integer PORTFOLIO = 0;
-    public static final Integer BALANCESHEET = 1;
-    public static final Integer INCOME = 2;
-    public static final Integer EXPENSE = 3;
+  public static final Integer PORTFOLIO = 0;
+  public static final Integer BALANCESHEET = 1;
+  public static final Integer INCOME = 2;
+  public static final Integer EXPENSE = 3;
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    private final String name;
-    private final String namespace;
-    private final String dimension;
-    private final Integer type;
-    @SuppressWarnings("unused")
-    private final String description;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public MixTaxonomyData(final Long id, final String name, final String namespace, final String dimension, final Integer type,
-            final String description) {
+  private final String name;
+  private final String namespace;
+  private final String dimension;
+  private final Integer type;
 
-        this.id = id;
-        this.name = name;
-        this.namespace = namespace;
-        this.dimension = dimension;
-        this.type = type;
-        this.description = description;
-    }
+  @SuppressWarnings("unused")
+  private final String description;
 
-    public String getName() {
-        return this.name;
-    }
+  public MixTaxonomyData(
+      final Long id,
+      final String name,
+      final String namespace,
+      final String dimension,
+      final Integer type,
+      final String description) {
 
-    public String getNamespace() {
-        return this.namespace;
-    }
+    this.id = id;
+    this.name = name;
+    this.namespace = namespace;
+    this.dimension = dimension;
+    this.type = type;
+    this.description = description;
+  }
 
-    public String getDimension() {
-        return this.dimension;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public Integer getType() {
-        return this.type;
-    }
+  public String getNamespace() {
+    return this.namespace;
+  }
 
-    public boolean isPortfolio() {
-        return this.type == 5;
-    }
+  public String getDimension() {
+    return this.dimension;
+  }
+
+  public Integer getType() {
+    return this.type;
+  }
+
+  public boolean isPortfolio() {
+    return this.type == 5;
+  }
 }

@@ -23,75 +23,75 @@ import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
 public interface ConfigurationDomainService {
 
-    boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
+  boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
 
-    boolean isAmazonS3Enabled();
+  boolean isAmazonS3Enabled();
 
-    boolean isRescheduleFutureRepaymentsEnabled();
+  boolean isRescheduleFutureRepaymentsEnabled();
 
-    boolean isRescheduleRepaymentsOnHolidaysEnabled();
+  boolean isRescheduleRepaymentsOnHolidaysEnabled();
 
-    boolean allowTransactionsOnHolidayEnabled();
+  boolean allowTransactionsOnHolidayEnabled();
 
-    boolean allowTransactionsOnNonWorkingDayEnabled();
+  boolean allowTransactionsOnNonWorkingDayEnabled();
 
-    boolean isConstraintApproachEnabledForDatatables();
+  boolean isConstraintApproachEnabledForDatatables();
 
-    boolean isEhcacheEnabled();
+  boolean isEhcacheEnabled();
 
-    void updateCache(CacheType cacheType);
+  void updateCache(CacheType cacheType);
 
-    Long retrievePenaltyWaitPeriod();
+  Long retrievePenaltyWaitPeriod();
 
-    boolean isPasswordForcedResetEnable();
+  boolean isPasswordForcedResetEnable();
 
-    Long retrievePasswordLiveTime();
+  Long retrievePasswordLiveTime();
 
-    Long retrieveGraceOnPenaltyPostingPeriod();
+  Long retrieveGraceOnPenaltyPostingPeriod();
 
-    Long retrieveOpeningBalancesContraAccount();
+  Long retrieveOpeningBalancesContraAccount();
 
-    boolean isSavingsInterestPostingAtCurrentPeriodEnd();
+  boolean isSavingsInterestPostingAtCurrentPeriodEnd();
 
-    Integer retrieveFinancialYearBeginningMonth();
+  Integer retrieveFinancialYearBeginningMonth();
 
-    public Integer retrieveMinAllowedClientsInGroup();
+  public Integer retrieveMinAllowedClientsInGroup();
 
-    public Integer retrieveMaxAllowedClientsInGroup();
+  public Integer retrieveMaxAllowedClientsInGroup();
 
-    boolean isMeetingMandatoryForJLGLoans();
+  boolean isMeetingMandatoryForJLGLoans();
 
-    int getRoundingMode();
+  int getRoundingMode();
 
-    boolean isBackdatePenaltiesEnabled();
+  boolean isBackdatePenaltiesEnabled();
 
-    boolean isOrganisationstartDateEnabled();
+  boolean isOrganisationstartDateEnabled();
 
-    Date retrieveOrganisationStartDate();
+  Date retrieveOrganisationStartDate();
 
-    boolean isPaymnetypeApplicableforDisbursementCharge();
+  boolean isPaymnetypeApplicableforDisbursementCharge();
 
-    boolean isInterestChargedFromDateSameAsDisbursementDate();
+  boolean isInterestChargedFromDateSameAsDisbursementDate();
 
-    boolean isSkippingMeetingOnFirstDayOfMonthEnabled();
+  boolean isSkippingMeetingOnFirstDayOfMonthEnabled();
 
-    Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
+  Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
 
-    boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
+  boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
 
-    boolean isDailyTPTLimitEnabled();
+  boolean isDailyTPTLimitEnabled();
 
-    Long getDailyTPTLimit();
+  Long getDailyTPTLimit();
 
-    void removeGlobalConfigurationPropertyDataFromCache(String propertyName);
+  void removeGlobalConfigurationPropertyDataFromCache(String propertyName);
 
-    boolean isSMSOTPDeliveryEnabled();
+  boolean isSMSOTPDeliveryEnabled();
 
-    boolean isEmailOTPDeliveryEnabled();
+  boolean isEmailOTPDeliveryEnabled();
 
-    Integer retrieveOTPCharacterLength();
+  Integer retrieveOTPCharacterLength();
 
-    Integer retrieveOTPLiveTime();
+  Integer retrieveOTPLiveTime();
 
-    boolean isSubRatesEnabled();
+  boolean isSubRatesEnabled();
 }

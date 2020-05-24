@@ -22,7 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class SavingsProductNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public SavingsProductNotFoundException(final Long id) {
-        super("error.msg.savingproduct.id.invalid", "Saving product with identifier " + id + " does not exist", id);
-    }
+  public SavingsProductNotFoundException(final Long id) {
+    super(
+        "error.msg.savingproduct.id.invalid",
+        "Saving product with identifier " + id + " does not exist",
+        id);
+  }
 }

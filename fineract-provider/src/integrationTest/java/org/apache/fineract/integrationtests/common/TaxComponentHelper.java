@@ -27,38 +27,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TaxComponentHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
-    private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;
+  private static final Logger LOG = LoggerFactory.getLogger(TaxComponentHelper.class);
+  private static final String CREATE_TAX_COMPONENT_URL =
+      "/fineract-provider/api/v1/taxes/component?" + Utils.TENANT_IDENTIFIER;
 
-    public static Integer createTaxComponent(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String percentage, final Integer liabilityAccountId) {
-        LOG.info("---------------------------------CREATING A TAX COMPONENT---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL,
-                getTaxComponentAsJSON(percentage, liabilityAccountId), "resourceId");
+  public static Integer createTaxComponent(
+      final RequestSpecification requestSpec,
+      final ResponseSpecification responseSpec,
+      final String percentage,
+      final Integer liabilityAccountId) {
+    LOG.info(
+        "---------------------------------CREATING A TAX"
+            + " COMPONENT---------------------------------------------");
+    return Utils.performServerPost(
+        requestSpec,
+        responseSpec,
+        CREATE_TAX_COMPONENT_URL,
+        getTaxComponentAsJSON(percentage, liabilityAccountId),
+        "resourceId");
+  }
+
+  public static String getTaxComponentAsJSON(
+      final String percentage, final Integer creditAccountId) {
+    final HashMap<String, String> map = getBasicTaxComponentMap(percentage);
+    if (creditAccountId != null) {
+      map.put("creditAccountType", Account.AccountType.LIABILITY.toString());
+      map.put("creditAcountId", String.valueOf(creditAccountId));
     }
+    LOG.info("map :  {}", map);
+    return new Gson().toJson(map);
+  }
 
-    public static String getTaxComponentAsJSON(final String percentage, final Integer creditAccountId) {
-        final HashMap<String, String> map = getBasicTaxComponentMap(percentage);
-        if (creditAccountId != null) {
-            map.put("creditAccountType", Account.AccountType.LIABILITY.toString());
-            map.put("creditAcountId", String.valueOf(creditAccountId));
-        }
-        LOG.info("map :  {}" , map);
-        return new Gson().toJson(map);
-    }
+  public static HashMap<String, String> getBasicTaxComponentMap(final String percentage) {
+    final HashMap<String, String> map = new HashMap<>();
+    map.put("name", randomNameGenerator("Tax_component_Name_", 5));
+    map.put("dateFormat", "dd MMMM yyyy");
+    map.put("locale", "en");
+    map.put("percentage", percentage);
+    map.put("startDate", "01 January 2013");
+    return map;
+  }
 
-    public static HashMap<String, String> getBasicTaxComponentMap(final String percentage) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("name", randomNameGenerator("Tax_component_Name_", 5));
-        map.put("dateFormat", "dd MMMM yyyy");
-        map.put("locale", "en");
-        map.put("percentage", percentage);
-        map.put("startDate", "01 January 2013");
-        return map;
-    }
-
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
-    }
-
+  public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
+    return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
+  }
 }

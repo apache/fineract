@@ -35,108 +35,127 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Table(name = "m_loanproduct_provisioning_entry")
 public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "history_id", referencedColumnName = "id", nullable = false)
-    private ProvisioningEntry entry;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "history_id", referencedColumnName = "id", nullable = false)
+  private ProvisioningEntry entry;
 
-    @Column(name = "criteria_id", nullable = false)
-    private Long criteriaId;
+  @Column(name = "criteria_id", nullable = false)
+  private Long criteriaId;
 
-    @ManyToOne
-    @JoinColumn(name = "office_id", nullable = false)
-    private Office office;
+  @ManyToOne
+  @JoinColumn(name = "office_id", nullable = false)
+  private Office office;
 
-    @Column(name = "currency_code", length = 3)
-    private String currencyCode;
+  @Column(name = "currency_code", length = 3)
+  private String currencyCode;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private LoanProduct loanProduct;
+  @ManyToOne
+  @JoinColumn(name = "product_id", nullable = false)
+  private LoanProduct loanProduct;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private ProvisioningCategory provisioningCategory;
+  @ManyToOne
+  @JoinColumn(name = "category_id", nullable = false)
+  private ProvisioningCategory provisioningCategory;
 
-    @Column(name = "overdue_in_days", nullable = false)
-    private Long overdueInDays;
+  @Column(name = "overdue_in_days", nullable = false)
+  private Long overdueInDays;
 
-    @Column(name = "reseve_amount", nullable = false)
-    private BigDecimal reservedAmount;
+  @Column(name = "reseve_amount", nullable = false)
+  private BigDecimal reservedAmount;
 
-    @ManyToOne
-    @JoinColumn(name = "liability_account", nullable = false)
-    private GLAccount liabilityAccount;
+  @ManyToOne
+  @JoinColumn(name = "liability_account", nullable = false)
+  private GLAccount liabilityAccount;
 
-    @ManyToOne
-    @JoinColumn(name = "expense_account", nullable = false)
-    private GLAccount expenseAccount;
+  @ManyToOne
+  @JoinColumn(name = "expense_account", nullable = false)
+  private GLAccount expenseAccount;
 
-    protected LoanProductProvisioningEntry() {
-    }
+  protected LoanProductProvisioningEntry() {}
 
-    public LoanProductProvisioningEntry(final LoanProduct loanProduct, final Office office, final String currencyCode,
-            final ProvisioningCategory provisioningCategory, final Long overdueInDays, final BigDecimal reservedAmount,
-            final GLAccount liabilityAccount, final GLAccount expenseAccount, Long criteriaId) {
-        this.loanProduct = loanProduct;
-        this.office = office;
-        this.currencyCode = currencyCode;
-        this.provisioningCategory = provisioningCategory;
-        this.overdueInDays = overdueInDays;
-        this.reservedAmount = reservedAmount;
-        this.liabilityAccount = liabilityAccount;
-        this.expenseAccount = expenseAccount;
-        this.criteriaId = criteriaId ;
-    }
+  public LoanProductProvisioningEntry(
+      final LoanProduct loanProduct,
+      final Office office,
+      final String currencyCode,
+      final ProvisioningCategory provisioningCategory,
+      final Long overdueInDays,
+      final BigDecimal reservedAmount,
+      final GLAccount liabilityAccount,
+      final GLAccount expenseAccount,
+      Long criteriaId) {
+    this.loanProduct = loanProduct;
+    this.office = office;
+    this.currencyCode = currencyCode;
+    this.provisioningCategory = provisioningCategory;
+    this.overdueInDays = overdueInDays;
+    this.reservedAmount = reservedAmount;
+    this.liabilityAccount = liabilityAccount;
+    this.expenseAccount = expenseAccount;
+    this.criteriaId = criteriaId;
+  }
 
-    public void setProvisioningEntry(ProvisioningEntry provisioningEntry) {
-        this.entry = provisioningEntry;
-    }
+  public void setProvisioningEntry(ProvisioningEntry provisioningEntry) {
+    this.entry = provisioningEntry;
+  }
 
-    public BigDecimal getReservedAmount() {
-  return this.reservedAmount;
-    }
-    public void addReservedAmount(BigDecimal value) {
-  this.reservedAmount = this.reservedAmount.add(value);
-    }
+  public BigDecimal getReservedAmount() {
+    return this.reservedAmount;
+  }
 
-    public Office getOffice() {
-  return this.office;
- }
+  public void addReservedAmount(BigDecimal value) {
+    this.reservedAmount = this.reservedAmount.add(value);
+  }
 
- public GLAccount getLiabilityAccount() {
-  return this.liabilityAccount;
- }
+  public Office getOffice() {
+    return this.office;
+  }
 
- public String getCurrencyCode() {
-  return this.currencyCode;
- }
+  public GLAccount getLiabilityAccount() {
+    return this.liabilityAccount;
+  }
 
- public GLAccount getExpenseAccount() {
-  return this.expenseAccount;
- }
+  public String getCurrencyCode() {
+    return this.currencyCode;
+  }
 
- // TODO Note that this domain class does equals() & hashCode() on getId() for @JoinColumn attributes, which not all other classes do...
+  public GLAccount getExpenseAccount() {
+    return this.expenseAccount;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
-        LoanProductProvisioningEntry other = (LoanProductProvisioningEntry) obj;
-        return Objects.equals(other.entry.getId(), this.entry.getId())
-  && Objects.equals(other.criteriaId, this.criteriaId)
-         && Objects.equals(other.office.getId(), this.office.getId())
-  && Objects.equals(other.currencyCode, this.currencyCode)
-  && Objects.equals(other.loanProduct.getId(), this.loanProduct.getId())
-            && Objects.equals(other.provisioningCategory.getId(), this.provisioningCategory.getId())
-            && Objects.equals(other.overdueInDays, this.overdueInDays)
-            && Objects.equals(other.reservedAmount, this.reservedAmount)
-  && Objects.equals(other.liabilityAccount.getId(), this.liabilityAccount.getId())
-  && Objects.equals(other.expenseAccount.getId(), this.expenseAccount.getId());
-    }
+  // TODO Note that this domain class does equals() & hashCode() on getId() for @JoinColumn
+  // attributes, which not all other classes do...
 
-    @Override
-    public int hashCode() {
-        // NOT return Objects.hash(entry, criteriaId, office, currencyCode, loanProduct, provisioningCategory, overdueInDays, reservedAmount, liabilityAccount, expenseAccount);
- // to remain consistent with the implementation in equals(), also use getId() here.
- return Objects.hash(entry.getId(), criteriaId, office.getId(), currencyCode, loanProduct.getId(), provisioningCategory.getId(), overdueInDays, reservedAmount, liabilityAccount.getId(), expenseAccount.getId());
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (!obj.getClass().equals(getClass())) return false;
+    LoanProductProvisioningEntry other = (LoanProductProvisioningEntry) obj;
+    return Objects.equals(other.entry.getId(), this.entry.getId())
+        && Objects.equals(other.criteriaId, this.criteriaId)
+        && Objects.equals(other.office.getId(), this.office.getId())
+        && Objects.equals(other.currencyCode, this.currencyCode)
+        && Objects.equals(other.loanProduct.getId(), this.loanProduct.getId())
+        && Objects.equals(other.provisioningCategory.getId(), this.provisioningCategory.getId())
+        && Objects.equals(other.overdueInDays, this.overdueInDays)
+        && Objects.equals(other.reservedAmount, this.reservedAmount)
+        && Objects.equals(other.liabilityAccount.getId(), this.liabilityAccount.getId())
+        && Objects.equals(other.expenseAccount.getId(), this.expenseAccount.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    // NOT return Objects.hash(entry, criteriaId, office, currencyCode, loanProduct,
+    // provisioningCategory, overdueInDays, reservedAmount, liabilityAccount, expenseAccount);
+    // to remain consistent with the implementation in equals(), also use getId() here.
+    return Objects.hash(
+        entry.getId(),
+        criteriaId,
+        office.getId(),
+        currencyCode,
+        loanProduct.getId(),
+        provisioningCategory.getId(),
+        overdueInDays,
+        reservedAmount,
+        liabilityAccount.getId(),
+        expenseAccount.getId());
+  }
 }

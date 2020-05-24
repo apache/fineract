@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.rate.domain;
 
 import java.math.BigDecimal;
@@ -37,10 +36,14 @@ import org.apache.fineract.useradministration.domain.AppUser;
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
-
 @Entity
-@Table(name = "m_rate", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"}, name = "name")})
+@Table(
+    name = "m_rate",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"name"},
+          name = "name")
+    })
 public class Rate extends AbstractAuditableCustom {
 
   @Column(name = "name", length = 250, unique = true)
@@ -59,12 +62,13 @@ public class Rate extends AbstractAuditableCustom {
   @JoinColumn(name = "approve_user", nullable = true)
   private AppUser approveUser;
 
+  public Rate() {}
 
-  public Rate() {
-  }
-
-
-  public Rate(String name, BigDecimal percentage, RateAppliesTo productApply, boolean active,
+  public Rate(
+      String name,
+      BigDecimal percentage,
+      RateAppliesTo productApply,
+      boolean active,
       AppUser approveUser) {
     this.name = name;
     this.percentage = percentage;
@@ -122,17 +126,24 @@ public class Rate extends AbstractAuditableCustom {
 
   @Override
   public String toString() {
-    return "Rate{" +
-        "name='" + name + '\'' +
-        ", percentage=" + percentage +
-        ", productApply='" + productApply + '\'' +
-        ", active=" + active +
-        ", approveUser=" + approveUser +
-        '}';
+    return "Rate{"
+        + "name='"
+        + name
+        + '\''
+        + ", percentage="
+        + percentage
+        + ", productApply='"
+        + productApply
+        + '\''
+        + ", active="
+        + active
+        + ", approveUser="
+        + approveUser
+        + '}';
   }
 
-  public static Rate from(String name, BigDecimal percentage, RateAppliesTo productApply,
-      Boolean active) {
+  public static Rate from(
+      String name, BigDecimal percentage, RateAppliesTo productApply, Boolean active) {
     return new Rate(name, percentage, productApply, active);
   }
 
@@ -142,8 +153,8 @@ public class Rate extends AbstractAuditableCustom {
 
     final BigDecimal percentage = command.bigDecimalValueOfParameterNamed("percentage");
 
-    final RateAppliesTo productApply = RateAppliesTo
-        .fromInt(command.integerValueOfParameterNamed("productApply"));
+    final RateAppliesTo productApply =
+        RateAppliesTo.fromInt(command.integerValueOfParameterNamed("productApply"));
 
     final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
 
@@ -198,8 +209,8 @@ public class Rate extends AbstractAuditableCustom {
     return approveUserId;
   }
 
-  public void assembleFrom(String name, BigDecimal percentage, Integer productApply,
-      boolean active) {
+  public void assembleFrom(
+      String name, BigDecimal percentage, Integer productApply, boolean active) {
     this.name = name;
     this.percentage = percentage;
     this.productApply = productApply;

@@ -50,65 +50,90 @@ import org.springframework.stereotype.Component;
 @Path("/scheduler")
 @Component
 @Api(tags = {"Scheduler"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Scheduler", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Scheduler", description = "")})
 public class SchedulerApiResource {
 
-    private final PlatformSecurityContext context;
-    private final JobRegisterService jobRegisterService;
-    private final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PlatformSecurityContext context;
+  private final JobRegisterService jobRegisterService;
+  private final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
 
-    @Autowired
-    public SchedulerApiResource(final PlatformSecurityContext context, final JobRegisterService jobRegisterService,
-            final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.jobRegisterService = jobRegisterService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
+  @Autowired
+  public SchedulerApiResource(
+      final PlatformSecurityContext context,
+      final JobRegisterService jobRegisterService,
+      final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper) {
+    this.context = context;
+    this.jobRegisterService = jobRegisterService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Scheduler Status", notes = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n" + "scheduler")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerApiResourceSwagger.GetSchedulerResponse.class)})
-    public String retrieveStatus(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
-        final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        final SchedulerDetailData schedulerDetailData = new SchedulerDetailData(isSchedulerRunning);
-        return this.toApiJsonSerializer.serialize(settings, schedulerDetailData,
-                SchedulerJobApiConstants.SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS);
-    }
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve Scheduler Status",
+      notes = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n" + "scheduler")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = SchedulerApiResourceSwagger.GetSchedulerResponse.class)
+  })
+  public String retrieveStatus(@Context final UriInfo uriInfo) {
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
+    final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    final SchedulerDetailData schedulerDetailData = new SchedulerDetailData(isSchedulerRunning);
+    return this.toApiJsonSerializer.serialize(
+        settings,
+        schedulerDetailData,
+        SchedulerJobApiConstants.SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS);
+  }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Activate Scheduler Jobs | Suspend Scheduler Jobs", notes = "Activates the scheduler job service. | Suspends the scheduler job service.")
-    @ApiResponses({@ApiResponse(code = 200, message = "POST :  scheduler?command=start\n\n"+"\n"+"POST : scheduler?command=stop")})
-    public Response changeSchedulerStatus(@QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command") final String commandParam) {
-        // check the logged in user have permissions to update scheduler status
-        final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "UPDATE_SCHEDULER");
-        if (hasNotPermission) {
-            final String authorizationMessage = "User has no authority to update scheduler status";
-            throw new NoAuthorizationException(authorizationMessage);
-        }
-        Response response = Response.status(400).build();
-        if (is(commandParam, SchedulerJobApiConstants.COMMAND_START_SCHEDULER)) {
-            this.jobRegisterService.startScheduler();
-            response = Response.status(202).build();
-        } else if (is(commandParam, SchedulerJobApiConstants.COMMAND_STOP_SCHEDULER)) {
-            this.jobRegisterService.pauseScheduler();
-            response = Response.status(202).build();
-        } else {
-            throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
-        }
-        return response;
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Activate Scheduler Jobs | Suspend Scheduler Jobs",
+      notes = "Activates the scheduler job service. | Suspends the scheduler job service.")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "POST :  scheduler?command=start\n\n" + "\n" + "POST : scheduler?command=stop")
+  })
+  public Response changeSchedulerStatus(
+      @QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command")
+          final String commandParam) {
+    // check the logged in user have permissions to update scheduler status
+    final boolean hasNotPermission =
+        this.context
+            .authenticatedUser()
+            .hasNotPermissionForAnyOf("ALL_FUNCTIONS", "UPDATE_SCHEDULER");
+    if (hasNotPermission) {
+      final String authorizationMessage = "User has no authority to update scheduler status";
+      throw new NoAuthorizationException(authorizationMessage);
     }
+    Response response = Response.status(400).build();
+    if (is(commandParam, SchedulerJobApiConstants.COMMAND_START_SCHEDULER)) {
+      this.jobRegisterService.startScheduler();
+      response = Response.status(202).build();
+    } else if (is(commandParam, SchedulerJobApiConstants.COMMAND_STOP_SCHEDULER)) {
+      this.jobRegisterService.pauseScheduler();
+      response = Response.status(202).build();
+    } else {
+      throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
+    }
+    return response;
+  }
 
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
+  private boolean is(final String commandParam, final String commandValue) {
+    return StringUtils.isNotBlank(commandParam)
+        && commandParam.trim().equalsIgnoreCase(commandValue);
+  }
 }

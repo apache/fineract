@@ -29,19 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "CREATE")
-public class RecurringDepositAccountApplicationSubmittalCommandHandler implements NewCommandSourceHandler {
+public class RecurringDepositAccountApplicationSubmittalCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+  private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public RecurringDepositAccountApplicationSubmittalCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public RecurringDepositAccountApplicationSubmittalCommandHandler(
+      final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.submitRDApplication(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.submitRDApplication(command);
+  }
 }

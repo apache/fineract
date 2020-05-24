@@ -42,105 +42,112 @@ import org.joda.time.LocalDate;
 
 public interface LoanReadPlatformService {
 
-    LoanAccountData retrieveOne(Long loanId);
+  LoanAccountData retrieveOne(Long loanId);
 
-    LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
-                                               Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges);
+  LoanScheduleData retrieveRepaymentSchedule(
+      Long loanId,
+      RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
+      Collection<DisbursementData> disbursementData,
+      boolean isInterestRecalculationEnabled,
+      BigDecimal totalPaidFeeCharges);
 
-    Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
+  Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
-    LoanAccountData retrieveTemplateWithClientAndProductDetails(Long clientId, Long productId);
+  LoanAccountData retrieveTemplateWithClientAndProductDetails(Long clientId, Long productId);
 
-    LoanAccountData retrieveTemplateWithGroupAndProductDetails(Long groupId, Long productId);
+  LoanAccountData retrieveTemplateWithGroupAndProductDetails(Long groupId, Long productId);
 
-    LoanTransactionData retrieveLoanTransactionTemplate(Long loanId);
+  LoanTransactionData retrieveLoanTransactionTemplate(Long loanId);
 
-    LoanTransactionData retrieveWaiveInterestDetails(Long loanId);
+  LoanTransactionData retrieveWaiveInterestDetails(Long loanId);
 
-    LoanTransactionData retrieveLoanTransaction(Long loanId, Long transactionId);
+  LoanTransactionData retrieveLoanTransaction(Long loanId, Long transactionId);
 
-    LoanTransactionData retrieveNewClosureDetails();
+  LoanTransactionData retrieveNewClosureDetails();
 
-    LoanTransactionData retrieveDisbursalTemplate(Long loanId, boolean paymentDetailsRequired);
+  LoanTransactionData retrieveDisbursalTemplate(Long loanId, boolean paymentDetailsRequired);
 
-    LoanApprovalData retrieveApprovalTemplate(Long loanId);
+  LoanApprovalData retrieveApprovalTemplate(Long loanId);
 
-    LoanAccountData retrieveTemplateWithCompleteGroupAndProductDetails(Long groupId, Long productId);
+  LoanAccountData retrieveTemplateWithCompleteGroupAndProductDetails(Long groupId, Long productId);
 
-    LoanAccountData retrieveLoanProductDetailsTemplate(Long productId, Long clientId, Long groupId);
+  LoanAccountData retrieveLoanProductDetailsTemplate(Long productId, Long clientId, Long groupId);
 
-    LoanAccountData retrieveClientDetailsTemplate(Long clientId);
+  LoanAccountData retrieveClientDetailsTemplate(Long clientId);
 
-    LoanAccountData retrieveGroupDetailsTemplate(Long groupId);
+  LoanAccountData retrieveGroupDetailsTemplate(Long groupId);
 
-    LoanAccountData retrieveGroupAndMembersDetailsTemplate(Long groupId);
+  LoanAccountData retrieveGroupAndMembersDetailsTemplate(Long groupId);
 
-    Collection<CalendarData> retrieveCalendars(Long groupId);
+  Collection<CalendarData> retrieveCalendars(Long groupId);
 
-    Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
+  Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
 
-    Collection<StaffData> retrieveAllowedLoanOfficers(Long selectedOfficeId, boolean staffInSelectedOfficeOnly);
+  Collection<StaffData> retrieveAllowedLoanOfficers(
+      Long selectedOfficeId, boolean staffInSelectedOfficeOnly);
 
-    /*
-     * musoni-specific at present - will find overdue scheduled installments
-     * that have a special 'overdue charge' associated with the loan product.
-     *
-     * The 'overdue-charge' is only ever applied once to an installment and as a
-     * result overdue installments with this charge already applied are not
-     * returned.
-     */
-    Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(final Long penaltyWaitPeriod, final Boolean backdatePenalties);
+  /*
+   * musoni-specific at present - will find overdue scheduled installments
+   * that have a special 'overdue charge' associated with the loan product.
+   *
+   * The 'overdue-charge' is only ever applied once to an installment and as a
+   * result overdue installments with this charge already applied are not
+   * returned.
+   */
+  Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(
+      final Long penaltyWaitPeriod, final Boolean backdatePenalties);
 
-    Integer retriveLoanCounter(Long groupId, Integer loanType, Long productId);
+  Integer retriveLoanCounter(Long groupId, Integer loanType, Long productId);
 
-    Integer retriveLoanCounter(Long clientId, Long productId);
+  Integer retriveLoanCounter(Long clientId, Long productId);
 
-    Collection<DisbursementData> retrieveLoanDisbursementDetails(Long loanId);
+  Collection<DisbursementData> retrieveLoanDisbursementDetails(Long loanId);
 
-    DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId);
+  DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId);
 
-    Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType);
+  Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType);
 
-    Collection<LoanScheduleAccrualData> retriveScheduleAccrualData();
+  Collection<LoanScheduleAccrualData> retriveScheduleAccrualData();
 
-    LoanTransactionData retrieveRecoveryPaymentTemplate(Long loanId);
+  LoanTransactionData retrieveRecoveryPaymentTemplate(Long loanId);
 
-    LoanTransactionData retrieveLoanWriteoffTemplate(Long loanId);
+  LoanTransactionData retrieveLoanWriteoffTemplate(Long loanId);
 
-    Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate);
+  Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate);
 
-    Collection<Long> fetchLoansForInterestRecalculation();
+  Collection<Long> fetchLoansForInterestRecalculation();
 
-    List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy);
+  List<Long> fetchLoansForInterestRecalculation(
+      Integer pageSize, Long maxLoanIdInList, String officeHierarchy);
 
-    LoanTransactionData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate onDate);
+  LoanTransactionData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate onDate);
 
-    Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
+  Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
 
-    Collection<LoanSchedulePeriodData> fetchWaiverInterestRepaymentData(Long loanId);
+  Collection<LoanSchedulePeriodData> fetchWaiverInterestRepaymentData(Long loanId);
 
-    boolean isGuaranteeRequired(Long loanId);
+  boolean isGuaranteeRequired(Long loanId);
 
-    Date retrieveMinimumDateOfRepaymentTransaction(Long loanId);
+  Date retrieveMinimumDateOfRepaymentTransaction(Long loanId);
 
-    PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId);
+  PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId);
 
-    LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
+  LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
 
-    Collection<InterestRatePeriodData> retrieveLoanInterestRatePeriodData(LoanAccountData loan);
+  Collection<InterestRatePeriodData> retrieveLoanInterestRatePeriodData(LoanAccountData loan);
 
-    Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions();
+  Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions();
 
-    LoanTransactionData retrieveLoanForeclosureTemplate(final Long loanId, final LocalDate transactionDate);
+  LoanTransactionData retrieveLoanForeclosureTemplate(
+      final Long loanId, final LocalDate transactionDate);
 
-    LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
+  LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
 
-    Long retrieveLoanIdByAccountNumber(String loanAccountNumber);
+  Long retrieveLoanIdByAccountNumber(String loanAccountNumber);
 
-    String retrieveAccountNumberByAccountId(Long accountId);
+  String retrieveAccountNumberByAccountId(Long accountId);
 
-    Integer retrieveNumberOfActiveLoans();
+  Integer retrieveNumberOfActiveLoans();
 
-    List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber);
-
+  List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber);
 }

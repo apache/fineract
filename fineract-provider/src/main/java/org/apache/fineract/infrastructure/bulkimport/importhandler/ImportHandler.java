@@ -22,6 +22,5 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public interface ImportHandler {
-    public Count process(Workbook workbook, String locale, String dateFormat);
+  public Count process(Workbook workbook, String locale, String dateFormat);
 }
-

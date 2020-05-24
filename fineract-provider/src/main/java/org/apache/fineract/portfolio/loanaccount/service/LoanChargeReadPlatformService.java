@@ -27,19 +27,23 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 public interface LoanChargeReadPlatformService {
 
-    ChargeData retrieveLoanChargeTemplate();
+  ChargeData retrieveLoanChargeTemplate();
 
-    Collection<LoanChargeData> retrieveLoanCharges(Long loanId);
+  Collection<LoanChargeData> retrieveLoanCharges(Long loanId);
 
-    LoanChargeData retrieveLoanChargeDetails(Long loanChargeId, Long loanId);
+  LoanChargeData retrieveLoanChargeDetails(Long loanChargeId, Long loanId);
 
-    Collection<LoanChargeData> retrieveLoanChargesForFeePayment(Integer paymentMode, Integer loanStatus);
+  Collection<LoanChargeData> retrieveLoanChargesForFeePayment(
+      Integer paymentMode, Integer loanStatus);
 
-    Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId, boolean onlyPaymentPendingCharges);
+  Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(
+      Long loanChargeId, boolean onlyPaymentPendingCharges);
 
-    Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(Long loanId, Long chargeId, Integer periodNumber);
+  Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(
+      Long loanId, Long chargeId, Integer periodNumber);
 
-    Collection<LoanChargeData> retrieveLoanChargesForAccural(Long loanId);
+  Collection<LoanChargeData> retrieveLoanChargesForAccural(Long loanId);
 
-    Collection<LoanChargePaidByData> retriveLoanChargesPaidBy(Long chargeId, LoanTransactionType transactionType, Integer installmentNumber);
+  Collection<LoanChargePaidByData> retriveLoanChargesPaidBy(
+      Long chargeId, LoanTransactionType transactionType, Integer installmentNumber);
 }

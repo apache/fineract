@@ -45,18 +45,24 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * and MariaDB4j (because those differ in the subclasses).
  */
 @Configuration
-@Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class,
-    MessagingConfiguration.class, WebTwoFactorXmlConfiguration.class })
-@ImportResource({ "classpath*:META-INF/spring/appContext.xml" })
-@PropertySource(value="classpath:META-INF/spring/jdbc.properties")
-@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        FlywayAutoConfiguration.class,
-        GsonAutoConfiguration.class,
-        JdbcTemplateAutoConfiguration.class})
+@Import({
+  WebXmlConfiguration.class,
+  WebXmlOauthConfiguration.class,
+  WebFrontEndConfiguration.class,
+  MessagingConfiguration.class,
+  WebTwoFactorXmlConfiguration.class
+})
+@ImportResource({"classpath*:META-INF/spring/appContext.xml"})
+@PropertySource(value = "classpath:META-INF/spring/jdbc.properties")
+@EnableAutoConfiguration(
+    exclude = {
+      DataSourceAutoConfiguration.class,
+      HibernateJpaAutoConfiguration.class,
+      DataSourceTransactionManagerAutoConfiguration.class,
+      FlywayAutoConfiguration.class,
+      GsonAutoConfiguration.class,
+      JdbcTemplateAutoConfiguration.class
+    })
 @EnableWebSecurity
 @EnableTransactionManagement
-public abstract class AbstractApplicationConfiguration {
-
-}
+public abstract class AbstractApplicationConfiguration {}

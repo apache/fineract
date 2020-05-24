@@ -24,6 +24,6 @@ import org.apache.fineract.portfolio.shareproducts.data.ShareProductDividendPayO
 
 public interface ShareProductDividendReadPlatformService {
 
-    Page<ShareProductDividendPayOutData> retriveAll(Long productId, Integer status, SearchParameters searchParameters);
-
+  Page<ShareProductDividendPayOutData> retriveAll(
+      Long productId, Integer status, SearchParameters searchParameters);
 }

@@ -23,7 +23,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface LoanScheduleWritePlatformService {
 
-    public CommandProcessingResult addLoanScheduleVariations(final Long loanId, final JsonCommand command);
+  public CommandProcessingResult addLoanScheduleVariations(
+      final Long loanId, final JsonCommand command);
 
-    CommandProcessingResult deleteLoanScheduleVariations(final Long loanId);
+  CommandProcessingResult deleteLoanScheduleVariations(final Long loanId);
 }

@@ -31,18 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PROVISIONCRITERIA", action = "CREATE")
 public class CreateProvisioningCriteriaRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService;
+  private final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService;
 
-    @Autowired
-    public CreateProvisioningCriteriaRequestCommandHandler(
-            final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
-        this.provisioningCriteriaWritePlatformService = provisioningCriteriaWritePlatformService;
-    }
+  @Autowired
+  public CreateProvisioningCriteriaRequestCommandHandler(
+      final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
+    this.provisioningCriteriaWritePlatformService = provisioningCriteriaWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningCriteriaWritePlatformService.createProvisioningCriteria(jsonCommand);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.provisioningCriteriaWritePlatformService.createProvisioningCriteria(jsonCommand);
+  }
 }

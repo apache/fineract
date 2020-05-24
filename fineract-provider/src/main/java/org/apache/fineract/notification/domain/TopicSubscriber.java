@@ -31,48 +31,46 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "topic_subscriber")
 public class TopicSubscriber extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
+  @ManyToOne
+  @JoinColumn(name = "topic_id")
+  private Topic topic;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private AppUser subscriber;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private AppUser subscriber;
 
-    @Column(name = "subscription_date")
-    private Date subscriptionDate;
+  @Column(name = "subscription_date")
+  private Date subscriptionDate;
 
-    public TopicSubscriber() {
-    }
+  public TopicSubscriber() {}
 
-    public TopicSubscriber(Topic topic, AppUser subscriber, Date subscriptionDate) {
-        this.topic = topic;
-        this.subscriber = subscriber;
-        this.subscriptionDate = subscriptionDate;
-    }
+  public TopicSubscriber(Topic topic, AppUser subscriber, Date subscriptionDate) {
+    this.topic = topic;
+    this.subscriber = subscriber;
+    this.subscriptionDate = subscriptionDate;
+  }
 
-    public Topic getTopic() {
-        return this.topic;
-    }
+  public Topic getTopic() {
+    return this.topic;
+  }
 
-    public void setTopic(Topic topic) {
-        this.topic = topic;
-    }
+  public void setTopic(Topic topic) {
+    this.topic = topic;
+  }
 
-    public AppUser getSubscriber() {
-        return this.subscriber;
-    }
+  public AppUser getSubscriber() {
+    return this.subscriber;
+  }
 
-    public void setSubscriber(AppUser subscriber) {
-        this.subscriber = subscriber;
-    }
+  public void setSubscriber(AppUser subscriber) {
+    this.subscriber = subscriber;
+  }
 
-    public Date getSubscriptionDate() {
-        return this.subscriptionDate;
-    }
+  public Date getSubscriptionDate() {
+    return this.subscriptionDate;
+  }
 
-    public void setSubscriptionDate(Date subscriptionDate) {
-        this.subscriptionDate = subscriptionDate;
-    }
-
+  public void setSubscriptionDate(Date subscriptionDate) {
+    this.subscriptionDate = subscriptionDate;
+  }
 }

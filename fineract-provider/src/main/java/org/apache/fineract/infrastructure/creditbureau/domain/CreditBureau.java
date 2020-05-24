@@ -31,80 +31,80 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_creditbureau")
 public class CreditBureau extends AbstractPersistableCustom {
 
+  private String name;
 
-    private String name;
+  private String product;
 
-    private String product;
+  private String country;
 
-    private String country;
+  private String implementationKey;
 
-    private String implementationKey;
+  @OneToMany(mappedBy = "organisation_creditbureau", cascade = CascadeType.ALL)
+  private List<CreditBureauLoanProductMapping> CreditBureauLoanProductMapping = new ArrayList<>();
 
-    @OneToMany(mappedBy = "organisation_creditbureau", cascade = CascadeType.ALL)
-    private List<CreditBureauLoanProductMapping> CreditBureauLoanProductMapping = new ArrayList<>();
+  public CreditBureau(
+      String name,
+      String product,
+      String country,
+      String implementationKey,
+      List<CreditBureauLoanProductMapping> CreditBureauLoanProductMapping) {
+    this.name = name;
+    this.product = product;
+    this.country = country;
+    this.implementationKey = implementationKey;
+    this.CreditBureauLoanProductMapping = CreditBureauLoanProductMapping;
+  }
 
-    public CreditBureau(String name, String product, String country, String implementationKey,
-            List<CreditBureauLoanProductMapping> CreditBureauLoanProductMapping) {
-        this.name = name;
-        this.product = product;
-        this.country = country;
-        this.implementationKey = implementationKey;
-        this.CreditBureauLoanProductMapping = CreditBureauLoanProductMapping;
-    }
+  public CreditBureau() {}
 
-    public CreditBureau() {
+  public static CreditBureau fromJson(final JsonCommand command) {
 
-    }
+    final String tname = command.stringValueOfParameterNamed("name");
+    final String tproduct = command.stringValueOfParameterNamed("product");
+    final String tcountry = command.stringValueOfParameterNamed("country");
+    final String timplementationKey = command.stringValueOfParameterNamed("implementationKey");
 
-    public static CreditBureau fromJson(final JsonCommand command) {
+    return new CreditBureau(tname, tproduct, tcountry, timplementationKey, null);
+  }
 
-        final String tname = command.stringValueOfParameterNamed("name");
-        final String tproduct = command.stringValueOfParameterNamed("product");
-        final String tcountry = command.stringValueOfParameterNamed("country");
-        final String timplementationKey = command.stringValueOfParameterNamed("implementationKey");
+  public String getName() {
+    return this.name;
+  }
 
-        return new CreditBureau(tname, tproduct, tcountry, timplementationKey, null);
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    }
+  public String getProduct() {
+    return this.product;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public void setProduct(String product) {
+    this.product = product;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getCountry() {
+    return this.country;
+  }
 
-    public String getProduct() {
-        return this.product;
-    }
+  public void setCountry(String country) {
+    this.country = country;
+  }
 
-    public void setProduct(String product) {
-        this.product = product;
-    }
+  public String getImplementationKey() {
+    return this.implementationKey;
+  }
 
-    public String getCountry() {
-        return this.country;
-    }
+  public void setImplementationKey(String implementationKey) {
+    this.implementationKey = implementationKey;
+  }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+  public List<CreditBureauLoanProductMapping> getCreditBureauLpMapping() {
+    return this.CreditBureauLoanProductMapping;
+  }
 
-    public String getImplementationKey() {
-        return this.implementationKey;
-    }
-
-    public void setImplementationKey(String implementationKey) {
-        this.implementationKey = implementationKey;
-    }
-
-    public List<CreditBureauLoanProductMapping> getCreditBureauLpMapping() {
-        return this.CreditBureauLoanProductMapping;
-    }
-
-    public void setCreditBureauLpMapping(List<CreditBureauLoanProductMapping> CreditBureauLoanProductMapping) {
-        this.CreditBureauLoanProductMapping = CreditBureauLoanProductMapping;
-    }
-
+  public void setCreditBureauLpMapping(
+      List<CreditBureauLoanProductMapping> CreditBureauLoanProductMapping) {
+    this.CreditBureauLoanProductMapping = CreditBureauLoanProductMapping;
+  }
 }

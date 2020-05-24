@@ -21,45 +21,47 @@ package org.apache.fineract.portfolio.savings.data;
 import org.joda.time.LocalDate;
 
 public class SavingsApproval {
-    private final transient Integer rowIndex;
+  private final transient Integer rowIndex;
 
-    private final LocalDate approvedOnDate;
+  private final LocalDate approvedOnDate;
 
-    private final String dateFormat;
+  private final String dateFormat;
 
-    private final String locale;
+  private final String locale;
 
-    private final String note;
+  private final String note;
 
-    public static SavingsApproval importInstance(LocalDate approvedOnDate, Integer rowIndex,String locale,String dateFormat){
-        return new SavingsApproval(approvedOnDate, rowIndex,locale,dateFormat);
-    }
+  public static SavingsApproval importInstance(
+      LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
+    return new SavingsApproval(approvedOnDate, rowIndex, locale, dateFormat);
+  }
 
-    private SavingsApproval(LocalDate approvedOnDate, Integer rowIndex,String locale,String dateFormat ) {
-        this.approvedOnDate = approvedOnDate;
-        this.rowIndex = rowIndex;
-        this.dateFormat = dateFormat;
-        this.locale = locale;
-        this.note = "";
-    }
+  private SavingsApproval(
+      LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
+    this.approvedOnDate = approvedOnDate;
+    this.rowIndex = rowIndex;
+    this.dateFormat = dateFormat;
+    this.locale = locale;
+    this.note = "";
+  }
 
-    public LocalDate getApprovedOnDate() {
-        return approvedOnDate;
-    }
+  public LocalDate getApprovedOnDate() {
+    return approvedOnDate;
+  }
 
-    public String getLocale() {
-        return locale;
-    }
+  public String getLocale() {
+    return locale;
+  }
 
-    public String getDateFormat() {
-        return dateFormat;
-    }
+  public String getDateFormat() {
+    return dateFormat;
+  }
 
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
+  public Integer getRowIndex() {
+    return rowIndex;
+  }
 
-    public String getNote() {
-        return note;
-    }
+  public String getNote() {
+    return note;
+  }
 }

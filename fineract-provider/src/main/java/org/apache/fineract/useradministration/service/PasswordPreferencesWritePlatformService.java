@@ -23,6 +23,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface PasswordPreferencesWritePlatformService {
 
-    CommandProcessingResult updatePreferences(JsonCommand command);
-
+  CommandProcessingResult updatePreferences(JsonCommand command);
 }

@@ -30,16 +30,15 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "TAXCOMPONENT", action = "CREATE")
 public class CreateTaxComponentCommandHandler implements NewCommandSourceHandler {
 
-    private final TaxWritePlatformService taxWritePlatformService;
+  private final TaxWritePlatformService taxWritePlatformService;
 
-    @Autowired
-    public CreateTaxComponentCommandHandler(final TaxWritePlatformService taxWritePlatformService) {
-        this.taxWritePlatformService = taxWritePlatformService;
-    }
+  @Autowired
+  public CreateTaxComponentCommandHandler(final TaxWritePlatformService taxWritePlatformService) {
+    this.taxWritePlatformService = taxWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.taxWritePlatformService.createTaxComponent(jsonCommand);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.taxWritePlatformService.createTaxComponent(jsonCommand);
+  }
 }

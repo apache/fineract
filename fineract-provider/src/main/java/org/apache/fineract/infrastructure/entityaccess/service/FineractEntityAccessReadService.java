@@ -25,22 +25,30 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType
 
 public interface FineractEntityAccessReadService {
 
-    Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType,
-                       final Long relId, final  Long fromEntityId,boolean includeAllSubOffices);
+  Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(
+      FineractEntityType firstEntityType,
+      final Long relId,
+      final Long fromEntityId,
+      boolean includeAllSubOffices);
 
-    String getSQLQueryInClause_WithListOfIDsForEntityAccess( FineractEntityType firstEntityType,
-                         final Long relId,final Long fromEntityId ,boolean includeAllOffices);
+  String getSQLQueryInClause_WithListOfIDsForEntityAccess(
+      FineractEntityType firstEntityType,
+      final Long relId,
+      final Long fromEntityId,
+      boolean includeAllOffices);
 
-    String getSQLQueryInClauseIDList_ForLoanProductsForOffice(Long loanProductId, boolean includeAllOffices);
+  String getSQLQueryInClauseIDList_ForLoanProductsForOffice(
+      Long loanProductId, boolean includeAllOffices);
 
-    String getSQLQueryInClauseIDList_ForSavingsProductsForOffice(Long savingsProductId, boolean includeAllOffices);
+  String getSQLQueryInClauseIDList_ForSavingsProductsForOffice(
+      Long savingsProductId, boolean includeAllOffices);
 
-    String getSQLQueryInClauseIDList_ForChargesForOffice(Long officeId, boolean includeAllOffices);
+  String getSQLQueryInClauseIDList_ForChargesForOffice(Long officeId, boolean includeAllOffices);
 
-    Collection<FineractEntityRelationData> retrieveAllSupportedMappingTypes();
+  Collection<FineractEntityRelationData> retrieveAllSupportedMappingTypes();
 
-    Collection<FineractEntityToEntityMappingData> retrieveOneMapping(Long mapId);
+  Collection<FineractEntityToEntityMappingData> retrieveOneMapping(Long mapId);
 
-    Collection<FineractEntityToEntityMappingData> retrieveEntityToEntityMappings(Long mapId, Long fromoId, Long toId);
-
+  Collection<FineractEntityToEntityMappingData> retrieveEntityToEntityMappings(
+      Long mapId, Long fromoId, Long toId);
 }

@@ -29,21 +29,24 @@ import org.apache.fineract.portfolio.group.data.StaffCenterData;
 
 public interface CenterReadPlatformService {
 
-    CenterData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
+  CenterData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
 
-    CenterData retrieveOne(Long centerId);
+  CenterData retrieveOne(Long centerId);
 
-    Collection<CenterData> retrieveAllForDropdown(Long officeId);
+  Collection<CenterData> retrieveAllForDropdown(Long officeId);
 
-    Page<CenterData> retrievePagedAll(SearchParameters searchParameters, PaginationParameters parameters);
+  Page<CenterData> retrievePagedAll(
+      SearchParameters searchParameters, PaginationParameters parameters);
 
-    Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters);
+  Collection<CenterData> retrieveAll(
+      SearchParameters searchParameters, PaginationParameters parameters);
 
-    GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
+  GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
 
-    Collection<GroupGeneralData> retrieveAssociatedGroups(Long centerId);
+  Collection<GroupGeneralData> retrieveAssociatedGroups(Long centerId);
 
-    CenterData retrieveCenterWithClosureReasons();
+  CenterData retrieveCenterWithClosureReasons();
 
-    Collection<StaffCenterData> retriveAllCentersByMeetingDate(Long officeId, Date meetingDate, Long staffId);
+  Collection<StaffCenterData> retriveAllCentersByMeetingDate(
+      Long officeId, Date meetingDate, Long staffId);
 }

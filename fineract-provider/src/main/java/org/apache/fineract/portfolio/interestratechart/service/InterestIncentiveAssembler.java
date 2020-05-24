@@ -49,54 +49,77 @@ import org.springframework.stereotype.Service;
 @Service
 public class InterestIncentiveAssembler {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public InterestIncentiveAssembler(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
+  @Autowired
+  public InterestIncentiveAssembler(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
 
-    public Collection<InterestIncentives> assembleIncentivesFrom(final JsonElement element, InterestRateChartSlab interestRateChartSlab,
-            final Locale locale) {
-        final Collection<InterestIncentives> interestIncentivesSet = new HashSet<>();
+  public Collection<InterestIncentives> assembleIncentivesFrom(
+      final JsonElement element, InterestRateChartSlab interestRateChartSlab, final Locale locale) {
+    final Collection<InterestIncentives> interestIncentivesSet = new HashSet<>();
 
-        if (element.isJsonObject()) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            if (topLevelJsonElement.has(incentivesParamName) && topLevelJsonElement.get(incentivesParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(incentivesParamName).getAsJsonArray();
-                for (int i = 0; i < array.size(); i++) {
-                    final JsonObject incentiveElement = array.get(i).getAsJsonObject();
-                    final InterestIncentives incentives = this.assembleFrom(incentiveElement, interestRateChartSlab, locale);
-                    interestIncentivesSet.add(incentives);
-                }
-            }
+    if (element.isJsonObject()) {
+      final JsonObject topLevelJsonElement = element.getAsJsonObject();
+      if (topLevelJsonElement.has(incentivesParamName)
+          && topLevelJsonElement.get(incentivesParamName).isJsonArray()) {
+        final JsonArray array = topLevelJsonElement.get(incentivesParamName).getAsJsonArray();
+        for (int i = 0; i < array.size(); i++) {
+          final JsonObject incentiveElement = array.get(i).getAsJsonObject();
+          final InterestIncentives incentives =
+              this.assembleFrom(incentiveElement, interestRateChartSlab, locale);
+          interestIncentivesSet.add(incentives);
         }
-
-        return interestIncentivesSet;
+      }
     }
 
-    private InterestIncentives assembleFrom(final JsonElement element, final InterestRateChartSlab interestRateChartSlab,
-            final Locale locale) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
-        InterestIncentivesFields incentivesFields = createInterestIncentiveFields(element, baseDataValidator, locale);
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        return new InterestIncentives(interestRateChartSlab, incentivesFields);
-    }
+    return interestIncentivesSet;
+  }
 
-    private InterestIncentivesFields createInterestIncentiveFields(final JsonElement element, final DataValidatorBuilder baseDataValidator,
-            final Locale locale) {
-        Integer entityType = this.fromApiJsonHelper.extractIntegerNamed(entityTypeParamName, element, locale);
-        Integer conditionType = this.fromApiJsonHelper.extractIntegerNamed(conditionTypeParamName, element, locale);
-        Integer attributeName = this.fromApiJsonHelper.extractIntegerNamed(attributeNameParamName, element, locale);
-        String attributeValue = this.fromApiJsonHelper.extractStringNamed(attributeValueParamName, element);
-        Integer incentiveType = this.fromApiJsonHelper.extractIntegerNamed(incentiveTypeparamName, element, locale);
-        BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, element, locale);
-        return InterestIncentivesFields.createNew(entityType, attributeName, conditionType, attributeValue, incentiveType, amount,
-                baseDataValidator);
-    }
+  private InterestIncentives assembleFrom(
+      final JsonElement element,
+      final InterestRateChartSlab interestRateChartSlab,
+      final Locale locale) {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
+    InterestIncentivesFields incentivesFields =
+        createInterestIncentiveFields(element, baseDataValidator, locale);
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    return new InterestIncentives(interestRateChartSlab, incentivesFields);
+  }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+  private InterestIncentivesFields createInterestIncentiveFields(
+      final JsonElement element,
+      final DataValidatorBuilder baseDataValidator,
+      final Locale locale) {
+    Integer entityType =
+        this.fromApiJsonHelper.extractIntegerNamed(entityTypeParamName, element, locale);
+    Integer conditionType =
+        this.fromApiJsonHelper.extractIntegerNamed(conditionTypeParamName, element, locale);
+    Integer attributeName =
+        this.fromApiJsonHelper.extractIntegerNamed(attributeNameParamName, element, locale);
+    String attributeValue =
+        this.fromApiJsonHelper.extractStringNamed(attributeValueParamName, element);
+    Integer incentiveType =
+        this.fromApiJsonHelper.extractIntegerNamed(incentiveTypeparamName, element, locale);
+    BigDecimal amount =
+        this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, element, locale);
+    return InterestIncentivesFields.createNew(
+        entityType,
+        attributeName,
+        conditionType,
+        attributeValue,
+        incentiveType,
+        amount,
+        baseDataValidator);
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
+  }
 }

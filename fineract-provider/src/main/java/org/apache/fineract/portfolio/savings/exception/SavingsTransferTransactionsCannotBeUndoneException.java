@@ -24,11 +24,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * {@link AbstractPlatformDomainRuleException} thrown an action to transition a
  * loan from one state to another violates a domain rule.
  */
-public class SavingsTransferTransactionsCannotBeUndoneException extends AbstractPlatformDomainRuleException {
+public class SavingsTransferTransactionsCannotBeUndoneException
+    extends AbstractPlatformDomainRuleException {
 
-    public SavingsTransferTransactionsCannotBeUndoneException(final Long transactionId) {
-        super("error.msg.savings.transfer.transactions.cannot.be.undone",
-                "Transactions related to savings account transfers cannot be undone", transactionId);
-    }
-
+  public SavingsTransferTransactionsCannotBeUndoneException(final Long transactionId) {
+    super(
+        "error.msg.savings.transfer.transactions.cannot.be.undone",
+        "Transactions related to savings account transfers cannot be undone",
+        transactionId);
+  }
 }

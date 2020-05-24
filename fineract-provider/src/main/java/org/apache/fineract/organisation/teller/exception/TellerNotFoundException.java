@@ -28,15 +28,16 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class TellerNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    private static final String ERROR_MESSAGE_CODE = "error.msg.teller.not.found";
-    private static final String DEFAULT_ERROR_MESSAGE = "Teller with identifier {0,number,long} not found!";
+  private static final String ERROR_MESSAGE_CODE = "error.msg.teller.not.found";
+  private static final String DEFAULT_ERROR_MESSAGE =
+      "Teller with identifier {0,number,long} not found!";
 
-    /**
-     * Creates a new instance.
-     *
-     * @param tellerId the primary key of the teller
-     */
-    public TellerNotFoundException(Long tellerId) {
-        super(ERROR_MESSAGE_CODE, DEFAULT_ERROR_MESSAGE, tellerId);
-    }
+  /**
+   * Creates a new instance.
+   *
+   * @param tellerId the primary key of the teller
+   */
+  public TellerNotFoundException(Long tellerId) {
+    super(ERROR_MESSAGE_CODE, DEFAULT_ERROR_MESSAGE, tellerId);
+  }
 }

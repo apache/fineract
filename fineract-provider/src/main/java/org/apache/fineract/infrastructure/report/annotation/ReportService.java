@@ -29,8 +29,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface ReportService {
 
-    /**
-     * @return the type of the report
-     */
-    String type();
+  /**
+   * @return the type of the report
+   */
+  String type();
 }

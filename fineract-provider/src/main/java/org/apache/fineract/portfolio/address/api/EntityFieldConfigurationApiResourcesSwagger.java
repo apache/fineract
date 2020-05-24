@@ -25,28 +25,31 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 12/01/17.
  */
 final class EntityFieldConfigurationApiResourcesSwagger {
-    private EntityFieldConfigurationApiResourcesSwagger() {
-    }
+  private EntityFieldConfigurationApiResourcesSwagger() {}
 
-    @ApiModel(value = "GetFieldConfigurationEntityResponse")
-    public static final class GetFieldConfigurationEntityResponse {
-        private GetFieldConfigurationEntityResponse() {
-        }
+  @ApiModel(value = "GetFieldConfigurationEntityResponse")
+  public static final class GetFieldConfigurationEntityResponse {
+    private GetFieldConfigurationEntityResponse() {}
 
-        @ApiModelProperty(example = "1")
-        public Integer fieldConfigurationId;
-        @ApiModelProperty(example = "ADDRESS")
-        public String entity;
-        @ApiModelProperty(example = "CLIENT")
-        public String subentity;
-        @ApiModelProperty(example = "addressType")
-        public String field;
-        @ApiModelProperty(example = "true")
-        public String is_enabled;
-        @ApiModelProperty(example = "false")
-        public String is_mandatory;
-        @ApiModelProperty(example = " ")
-        public String validation_regex;
-    }
+    @ApiModelProperty(example = "1")
+    public Integer fieldConfigurationId;
+
+    @ApiModelProperty(example = "ADDRESS")
+    public String entity;
+
+    @ApiModelProperty(example = "CLIENT")
+    public String subentity;
+
+    @ApiModelProperty(example = "addressType")
+    public String field;
+
+    @ApiModelProperty(example = "true")
+    public String is_enabled;
+
+    @ApiModelProperty(example = "false")
+    public String is_mandatory;
+
+    @ApiModelProperty(example = " ")
+    public String validation_regex;
+  }
 }
-

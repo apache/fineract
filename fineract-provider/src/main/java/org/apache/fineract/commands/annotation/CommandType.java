@@ -38,13 +38,13 @@ import java.lang.annotation.Target;
 @Documented
 public @interface CommandType {
 
-    /**
-     * Returns the name of the entity for this {@link CommandType}.
-     */
-    String entity();
+  /**
+   * Returns the name of the entity for this {@link CommandType}.
+   */
+  String entity();
 
-    /**
-     * Return the name of the action for this {@link CommandType}.
-     */
-    String action();
+  /**
+   * Return the name of the action for this {@link CommandType}.
+   */
+  String action();
 }

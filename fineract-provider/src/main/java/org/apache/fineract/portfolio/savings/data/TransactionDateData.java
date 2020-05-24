@@ -26,9 +26,9 @@ import org.joda.time.LocalDate;
 @SuppressWarnings("unused")
 public class TransactionDateData {
 
-    private final LocalDate date;
+  private final LocalDate date;
 
-    public TransactionDateData(final LocalDate date) {
-        this.date = date;
-    }
+  public TransactionDateData(final LocalDate date) {
+    this.date = date;
+  }
 }

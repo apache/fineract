@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "DISASSOCIATECLIENTS")
 public class DisassociateClientsFromGroupCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService writePlatformService;
+  private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Autowired
-    public DisassociateClientsFromGroupCommandHandler(final GroupingTypesWritePlatformService clientWritePlatformService) {
-        this.writePlatformService = clientWritePlatformService;
-    }
+  @Autowired
+  public DisassociateClientsFromGroupCommandHandler(
+      final GroupingTypesWritePlatformService clientWritePlatformService) {
+    this.writePlatformService = clientWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.disassociateClientsFromGroup(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.disassociateClientsFromGroup(command.entityId(), command);
+  }
 }

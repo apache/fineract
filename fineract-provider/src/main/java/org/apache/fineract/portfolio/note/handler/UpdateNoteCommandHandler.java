@@ -29,18 +29,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UpdateNoteCommandHandler implements NewCommandSourceHandler {
 
-    private final NoteWritePlatformService writePlatformService;
+  private final NoteWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateNoteCommandHandler(final NoteWritePlatformService noteWritePlatformService) {
-        this.writePlatformService = noteWritePlatformService;
-    }
+  @Autowired
+  public UpdateNoteCommandHandler(final NoteWritePlatformService noteWritePlatformService) {
+    this.writePlatformService = noteWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateNote(command);
-    }
-
+    return this.writePlatformService.updateNote(command);
+  }
 }

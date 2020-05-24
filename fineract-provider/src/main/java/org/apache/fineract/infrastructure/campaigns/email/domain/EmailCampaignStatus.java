@@ -19,53 +19,53 @@
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 public enum EmailCampaignStatus {
+  INVALID(0, "emailCampaignStatus.invalid"), //
+  PENDING(100, "emailCampaignStatus.pending"), //
+  ACTIVE(300, "emailCampaignStatus.active"), //
+  CLOSED(600, "emailCampaignStatus.closed");
 
-    INVALID(0, "emailCampaignStatus.invalid"), //
-    PENDING(100, "emailCampaignStatus.pending"), //
-    ACTIVE(300, "emailCampaignStatus.active"), //
-    CLOSED(600, "emailCampaignStatus.closed");
+  private final Integer value;
+  private final String code;
 
-    private final Integer value;
-    private final String code;
+  EmailCampaignStatus(Integer value, String code) {
+    this.value = value;
+    this.code = code;
+  }
 
-    EmailCampaignStatus(Integer value, String code) {
-        this.value = value;
-        this.code = code;
+  public static EmailCampaignStatus fromInt(final Integer statusValue) {
+
+    EmailCampaignStatus enumeration = EmailCampaignStatus.INVALID;
+    switch (statusValue) {
+      case 100:
+        enumeration = EmailCampaignStatus.PENDING;
+        break;
+      case 300:
+        enumeration = EmailCampaignStatus.ACTIVE;
+        break;
+      case 600:
+        enumeration = EmailCampaignStatus.CLOSED;
+        break;
     }
+    return enumeration;
+  }
 
-    public static EmailCampaignStatus fromInt(final Integer statusValue) {
+  public Integer getValue() {
+    return value;
+  }
 
-        EmailCampaignStatus enumeration = EmailCampaignStatus.INVALID;
-        switch (statusValue) {
-            case 100:
-                enumeration = EmailCampaignStatus.PENDING;
-                break;
-            case 300:
-                enumeration = EmailCampaignStatus.ACTIVE;
-                break;
-            case 600:
-                enumeration = EmailCampaignStatus.CLOSED;
-                break;
-        }
-        return enumeration;
-    }
+  public String getCode() {
+    return code;
+  }
 
-    public Integer getValue() {
-        return value;
-    }
+  public boolean isActive() {
+    return this.value.equals(EmailCampaignStatus.ACTIVE.getValue());
+  }
 
-    public String getCode() {
-        return code;
-    }
-    public boolean isActive(){
-        return this.value.equals(EmailCampaignStatus.ACTIVE.getValue());
-    }
+  public boolean isPending() {
+    return this.value.equals(EmailCampaignStatus.PENDING.getValue());
+  }
 
-    public boolean isPending(){
-        return this.value.equals(EmailCampaignStatus.PENDING.getValue());
-    }
-
-    public boolean isClosed(){
-         return this.value.equals(EmailCampaignStatus.CLOSED.getValue());
-    }
+  public boolean isClosed() {
+    return this.value.equals(EmailCampaignStatus.CLOSED.getValue());
+  }
 }

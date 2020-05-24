@@ -43,15 +43,15 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
 public class SpringConfigurationTest {
 
-    /**
-     * This tests if "Aal izz well" (i.e. if we can start-up with the [almost]
-     * "production" Spring XML configuration) by doing nothing - it doesn't have
-     * to, as the SpringJUnit4ClassRunner with this @ContextConfiguration will
-     * automatically fail if e.g. there is any invalid Spring XML, an invalid
-     * bean definition somewhere or anything like that.
-     *
-     * @see https://www.google.ch/search?q=Aal+izz+well
-     */
-    @Test
-    public void testSpringXMLConfiguration() {}
+  /**
+   * This tests if "Aal izz well" (i.e. if we can start-up with the [almost]
+   * "production" Spring XML configuration) by doing nothing - it doesn't have
+   * to, as the SpringJUnit4ClassRunner with this @ContextConfiguration will
+   * automatically fail if e.g. there is any invalid Spring XML, an invalid
+   * bean definition somewhere or anything like that.
+   *
+   * @see https://www.google.ch/search?q=Aal+izz+well
+   */
+  @Test
+  public void testSpringXMLConfiguration() {}
 }

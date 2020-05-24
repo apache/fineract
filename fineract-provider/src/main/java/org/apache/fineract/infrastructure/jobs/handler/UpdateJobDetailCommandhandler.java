@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "SCHEDULER", action = "UPDATE")
 public class UpdateJobDetailCommandhandler implements NewCommandSourceHandler {
 
-    private final SchedularWritePlatformService schedularWritePlatformService;
+  private final SchedularWritePlatformService schedularWritePlatformService;
 
-    @Autowired
-    public UpdateJobDetailCommandhandler(final SchedularWritePlatformService schedularWritePlatformService) {
-        this.schedularWritePlatformService = schedularWritePlatformService;
-    }
+  @Autowired
+  public UpdateJobDetailCommandhandler(
+      final SchedularWritePlatformService schedularWritePlatformService) {
+    this.schedularWritePlatformService = schedularWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.schedularWritePlatformService.updateJobDetail(command.entityId(), command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.schedularWritePlatformService.updateJobDetail(command.entityId(), command);
+  }
 }

@@ -16,22 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.client.domain.Client;
 
-public interface ClientFamilyMembersWritePlatformService
-{
+public interface ClientFamilyMembersWritePlatformService {
 
-    CommandProcessingResult addFamilyMember(final long clientId,final JsonCommand command);
+  CommandProcessingResult addFamilyMember(final long clientId, final JsonCommand command);
 
-    CommandProcessingResult addClientFamilyMember(final Client client,final JsonCommand command);
+  CommandProcessingResult addClientFamilyMember(final Client client, final JsonCommand command);
 
-    CommandProcessingResult updateFamilyMember(Long familyMemberId, JsonCommand command);
+  CommandProcessingResult updateFamilyMember(Long familyMemberId, JsonCommand command);
 
-    CommandProcessingResult deleteFamilyMember(Long familyMemberId, JsonCommand command);
-
+  CommandProcessingResult deleteFamilyMember(Long familyMemberId, JsonCommand command);
 }

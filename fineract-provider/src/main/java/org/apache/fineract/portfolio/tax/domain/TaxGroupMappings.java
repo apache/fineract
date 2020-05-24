@@ -37,81 +37,84 @@ import org.joda.time.LocalDate;
 @Table(name = "m_tax_group_mappings")
 public class TaxGroupMappings extends AbstractAuditableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "tax_component_id", nullable = false)
-    private TaxComponent taxComponent;
+  @ManyToOne
+  @JoinColumn(name = "tax_component_id", nullable = false)
+  private TaxComponent taxComponent;
 
-    @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+  @Column(name = "start_date", nullable = false)
+  @Temporal(TemporalType.DATE)
+  private Date startDate;
 
-    @Column(name = "end_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+  @Column(name = "end_date", nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date endDate;
 
-    protected TaxGroupMappings() {}
+  protected TaxGroupMappings() {}
 
-    private TaxGroupMappings(final TaxComponent taxComponent, final LocalDate startDate, final LocalDate endDate) {
+  private TaxGroupMappings(
+      final TaxComponent taxComponent, final LocalDate startDate, final LocalDate endDate) {
 
-        this.taxComponent = taxComponent;
-        if (startDate != null) {
-            this.startDate = startDate.toDate();
-        }
-        if (endDate != null) {
-            this.endDate = endDate.toDate();
-        }
+    this.taxComponent = taxComponent;
+    if (startDate != null) {
+      this.startDate = startDate.toDate();
     }
-
-    public static TaxGroupMappings createTaxGroupMappings(final TaxComponent taxComponent, final LocalDate startDate) {
-        final LocalDate endDate = null;
-        return new TaxGroupMappings(taxComponent, startDate, endDate);
-
+    if (endDate != null) {
+      this.endDate = endDate.toDate();
     }
+  }
 
-    public static TaxGroupMappings createTaxGroupMappings(final Long id, final TaxComponent taxComponent, final LocalDate endDate) {
-        final LocalDate startDate = null;
-        TaxGroupMappings groupMappings = new TaxGroupMappings(taxComponent, startDate, endDate);
-        groupMappings.setId(id);
-        return groupMappings;
+  public static TaxGroupMappings createTaxGroupMappings(
+      final TaxComponent taxComponent, final LocalDate startDate) {
+    final LocalDate endDate = null;
+    return new TaxGroupMappings(taxComponent, startDate, endDate);
+  }
 
+  public static TaxGroupMappings createTaxGroupMappings(
+      final Long id, final TaxComponent taxComponent, final LocalDate endDate) {
+    final LocalDate startDate = null;
+    TaxGroupMappings groupMappings = new TaxGroupMappings(taxComponent, startDate, endDate);
+    groupMappings.setId(id);
+    return groupMappings;
+  }
+
+  public void update(final Date endDate, final List<Map<String, Object>> changes) {
+    if (endDate != null && this.endDate == null) {
+      this.endDate = endDate;
+      Map<String, Object> map = new HashMap<>(2);
+      map.put(TaxApiConstants.endDateParamName, endDate);
+      map.put(TaxApiConstants.taxComponentIdParamName, this.getTaxComponent().getId());
+      changes.add(map);
     }
+  }
 
-    public void update(final Date endDate, final List<Map<String, Object>> changes) {
-        if (endDate != null && this.endDate == null) {
-            this.endDate = endDate;
-            Map<String, Object> map = new HashMap<>(2);
-            map.put(TaxApiConstants.endDateParamName, endDate);
-            map.put(TaxApiConstants.taxComponentIdParamName, this.getTaxComponent().getId());
-            changes.add(map);
-        }
+  public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
+    if (this.endDate == null) {
+      return target != null && target.isAfter(startDate());
     }
+    return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
+  }
 
-    public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        if (this.endDate == null) { return target != null && target.isAfter(startDate()); }
-        return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
-    }
+  public TaxComponent getTaxComponent() {
+    return this.taxComponent;
+  }
 
-    public TaxComponent getTaxComponent() {
-        return this.taxComponent;
-    }
+  public Date getEndDate() {
+    return this.endDate;
+  }
 
-    public Date getEndDate() {
-        return this.endDate;
+  public LocalDate startDate() {
+    LocalDate startDate = null;
+    if (this.startDate != null) {
+      startDate = new LocalDate(this.startDate);
     }
+    return startDate;
+  }
 
-    public LocalDate startDate() {
-        LocalDate startDate = null;
-        if (this.startDate != null) {
-            startDate = new LocalDate(this.startDate);
-        }
-        return startDate;
+  public LocalDate endDate() {
+    LocalDate endDate = null;
+    if (this.endDate != null) {
+      endDate = new LocalDate(this.endDate);
     }
-
-    public LocalDate endDate() {
-        LocalDate endDate = null;
-        if (this.endDate != null) {
-            endDate = new LocalDate(this.endDate);
-        }
-        return endDate;
-    }
+    return endDate;
+  }
 }

@@ -46,35 +46,38 @@ import org.springframework.stereotype.Service;
 @Profile("!twofactor")
 public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticationFilter {
 
-    public InsecureTwoFactorAuthenticationFilter() {
-        super(null);
+  public InsecureTwoFactorAuthenticationFilter() {
+    super(null);
+  }
+
+  @Override
+  public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+      throws IOException, ServletException {
+
+    SecurityContext context = SecurityContextHolder.getContext();
+    Authentication authentication = null;
+    if (context != null) {
+      authentication = context.getAuthentication();
     }
 
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+    // Add two-factor authenticated authority if user is authenticated
+    if (authentication != null
+        && authentication.isAuthenticated()
+        && authentication.getPrincipal() instanceof AppUser) {
+      AppUser user = (AppUser) authentication.getPrincipal();
 
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = null;
-        if(context != null) {
-            authentication = context.getAuthentication();
-        }
+      if (user == null) {
+        return;
+      }
 
-        // Add two-factor authenticated authority if user is authenticated
-        if(authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
-            AppUser user = (AppUser) authentication.getPrincipal();
-
-            if(user == null) {
-                return;
-            }
-
-            List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
-            updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));
-            UsernamePasswordAuthenticationToken updatedAuthentication =
-                    new UsernamePasswordAuthenticationToken(authentication.getPrincipal(),
-                            authentication.getCredentials(), updatedAuthorities);
-            context.setAuthentication(updatedAuthentication);
-        }
-
-        chain.doFilter(req, res);
+      List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
+      updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));
+      UsernamePasswordAuthenticationToken updatedAuthentication =
+          new UsernamePasswordAuthenticationToken(
+              authentication.getPrincipal(), authentication.getCredentials(), updatedAuthorities);
+      context.setAuthentication(updatedAuthentication);
     }
+
+    chain.doFilter(req, res);
+  }
 }

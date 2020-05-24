@@ -27,107 +27,125 @@ import java.util.Collection;
  **/
 public class SmsMessageApiQueueResourceData {
 
-    private Long internalId;
-    private String tenantId;
-    private String createdOnDate;
-    private String sourceAddress;
-    private String mobileNumber;
-    private String message;
-    private Long providerId;
+  private Long internalId;
+  private String tenantId;
+  private String createdOnDate;
+  private String sourceAddress;
+  private String mobileNumber;
+  private String message;
+  private Long providerId;
 
-    /**
-     * SmsMessageApiQueueResourceData constructor
-     **/
-    private SmsMessageApiQueueResourceData(Long internalId, String mifosTenantIdentifier, String createdOnDate, String sourceAddress,
-            String mobileNumber, String message, Long providerId) {
-        this.internalId = internalId;
-        this.tenantId = mifosTenantIdentifier;
-        this.createdOnDate = createdOnDate;
-        this.sourceAddress = sourceAddress;
-        this.mobileNumber = mobileNumber;
-        this.message = message;
-        this.providerId = providerId;
-    }
+  /**
+   * SmsMessageApiQueueResourceData constructor
+   **/
+  private SmsMessageApiQueueResourceData(
+      Long internalId,
+      String mifosTenantIdentifier,
+      String createdOnDate,
+      String sourceAddress,
+      String mobileNumber,
+      String message,
+      Long providerId) {
+    this.internalId = internalId;
+    this.tenantId = mifosTenantIdentifier;
+    this.createdOnDate = createdOnDate;
+    this.sourceAddress = sourceAddress;
+    this.mobileNumber = mobileNumber;
+    this.message = message;
+    this.providerId = providerId;
+  }
 
-    /**
-     * SmsMessageApiQueueResourceData constructor
-     **/
-    protected SmsMessageApiQueueResourceData() {}
+  /**
+   * SmsMessageApiQueueResourceData constructor
+   **/
+  protected SmsMessageApiQueueResourceData() {}
 
-    /**
-     * @return a new instance of the SmsMessageApiQueueResourceData class
-     **/
-    public static final SmsMessageApiQueueResourceData instance(Long internalId, String mifosTenantIdentifier, String createdOnDate,
-            String sourceAddress, String mobileNumber, String message, Long providerId) {
+  /**
+   * @return a new instance of the SmsMessageApiQueueResourceData class
+   **/
+  public static final SmsMessageApiQueueResourceData instance(
+      Long internalId,
+      String mifosTenantIdentifier,
+      String createdOnDate,
+      String sourceAddress,
+      String mobileNumber,
+      String message,
+      Long providerId) {
 
-        return new SmsMessageApiQueueResourceData(internalId, mifosTenantIdentifier, createdOnDate, sourceAddress, mobileNumber, message,
-                providerId);
-    }
+    return new SmsMessageApiQueueResourceData(
+        internalId,
+        mifosTenantIdentifier,
+        createdOnDate,
+        sourceAddress,
+        mobileNumber,
+        message,
+        providerId);
+  }
 
-    /**
-     * @return the internalId
-     */
-    public Long getInternalId() {
-        return internalId;
-    }
+  /**
+   * @return the internalId
+   */
+  public Long getInternalId() {
+    return internalId;
+  }
 
-    /**
-     * @return the mifosTenantIdentifier
-     */
-    public String getTenantId() {
-        return tenantId;
-    }
+  /**
+   * @return the mifosTenantIdentifier
+   */
+  public String getTenantId() {
+    return tenantId;
+  }
 
-    /**
-     * @return the createdOnDate
-     */
-    public String getCreatedOnDate() {
-        return createdOnDate;
-    }
+  /**
+   * @return the createdOnDate
+   */
+  public String getCreatedOnDate() {
+    return createdOnDate;
+  }
 
-    /**
-     * @return the sourceAddress
-     */
-    public String getSourceAddress() {
-        return sourceAddress;
-    }
+  /**
+   * @return the sourceAddress
+   */
+  public String getSourceAddress() {
+    return sourceAddress;
+  }
 
-    /**
-     * @return the mobileNumber
-     */
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
+  /**
+   * @return the mobileNumber
+   */
+  public String getMobileNumber() {
+    return mobileNumber;
+  }
 
-    /**
-     * @return the message
-     */
-    public String getMessage() {
-        return message;
-    }
+  /**
+   * @return the message
+   */
+  public String getMessage() {
+    return message;
+  }
 
-    /**
-     * @return the providerId
-     */
-    public Long getproviderId() {
-        return providerId;
-    }
+  /**
+   * @return the providerId
+   */
+  public Long getproviderId() {
+    return providerId;
+  }
 
-    /**
-     * Returns the JSOPN representation of the current object.
-     * @return the JSON representation of the current object
-     */
-    public String toJsonString() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
-    }
+  /**
+   * Returns the JSOPN representation of the current object.
+   * @return the JSON representation of the current object
+   */
+  public String toJsonString() {
+    Gson gson = new Gson();
+    return gson.toJson(this);
+  }
 
-    /**
-     * @return JSON representation of the object
-     **/
-    public static String toJsonString(Collection<SmsMessageApiQueueResourceData> smsResourceData) {
-        Gson gson = new Gson();
+  /**
+   * @return JSON representation of the object
+   **/
+  public static String toJsonString(Collection<SmsMessageApiQueueResourceData> smsResourceData) {
+    Gson gson = new Gson();
 
-        return gson.toJson(smsResourceData);
-    }
+    return gson.toJson(smsResourceData);
+  }
 }

@@ -50,169 +50,190 @@ import org.joda.time.LocalDate;
 @Table(name = "m_tax_component")
 public class TaxComponent extends AbstractAuditableCustom {
 
-    @Column(name = "name", length = 100)
-    private String name;
+  @Column(name = "name", length = 100)
+  private String name;
 
-    @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
-    private BigDecimal percentage;
+  @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
+  private BigDecimal percentage;
 
-    @Column(name = "debit_account_type_enum")
-    private Integer debitAccountType;
+  @Column(name = "debit_account_type_enum")
+  private Integer debitAccountType;
 
-    @ManyToOne
-    @JoinColumn(name = "debit_account_id")
-    private GLAccount debitAcount;
+  @ManyToOne
+  @JoinColumn(name = "debit_account_id")
+  private GLAccount debitAcount;
 
-    @Column(name = "credit_account_type_enum")
-    private Integer creditAccountType;
+  @Column(name = "credit_account_type_enum")
+  private Integer creditAccountType;
 
-    @ManyToOne
-    @JoinColumn(name = "credit_account_id")
-    private GLAccount creditAcount;
+  @ManyToOne
+  @JoinColumn(name = "credit_account_id")
+  private GLAccount creditAcount;
 
-    @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+  @Column(name = "start_date", nullable = false)
+  @Temporal(TemporalType.DATE)
+  private Date startDate;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "tax_component_id", referencedColumnName = "id", nullable = false)
-    private Set<TaxComponentHistory> taxComponentHistories = new HashSet<>();
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "tax_component_id", referencedColumnName = "id", nullable = false)
+  private Set<TaxComponentHistory> taxComponentHistories = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.DETACH, mappedBy = "taxComponent", orphanRemoval = false, fetch=FetchType.EAGER)
-    private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
+  @OneToMany(
+      cascade = CascadeType.DETACH,
+      mappedBy = "taxComponent",
+      orphanRemoval = false,
+      fetch = FetchType.EAGER)
+  private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
-    protected TaxComponent() {
+  protected TaxComponent() {}
 
+  private TaxComponent(
+      final String name,
+      final BigDecimal percentage,
+      final GLAccountType debitAccountType,
+      final GLAccount debitAcount,
+      final GLAccountType creditAccountType,
+      final GLAccount creditAcount,
+      final LocalDate startDate) {
+    this.name = name;
+    this.percentage = percentage;
+    if (debitAccountType != null) {
+      this.debitAccountType = debitAccountType.getValue();
+    }
+    this.debitAcount = debitAcount;
+    if (creditAccountType != null) {
+      this.creditAccountType = creditAccountType.getValue();
+    }
+    this.creditAcount = creditAcount;
+    this.startDate = startDate.toDate();
+  }
+
+  public static TaxComponent createTaxComponent(
+      final String name,
+      final BigDecimal percentage,
+      final GLAccountType debitAccountType,
+      final GLAccount debitAcount,
+      final GLAccountType creditAccountType,
+      final GLAccount creditAcount,
+      final LocalDate startDate) {
+    return new TaxComponent(
+        name,
+        percentage,
+        debitAccountType,
+        debitAcount,
+        creditAccountType,
+        creditAcount,
+        startDate);
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+    final Map<String, Object> changes = new HashMap<>();
+
+    if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
+      final String newValue = command.stringValueOfParameterNamed(TaxApiConstants.nameParamName);
+      changes.put(TaxApiConstants.nameParamName, newValue);
+      this.name = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    private TaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType, final GLAccount debitAcount,
-            final GLAccountType creditAccountType, final GLAccount creditAcount, final LocalDate startDate) {
-        this.name = name;
-        this.percentage = percentage;
-        if (debitAccountType != null) {
-            this.debitAccountType = debitAccountType.getValue();
+    if (command.isChangeInBigDecimalParameterNamed(
+        TaxApiConstants.percentageParamName, this.percentage)) {
+      final BigDecimal newValue =
+          command.bigDecimalValueOfParameterNamed(TaxApiConstants.percentageParamName);
+      changes.put(TaxApiConstants.percentageParamName, newValue);
+
+      LocalDate oldStartDate = new LocalDate(this.startDate);
+      updateStartDate(command, changes, true);
+      LocalDate newStartDate = new LocalDate(this.startDate);
+
+      TaxComponentHistory history =
+          TaxComponentHistory.createTaxComponentHistory(
+              this.percentage, oldStartDate, newStartDate);
+      this.taxComponentHistories.add(history);
+      this.percentage = newValue;
+    }
+
+    return changes;
+  }
+
+  private void updateStartDate(
+      final JsonCommand command, final Map<String, Object> changes, boolean setAsCurrentDate) {
+    LocalDate startDate = DateUtils.getLocalDateOfTenant();
+    if (command.parameterExists(TaxApiConstants.startDateParamName)) {
+      LocalDate startDateFromUI =
+          command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName);
+      if (startDateFromUI != null) {
+        startDate = startDateFromUI;
+      }
+      this.startDate = startDate.toDate();
+      changes.put(TaxApiConstants.startDateParamName, startDate);
+    } else if (setAsCurrentDate) {
+      changes.put(TaxApiConstants.startDateParamName, startDate);
+      this.startDate = startDate.toDate();
+    }
+  }
+
+  public BigDecimal getPercentage() {
+    return this.percentage;
+  }
+
+  public LocalDate startDate() {
+    LocalDate startDate = null;
+    if (this.startDate != null) {
+      startDate = new LocalDate(this.startDate);
+    }
+    return startDate;
+  }
+
+  public BigDecimal getApplicablePercentage(final LocalDate date) {
+    BigDecimal percentage = null;
+    if (occursOnDayFrom(date)) {
+      percentage = getPercentage();
+    } else {
+      for (TaxComponentHistory componentHistory : taxComponentHistories) {
+        if (componentHistory.occursOnDayFromAndUpToAndIncluding(date)) {
+          percentage = componentHistory.getPercentage();
+          break;
         }
-        this.debitAcount = debitAcount;
-        if (creditAccountType != null) {
-            this.creditAccountType = creditAccountType.getValue();
-        }
-        this.creditAcount = creditAcount;
-        this.startDate = startDate.toDate();
+      }
+    }
+    return percentage;
+  }
+
+  private boolean occursOnDayFrom(final LocalDate target) {
+    return target != null && target.isAfter(startDate());
+  }
+
+  public Set<TaxComponentHistory> getTaxComponentHistories() {
+    return this.taxComponentHistories;
+  }
+
+  public Set<TaxGroupMappings> getTaxGroupMappings() {
+    return this.taxGroupMappings;
+  }
+
+  public Collection<LocalDate> allStartDates() {
+    List<LocalDate> dates = new ArrayList<>();
+    dates.add(startDate());
+    for (TaxComponentHistory componentHistory : taxComponentHistories) {
+      dates.add(componentHistory.startDate());
     }
 
-    public static TaxComponent createTaxComponent(final String name, final BigDecimal percentage, final GLAccountType debitAccountType,
-            final GLAccount debitAcount, final GLAccountType creditAccountType, final GLAccount creditAcount, final LocalDate startDate) {
-        return new TaxComponent(name, percentage, debitAccountType, debitAcount, creditAccountType, creditAcount, startDate);
-    }
+    return dates;
+  }
 
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> changes = new HashMap<>();
+  public Integer getDebitAccountType() {
+    return this.debitAccountType;
+  }
 
-        if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(TaxApiConstants.nameParamName);
-            changes.put(TaxApiConstants.nameParamName, newValue);
-            this.name = StringUtils.defaultIfEmpty(newValue, null);
-        }
+  public GLAccount getDebitAcount() {
+    return this.debitAcount;
+  }
 
-        if (command.isChangeInBigDecimalParameterNamed(TaxApiConstants.percentageParamName, this.percentage)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(TaxApiConstants.percentageParamName);
-            changes.put(TaxApiConstants.percentageParamName, newValue);
+  public Integer getCreditAccountType() {
+    return this.creditAccountType;
+  }
 
-            LocalDate oldStartDate = new LocalDate(this.startDate);
-            updateStartDate(command, changes, true);
-            LocalDate newStartDate = new LocalDate(this.startDate);
-
-            TaxComponentHistory history = TaxComponentHistory.createTaxComponentHistory(this.percentage, oldStartDate, newStartDate);
-            this.taxComponentHistories.add(history);
-            this.percentage = newValue;
-
-        }
-
-        return changes;
-    }
-
-    private void updateStartDate(final JsonCommand command, final Map<String, Object> changes, boolean setAsCurrentDate) {
-        LocalDate startDate = DateUtils.getLocalDateOfTenant();
-        if (command.parameterExists(TaxApiConstants.startDateParamName)) {
-            LocalDate startDateFromUI = command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName);
-            if (startDateFromUI != null) {
-                startDate = startDateFromUI;
-            }
-            this.startDate = startDate.toDate();
-            changes.put(TaxApiConstants.startDateParamName, startDate);
-        } else if (setAsCurrentDate) {
-            changes.put(TaxApiConstants.startDateParamName, startDate);
-            this.startDate = startDate.toDate();
-        }
-
-    }
-
-    public BigDecimal getPercentage() {
-        return this.percentage;
-    }
-
-    public LocalDate startDate() {
-        LocalDate startDate = null;
-        if (this.startDate != null) {
-            startDate = new LocalDate(this.startDate);
-        }
-        return startDate;
-    }
-
-    public BigDecimal getApplicablePercentage(final LocalDate date) {
-        BigDecimal percentage = null;
-        if (occursOnDayFrom(date)) {
-            percentage = getPercentage();
-        } else {
-            for (TaxComponentHistory componentHistory : taxComponentHistories) {
-                if (componentHistory.occursOnDayFromAndUpToAndIncluding(date)) {
-                    percentage = componentHistory.getPercentage();
-                    break;
-                }
-            }
-        }
-        return percentage;
-    }
-
-    private boolean occursOnDayFrom(final LocalDate target) {
-        return target != null && target.isAfter(startDate());
-    }
-
-    public Set<TaxComponentHistory> getTaxComponentHistories() {
-        return this.taxComponentHistories;
-    }
-
-    public Set<TaxGroupMappings> getTaxGroupMappings() {
-        return this.taxGroupMappings;
-    }
-
-    public Collection<LocalDate> allStartDates() {
-        List<LocalDate> dates = new ArrayList<>();
-        dates.add(startDate());
-        for (TaxComponentHistory componentHistory : taxComponentHistories) {
-            dates.add(componentHistory.startDate());
-        }
-
-        return dates;
-    }
-
-
-    public Integer getDebitAccountType() {
-        return this.debitAccountType;
-    }
-
-
-    public GLAccount getDebitAcount() {
-        return this.debitAcount;
-    }
-
-
-    public Integer getCreditAccountType() {
-        return this.creditAccountType;
-    }
-
-
-    public GLAccount getCreditAcount() {
-        return this.creditAcount;
-    }
+  public GLAccount getCreditAcount() {
+    return this.creditAcount;
+  }
 }

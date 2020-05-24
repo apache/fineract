@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class MeetingDateException extends AbstractPlatformDomainRuleException {
 
-    public MeetingDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.meeting.date." + postFix, defaultUserMessage, defaultUserMessageArgs);
-    }
+  public MeetingDateException(
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super("error.msg.meeting.date." + postFix, defaultUserMessage, defaultUserMessageArgs);
+  }
 }

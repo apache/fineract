@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface ReportWritePlatformService {
 
-    CommandProcessingResult createReport(JsonCommand command);
+  CommandProcessingResult createReport(JsonCommand command);
 
-    CommandProcessingResult updateReport(Long reportId, JsonCommand command);
+  CommandProcessingResult updateReport(Long reportId, JsonCommand command);
 
-    CommandProcessingResult deleteReport(Long reportId);
+  CommandProcessingResult deleteReport(Long reportId);
 }

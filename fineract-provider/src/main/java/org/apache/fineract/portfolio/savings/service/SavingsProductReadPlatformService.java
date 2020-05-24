@@ -23,14 +23,13 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
 public interface SavingsProductReadPlatformService {
 
-    Collection<SavingsProductData> retrieveAll();
+  Collection<SavingsProductData> retrieveAll();
 
-    Collection<SavingsProductData> retrieveAllForLookup();
+  Collection<SavingsProductData> retrieveAllForLookup();
 
-    Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType);
+  Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType);
 
-    Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode);
+  Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode);
 
-    SavingsProductData retrieveOne(Long productId);
-
+  SavingsProductData retrieveOne(Long productId);
 }

@@ -27,36 +27,40 @@ import org.apache.fineract.infrastructure.configuration.data.GlobalConfiguration
  * Created by sanyam on 30/7/17.
  */
 final class GlobalConfigurationApiResourceSwagger {
-    private GlobalConfigurationApiResourceSwagger() {
+  private GlobalConfigurationApiResourceSwagger() {}
 
+  @ApiModel(value = "GetGlobalConfigurationsResponse")
+  public static final class GetGlobalConfigurationsResponse {
+    private GetGlobalConfigurationsResponse() {}
+
+    public List<GlobalConfigurationPropertyData> globalConfiguration;
+  }
+
+  @ApiModel(value = "PutGlobalConfigurationsRequest")
+  public static final class PutGlobalConfigurationsRequest {
+    private PutGlobalConfigurationsRequest() {}
+
+    @ApiModelProperty(example = "true")
+    public boolean enabled;
+
+    @ApiModelProperty(example = "2")
+    public Long value;
+  }
+
+  @ApiModel(value = "PutGlobalConfigurationsResponse")
+  public static final class PutGlobalConfigurationsResponse {
+    private PutGlobalConfigurationsResponse() {}
+
+    final class PutGlobalConfigurationsResponsechangesSwagger {
+      private PutGlobalConfigurationsResponsechangesSwagger() {}
+
+      @ApiModelProperty(example = "true")
+      public boolean enabled;
     }
 
-    @ApiModel(value = "GetGlobalConfigurationsResponse")
-    public static final class GetGlobalConfigurationsResponse {
-        private GetGlobalConfigurationsResponse(){}
-        public List<GlobalConfigurationPropertyData> globalConfiguration;
-    }
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
 
-    @ApiModel(value = "PutGlobalConfigurationsRequest")
-    public static final class PutGlobalConfigurationsRequest {
-        private PutGlobalConfigurationsRequest(){}
-        @ApiModelProperty(example = "true")
-        public boolean enabled;
-        @ApiModelProperty(example = "2")
-        public Long value;
-    }
-
-    @ApiModel(value = "PutGlobalConfigurationsResponse")
-    public static final class PutGlobalConfigurationsResponse {
-        private PutGlobalConfigurationsResponse(){}
-        final class PutGlobalConfigurationsResponsechangesSwagger{
-            private PutGlobalConfigurationsResponsechangesSwagger() {}
-            @ApiModelProperty(example = "true")
-            public boolean enabled;
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-        public PutGlobalConfigurationsResponsechangesSwagger changes;
-    }
-
+    public PutGlobalConfigurationsResponsechangesSwagger changes;
+  }
 }

@@ -40,77 +40,83 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HookIntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+  private static final Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
+  private RequestSpecification requestSpec;
+  private ResponseSpecification responseSpec;
 
-    private HookHelper hookHelper;
-    private OfficeHelper officeHelper;
+  private HookHelper hookHelper;
+  private OfficeHelper officeHelper;
 
-    @Before
-    public void setUp() throws Exception {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.hookHelper = new HookHelper(this.requestSpec, this.responseSpec);
-        this.officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-    }
+  @Before
+  public void setUp() throws Exception {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    this.hookHelper = new HookHelper(this.requestSpec, this.responseSpec);
+    this.officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
+  }
 
-    @Test
-    public void shouldSendOfficeCreationNotification() {
-        // Subject to https://echo-webhook.herokuapp.com being up
-        // See
-        // http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
-        final String uniqueId = UUID.randomUUID().toString();
-        final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "?";
-        this.hookHelper.createHook(payloadURL);
-        final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
+  @Test
+  public void shouldSendOfficeCreationNotification() {
+    // Subject to https://echo-webhook.herokuapp.com being up
+    // See
+    // http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
+    final String uniqueId = UUID.randomUUID().toString();
+    final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "?";
+    this.hookHelper.createHook(payloadURL);
+    final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
+    try {
+
+      /**
+       * sleep for a three seconds after each failure to increase the
+       * likelihood of the previous request for creating office completing
+       **/
+      for (int i = 0; i < 6; i++) {
         try {
-
-            /**
-             * sleep for a three seconds after each failure to increase the
-             * likelihood of the previous request for creating office completing
-             **/
-
-            for (int i = 0; i < 6; i++) {
-                try {
-                    final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
-                    final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
-                    Assert.assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
-                            notificationOfficeId);
-                    LOG.info("Notification Office Id - {}" , notificationOfficeId);
-                    i = 6;
-                } catch (Exception e) {
-                    TimeUnit.SECONDS.sleep(3);
-                    i++;
-                }
-            }
-
-        } catch (final Exception e) {
-            if (e instanceof HttpHostConnectException) {
-                fail("Failed to connect to https://echo-webhook.herokuapp.com platform");
-            }
-            throw new RuntimeException(e);
+          final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
+          final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
+          Assert.assertEquals(
+              "Equality check for created officeId and hook received payload officeId",
+              createdOfficeID,
+              notificationOfficeId);
+          LOG.info("Notification Office Id - {}", notificationOfficeId);
+          i = 6;
+        } catch (Exception e) {
+          TimeUnit.SECONDS.sleep(3);
+          i++;
         }
+      }
 
+    } catch (final Exception e) {
+      if (e instanceof HttpHostConnectException) {
+        fail("Failed to connect to https://echo-webhook.herokuapp.com platform");
+      }
+      throw new RuntimeException(e);
     }
+  }
 
-    @Test
-    public void createUpdateAndDeleteHook(){
-        final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
-        final String updateURL = "http://localhost";
+  @Test
+  public void createUpdateAndDeleteHook() {
+    final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
+    final String updateURL = "http://localhost";
 
-        Long hookId = this.hookHelper.createHook(payloadURL).longValue();
-        Assert.assertNotNull(hookId);
-        this.hookHelper.verifyHookCreatedOnServer(hookId);
-        LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}",hookId);
-        this.hookHelper.updateHook(updateURL, hookId);
-        this.hookHelper.verifyUpdateHook(updateURL, hookId);
-        LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}",hookId);
-        this.hookHelper.deleteHook(hookId);
-        this.hookHelper.verifyDeleteHook(hookId);
-        LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}",hookId);
-
-    }
+    Long hookId = this.hookHelper.createHook(payloadURL).longValue();
+    Assert.assertNotNull(hookId);
+    this.hookHelper.verifyHookCreatedOnServer(hookId);
+    LOG.info(
+        "---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}",
+        hookId);
+    this.hookHelper.updateHook(updateURL, hookId);
+    this.hookHelper.verifyUpdateHook(updateURL, hookId);
+    LOG.info(
+        "---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}",
+        hookId);
+    this.hookHelper.deleteHook(hookId);
+    this.hookHelper.verifyDeleteHook(hookId);
+    LOG.info(
+        "---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}",
+        hookId);
+  }
 }

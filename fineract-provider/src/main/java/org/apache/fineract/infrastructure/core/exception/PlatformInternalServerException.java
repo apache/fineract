@@ -23,26 +23,28 @@ package org.apache.fineract.infrastructure.core.exception;
  */
 public class PlatformInternalServerException extends RuntimeException {
 
-    private final String globalisationMessageCode;
-    private final String defaultUserMessage;
-    private final Object[] defaultUserMessageArgs;
+  private final String globalisationMessageCode;
+  private final String defaultUserMessage;
+  private final Object[] defaultUserMessageArgs;
 
-    public PlatformInternalServerException(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        this.globalisationMessageCode = globalisationMessageCode;
-        this.defaultUserMessage = defaultUserMessage;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
-    }
+  public PlatformInternalServerException(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    this.globalisationMessageCode = globalisationMessageCode;
+    this.defaultUserMessage = defaultUserMessage;
+    this.defaultUserMessageArgs = defaultUserMessageArgs;
+  }
 
-    public String getGlobalisationMessageCode() {
-        return this.globalisationMessageCode;
-    }
+  public String getGlobalisationMessageCode() {
+    return this.globalisationMessageCode;
+  }
 
-    public String getDefaultUserMessage() {
-        return this.defaultUserMessage;
-    }
+  public String getDefaultUserMessage() {
+    return this.defaultUserMessage;
+  }
 
-    public Object[] getDefaultUserMessageArgs() {
-        return this.defaultUserMessageArgs;
-    }
+  public Object[] getDefaultUserMessageArgs() {
+    return this.defaultUserMessageArgs;
+  }
 }

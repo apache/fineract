@@ -39,5 +39,4 @@ public interface RateReadService {
   List<RateData> retrieveProductLoanRates(Long loanId);
 
   List<RateData> retrieveLoanRates(Long loanId);
-
 }

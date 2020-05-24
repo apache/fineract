@@ -31,19 +31,19 @@ import org.junit.Before;
  * Client Loan Integration Test for checking Loan Application Repayment
  * Schedule.
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SurveyIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
+  private LoanTransactionHelper loanTransactionHelper;
 
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
-
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 }

@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "REPORT", action = "CREATE")
 public class CreateReportCommandHandler implements NewCommandSourceHandler {
 
-    private final ReportWritePlatformService writePlatformService;
+  private final ReportWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateReportCommandHandler(final ReportWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateReportCommandHandler(final ReportWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createReport(command);
-    }
+    return this.writePlatformService.createReport(command);
+  }
 }

@@ -1,4 +1,3 @@
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -17,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.savings.service;
 
 import java.util.Collection;
@@ -27,22 +25,21 @@ import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitori
 
 public interface GSIMReadPlatformService {
 
-    Collection<GroupSavingsIndividualMonitoringAccountData> findGsimAccountByParentAccountNumber(String parentAccountIds);
+  Collection<GroupSavingsIndividualMonitoringAccountData> findGsimAccountByParentAccountNumber(
+      String parentAccountIds);
 
-    Collection<GroupSavingsIndividualMonitoringAccountData> findGSIMAccountsByGSIMId(Long glimId);
+  Collection<GroupSavingsIndividualMonitoringAccountData> findGSIMAccountsByGSIMId(Long glimId);
 
-    Collection<GroupSavingsIndividualMonitoringAccountData> findGSIMAccountsByGroupId(String groupId);
+  Collection<GroupSavingsIndividualMonitoringAccountData> findGSIMAccountsByGroupId(String groupId);
 
-    Collection<GSIMContainer> findGSIMAccountContainerByGroupId(Long groupId);
+  Collection<GSIMContainer> findGSIMAccountContainerByGroupId(Long groupId);
 
-    Collection<GSIMContainer> findGsimAccountContainerbyGsimAccountNumber(String accountNumber);
+  Collection<GSIMContainer> findGsimAccountContainerbyGsimAccountNumber(String accountNumber);
 
+  Collection<GroupSavingsIndividualMonitoringAccountData> findGsimAccountByGroupIdandAccountNo(
+      String groupId, String accountNo);
 
-    Collection<GroupSavingsIndividualMonitoringAccountData> findGsimAccountByGroupIdandAccountNo(String groupId,
-            String accountNo);
+  List<GSIMContainer> findGsimAccountContainerbyGsimAccountId(Long parentAccountId);
 
-    List<GSIMContainer> findGsimAccountContainerbyGsimAccountId(Long parentAccountId);
-
-    GroupSavingsIndividualMonitoringAccountData findGSIMAccountByGSIMId(Long gsimId);
-
+  GroupSavingsIndividualMonitoringAccountData findGSIMAccountByGSIMId(Long gsimId);
 }

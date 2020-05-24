@@ -28,35 +28,32 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_share_account_dividend_details")
 public class ShareAccountDividendDetails extends AbstractPersistableCustom {
 
-    @Column(name = "account_id", nullable = false)
-    private Long shareAccountId;
+  @Column(name = "account_id", nullable = false)
+  private Long shareAccountId;
 
-    @Column(name = "amount", scale = 6, precision = 19)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19)
+  private BigDecimal amount;
 
-    @Column(name = "status")
-    private Integer status;
+  @Column(name = "status")
+  private Integer status;
 
-    @Column(name = "savings_transaction_id")
-    private Long savingsTransactionId;
+  @Column(name = "savings_transaction_id")
+  private Long savingsTransactionId;
 
-    protected ShareAccountDividendDetails() {
+  protected ShareAccountDividendDetails() {}
 
-    }
+  public ShareAccountDividendDetails(final Long shareAccountId, final BigDecimal amount) {
+    this.shareAccountId = shareAccountId;
+    this.amount = amount;
+    this.status = ShareAccountDividendStatusType.INITIATED.getValue();
+  }
 
-    public ShareAccountDividendDetails(final Long shareAccountId, final BigDecimal amount) {
-        this.shareAccountId = shareAccountId;
-        this.amount = amount;
-        this.status = ShareAccountDividendStatusType.INITIATED.getValue();
-    }
+  public void update(final Integer status, final Long savingsTransactionId) {
+    this.status = status;
+    this.savingsTransactionId = savingsTransactionId;
+  }
 
-    public void update(final Integer status, final Long savingsTransactionId) {
-        this.status = status;
-        this.savingsTransactionId = savingsTransactionId;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
 }

@@ -62,478 +62,526 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareAccountWritePlatformService {
+public class ShareAccountWritePlatformServiceJpaRepositoryImpl
+    implements ShareAccountWritePlatformService {
 
-    private final ShareAccountDataSerializer accountDataSerializer;
+  private final ShareAccountDataSerializer accountDataSerializer;
 
-    private final ShareAccountRepositoryWrapper shareAccountRepository;
+  private final ShareAccountRepositoryWrapper shareAccountRepository;
 
-    private final ShareProductRepositoryWrapper shareProductRepository ;
+  private final ShareProductRepositoryWrapper shareProductRepository;
 
-    private final AccountNumberGenerator accountNumberGenerator;
+  private final AccountNumberGenerator accountNumberGenerator;
 
-    private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
+  private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
 
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+  private final JournalEntryWritePlatformService journalEntryWritePlatformService;
 
-    private final NoteRepository noteRepository;
+  private final NoteRepository noteRepository;
 
-    private final BusinessEventNotifierService businessEventNotifierService;
+  private final BusinessEventNotifierService businessEventNotifierService;
 
-    @Autowired
-    public ShareAccountWritePlatformServiceJpaRepositoryImpl(final ShareAccountDataSerializer accountDataSerializer,
-            final ShareAccountRepositoryWrapper shareAccountRepository,
-            final ShareProductRepositoryWrapper shareProductRepository,
-            final AccountNumberGenerator accountNumberGenerator,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final NoteRepository noteRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
-        this.accountDataSerializer = accountDataSerializer;
-        this.shareAccountRepository = shareAccountRepository;
-        this.shareProductRepository = shareProductRepository ;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.noteRepository = noteRepository;
-        this.businessEventNotifierService = businessEventNotifierService;
+  @Autowired
+  public ShareAccountWritePlatformServiceJpaRepositoryImpl(
+      final ShareAccountDataSerializer accountDataSerializer,
+      final ShareAccountRepositoryWrapper shareAccountRepository,
+      final ShareProductRepositoryWrapper shareProductRepository,
+      final AccountNumberGenerator accountNumberGenerator,
+      final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
+      final JournalEntryWritePlatformService journalEntryWritePlatformService,
+      final NoteRepository noteRepository,
+      final BusinessEventNotifierService businessEventNotifierService) {
+    this.accountDataSerializer = accountDataSerializer;
+    this.shareAccountRepository = shareAccountRepository;
+    this.shareProductRepository = shareProductRepository;
+    this.accountNumberGenerator = accountNumberGenerator;
+    this.accountNumberFormatRepository = accountNumberFormatRepository;
+    this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+    this.noteRepository = noteRepository;
+    this.businessEventNotifierService = businessEventNotifierService;
+  }
+
+  @Override
+  public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.accountDataSerializer.validateAndCreate(jsonCommand);
+      this.shareAccountRepository.save(account);
+      generateAccountNumber(account);
+      journalEntryWritePlatformService.createJournalEntriesForShares(
+          populateJournalEntries(
+              account, account.getPendingForApprovalSharePurchaseTransactions()));
+
+      this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+          BusinessEvents.SHARE_ACCOUNT_CREATE,
+          constructEntityMap(BusinessEntity.SHARE_ACCOUNT, account));
+
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(account.getId()) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleDataIntegrityIssues(jsonCommand, throwable, dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Override
-    public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.accountDataSerializer.validateAndCreate(jsonCommand);
-            this.shareAccountRepository.save(account);
-            generateAccountNumber(account);
-            journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
-                    account.getPendingForApprovalSharePurchaseTransactions()));
+  private void generateAccountNumber(final ShareAccount account) {
+    if (account.isAccountNumberRequiresAutoGeneration()) {
+      final AccountNumberFormat accountNumberFormat =
+          this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SHARES);
+      account.updateAccountNumber(
+          this.accountNumberGenerator.generate(account, accountNumberFormat));
+      this.shareAccountRepository.save(account);
+    }
+  }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SHARE_ACCOUNT_CREATE,
-                    constructEntityMap(BusinessEntity.SHARE_ACCOUNT, account));
+  private Map<String, Object> populateJournalEntries(
+      final ShareAccount account, final Set<ShareAccountTransaction> transactions) {
+    final Map<String, Object> accountingBridgeData = new HashMap<>();
+    Boolean cashBasedAccounting =
+        account.getShareProduct().getAccountingType().intValue() == 2
+            ? Boolean.TRUE
+            : Boolean.FALSE;
+    accountingBridgeData.put("cashBasedAccountingEnabled", cashBasedAccounting);
+    accountingBridgeData.put("accrualBasedAccountingEnabled", Boolean.FALSE);
+    accountingBridgeData.put("shareAccountId", account.getId());
+    accountingBridgeData.put("shareProductId", account.getShareProduct().getId());
+    accountingBridgeData.put("officeId", account.getOfficeId());
+    MonetaryCurrency currency = account.getCurrency();
+    final CurrencyData currencyData =
+        new CurrencyData(
+            currency.getCode(),
+            "",
+            currency.getDigitsAfterDecimal(),
+            currency.getCurrencyInMultiplesOf(),
+            "",
+            "");
+    accountingBridgeData.put("currency", currencyData);
+    final List<Map<String, Object>> newTransactionsMap = new ArrayList<>();
+    accountingBridgeData.put("newTransactions", newTransactionsMap);
 
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(account.getId()) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleDataIntegrityIssues(jsonCommand, throwable, dve);
-            return CommandProcessingResult.empty();
+    for (ShareAccountTransaction transaction : transactions) {
+      final Map<String, Object> transactionDto = new HashMap<>();
+      transactionDto.put("officeId", account.getOfficeId());
+      transactionDto.put("id", transaction.getId());
+      transactionDto.put("date", new LocalDate(transaction.getPurchasedDate()));
+      final Integer status = transaction.getTransactionStatus();
+      final ShareAccountTransactionEnumData statusEnum =
+          new ShareAccountTransactionEnumData(status.longValue(), null, null);
+      final Integer type = transaction.getTransactionType();
+      final ShareAccountTransactionEnumData typeEnum =
+          new ShareAccountTransactionEnumData(type.longValue(), null, null);
+      transactionDto.put("status", statusEnum);
+      transactionDto.put("type", typeEnum);
+      if (transaction.isPurchaseRejectedTransaction() || transaction.isRedeemTransaction()) {
+        BigDecimal amount = transaction.amount();
+        if (transaction.chargeAmount() != null) {
+          amount = amount.add(transaction.chargeAmount());
         }
-    }
+        transactionDto.put("amount", amount);
+      } else {
+        transactionDto.put("amount", transaction.amount());
+      }
 
-    private void generateAccountNumber(final ShareAccount account) {
-        if (account.isAccountNumberRequiresAutoGeneration()) {
-            final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SHARES);
-            account.updateAccountNumber(this.accountNumberGenerator.generate(account, accountNumberFormat));
-            this.shareAccountRepository.save(account);
+      transactionDto.put("chargeAmount", transaction.chargeAmount());
+      transactionDto.put("paymentTypeId", null); // FIXME::make it cash
+      // payment
+      if (transaction.getChargesPaidBy() != null && !transaction.getChargesPaidBy().isEmpty()) {
+        final List<Map<String, Object>> chargesPaidData = new ArrayList<>();
+        transactionDto.put("chargesPaid", chargesPaidData);
+        Set<ShareAccountChargePaidBy> chargesPaidBySet = transaction.getChargesPaidBy();
+        for (ShareAccountChargePaidBy chargesPaidBy : chargesPaidBySet) {
+          Map<String, Object> chargesPaidDto = new HashMap<>();
+          chargesPaidDto.put("chargeId", chargesPaidBy.getChargeId());
+          chargesPaidDto.put("sharesChargeId", chargesPaidBy.getShareChargeId());
+          chargesPaidDto.put("amount", chargesPaidBy.getAmount());
+          chargesPaidData.add(chargesPaidDto);
         }
+      }
+      newTransactionsMap.add(transactionDto);
     }
+    return accountingBridgeData;
+  }
 
-    private Map<String, Object> populateJournalEntries(final ShareAccount account, final Set<ShareAccountTransaction> transactions) {
-        final Map<String, Object> accountingBridgeData = new HashMap<>();
-        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType().intValue() == 2 ? Boolean.TRUE : Boolean.FALSE;
-        accountingBridgeData.put("cashBasedAccountingEnabled", cashBasedAccounting);
-        accountingBridgeData.put("accrualBasedAccountingEnabled", Boolean.FALSE);
-        accountingBridgeData.put("shareAccountId", account.getId());
-        accountingBridgeData.put("shareProductId", account.getShareProduct().getId());
-        accountingBridgeData.put("officeId", account.getOfficeId());
-        MonetaryCurrency currency = account.getCurrency();
-        final CurrencyData currencyData = new CurrencyData(currency.getCode(), "", currency.getDigitsAfterDecimal(),
-                currency.getCurrencyInMultiplesOf(), "", "");
-        accountingBridgeData.put("currency", currencyData);
-        final List<Map<String, Object>> newTransactionsMap = new ArrayList<>();
-        accountingBridgeData.put("newTransactions", newTransactionsMap);
+  @SuppressWarnings("unchecked")
+  @Override
+  public CommandProcessingResult updateShareAccount(Long accountId, JsonCommand jsonCommand) {
+    try {
+      Date transactionDate = DateUtils.getDateOfTenant();
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndUpdate(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+      }
+      // since we are reverting all journal entries we need to add journal
+      // entries for application request
+      if (changes.containsKey("reversalIds")) {
+        ArrayList<Long> reversalIds = (ArrayList<Long>) changes.get("reversalIds");
+        this.journalEntryWritePlatformService.revertShareAccountJournalEntries(
+            reversalIds, transactionDate);
+        journalEntryWritePlatformService.createJournalEntriesForShares(
+            populateJournalEntries(
+                account, account.getPendingForApprovalSharePurchaseTransactions()));
+        changes.remove("reversalIds");
+      }
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleDataIntegrityIssues(jsonCommand, throwable, dve);
+      return CommandProcessingResult.empty();
+    }
+  }
 
-        for (ShareAccountTransaction transaction : transactions) {
-            final Map<String, Object> transactionDto = new HashMap<>();
-            transactionDto.put("officeId", account.getOfficeId());
-            transactionDto.put("id", transaction.getId());
-            transactionDto.put("date", new LocalDate(transaction.getPurchasedDate()));
-            final Integer status = transaction.getTransactionStatus();
-            final ShareAccountTransactionEnumData statusEnum = new ShareAccountTransactionEnumData(status.longValue(), null, null);
-            final Integer type = transaction.getTransactionType();
-            final ShareAccountTransactionEnumData typeEnum = new ShareAccountTransactionEnumData(type.longValue(), null, null);
-            transactionDto.put("status", statusEnum);
-            transactionDto.put("type", typeEnum);
-            if(transaction.isPurchaseRejectedTransaction() || transaction.isRedeemTransaction()) {
-                BigDecimal amount = transaction.amount() ;
-                if(transaction.chargeAmount() != null) {
-                    amount = amount.add(transaction.chargeAmount()) ;
-                }
-                transactionDto.put("amount", amount);
-            }else {
-                transactionDto.put("amount", transaction.amount());
-            }
-
-            transactionDto.put("chargeAmount", transaction.chargeAmount());
-            transactionDto.put("paymentTypeId", null); // FIXME::make it cash
-                                                       // payment
-            if (transaction.getChargesPaidBy() != null && !transaction.getChargesPaidBy().isEmpty()) {
-                final List<Map<String, Object>> chargesPaidData = new ArrayList<>();
-                transactionDto.put("chargesPaid", chargesPaidData);
-                Set<ShareAccountChargePaidBy> chargesPaidBySet = transaction.getChargesPaidBy();
-                for (ShareAccountChargePaidBy chargesPaidBy : chargesPaidBySet) {
-                    Map<String, Object> chargesPaidDto = new HashMap<>();
-                    chargesPaidDto.put("chargeId", chargesPaidBy.getChargeId());
-                    chargesPaidDto.put("sharesChargeId", chargesPaidBy.getShareChargeId());
-                    chargesPaidDto.put("amount", chargesPaidBy.getAmount());
-                    chargesPaidData.add(chargesPaidDto);
-                }
-            }
-            newTransactionsMap.add(transactionDto);
+  @Override
+  public CommandProcessingResult applyAddtionalShares(
+      final Long accountId, JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndApplyAddtionalShares(jsonCommand, account);
+      ShareAccountTransaction transaction = null;
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        transaction =
+            (ShareAccountTransaction)
+                changes.get(ShareAccountApiConstants.additionalshares_paramname);
+        transaction = account.getShareAccountTransaction(transaction);
+        if (transaction != null) {
+          changes.clear();
+          changes.put(ShareAccountApiConstants.additionalshares_paramname, transaction.getId());
+          Set<ShareAccountTransaction> transactions = new HashSet<>();
+          transactions.add(transaction);
+          this.journalEntryWritePlatformService.createJournalEntriesForShares(
+              populateJournalEntries(account, transactions));
         }
-        return accountingBridgeData;
-    }
+      }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public CommandProcessingResult updateShareAccount(Long accountId, JsonCommand jsonCommand) {
-        try {
-            Date transactionDate = DateUtils.getDateOfTenant();
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndUpdate(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-            }
-            // since we are reverting all journal entries we need to add journal
-            // entries for application request
-            if (changes.containsKey("reversalIds")) {
-                ArrayList<Long> reversalIds = (ArrayList<Long>) changes.get("reversalIds");
-                this.journalEntryWritePlatformService.revertShareAccountJournalEntries(reversalIds, transactionDate);
-                journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
-                        account.getPendingForApprovalSharePurchaseTransactions()));
-                changes.remove("reversalIds") ;
-            }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleDataIntegrityIssues(jsonCommand, throwable, dve);
-            return CommandProcessingResult.empty();
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  @Override
+  public CommandProcessingResult approveShareAccount(Long accountId, JsonCommand jsonCommand) {
+
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndApprove(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+          final Note note = Note.shareNote(account, noteText);
+          changes.put("note", noteText);
+          this.noteRepository.save(note);
         }
-    }
+      }
+      Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
+      Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
+      Long totalSubsribedShares = Long.valueOf(0);
 
-    @Override
-    public CommandProcessingResult applyAddtionalShares(final Long accountId, JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndApplyAddtionalShares(jsonCommand, account);
-            ShareAccountTransaction transaction = null;
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                transaction = (ShareAccountTransaction) changes.get(ShareAccountApiConstants.additionalshares_paramname);
-                transaction = account.getShareAccountTransaction(transaction);
-                if (transaction != null) {
-                    changes.clear();
-                    changes.put(ShareAccountApiConstants.additionalshares_paramname, transaction.getId());
-                    Set<ShareAccountTransaction> transactions = new HashSet<>();
-                    transactions.add(transaction);
-                    this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
-                }
-            }
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+      for (ShareAccountTransaction transaction : transactions) {
+        if (transaction.isActive() && transaction.isPurchasTransaction()) {
+          journalTransactions.add(transaction);
+          totalSubsribedShares += transaction.getTotalShares();
         }
+      }
+      ShareProduct shareProduct = account.getShareProduct();
+      shareProduct.addSubscribedShares(totalSubsribedShares);
+      this.shareProductRepository.save(shareProduct);
+
+      this.journalEntryWritePlatformService.createJournalEntriesForShares(
+          populateJournalEntries(account, journalTransactions));
+
+      this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+          BusinessEvents.SHARE_ACCOUNT_APPROVE,
+          constructEntityMap(BusinessEntity.SHARE_ACCOUNT, account));
+
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Override
-    public CommandProcessingResult approveShareAccount(Long accountId, JsonCommand jsonCommand) {
-
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndApprove(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
-                if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
-                    changes.put("note", noteText);
-                    this.noteRepository.save(note);
-                }
-            }
-            Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
-            Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
-            Long totalSubsribedShares = Long.valueOf(0) ;
-
-            for (ShareAccountTransaction transaction : transactions) {
-                if (transaction.isActive() && transaction.isPurchasTransaction()) {
-                    journalTransactions.add(transaction);
-                    totalSubsribedShares += transaction.getTotalShares() ;
-                }
-            }
-            ShareProduct shareProduct = account.getShareProduct() ;
-            shareProduct.addSubscribedShares(totalSubsribedShares);
-            this.shareProductRepository.save(shareProduct);
-
-            this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
-
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SHARE_ACCOUNT_APPROVE,
-                    constructEntityMap(BusinessEntity.SHARE_ACCOUNT, account));
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+  @Override
+  public CommandProcessingResult rejectShareAccount(Long accountId, JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndReject(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+          final Note note = Note.shareNote(account, noteText);
+          changes.put("note", noteText);
+          this.noteRepository.save(note);
         }
-    }
-
-    @Override
-    public CommandProcessingResult rejectShareAccount(Long accountId, JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndReject(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
-                if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
-                    changes.put("note", noteText);
-                    this.noteRepository.save(note);
-                }
-            }
-            Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
-            Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
-            for (ShareAccountTransaction transaction : transactions) {
-                if (transaction.isActive() && !transaction.isChargeTransaction()) {
-                    journalTransactions.add(transaction);
-                }
-            }
-
-            this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+      }
+      Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
+      Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
+      for (ShareAccountTransaction transaction : transactions) {
+        if (transaction.isActive() && !transaction.isChargeTransaction()) {
+          journalTransactions.add(transaction);
         }
+      }
+
+      this.journalEntryWritePlatformService.createJournalEntriesForShares(
+          populateJournalEntries(account, journalTransactions));
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Override
-    public CommandProcessingResult undoApproveShareAccount(Long accountId, JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndUndoApprove(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
-                if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
-                    changes.put("note", noteText);
-                    this.noteRepository.save(note);
-                }
-            }
-
-            Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions() ;
-            ArrayList<Long> journalEntryTransactions = new ArrayList<>() ;
-            for(ShareAccountTransaction transaction: transactions) {
-                if(transaction.isActive() && !transaction.isChargeTransaction()){
-                    journalEntryTransactions.add(transaction.getId()) ;
-                }
-            }
-            Date transactionDate = DateUtils.getDateOfTenant();
-            this.journalEntryWritePlatformService.revertShareAccountJournalEntries(journalEntryTransactions, transactionDate);
-            journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
-                    account.getPendingForApprovalSharePurchaseTransactions()));
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+  @Override
+  public CommandProcessingResult undoApproveShareAccount(Long accountId, JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndUndoApprove(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+          final Note note = Note.shareNote(account, noteText);
+          changes.put("note", noteText);
+          this.noteRepository.save(note);
         }
-    }
+      }
 
-    @Override
-    public CommandProcessingResult activateShareAccount(Long accountId, JsonCommand jsonCommand) {
-
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndActivate(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-            }
-            this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
-                    account.getChargeTransactions()));
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+      Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
+      ArrayList<Long> journalEntryTransactions = new ArrayList<>();
+      for (ShareAccountTransaction transaction : transactions) {
+        if (transaction.isActive() && !transaction.isChargeTransaction()) {
+          journalEntryTransactions.add(transaction.getId());
         }
+      }
+      Date transactionDate = DateUtils.getDateOfTenant();
+      this.journalEntryWritePlatformService.revertShareAccountJournalEntries(
+          journalEntryTransactions, transactionDate);
+      journalEntryWritePlatformService.createJournalEntriesForShares(
+          populateJournalEntries(
+              account, account.getPendingForApprovalSharePurchaseTransactions()));
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public CommandProcessingResult approveAdditionalShares(Long accountId, JsonCommand jsonCommand) {
+  @Override
+  public CommandProcessingResult activateShareAccount(Long accountId, JsonCommand jsonCommand) {
 
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndApproveAddtionalShares(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                ArrayList<Long> transactionIds = (ArrayList<Long>) changes.get(ShareAccountApiConstants.requestedshares_paramname);
-                Long totalSubscribedShares = Long.valueOf(0) ;
-                if (transactionIds != null) {
-                    Set<ShareAccountTransaction> transactions = new HashSet<>();
-                    for (Long id : transactionIds) {
-                        ShareAccountTransaction transaction = account.retrievePurchasedShares(id);
-                        transactions.add(transaction);
-                        totalSubscribedShares += transaction.getTotalShares() ;
-                    }
-                    this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
-                }
-                if(!totalSubscribedShares.equals(Long.valueOf(0))) {
-                    ShareProduct shareProduct = account.getShareProduct() ;
-                    shareProduct.addSubscribedShares(totalSubscribedShares);
-                    this.shareProductRepository.save(shareProduct);
-                }
-            }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndActivate(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+      }
+      this.journalEntryWritePlatformService.createJournalEntriesForShares(
+          populateJournalEntries(account, account.getChargeTransactions()));
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public CommandProcessingResult approveAdditionalShares(Long accountId, JsonCommand jsonCommand) {
+
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndApproveAddtionalShares(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        ArrayList<Long> transactionIds =
+            (ArrayList<Long>) changes.get(ShareAccountApiConstants.requestedshares_paramname);
+        Long totalSubscribedShares = Long.valueOf(0);
+        if (transactionIds != null) {
+          Set<ShareAccountTransaction> transactions = new HashSet<>();
+          for (Long id : transactionIds) {
+            ShareAccountTransaction transaction = account.retrievePurchasedShares(id);
+            transactions.add(transaction);
+            totalSubscribedShares += transaction.getTotalShares();
+          }
+          this.journalEntryWritePlatformService.createJournalEntriesForShares(
+              populateJournalEntries(account, transactions));
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public CommandProcessingResult rejectAdditionalShares(Long accountId, JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndRejectAddtionalShares(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                ArrayList<Long> transactionIds = (ArrayList<Long>) changes.get(ShareAccountApiConstants.requestedshares_paramname);
-                if (transactionIds != null) {
-                    Set<ShareAccountTransaction> transactions = new HashSet<>();
-                    for (Long id : transactionIds) {
-                        ShareAccountTransaction transaction = account.retrievePurchasedShares(id);
-                        transactions.add(transaction);
-                    }
-                    this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
-                }
-            }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+        if (!totalSubscribedShares.equals(Long.valueOf(0))) {
+          ShareProduct shareProduct = account.getShareProduct();
+          shareProduct.addSubscribedShares(totalSubscribedShares);
+          this.shareProductRepository.save(shareProduct);
         }
+      }
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Override
-    public CommandProcessingResult redeemShares(Long accountId, JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndRedeemShares(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                ShareAccountTransaction transaction = (ShareAccountTransaction) changes
-                        .get(ShareAccountApiConstants.requestedshares_paramname);
-             // after saving, entity will have different object. So need to retrieve the entity object
-                transaction = account.getShareAccountTransaction(transaction);
-                Long redeemShares = transaction.getTotalShares() ;
-                ShareProduct shareProduct = account.getShareProduct() ;
-                //remove the redeem shares from total subscribed shares
-                shareProduct.removeSubscribedShares(redeemShares);
-                this.shareProductRepository.save(shareProduct);
-
-                Set<ShareAccountTransaction> transactions = new HashSet<>();
-                transactions.add(transaction);
-                this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
-                changes.clear();
-                changes.put(ShareAccountApiConstants.requestedshares_paramname, transaction.getId());
-
-            }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+  @SuppressWarnings("unchecked")
+  @Override
+  public CommandProcessingResult rejectAdditionalShares(Long accountId, JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndRejectAddtionalShares(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        ArrayList<Long> transactionIds =
+            (ArrayList<Long>) changes.get(ShareAccountApiConstants.requestedshares_paramname);
+        if (transactionIds != null) {
+          Set<ShareAccountTransaction> transactions = new HashSet<>();
+          for (Long id : transactionIds) {
+            ShareAccountTransaction transaction = account.retrievePurchasedShares(id);
+            transactions.add(transaction);
+          }
+          this.journalEntryWritePlatformService.createJournalEntriesForShares(
+              populateJournalEntries(account, transactions));
         }
+      }
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Override
-    public CommandProcessingResult closeShareAccount(Long accountId, JsonCommand jsonCommand) {
-        try {
-            ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
-            Map<String, Object> changes = this.accountDataSerializer.validateAndClose(jsonCommand, account);
-            if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
-                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
-                if (StringUtils.isNotBlank(noteText)) {
-                    final Note note = Note.shareNote(account, noteText);
-                    changes.put("note", noteText);
-                    this.noteRepository.save(note);
-                }
-                ShareAccountTransaction transaction = (ShareAccountTransaction) changes
-                        .get(ShareAccountApiConstants.requestedshares_paramname);
-                transaction = account.getShareAccountTransaction(transaction);
-                Set<ShareAccountTransaction> transactions = new HashSet<>();
-                transactions.add(transaction);
-                this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));
-                changes.clear();
-                changes.put(ShareAccountApiConstants.requestedshares_paramname, transaction.getId());
+  @Override
+  public CommandProcessingResult redeemShares(Long accountId, JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndRedeemShares(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        ShareAccountTransaction transaction =
+            (ShareAccountTransaction)
+                changes.get(ShareAccountApiConstants.requestedshares_paramname);
+        // after saving, entity will have different object. So need to retrieve the entity object
+        transaction = account.getShareAccountTransaction(transaction);
+        Long redeemShares = transaction.getTotalShares();
+        ShareProduct shareProduct = account.getShareProduct();
+        // remove the redeem shares from total subscribed shares
+        shareProduct.removeSubscribedShares(redeemShares);
+        this.shareProductRepository.save(shareProduct);
 
-            }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(jsonCommand.commandId()) //
-                    .withEntityId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
+        Set<ShareAccountTransaction> transactions = new HashSet<>();
+        transactions.add(transaction);
+        this.journalEntryWritePlatformService.createJournalEntriesForShares(
+            populateJournalEntries(account, transactions));
+        changes.clear();
+        changes.put(ShareAccountApiConstants.requestedshares_paramname, transaction.getId());
+      }
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  @Override
+  public CommandProcessingResult closeShareAccount(Long accountId, JsonCommand jsonCommand) {
+    try {
+      ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
+      Map<String, Object> changes =
+          this.accountDataSerializer.validateAndClose(jsonCommand, account);
+      if (!changes.isEmpty()) {
+        this.shareAccountRepository.save(account);
+        final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+          final Note note = Note.shareNote(account, noteText);
+          changes.put("note", noteText);
+          this.noteRepository.save(note);
         }
+        ShareAccountTransaction transaction =
+            (ShareAccountTransaction)
+                changes.get(ShareAccountApiConstants.requestedshares_paramname);
+        transaction = account.getShareAccountTransaction(transaction);
+        Set<ShareAccountTransaction> transactions = new HashSet<>();
+        transactions.add(transaction);
+        this.journalEntryWritePlatformService.createJournalEntriesForShares(
+            populateJournalEntries(account, transactions));
+        changes.clear();
+        changes.put(ShareAccountApiConstants.requestedshares_paramname, transaction.getId());
+      }
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(jsonCommand.commandId()) //
+          .withEntityId(accountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        throw new PlatformDataIntegrityException("error.msg.shareaccount.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
+  private void handleDataIntegrityIssues(
+      final JsonCommand command, final Throwable realCause, final Exception dve) {
+    throw new PlatformDataIntegrityException(
+        "error.msg.shareaccount.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource.");
+  }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
-    }
+  private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
+      final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
+    Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
+    map.put(entityEvent, entity);
+    return map;
+  }
 }

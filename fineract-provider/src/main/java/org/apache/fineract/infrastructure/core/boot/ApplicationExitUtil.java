@@ -26,24 +26,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
-
 public abstract class ApplicationExitUtil {
-    private final static Logger LOG = LoggerFactory.getLogger(ApplicationExitUtil.class);
-    private ApplicationExitUtil() {}
+  private static final Logger LOG = LoggerFactory.getLogger(ApplicationExitUtil.class);
 
-    public static void waitForKeyPressToCleanlyExit(ConfigurableApplicationContext ctx) throws IOException {
+  private ApplicationExitUtil() {}
 
-        // NOTE: In Eclipse, the Shutdown Hooks are not invoked on exit (red
-        // button).. In the case of MariaDB4j that's a problem because then the
-        // mysqld won't be stopped, so:
-        // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016)
-        LOG.info("\nHit Enter to quit...");
-        // NOTE: In Eclipse, System.console() is not available.. so:
-        // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429)
-        BufferedReader d = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-        d.readLine();
+  public static void waitForKeyPressToCleanlyExit(ConfigurableApplicationContext ctx)
+      throws IOException {
 
-        ctx.stop();
-        ctx.close();
-    }
+    // NOTE: In Eclipse, the Shutdown Hooks are not invoked on exit (red
+    // button).. In the case of MariaDB4j that's a problem because then the
+    // mysqld won't be stopped, so:
+    // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016)
+    LOG.info("\nHit Enter to quit...");
+    // NOTE: In Eclipse, System.console() is not available.. so:
+    // (@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429)
+    BufferedReader d = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+    d.readLine();
+
+    ctx.stop();
+    ctx.close();
+  }
 }

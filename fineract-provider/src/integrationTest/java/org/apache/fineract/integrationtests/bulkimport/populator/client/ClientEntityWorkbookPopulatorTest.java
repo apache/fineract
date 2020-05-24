@@ -40,43 +40,39 @@ import org.junit.Test;
 
 public class ClientEntityWorkbookPopulatorTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
 
-    @Before
-    public void setup(){
-        Utils.initializeRESTAssured();
-        this.requestSpec=new RequestSpecBuilder().build();
-        this.requestSpec
-                .header("Authorization",
-                        "Basic "
-                                + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200)
-                .build();
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
+  @Test
+  public void testClientEntityWorkbookPopulate() throws IOException {
+    // in order to populate helper sheets
+    StaffHelper staffHelper = new StaffHelper();
+    requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+    Integer outcome_staff_creation = staffHelper.createStaff(requestSpec, responseSpec);
+    Assert.assertNotNull("Could not create staff", outcome_staff_creation);
 
-    }
+    // in order to populate helper sheets
+    OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+    Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
+    Assert.assertNotNull("Could not create office", outcome_office_creation);
 
-    @Test
-    public void testClientEntityWorkbookPopulate() throws IOException {
-        //in order to populate helper sheets
-        StaffHelper staffHelper=new StaffHelper();
-        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create staff",outcome_staff_creation);
-
-        //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
-        Assert.assertNotNull("Could not create office" ,outcome_office_creation);
-
-        ClientHelper clientHelper=new ClientHelper(requestSpec,responseSpec);
-        Workbook workbook=clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY,"dd MMMM yyyy");
-        Sheet officeSheet=workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Row firstOfficeRow=officeSheet.getRow(1);
-        Assert.assertNotNull("No offices found for given OfficeId ",firstOfficeRow.getCell(1));
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
-        Row firstStaffRow=staffSheet.getRow(1);
-        Assert.assertNotNull("No staff found for given staffId",firstStaffRow.getCell(1));
-    }
+    ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+    Workbook workbook =
+        clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY, "dd MMMM yyyy");
+    Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+    Row firstOfficeRow = officeSheet.getRow(1);
+    Assert.assertNotNull("No offices found for given OfficeId ", firstOfficeRow.getCell(1));
+    Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
+    Row firstStaffRow = staffSheet.getRow(1);
+    Assert.assertNotNull("No staff found for given staffId", firstStaffRow.getCell(1));
+  }
 }

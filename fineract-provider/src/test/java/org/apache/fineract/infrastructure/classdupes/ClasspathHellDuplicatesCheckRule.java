@@ -41,27 +41,27 @@ import org.junit.runners.model.Statement;
  */
 public class ClasspathHellDuplicatesCheckRule implements TestRule {
 
-    private final ClasspathHellDuplicatesChecker checker;
+  private final ClasspathHellDuplicatesChecker checker;
 
-    public ClasspathHellDuplicatesCheckRule(ClasspathHellDuplicatesChecker checker) {
-        this.checker = checker;
-    }
+  public ClasspathHellDuplicatesCheckRule(ClasspathHellDuplicatesChecker checker) {
+    this.checker = checker;
+  }
 
-    public ClasspathHellDuplicatesCheckRule() {
-        this(ClasspathHellDuplicatesChecker.INSTANCE);
-    }
+  public ClasspathHellDuplicatesCheckRule() {
+    this(ClasspathHellDuplicatesChecker.INSTANCE);
+  }
 
-    @Override
-    public Statement apply(Statement base, Description description) {
-        checkClasspath();
-        return base;
-    }
+  @Override
+  public Statement apply(Statement base, Description description) {
+    checkClasspath();
+    return base;
+  }
 
-    protected void checkClasspath() {
-        Map<String, List<String>> dupes = checker.getDuplicates();
-        if (!dupes.isEmpty()) {
-            throw new AssertionFailedError(dupes.size() + " Classpath duplicates detected:\n" + checker.toString(dupes));
-        }
+  protected void checkClasspath() {
+    Map<String, List<String>> dupes = checker.getDuplicates();
+    if (!dupes.isEmpty()) {
+      throw new AssertionFailedError(
+          dupes.size() + " Classpath duplicates detected:\n" + checker.toString(dupes));
     }
+  }
 }
-

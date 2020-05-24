@@ -27,14 +27,14 @@ import org.joda.time.LocalDate;
 
 public class DateSerializer implements JsonSerializer<LocalDate> {
 
-    private final String dateFormat;
+  private final String dateFormat;
 
-    public DateSerializer(String dateFormat) {
-        this.dateFormat = dateFormat;
-    }
+  public DateSerializer(String dateFormat) {
+    this.dateFormat = dateFormat;
+  }
 
-    @Override
-    public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.toString(dateFormat));
-    }
+  @Override
+  public JsonElement serialize(LocalDate src, Type typeOfSrc, JsonSerializationContext context) {
+    return new JsonPrimitive(src.toString(dateFormat));
+  }
 }

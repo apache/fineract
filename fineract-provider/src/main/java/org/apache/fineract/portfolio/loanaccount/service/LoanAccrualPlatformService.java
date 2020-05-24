@@ -26,13 +26,15 @@ import org.joda.time.LocalDate;
 
 public interface LoanAccrualPlatformService {
 
-    void addPeriodicAccruals(LocalDate tilldate) throws MultiException;
+  void addPeriodicAccruals(LocalDate tilldate) throws MultiException;
 
-    void addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws MultiException;
+  void addPeriodicAccruals(
+      LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas)
+      throws MultiException;
 
-    void addAccrualAccounting() throws JobExecutionException;
+  void addAccrualAccounting() throws JobExecutionException;
 
-    void addPeriodicAccruals() throws JobExecutionException;
-    void addPeriodicAccrualsForLoansWithIncomePostedAsTransactions() throws JobExecutionException;
+  void addPeriodicAccruals() throws JobExecutionException;
 
+  void addPeriodicAccrualsForLoansWithIncomePostedAsTransactions() throws JobExecutionException;
 }

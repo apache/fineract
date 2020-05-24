@@ -32,16 +32,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "POSTINTEREST")
 public class PostInterestRecurringDepositAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public PostInterestRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public PostInterestRecurringDepositAccountCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.postInterest(command.entityId(), DepositAccountType.RECURRING_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.postInterest(
+        command.entityId(), DepositAccountType.RECURRING_DEPOSIT);
+  }
 }

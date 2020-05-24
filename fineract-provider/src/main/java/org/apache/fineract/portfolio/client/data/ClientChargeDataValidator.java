@@ -39,85 +39,136 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClientChargeDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public ClientChargeDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public ClientChargeDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateAdd(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateAdd(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, ClientApiCollectionConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ClientApiCollectionConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final BigDecimal amount =
+        this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+            ClientApiConstants.amountParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(ClientApiConstants.amountParamName)
+        .value(amount)
+        .notNull()
+        .positiveAmount();
 
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(ClientApiConstants.amountParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.amountParamName).value(amount).notNull().positiveAmount();
+    final LocalDate dueDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(
+            ClientApiConstants.dueAsOfDateParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(ClientApiConstants.dueAsOfDateParamName)
+        .value(dueDate)
+        .notNull();
 
-        final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dueAsOfDateParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate).notNull();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validateUpdate(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, ClientApiCollectionConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ClientApiCollectionConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.amountParamName, element)) {
-            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(ClientApiConstants.amountParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.amountParamName).value(amount).notNull().positiveAmount();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dueAsOfDateParamName, element)) {
-            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dueAsOfDateParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate).notNull();
-        }
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.amountParamName, element)) {
+      final BigDecimal amount =
+          this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+              ClientApiConstants.amountParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(ClientApiConstants.amountParamName)
+          .value(amount)
+          .notNull()
+          .positiveAmount();
     }
 
-    public void validatePayCharge(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dueAsOfDateParamName, element)) {
+      final LocalDate dueDate =
+          this.fromApiJsonHelper.extractLocalDateNamed(
+              ClientApiConstants.dueAsOfDateParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(ClientApiConstants.dueAsOfDateParamName)
+          .value(dueDate)
+          .notNull();
+    }
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ClientApiCollectionConstants.CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(ClientApiConstants.amountParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.amountParamName).value(amount).notNull().positiveAmount();
-
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.transactionDateParamName,
-                element);
-        baseDataValidator.reset().parameter(ClientApiConstants.transactionDateParamName).value(transactionDate).notNull();
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validatePayCharge(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap,
+        json,
+        ClientApiCollectionConstants.CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS);
 
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    final BigDecimal amount =
+        this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+            ClientApiConstants.amountParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(ClientApiConstants.amountParamName)
+        .value(amount)
+        .notNull()
+        .positiveAmount();
+
+    final LocalDate transactionDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(
+            ClientApiConstants.transactionDateParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(ClientApiConstants.transactionDateParamName)
+        .value(transactionDate)
+        .notNull();
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
 }

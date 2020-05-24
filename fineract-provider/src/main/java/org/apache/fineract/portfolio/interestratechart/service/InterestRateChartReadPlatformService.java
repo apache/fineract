@@ -23,23 +23,23 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDat
 
 public interface InterestRateChartReadPlatformService {
 
-    //Collection<InterestRateChartData> retrieveAll(Long savingsProductId);
+  // Collection<InterestRateChartData> retrieveAll(Long savingsProductId);
 
-    InterestRateChartData retrieveOne(Long interestChartId);
+  InterestRateChartData retrieveOne(Long interestChartId);
 
-    //Collection<InterestRateChartData> retrieveAllWithSlabs();
+  // Collection<InterestRateChartData> retrieveAllWithSlabs();
 
-    Collection<InterestRateChartData> retrieveAllWithSlabs(Long savingsProductId);
+  Collection<InterestRateChartData> retrieveAllWithSlabs(Long savingsProductId);
 
-    Collection<InterestRateChartData> retrieveAllWithSlabsWithTemplate(Long savingsProductId);
+  Collection<InterestRateChartData> retrieveAllWithSlabsWithTemplate(Long savingsProductId);
 
-    InterestRateChartData retrieveOneWithSlabs(Long interestChartId);
+  InterestRateChartData retrieveOneWithSlabs(Long interestChartId);
 
-    InterestRateChartData retrieveWithTemplate(InterestRateChartData interestRateChartData);
+  InterestRateChartData retrieveWithTemplate(InterestRateChartData interestRateChartData);
 
-    InterestRateChartData retrieveOneWithSlabsOnProductId(Long productId);
+  InterestRateChartData retrieveOneWithSlabsOnProductId(Long productId);
 
-    InterestRateChartData template();
+  InterestRateChartData template();
 
-    InterestRateChartData retrieveActiveChartWithTemplate(Long productId);
+  InterestRateChartData retrieveActiveChartWithTemplate(Long productId);
 }

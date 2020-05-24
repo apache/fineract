@@ -23,49 +23,56 @@ import org.springframework.context.ApplicationEvent;
 
 public class BulkImportEvent extends ApplicationEvent {
 
-    private final String tenantIdentifier;
+  private final String tenantIdentifier;
 
-    private final Workbook workbook;
+  private final Workbook workbook;
 
-    private final Long importId;
+  private final Long importId;
 
-    private final String locale;
+  private final String locale;
 
-    private final String dateFormat;
+  private final String dateFormat;
 
-    private BulkImportEvent(final String tenantIdentifier, final Workbook workbook,
-            final Long importId, final String locale, final String dateFormat) {
-        super(BulkImportEvent.class);
-        this.tenantIdentifier = tenantIdentifier;
-        this.workbook = workbook;
-        this.importId = importId;
-        this.locale = locale;
-        this.dateFormat = dateFormat;
-    }
+  private BulkImportEvent(
+      final String tenantIdentifier,
+      final Workbook workbook,
+      final Long importId,
+      final String locale,
+      final String dateFormat) {
+    super(BulkImportEvent.class);
+    this.tenantIdentifier = tenantIdentifier;
+    this.workbook = workbook;
+    this.importId = importId;
+    this.locale = locale;
+    this.dateFormat = dateFormat;
+  }
 
-    public static BulkImportEvent instance(final String tenantIdentifier, final Workbook workbook,
-            final Long importId, final String locale, final String dateFormat) {
-        return new BulkImportEvent(tenantIdentifier, workbook, importId, locale, dateFormat);
-    }
+  public static BulkImportEvent instance(
+      final String tenantIdentifier,
+      final Workbook workbook,
+      final Long importId,
+      final String locale,
+      final String dateFormat) {
+    return new BulkImportEvent(tenantIdentifier, workbook, importId, locale, dateFormat);
+  }
 
-    public String getTenantIdentifier() {
-        return tenantIdentifier;
-    }
+  public String getTenantIdentifier() {
+    return tenantIdentifier;
+  }
 
-    public Workbook getWorkbook() {
-        return workbook;
-    }
+  public Workbook getWorkbook() {
+    return workbook;
+  }
 
-    public Long getImportId() {
-        return importId;
-    }
+  public Long getImportId() {
+    return importId;
+  }
 
-    public String getDateFormat() {
-        return dateFormat;
-    }
+  public String getDateFormat() {
+    return dateFormat;
+  }
 
-    public String getLocale() {
-        return locale;
-    }
-
+  public String getLocale() {
+    return locale;
+  }
 }

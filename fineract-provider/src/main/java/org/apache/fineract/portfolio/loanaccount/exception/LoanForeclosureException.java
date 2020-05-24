@@ -22,7 +22,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class LoanForeclosureException extends AbstractPlatformDomainRuleException {
 
-    public LoanForeclosureException(final String errorCode, final String errorMessage, final Object... defaultUserMessageArgs) {
-        super(errorCode, errorMessage, defaultUserMessageArgs);
-    }
+  public LoanForeclosureException(
+      final String errorCode, final String errorMessage, final Object... defaultUserMessageArgs) {
+    super(errorCode, errorMessage, defaultUserMessageArgs);
+  }
 }

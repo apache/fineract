@@ -26,19 +26,21 @@ import org.apache.fineract.portfolio.account.data.AccountTransferData;
 
 public class AccountTransfersApiConstants {
 
-    public static final String ACCOUNT_TRANSFER_RESOURCE_NAME = "accounttransfer";
+  public static final String ACCOUNT_TRANSFER_RESOURCE_NAME = "accounttransfer";
 
-    // transaction parameters
-    public static final String transferDateParamName = "transferDate";
-    public static final String transferAmountParamName = "transferAmount";
-    public static final String transferDescriptionParamName = "transferDescription";
-    public static final String currencyParamName = "currency";
+  // transaction parameters
+  public static final String transferDateParamName = "transferDate";
+  public static final String transferAmountParamName = "transferAmount";
+  public static final String transferDescriptionParamName = "transferDescription";
+  public static final String currencyParamName = "currency";
 
-    /**
-     * These parameters will match the class level parameters of
-     * {@link AccountTransferData}. Where possible, we try to get response
-     * parameters to match those of request parameters.
-     */
-    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(AccountDetailConstants.idParamName, transferDescriptionParamName, currencyParamName));
+  /**
+   * These parameters will match the class level parameters of
+   * {@link AccountTransferData}. Where possible, we try to get response
+   * parameters to match those of request parameters.
+   */
+  protected static final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              AccountDetailConstants.idParamName, transferDescriptionParamName, currencyParamName));
 }

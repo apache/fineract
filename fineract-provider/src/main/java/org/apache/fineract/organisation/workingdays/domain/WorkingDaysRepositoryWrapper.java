@@ -34,34 +34,36 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkingDaysRepositoryWrapper {
 
-    private final WorkingDaysRepository repository;
+  private final WorkingDaysRepository repository;
 
-    @Autowired
-    public WorkingDaysRepositoryWrapper(final WorkingDaysRepository repository) {
-        this.repository = repository;
+  @Autowired
+  public WorkingDaysRepositoryWrapper(final WorkingDaysRepository repository) {
+    this.repository = repository;
+  }
+
+  public WorkingDays findOne() {
+    final List<WorkingDays> workingDaysList = this.repository.findAll();
+
+    if (workingDaysList == null || workingDaysList.isEmpty()) {
+      throw new WorkingDaysNotFoundException();
     }
+    return workingDaysList.get(0);
+  }
 
-    public WorkingDays findOne() {
-        final List<WorkingDays> workingDaysList = this.repository.findAll();
+  public void save(final WorkingDays workingDays) {
+    this.repository.save(workingDays);
+  }
 
-        if (workingDaysList == null || workingDaysList.isEmpty()) { throw new WorkingDaysNotFoundException(); }
-        return workingDaysList.get(0);
-    }
+  public void saveAndFlush(final WorkingDays workingDays) {
+    this.repository.saveAndFlush(workingDays);
+  }
 
-    public void save(final WorkingDays workingDays) {
-        this.repository.save(workingDays);
-    }
+  public void delete(final WorkingDays workingDays) {
+    this.repository.delete(workingDays);
+  }
 
-    public void saveAndFlush(final WorkingDays workingDays) {
-        this.repository.saveAndFlush(workingDays);
-    }
-
-    public void delete(final WorkingDays workingDays) {
-        this.repository.delete(workingDays);
-    }
-
-    public boolean isWorkingDay(LocalDate transactionDate) {
-        final WorkingDays workingDays = findOne();
-        return WorkingDaysUtil.isWorkingDay(workingDays, transactionDate);
-    }
+  public boolean isWorkingDay(LocalDate transactionDate) {
+    final WorkingDays workingDays = findOne();
+    return WorkingDaysUtil.isWorkingDay(workingDays, transactionDate);
+  }
 }

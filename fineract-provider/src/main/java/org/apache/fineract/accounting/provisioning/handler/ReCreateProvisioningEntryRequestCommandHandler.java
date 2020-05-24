@@ -29,21 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "PROVISIONENTRIES", action = "RECREATE")
-public class ReCreateProvisioningEntryRequestCommandHandler  implements NewCommandSourceHandler {
+public class ReCreateProvisioningEntryRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService ;
+  private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
 
-    @Autowired
-    public ReCreateProvisioningEntryRequestCommandHandler(
-            final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService) {
-        this.provisioningEntriesWritePlatformService = provisioningEntriesWritePlatformService;
-    }
+  @Autowired
+  public ReCreateProvisioningEntryRequestCommandHandler(
+      final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService) {
+    this.provisioningEntriesWritePlatformService = provisioningEntriesWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningEntriesWritePlatformService.reCreateProvisioningEntries(jsonCommand.entityId(), jsonCommand) ;
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.provisioningEntriesWritePlatformService.reCreateProvisioningEntries(
+        jsonCommand.entityId(), jsonCommand);
+  }
 }
-

@@ -39,64 +39,68 @@ import org.springframework.stereotype.Service;
 @Service
 public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
-    private final static Logger logger = LoggerFactory.getLogger(WriteLikelihoodServiceImpl.class);
-    private final PlatformSecurityContext context;
-    private final LikelihoodDataValidator likelihoodDataValidator;
-    private final LikelihoodRepository repository;
+  private static final Logger logger = LoggerFactory.getLogger(WriteLikelihoodServiceImpl.class);
+  private final PlatformSecurityContext context;
+  private final LikelihoodDataValidator likelihoodDataValidator;
+  private final LikelihoodRepository repository;
 
-    @Autowired
-    WriteLikelihoodServiceImpl(final PlatformSecurityContext context, final LikelihoodDataValidator likelihoodDataValidator,
-            final LikelihoodRepository repository) {
-        this.context = context;
-        this.likelihoodDataValidator = likelihoodDataValidator;
-        this.repository = repository;
+  @Autowired
+  WriteLikelihoodServiceImpl(
+      final PlatformSecurityContext context,
+      final LikelihoodDataValidator likelihoodDataValidator,
+      final LikelihoodRepository repository) {
+    this.context = context;
+    this.likelihoodDataValidator = likelihoodDataValidator;
+    this.repository = repository;
+  }
 
-    }
+  @Override
+  public CommandProcessingResult update(Long likelihoodId, JsonCommand command) {
 
-    @Override
-    public CommandProcessingResult update(Long likelihoodId, JsonCommand command) {
+    this.context.authenticatedUser();
 
-        this.context.authenticatedUser();
+    try {
 
-        try {
+      this.likelihoodDataValidator.validateForUpdate(command);
 
-            this.likelihoodDataValidator.validateForUpdate(command);
+      final Likelihood likelihood = this.repository.findById(likelihoodId).orElse(null);
 
-            final Likelihood likelihood = this.repository.findById(likelihoodId).orElse(null);
+      if (!likelihood.update(command).isEmpty()) {
+        this.repository.save(likelihood);
 
-            if (!likelihood.update(command).isEmpty()) {
-                this.repository.save(likelihood);
+        if (likelihood.isActivateCommand(command)) {
+          List<Likelihood> likelihoods =
+              this.repository.findByPpiNameAndLikeliHoodId(
+                  likelihood.getPpiName(), likelihood.getId());
 
-                if (likelihood.isActivateCommand(command)) {
-                    List<Likelihood> likelihoods = this.repository
-                            .findByPpiNameAndLikeliHoodId(likelihood.getPpiName(), likelihood.getId());
-
-                    for (Likelihood aLikelihood : likelihoods) {
-                        aLikelihood.disable();
-                    }
-                    this.repository.saveAll(likelihoods);
-                }
-
-            }
-
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(likelihood.getId()).build();
-
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(dve);
-            return CommandProcessingResult.empty();
+          for (Likelihood aLikelihood : likelihoods) {
+            aLikelihood.disable();
+          }
+          this.repository.saveAll(likelihoods);
         }
+      }
 
+      return new CommandProcessingResultBuilder()
+          .withCommandId(command.commandId())
+          .withEntityId(likelihood.getId())
+          .build();
+
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
-     */
-    private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
+  /*
+   * Guaranteed to throw an exception no matter what the data integrity issue
+   * is.
+   */
+  private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
-        logger.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.likelihood.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource: " + realCause.getMessage());
-    }
+    final Throwable realCause = dve.getMostSpecificCause();
+    logger.error("Error occured.", dve);
+    throw new PlatformDataIntegrityException(
+        "error.msg.likelihood.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource: " + realCause.getMessage());
+  }
 }

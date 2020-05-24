@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class CommandNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public CommandNotFoundException(final Long id) {
-        super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
-    }
+  public CommandNotFoundException(final Long id) {
+    super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
+  }
 }

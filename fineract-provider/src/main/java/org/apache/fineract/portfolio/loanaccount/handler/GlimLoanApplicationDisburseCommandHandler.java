@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.fineract.portfolio.loanaccount.handler;
 
 import org.apache.fineract.commands.annotation.CommandType;
@@ -29,24 +27,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @CommandType(entity = "GLIMLOAN", action = "DISBURSE")
-public class GlimLoanApplicationDisburseCommandHandler implements NewCommandSourceHandler
-{
+public class GlimLoanApplicationDisburseCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public GlimLoanApplicationDisburseCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public GlimLoanApplicationDisburseCommandHandler(
+      final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.disburseGLIMLoan(command.entityId(), command);
-    }
-
+    return this.writePlatformService.disburseGLIMLoan(command.entityId(), command);
+  }
 }

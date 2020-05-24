@@ -25,12 +25,18 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class CollateralNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public CollateralNotFoundException(final Long loanId, final Long collateralId) {
-        super("error.msg.loan.collateral.", "Collateral with Id " + collateralId + " does not exist for loan with Id " + loanId, loanId,
-                collateralId);
-    }
+  public CollateralNotFoundException(final Long loanId, final Long collateralId) {
+    super(
+        "error.msg.loan.collateral.",
+        "Collateral with Id " + collateralId + " does not exist for loan with Id " + loanId,
+        loanId,
+        collateralId);
+  }
 
-    public CollateralNotFoundException(final Long id) {
-        super("error.msg.loan.collateral.id.invalid", "Loan collateral with identifier " + id + " does not exist", id);
-    }
+  public CollateralNotFoundException(final Long id) {
+    super(
+        "error.msg.loan.collateral.id.invalid",
+        "Loan collateral with identifier " + id + " does not exist",
+        id);
+  }
 }

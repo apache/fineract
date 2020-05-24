@@ -36,48 +36,55 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
 
-    private final Set<String> S3SupportedParameters = S3JSONinputParams.getAllValues();
-    private final Set<String> SMTPSupportedParameters = SMTPJSONinputParams.getAllValues();
-    private final Set<String> SMSSupportedParameters = SMSJSONinputParams.getAllValues();
-    private final Set<String> NotificationSupportedParameters = NotificationJSONinputParams.getAllValues();
-    private final FromJsonHelper fromApiJsonHelper;
+  private final Set<String> S3SupportedParameters = S3JSONinputParams.getAllValues();
+  private final Set<String> SMTPSupportedParameters = SMTPJSONinputParams.getAllValues();
+  private final Set<String> SMSSupportedParameters = SMSJSONinputParams.getAllValues();
+  private final Set<String> NotificationSupportedParameters =
+      NotificationJSONinputParams.getAllValues();
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public ExternalServicesPropertiesCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public ExternalServicesPropertiesCommandFromApiJsonDeserializer(
+      final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateForUpdate(final String json, final String externalServiceName) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForUpdate(final String json, final String externalServiceName) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    switch (externalServiceName) {
+      case "S3":
+        this.fromApiJsonHelper.checkForUnsupportedParameters(
+            typeOfMap, json, this.S3SupportedParameters);
+        break;
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        switch (externalServiceName) {
-            case "S3":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.S3SupportedParameters);
-            break;
+      case "SMTP":
+        this.fromApiJsonHelper.checkForUnsupportedParameters(
+            typeOfMap, json, this.SMTPSupportedParameters);
+        break;
 
-            case "SMTP":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.SMTPSupportedParameters);
-            break;
+      case "SMS":
+        this.fromApiJsonHelper.checkForUnsupportedParameters(
+            typeOfMap, json, this.SMSSupportedParameters);
+        break;
 
-            case "SMS":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.SMSSupportedParameters);
-            break;
+      case "NOTIFICATION":
+        this.fromApiJsonHelper.checkForUnsupportedParameters(
+            typeOfMap, json, this.NotificationSupportedParameters);
+        break;
 
-            case "NOTIFICATION":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.NotificationSupportedParameters);
-            break;
-
-            default:
-                throw new ExternalServiceConfigurationNotFoundException(externalServiceName);
-        }
-
+      default:
+        throw new ExternalServiceConfigurationNotFoundException(externalServiceName);
     }
+  }
 
-    public Set<String> getNameKeys(final String json) {
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, String> jsonMap = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
-        Set<String> keyNames = jsonMap.keySet();
-        return keyNames;
-    }
+  public Set<String> getNameKeys(final String json) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    Map<String, String> jsonMap = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
+    Set<String> keyNames = jsonMap.keySet();
+    return keyNames;
+  }
 }

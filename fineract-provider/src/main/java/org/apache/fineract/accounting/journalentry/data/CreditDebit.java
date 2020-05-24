@@ -21,11 +21,11 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 
 public class CreditDebit {
-    private final Long glAccountId;
-    private final BigDecimal amount;
+  private final Long glAccountId;
+  private final BigDecimal amount;
 
-    public CreditDebit(Long glAccountId, BigDecimal amount) {
-        this.glAccountId = glAccountId;
-        this.amount = amount;
-    }
+  public CreditDebit(Long glAccountId, BigDecimal amount) {
+    this.glAccountId = glAccountId;
+    this.amount = amount;
+  }
 }

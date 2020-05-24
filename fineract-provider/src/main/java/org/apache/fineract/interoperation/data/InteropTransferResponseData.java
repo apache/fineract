@@ -28,51 +28,90 @@ import org.joda.time.LocalDateTime;
 
 public class InteropTransferResponseData extends InteropResponseData {
 
-    @NotNull
-    private final String transferCode;
+  @NotNull private final String transferCode;
 
-    private String completedTimestamp;
+  private String completedTimestamp;
 
-    private InteropTransferResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
-                                        @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration,
-                                        List<ExtensionData> extensionList, @NotNull String transferCode, LocalDateTime completedTimestamp) {
-        super(resourceId, officeId, commandId, changesOnly, transactionCode, state, expiration, extensionList);
-        this.transferCode = transferCode;
-        this.completedTimestamp = format(completedTimestamp);
-    }
+  private InteropTransferResponseData(
+      Long resourceId,
+      Long officeId,
+      Long commandId,
+      Map<String, Object> changesOnly,
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      LocalDateTime expiration,
+      List<ExtensionData> extensionList,
+      @NotNull String transferCode,
+      LocalDateTime completedTimestamp) {
+    super(
+        resourceId,
+        officeId,
+        commandId,
+        changesOnly,
+        transactionCode,
+        state,
+        expiration,
+        extensionList);
+    this.transferCode = transferCode;
+    this.completedTimestamp = format(completedTimestamp);
+  }
 
-    public static InteropTransferResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                                    LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String transferCode,
-                                                    LocalDateTime completedTimestamp) {
-        return new InteropTransferResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList,
-                transferCode, completedTimestamp);
-    }
+  public static InteropTransferResponseData build(
+      Long commandId,
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      LocalDateTime expiration,
+      List<ExtensionData> extensionList,
+      @NotNull String transferCode,
+      LocalDateTime completedTimestamp) {
+    return new InteropTransferResponseData(
+        null,
+        null,
+        commandId,
+        null,
+        transactionCode,
+        state,
+        expiration,
+        extensionList,
+        transferCode,
+        completedTimestamp);
+  }
 
-    public static InteropTransferResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
-                                                    List<ExtensionData> extensionList, @NotNull String transferCode,
-                                                    LocalDateTime completedTimestamp) {
-        return build(null, transactionCode, state, null, extensionList, transferCode, completedTimestamp);
-    }
+  public static InteropTransferResponseData build(
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      List<ExtensionData> extensionList,
+      @NotNull String transferCode,
+      LocalDateTime completedTimestamp) {
+    return build(
+        null, transactionCode, state, null, extensionList, transferCode, completedTimestamp);
+  }
 
-    public static InteropTransferResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                                    @NotNull String transferCode) {
-        return build(commandId, transactionCode, state, null, null, transferCode, null);
-    }
+  public static InteropTransferResponseData build(
+      Long commandId,
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      @NotNull String transferCode) {
+    return build(commandId, transactionCode, state, null, null, transferCode, null);
+  }
 
-    public static InteropTransferResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state, @NotNull String transferCode) {
-        return build(null, transactionCode, state, transferCode);
-    }
+  public static InteropTransferResponseData build(
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      @NotNull String transferCode) {
+    return build(null, transactionCode, state, transferCode);
+  }
 
-    public String getTransferCode() {
-        return transferCode;
-    }
+  public String getTransferCode() {
+    return transferCode;
+  }
 
-    public String getCompletedTimestamp() {
-        return completedTimestamp;
-    }
+  public String getCompletedTimestamp() {
+    return completedTimestamp;
+  }
 
-    @Transient
-    public LocalDateTime getCompletedTimestampDate() throws ParseException {
-        return parse(completedTimestamp);
-    }
+  @Transient
+  public LocalDateTime getCompletedTimestampDate() throws ParseException {
+    return parse(completedTimestamp);
+  }
 }

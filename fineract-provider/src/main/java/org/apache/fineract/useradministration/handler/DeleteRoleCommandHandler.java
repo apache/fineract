@@ -31,17 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ROLE", action = "DELETE")
 public class DeleteRoleCommandHandler implements NewCommandSourceHandler {
 
-    private final RoleWritePlatformService writePlatformService;
+  private final RoleWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteRole(command.entityId());
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteRole(command.entityId());
+  }
 }

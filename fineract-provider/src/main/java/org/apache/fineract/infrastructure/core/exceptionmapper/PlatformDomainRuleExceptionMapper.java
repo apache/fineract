@@ -38,15 +38,22 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformDomainRuleExceptionMapper implements ExceptionMapper<AbstractPlatformDomainRuleException> {
+public class PlatformDomainRuleExceptionMapper
+    implements ExceptionMapper<AbstractPlatformDomainRuleException> {
 
-    @Override
-    public Response toResponse(final AbstractPlatformDomainRuleException exception) {
+  @Override
+  public Response toResponse(final AbstractPlatformDomainRuleException exception) {
 
-        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.domainRuleViolation(
-                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
-        // request understood but not carried out due to it violating some
-        // domain/business logic
-        return Response.status(Status.FORBIDDEN).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
-    }
+    final ApiGlobalErrorResponse notFoundErrorResponse =
+        ApiGlobalErrorResponse.domainRuleViolation(
+            exception.getGlobalisationMessageCode(),
+            exception.getDefaultUserMessage(),
+            exception.getDefaultUserMessageArgs());
+    // request understood but not carried out due to it violating some
+    // domain/business logic
+    return Response.status(Status.FORBIDDEN)
+        .entity(notFoundErrorResponse)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

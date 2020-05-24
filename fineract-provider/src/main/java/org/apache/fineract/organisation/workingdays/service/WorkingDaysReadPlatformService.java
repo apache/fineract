@@ -22,7 +22,7 @@ import org.apache.fineract.organisation.workingdays.data.WorkingDaysData;
 
 public interface WorkingDaysReadPlatformService {
 
-    WorkingDaysData retrieve();
+  WorkingDaysData retrieve();
 
-    WorkingDaysData repaymentRescheduleType();
+  WorkingDaysData repaymentRescheduleType();
 }

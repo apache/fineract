@@ -46,182 +46,238 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-
 @Component
 public class FineractEntityDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private final OfficeRepositoryWrapper officeRepositoryWrapper;
-    private final LoanProductRepository loanProductRepository;
-    private final SavingsProductRepository savingsProductRepository;
-    private final ChargeRepositoryWrapper chargeRepositoryWrapper;
-    private final RoleRepository roleRepository;
-    private static final Set<String> CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType,
-            FineractEntityApiResourceConstants.startDate, FineractEntityApiResourceConstants.LOCALE,
-            FineractEntityApiResourceConstants.DATE_FORMAT, FineractEntityApiResourceConstants.endDate));
+  private final FromJsonHelper fromApiJsonHelper;
+  private final OfficeRepositoryWrapper officeRepositoryWrapper;
+  private final LoanProductRepository loanProductRepository;
+  private final SavingsProductRepository savingsProductRepository;
+  private final ChargeRepositoryWrapper chargeRepositoryWrapper;
+  private final RoleRepository roleRepository;
+  private static final Set<String> CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              FineractEntityApiResourceConstants.fromEnityType,
+                  FineractEntityApiResourceConstants.toEntityType,
+              FineractEntityApiResourceConstants.startDate,
+                  FineractEntityApiResourceConstants.LOCALE,
+              FineractEntityApiResourceConstants.DATE_FORMAT,
+                  FineractEntityApiResourceConstants.endDate));
 
-    private static final Set<String> UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(FineractEntityApiResourceConstants.relId, FineractEntityApiResourceConstants.fromEnityType,
-                    FineractEntityApiResourceConstants.toEntityType, FineractEntityApiResourceConstants.startDate,
-                    FineractEntityApiResourceConstants.LOCALE, FineractEntityApiResourceConstants.DATE_FORMAT,
-                    FineractEntityApiResourceConstants.endDate));
+  private static final Set<String> UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              FineractEntityApiResourceConstants.relId,
+              FineractEntityApiResourceConstants.fromEnityType,
+              FineractEntityApiResourceConstants.toEntityType,
+              FineractEntityApiResourceConstants.startDate,
+              FineractEntityApiResourceConstants.LOCALE,
+              FineractEntityApiResourceConstants.DATE_FORMAT,
+              FineractEntityApiResourceConstants.endDate));
 
-    @Autowired
-    public FineractEntityDataValidator(final FromJsonHelper fromApiJsonHelper, final OfficeRepositoryWrapper officeRepositoryWrapper,
-            final LoanProductRepository loanProductRepository, final SavingsProductRepository savingsProductRepository,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper, final RoleRepository roleRepository) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.loanProductRepository = loanProductRepository;
-        this.savingsProductRepository = savingsProductRepository;
-        this.chargeRepositoryWrapper = chargeRepositoryWrapper;
-        this.roleRepository = roleRepository;
+  @Autowired
+  public FineractEntityDataValidator(
+      final FromJsonHelper fromApiJsonHelper,
+      final OfficeRepositoryWrapper officeRepositoryWrapper,
+      final LoanProductRepository loanProductRepository,
+      final SavingsProductRepository savingsProductRepository,
+      final ChargeRepositoryWrapper chargeRepositoryWrapper,
+      final RoleRepository roleRepository) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+    this.officeRepositoryWrapper = officeRepositoryWrapper;
+    this.loanProductRepository = loanProductRepository;
+    this.savingsProductRepository = savingsProductRepository;
+    this.chargeRepositoryWrapper = chargeRepositoryWrapper;
+    this.roleRepository = roleRepository;
+  }
+
+  public void validateForCreate(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForCreate(final String json) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
-            final Long fromId = this.fromApiJsonHelper.extractLongNamed(FineractEntityApiResourceConstants.fromEnityType, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(fromId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.toEntityType, element)) {
-            final Long toId = this.fromApiJsonHelper.extractLongNamed(FineractEntityApiResourceConstants.toEntityType, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.toEntityType).value(toId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.startDate, element)) {
-            final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(FineractEntityApiResourceConstants.startDate, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.startDate).value(startDate);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.endDate, element)) {
-            final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(FineractEntityApiResourceConstants.endDate, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.endDate).value(endDate);
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.fromEnityType, element)) {
+      final Long fromId =
+          this.fromApiJsonHelper.extractLongNamed(
+              FineractEntityApiResourceConstants.fromEnityType, element);
+      baseDataValidator
+          .reset()
+          .parameter(FineractEntityApiResourceConstants.fromEnityType)
+          .value(fromId)
+          .notNull()
+          .integerGreaterThanZero();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            //
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.toEntityType, element)) {
+      final Long toId =
+          this.fromApiJsonHelper.extractLongNamed(
+              FineractEntityApiResourceConstants.toEntityType, element);
+      baseDataValidator
+          .reset()
+          .parameter(FineractEntityApiResourceConstants.toEntityType)
+          .value(toId)
+          .notNull()
+          .integerGreaterThanZero();
     }
 
-    public void checkForEntity(String relId, Long fromId, Long toId) {
-
-        switch (relId) {
-            case "1":
-                checkForOffice(fromId);
-                checkForLoanProducts(toId);
-            break;
-            case "2":
-                checkForOffice(fromId);
-                checkForSavingsProducts(toId);
-            break;
-            case "3":
-                checkForOffice(fromId);
-                checkForCharges(toId);
-            break;
-            case "4":
-                checkForRoles(fromId);
-                checkForLoanProducts(toId);
-            break;
-            case "5":
-                checkForRoles(fromId);
-                checkForSavingsProducts(toId);
-            break;
-
-        }
-
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.startDate, element)) {
+      final LocalDate startDate =
+          this.fromApiJsonHelper.extractLocalDateNamed(
+              FineractEntityApiResourceConstants.startDate, element);
+      baseDataValidator
+          .reset()
+          .parameter(FineractEntityApiResourceConstants.startDate)
+          .value(startDate);
     }
 
-    public void checkForOffice(Long id) {
-        this.officeRepositoryWrapper.findOneWithNotFoundDetection(id);
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.endDate, element)) {
+      final LocalDate endDate =
+          this.fromApiJsonHelper.extractLocalDateNamed(
+              FineractEntityApiResourceConstants.endDate, element);
+      baseDataValidator
+          .reset()
+          .parameter(FineractEntityApiResourceConstants.endDate)
+          .value(endDate);
     }
 
-    public void checkForLoanProducts(final Long id) {
-        this.loanProductRepository.findById(id)
-                .orElseThrow(() -> new LoanProductNotFoundException(id));
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      //
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  public void checkForEntity(String relId, Long fromId, Long toId) {
+
+    switch (relId) {
+      case "1":
+        checkForOffice(fromId);
+        checkForLoanProducts(toId);
+        break;
+      case "2":
+        checkForOffice(fromId);
+        checkForSavingsProducts(toId);
+        break;
+      case "3":
+        checkForOffice(fromId);
+        checkForCharges(toId);
+        break;
+      case "4":
+        checkForRoles(fromId);
+        checkForLoanProducts(toId);
+        break;
+      case "5":
+        checkForRoles(fromId);
+        checkForSavingsProducts(toId);
+        break;
+    }
+  }
+
+  public void checkForOffice(Long id) {
+    this.officeRepositoryWrapper.findOneWithNotFoundDetection(id);
+  }
+
+  public void checkForLoanProducts(final Long id) {
+    this.loanProductRepository.findById(id).orElseThrow(() -> new LoanProductNotFoundException(id));
+  }
+
+  public void checkForSavingsProducts(final Long id) {
+    this.savingsProductRepository
+        .findById(id)
+        .orElseThrow(() -> new SavingsProductNotFoundException(id));
+  }
+
+  public void checkForCharges(final Long id) {
+    this.chargeRepositoryWrapper.findOneWithNotFoundDetection(id);
+  }
+
+  public void checkForRoles(final Long id) {
+    this.roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
+  }
+
+  public void validateForUpdate(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void checkForSavingsProducts(final Long id) {
-        this.savingsProductRepository.findById(id)
-                .orElseThrow(() -> new SavingsProductNotFoundException(id));
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
+
+    boolean atLeastOneParameterPassedForUpdate = false;
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.fromEnityType, element)) {
+      atLeastOneParameterPassedForUpdate = true;
+      final String fromEnityType =
+          this.fromApiJsonHelper.extractStringNamed(
+              FineractEntityApiResourceConstants.fromEnityType, element);
+      baseDataValidator
+          .reset()
+          .parameter(FineractEntityApiResourceConstants.fromEnityType)
+          .value(fromEnityType);
     }
 
-    public void checkForCharges(final Long id) {
-        this.chargeRepositoryWrapper.findOneWithNotFoundDetection(id);
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.fromEnityType, element)) {
+      atLeastOneParameterPassedForUpdate = true;
+      final String toEnityType =
+          this.fromApiJsonHelper.extractStringNamed(
+              FineractEntityApiResourceConstants.toEntityType, element);
+      baseDataValidator
+          .reset()
+          .parameter(FineractEntityApiResourceConstants.fromEnityType)
+          .value(toEnityType);
     }
 
-    public void checkForRoles(final Long id) {
-        this.roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException(id));
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.toEntityType, element)) {
+      atLeastOneParameterPassedForUpdate = true;
     }
 
-    public void validateForUpdate(final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
-
-        boolean atLeastOneParameterPassedForUpdate = false;
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final String fromEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.fromEnityType, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(fromEnityType);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final String toEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.toEntityType, element);
-            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(toEnityType);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.toEntityType, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.startDate, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.endDate, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-        }
-
-        if (!atLeastOneParameterPassedForUpdate) {
-            final Object forceError = null;
-            baseDataValidator.reset().anyOfNotNull(forceError);
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.startDate, element)) {
+      atLeastOneParameterPassedForUpdate = true;
     }
 
+    if (this.fromApiJsonHelper.parameterExists(
+        FineractEntityApiResourceConstants.endDate, element)) {
+      atLeastOneParameterPassedForUpdate = true;
+    }
+
+    if (!atLeastOneParameterPassedForUpdate) {
+      final Object forceError = null;
+      baseDataValidator.reset().anyOfNotNull(forceError);
+    }
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 }

@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class SmsRuntimeException extends AbstractPlatformDomainRuleException {
 
-    public SmsRuntimeException(String errorCode, String errorMessage) {
-        super(errorCode, errorMessage);
-    }
+  public SmsRuntimeException(String errorCode, String errorMessage) {
+    super(errorCode, errorMessage);
+  }
 }

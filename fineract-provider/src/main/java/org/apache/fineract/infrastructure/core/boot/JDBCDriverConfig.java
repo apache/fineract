@@ -27,31 +27,40 @@ import org.springframework.stereotype.Service;
 @Service
 public class JDBCDriverConfig {
 
-    private final static String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
-    private final static String PROTOCOL_PROPERTYNAME = "PROTOCOL";
-    private final static String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
+  private static final String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
+  private static final String PROTOCOL_PROPERTYNAME = "PROTOCOL";
+  private static final String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
 
-    private String driverClassName;
-    private String protocol;
-    private String subProtocol;
+  private String driverClassName;
+  private String protocol;
+  private String subProtocol;
 
-    @Autowired ApplicationContext context;
+  @Autowired ApplicationContext context;
 
-    @PostConstruct
-    protected void init() {
-        Environment environment = context.getEnvironment();
-        driverClassName = environment.getProperty(DRIVER_CLASS_PROPERTYNAME);
-        protocol = environment.getProperty(PROTOCOL_PROPERTYNAME);
-        subProtocol = environment.getProperty(SUBPROTOCOL_PROPERTYNAME);
-    }
+  @PostConstruct
+  protected void init() {
+    Environment environment = context.getEnvironment();
+    driverClassName = environment.getProperty(DRIVER_CLASS_PROPERTYNAME);
+    protocol = environment.getProperty(PROTOCOL_PROPERTYNAME);
+    subProtocol = environment.getProperty(SUBPROTOCOL_PROPERTYNAME);
+  }
 
-    public String getDriverClassName() {
-        return this.driverClassName;
-    }
+  public String getDriverClassName() {
+    return this.driverClassName;
+  }
 
-    public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {
-        final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':').append(schemaServerPort)
-                .append('/').append(schemaName).toString();
-        return url;
-    }
+  public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {
+    final String url =
+        new StringBuilder(protocol)
+            .append(":")
+            .append(subProtocol)
+            .append("://")
+            .append(schemaServer)
+            .append(':')
+            .append(schemaServerPort)
+            .append('/')
+            .append(schemaName)
+            .toString();
+    return url;
+  }
 }

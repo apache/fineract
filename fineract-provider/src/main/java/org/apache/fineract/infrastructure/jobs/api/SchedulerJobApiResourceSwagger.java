@@ -28,68 +28,76 @@ import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
  * Created by sanyam on 12/8/17.
  */
 final class SchedulerJobApiResourceSwagger {
-    private SchedulerJobApiResourceSwagger() {
+  private SchedulerJobApiResourceSwagger() {}
 
+  @ApiModel(value = "GetJobsResponse")
+  public static final class GetJobsResponse {
+    private GetJobsResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long jobId;
+
+    @ApiModelProperty(example = "Update loan Summary")
+    public String displayName;
+
+    @ApiModelProperty(example = "")
+    public Date nextRunTime;
+
+    @ApiModelProperty(example = "")
+    public String initializingError;
+
+    @ApiModelProperty(example = "0 0 22 1/1 * ? *")
+    public String cronExpression;
+
+    @ApiModelProperty(example = "false")
+    public boolean active;
+
+    @ApiModelProperty(example = "false")
+    public boolean currentlyRunning;
+
+    public JobDetailHistoryData lastRunHistory;
+  }
+
+  @ApiModel(value = "PutJobsJobsIDRequest")
+  public static final class PutJobsJobIDRequest {
+    private PutJobsJobIDRequest() {}
+
+    @ApiModelProperty(example = "Update loan Summary")
+    public String displayName;
+
+    @ApiModelProperty(example = "0 0 22 1/1 * ? *")
+    public String cronExpression;
+
+    @ApiModelProperty(example = "false")
+    public boolean active;
+  }
+
+  @ApiModel(value = "GetJobsJobIDJobRunHistoryResponse")
+  public static final class GetJobsJobIDJobRunHistoryResponse {
+    private GetJobsJobIDJobRunHistoryResponse() {}
+
+    final class JobDetailHistoryDataSwagger {
+      private JobDetailHistoryDataSwagger() {}
+
+      @ApiModelProperty(example = "1")
+      public Long version;
+
+      @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
+      public Date jobRunStartTime;
+
+      @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
+      public Date jobRunEndTime;
+
+      @ApiModelProperty(example = "success")
+      public String status;
+
+      @ApiModelProperty(example = "cron")
+      public String triggerType;
     }
 
-    @ApiModel(value = "GetJobsResponse")
-    public static final class GetJobsResponse {
-        private GetJobsResponse() {
+    @ApiModelProperty(example = "8")
+    public int totalFilteredRecords;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long jobId;
-        @ApiModelProperty(example = "Update loan Summary")
-        public String displayName;
-        @ApiModelProperty(example = "")
-        public Date nextRunTime;
-        @ApiModelProperty(example = "")
-        public String initializingError;
-        @ApiModelProperty(example = "0 0 22 1/1 * ? *")
-        public String cronExpression;
-        @ApiModelProperty(example = "false")
-        public boolean active;
-        @ApiModelProperty(example = "false")
-        public boolean currentlyRunning;
-        public JobDetailHistoryData lastRunHistory;
-    }
-
-    @ApiModel(value = "PutJobsJobsIDRequest")
-    public static final class PutJobsJobIDRequest {
-        private PutJobsJobIDRequest() {
-
-        }
-        @ApiModelProperty(example = "Update loan Summary")
-        public String displayName;
-        @ApiModelProperty(example = "0 0 22 1/1 * ? *")
-        public String cronExpression;
-        @ApiModelProperty(example = "false")
-        public boolean active;
-
-    }
-
-    @ApiModel(value = "GetJobsJobIDJobRunHistoryResponse")
-    public static final class GetJobsJobIDJobRunHistoryResponse {
-        private GetJobsJobIDJobRunHistoryResponse() {
-
-        }
-
-        final class JobDetailHistoryDataSwagger {
-            private JobDetailHistoryDataSwagger(){}
-            @ApiModelProperty(example = "1")
-            public Long version;
-            @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
-            public Date jobRunStartTime;
-            @ApiModelProperty(example = "Jul 16, 2013 12:00:00 PM")
-            public Date jobRunEndTime;
-            @ApiModelProperty(example = "success")
-            public String status;
-            @ApiModelProperty(example = "cron")
-            public String triggerType;
-        }
-        @ApiModelProperty(example = "8")
-        public int totalFilteredRecords;
-        public List<JobDetailHistoryDataSwagger> pageItems;
-
-    }
+    public List<JobDetailHistoryDataSwagger> pageItems;
+  }
 }

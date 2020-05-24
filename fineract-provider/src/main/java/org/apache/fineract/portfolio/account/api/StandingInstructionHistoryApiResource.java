@@ -52,61 +52,109 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Standing Instructions History"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Standing Instructions History", description = "The list capability of history can support pagination and sorting.")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Standing Instructions History",
+          description = "The list capability of history can support pagination and sorting.")
+    })
 public class StandingInstructionHistoryApiResource {
 
-    private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<StandingInstructionHistoryData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService;
+  private final PlatformSecurityContext context;
+  private final DefaultToApiJsonSerializer<StandingInstructionHistoryData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final StandingInstructionHistoryReadPlatformService
+      standingInstructionHistoryReadPlatformService;
 
-    @Autowired
-    public StandingInstructionHistoryApiResource(final PlatformSecurityContext context,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final StandingInstructionHistoryReadPlatformService standingInstructionHistoryReadPlatformService,
-            final DefaultToApiJsonSerializer<StandingInstructionHistoryData> toApiJsonSerializer) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.standingInstructionHistoryReadPlatformService = standingInstructionHistoryReadPlatformService;
+  @Autowired
+  public StandingInstructionHistoryApiResource(
+      final PlatformSecurityContext context,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final StandingInstructionHistoryReadPlatformService
+          standingInstructionHistoryReadPlatformService,
+      final DefaultToApiJsonSerializer<StandingInstructionHistoryData> toApiJsonSerializer) {
+    this.context = context;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.standingInstructionHistoryReadPlatformService =
+        standingInstructionHistoryReadPlatformService;
+  }
+
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Standing Instructions Logged History",
+      httpMethod = "GET",
+      notes =
+          "The list capability of history can support pagination and sorting \n\n"
+              + "Example Requests :\n"
+              + "\n"
+              + "standinginstructionrunhistory\n"
+              + "\n"
+              + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n"
+              + "\n"
+              + "standinginstructionrunhistory?offset=10&limit=50")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response =
+            StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse
+                .class)
+  })
+  public String retrieveAll(
+      @Context final UriInfo uriInfo,
+      @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
+      @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
+      @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+      @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+      @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+      @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
+      @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType,
+      @QueryParam("clientName") @ApiParam(value = "clientName") final String clientName,
+      @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+      @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccount,
+      @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType")
+          final Integer fromAccountType,
+      @QueryParam("locale") @ApiParam(value = "locale") final String locale,
+      @QueryParam("dateFormat") @ApiParam(value = "dateFormat") final String dateFormat,
+      @QueryParam("fromDate") @ApiParam(value = "fromDate") final DateParam fromDateParam,
+      @QueryParam("toDate") @ApiParam(value = "toDate") final DateParam toDateParam) {
+
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(
+            StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
+
+    final SearchParameters searchParameters =
+        SearchParameters.forAccountTransfer(
+            sqlSearch, externalId, offset, limit, orderBy, sortOrder);
+    Date startDateRange = null;
+    Date endDateRange = null;
+    if (fromDateParam != null) {
+      startDateRange = fromDateParam.getDate("fromDate", dateFormat, locale);
+    }
+    if (toDateParam != null) {
+      endDateRange = toDateParam.getDate("toDate", dateFormat, locale);
     }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Standing Instructions Logged History", httpMethod = "GET", notes = "The list capability of history can support pagination and sorting \n\n" +"Example Requests :\n" + "\n" + "standinginstructionrunhistory\n" + "\n" + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n" + "\n" + "standinginstructionrunhistory?offset=10&limit=50")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse.class)})
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
-            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
-            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder, @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType,
-            @QueryParam("clientName") @ApiParam(value = "clientName") final String clientName, @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccount, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
-            @QueryParam("locale") @ApiParam(value = "locale") final String locale, @QueryParam("dateFormat") @ApiParam(value = "dateFormat") final String dateFormat,
-            @QueryParam("fromDate") @ApiParam(value = "fromDate") final DateParam fromDateParam, @QueryParam("toDate") @ApiParam(value = "toDate") final DateParam toDateParam) {
+    StandingInstructionDTO standingInstructionDTO =
+        new StandingInstructionDTO(
+            searchParameters,
+            transferType,
+            clientName,
+            clientId,
+            fromAccount,
+            fromAccountType,
+            startDateRange,
+            endDateRange);
 
-        this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
+    final Page<StandingInstructionHistoryData> history =
+        this.standingInstructionHistoryReadPlatformService.retrieveAll(standingInstructionDTO);
 
-        final SearchParameters searchParameters = SearchParameters.forAccountTransfer(sqlSearch, externalId, offset, limit, orderBy,
-                sortOrder);
-        Date startDateRange = null;
-        Date endDateRange = null;
-        if (fromDateParam != null) {
-            startDateRange = fromDateParam.getDate("fromDate", dateFormat, locale);
-        }
-        if (toDateParam != null) {
-            endDateRange = toDateParam.getDate("toDate", dateFormat, locale);
-        }
-
-        StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName, clientId,
-                fromAccount, fromAccountType, startDateRange, endDateRange);
-
-        final Page<StandingInstructionHistoryData> history = this.standingInstructionHistoryReadPlatformService
-                .retrieveAll(standingInstructionDTO);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, history);
-    }
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, history);
+  }
 }

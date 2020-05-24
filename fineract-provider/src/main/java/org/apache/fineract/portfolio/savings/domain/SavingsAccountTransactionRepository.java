@@ -22,10 +22,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
-public interface SavingsAccountTransactionRepository extends JpaRepository<SavingsAccountTransaction, Long>,
+public interface SavingsAccountTransactionRepository
+    extends JpaRepository<SavingsAccountTransaction, Long>,
         JpaSpecificationExecutor<SavingsAccountTransaction> {
 
-    @Query("select sat from SavingsAccountTransaction sat where sat.id = :transactionId and sat.savingsAccount.id = :savingsId")
-    SavingsAccountTransaction findOneByIdAndSavingsAccountId(Long transactionId, Long savingsId);
-
+  @Query(
+      "select sat from SavingsAccountTransaction sat where sat.id = :transactionId and"
+          + " sat.savingsAccount.id = :savingsId")
+  SavingsAccountTransaction findOneByIdAndSavingsAccountId(Long transactionId, Long savingsId);
 }

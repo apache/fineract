@@ -38,13 +38,20 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformInternalServerExceptionMapper implements ExceptionMapper<PlatformInternalServerException> {
+public class PlatformInternalServerExceptionMapper
+    implements ExceptionMapper<PlatformInternalServerException> {
 
-    @Override
-    public Response toResponse(final PlatformInternalServerException exception) {
+  @Override
+  public Response toResponse(final PlatformInternalServerException exception) {
 
-        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.serverSideError(exception.getGlobalisationMessageCode(),
-                exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
-        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
-    }
+    final ApiGlobalErrorResponse notFoundErrorResponse =
+        ApiGlobalErrorResponse.serverSideError(
+            exception.getGlobalisationMessageCode(),
+            exception.getDefaultUserMessage(),
+            exception.getDefaultUserMessageArgs());
+    return Response.status(Status.INTERNAL_SERVER_ERROR)
+        .entity(notFoundErrorResponse)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

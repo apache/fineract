@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "EMAIL_CONFIGURATION", action = "UPDATE")
 public class UpdateEmailConfigurationCommandHandler implements NewCommandSourceHandler {
 
-    private final EmailConfigurationWritePlatformService writePlatformService;
+  private final EmailConfigurationWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateEmailConfigurationCommandHandler(final EmailConfigurationWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateEmailConfigurationCommandHandler(
+      final EmailConfigurationWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.update(command);
-    }
+    return this.writePlatformService.update(command);
+  }
 }

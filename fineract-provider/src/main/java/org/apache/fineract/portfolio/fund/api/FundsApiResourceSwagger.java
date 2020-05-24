@@ -25,54 +25,50 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 12/08/17.
  */
 final class FundsApiResourceSwagger {
-    private FundsApiResourceSwagger() {
-    }
+  private FundsApiResourceSwagger() {}
 
-    @ApiModel(value = "GetFundsResponse")
-    public static final class GetFundsResponse {
-        private GetFundsResponse() {
-        }
+  @ApiModel(value = "GetFundsResponse")
+  public static final class GetFundsResponse {
+    private GetFundsResponse() {}
 
-        @ApiModelProperty(example = "1")
-        public Integer id;
-        @ApiModelProperty(example = "EU Agri Fund")
-        public String name;
-    }
+    @ApiModelProperty(example = "1")
+    public Integer id;
 
-    @ApiModel(value = "PostFundsRequest")
-    public static final class PostFundsRequest {
-        private PostFundsRequest() {
-        }
+    @ApiModelProperty(example = "EU Agri Fund")
+    public String name;
+  }
 
-        @ApiModelProperty(example = "EU Agri Fund")
-        public String name;
-    }
+  @ApiModel(value = "PostFundsRequest")
+  public static final class PostFundsRequest {
+    private PostFundsRequest() {}
 
-    @ApiModel(value = "PostFundsResponse")
-    public static final class PostFundsResponse {
-        private PostFundsResponse() {
-        }
+    @ApiModelProperty(example = "EU Agri Fund")
+    public String name;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-    }
+  @ApiModel(value = "PostFundsResponse")
+  public static final class PostFundsResponse {
+    private PostFundsResponse() {}
 
-    @ApiModel(value = "PutFundsFundIdRequest")
-    public static final class PutFundsFundIdRequest {
-        private PutFundsFundIdRequest() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
 
-        @ApiModelProperty(example = "EU Agri Fund (2010-2020)")
-        public String name;
-    }
+  @ApiModel(value = "PutFundsFundIdRequest")
+  public static final class PutFundsFundIdRequest {
+    private PutFundsFundIdRequest() {}
 
-    @ApiModel(value = "PutFundsFundIdResponse")
-    public static final class PutFundsFundIdResponse {
-        private PutFundsFundIdResponse() {
-        }
+    @ApiModelProperty(example = "EU Agri Fund (2010-2020)")
+    public String name;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-        public PutFundsFundIdRequest changes;
-    }
+  @ApiModel(value = "PutFundsFundIdResponse")
+  public static final class PutFundsFundIdResponse {
+    private PutFundsFundIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+
+    public PutFundsFundIdRequest changes;
+  }
 }

@@ -46,49 +46,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class UpdateClientCommandStrategy implements CommandStrategy {
 
-    private final ClientsApiResource clientsApiResource;
+  private final ClientsApiResource clientsApiResource;
 
-    @Autowired
-    public UpdateClientCommandStrategy(final ClientsApiResource clientsApiResource) {
-        this.clientsApiResource = clientsApiResource;
+  @Autowired
+  public UpdateClientCommandStrategy(final ClientsApiResource clientsApiResource) {
+    this.clientsApiResource = clientsApiResource;
+  }
+
+  @Override
+  public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
+
+    final BatchResponse response = new BatchResponse();
+    final String responseBody;
+
+    response.setRequestId(request.getRequestId());
+    response.setHeaders(request.getHeaders());
+
+    // Get the clientID
+    final String relativeUrl = request.getRelativeUrl();
+    final Long clientId = Long.parseLong(relativeUrl.substring(relativeUrl.indexOf('/') + 1));
+
+    // Try-catch blocks to map exceptions to appropriate status codes
+    try {
+
+      // Calls 'update' function from 'ClientsApiResource' to update a
+      // client
+      responseBody = clientsApiResource.update(clientId, request.getBody());
+
+      response.setStatusCode(200);
+      // Sets the body of the response after the successful update of
+      // client information
+      response.setBody(responseBody);
+
+    } catch (RuntimeException e) {
+
+      // Gets an object of type ErrorInfo, containing information about
+      // raised exception
+      ErrorInfo ex = ErrorHandler.handler(e);
+
+      response.setStatusCode(ex.getStatusCode());
+      response.setBody(ex.getMessage());
     }
 
-    @Override
-    public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
-
-        final BatchResponse response = new BatchResponse();
-        final String responseBody;
-
-        response.setRequestId(request.getRequestId());
-        response.setHeaders(request.getHeaders());
-
-        // Get the clientID
-        final String relativeUrl = request.getRelativeUrl();
-        final Long clientId = Long.parseLong(relativeUrl.substring(relativeUrl.indexOf('/') + 1));
-
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
-
-            // Calls 'update' function from 'ClientsApiResource' to update a
-            // client
-            responseBody = clientsApiResource.update(clientId, request.getBody());
-
-            response.setStatusCode(200);
-            // Sets the body of the response after the successful update of
-            // client information
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
-
-        return response;
-    }
-
+    return response;
+  }
 }

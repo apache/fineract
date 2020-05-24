@@ -44,34 +44,48 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GroupsLevelApiResource {
 
-    private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("levelId", "levelName",
-            "parentLevelId", "parentLevelName", "childLevelId", "childLevelName", "superParent", "recursable", "canHaveClients"));
+  private static final Set<String> GROUPLEVEL_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              "levelId",
+              "levelName",
+              "parentLevelId",
+              "parentLevelName",
+              "childLevelId",
+              "childLevelName",
+              "superParent",
+              "recursable",
+              "canHaveClients"));
 
-    private final PlatformSecurityContext context;
-    private final GroupLevelReadPlatformService groupLevelReadPlatformService;
-    private final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PlatformSecurityContext context;
+  private final GroupLevelReadPlatformService groupLevelReadPlatformService;
+  private final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
 
-    @Autowired
-    public GroupsLevelApiResource(final PlatformSecurityContext context, final GroupLevelReadPlatformService groupLevelReadPlatformService,
-            final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
-        this.context = context;
-        this.groupLevelReadPlatformService = groupLevelReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-    }
+  @Autowired
+  public GroupsLevelApiResource(
+      final PlatformSecurityContext context,
+      final GroupLevelReadPlatformService groupLevelReadPlatformService,
+      final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper) {
+    this.context = context;
+    this.groupLevelReadPlatformService = groupLevelReadPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllGroups(@Context final UriInfo uriInfo) {
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAllGroups(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+    this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final Collection<GroupLevelData> groupLevel = this.groupLevelReadPlatformService.retrieveAllLevels();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    final Collection<GroupLevelData> groupLevel =
+        this.groupLevelReadPlatformService.retrieveAllLevels();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return this.toApiJsonSerializer.serialize(settings, groupLevel, GROUPLEVEL_DATA_PARAMETERS);
-
-    }
+    return this.toApiJsonSerializer.serialize(settings, groupLevel, GROUPLEVEL_DATA_PARAMETERS);
+  }
 }

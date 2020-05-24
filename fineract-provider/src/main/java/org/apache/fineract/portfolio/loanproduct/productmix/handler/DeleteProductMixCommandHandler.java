@@ -31,19 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PRODUCTMIX", action = "DELETE")
 public class DeleteProductMixCommandHandler implements NewCommandSourceHandler {
 
-    private final ProductMixWritePlatformService productMixWritePlatformService;
+  private final ProductMixWritePlatformService productMixWritePlatformService;
 
-    @Autowired
-    public DeleteProductMixCommandHandler(final ProductMixWritePlatformService productMixWritePlatformService) {
+  @Autowired
+  public DeleteProductMixCommandHandler(
+      final ProductMixWritePlatformService productMixWritePlatformService) {
 
-        this.productMixWritePlatformService = productMixWritePlatformService;
-    }
+    this.productMixWritePlatformService = productMixWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.productMixWritePlatformService.deleteProductMix(command.getProductId());
-    }
-
+    return this.productMixWritePlatformService.deleteProductMix(command.getProductId());
+  }
 }

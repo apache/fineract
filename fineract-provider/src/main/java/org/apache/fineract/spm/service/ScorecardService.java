@@ -30,32 +30,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class ScorecardService {
 
-    private final PlatformSecurityContext securityContext;
-    private final ScorecardRepository scorecardRepository;
+  private final PlatformSecurityContext securityContext;
+  private final ScorecardRepository scorecardRepository;
 
-    @Autowired
-    public ScorecardService(final PlatformSecurityContext securityContext,
-                            final ScorecardRepository scorecardRepository) {
-        super();
-        this.securityContext = securityContext;
-        this.scorecardRepository = scorecardRepository;
-    }
+  @Autowired
+  public ScorecardService(
+      final PlatformSecurityContext securityContext,
+      final ScorecardRepository scorecardRepository) {
+    super();
+    this.securityContext = securityContext;
+    this.scorecardRepository = scorecardRepository;
+  }
 
-    public List<Scorecard> createScorecard(final List<Scorecard> scorecards) {
-        this.securityContext.authenticatedUser();
+  public List<Scorecard> createScorecard(final List<Scorecard> scorecards) {
+    this.securityContext.authenticatedUser();
 
-        return this.scorecardRepository.saveAll(scorecards);
-    }
+    return this.scorecardRepository.saveAll(scorecards);
+  }
 
-    public List<Scorecard> findBySurvey(final Survey survey) {
-        this.securityContext.authenticatedUser();
+  public List<Scorecard> findBySurvey(final Survey survey) {
+    this.securityContext.authenticatedUser();
 
-        return this.scorecardRepository.findBySurvey(survey);
-    }
+    return this.scorecardRepository.findBySurvey(survey);
+  }
 
-    public List<Scorecard> findBySurveyAndClient(final Survey survey, final Client client) {
-        this.securityContext.authenticatedUser();
+  public List<Scorecard> findBySurveyAndClient(final Survey survey, final Client client) {
+    this.securityContext.authenticatedUser();
 
-        return this.scorecardRepository.findBySurveyAndClient(survey, client);
-    }
+    return this.scorecardRepository.findBySurveyAndClient(survey, client);
+  }
 }

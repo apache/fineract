@@ -39,20 +39,20 @@ import org.springframework.stereotype.Service;
 @Service(value = "routingDataSource")
 public class RoutingDataSource extends AbstractDataSource {
 
-    @Autowired
-    private RoutingDataSourceServiceFactory dataSourceServiceFactory;
+  @Autowired private RoutingDataSourceServiceFactory dataSourceServiceFactory;
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        return determineTargetDataSource().getConnection();
-    }
+  @Override
+  public Connection getConnection() throws SQLException {
+    return determineTargetDataSource().getConnection();
+  }
 
-    private DataSource determineTargetDataSource() {
-        return this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource();
-    }
+  private DataSource determineTargetDataSource() {
+    return this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource();
+  }
 
-    @Override
-    public Connection getConnection(final String username, final String password) throws SQLException {
-        return determineTargetDataSource().getConnection(username, password);
-    }
+  @Override
+  public Connection getConnection(final String username, final String password)
+      throws SQLException {
+    return determineTargetDataSource().getConnection(username, password);
+  }
 }

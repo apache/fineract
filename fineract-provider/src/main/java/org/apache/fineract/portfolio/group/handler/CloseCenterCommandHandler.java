@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CENTER", action = "CLOSE")
 public class CloseCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
+  private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
-    @Autowired
-    public CloseCenterCommandHandler(final GroupingTypesWritePlatformService groupingTypesWritePlatformService) {
-        this.groupingTypesWritePlatformService = groupingTypesWritePlatformService;
-    }
+  @Autowired
+  public CloseCenterCommandHandler(
+      final GroupingTypesWritePlatformService groupingTypesWritePlatformService) {
+    this.groupingTypesWritePlatformService = groupingTypesWritePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupingTypesWritePlatformService.closeCenter(command.entityId(), command);
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.groupingTypesWritePlatformService.closeCenter(command.entityId(), command);
+  }
 }

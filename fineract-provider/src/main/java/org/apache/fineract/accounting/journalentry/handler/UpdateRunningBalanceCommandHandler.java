@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "JOURNALENTRY", action = "UPDATERUNNINGBALANCE")
 public class UpdateRunningBalanceCommandHandler implements NewCommandSourceHandler {
 
-    private final JournalEntryRunningBalanceUpdateService journalEntryRunningBalanceUpdateService;
+  private final JournalEntryRunningBalanceUpdateService journalEntryRunningBalanceUpdateService;
 
-    @Autowired
-    public UpdateRunningBalanceCommandHandler(final JournalEntryRunningBalanceUpdateService journalEntryRunningBalanceUpdateService) {
-        this.journalEntryRunningBalanceUpdateService = journalEntryRunningBalanceUpdateService;
-    }
+  @Autowired
+  public UpdateRunningBalanceCommandHandler(
+      final JournalEntryRunningBalanceUpdateService journalEntryRunningBalanceUpdateService) {
+    this.journalEntryRunningBalanceUpdateService = journalEntryRunningBalanceUpdateService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return journalEntryRunningBalanceUpdateService.updateOfficeRunningBalance(command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return journalEntryRunningBalanceUpdateService.updateOfficeRunningBalance(command);
+  }
 }

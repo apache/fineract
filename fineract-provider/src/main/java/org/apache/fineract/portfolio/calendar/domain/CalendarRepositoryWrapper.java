@@ -37,27 +37,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class CalendarRepositoryWrapper {
 
-    private final CalendarRepository repository;
+  private final CalendarRepository repository;
 
-    @Autowired
-    public CalendarRepositoryWrapper(final CalendarRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public CalendarRepositoryWrapper(final CalendarRepository repository) {
+    this.repository = repository;
+  }
 
-    public Calendar findOneWithNotFoundDetection(final Long calendarId) {
-        return this.repository.findById(calendarId)
-                .orElseThrow(() -> new CalendarNotFoundException(calendarId));
-    }
+  public Calendar findOneWithNotFoundDetection(final Long calendarId) {
+    return this.repository
+        .findById(calendarId)
+        .orElseThrow(() -> new CalendarNotFoundException(calendarId));
+  }
 
-    public void save(final Calendar calendar) {
-        this.repository.save(calendar);
-    }
+  public void save(final Calendar calendar) {
+    this.repository.save(calendar);
+  }
 
-    public void delete(final Calendar calendar) {
-        this.repository.delete(calendar);
-    }
+  public void delete(final Calendar calendar) {
+    this.repository.delete(calendar);
+  }
 
-    public void saveAndFlush(final Calendar calendar) {
-        this.repository.saveAndFlush(calendar);
-    }
+  public void saveAndFlush(final Calendar calendar) {
+    this.repository.saveAndFlush(calendar);
+  }
 }

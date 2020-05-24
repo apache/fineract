@@ -30,21 +30,21 @@ import org.springframework.stereotype.Component;
 @Component
 public final class ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson {
 
-    private final Gson gson;
+  private final Gson gson;
 
-    public ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson() {
-        final GsonBuilder builder = new GsonBuilder();
-        GoogleGsonSerializerHelper.registerTypeAdapters(builder);
+  public ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson() {
+    final GsonBuilder builder = new GsonBuilder();
+    GoogleGsonSerializerHelper.registerTypeAdapters(builder);
 
-        this.gson = builder.create();
+    this.gson = builder.create();
+  }
+
+  public String serialize(final Object result) {
+    String returnedResult = null;
+    final String serializedResult = this.gson.toJson(result);
+    if (!"null".equalsIgnoreCase(serializedResult)) {
+      returnedResult = serializedResult;
     }
-
-    public String serialize(final Object result) {
-        String returnedResult = null;
-        final String serializedResult = this.gson.toJson(result);
-        if (!"null".equalsIgnoreCase(serializedResult)) {
-            returnedResult = serializedResult;
-        }
-        return returnedResult;
-    }
+    return returnedResult;
+  }
 }

@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "REJECT")
 public class SavingsAccountApplicationRejectedCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsApplicationProcessWritePlatformService writePlatformService;
+  private final SavingsApplicationProcessWritePlatformService writePlatformService;
 
-    @Autowired
-    public SavingsAccountApplicationRejectedCommandHandler(final SavingsApplicationProcessWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public SavingsAccountApplicationRejectedCommandHandler(
+      final SavingsApplicationProcessWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.rejectApplication(command.entityId(), command);
-    }
+    return this.writePlatformService.rejectApplication(command.entityId(), command);
+  }
 }

@@ -38,512 +38,817 @@ import org.joda.time.LocalTime;
  */
 public class CalendarData implements Serializable {
 
-    private final Long id;
-    private final Long calendarInstanceId;
-    private final Long entityId;
-    private final EnumOptionData entityType;
-    private String title;
-    private final String description;
-    private final String location;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
-    private final LocalTime meetingTime;
-    private final Integer duration;
-    private final EnumOptionData type;
-    private final boolean repeating;
-    private final String recurrence;
-    private final EnumOptionData frequency;
-    private final Integer interval;
-    private final EnumOptionData repeatsOnDay;
-    private final EnumOptionData repeatsOnNthDayOfMonth;
-    private final EnumOptionData remindBy;
-    private final Integer firstReminder;
-    private final Integer secondReminder;
-    private final Collection<LocalDate> recurringDates;
-    private final Collection<LocalDate> nextTenRecurringDates;
-    private final String humanReadable;
-    private final LocalDate recentEligibleMeetingDate;
+  private final Long id;
+  private final Long calendarInstanceId;
+  private final Long entityId;
+  private final EnumOptionData entityType;
+  private String title;
+  private final String description;
+  private final String location;
+  private final LocalDate startDate;
+  private final LocalDate endDate;
+  private final LocalTime meetingTime;
+  private final Integer duration;
+  private final EnumOptionData type;
+  private final boolean repeating;
+  private final String recurrence;
+  private final EnumOptionData frequency;
+  private final Integer interval;
+  private final EnumOptionData repeatsOnDay;
+  private final EnumOptionData repeatsOnNthDayOfMonth;
+  private final EnumOptionData remindBy;
+  private final Integer firstReminder;
+  private final Integer secondReminder;
+  private final Collection<LocalDate> recurringDates;
+  private final Collection<LocalDate> nextTenRecurringDates;
+  private final String humanReadable;
+  private final LocalDate recentEligibleMeetingDate;
 
-    private final LocalDate createdDate;
-    private final LocalDate lastUpdatedDate;
-    private final Long createdByUserId;
-    private final String createdByUsername;
-    private final Long lastUpdatedByUserId;
-    private final String lastUpdatedByUsername;
-    private final Integer repeatsOnDayOfMonth;
+  private final LocalDate createdDate;
+  private final LocalDate lastUpdatedDate;
+  private final Long createdByUserId;
+  private final String createdByUsername;
+  private final Long lastUpdatedByUserId;
+  private final String lastUpdatedByUsername;
+  private final Integer repeatsOnDayOfMonth;
 
-    // template related
-    final List<EnumOptionData> entityTypeOptions;
-    final List<EnumOptionData> calendarTypeOptions;
-    final List<EnumOptionData> remindByOptions;
-    final List<EnumOptionData> frequencyOptions;
-    final List<EnumOptionData> repeatsOnDayOptions;
-    final List<EnumOptionData> frequencyNthDayTypeOptions;
+  // template related
+  final List<EnumOptionData> entityTypeOptions;
+  final List<EnumOptionData> calendarTypeOptions;
+  final List<EnumOptionData> remindByOptions;
+  final List<EnumOptionData> frequencyOptions;
+  final List<EnumOptionData> repeatsOnDayOptions;
+  final List<EnumOptionData> frequencyNthDayTypeOptions;
 
-    //import fields
-    private transient Integer rowIndex;
-    private  String dateFormat;
-    private  String locale;
-    private  String centerId;
-    private String typeId;
+  // import fields
+  private transient Integer rowIndex;
+  private String dateFormat;
+  private String locale;
+  private String centerId;
+  private String typeId;
 
-    public static CalendarData importInstanceNoRepeatsOnDay(LocalDate startDate, boolean repeating,
-            EnumOptionData frequency, Integer interval,Integer rowIndex,String locale,String dateFormat){
-       return  new CalendarData(startDate, repeating, frequency, interval, rowIndex,locale,dateFormat);
+  public static CalendarData importInstanceNoRepeatsOnDay(
+      LocalDate startDate,
+      boolean repeating,
+      EnumOptionData frequency,
+      Integer interval,
+      Integer rowIndex,
+      String locale,
+      String dateFormat) {
+    return new CalendarData(
+        startDate, repeating, frequency, interval, rowIndex, locale, dateFormat);
+  }
 
+  public static CalendarData importInstanceWithRepeatsOnDay(
+      LocalDate startDate,
+      boolean repeating,
+      EnumOptionData frequency,
+      Integer interval,
+      EnumOptionData repeatsOnDay,
+      Integer rowIndex,
+      String locale,
+      String dateFormat) {
+    return new CalendarData(
+        startDate, repeating, frequency, interval, repeatsOnDay, rowIndex, locale, dateFormat);
+  }
+
+  private CalendarData(
+      LocalDate startDate,
+      boolean repeating,
+      EnumOptionData frequency,
+      Integer interval,
+      Integer rowIndex,
+      String locale,
+      String dateFormat) {
+    this.startDate = startDate;
+    this.repeating = repeating;
+    this.frequency = frequency;
+    this.interval = interval;
+    this.rowIndex = rowIndex;
+    this.dateFormat = dateFormat;
+    this.locale = locale;
+    this.description = "";
+    this.typeId = "1";
+    this.id = null;
+    this.calendarInstanceId = null;
+    this.entityId = null;
+    this.entityType = null;
+    this.title = null;
+    this.location = null;
+    this.endDate = null;
+    this.meetingTime = null;
+    this.type = null;
+    this.recurrence = null;
+    this.repeatsOnDay = null;
+    this.repeatsOnNthDayOfMonth = null;
+    this.remindBy = null;
+    this.firstReminder = null;
+    this.secondReminder = null;
+    this.recurringDates = null;
+    this.nextTenRecurringDates = null;
+    this.humanReadable = null;
+    this.recentEligibleMeetingDate = null;
+    this.createdDate = null;
+    this.lastUpdatedDate = null;
+    this.createdByUserId = null;
+    this.createdByUsername = null;
+    this.lastUpdatedByUserId = null;
+    this.lastUpdatedByUsername = null;
+    this.repeatsOnDayOfMonth = null;
+    this.entityTypeOptions = null;
+    this.calendarTypeOptions = null;
+    this.remindByOptions = null;
+    this.frequencyOptions = null;
+    this.repeatsOnDayOptions = null;
+    this.frequencyNthDayTypeOptions = null;
+    this.duration = null;
+  }
+
+  private CalendarData(
+      LocalDate startDate,
+      boolean repeating,
+      EnumOptionData frequency,
+      Integer interval,
+      EnumOptionData repeatsOnDay,
+      Integer rowIndex,
+      String locale,
+      String dateFormat) {
+    this.startDate = startDate;
+    this.repeating = repeating;
+    this.frequency = frequency;
+    this.interval = interval;
+    this.repeatsOnDay = repeatsOnDay;
+    this.rowIndex = rowIndex;
+    this.dateFormat = dateFormat;
+    this.locale = locale;
+    this.description = "";
+    this.typeId = "1";
+    this.id = null;
+    this.calendarInstanceId = null;
+    this.entityId = null;
+    this.entityType = null;
+    this.title = null;
+    this.location = null;
+    this.endDate = null;
+    this.meetingTime = null;
+    this.type = null;
+    this.recurrence = null;
+    this.repeatsOnNthDayOfMonth = null;
+    this.remindBy = null;
+    this.firstReminder = null;
+    this.secondReminder = null;
+    this.recurringDates = null;
+    this.nextTenRecurringDates = null;
+    this.humanReadable = null;
+    this.recentEligibleMeetingDate = null;
+    this.createdDate = null;
+    this.lastUpdatedDate = null;
+    this.createdByUserId = null;
+    this.createdByUsername = null;
+    this.lastUpdatedByUserId = null;
+    this.lastUpdatedByUsername = null;
+    this.repeatsOnDayOfMonth = null;
+    this.entityTypeOptions = null;
+    this.calendarTypeOptions = null;
+    this.remindByOptions = null;
+    this.frequencyOptions = null;
+    this.repeatsOnDayOptions = null;
+    this.frequencyNthDayTypeOptions = null;
+    this.duration = null;
+  }
+
+  public void setCenterId(String centerId) {
+    this.centerId = centerId;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public static CalendarData instance(
+      final Long id,
+      final Long calendarInstanceId,
+      final Long entityId,
+      final EnumOptionData entityType,
+      final String title,
+      final String description,
+      final String location,
+      final LocalDate startDate,
+      final LocalDate endDate,
+      final Integer duration,
+      final EnumOptionData type,
+      final boolean repeating,
+      final String recurrence,
+      final EnumOptionData frequency,
+      final Integer interval,
+      final EnumOptionData repeatsOnDay,
+      final EnumOptionData repeatsOnNthDayOfMonth,
+      final EnumOptionData remindBy,
+      final Integer firstReminder,
+      final Integer secondReminder,
+      final String humanReadable,
+      final LocalDate createdDate,
+      final LocalDate lastUpdatedDate,
+      final Long createdByUserId,
+      final String createdByUsername,
+      final Long lastUpdatedByUserId,
+      final String lastUpdatedByUsername,
+      final LocalTime meetingTime,
+      final Integer repeatsOnDayOfMonth) {
+
+    final Collection<LocalDate> recurringDates = null;
+    final Collection<LocalDate> nextTenRecurringDates = null;
+    final LocalDate recentEligibleMeetingDate = null;
+
+    final List<EnumOptionData> entityTypeOptions = null;
+    final List<EnumOptionData> calendarTypeOptions = null;
+    final List<EnumOptionData> remindByOptions = null;
+    final List<EnumOptionData> frequencyOptions = null;
+    final List<EnumOptionData> repeatsOnDayOptions = null;
+    final List<EnumOptionData> frequencyNthDayTypeOptions = null;
+
+    return new CalendarData(
+        id,
+        calendarInstanceId,
+        entityId,
+        entityType,
+        title,
+        description,
+        location,
+        startDate,
+        endDate,
+        duration,
+        type,
+        repeating,
+        recurrence,
+        frequency,
+        interval,
+        repeatsOnDay,
+        repeatsOnNthDayOfMonth,
+        remindBy,
+        firstReminder,
+        secondReminder,
+        recurringDates,
+        nextTenRecurringDates,
+        humanReadable,
+        recentEligibleMeetingDate,
+        createdDate,
+        lastUpdatedDate,
+        createdByUserId,
+        createdByUsername,
+        lastUpdatedByUserId,
+        lastUpdatedByUsername,
+        repeatsOnDayOfMonth,
+        entityTypeOptions,
+        calendarTypeOptions,
+        remindByOptions,
+        frequencyOptions,
+        repeatsOnDayOptions,
+        meetingTime,
+        frequencyNthDayTypeOptions);
+  }
+
+  public static CalendarData withRecurringDates(
+      final CalendarData calendarData,
+      final Collection<LocalDate> recurringDates,
+      final Collection<LocalDate> nextTenRecurringDates,
+      final LocalDate recentEligibleMeetingDate) {
+    return new CalendarData(
+        calendarData.id,
+        calendarData.calendarInstanceId,
+        calendarData.entityId,
+        calendarData.entityType,
+        calendarData.title,
+        calendarData.description,
+        calendarData.location,
+        calendarData.startDate,
+        calendarData.endDate,
+        calendarData.duration,
+        calendarData.type,
+        calendarData.repeating,
+        calendarData.recurrence,
+        calendarData.frequency,
+        calendarData.interval,
+        calendarData.repeatsOnDay,
+        calendarData.repeatsOnNthDayOfMonth,
+        calendarData.remindBy,
+        calendarData.firstReminder,
+        calendarData.secondReminder,
+        recurringDates,
+        nextTenRecurringDates,
+        calendarData.humanReadable,
+        recentEligibleMeetingDate,
+        calendarData.createdDate,
+        calendarData.lastUpdatedDate,
+        calendarData.createdByUserId,
+        calendarData.createdByUsername,
+        calendarData.lastUpdatedByUserId,
+        calendarData.lastUpdatedByUsername,
+        calendarData.repeatsOnDayOfMonth,
+        calendarData.entityTypeOptions,
+        calendarData.calendarTypeOptions,
+        calendarData.remindByOptions,
+        calendarData.frequencyOptions,
+        calendarData.repeatsOnDayOptions,
+        calendarData.meetingTime,
+        calendarData.frequencyNthDayTypeOptions);
+  }
+
+  public static CalendarData withRecentEligibleMeetingDate(
+      final CalendarData calendarData, final LocalDate recentEligibleMeetingDate) {
+    return new CalendarData(
+        calendarData.id,
+        calendarData.calendarInstanceId,
+        calendarData.entityId,
+        calendarData.entityType,
+        calendarData.title,
+        calendarData.description,
+        calendarData.location,
+        calendarData.startDate,
+        calendarData.endDate,
+        calendarData.duration,
+        calendarData.type,
+        calendarData.repeating,
+        calendarData.recurrence,
+        calendarData.frequency,
+        calendarData.interval,
+        calendarData.repeatsOnDay,
+        calendarData.repeatsOnNthDayOfMonth,
+        calendarData.remindBy,
+        calendarData.firstReminder,
+        calendarData.secondReminder,
+        calendarData.recurringDates,
+        calendarData.nextTenRecurringDates,
+        calendarData.humanReadable,
+        recentEligibleMeetingDate,
+        calendarData.createdDate,
+        calendarData.lastUpdatedDate,
+        calendarData.createdByUserId,
+        calendarData.createdByUsername,
+        calendarData.lastUpdatedByUserId,
+        calendarData.lastUpdatedByUsername,
+        calendarData.repeatsOnDayOfMonth,
+        calendarData.entityTypeOptions,
+        calendarData.calendarTypeOptions,
+        calendarData.remindByOptions,
+        calendarData.frequencyOptions,
+        calendarData.repeatsOnDayOptions,
+        calendarData.meetingTime,
+        calendarData.frequencyNthDayTypeOptions);
+  }
+
+  public static CalendarData sensibleDefaultsForNewCalendarCreation() {
+    final Long id = null;
+    final Long calendarInstanceId = null;
+    final Long entityId = null;
+    final EnumOptionData entityType = null;
+    final String title = null;
+    final String description = null;
+    final String location = null;
+    final LocalDate startDate = null;
+    final LocalDate endDate = null;
+    final Integer duration = Integer.valueOf(0);
+    final EnumOptionData type = CalendarEnumerations.calendarType(CalendarType.COLLECTION);
+    final boolean repeating = false;
+    final String recurrence = null;
+    final EnumOptionData frequency =
+        CalendarEnumerations.calendarFrequencyType(CalendarFrequencyType.DAILY);
+    final Integer interval = Integer.valueOf(1);
+    final EnumOptionData repeatsOnDay =
+        CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.MO);
+    final EnumOptionData repeatsOnNthDayOfMonth =
+        CalendarEnumerations.calendarFrequencyNthDayType(NthDayType.ONE);
+    final EnumOptionData remindBy = CalendarEnumerations.calendarRemindBy(CalendarRemindBy.EMAIL);
+    final Integer firstReminder = Integer.valueOf(0);
+    final Integer secondReminder = Integer.valueOf(0);
+    final String humanReadable = null;
+    final Collection<LocalDate> recurringDates = null;
+    final Collection<LocalDate> nextTenRecurringDates = null;
+    final LocalDate recentEligibleMeetingDate = null;
+
+    final List<EnumOptionData> entityTypeOptions = null;
+    final List<EnumOptionData> calendarTypeOptions = null;
+    final List<EnumOptionData> remindByOptions = null;
+    final List<EnumOptionData> frequencyOptions = null;
+    final List<EnumOptionData> repeatsOnDayOptions = null;
+    final List<EnumOptionData> frequencyNthDayTypeOptions = null;
+
+    final LocalDate createdDate = null;
+    final LocalDate lastUpdatedDate = null;
+    final Long createdByUserId = null;
+    final String createdByUsername = null;
+    final Long lastUpdatedByUserId = null;
+    final String lastUpdatedByUsername = null;
+    final LocalTime meetingTime = null;
+    final Integer repeatsOnDayOfMonth = null;
+
+    return new CalendarData(
+        id,
+        calendarInstanceId,
+        entityId,
+        entityType,
+        title,
+        description,
+        location,
+        startDate,
+        endDate,
+        duration,
+        type,
+        repeating,
+        recurrence,
+        frequency,
+        interval,
+        repeatsOnDay,
+        repeatsOnNthDayOfMonth,
+        remindBy,
+        firstReminder,
+        secondReminder,
+        recurringDates,
+        nextTenRecurringDates,
+        humanReadable,
+        recentEligibleMeetingDate,
+        createdDate,
+        lastUpdatedDate,
+        createdByUserId,
+        createdByUsername,
+        lastUpdatedByUserId,
+        lastUpdatedByUsername,
+        repeatsOnDayOfMonth,
+        entityTypeOptions,
+        calendarTypeOptions,
+        remindByOptions,
+        frequencyOptions,
+        repeatsOnDayOptions,
+        meetingTime,
+        frequencyNthDayTypeOptions);
+  }
+
+  public static CalendarData withTemplateOptions(
+      final CalendarData calendarData,
+      final List<EnumOptionData> entityTypeOptions,
+      final List<EnumOptionData> calendarTypeOptions,
+      final List<EnumOptionData> remindByOptions,
+      final List<EnumOptionData> repeatsOptions,
+      final List<EnumOptionData> repeatsOnDayOptions,
+      final List<EnumOptionData> frequencyNthDayTypeOptions) {
+
+    return new CalendarData(
+        calendarData.id,
+        calendarData.calendarInstanceId,
+        calendarData.entityId,
+        calendarData.entityType,
+        calendarData.title,
+        calendarData.description,
+        calendarData.location,
+        calendarData.startDate,
+        calendarData.endDate,
+        calendarData.duration,
+        calendarData.type,
+        calendarData.repeating,
+        calendarData.recurrence,
+        calendarData.frequency,
+        calendarData.interval,
+        calendarData.repeatsOnDay,
+        calendarData.repeatsOnNthDayOfMonth,
+        calendarData.remindBy,
+        calendarData.firstReminder,
+        calendarData.secondReminder,
+        calendarData.recurringDates,
+        calendarData.nextTenRecurringDates,
+        calendarData.humanReadable,
+        calendarData.recentEligibleMeetingDate,
+        calendarData.createdDate,
+        calendarData.lastUpdatedDate,
+        calendarData.createdByUserId,
+        calendarData.createdByUsername,
+        calendarData.lastUpdatedByUserId,
+        calendarData.lastUpdatedByUsername,
+        calendarData.repeatsOnDayOfMonth,
+        entityTypeOptions,
+        calendarTypeOptions,
+        remindByOptions,
+        repeatsOptions,
+        repeatsOnDayOptions,
+        calendarData.meetingTime,
+        frequencyNthDayTypeOptions);
+  }
+
+  private CalendarData(
+      final Long id,
+      final Long calendarInstanceId,
+      final Long entityId,
+      final EnumOptionData entityType,
+      final String title,
+      final String description,
+      final String location,
+      final LocalDate startDate,
+      final LocalDate endDate,
+      final Integer duration,
+      final EnumOptionData type,
+      final boolean repeating,
+      final String recurrence,
+      final EnumOptionData frequency,
+      final Integer interval,
+      final EnumOptionData repeatsOnDay,
+      final EnumOptionData repeatsOnNthDayOfMonth,
+      final EnumOptionData remindBy,
+      final Integer firstReminder,
+      final Integer secondReminder,
+      final Collection<LocalDate> recurringDates,
+      final Collection<LocalDate> nextTenRecurringDates,
+      final String humanReadable,
+      final LocalDate recentEligibleMeetingDate,
+      final LocalDate createdDate,
+      final LocalDate lastUpdatedDate,
+      final Long createdByUserId,
+      final String createdByUsername,
+      final Long lastUpdatedByUserId,
+      final String lastUpdatedByUsername,
+      final Integer repeatsOnDayOfMonth,
+      final List<EnumOptionData> entityTypeOptions,
+      final List<EnumOptionData> calendarTypeOptions,
+      final List<EnumOptionData> remindByOptions,
+      final List<EnumOptionData> repeatsOptions,
+      final List<EnumOptionData> repeatsOnDayOptions,
+      final LocalTime meetingTime,
+      final List<EnumOptionData> frequencyNthDayTypeOptions) {
+    this.id = id;
+    this.calendarInstanceId = calendarInstanceId;
+    this.entityId = entityId;
+    this.entityType = entityType;
+    this.title = title;
+    this.description = description;
+    this.location = location;
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.duration = duration;
+    this.type = type;
+    this.repeating = repeating;
+    this.recurrence = recurrence;
+    this.frequency = frequency;
+    this.interval = interval;
+    this.repeatsOnDay = repeatsOnDay;
+    this.repeatsOnNthDayOfMonth = repeatsOnNthDayOfMonth;
+    this.remindBy = remindBy;
+    this.firstReminder = firstReminder;
+    this.secondReminder = secondReminder;
+    this.recurringDates = recurringDates;
+    this.nextTenRecurringDates = nextTenRecurringDates;
+    this.humanReadable = humanReadable;
+    this.recentEligibleMeetingDate = recentEligibleMeetingDate;
+    this.createdDate = createdDate;
+    this.lastUpdatedDate = lastUpdatedDate;
+    this.createdByUserId = createdByUserId;
+    this.createdByUsername = createdByUsername;
+    this.lastUpdatedByUserId = lastUpdatedByUserId;
+    this.lastUpdatedByUsername = lastUpdatedByUsername;
+    this.repeatsOnDayOfMonth = repeatsOnDayOfMonth;
+    this.entityTypeOptions = entityTypeOptions;
+    this.calendarTypeOptions = calendarTypeOptions;
+    this.remindByOptions = remindByOptions;
+    this.frequencyOptions = repeatsOptions;
+    this.repeatsOnDayOptions = repeatsOnDayOptions;
+    this.meetingTime = meetingTime;
+    this.frequencyNthDayTypeOptions = frequencyNthDayTypeOptions;
+  }
+
+  public Long getId() {
+    return this.id;
+  }
+
+  public Long getEntityId() {
+    return this.entityId;
+  }
+
+  public EnumOptionData getEntityType() {
+    return this.entityType;
+  }
+
+  public String getTitle() {
+    return this.title;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public String getLocation() {
+    return this.location;
+  }
+
+  public LocalDate getStartDate() {
+    return this.startDate;
+  }
+
+  public LocalDate getEndDate() {
+    return this.endDate;
+  }
+
+  public LocalDate getCreatedDate() {
+    return this.createdDate;
+  }
+
+  public Integer getDuration() {
+    return this.duration;
+  }
+
+  public EnumOptionData getType() {
+    return this.type;
+  }
+
+  public boolean isRepeating() {
+    return this.repeating;
+  }
+
+  public String getRecurrence() {
+    return this.recurrence;
+  }
+
+  public EnumOptionData getRemindBy() {
+    return this.remindBy;
+  }
+
+  public Integer getFirstReminder() {
+    return this.firstReminder;
+  }
+
+  public Integer getSecondReminder() {
+    return this.secondReminder;
+  }
+
+  public List<EnumOptionData> getEntityTypeOptions() {
+    return this.entityTypeOptions;
+  }
+
+  public List<EnumOptionData> getCalendarTypeOptions() {
+    return this.calendarTypeOptions;
+  }
+
+  public List<EnumOptionData> getRemindByOptions() {
+    return this.remindByOptions;
+  }
+
+  public String getHumanReadable() {
+    return this.humanReadable;
+  }
+
+  public Long getCalendarInstanceId() {
+    return this.calendarInstanceId;
+  }
+
+  public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
+    if (this.startDate != null && compareDate != null) {
+      if (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate)) {
+        return true;
+      }
     }
-    public static CalendarData importInstanceWithRepeatsOnDay(LocalDate startDate, boolean repeating,
-            EnumOptionData frequency,Integer interval,EnumOptionData repeatsOnDay,Integer rowIndex,
-            String locale,String dateFormat){
-        return new CalendarData(startDate, repeating, frequency, interval, repeatsOnDay, rowIndex,locale,dateFormat);
+    return false;
+  }
+
+  public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
+    if (this.endDate != null && compareDate != null) {
+      if (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate)) {
+        return true;
+      }
     }
-    private CalendarData(LocalDate startDate, boolean repeating,EnumOptionData frequency,Integer interval,
-            Integer rowIndex,String locale,String dateFormat) {
-        this.startDate = startDate;
-        this.repeating = repeating;
-        this.frequency = frequency;
-        this.interval = interval;
-        this.rowIndex=rowIndex;
-        this.dateFormat= dateFormat;
-        this.locale= locale;
-        this.description = "";
-        this.typeId = "1";
-        this.id = null;
-        this.calendarInstanceId = null;
-        this.entityId = null;
-        this.entityType = null;
-        this.title = null;
-        this.location = null;
-        this.endDate = null;
-        this.meetingTime = null;
-        this.type = null;
-        this.recurrence = null;
-        this.repeatsOnDay = null;
-        this.repeatsOnNthDayOfMonth = null;
-        this.remindBy = null;
-        this.firstReminder = null;
-        this.secondReminder = null;
-        this.recurringDates = null;
-        this.nextTenRecurringDates = null;
-        this.humanReadable = null;
-        this.recentEligibleMeetingDate =null;
-        this.createdDate = null;
-        this.lastUpdatedDate = null;
-        this.createdByUserId = null;
-        this.createdByUsername = null;
-        this.lastUpdatedByUserId = null;
-        this.lastUpdatedByUsername = null;
-        this.repeatsOnDayOfMonth = null;
-        this.entityTypeOptions = null;
-        this.calendarTypeOptions = null;
-        this.remindByOptions = null;
-        this.frequencyOptions = null;
-        this.repeatsOnDayOptions = null;
-        this.frequencyNthDayTypeOptions = null;
-        this.duration=null;
+    return false;
+  }
+
+  public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
+    if (isStartDateBeforeOrEqual(compareDate)) {
+      if (this.endDate == null || isEndDateAfterOrEqual(compareDate)) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    private CalendarData(LocalDate startDate, boolean repeating,EnumOptionData frequency,Integer interval,
-            EnumOptionData repeatsOnDay,Integer rowIndex,String locale,String dateFormat) {
-        this.startDate = startDate;
-        this.repeating = repeating;
-        this.frequency = frequency;
-        this.interval = interval;
-        this.repeatsOnDay = repeatsOnDay;
-        this.rowIndex=rowIndex;
-        this.dateFormat= dateFormat;
-        this.locale= locale;
-        this.description = "";
-        this.typeId = "1";
-        this.id = null;
-        this.calendarInstanceId = null;
-        this.entityId = null;
-        this.entityType = null;
-        this.title = null;
-        this.location = null;
-        this.endDate = null;
-        this.meetingTime = null;
-        this.type = null;
-        this.recurrence = null;
-        this.repeatsOnNthDayOfMonth = null;
-        this.remindBy = null;
-        this.firstReminder = null;
-        this.secondReminder = null;
-        this.recurringDates = null;
-        this.nextTenRecurringDates = null;
-        this.humanReadable = null;
-        this.recentEligibleMeetingDate =null;
-        this.createdDate = null;
-        this.lastUpdatedDate = null;
-        this.createdByUserId = null;
-        this.createdByUsername = null;
-        this.lastUpdatedByUserId = null;
-        this.lastUpdatedByUsername = null;
-        this.repeatsOnDayOfMonth = null;
-        this.entityTypeOptions = null;
-        this.calendarTypeOptions = null;
-        this.remindByOptions = null;
-        this.frequencyOptions = null;
-        this.repeatsOnDayOptions = null;
-        this.frequencyNthDayTypeOptions = null;
-        this.duration=null;
+  public boolean isValidRecurringDate(
+      final LocalDate compareDate,
+      final Boolean isSkipMeetingOnFirstDay,
+      final Integer numberOfDays) {
+    if (isBetweenStartAndEndDate(compareDate)) {
+      return CalendarUtils.isValidRedurringDate(
+          this.getRecurrence(),
+          this.getStartDate(),
+          compareDate,
+          isSkipMeetingOnFirstDay,
+          numberOfDays);
     }
-    public void setCenterId(String centerId) {
-        this.centerId = centerId;
-    }
+    return false;
+  }
 
-    public void setTitle(String title){
-        this.title=title;
-    }
+  public Integer interval() {
+    return this.interval;
+  }
 
-    public static CalendarData instance(final Long id, final Long calendarInstanceId, final Long entityId, final EnumOptionData entityType,
-            final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
-            final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,
-            final EnumOptionData frequency, final Integer interval, final EnumOptionData repeatsOnDay,
-            final EnumOptionData repeatsOnNthDayOfMonth, final EnumOptionData remindBy, final Integer firstReminder,
-            final Integer secondReminder, final String humanReadable, final LocalDate createdDate, final LocalDate lastUpdatedDate,
-            final Long createdByUserId, final String createdByUsername, final Long lastUpdatedByUserId, final String lastUpdatedByUsername,
-            final LocalTime meetingTime, final Integer repeatsOnDayOfMonth) {
+  public EnumOptionData frequencyType() {
+    return this.frequency;
+  }
 
-        final Collection<LocalDate> recurringDates = null;
-        final Collection<LocalDate> nextTenRecurringDates = null;
-        final LocalDate recentEligibleMeetingDate = null;
+  public EnumOptionData getRepeatsOnDay() {
+    return this.repeatsOnDay;
+  }
 
-        final List<EnumOptionData> entityTypeOptions = null;
-        final List<EnumOptionData> calendarTypeOptions = null;
-        final List<EnumOptionData> remindByOptions = null;
-        final List<EnumOptionData> frequencyOptions = null;
-        final List<EnumOptionData> repeatsOnDayOptions = null;
-        final List<EnumOptionData> frequencyNthDayTypeOptions = null;
+  public EnumOptionData getRepeatsOnNthDayOfMonth() {
+    return this.repeatsOnNthDayOfMonth;
+  }
 
-        return new CalendarData(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate, duration,
-                type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy, firstReminder,
-                secondReminder, recurringDates, nextTenRecurringDates, humanReadable, recentEligibleMeetingDate, createdDate,
-                lastUpdatedDate, createdByUserId, createdByUsername, lastUpdatedByUserId, lastUpdatedByUsername, repeatsOnDayOfMonth,
-                entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions, repeatsOnDayOptions, meetingTime,
-                frequencyNthDayTypeOptions);
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof CalendarData)) return false;
+    CalendarData that = (CalendarData) o;
+    return Objects.equals(repeating, that.repeating)
+        && Objects.equals(id, that.id)
+        && Objects.equals(calendarInstanceId, that.calendarInstanceId)
+        && Objects.equals(entityId, that.entityId)
+        && Objects.equals(entityType, that.entityType)
+        && Objects.equals(title, that.title)
+        && Objects.equals(description, that.description)
+        && Objects.equals(location, that.location)
+        && Objects.equals(startDate, that.startDate)
+        && Objects.equals(endDate, that.endDate)
+        && Objects.equals(meetingTime, that.meetingTime)
+        && Objects.equals(duration, that.duration)
+        && Objects.equals(type, that.type)
+        && Objects.equals(recurrence, that.recurrence)
+        && Objects.equals(frequency, that.frequency)
+        && Objects.equals(interval, that.interval)
+        && Objects.equals(repeatsOnDay, that.repeatsOnDay)
+        && Objects.equals(repeatsOnNthDayOfMonth, that.repeatsOnNthDayOfMonth)
+        && Objects.equals(remindBy, that.remindBy)
+        && Objects.equals(firstReminder, that.firstReminder)
+        && Objects.equals(secondReminder, that.secondReminder)
+        && Objects.equals(recurringDates, that.recurringDates)
+        && Objects.equals(nextTenRecurringDates, that.nextTenRecurringDates)
+        && Objects.equals(humanReadable, that.humanReadable)
+        && Objects.equals(recentEligibleMeetingDate, that.recentEligibleMeetingDate)
+        && Objects.equals(createdDate, that.createdDate)
+        && Objects.equals(lastUpdatedDate, that.lastUpdatedDate)
+        && Objects.equals(createdByUserId, that.createdByUserId)
+        && Objects.equals(createdByUsername, that.createdByUsername)
+        && Objects.equals(lastUpdatedByUserId, that.lastUpdatedByUserId)
+        && Objects.equals(lastUpdatedByUsername, that.lastUpdatedByUsername)
+        && Objects.equals(repeatsOnDayOfMonth, that.repeatsOnDayOfMonth)
+        && Objects.equals(entityTypeOptions, that.entityTypeOptions)
+        && Objects.equals(calendarTypeOptions, that.calendarTypeOptions)
+        && Objects.equals(remindByOptions, that.remindByOptions)
+        && Objects.equals(frequencyOptions, that.frequencyOptions)
+        && Objects.equals(repeatsOnDayOptions, that.repeatsOnDayOptions)
+        && Objects.equals(frequencyNthDayTypeOptions, that.frequencyNthDayTypeOptions)
+        && Objects.equals(rowIndex, that.rowIndex)
+        && Objects.equals(dateFormat, that.dateFormat)
+        && Objects.equals(locale, that.locale)
+        && Objects.equals(centerId, that.centerId)
+        && Objects.equals(typeId, that.typeId);
+  }
 
-    public static CalendarData withRecurringDates(final CalendarData calendarData, final Collection<LocalDate> recurringDates,
-            final Collection<LocalDate> nextTenRecurringDates, final LocalDate recentEligibleMeetingDate) {
-        return new CalendarData(calendarData.id, calendarData.calendarInstanceId, calendarData.entityId, calendarData.entityType,
-                calendarData.title, calendarData.description, calendarData.location, calendarData.startDate, calendarData.endDate,
-                calendarData.duration, calendarData.type, calendarData.repeating, calendarData.recurrence, calendarData.frequency,
-                calendarData.interval, calendarData.repeatsOnDay, calendarData.repeatsOnNthDayOfMonth, calendarData.remindBy, calendarData.firstReminder,
-                calendarData.secondReminder, recurringDates, nextTenRecurringDates, calendarData.humanReadable, recentEligibleMeetingDate,
-                calendarData.createdDate, calendarData.lastUpdatedDate, calendarData.createdByUserId, calendarData.createdByUsername,
-                calendarData.lastUpdatedByUserId, calendarData.lastUpdatedByUsername, calendarData.repeatsOnDayOfMonth, calendarData.entityTypeOptions,
-                calendarData.calendarTypeOptions, calendarData.remindByOptions, calendarData.frequencyOptions,
-                calendarData.repeatsOnDayOptions, calendarData.meetingTime, calendarData.frequencyNthDayTypeOptions);
-    }
-
-    public static CalendarData withRecentEligibleMeetingDate(final CalendarData calendarData, final LocalDate recentEligibleMeetingDate) {
-        return new CalendarData(calendarData.id, calendarData.calendarInstanceId, calendarData.entityId, calendarData.entityType,
-                calendarData.title, calendarData.description, calendarData.location, calendarData.startDate, calendarData.endDate,
-                calendarData.duration, calendarData.type, calendarData.repeating, calendarData.recurrence, calendarData.frequency,
-                calendarData.interval, calendarData.repeatsOnDay, calendarData.repeatsOnNthDayOfMonth, calendarData.remindBy, calendarData.firstReminder,
-                calendarData.secondReminder, calendarData.recurringDates, calendarData.nextTenRecurringDates, calendarData.humanReadable,
-                recentEligibleMeetingDate, calendarData.createdDate, calendarData.lastUpdatedDate, calendarData.createdByUserId,
-                calendarData.createdByUsername, calendarData.lastUpdatedByUserId, calendarData.lastUpdatedByUsername,
-                calendarData.repeatsOnDayOfMonth, calendarData.entityTypeOptions, calendarData.calendarTypeOptions, calendarData.remindByOptions,
-                calendarData.frequencyOptions, calendarData.repeatsOnDayOptions,calendarData.meetingTime, calendarData.frequencyNthDayTypeOptions);
-    }
-
-    public static CalendarData sensibleDefaultsForNewCalendarCreation() {
-        final Long id = null;
-        final Long calendarInstanceId = null;
-        final Long entityId = null;
-        final EnumOptionData entityType = null;
-        final String title = null;
-        final String description = null;
-        final String location = null;
-        final LocalDate startDate = null;
-        final LocalDate endDate = null;
-        final Integer duration = Integer.valueOf(0);
-        final EnumOptionData type = CalendarEnumerations.calendarType(CalendarType.COLLECTION);
-        final boolean repeating = false;
-        final String recurrence = null;
-        final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarFrequencyType.DAILY);
-        final Integer interval = Integer.valueOf(1);
-        final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.MO);
-        final EnumOptionData repeatsOnNthDayOfMonth = CalendarEnumerations.calendarFrequencyNthDayType(NthDayType.ONE);
-        final EnumOptionData remindBy = CalendarEnumerations.calendarRemindBy(CalendarRemindBy.EMAIL);
-        final Integer firstReminder = Integer.valueOf(0);
-        final Integer secondReminder = Integer.valueOf(0);
-        final String humanReadable = null;
-        final Collection<LocalDate> recurringDates = null;
-        final Collection<LocalDate> nextTenRecurringDates = null;
-        final LocalDate recentEligibleMeetingDate = null;
-
-        final List<EnumOptionData> entityTypeOptions = null;
-        final List<EnumOptionData> calendarTypeOptions = null;
-        final List<EnumOptionData> remindByOptions = null;
-        final List<EnumOptionData> frequencyOptions = null;
-        final List<EnumOptionData> repeatsOnDayOptions = null;
-        final List<EnumOptionData> frequencyNthDayTypeOptions = null;
-
-        final LocalDate createdDate = null;
-        final LocalDate lastUpdatedDate = null;
-        final Long createdByUserId = null;
-        final String createdByUsername = null;
-        final Long lastUpdatedByUserId = null;
-        final String lastUpdatedByUsername = null;
-        final LocalTime meetingTime = null;
-        final Integer repeatsOnDayOfMonth = null;
-
-        return new CalendarData(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate, duration,
-                type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy, firstReminder,
-                secondReminder, recurringDates, nextTenRecurringDates, humanReadable, recentEligibleMeetingDate, createdDate,
-                lastUpdatedDate, createdByUserId, createdByUsername, lastUpdatedByUserId, lastUpdatedByUsername, repeatsOnDayOfMonth,
-                entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions, repeatsOnDayOptions, meetingTime,
-                frequencyNthDayTypeOptions);
-    }
-
-    public static CalendarData withTemplateOptions(final CalendarData calendarData, final List<EnumOptionData> entityTypeOptions,
-            final List<EnumOptionData> calendarTypeOptions, final List<EnumOptionData> remindByOptions,
-            final List<EnumOptionData> repeatsOptions, final List<EnumOptionData> repeatsOnDayOptions,
-            final List<EnumOptionData> frequencyNthDayTypeOptions) {
-
-        return new CalendarData(calendarData.id, calendarData.calendarInstanceId, calendarData.entityId, calendarData.entityType,
-                calendarData.title, calendarData.description, calendarData.location, calendarData.startDate, calendarData.endDate,
-                calendarData.duration, calendarData.type, calendarData.repeating, calendarData.recurrence, calendarData.frequency,
-                calendarData.interval, calendarData.repeatsOnDay, calendarData.repeatsOnNthDayOfMonth, calendarData.remindBy,
-                calendarData.firstReminder, calendarData.secondReminder, calendarData.recurringDates, calendarData.nextTenRecurringDates,
-                calendarData.humanReadable, calendarData.recentEligibleMeetingDate, calendarData.createdDate, calendarData.lastUpdatedDate,
-                calendarData.createdByUserId, calendarData.createdByUsername, calendarData.lastUpdatedByUserId,
-                calendarData.lastUpdatedByUsername, calendarData.repeatsOnDayOfMonth, entityTypeOptions, calendarTypeOptions,
-                remindByOptions, repeatsOptions, repeatsOnDayOptions, calendarData.meetingTime, frequencyNthDayTypeOptions);
-    }
-
-    private CalendarData(final Long id, final Long calendarInstanceId, final Long entityId, final EnumOptionData entityType,
-            final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
-            final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,
-            final EnumOptionData frequency, final Integer interval, final EnumOptionData repeatsOnDay,
-            final EnumOptionData repeatsOnNthDayOfMonth, final EnumOptionData remindBy, final Integer firstReminder,
-            final Integer secondReminder, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates,
-            final String humanReadable, final LocalDate recentEligibleMeetingDate, final LocalDate createdDate,
-            final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername, final Long lastUpdatedByUserId,
-            final String lastUpdatedByUsername, final Integer repeatsOnDayOfMonth, final List<EnumOptionData> entityTypeOptions,
-            final List<EnumOptionData> calendarTypeOptions, final List<EnumOptionData> remindByOptions,
-            final List<EnumOptionData> repeatsOptions, final List<EnumOptionData> repeatsOnDayOptions,final LocalTime meetingTime,
-            final List<EnumOptionData> frequencyNthDayTypeOptions) {
-        this.id = id;
-        this.calendarInstanceId = calendarInstanceId;
-        this.entityId = entityId;
-        this.entityType = entityType;
-        this.title = title;
-        this.description = description;
-        this.location = location;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.duration = duration;
-        this.type = type;
-        this.repeating = repeating;
-        this.recurrence = recurrence;
-        this.frequency = frequency;
-        this.interval = interval;
-        this.repeatsOnDay = repeatsOnDay;
-        this.repeatsOnNthDayOfMonth = repeatsOnNthDayOfMonth;
-        this.remindBy = remindBy;
-        this.firstReminder = firstReminder;
-        this.secondReminder = secondReminder;
-        this.recurringDates = recurringDates;
-        this.nextTenRecurringDates = nextTenRecurringDates;
-        this.humanReadable = humanReadable;
-        this.recentEligibleMeetingDate = recentEligibleMeetingDate;
-        this.createdDate = createdDate;
-        this.lastUpdatedDate = lastUpdatedDate;
-        this.createdByUserId = createdByUserId;
-        this.createdByUsername = createdByUsername;
-        this.lastUpdatedByUserId = lastUpdatedByUserId;
-        this.lastUpdatedByUsername = lastUpdatedByUsername;
-        this.repeatsOnDayOfMonth = repeatsOnDayOfMonth;
-        this.entityTypeOptions = entityTypeOptions;
-        this.calendarTypeOptions = calendarTypeOptions;
-        this.remindByOptions = remindByOptions;
-        this.frequencyOptions = repeatsOptions;
-        this.repeatsOnDayOptions = repeatsOnDayOptions;
-        this.meetingTime = meetingTime;
-        this.frequencyNthDayTypeOptions = frequencyNthDayTypeOptions;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public Long getEntityId() {
-        return this.entityId;
-    }
-
-    public EnumOptionData getEntityType() {
-        return this.entityType;
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public LocalDate getStartDate() {
-        return this.startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return this.endDate;
-    }
-
-    public LocalDate getCreatedDate() {
-        return this.createdDate;
-    }
-
-    public Integer getDuration() {
-        return this.duration;
-    }
-
-    public EnumOptionData getType() {
-        return this.type;
-    }
-
-    public boolean isRepeating() {
-        return this.repeating;
-    }
-
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    public EnumOptionData getRemindBy() {
-        return this.remindBy;
-    }
-
-    public Integer getFirstReminder() {
-        return this.firstReminder;
-    }
-
-    public Integer getSecondReminder() {
-        return this.secondReminder;
-    }
-
-    public List<EnumOptionData> getEntityTypeOptions() {
-        return this.entityTypeOptions;
-    }
-
-    public List<EnumOptionData> getCalendarTypeOptions() {
-        return this.calendarTypeOptions;
-    }
-
-    public List<EnumOptionData> getRemindByOptions() {
-        return this.remindByOptions;
-    }
-
-    public String getHumanReadable() {
-        return this.humanReadable;
-    }
-
-    public Long getCalendarInstanceId() {
-        return this.calendarInstanceId;
-    }
-
-    public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null) {
-            if (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate)) { return true; }
-        }
-        return false;
-    }
-
-    public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
-        if (this.endDate != null && compareDate != null) {
-            if (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate)) { return true; }
-        }
-        return false;
-    }
-
-    public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
-        if (isStartDateBeforeOrEqual(compareDate)) {
-            if (this.endDate == null || isEndDateAfterOrEqual(compareDate)) { return true; }
-        }
-        return false;
-    }
-
-    public boolean isValidRecurringDate(final LocalDate compareDate, final Boolean isSkipMeetingOnFirstDay, final Integer numberOfDays) {
-        if (isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(this.getRecurrence(), this.getStartDate(),
-                compareDate, isSkipMeetingOnFirstDay, numberOfDays); }
-        return false;
-    }
-
-    public Integer interval(){
-        return this.interval;
-    }
-
-    public EnumOptionData frequencyType(){
-        return this.frequency;
-    }
-    public EnumOptionData getRepeatsOnDay() {
-        return this.repeatsOnDay;
-    }
-    public EnumOptionData getRepeatsOnNthDayOfMonth() {
-        return this.repeatsOnNthDayOfMonth;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CalendarData)) return false;
-        CalendarData that = (CalendarData) o;
-        return Objects.equals(repeating, that.repeating) &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(calendarInstanceId, that.calendarInstanceId) &&
-                Objects.equals(entityId, that.entityId) &&
-                Objects.equals(entityType, that.entityType) &&
-                Objects.equals(title, that.title) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(location, that.location) &&
-                Objects.equals(startDate, that.startDate) &&
-                Objects.equals(endDate, that.endDate) &&
-                Objects.equals(meetingTime, that.meetingTime) &&
-                Objects.equals(duration, that.duration) &&
-                Objects.equals(type, that.type) &&
-                Objects.equals(recurrence, that.recurrence) &&
-                Objects.equals(frequency, that.frequency) &&
-                Objects.equals(interval, that.interval) &&
-                Objects.equals(repeatsOnDay, that.repeatsOnDay) &&
-                Objects.equals(repeatsOnNthDayOfMonth, that.repeatsOnNthDayOfMonth) &&
-                Objects.equals(remindBy, that.remindBy) &&
-                Objects.equals(firstReminder, that.firstReminder) &&
-                Objects.equals(secondReminder, that.secondReminder) &&
-                Objects.equals(recurringDates, that.recurringDates) &&
-                Objects.equals(nextTenRecurringDates, that.nextTenRecurringDates) &&
-                Objects.equals(humanReadable, that.humanReadable) &&
-                Objects.equals(recentEligibleMeetingDate, that.recentEligibleMeetingDate) &&
-                Objects.equals(createdDate, that.createdDate) &&
-                Objects.equals(lastUpdatedDate, that.lastUpdatedDate) &&
-                Objects.equals(createdByUserId, that.createdByUserId) &&
-                Objects.equals(createdByUsername, that.createdByUsername) &&
-                Objects.equals(lastUpdatedByUserId, that.lastUpdatedByUserId) &&
-                Objects.equals(lastUpdatedByUsername, that.lastUpdatedByUsername) &&
-                Objects.equals(repeatsOnDayOfMonth, that.repeatsOnDayOfMonth) &&
-                Objects.equals(entityTypeOptions, that.entityTypeOptions) &&
-                Objects.equals(calendarTypeOptions, that.calendarTypeOptions) &&
-                Objects.equals(remindByOptions, that.remindByOptions) &&
-                Objects.equals(frequencyOptions, that.frequencyOptions) &&
-                Objects.equals(repeatsOnDayOptions, that.repeatsOnDayOptions) &&
-                Objects.equals(frequencyNthDayTypeOptions, that.frequencyNthDayTypeOptions) &&
-                Objects.equals(rowIndex, that.rowIndex) &&
-                Objects.equals(dateFormat, that.dateFormat) &&
-                Objects.equals(locale, that.locale) &&
-                Objects.equals(centerId, that.centerId) &&
-                Objects.equals(typeId, that.typeId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate, meetingTime, duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy, firstReminder, secondReminder, recurringDates, nextTenRecurringDates, humanReadable, recentEligibleMeetingDate, createdDate, lastUpdatedDate, createdByUserId, createdByUsername, lastUpdatedByUserId, lastUpdatedByUsername, repeatsOnDayOfMonth, entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions, repeatsOnDayOptions, frequencyNthDayTypeOptions, rowIndex, dateFormat, locale, centerId, typeId);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        id,
+        calendarInstanceId,
+        entityId,
+        entityType,
+        title,
+        description,
+        location,
+        startDate,
+        endDate,
+        meetingTime,
+        duration,
+        type,
+        repeating,
+        recurrence,
+        frequency,
+        interval,
+        repeatsOnDay,
+        repeatsOnNthDayOfMonth,
+        remindBy,
+        firstReminder,
+        secondReminder,
+        recurringDates,
+        nextTenRecurringDates,
+        humanReadable,
+        recentEligibleMeetingDate,
+        createdDate,
+        lastUpdatedDate,
+        createdByUserId,
+        createdByUsername,
+        lastUpdatedByUserId,
+        lastUpdatedByUsername,
+        repeatsOnDayOfMonth,
+        entityTypeOptions,
+        calendarTypeOptions,
+        remindByOptions,
+        frequencyOptions,
+        repeatsOnDayOptions,
+        frequencyNthDayTypeOptions,
+        rowIndex,
+        dateFormat,
+        locale,
+        centerId,
+        typeId);
+  }
 }

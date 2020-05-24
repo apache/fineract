@@ -35,29 +35,28 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class OfficeWorkBookPopulatorTest {
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
 
-    @Before
-    public void setup(){
-        Utils.initializeRESTAssured();
-        this.requestSpec=new RequestSpecBuilder().build();
-        this.requestSpec
-                .header("Authorization",
-                        "Basic "
-                                + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200)
-                .build();
-    }
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
-    @Test
-    public void testOfficeWorkbookPopulate() throws IOException {
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Workbook workbook=officeHelper.getOfficeWorkBook("dd MMMM yyyy");
-        Sheet sheet=workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Row firstRow= sheet.getRow(1);
-        Assert.assertNotNull("No parent offices found",firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());
-        Assert.assertEquals(1,firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_ID_COL).getNumericCellValue(),0.0);
-
-    }
+  @Test
+  public void testOfficeWorkbookPopulate() throws IOException {
+    OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+    Workbook workbook = officeHelper.getOfficeWorkBook("dd MMMM yyyy");
+    Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+    Row firstRow = sheet.getRow(1);
+    Assert.assertNotNull(
+        "No parent offices found",
+        firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());
+    Assert.assertEquals(
+        1, firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_ID_COL).getNumericCellValue(), 0.0);
+  }
 }

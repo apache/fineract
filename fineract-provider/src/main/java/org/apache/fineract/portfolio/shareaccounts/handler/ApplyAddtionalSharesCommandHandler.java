@@ -29,19 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "SHAREACCOUNT", action = "APPLYADDITIONALSHARES")
-public class ApplyAddtionalSharesCommandHandler implements NewCommandSourceHandler{
+public class ApplyAddtionalSharesCommandHandler implements NewCommandSourceHandler {
 
+  private final ShareAccountWritePlatformService shareAccountWritePlatformService;
 
-    private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
+  @Autowired
+  public ApplyAddtionalSharesCommandHandler(
+      final ShareAccountWritePlatformService shareAccountWritePlatformService) {
+    this.shareAccountWritePlatformService = shareAccountWritePlatformService;
+  }
 
-    @Autowired
-    public ApplyAddtionalSharesCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
-        this.shareAccountWritePlatformService = shareAccountWritePlatformService ;
-    }
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.shareAccountWritePlatformService.applyAddtionalShares(jsonCommand.entityId(), jsonCommand);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.shareAccountWritePlatformService.applyAddtionalShares(
+        jsonCommand.entityId(), jsonCommand);
+  }
 }

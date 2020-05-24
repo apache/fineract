@@ -26,13 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ClientTransactionReadPlatformService {
 
-    @Transactional(readOnly = true)
-    public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, SearchParameters parameters);
+  @Transactional(readOnly = true)
+  public Page<ClientTransactionData> retrieveAllTransactions(
+      Long clientId, SearchParameters parameters);
 
-    @Transactional(readOnly = true)
-    public Collection<ClientTransactionData> retrieveAllTransactions(final Long clientId, final Long chargeId);
+  @Transactional(readOnly = true)
+  public Collection<ClientTransactionData> retrieveAllTransactions(
+      final Long clientId, final Long chargeId);
 
-    @Transactional(readOnly = true)
-    public ClientTransactionData retrieveTransaction(Long clientId, Long transactionId);
-
+  @Transactional(readOnly = true)
+  public ClientTransactionData retrieveTransaction(Long clientId, Long transactionId);
 }

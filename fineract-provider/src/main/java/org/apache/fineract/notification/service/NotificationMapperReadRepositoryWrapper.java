@@ -23,11 +23,9 @@ import org.apache.fineract.notification.domain.NotificationMapper;
 
 public interface NotificationMapperReadRepositoryWrapper {
 
+  NotificationMapper findById(Long id);
 
-    NotificationMapper findById(Long id);
+  List<NotificationMapper> fetchAllNotifications();
 
-    List<NotificationMapper> fetchAllNotifications();
-
-    void delete(Long id);
-
+  void delete(Long id);
 }

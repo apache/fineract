@@ -26,59 +26,68 @@ import org.joda.time.Years;
 
 public class ClientAttributeIncentiveCalculation extends AttributeIncentiveCalculation {
 
-    @Override
-    public BigDecimal calculateIncentive(IncentiveDTO incentiveDTO) {
-        final Client client = incentiveDTO.client();
-        BigDecimal interest = incentiveDTO.interest();
-        final InterestIncentivesFields incentivesFields = incentiveDTO.incentives();
-        boolean applyIncentive = false;
-        switch (incentivesFields.attributeName()) {
-            case GENDER:
-                if (client.genderId() != null) {
-                    applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
-                            client.genderId());
-                }
-            break;
-            case AGE:
-                if (client.dateOfBirth() != null) {
-                    final LocalDate dobLacalDate = LocalDate.fromDateFields(client.dateOfBirth());
-                    final int age = Years.yearsBetween(dobLacalDate, LocalDate.now()).getYears();
-                    applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
-                            Long.valueOf(age));
-                }
-            break;
-            case CLIENT_TYPE:
-                if (client.clientTypeId() != null) {
-                    applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
-                            client.clientTypeId());
-                }
-            break;
-            case CLIENT_CLASSIFICATION:
-                if (client.clientClassificationId() != null) {
-                    applyIncentive = applyIncentive(incentivesFields.conditionType(), Long.valueOf(incentivesFields.attributeValue()),
-                            client.clientClassificationId());
-                }
-            break;
-
-            default:
-            break;
-
+  @Override
+  public BigDecimal calculateIncentive(IncentiveDTO incentiveDTO) {
+    final Client client = incentiveDTO.client();
+    BigDecimal interest = incentiveDTO.interest();
+    final InterestIncentivesFields incentivesFields = incentiveDTO.incentives();
+    boolean applyIncentive = false;
+    switch (incentivesFields.attributeName()) {
+      case GENDER:
+        if (client.genderId() != null) {
+          applyIncentive =
+              applyIncentive(
+                  incentivesFields.conditionType(),
+                  Long.valueOf(incentivesFields.attributeValue()),
+                  client.genderId());
         }
-        if (applyIncentive) {
-            switch (incentivesFields.incentiveType()) {
-                case FIXED:
-                    interest = incentivesFields.amount();
-                break;
-                case INCENTIVE:
-                    interest = interest.add(incentivesFields.amount());
-                break;
-                default:
-                break;
-
-            }
+        break;
+      case AGE:
+        if (client.dateOfBirth() != null) {
+          final LocalDate dobLacalDate = LocalDate.fromDateFields(client.dateOfBirth());
+          final int age = Years.yearsBetween(dobLacalDate, LocalDate.now()).getYears();
+          applyIncentive =
+              applyIncentive(
+                  incentivesFields.conditionType(),
+                  Long.valueOf(incentivesFields.attributeValue()),
+                  Long.valueOf(age));
         }
+        break;
+      case CLIENT_TYPE:
+        if (client.clientTypeId() != null) {
+          applyIncentive =
+              applyIncentive(
+                  incentivesFields.conditionType(),
+                  Long.valueOf(incentivesFields.attributeValue()),
+                  client.clientTypeId());
+        }
+        break;
+      case CLIENT_CLASSIFICATION:
+        if (client.clientClassificationId() != null) {
+          applyIncentive =
+              applyIncentive(
+                  incentivesFields.conditionType(),
+                  Long.valueOf(incentivesFields.attributeValue()),
+                  client.clientClassificationId());
+        }
+        break;
 
-        return interest;
+      default:
+        break;
+    }
+    if (applyIncentive) {
+      switch (incentivesFields.incentiveType()) {
+        case FIXED:
+          interest = incentivesFields.amount();
+          break;
+        case INCENTIVE:
+          interest = interest.add(incentivesFields.amount());
+          break;
+        default:
+          break;
+      }
     }
 
+    return interest;
+  }
 }

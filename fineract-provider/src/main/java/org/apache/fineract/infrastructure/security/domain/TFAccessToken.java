@@ -35,101 +35,106 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 
 @Entity
-@Table(name = "twofactor_access_token",
-        uniqueConstraints = {@UniqueConstraint(columnNames = { "token", "appuser_id" }, name = "token_appuser_UNIQUE")})
+@Table(
+    name = "twofactor_access_token",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"token", "appuser_id"},
+          name = "token_appuser_UNIQUE")
+    })
 public class TFAccessToken extends AbstractPersistableCustom {
 
-    @Column(name = "token", nullable = false, length = 32)
-    private String token;
+  @Column(name = "token", nullable = false, length = 32)
+  private String token;
 
-    @ManyToOne
-    @JoinColumn(name = "appuser_id", nullable = false)
-    private AppUser user;
+  @ManyToOne
+  @JoinColumn(name = "appuser_id", nullable = false)
+  private AppUser user;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "valid_from", nullable = false)
-    private Date validFrom;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "valid_from", nullable = false)
+  private Date validFrom;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "valid_to", nullable = false)
-    private Date validTo;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "valid_to", nullable = false)
+  private Date validTo;
 
-    @Column(name = "enabled", nullable = false)
-    private boolean enabled;
+  @Column(name = "enabled", nullable = false)
+  private boolean enabled;
 
-    public TFAccessToken() {
-    }
+  public TFAccessToken() {}
 
-    public static TFAccessToken create(String token, AppUser user, int tokenLiveTimeInSec) {
-        DateTime validFrom = DateUtils.getLocalDateTimeOfTenant().toDateTime();
-        DateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
+  public static TFAccessToken create(String token, AppUser user, int tokenLiveTimeInSec) {
+    DateTime validFrom = DateUtils.getLocalDateTimeOfTenant().toDateTime();
+    DateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
 
-        return new TFAccessToken(token, user, validFrom.toDate(), validTo.toDate(), true);
-    }
+    return new TFAccessToken(token, user, validFrom.toDate(), validTo.toDate(), true);
+  }
 
-    public TFAccessToken(String token, AppUser user, Date validFrom, Date validTo, boolean enabled) {
-        this.token = token;
-        this.user = user;
-        this.validFrom = validFrom;
-        this.validTo = validTo;
-        this.enabled = enabled;
-    }
+  public TFAccessToken(String token, AppUser user, Date validFrom, Date validTo, boolean enabled) {
+    this.token = token;
+    this.user = user;
+    this.validFrom = validFrom;
+    this.validTo = validTo;
+    this.enabled = enabled;
+  }
 
-    public boolean isValid() {
-        return this.enabled && isDateInTheFuture(getValidToDate())
-                && isDateInThePast(getValidFromDate());
-    }
+  public boolean isValid() {
+    return this.enabled
+        && isDateInTheFuture(getValidToDate())
+        && isDateInThePast(getValidFromDate());
+  }
 
-    public AccessTokenData toTokenData() {
-        return new AccessTokenData(this.token, getValidFromDate().toDateTime(),
-                getValidToDate().toDateTime());
-    }
+  public AccessTokenData toTokenData() {
+    return new AccessTokenData(
+        this.token, getValidFromDate().toDateTime(), getValidToDate().toDateTime());
+  }
 
-    public String getToken() {
-        return token;
-    }
+  public String getToken() {
+    return token;
+  }
 
-    public AppUser getUser() {
-        return user;
-    }
+  public AppUser getUser() {
+    return user;
+  }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-    public LocalDateTime getValidFromDate() {
-        return new LocalDateTime(validFrom);
-    }
+  public LocalDateTime getValidFromDate() {
+    return new LocalDateTime(validFrom);
+  }
 
-    public LocalDateTime getValidToDate() {
-        return new LocalDateTime(validTo);
-    }
+  public LocalDateTime getValidToDate() {
+    return new LocalDateTime(validTo);
+  }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+  public void setToken(String token) {
+    this.token = token;
+  }
 
-    public void setUser(AppUser user) {
-        this.user = user;
-    }
+  public void setUser(AppUser user) {
+    this.user = user;
+  }
 
-    public void setValidFrom(Date validFrom) {
-        this.validFrom = validFrom;
-    }
+  public void setValidFrom(Date validFrom) {
+    this.validFrom = validFrom;
+  }
 
-    public void setValidTo(Date validTo) {
-        this.validTo = validTo;
-    }
+  public void setValidTo(Date validTo) {
+    this.validTo = validTo;
+  }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 
-    private boolean isDateInTheFuture(LocalDateTime dateTime) {
-        return dateTime.isAfter(DateUtils.getLocalDateTimeOfTenant());
-    }
+  private boolean isDateInTheFuture(LocalDateTime dateTime) {
+    return dateTime.isAfter(DateUtils.getLocalDateTimeOfTenant());
+  }
 
-    private boolean isDateInThePast(LocalDateTime dateTime) {
-        return dateTime.isBefore(DateUtils.getLocalDateTimeOfTenant());
-    }
+  private boolean isDateInThePast(LocalDateTime dateTime) {
+    return dateTime.isBefore(DateUtils.getLocalDateTimeOfTenant());
+  }
 }

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
@@ -26,172 +25,239 @@ import org.joda.time.LocalDate;
 
 public class ClientFamilyMembersData implements Serializable {
 
-    private final Long id;
+  private final Long id;
 
-    private final Long clientId;
+  private final Long clientId;
 
-    private final String firstName;
+  private final String firstName;
 
-    private final String middleName;
+  private final String middleName;
 
-    private final String lastName;
+  private final String lastName;
 
-    private final String qualification;
+  private final String qualification;
 
-    private final Long relationshipId;
+  private final Long relationshipId;
 
-    private final String relationship;
+  private final String relationship;
 
-    private final Long maritalStatusId;
+  private final Long maritalStatusId;
 
-    private final String maritalStatus;
+  private final String maritalStatus;
 
-    private final Long genderId;
+  private final Long genderId;
 
-    private final String gender;
+  private final String gender;
 
-    private final LocalDate dateOfBirth;
+  private final LocalDate dateOfBirth;
 
-    private final Long professionId;
+  private final Long professionId;
 
-    private final String profession;
+  private final String profession;
 
-    private final String mobileNumber;
+  private final String mobileNumber;
 
-    private final Long age;
+  private final Long age;
 
-    private final Boolean isDependent;
+  private final Boolean isDependent;
 
-    // template holder
-    private final Collection<CodeValueData> relationshipIdOptions;
-    private final Collection<CodeValueData> genderIdOptions;
-    private final Collection<CodeValueData> maritalStatusIdOptions;
-    private final Collection<CodeValueData> professionIdOptions;
+  // template holder
+  private final Collection<CodeValueData> relationshipIdOptions;
+  private final Collection<CodeValueData> genderIdOptions;
+  private final Collection<CodeValueData> maritalStatusIdOptions;
+  private final Collection<CodeValueData> professionIdOptions;
 
-    private ClientFamilyMembersData(final Long id, final Long clientId, final String firstName, final String middleName,
-            final String lastName, final String qualification,final String mobileNumber,final Long age,final Boolean isDependent, final String relationship, final Long relationshipId,
-            final String maritalStatus, final Long maritalStatusId, final String gender, final Long genderId,
-            final LocalDate dateOfBirth, final String profession, final Long professionId,
-            final Collection<CodeValueData> relationshipIdOptions,final Collection<CodeValueData> genderIdOptions,final Collection<CodeValueData> maritalStatusIdOptions,
-            final Collection<CodeValueData> professionIdOptions) {
-        this.id = id;
-        this.clientId = clientId;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.qualification = qualification;
-        this.relationship = relationship;
-        this.relationshipId = relationshipId;
-        this.maritalStatus = maritalStatus;
-        this.maritalStatusId = maritalStatusId;
-        this.gender = gender;
-        this.genderId = genderId;
-        this.dateOfBirth = dateOfBirth;
-        this.profession = profession;
-        this.professionId = professionId;
-        this.mobileNumber=mobileNumber;
-        this.age=age;
-        this.isDependent=isDependent;
-        this.relationshipIdOptions=relationshipIdOptions;
-        this.genderIdOptions=genderIdOptions;
-        this.maritalStatusIdOptions=maritalStatusIdOptions;
-        this.professionIdOptions=professionIdOptions;
+  private ClientFamilyMembersData(
+      final Long id,
+      final Long clientId,
+      final String firstName,
+      final String middleName,
+      final String lastName,
+      final String qualification,
+      final String mobileNumber,
+      final Long age,
+      final Boolean isDependent,
+      final String relationship,
+      final Long relationshipId,
+      final String maritalStatus,
+      final Long maritalStatusId,
+      final String gender,
+      final Long genderId,
+      final LocalDate dateOfBirth,
+      final String profession,
+      final Long professionId,
+      final Collection<CodeValueData> relationshipIdOptions,
+      final Collection<CodeValueData> genderIdOptions,
+      final Collection<CodeValueData> maritalStatusIdOptions,
+      final Collection<CodeValueData> professionIdOptions) {
+    this.id = id;
+    this.clientId = clientId;
+    this.firstName = firstName;
+    this.middleName = middleName;
+    this.lastName = lastName;
+    this.qualification = qualification;
+    this.relationship = relationship;
+    this.relationshipId = relationshipId;
+    this.maritalStatus = maritalStatus;
+    this.maritalStatusId = maritalStatusId;
+    this.gender = gender;
+    this.genderId = genderId;
+    this.dateOfBirth = dateOfBirth;
+    this.profession = profession;
+    this.professionId = professionId;
+    this.mobileNumber = mobileNumber;
+    this.age = age;
+    this.isDependent = isDependent;
+    this.relationshipIdOptions = relationshipIdOptions;
+    this.genderIdOptions = genderIdOptions;
+    this.maritalStatusIdOptions = maritalStatusIdOptions;
+    this.professionIdOptions = professionIdOptions;
+  }
 
-    }
+  public static ClientFamilyMembersData instance(
+      final Long id,
+      final Long clientId,
+      final String firstName,
+      final String middleName,
+      final String lastName,
+      final String qualification,
+      final String mobileNumber,
+      final Long age,
+      final Boolean isDependent,
+      final String relationship,
+      final Long relationshipId,
+      final String maritalStatus,
+      final Long maritalStatusId,
+      final String gender,
+      final Long genderId,
+      final LocalDate dateOfBirth,
+      final String profession,
+      final Long professionId) {
+    return new ClientFamilyMembersData(
+        id,
+        clientId,
+        firstName,
+        middleName,
+        lastName,
+        qualification,
+        mobileNumber,
+        age,
+        isDependent,
+        relationship,
+        relationshipId,
+        maritalStatus,
+        maritalStatusId,
+        gender,
+        genderId,
+        dateOfBirth,
+        profession,
+        professionId,
+        null,
+        null,
+        null,
+        null);
+  }
 
-    public static ClientFamilyMembersData instance(final Long id, final Long clientId, final String firstName,
-            final String middleName, final String lastName, final String qualification,final String mobileNumber,final Long age,final Boolean isDependent, final String relationship,
-            final Long relationshipId, final String maritalStatus, final Long maritalStatusId, final String gender,
-            final Long genderId, final LocalDate dateOfBirth, final String profession, final Long professionId
-            ) {
-        return new ClientFamilyMembersData(id, clientId, firstName, middleName, lastName, qualification,mobileNumber,age,isDependent, relationship,
-                relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
-                professionId,null,null,null,null);
-    }
+  public static ClientFamilyMembersData templateInstance(
+      final Collection<CodeValueData> relationshipIdOptions,
+      final Collection<CodeValueData> genderIdOptions,
+      final Collection<CodeValueData> maritalStatusIdOptions,
+      final Collection<CodeValueData> professionIdOptions) {
 
+    return new ClientFamilyMembersData(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        relationshipIdOptions,
+        genderIdOptions,
+        maritalStatusIdOptions,
+        professionIdOptions);
+  }
 
-    public static ClientFamilyMembersData templateInstance(final Collection<CodeValueData> relationshipIdOptions,
-            final Collection<CodeValueData> genderIdOptions,final Collection<CodeValueData> maritalStatusIdOptions,
-            final Collection<CodeValueData> professionIdOptions) {
+  public Long getId() {
+    return this.id;
+  }
 
+  public Long getClientId() {
+    return this.clientId;
+  }
 
-        return new ClientFamilyMembersData(null, null, null, null, null, null,null,
-                null, null, null, null, null, null, null,
-                null,null,null,null,relationshipIdOptions,genderIdOptions,maritalStatusIdOptions,professionIdOptions);
-    }
+  public String getFirstName() {
+    return this.firstName;
+  }
 
-    public Long getId() {
-        return this.id;
-    }
+  public String getMiddleName() {
+    return this.middleName;
+  }
 
-    public Long getClientId() {
-        return this.clientId;
-    }
+  public String getLastName() {
+    return this.lastName;
+  }
 
-    public String getFirstName() {
-        return this.firstName;
-    }
+  public String getQualification() {
+    return this.qualification;
+  }
 
-    public String getMiddleName() {
-        return this.middleName;
-    }
+  public Long getRelationshipId() {
+    return this.relationshipId;
+  }
 
-    public String getLastName() {
-        return this.lastName;
-    }
+  public String getRelationship() {
+    return this.relationship;
+  }
 
-    public String getQualification() {
-        return this.qualification;
-    }
+  public Long getMaritalStatusId() {
+    return this.maritalStatusId;
+  }
 
-    public Long getRelationshipId() {
-        return this.relationshipId;
-    }
+  public String getMaritalStatus() {
+    return this.maritalStatus;
+  }
 
-    public String getRelationship() {
-        return this.relationship;
-    }
+  public Long getGenderId() {
+    return this.genderId;
+  }
 
-    public Long getMaritalStatusId() {
-        return this.maritalStatusId;
-    }
+  public String getGender() {
+    return this.gender;
+  }
 
-    public String getMaritalStatus() {
-        return this.maritalStatus;
-    }
+  public LocalDate getDateOfBirth() {
+    return this.dateOfBirth;
+  }
 
-    public Long getGenderId() {
-        return this.genderId;
-    }
+  public Long getProfessionId() {
+    return this.professionId;
+  }
 
-    public String getGender() {
-        return this.gender;
-    }
+  public String getProfession() {
+    return this.profession;
+  }
 
-    public LocalDate getDateOfBirth() {
-        return this.dateOfBirth;
-    }
+  public String getMobileNumber() {
+    return this.mobileNumber;
+  }
 
-    public Long getProfessionId() {
-        return this.professionId;
-    }
+  public Long getAge() {
+    return this.age;
+  }
 
-    public String getProfession() {
-        return this.profession;
-    }
-
-    public String getMobileNumber() {
-        return this.mobileNumber;
-    }
-
-    public Long getAge() {
-        return this.age;
-    }
-
-    public Boolean getIsDependent() {
-        return this.isDependent;
-    }
-
-
-
+  public Boolean getIsDependent() {
+    return this.isDependent;
+  }
 }

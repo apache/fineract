@@ -36,126 +36,201 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail
  */
 public class LoanProductRelatedDetailTestHelper {
 
-    public static LoanProductRelatedDetail createSettingsForEqualPrincipalAmortizationQuarterly() {
+  public static LoanProductRelatedDetail createSettingsForEqualPrincipalAmortizationQuarterly() {
 
-        final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
+    final MonetaryCurrency currency =
+        new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
+    final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
 
-        // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+    // 2% per month, 24% per year
+    final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+    final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
+    final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
-        final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
-        final Integer repayEvery = Integer.valueOf(3);
-        final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
+    final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
+    final InterestCalculationPeriodMethod interestCalculationPeriodMethod =
+        InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
+    final Integer repayEvery = Integer.valueOf(3);
+    final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
-        final Integer defaultNumberOfRepayments = Integer.valueOf(4);
-        final AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_PRINCIPAL;
+    final Integer defaultNumberOfRepayments = Integer.valueOf(4);
+    final AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_PRINCIPAL;
 
-        final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
+    final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
-                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
-                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
-    }
+    return createLoanProductRelatedDetail(
+        currency,
+        defaultPrincipal,
+        defaultNominalInterestRatePerPeriod,
+        interestPeriodFrequencyType,
+        defaultAnnualNominalInterestRate,
+        interestMethod,
+        interestCalculationPeriodMethod,
+        repayEvery,
+        repaymentFrequencyType,
+        defaultNumberOfRepayments,
+        amortizationMethod,
+        inArrearsTolerance);
+  }
 
-    public static LoanProductRelatedDetail createSettingsForEqualInstallmentAmortizationQuarterly() {
-        final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
+  public static LoanProductRelatedDetail createSettingsForEqualInstallmentAmortizationQuarterly() {
+    final MonetaryCurrency currency =
+        new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
+    final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
 
-        // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+    // 2% per month, 24% per year
+    final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+    final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
+    final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
-        final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
-        final Integer repayEvery = Integer.valueOf(3);
-        final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
+    final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
+    final InterestCalculationPeriodMethod interestCalculationPeriodMethod =
+        InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
+    final Integer repayEvery = Integer.valueOf(3);
+    final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
-        final Integer defaultNumberOfRepayments = Integer.valueOf(4);
-        final AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_INSTALLMENTS;
+    final Integer defaultNumberOfRepayments = Integer.valueOf(4);
+    final AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_INSTALLMENTS;
 
-        final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
+    final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
-                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
-                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
-    }
+    return createLoanProductRelatedDetail(
+        currency,
+        defaultPrincipal,
+        defaultNominalInterestRatePerPeriod,
+        interestPeriodFrequencyType,
+        defaultAnnualNominalInterestRate,
+        interestMethod,
+        interestCalculationPeriodMethod,
+        repayEvery,
+        repaymentFrequencyType,
+        defaultNumberOfRepayments,
+        amortizationMethod,
+        inArrearsTolerance);
+  }
 
-    public static LoanProductRelatedDetail createSettingsForFlatQuarterly(final AmortizationMethod amortizationMethod) {
+  public static LoanProductRelatedDetail createSettingsForFlatQuarterly(
+      final AmortizationMethod amortizationMethod) {
 
-        final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
+    final MonetaryCurrency currency =
+        new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
+    final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
 
-        // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+    // 2% per month, 24% per year
+    final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+    final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
+    final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
-        final InterestMethod interestMethod = InterestMethod.FLAT;
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
-        final Integer repayEvery = Integer.valueOf(3);
-        final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
+    final InterestMethod interestMethod = InterestMethod.FLAT;
+    final InterestCalculationPeriodMethod interestCalculationPeriodMethod =
+        InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
+    final Integer repayEvery = Integer.valueOf(3);
+    final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
-        final Integer defaultNumberOfRepayments = Integer.valueOf(4);
+    final Integer defaultNumberOfRepayments = Integer.valueOf(4);
 
-        final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
+    final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
-                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
-                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
-    }
+    return createLoanProductRelatedDetail(
+        currency,
+        defaultPrincipal,
+        defaultNominalInterestRatePerPeriod,
+        interestPeriodFrequencyType,
+        defaultAnnualNominalInterestRate,
+        interestMethod,
+        interestCalculationPeriodMethod,
+        repayEvery,
+        repaymentFrequencyType,
+        defaultNumberOfRepayments,
+        amortizationMethod,
+        inArrearsTolerance);
+  }
 
-    public static LoanProductRelatedDetail createSettingsForIrregularFlatEveryFourMonths() {
+  public static LoanProductRelatedDetail createSettingsForIrregularFlatEveryFourMonths() {
 
-        final MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("KSH").withDigitsAfterDecimal(0).build();
-        final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("15000"));
+    final MonetaryCurrency currency =
+        new MonetaryCurrencyBuilder().withCode("KSH").withDigitsAfterDecimal(0).build();
+    final BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("15000"));
 
-        // 2% per month, 24% per year
-        final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
-        final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
+    // 2% per month, 24% per year
+    final BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
+    final PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
+    final BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
-        final InterestMethod interestMethod = InterestMethod.FLAT;
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
-        final Integer repayEvery = Integer.valueOf(3);
-        final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
+    final InterestMethod interestMethod = InterestMethod.FLAT;
+    final InterestCalculationPeriodMethod interestCalculationPeriodMethod =
+        InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
+    final Integer repayEvery = Integer.valueOf(3);
+    final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
-        final Integer defaultNumberOfRepayments = Integer.valueOf(2);
+    final Integer defaultNumberOfRepayments = Integer.valueOf(2);
 
-        final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
+    final BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        final AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_PRINCIPAL;
+    final AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_PRINCIPAL;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
-                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
-                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
-    }
+    return createLoanProductRelatedDetail(
+        currency,
+        defaultPrincipal,
+        defaultNominalInterestRatePerPeriod,
+        interestPeriodFrequencyType,
+        defaultAnnualNominalInterestRate,
+        interestMethod,
+        interestCalculationPeriodMethod,
+        repayEvery,
+        repaymentFrequencyType,
+        defaultNumberOfRepayments,
+        amortizationMethod,
+        inArrearsTolerance);
+  }
 
-    private static LoanProductRelatedDetail createLoanProductRelatedDetail(final MonetaryCurrency currency,
-            final BigDecimal defaultPrincipal, final BigDecimal defaultNominalInterestRatePerPeriod,
-            final PeriodFrequencyType interestPeriodFrequencyType, final BigDecimal defaultAnnualNominalInterestRate,
-            final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
-            final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
+  private static LoanProductRelatedDetail createLoanProductRelatedDetail(
+      final MonetaryCurrency currency,
+      final BigDecimal defaultPrincipal,
+      final BigDecimal defaultNominalInterestRatePerPeriod,
+      final PeriodFrequencyType interestPeriodFrequencyType,
+      final BigDecimal defaultAnnualNominalInterestRate,
+      final InterestMethod interestMethod,
+      final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
+      final Integer repayEvery,
+      final PeriodFrequencyType repaymentFrequencyType,
+      final Integer defaultNumberOfRepayments,
+      final AmortizationMethod amortizationMethod,
+      final BigDecimal inArrearsTolerance) {
 
-        final Integer graceOnPrincipalPayment = Integer.valueOf(0);
-        final Integer recurringMoratoriumOnPrincipalPeriods = Integer.valueOf(0);
-        final Integer graceOnInterestPayment = Integer.valueOf(0);
-        final Integer graceOnInterestCharged = Integer.valueOf(0);
-        final Integer graceOnArrearsAgeing = Integer.valueOf(0);
+    final Integer graceOnPrincipalPayment = Integer.valueOf(0);
+    final Integer recurringMoratoriumOnPrincipalPeriods = Integer.valueOf(0);
+    final Integer graceOnInterestPayment = Integer.valueOf(0);
+    final Integer graceOnInterestCharged = Integer.valueOf(0);
+    final Integer graceOnArrearsAgeing = Integer.valueOf(0);
 
-        final Integer daysInMonthType = DaysInMonthType.ACTUAL.getValue();
-        final Integer daysInYearType = DaysInYearType.ACTUAL.getValue();
-        final boolean isInterestRecalculationEnabled = false;
-        final boolean considerPartialPeriodInterest = false;
-        final boolean isEqualAmortization = false;
-        return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
-                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, considerPartialPeriodInterest, repayEvery,
-                repaymentFrequencyType, defaultNumberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
-                amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, isEqualAmortization);
-    }
+    final Integer daysInMonthType = DaysInMonthType.ACTUAL.getValue();
+    final Integer daysInYearType = DaysInYearType.ACTUAL.getValue();
+    final boolean isInterestRecalculationEnabled = false;
+    final boolean considerPartialPeriodInterest = false;
+    final boolean isEqualAmortization = false;
+    return new LoanProductRelatedDetail(
+        currency,
+        defaultPrincipal,
+        defaultNominalInterestRatePerPeriod,
+        interestPeriodFrequencyType,
+        defaultAnnualNominalInterestRate,
+        interestMethod,
+        interestCalculationPeriodMethod,
+        considerPartialPeriodInterest,
+        repayEvery,
+        repaymentFrequencyType,
+        defaultNumberOfRepayments,
+        graceOnPrincipalPayment,
+        recurringMoratoriumOnPrincipalPeriods,
+        graceOnInterestPayment,
+        graceOnInterestCharged,
+        amortizationMethod,
+        inArrearsTolerance,
+        graceOnArrearsAgeing,
+        daysInMonthType,
+        daysInYearType,
+        isInterestRecalculationEnabled,
+        isEqualAmortization);
+  }
 }

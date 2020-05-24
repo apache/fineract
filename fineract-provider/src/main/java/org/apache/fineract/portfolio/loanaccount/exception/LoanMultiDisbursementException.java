@@ -22,8 +22,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class LoanMultiDisbursementException extends AbstractPlatformDomainRuleException {
 
-    public LoanMultiDisbursementException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg." + defaultUserMessage, defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public LoanMultiDisbursementException(
+      final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+    super("error.msg." + defaultUserMessage, defaultUserMessage, defaultUserMessageArgs);
+  }
 }

@@ -22,5 +22,5 @@ import java.util.List;
 
 public interface JournalEntryRepositoryCustom {
 
-    List<JournalEntry> findFirstJournalEntryForAccount(long glAccountId);
+  List<JournalEntry> findFirstJournalEntryForAccount(long glAccountId);
 }

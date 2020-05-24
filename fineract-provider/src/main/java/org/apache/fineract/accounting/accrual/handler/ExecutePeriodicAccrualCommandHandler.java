@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PERIODICACCRUALACCOUNTING", action = "EXECUTE")
 public class ExecutePeriodicAccrualCommandHandler implements NewCommandSourceHandler {
 
-    private final AccrualAccountingWritePlatformService writePlatformService;
+  private final AccrualAccountingWritePlatformService writePlatformService;
 
-    @Autowired
-    public ExecutePeriodicAccrualCommandHandler(final AccrualAccountingWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public ExecutePeriodicAccrualCommandHandler(
+      final AccrualAccountingWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.executeLoansPeriodicAccrual(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.executeLoansPeriodicAccrual(command);
+  }
 }

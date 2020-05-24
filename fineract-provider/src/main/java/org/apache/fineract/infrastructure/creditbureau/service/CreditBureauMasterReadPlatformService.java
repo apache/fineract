@@ -23,8 +23,7 @@ import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauMasterDa
 
 public interface CreditBureauMasterReadPlatformService {
 
-    Collection<CreditBureauMasterData> retrieveCreditBureauByCountry(String country);
+  Collection<CreditBureauMasterData> retrieveCreditBureauByCountry(String country);
 
-    Collection<CreditBureauMasterData> retrieveCreditBureauByCountry();
-
+  Collection<CreditBureauMasterData> retrieveCreditBureauByCountry();
 }

@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @see org.apache.fineract.organisation.teller.domain.Cashier
  * @since 2.0.0
  */
-public interface CashierRepository extends JpaRepository<Cashier, Long>, JpaSpecificationExecutor<Cashier> {
-    // no added behavior
+public interface CashierRepository
+    extends JpaRepository<Cashier, Long>, JpaSpecificationExecutor<Cashier> {
+  // no added behavior
 }

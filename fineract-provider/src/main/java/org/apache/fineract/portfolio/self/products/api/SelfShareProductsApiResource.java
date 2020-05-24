@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.self.products.api;
 
 import javax.ws.rs.Consumes;
@@ -40,39 +39,41 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class SelfShareProductsApiResource {
 
-    private final ProductsApiResource productsApiResource;
-    private final AppuserClientMapperReadService appUserClientMapperReadService;
+  private final ProductsApiResource productsApiResource;
+  private final AppuserClientMapperReadService appUserClientMapperReadService;
 
-    @Autowired
-    public SelfShareProductsApiResource(final ProductsApiResource productsApiResource,
-            final AppuserClientMapperReadService appUserClientMapperReadService) {
-        this.productsApiResource = productsApiResource;
-        this.appUserClientMapperReadService = appUserClientMapperReadService;
+  @Autowired
+  public SelfShareProductsApiResource(
+      final ProductsApiResource productsApiResource,
+      final AppuserClientMapperReadService appUserClientMapperReadService) {
+    this.productsApiResource = productsApiResource;
+    this.appUserClientMapperReadService = appUserClientMapperReadService;
+  }
 
-    }
+  @GET
+  @Path("{productId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveProduct(
+      @QueryParam(ShareAccountApiConstants.clientid_paramname) final Long clientId,
+      @PathParam("productId") final Long productId,
+      @PathParam("type") final String productType,
+      @Context final UriInfo uriInfo) {
+    this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
+    return this.productsApiResource.retrieveProduct(
+        productId, ShareAccountApiConstants.shareEntityType, uriInfo);
+  }
 
-    @GET
-    @Path("{productId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveProduct(@QueryParam(ShareAccountApiConstants.clientid_paramname) final Long clientId,
-            @PathParam("productId") final Long productId, @PathParam("type") final String productType,
-            @Context final UriInfo uriInfo) {
-        this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
-        return this.productsApiResource.retrieveProduct(productId, ShareAccountApiConstants.shareEntityType, uriInfo);
-
-    }
-
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllProducts(@QueryParam(ShareAccountApiConstants.clientid_paramname) final Long clientId,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @Context final UriInfo uriInfo) {
-        this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
-        return this.productsApiResource.retrieveAllProducts(ShareAccountApiConstants.shareEntityType, offset, limit,
-                uriInfo);
-
-    }
-
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAllProducts(
+      @QueryParam(ShareAccountApiConstants.clientid_paramname) final Long clientId,
+      @QueryParam("offset") final Integer offset,
+      @QueryParam("limit") final Integer limit,
+      @Context final UriInfo uriInfo) {
+    this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
+    return this.productsApiResource.retrieveAllProducts(
+        ShareAccountApiConstants.shareEntityType, offset, limit, uriInfo);
+  }
 }

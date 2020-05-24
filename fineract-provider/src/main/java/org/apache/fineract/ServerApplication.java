@@ -43,24 +43,24 @@ import org.springframework.context.annotation.ImportResource;
  *
  * @see ServerWithMariaDB4jApplication for an alternative with an embedded DB
  */
-
 public class ServerApplication extends SpringBootServletInitializer {
 
-    @Import({ EmbeddedTomcatWithSSLConfiguration.class })
-    @ImportResource({ "classpath*:META-INF/spring/hikariDataSource.xml" })
-    private static class Configuration extends AbstractApplicationConfiguration { }
+  @Import({EmbeddedTomcatWithSSLConfiguration.class})
+  @ImportResource({"classpath*:META-INF/spring/hikariDataSource.xml"})
+  private static class Configuration extends AbstractApplicationConfiguration {}
 
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        return builder.sources(Configuration.class);
-    }
+  @Override
+  protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+    return builder.sources(Configuration.class);
+  }
 
-    private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
-        return builder.sources(Configuration.class);
-    }
+  private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
+    return builder.sources(Configuration.class);
+  }
 
-    public static void main(String[] args) throws IOException {
-        ConfigurableApplicationContext ctx = configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
-        //ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
-    }
+  public static void main(String[] args) throws IOException {
+    ConfigurableApplicationContext ctx =
+        configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
+    // ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
+  }
 }

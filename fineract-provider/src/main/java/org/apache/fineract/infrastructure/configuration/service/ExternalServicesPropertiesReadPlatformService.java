@@ -27,14 +27,13 @@ import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationDa
 
 public interface ExternalServicesPropertiesReadPlatformService {
 
-    S3CredentialsData getS3Credentials();
+  S3CredentialsData getS3Credentials();
 
-    SMTPCredentialsData getSMTPCredentials();
+  SMTPCredentialsData getSMTPCredentials();
 
-    MessageGatewayConfigurationData getSMSGateway();
+  MessageGatewayConfigurationData getSMSGateway();
 
-    Collection<ExternalServicesPropertiesData> retrieveOne(String serviceName);
+  Collection<ExternalServicesPropertiesData> retrieveOne(String serviceName);
 
-    NotificationConfigurationData getNotificationConfiguration();
-
+  NotificationConfigurationData getNotificationConfiguration();
 }

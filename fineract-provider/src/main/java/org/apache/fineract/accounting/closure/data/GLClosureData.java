@@ -31,57 +31,77 @@ import org.joda.time.LocalDate;
  */
 public class GLClosureData {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final Long officeId;
-    @SuppressWarnings("unused")
-    private final String officeName;
-    @SuppressWarnings("unused")
-    private final LocalDate closingDate;
-    @SuppressWarnings("unused")
-    private final boolean deleted;
-    @SuppressWarnings("unused")
-    private final LocalDate createdDate;
-    @SuppressWarnings("unused")
-    private final LocalDate lastUpdatedDate;
-    @SuppressWarnings("unused")
-    private final Long createdByUserId;
-    @SuppressWarnings("unused")
-    private final String createdByUsername;
-    @SuppressWarnings("unused")
-    private final Long lastUpdatedByUserId;
-    @SuppressWarnings("unused")
-    private final String lastUpdatedByUsername;
-    @SuppressWarnings("unused")
-    private final String comments;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    private Collection<OfficeData> allowedOffices = new ArrayList<>();
+  @SuppressWarnings("unused")
+  private final Long officeId;
 
-    public GLClosureData(final Long id, final Long officeId, final String officeName, final LocalDate closingDate, final boolean deleted,
-            final LocalDate createdDate, final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
-            final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final String comments) {
-        this.id = id;
-        this.officeId = officeId;
-        this.officeName = officeName;
-        this.closingDate = closingDate;
-        this.deleted = deleted;
-        this.createdDate = createdDate;
-        this.lastUpdatedDate = lastUpdatedDate;
-        this.createdByUserId = createdByUserId;
-        this.createdByUsername = createdByUsername;
-        this.lastUpdatedByUserId = lastUpdatedByUserId;
-        this.lastUpdatedByUsername = lastUpdatedByUsername;
-        this.comments = comments;
-        this.allowedOffices = null;
-    }
+  @SuppressWarnings("unused")
+  private final String officeName;
 
-    public final Collection<OfficeData> getAllowedOffices() {
-        return this.allowedOffices;
-    }
+  @SuppressWarnings("unused")
+  private final LocalDate closingDate;
 
-    public void setAllowedOffices(final Collection<OfficeData> allowedOffices) {
-        this.allowedOffices = allowedOffices;
-    }
+  @SuppressWarnings("unused")
+  private final boolean deleted;
 
+  @SuppressWarnings("unused")
+  private final LocalDate createdDate;
+
+  @SuppressWarnings("unused")
+  private final LocalDate lastUpdatedDate;
+
+  @SuppressWarnings("unused")
+  private final Long createdByUserId;
+
+  @SuppressWarnings("unused")
+  private final String createdByUsername;
+
+  @SuppressWarnings("unused")
+  private final Long lastUpdatedByUserId;
+
+  @SuppressWarnings("unused")
+  private final String lastUpdatedByUsername;
+
+  @SuppressWarnings("unused")
+  private final String comments;
+
+  private Collection<OfficeData> allowedOffices = new ArrayList<>();
+
+  public GLClosureData(
+      final Long id,
+      final Long officeId,
+      final String officeName,
+      final LocalDate closingDate,
+      final boolean deleted,
+      final LocalDate createdDate,
+      final LocalDate lastUpdatedDate,
+      final Long createdByUserId,
+      final String createdByUsername,
+      final Long lastUpdatedByUserId,
+      final String lastUpdatedByUsername,
+      final String comments) {
+    this.id = id;
+    this.officeId = officeId;
+    this.officeName = officeName;
+    this.closingDate = closingDate;
+    this.deleted = deleted;
+    this.createdDate = createdDate;
+    this.lastUpdatedDate = lastUpdatedDate;
+    this.createdByUserId = createdByUserId;
+    this.createdByUsername = createdByUsername;
+    this.lastUpdatedByUserId = lastUpdatedByUserId;
+    this.lastUpdatedByUsername = lastUpdatedByUsername;
+    this.comments = comments;
+    this.allowedOffices = null;
+  }
+
+  public final Collection<OfficeData> getAllowedOffices() {
+    return this.allowedOffices;
+  }
+
+  public void setAllowedOffices(final Collection<OfficeData> allowedOffices) {
+    this.allowedOffices = allowedOffices;
+  }
 }

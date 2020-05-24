@@ -22,5 +22,5 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 
 public interface BasicAuthTenantDetailsService {
 
-    FineractPlatformTenant loadTenantById(String tenantId, boolean isReport);
+  FineractPlatformTenant loadTenantById(String tenantId, boolean isReport);
 }

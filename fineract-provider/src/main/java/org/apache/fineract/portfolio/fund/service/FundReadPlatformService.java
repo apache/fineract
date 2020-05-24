@@ -23,7 +23,7 @@ import org.apache.fineract.portfolio.fund.data.FundData;
 
 public interface FundReadPlatformService {
 
-    Collection<FundData> retrieveAllFunds();
+  Collection<FundData> retrieveAllFunds();
 
-    FundData retrieveFund(Long fundId);
+  FundData retrieveFund(Long fundId);
 }

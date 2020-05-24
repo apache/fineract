@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "UPDATE")
 public class UpdateGroupCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+  private final GroupingTypesWritePlatformService groupWritePlatformService;
 
-    @Autowired
-    public UpdateGroupCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public UpdateGroupCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.groupWritePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.groupWritePlatformService.updateGroup(command.entityId(), command);
-    }
+    return this.groupWritePlatformService.updateGroup(command.entityId(), command);
+  }
 }

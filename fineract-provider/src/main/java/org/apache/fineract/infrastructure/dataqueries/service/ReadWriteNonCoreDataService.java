@@ -27,47 +27,51 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ReadWriteNonCoreDataService {
 
-    List<DatatableData> retrieveDatatableNames(String appTable);
+  List<DatatableData> retrieveDatatableNames(String appTable);
 
-    DatatableData retrieveDatatable(String datatable);
+  DatatableData retrieveDatatable(String datatable);
 
-    @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
-    void registerDatatable(JsonCommand command);
+  @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
+  void registerDatatable(JsonCommand command);
 
-    @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
-    void registerDatatable(String dataTableName, String applicationTableName);
+  @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
+  void registerDatatable(String dataTableName, String applicationTableName);
 
-    @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
-    void registerDatatable(JsonCommand command, String permissionTable);
+  @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'REGISTER_DATATABLE')")
+  void registerDatatable(JsonCommand command, String permissionTable);
 
-    @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'DEREGISTER_DATATABLE')")
-    void deregisterDatatable(String datatable);
+  @PreAuthorize(value = "hasAnyAuthority('ALL_FUNCTIONS', 'DEREGISTER_DATATABLE')")
+  void deregisterDatatable(String datatable);
 
-    GenericResultsetData retrieveDataTableGenericResultSet(String datatable, Long appTableId, String order, Long id);
+  GenericResultsetData retrieveDataTableGenericResultSet(
+      String datatable, Long appTableId, String order, Long id);
 
-    CommandProcessingResult createDatatable(JsonCommand command);
+  CommandProcessingResult createDatatable(JsonCommand command);
 
-    void updateDatatable(String datatableName, JsonCommand command);
+  void updateDatatable(String datatableName, JsonCommand command);
 
-    void deleteDatatable(String datatableName);
+  void deleteDatatable(String datatableName);
 
-    CommandProcessingResult createNewDatatableEntry(String datatable, Long appTableId, JsonCommand command);
+  CommandProcessingResult createNewDatatableEntry(
+      String datatable, Long appTableId, JsonCommand command);
 
-    CommandProcessingResult createNewDatatableEntry(String datatable, Long appTableId, String json);
+  CommandProcessingResult createNewDatatableEntry(String datatable, Long appTableId, String json);
 
-    CommandProcessingResult createPPIEntry(String datatable, Long appTableId, JsonCommand command);
+  CommandProcessingResult createPPIEntry(String datatable, Long appTableId, JsonCommand command);
 
-    CommandProcessingResult updateDatatableEntryOneToOne(String datatable, Long appTableId, JsonCommand command);
+  CommandProcessingResult updateDatatableEntryOneToOne(
+      String datatable, Long appTableId, JsonCommand command);
 
-    CommandProcessingResult updateDatatableEntryOneToMany(String datatable, Long appTableId, Long datatableId, JsonCommand command);
+  CommandProcessingResult updateDatatableEntryOneToMany(
+      String datatable, Long appTableId, Long datatableId, JsonCommand command);
 
-    CommandProcessingResult deleteDatatableEntries(String datatable, Long appTableId);
+  CommandProcessingResult deleteDatatableEntries(String datatable, Long appTableId);
 
-    CommandProcessingResult deleteDatatableEntry(String datatable, Long appTableId, Long datatableId);
+  CommandProcessingResult deleteDatatableEntry(String datatable, Long appTableId, Long datatableId);
 
-    String getTableName(String Url);
+  String getTableName(String Url);
 
-    String getDataTableName(String Url);
+  String getDataTableName(String Url);
 
-    Long countDatatableEntries(String datatableName,Long appTableId,String foreignKeyColumn);
+  Long countDatatableEntries(String datatableName, Long appTableId, String foreignKeyColumn);
 }

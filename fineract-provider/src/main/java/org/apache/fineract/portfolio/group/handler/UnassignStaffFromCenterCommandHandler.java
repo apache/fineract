@@ -29,16 +29,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UnassignStaffFromCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService writePlatformService;
+  private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Autowired
-    public UnassignStaffFromCenterCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.writePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public UnassignStaffFromCenterCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.writePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
+  }
 }

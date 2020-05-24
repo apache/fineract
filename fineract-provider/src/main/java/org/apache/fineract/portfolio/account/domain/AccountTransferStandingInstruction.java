@@ -55,246 +55,325 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
 @Entity
-@Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
+@Table(
+    name = "m_account_transfer_standing_instructions",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"name"},
+          name = "name")
+    })
 public class AccountTransferStandingInstruction extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "account_transfer_details_id", nullable = true)
-    private AccountTransferDetails accountTransferDetails;
+  @ManyToOne
+  @JoinColumn(name = "account_transfer_details_id", nullable = true)
+  private AccountTransferDetails accountTransferDetails;
 
-    @Column(name = "name")
-    private String name;
+  @Column(name = "name")
+  private String name;
 
-    @Column(name = "priority")
-    private Integer priority;
+  @Column(name = "priority")
+  private Integer priority;
 
-    @Column(name = "instruction_type")
-    private Integer instructionType;
+  @Column(name = "instruction_type")
+  private Integer instructionType;
 
-    @Column(name = "status")
-    private Integer status;
+  @Column(name = "status")
+  private Integer status;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal amount;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "valid_from")
-    private Date validFrom;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "valid_from")
+  private Date validFrom;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "valid_till")
-    private Date validTill;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "valid_till")
+  private Date validTill;
 
-    @Column(name = "recurrence_type")
-    private Integer recurrenceType;
+  @Column(name = "recurrence_type")
+  private Integer recurrenceType;
 
-    @Column(name = "recurrence_frequency")
-    private Integer recurrenceFrequency;
+  @Column(name = "recurrence_frequency")
+  private Integer recurrenceFrequency;
 
-    @Column(name = "recurrence_interval")
-    private Integer recurrenceInterval;
+  @Column(name = "recurrence_interval")
+  private Integer recurrenceInterval;
 
-    @Column(name = "recurrence_on_day")
-    private Integer recurrenceOnDay;
+  @Column(name = "recurrence_on_day")
+  private Integer recurrenceOnDay;
 
-    @Column(name = "recurrence_on_month")
-    private Integer recurrenceOnMonth;
+  @Column(name = "recurrence_on_month")
+  private Integer recurrenceOnMonth;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "last_run_date")
-    private Date latsRunDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "last_run_date")
+  private Date latsRunDate;
 
-    protected AccountTransferStandingInstruction() {
+  protected AccountTransferStandingInstruction() {}
 
+  public static AccountTransferStandingInstruction create(
+      final AccountTransferDetails accountTransferDetails,
+      final String name,
+      final Integer priority,
+      final Integer instructionType,
+      final Integer status,
+      final BigDecimal amount,
+      final LocalDate validFrom,
+      final LocalDate validTill,
+      final Integer recurrenceType,
+      final Integer recurrenceFrequency,
+      final Integer recurrenceInterval,
+      final MonthDay recurrenceOnMonthDay) {
+    Integer recurrenceOnDay = null;
+    Integer recurrenceOnMonth = null;
+    if (recurrenceOnMonthDay != null) {
+      recurrenceOnDay = recurrenceOnMonthDay.getDayOfMonth();
+      recurrenceOnMonth = recurrenceOnMonthDay.getMonthOfYear();
+    }
+    return new AccountTransferStandingInstruction(
+        accountTransferDetails,
+        name,
+        priority,
+        instructionType,
+        status,
+        amount,
+        validFrom,
+        validTill,
+        recurrenceType,
+        recurrenceFrequency,
+        recurrenceInterval,
+        recurrenceOnDay,
+        recurrenceOnMonth);
+  }
+
+  private AccountTransferStandingInstruction(
+      final AccountTransferDetails accountTransferDetails,
+      final String name,
+      final Integer priority,
+      final Integer instructionType,
+      final Integer status,
+      final BigDecimal amount,
+      final LocalDate validFrom,
+      final LocalDate validTill,
+      final Integer recurrenceType,
+      final Integer recurrenceFrequency,
+      final Integer recurrenceInterval,
+      final Integer recurrenceOnDay,
+      final Integer recurrenceOnMonth) {
+    this.accountTransferDetails = accountTransferDetails;
+    this.name = name;
+    this.priority = priority;
+    this.instructionType = instructionType;
+    this.status = status;
+    this.amount = amount;
+    if (validFrom != null) {
+      this.validFrom = validFrom.toDate();
+    }
+    if (validTill == null) {
+      this.validTill = null;
+    } else {
+      this.validTill = validTill.toDate();
+    }
+    this.recurrenceType = recurrenceType;
+    this.recurrenceFrequency = recurrenceFrequency;
+    this.recurrenceInterval = recurrenceInterval;
+    this.recurrenceOnDay = recurrenceOnDay;
+    this.recurrenceOnMonth = recurrenceOnMonth;
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(STANDING_INSTRUCTION_RESOURCE_NAME);
+
+    validateDependencies(baseDataValidator);
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  public Map<String, Object> update(JsonCommand command) {
+    final Map<String, Object> actualChanges = new HashMap<>();
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(STANDING_INSTRUCTION_RESOURCE_NAME);
+
+    if (StandingInstructionStatus.fromInt(this.status).isDeleted()) {
+      baseDataValidator
+          .reset()
+          .parameter(statusParamName)
+          .failWithCode("can.not.modify.once.deleted");
     }
 
-    public static AccountTransferStandingInstruction create(final AccountTransferDetails accountTransferDetails, final String name,
-            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount,
-            final LocalDate validFrom, final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency,
-            final Integer recurrenceInterval, final MonthDay recurrenceOnMonthDay) {
-        Integer recurrenceOnDay = null;
-        Integer recurrenceOnMonth = null;
-        if (recurrenceOnMonthDay != null) {
-            recurrenceOnDay = recurrenceOnMonthDay.getDayOfMonth();
-            recurrenceOnMonth = recurrenceOnMonthDay.getMonthOfYear();
-        }
-        return new AccountTransferStandingInstruction(accountTransferDetails, name, priority, instructionType, status, amount, validFrom,
-                validTill, recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnDay, recurrenceOnMonth);
+    if (command.isChangeInDateParameterNamed(validFromParamName, this.validFrom)) {
+      final LocalDate newValue = command.localDateValueOfParameterNamed(validFromParamName);
+      actualChanges.put(validFromParamName, newValue);
+      this.validFrom = newValue.toDate();
     }
 
-    private AccountTransferStandingInstruction(final AccountTransferDetails accountTransferDetails, final String name,
-            final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount,
-            final LocalDate validFrom, final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency,
-            final Integer recurrenceInterval, final Integer recurrenceOnDay, final Integer recurrenceOnMonth) {
-        this.accountTransferDetails = accountTransferDetails;
-        this.name = name;
-        this.priority = priority;
-        this.instructionType = instructionType;
-        this.status = status;
-        this.amount = amount;
-        if (validFrom != null) {
-            this.validFrom = validFrom.toDate();
-        }
-        if (validTill == null) {
-            this.validTill = null;
-        } else {
-            this.validTill = validTill.toDate();
-        }
-        this.recurrenceType = recurrenceType;
-        this.recurrenceFrequency = recurrenceFrequency;
-        this.recurrenceInterval = recurrenceInterval;
-        this.recurrenceOnDay = recurrenceOnDay;
-        this.recurrenceOnMonth = recurrenceOnMonth;
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
-
-        validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (command.isChangeInDateParameterNamed(validTillParamName, this.validTill)) {
+      final LocalDate newValue = command.localDateValueOfParameterNamed(validTillParamName);
+      actualChanges.put(validTillParamName, newValue);
+      this.validTill = newValue.toDate();
     }
 
-    public Map<String, Object> update(JsonCommand command) {
-        final Map<String, Object> actualChanges = new HashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
-
-        if (StandingInstructionStatus.fromInt(this.status).isDeleted()) {
-            baseDataValidator.reset().parameter(statusParamName).failWithCode("can.not.modify.once.deleted");
-        }
-
-        if (command.isChangeInDateParameterNamed(validFromParamName, this.validFrom)) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(validFromParamName);
-            actualChanges.put(validFromParamName, newValue);
-            this.validFrom = newValue.toDate();
-        }
-
-        if (command.isChangeInDateParameterNamed(validTillParamName, this.validTill)) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(validTillParamName);
-            actualChanges.put(validTillParamName, newValue);
-            this.validTill = newValue.toDate();
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
-            actualChanges.put(amountParamName, newValue);
-            this.amount = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(statusParamName, this.status)) {
-            final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
-            actualChanges.put(statusParamName, newValue);
-            this.status = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(priorityParamName, this.priority)) {
-            final Integer newValue = command.integerValueOfParameterNamed(priorityParamName);
-            actualChanges.put(priorityParamName, newValue);
-            this.priority = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(instructionTypeParamName, this.instructionType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(instructionTypeParamName);
-            actualChanges.put(instructionTypeParamName, newValue);
-            this.instructionType = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceTypeParamName, this.recurrenceType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceTypeParamName);
-            actualChanges.put(recurrenceTypeParamName, newValue);
-            this.recurrenceType = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceFrequencyParamName, this.recurrenceFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceFrequencyParamName);
-            actualChanges.put(recurrenceFrequencyParamName, newValue);
-            this.recurrenceFrequency = newValue;
-        }
-
-        if (command.hasParameter(recurrenceOnMonthDayParamName)) {
-            final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
-            final String actualValueEntered = command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
-            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
-                actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
-                this.recurrenceOnDay = dayOfMonthValue;
-            }
-
-            final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (!this.recurrenceOnMonth.equals(monthOfYear)) {
-                actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
-                this.recurrenceOnMonth = monthOfYear;
-            }
-        }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceIntervalParamName, this.recurrenceInterval)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceIntervalParamName);
-            actualChanges.put(recurrenceIntervalParamName, newValue);
-            this.recurrenceInterval = newValue;
-        }
-        validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        return actualChanges;
+    if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
+      final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
+      actualChanges.put(amountParamName, newValue);
+      this.amount = newValue;
     }
 
-    private void validateDependencies(final DataValidatorBuilder baseDataValidator) {
-
-        if (this.validTill != null && this.validFrom != null) {
-            baseDataValidator.reset().parameter(validTillParamName).value(LocalDate.fromDateFields(this.validTill))
-                    .validateDateAfter(LocalDate.fromDateFields(this.validFrom));
-        }
-
-        if (AccountTransferRecurrenceType.fromInt(recurrenceType).isPeriodicRecurrence()) {
-            baseDataValidator.reset().parameter(recurrenceFrequencyParamName).value(this.recurrenceFrequency).notNull();
-            baseDataValidator.reset().parameter(recurrenceIntervalParamName).value(this.recurrenceInterval).notNull();
-            if (this.recurrenceFrequency != null) {
-                PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(this.recurrenceFrequency);
-                if (frequencyType.isMonthly()) {
-                    baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(this.recurrenceOnDay).notNull();
-                } else if (frequencyType.isYearly()) {
-                    baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(this.recurrenceOnDay).notNull();
-                    baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(this.recurrenceOnMonth).notNull();
-                }
-            }
-        }
-
-        if (this.accountTransferDetails.toSavingsAccount() != null) {
-            baseDataValidator.reset().parameter(instructionTypeParamName).value(this.instructionType).notNull().inMinMaxRange(1, 1);
-            baseDataValidator.reset().parameter(recurrenceTypeParamName).value(this.recurrenceType).notNull().inMinMaxRange(1, 1);
-        }
-
-        if (StandingInstructionType.fromInt(this.instructionType).isFixedAmoutTransfer()) {
-            baseDataValidator.reset().parameter(amountParamName).value(this.amount).notNull();
-        }
-
-        String errorCode = null;
-        if (this.accountTransferDetails.transferType().isAccountTransfer()
-                && (this.accountTransferDetails.fromSavingsAccount() == null || this.accountTransferDetails.toSavingsAccount() == null)) {
-            errorCode = "not.account.transfer";
-        } else if (this.accountTransferDetails.transferType().isLoanRepayment()
-                && (this.accountTransferDetails.fromSavingsAccount() == null || this.accountTransferDetails.toLoanAccount() == null)) {
-            errorCode = "not.loan.repayment";
-        }
-        if (errorCode != null) {
-            baseDataValidator.reset().parameter(transferTypeParamName).failWithCode(errorCode);
-        }
-
+    if (command.isChangeInIntegerParameterNamed(statusParamName, this.status)) {
+      final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
+      actualChanges.put(statusParamName, newValue);
+      this.status = newValue;
     }
 
-    public void updateLatsRunDate(Date latsRunDate) {
-        this.latsRunDate = latsRunDate;
+    if (command.isChangeInIntegerParameterNamed(priorityParamName, this.priority)) {
+      final Integer newValue = command.integerValueOfParameterNamed(priorityParamName);
+      actualChanges.put(priorityParamName, newValue);
+      this.priority = newValue;
     }
 
-    public void updateStatus(Integer status){
-        this.status = status;
+    if (command.isChangeInIntegerParameterNamed(instructionTypeParamName, this.instructionType)) {
+      final Integer newValue = command.integerValueOfParameterNamed(instructionTypeParamName);
+      actualChanges.put(instructionTypeParamName, newValue);
+      this.instructionType = newValue;
     }
 
-    /**
-     * delete the standing instruction by setting the status to 3 and appending "_deleted_" and the id to the name
-     **/
-     public void delete() {
-         this.status = StandingInstructionStatus.DELETED.getValue();
-         this.name = this.name + "_deleted_" + this.getId();
-     }
+    if (command.isChangeInIntegerParameterNamed(recurrenceTypeParamName, this.recurrenceType)) {
+      final Integer newValue = command.integerValueOfParameterNamed(recurrenceTypeParamName);
+      actualChanges.put(recurrenceTypeParamName, newValue);
+      this.recurrenceType = newValue;
+    }
+
+    if (command.isChangeInIntegerParameterNamed(
+        recurrenceFrequencyParamName, this.recurrenceFrequency)) {
+      final Integer newValue = command.integerValueOfParameterNamed(recurrenceFrequencyParamName);
+      actualChanges.put(recurrenceFrequencyParamName, newValue);
+      this.recurrenceFrequency = newValue;
+    }
+
+    if (command.hasParameter(recurrenceOnMonthDayParamName)) {
+      final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
+      final String actualValueEntered =
+          command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
+      final Integer dayOfMonthValue = monthDay.getDayOfMonth();
+      if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
+        actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
+        this.recurrenceOnDay = dayOfMonthValue;
+      }
+
+      final Integer monthOfYear = monthDay.getMonthOfYear();
+      if (!this.recurrenceOnMonth.equals(monthOfYear)) {
+        actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
+        this.recurrenceOnMonth = monthOfYear;
+      }
+    }
+
+    if (command.isChangeInIntegerParameterNamed(
+        recurrenceIntervalParamName, this.recurrenceInterval)) {
+      final Integer newValue = command.integerValueOfParameterNamed(recurrenceIntervalParamName);
+      actualChanges.put(recurrenceIntervalParamName, newValue);
+      this.recurrenceInterval = newValue;
+    }
+    validateDependencies(baseDataValidator);
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+    return actualChanges;
+  }
+
+  private void validateDependencies(final DataValidatorBuilder baseDataValidator) {
+
+    if (this.validTill != null && this.validFrom != null) {
+      baseDataValidator
+          .reset()
+          .parameter(validTillParamName)
+          .value(LocalDate.fromDateFields(this.validTill))
+          .validateDateAfter(LocalDate.fromDateFields(this.validFrom));
+    }
+
+    if (AccountTransferRecurrenceType.fromInt(recurrenceType).isPeriodicRecurrence()) {
+      baseDataValidator
+          .reset()
+          .parameter(recurrenceFrequencyParamName)
+          .value(this.recurrenceFrequency)
+          .notNull();
+      baseDataValidator
+          .reset()
+          .parameter(recurrenceIntervalParamName)
+          .value(this.recurrenceInterval)
+          .notNull();
+      if (this.recurrenceFrequency != null) {
+        PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(this.recurrenceFrequency);
+        if (frequencyType.isMonthly()) {
+          baseDataValidator
+              .reset()
+              .parameter(recurrenceOnMonthDayParamName)
+              .value(this.recurrenceOnDay)
+              .notNull();
+        } else if (frequencyType.isYearly()) {
+          baseDataValidator
+              .reset()
+              .parameter(recurrenceOnMonthDayParamName)
+              .value(this.recurrenceOnDay)
+              .notNull();
+          baseDataValidator
+              .reset()
+              .parameter(recurrenceOnMonthDayParamName)
+              .value(this.recurrenceOnMonth)
+              .notNull();
+        }
+      }
+    }
+
+    if (this.accountTransferDetails.toSavingsAccount() != null) {
+      baseDataValidator
+          .reset()
+          .parameter(instructionTypeParamName)
+          .value(this.instructionType)
+          .notNull()
+          .inMinMaxRange(1, 1);
+      baseDataValidator
+          .reset()
+          .parameter(recurrenceTypeParamName)
+          .value(this.recurrenceType)
+          .notNull()
+          .inMinMaxRange(1, 1);
+    }
+
+    if (StandingInstructionType.fromInt(this.instructionType).isFixedAmoutTransfer()) {
+      baseDataValidator.reset().parameter(amountParamName).value(this.amount).notNull();
+    }
+
+    String errorCode = null;
+    if (this.accountTransferDetails.transferType().isAccountTransfer()
+        && (this.accountTransferDetails.fromSavingsAccount() == null
+            || this.accountTransferDetails.toSavingsAccount() == null)) {
+      errorCode = "not.account.transfer";
+    } else if (this.accountTransferDetails.transferType().isLoanRepayment()
+        && (this.accountTransferDetails.fromSavingsAccount() == null
+            || this.accountTransferDetails.toLoanAccount() == null)) {
+      errorCode = "not.loan.repayment";
+    }
+    if (errorCode != null) {
+      baseDataValidator.reset().parameter(transferTypeParamName).failWithCode(errorCode);
+    }
+  }
+
+  public void updateLatsRunDate(Date latsRunDate) {
+    this.latsRunDate = latsRunDate;
+  }
+
+  public void updateStatus(Integer status) {
+    this.status = status;
+  }
+
+  /**
+   * delete the standing instruction by setting the status to 3 and appending "_deleted_" and the id to the name
+   **/
+  public void delete() {
+    this.status = StandingInstructionStatus.DELETED.getValue();
+    this.name = this.name + "_deleted_" + this.getId();
+  }
 }

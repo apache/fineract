@@ -20,17 +20,17 @@ package org.apache.fineract.portfolio.paymentdetail;
 
 public class PaymentDetailConstants {
 
-    // Code representing Payment Details
-    public static final String paymentTypeCodeName = "PaymentType";
+  // Code representing Payment Details
+  public static final String paymentTypeCodeName = "PaymentType";
 
-    // request parameters
-    public static final String paymentTypeParamName = "paymentTypeId";
-    public static final String accountNumberParamName = "accountNumber";
-    public static final String checkNumberParamName = "checkNumber";
-    public static final String routingCodeParamName = "routingCode";
-    public static final String receiptNumberParamName = "receiptNumber";
-    public static final String bankNumberParamName = "bankNumber";
+  // request parameters
+  public static final String paymentTypeParamName = "paymentTypeId";
+  public static final String accountNumberParamName = "accountNumber";
+  public static final String checkNumberParamName = "checkNumber";
+  public static final String routingCodeParamName = "routingCode";
+  public static final String receiptNumberParamName = "receiptNumber";
+  public static final String bankNumberParamName = "bankNumber";
 
-    // template related part of response
-    public static final String officeOptionsParamName = "paymentTypeOptions";
+  // template related part of response
+  public static final String officeOptionsParamName = "paymentTypeOptions";
 }

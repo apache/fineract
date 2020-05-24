@@ -36,97 +36,110 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public class JdbcSupport {
 
-    public static DateTime getDateTime(final ResultSet rs, final String columnName) throws SQLException {
-        DateTime dateTime = null;
-        final Timestamp dateValue = rs.getTimestamp(columnName);
-        if (dateValue != null) {
-            dateTime = new DateTime(dateValue.getTime());
-        }
-        return dateTime;
+  public static DateTime getDateTime(final ResultSet rs, final String columnName)
+      throws SQLException {
+    DateTime dateTime = null;
+    final Timestamp dateValue = rs.getTimestamp(columnName);
+    if (dateValue != null) {
+      dateTime = new DateTime(dateValue.getTime());
     }
+    return dateTime;
+  }
 
-    public static DateTime getLocalDateTime(final ResultSet rs, final String columnName) throws SQLException {
-        DateTime dateTime = null;
-        final Timestamp dateValue = rs.getTimestamp(columnName);
-        if (dateValue != null) {
-            dateTime = new DateTime(dateValue.getTime()).withZone(getDateTimeZoneOfTenant());
-        }
-        return dateTime;
+  public static DateTime getLocalDateTime(final ResultSet rs, final String columnName)
+      throws SQLException {
+    DateTime dateTime = null;
+    final Timestamp dateValue = rs.getTimestamp(columnName);
+    if (dateValue != null) {
+      dateTime = new DateTime(dateValue.getTime()).withZone(getDateTimeZoneOfTenant());
     }
+    return dateTime;
+  }
 
-    public static LocalDate getLocalDate(final ResultSet rs, final String columnName) throws SQLException {
-        LocalDate localDate = null;
-        final Date dateValue = rs.getDate(columnName);
-        if (dateValue != null) {
-            localDate = new LocalDate(dateValue);
-        }
-        return localDate;
+  public static LocalDate getLocalDate(final ResultSet rs, final String columnName)
+      throws SQLException {
+    LocalDate localDate = null;
+    final Date dateValue = rs.getDate(columnName);
+    if (dateValue != null) {
+      localDate = new LocalDate(dateValue);
     }
-    public static LocalTime getLocalTime(final ResultSet rs, final String columnName) throws SQLException {
-        LocalTime localTime = null;
-        final Date timeValue = rs.getTime(columnName);
-        if (timeValue != null) {
-            localTime = new LocalTime(timeValue);
-        }
-        return localTime;
-    }
-    public static Long getLong(final ResultSet rs, final String columnName) throws SQLException {
-        return (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
-    }
+    return localDate;
+  }
 
-    public static Integer getInteger(final ResultSet rs, final String columnName) throws SQLException {
-        return (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
+  public static LocalTime getLocalTime(final ResultSet rs, final String columnName)
+      throws SQLException {
+    LocalTime localTime = null;
+    final Date timeValue = rs.getTime(columnName);
+    if (timeValue != null) {
+      localTime = new LocalTime(timeValue);
     }
+    return localTime;
+  }
 
-    public static Integer getIntegerDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
-        final Integer value = (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
-        return defaultToNullIfZero(value);
-    }
+  public static Long getLong(final ResultSet rs, final String columnName) throws SQLException {
+    return (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
+  }
 
-    public static Long getLongDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
-        final Long value = (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
-        return defaultToNullIfZero(value);
-    }
+  public static Integer getInteger(final ResultSet rs, final String columnName)
+      throws SQLException {
+    return (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
+  }
 
-    private static Integer defaultToNullIfZero(final Integer value) {
-        Integer result = value;
-        if (result != null && Integer.valueOf(0).equals(value)) {
-            result = null;
-        }
-        return result;
-    }
+  public static Integer getIntegerDefaultToNullIfZero(final ResultSet rs, final String columnName)
+      throws SQLException {
+    final Integer value =
+        (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
+    return defaultToNullIfZero(value);
+  }
 
-    private static Long defaultToNullIfZero(final Long value) {
-        Long result = value;
-        if (result != null && Long.valueOf(0).equals(value)) {
-            result = null;
-        }
-        return result;
-    }
+  public static Long getLongDefaultToNullIfZero(final ResultSet rs, final String columnName)
+      throws SQLException {
+    final Long value =
+        (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
+    return defaultToNullIfZero(value);
+  }
 
-    public static BigDecimal getBigDecimalDefaultToZeroIfNull(final ResultSet rs, final String columnName) throws SQLException {
-        final BigDecimal value = rs.getBigDecimal(columnName);
-        return defaultToZeroIfNull(value);
+  private static Integer defaultToNullIfZero(final Integer value) {
+    Integer result = value;
+    if (result != null && Integer.valueOf(0).equals(value)) {
+      result = null;
     }
+    return result;
+  }
 
-    private static BigDecimal defaultToZeroIfNull(final BigDecimal value) {
-        BigDecimal result = BigDecimal.ZERO;
-        if (value != null) {
-            result = value;
-        }
-        return result;
+  private static Long defaultToNullIfZero(final Long value) {
+    Long result = value;
+    if (result != null && Long.valueOf(0).equals(value)) {
+      result = null;
     }
+    return result;
+  }
 
-    public static BigDecimal getBigDecimalDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
-        final BigDecimal value = rs.getBigDecimal(columnName);
-        return defaultToNullIfZero(value);
-    }
+  public static BigDecimal getBigDecimalDefaultToZeroIfNull(
+      final ResultSet rs, final String columnName) throws SQLException {
+    final BigDecimal value = rs.getBigDecimal(columnName);
+    return defaultToZeroIfNull(value);
+  }
 
-    private static BigDecimal defaultToNullIfZero(final BigDecimal value) {
-        BigDecimal result = value;
-        if (value != null && BigDecimal.ZERO.compareTo(value) == 0) {
-            result = null;
-        }
-        return result;
+  private static BigDecimal defaultToZeroIfNull(final BigDecimal value) {
+    BigDecimal result = BigDecimal.ZERO;
+    if (value != null) {
+      result = value;
     }
+    return result;
+  }
+
+  public static BigDecimal getBigDecimalDefaultToNullIfZero(
+      final ResultSet rs, final String columnName) throws SQLException {
+    final BigDecimal value = rs.getBigDecimal(columnName);
+    return defaultToNullIfZero(value);
+  }
+
+  private static BigDecimal defaultToNullIfZero(final BigDecimal value) {
+    BigDecimal result = value;
+    if (value != null && BigDecimal.ZERO.compareTo(value) == 0) {
+      result = null;
+    }
+    return result;
+  }
 }

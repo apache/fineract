@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ADHOC", action = "UPDATE")
 public class UpdateAdHocCommandHandler implements NewCommandSourceHandler {
 
-    private final AdHocWritePlatformService writePlatformService;
+  private final AdHocWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateAdHocCommandHandler(final AdHocWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateAdHocCommandHandler(final AdHocWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final Long adHocId = command.entityId();
-        return this.writePlatformService.updateAdHocQuery(adHocId, command);
-    }
+    final Long adHocId = command.entityId();
+    return this.writePlatformService.updateAdHocQuery(adHocId, command);
+  }
 }

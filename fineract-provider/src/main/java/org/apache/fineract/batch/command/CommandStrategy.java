@@ -32,15 +32,15 @@ import org.apache.fineract.batch.domain.BatchResponse;
  */
 public interface CommandStrategy {
 
-    /**
-     * Returns an object of type
-     * {@link org.apache.fineract.batch.domain.BatchResponse}. This takes
-     * {@link org.apache.fineract.batch.domain.BatchRequest} as it's single
-     * argument and provides appropriate response.
-     *
-     * @param batchRequest
-     * @param uriInfo
-     * @return BatchResponse
-     */
-    public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo);
+  /**
+   * Returns an object of type
+   * {@link org.apache.fineract.batch.domain.BatchResponse}. This takes
+   * {@link org.apache.fineract.batch.domain.BatchRequest} as it's single
+   * argument and provides appropriate response.
+   *
+   * @param batchRequest
+   * @param uriInfo
+   * @return BatchResponse
+   */
+  public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo);
 }

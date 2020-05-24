@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CALENDAR", action = "UPDATE")
 public class UpdateCalendarCommandHandler implements NewCommandSourceHandler {
 
-    private final CalendarWritePlatformService calendarWritePlatformService;
+  private final CalendarWritePlatformService calendarWritePlatformService;
 
-    @Autowired
-    public UpdateCalendarCommandHandler(final CalendarWritePlatformService calendarWritePlatformService) {
-        this.calendarWritePlatformService = calendarWritePlatformService;
-    }
+  @Autowired
+  public UpdateCalendarCommandHandler(
+      final CalendarWritePlatformService calendarWritePlatformService) {
+    this.calendarWritePlatformService = calendarWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.calendarWritePlatformService.updateCalendar(command);
-    }
-
+    return this.calendarWritePlatformService.updateCalendar(command);
+  }
 }

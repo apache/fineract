@@ -25,71 +25,70 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 29/7/17.
  */
 final class CodesApiResourceSwagger {
-    private CodesApiResourceSwagger() {
-        // this class is only for Swagger Live Documentation
+  private CodesApiResourceSwagger() {
+    // this class is only for Swagger Live Documentation
+  }
+
+  @ApiModel(value = "GetCodesResponse")
+  public static final class GetCodesResponse {
+    private GetCodesResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long id;
+
+    @ApiModelProperty(example = "Education")
+    public String name;
+
+    @ApiModelProperty(example = "true")
+    public boolean systemDefined;
+  }
+
+  @ApiModel(value = "PostCodesRequest")
+  public static final class PostCodesRequest {
+    private PostCodesRequest() {}
+
+    @ApiModelProperty(example = "MyNewCode")
+    public String name;
+  }
+
+  @ApiModel(value = "PostCodesResponse")
+  public static final class PostCodesResponse {
+    private PostCodesResponse() {}
+
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "PutCodesRequest")
+  public static final class PutCodesRequest {
+    private PutCodesRequest() {}
+
+    @ApiModelProperty(example = "MyNewCode(changed)")
+    public String name;
+  }
+
+  @ApiModel(value = "PutCodesResponse")
+  public static final class PutCodesResponse {
+    private PutCodesResponse() {}
+
+    private final class PutCodesApichangesSwagger {
+      private PutCodesApichangesSwagger() {}
+
+      @ApiModelProperty(example = "MyNewCode(changed)")
+      public String name;
     }
 
-    @ApiModel(value = "GetCodesResponse")
-    public static final class GetCodesResponse {
-        private GetCodesResponse() {
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long id;
-        @ApiModelProperty(example = "Education")
-        public String name;
-        @ApiModelProperty(example = "true")
-        public boolean systemDefined;
-    }
+    public PutCodesApichangesSwagger changes;
+  }
 
-    @ApiModel(value = "PostCodesRequest")
-    public static final class PostCodesRequest {
-        private PostCodesRequest() {
+  @ApiModel(value = "DeleteCodesResponse")
+  public static final class DeleteCodesResponse {
+    private DeleteCodesResponse() {}
 
-        }
-        @ApiModelProperty(example = "MyNewCode")
-        public String name;
-    }
-
-    @ApiModel(value = "PostCodesResponse")
-    public static final class PostCodesResponse {
-        private PostCodesResponse() {
-
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-    }
-
-    @ApiModel(value = "PutCodesRequest")
-    public static final class PutCodesRequest {
-        private PutCodesRequest() {
-
-        }
-        @ApiModelProperty(example = "MyNewCode(changed)")
-        public String name;
-    }
-
-    @ApiModel(value = "PutCodesResponse")
-    public static final class PutCodesResponse {
-        private PutCodesResponse() {
-
-        }
-        private final class PutCodesApichangesSwagger{
-            private PutCodesApichangesSwagger() {}
-            @ApiModelProperty(example = "MyNewCode(changed)")
-            public String name;
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-        public PutCodesApichangesSwagger changes;
-    }
-
-    @ApiModel(value = "DeleteCodesResponse")
-    public static final class DeleteCodesResponse {
-        private DeleteCodesResponse() {
-
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
+  }
 }

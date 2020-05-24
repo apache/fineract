@@ -25,36 +25,39 @@ import org.joda.time.LocalDate;
 
 public class DepositAccountUtils {
 
-    public static final int GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS = 5;
+  public static final int GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS = 5;
 
-    public static LocalDate calculateNextDepositDate(final LocalDate lastDepositDate, final PeriodFrequencyType frequency,
-            final int recurringEvery) {
-        LocalDate nextDepositDate = lastDepositDate;
+  public static LocalDate calculateNextDepositDate(
+      final LocalDate lastDepositDate,
+      final PeriodFrequencyType frequency,
+      final int recurringEvery) {
+    LocalDate nextDepositDate = lastDepositDate;
 
-        switch (frequency) {
-            case DAYS:
-                nextDepositDate = lastDepositDate.plusDays(recurringEvery);
-            break;
-            case WEEKS:
-                nextDepositDate = lastDepositDate.plusWeeks(recurringEvery);
-            break;
-            case MONTHS:
-                nextDepositDate = lastDepositDate.plusMonths(recurringEvery);
-            break;
-            case YEARS:
-                nextDepositDate = lastDepositDate.plusYears(recurringEvery);
-            break;
-            case INVALID:
-            break;
-        }
-        return nextDepositDate;
+    switch (frequency) {
+      case DAYS:
+        nextDepositDate = lastDepositDate.plusDays(recurringEvery);
+        break;
+      case WEEKS:
+        nextDepositDate = lastDepositDate.plusWeeks(recurringEvery);
+        break;
+      case MONTHS:
+        nextDepositDate = lastDepositDate.plusMonths(recurringEvery);
+        break;
+      case YEARS:
+        nextDepositDate = lastDepositDate.plusYears(recurringEvery);
+        break;
+      case INVALID:
+        break;
     }
+    return nextDepositDate;
+  }
 
-    public static LocalDate calculateNextDepositDate(final LocalDate lastDepositDate, final String recurrence) {
-        final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(recurrence));
-        Integer frequency = CalendarUtils.getInterval(recurrence);
-        frequency = frequency == -1 ? 1 : frequency;
-        return calculateNextDepositDate(lastDepositDate, frequencyType, frequency);
-    }
-
+  public static LocalDate calculateNextDepositDate(
+      final LocalDate lastDepositDate, final String recurrence) {
+    final PeriodFrequencyType frequencyType =
+        CalendarFrequencyType.from(CalendarUtils.getFrequency(recurrence));
+    Integer frequency = CalendarUtils.getInterval(recurrence);
+    frequency = frequency == -1 ? 1 : frequency;
+    return calculateNextDepositDate(lastDepositDate, frequencyType, frequency);
+  }
 }

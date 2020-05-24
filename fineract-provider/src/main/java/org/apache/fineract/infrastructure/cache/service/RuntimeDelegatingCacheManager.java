@@ -45,81 +45,82 @@ import org.springframework.stereotype.Component;
 @Component(value = "runtimeDelegatingCacheManager")
 public class RuntimeDelegatingCacheManager implements CacheManager {
 
-    private final EhCacheCacheManager ehcacheCacheManager;
-    private final CacheManager noOpCacheManager = new NoOpCacheManager();
-    private CacheManager currentCacheManager;
+  private final EhCacheCacheManager ehcacheCacheManager;
+  private final CacheManager noOpCacheManager = new NoOpCacheManager();
+  private CacheManager currentCacheManager;
 
-    @Autowired
-    public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehCacheCacheManager) {
-        this.ehcacheCacheManager = ehCacheCacheManager;
-        this.currentCacheManager = this.noOpCacheManager;
-    }
+  @Autowired
+  public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehCacheCacheManager) {
+    this.ehcacheCacheManager = ehCacheCacheManager;
+    this.currentCacheManager = this.noOpCacheManager;
+  }
 
-    @Override
-    public Cache getCache(final String name) {
-        return this.currentCacheManager.getCache(name);
-    }
+  @Override
+  public Cache getCache(final String name) {
+    return this.currentCacheManager.getCache(name);
+  }
 
-    @Override
-    public Collection<String> getCacheNames() {
-        return this.currentCacheManager.getCacheNames();
-    }
+  @Override
+  public Collection<String> getCacheNames() {
+    return this.currentCacheManager.getCacheNames();
+  }
 
-    public Collection<CacheData> retrieveAll() {
+  public Collection<CacheData> retrieveAll() {
 
-        final boolean noCacheEnabled = this.currentCacheManager instanceof NoOpCacheManager;
-        final boolean ehcacheEnabled = this.currentCacheManager instanceof EhCacheCacheManager;
+    final boolean noCacheEnabled = this.currentCacheManager instanceof NoOpCacheManager;
+    final boolean ehcacheEnabled = this.currentCacheManager instanceof EhCacheCacheManager;
 
-        // final boolean distributedCacheEnabled = false;
+    // final boolean distributedCacheEnabled = false;
 
-        final EnumOptionData noCacheType = CacheEnumerations.cacheType(CacheType.NO_CACHE);
-        final EnumOptionData singleNodeCacheType = CacheEnumerations.cacheType(CacheType.SINGLE_NODE);
-        // final EnumOptionData multiNodeCacheType =
-        // CacheEnumerations.cacheType(CacheType.MULTI_NODE);
+    final EnumOptionData noCacheType = CacheEnumerations.cacheType(CacheType.NO_CACHE);
+    final EnumOptionData singleNodeCacheType = CacheEnumerations.cacheType(CacheType.SINGLE_NODE);
+    // final EnumOptionData multiNodeCacheType =
+    // CacheEnumerations.cacheType(CacheType.MULTI_NODE);
 
-        final CacheData noCache = CacheData.instance(noCacheType, noCacheEnabled);
-        final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, ehcacheEnabled);
-        // final CacheData distributedCache =
-        // CacheData.instance(multiNodeCacheType, distributedCacheEnabled);
+    final CacheData noCache = CacheData.instance(noCacheType, noCacheEnabled);
+    final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, ehcacheEnabled);
+    // final CacheData distributedCache =
+    // CacheData.instance(multiNodeCacheType, distributedCacheEnabled);
 
-        final Collection<CacheData> caches = Arrays.asList(noCache, singleNodeCache);
-        return caches;
-    }
+    final Collection<CacheData> caches = Arrays.asList(noCache, singleNodeCache);
+    return caches;
+  }
 
-    public Map<String, Object> switchToCache(final boolean ehcacheEnabled, final CacheType toCacheType) {
+  public Map<String, Object> switchToCache(
+      final boolean ehcacheEnabled, final CacheType toCacheType) {
 
-        final Map<String, Object> changes = new HashMap<>();
+    final Map<String, Object> changes = new HashMap<>();
 
-        final boolean noCacheEnabled = !ehcacheEnabled;
-        final boolean distributedCacheEnabled = !ehcacheEnabled;
+    final boolean noCacheEnabled = !ehcacheEnabled;
+    final boolean distributedCacheEnabled = !ehcacheEnabled;
 
-        switch (toCacheType) {
-            case INVALID:
-            break;
-            case NO_CACHE:
-                if (!noCacheEnabled) {
-                    changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
-                }
-                this.currentCacheManager = this.noOpCacheManager;
-            break;
-            case SINGLE_NODE:
-                if (!ehcacheEnabled) {
-                    changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
-                    clearEhCache();
-                }
-                this.currentCacheManager = this.ehcacheCacheManager;
-            break;
-            case MULTI_NODE:
-                if (!distributedCacheEnabled) {
-                    changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
-                }
-            break;
+    switch (toCacheType) {
+      case INVALID:
+        break;
+      case NO_CACHE:
+        if (!noCacheEnabled) {
+          changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
         }
-
-        return changes;
+        this.currentCacheManager = this.noOpCacheManager;
+        break;
+      case SINGLE_NODE:
+        if (!ehcacheEnabled) {
+          changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
+          clearEhCache();
+        }
+        this.currentCacheManager = this.ehcacheCacheManager;
+        break;
+      case MULTI_NODE:
+        if (!distributedCacheEnabled) {
+          changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
+        }
+        break;
     }
 
-    private void clearEhCache() {
-        this.ehcacheCacheManager.getCacheManager().clearAll();
-    }
+    return changes;
+  }
+
+  private void clearEhCache() {
+    this.ehcacheCacheManager.getCacheManager().clearAll();
+  }
 }

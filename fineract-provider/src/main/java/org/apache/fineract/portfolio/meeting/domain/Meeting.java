@@ -52,149 +52,187 @@ import org.apache.fineract.portfolio.meeting.exception.MeetingDateException;
 import org.joda.time.LocalDate;
 
 @Entity
-@Table(name = "m_meeting", uniqueConstraints = { @UniqueConstraint(columnNames = { "calendar_instance_id", "meeting_date" }, name = "unique_calendar_instance_id_meeting_date") })
+@Table(
+    name = "m_meeting",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"calendar_instance_id", "meeting_date"},
+          name = "unique_calendar_instance_id_meeting_date")
+    })
 public class Meeting extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "calendar_instance_id", nullable = false)
-    private CalendarInstance calendarInstance;
+  @ManyToOne
+  @JoinColumn(name = "calendar_instance_id", nullable = false)
+  private CalendarInstance calendarInstance;
 
-    @Column(name = "meeting_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date meetingDate;
+  @Column(name = "meeting_date", nullable = false)
+  @Temporal(TemporalType.DATE)
+  private Date meetingDate;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "meeting", orphanRemoval = true)
-    private Set<ClientAttendance> clientsAttendance;
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      cascade = CascadeType.ALL,
+      mappedBy = "meeting",
+      orphanRemoval = true)
+  private Set<ClientAttendance> clientsAttendance;
 
-    protected Meeting() {
-        //
+  protected Meeting() {
+    //
+  }
+
+  private Meeting(final CalendarInstance calendarInstance, final Date meetingDate) {
+    this.calendarInstance = calendarInstance;
+    this.meetingDate = meetingDate;
+  }
+
+  public static Meeting createNew(
+      final CalendarInstance calendarInstance,
+      final Date meetingDate,
+      Boolean isTransactionDateOnNonMeetingDate,
+      final boolean isSkipRepaymentOnFirstMonth,
+      final int numberOfDays) {
+
+    if (!isTransactionDateOnNonMeetingDate
+        && !isValidMeetingDate(
+            calendarInstance, meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
+      throw new NotValidRecurringDateException(
+          "meeting", "The date '" + meetingDate + "' is not a valid meeting date.", meetingDate);
+    }
+    return new Meeting(calendarInstance, meetingDate);
+  }
+
+  public void associateClientsAttendance(final Collection<ClientAttendance> clientsAttendance) {
+    // do not allow to capture attendance in advance.
+    if (isMeetingDateAfter(DateUtils.getLocalDateOfTenant())) {
+      final String errorMessage = "Attendance cannot be in the future.";
+      throw new MeetingDateException(
+          "cannot.be.a.future.date", errorMessage, getMeetingDateLocalDate());
+    }
+    this.clientsAttendance = new HashSet<>(clientsAttendance);
+  }
+
+  public Map<String, Object> update(
+      final JsonCommand command,
+      final boolean isSkipRepaymentOnFirstMonth,
+      final int numberOfDays) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+    final String dateFormatAsInput = command.dateFormat();
+    final String localeAsInput = command.locale();
+
+    if (command.isChangeInLocalDateParameterNamed(
+        meetingDateParamName, getMeetingDateLocalDate())) {
+      final String valueAsInput = command.stringValueOfParameterNamed(meetingDateParamName);
+      final LocalDate newValue = command.localDateValueOfParameterNamed(meetingDateParamName);
+      actualChanges.put(meetingDateParamName, valueAsInput);
+      actualChanges.put("dateFormat", dateFormatAsInput);
+      actualChanges.put("locale", localeAsInput);
+      this.meetingDate = newValue.toDate();
+
+      if (!isValidMeetingDate(
+          this.calendarInstance, this.meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
+        throw new NotValidRecurringDateException(
+            "meeting", "Not a valid meeting date", this.meetingDate);
+      }
     }
 
-    private Meeting(final CalendarInstance calendarInstance, final Date meetingDate) {
-        this.calendarInstance = calendarInstance;
-        this.meetingDate = meetingDate;
-    }
+    return actualChanges;
+  }
 
-    public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate, Boolean isTransactionDateOnNonMeetingDate,
-            final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
+  public Map<String, Object> updateAttendance(
+      final Collection<ClientAttendance> clientsAttendance) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+    final Map<String, Object> clientAttendanceChanges =
+        new LinkedHashMap<>(clientsAttendance.size());
 
-        if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate,isSkipRepaymentOnFirstMonth, numberOfDays))
-        { throw new NotValidRecurringDateException("meeting", "The date '"
-                + meetingDate + "' is not a valid meeting date.", meetingDate); }
-        return new Meeting(calendarInstance, meetingDate);
-    }
-
-    public void associateClientsAttendance(final Collection<ClientAttendance> clientsAttendance) {
-        // do not allow to capture attendance in advance.
-        if (isMeetingDateAfter(DateUtils.getLocalDateOfTenant())) {
-            final String errorMessage = "Attendance cannot be in the future.";
-            throw new MeetingDateException("cannot.be.a.future.date", errorMessage, getMeetingDateLocalDate());
+    updateAttendanceLoop:
+    for (final ClientAttendance clientAttendance : clientsAttendance) {
+      if (this.clientsAttendance == null) {
+        this.clientsAttendance = new HashSet<>();
+      }
+      for (final ClientAttendance clientAttendanceOriginal : this.clientsAttendance) {
+        if (clientAttendanceOriginal.clientId().equals(clientAttendance.clientId())) {
+          final Integer newValue = clientAttendance.getAttendanceTypeId();
+          if (!newValue.equals(clientAttendanceOriginal.getAttendanceTypeId())) {
+            clientAttendanceOriginal.updateAttendanceTypeId(newValue);
+            final Map<String, Object> clientAttendanceChange = new LinkedHashMap<>(2);
+            clientAttendanceChange.put(clientIdParamName, clientAttendanceOriginal.clientId());
+            clientAttendanceChange.put(attendanceTypeParamName, newValue);
+            clientAttendanceChanges.put(
+                clientAttendanceOriginal.clientId().toString(), clientAttendanceChange);
+          }
+          continue updateAttendanceLoop;
         }
-        this.clientsAttendance = new HashSet<>(clientsAttendance);
+      }
+
+      final Map<String, Object> clientAttendanceChange = new LinkedHashMap<>();
+      clientAttendanceChange.put(clientIdParamName, clientAttendance.clientId());
+      clientAttendanceChange.put(attendanceTypeParamName, clientAttendance.getAttendanceTypeId());
+      clientAttendanceChanges.put(clientAttendance.clientId().toString(), clientAttendanceChange);
+      // New attendance record
+      this.clientsAttendance.add(clientAttendance);
     }
 
-    public Map<String, Object> update(final JsonCommand command, final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
+    actualChanges.put(clientsAttendanceParamName, clientAttendanceChanges);
 
-        if (command.isChangeInLocalDateParameterNamed(meetingDateParamName, getMeetingDateLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(meetingDateParamName);
-            final LocalDate newValue = command.localDateValueOfParameterNamed(meetingDateParamName);
-            actualChanges.put(meetingDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-            this.meetingDate = newValue.toDate();
+    return actualChanges;
+  }
 
-            if (!isValidMeetingDate(this.calendarInstance, this.meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) { throw new NotValidRecurringDateException("meeting",
-                    "Not a valid meeting date", this.meetingDate); }
+  public Long entityId() {
+    return this.calendarInstance.getEntityId();
+  }
 
-        }
+  public boolean isCenterEntity() {
+    return CalendarEntityType.isCenter(this.calendarInstance.getEntityTypeId());
+  }
 
-        return actualChanges;
+  public boolean isGroupEntity() {
+    return CalendarEntityType.isGroup(this.calendarInstance.getEntityTypeId());
+  }
+
+  public LocalDate getMeetingDateLocalDate() {
+    LocalDate meetingDateLocalDate = null;
+    if (this.meetingDate != null) {
+      meetingDateLocalDate = LocalDate.fromDateFields(this.meetingDate);
+    }
+    return meetingDateLocalDate;
+  }
+
+  public Date getMeetingDate() {
+    return this.meetingDate;
+  }
+
+  public boolean isMeetingDateBefore(final LocalDate newStartDate) {
+    return this.meetingDate != null
+            && newStartDate != null
+            && getMeetingDateLocalDate().isBefore(newStartDate)
+        ? true
+        : false;
+  }
+
+  private static boolean isValidMeetingDate(
+      final CalendarInstance calendarInstance,
+      final Date meetingDate,
+      final boolean isSkipRepaymentOnFirstMonth,
+      final int numberOfDays) {
+    final Calendar calendar = calendarInstance.getCalendar();
+    LocalDate meetingDateLocalDate = null;
+    if (meetingDate != null) {
+      meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
     }
 
-    public Map<String, Object> updateAttendance(final Collection<ClientAttendance> clientsAttendance) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
-        final Map<String, Object> clientAttendanceChanges = new LinkedHashMap<>(clientsAttendance.size());
-
-        updateAttendanceLoop: for (final ClientAttendance clientAttendance : clientsAttendance) {
-            if (this.clientsAttendance == null) {
-                this.clientsAttendance = new HashSet<>();
-            }
-            for (final ClientAttendance clientAttendanceOriginal : this.clientsAttendance) {
-                if (clientAttendanceOriginal.clientId().equals(clientAttendance.clientId())) {
-                    final Integer newValue = clientAttendance.getAttendanceTypeId();
-                    if (!newValue.equals(clientAttendanceOriginal.getAttendanceTypeId())) {
-                        clientAttendanceOriginal.updateAttendanceTypeId(newValue);
-                        final Map<String, Object> clientAttendanceChange = new LinkedHashMap<>(2);
-                        clientAttendanceChange.put(clientIdParamName, clientAttendanceOriginal.clientId());
-                        clientAttendanceChange.put(attendanceTypeParamName, newValue);
-                        clientAttendanceChanges.put(clientAttendanceOriginal.clientId().toString(), clientAttendanceChange);
-                    }
-                    continue updateAttendanceLoop;
-                }
-            }
-
-            final Map<String, Object> clientAttendanceChange = new LinkedHashMap<>();
-            clientAttendanceChange.put(clientIdParamName, clientAttendance.clientId());
-            clientAttendanceChange.put(attendanceTypeParamName, clientAttendance.getAttendanceTypeId());
-            clientAttendanceChanges.put(clientAttendance.clientId().toString(), clientAttendanceChange);
-            // New attendance record
-            this.clientsAttendance.add(clientAttendance);
-        }
-
-        actualChanges.put(clientsAttendanceParamName, clientAttendanceChanges);
-
-        return actualChanges;
+    if (meetingDateLocalDate == null
+        || !calendar.isValidRecurringDate(
+            meetingDateLocalDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
+      return false;
     }
+    return true;
+  }
 
-    public Long entityId() {
-        return this.calendarInstance.getEntityId();
-    }
+  private boolean isMeetingDateAfter(final LocalDate date) {
+    return getMeetingDateLocalDate().isAfter(date);
+  }
 
-    public boolean isCenterEntity() {
-        return CalendarEntityType.isCenter(this.calendarInstance.getEntityTypeId());
-    }
-
-    public boolean isGroupEntity() {
-        return CalendarEntityType.isGroup(this.calendarInstance.getEntityTypeId());
-    }
-
-    public LocalDate getMeetingDateLocalDate() {
-        LocalDate meetingDateLocalDate = null;
-        if (this.meetingDate != null) {
-            meetingDateLocalDate = LocalDate.fromDateFields(this.meetingDate);
-        }
-        return meetingDateLocalDate;
-    }
-
-    public Date getMeetingDate() {
-        return this.meetingDate;
-    }
-
-    public boolean isMeetingDateBefore(final LocalDate newStartDate) {
-        return this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate) ? true : false;
-    }
-
-    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate,
-            final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
-        final Calendar calendar = calendarInstance.getCalendar();
-        LocalDate meetingDateLocalDate = null;
-        if (meetingDate != null) {
-            meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
-        }
-
-        if (meetingDateLocalDate == null || !calendar.isValidRecurringDate(meetingDateLocalDate, isSkipRepaymentOnFirstMonth, numberOfDays)) { return false; }
-        return true;
-    }
-
-    private boolean isMeetingDateAfter(final LocalDate date) {
-        return getMeetingDateLocalDate().isAfter(date);
-    }
-
-    public Collection<ClientAttendance> getClientsAttendance() {
-        return this.clientsAttendance;
-    }
-
+  public Collection<ClientAttendance> getClientsAttendance() {
+    return this.clientsAttendance;
+  }
 }

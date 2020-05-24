@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface NewCommandSourceHandler {
 
-    CommandProcessingResult processCommand(JsonCommand command);
+  CommandProcessingResult processCommand(JsonCommand command);
 }

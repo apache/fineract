@@ -29,7 +29,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-//import org.apache.commons.collections.CollectionUtils;
+// import org.apache.commons.collections.CollectionUtils;
 
 public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 
@@ -54,9 +54,8 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
     this.offices = offices;
   }
 
-
   @Override
-  public void populate(Workbook workbook,String dateFormat) {
+  public void populate(Workbook workbook, String dateFormat) {
     Sheet staffSheet = workbook.createSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
     setLayout(staffSheet);
 
@@ -70,7 +69,6 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
     staffSheet.protectSheet("");
   }
 
-
   private void populateStaffByOfficeName(Sheet staffSheet) {
     int rowIndex = 1, startIndex = 1, officeIndex = 0;
     officeNameToBeginEndIndexesOfStaff = new HashMap<>();
@@ -80,19 +78,19 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
       writeString(OFFICE_NAME_COL, row, office.name().trim().replaceAll("[ )(]", "_"));
 
       List<StaffData> staffList =
-              officeToPersonnel.get(office.name().trim().replaceAll("[ )(]", "_"));
+          officeToPersonnel.get(office.name().trim().replaceAll("[ )(]", "_"));
 
-    if (staffList!=null){
-      if (!staffList.isEmpty()) {
-        for (StaffData staff : staffList) {
-          writeString(STAFF_NAME_COL, row, staff.getDisplayName());
-          writeLong(STAFF_ID_COL, row, staff.getId());
-          row = staffSheet.createRow(++rowIndex);
+      if (staffList != null) {
+        if (!staffList.isEmpty()) {
+          for (StaffData staff : staffList) {
+            writeString(STAFF_NAME_COL, row, staff.getDisplayName());
+            writeLong(STAFF_ID_COL, row, staff.getId());
+            row = staffSheet.createRow(++rowIndex);
+          }
+          officeNameToBeginEndIndexesOfStaff.put(
+              officeIndex++, new Integer[] {startIndex, rowIndex});
         }
-        officeNameToBeginEndIndexesOfStaff.put(officeIndex++, new Integer[]{startIndex, rowIndex});
-      }
-    }else
-        officeIndex++;
+      } else officeIndex++;
     }
   }
 
@@ -126,5 +124,4 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
   public Map<Integer, Integer[]> getOfficeNameToBeginEndIndexesOfStaff() {
     return officeNameToBeginEndIndexesOfStaff;
   }
-
 }

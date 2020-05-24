@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "CREATE")
 public class CreateClientCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientWritePlatformService clientWritePlatformService;
+  private final ClientWritePlatformService clientWritePlatformService;
 
-    @Autowired
-    public CreateClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
-        this.clientWritePlatformService = clientWritePlatformService;
-    }
+  @Autowired
+  public CreateClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
+    this.clientWritePlatformService = clientWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.clientWritePlatformService.createClient(command);
-    }
+    return this.clientWritePlatformService.createClient(command);
+  }
 }

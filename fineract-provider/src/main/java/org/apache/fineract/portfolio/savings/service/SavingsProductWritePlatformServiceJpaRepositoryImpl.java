@@ -56,164 +56,186 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements SavingsProductWritePlatformService {
+public class SavingsProductWritePlatformServiceJpaRepositoryImpl
+    implements SavingsProductWritePlatformService {
 
-    private final Logger logger;
-    private final PlatformSecurityContext context;
-    private final SavingsProductRepository savingProductRepository;
-    private final SavingsProductDataValidator fromApiJsonDataValidator;
-    private final SavingsProductAssembler savingsProductAssembler;
-    private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
-    private final FineractEntityAccessUtil fineractEntityAccessUtil;
+  private final Logger logger;
+  private final PlatformSecurityContext context;
+  private final SavingsProductRepository savingProductRepository;
+  private final SavingsProductDataValidator fromApiJsonDataValidator;
+  private final SavingsProductAssembler savingsProductAssembler;
+  private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
+  private final FineractEntityAccessUtil fineractEntityAccessUtil;
 
-    @Autowired
-    public SavingsProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsProductRepository savingProductRepository, final SavingsProductDataValidator fromApiJsonDataValidator,
-            final SavingsProductAssembler savingsProductAssembler,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final FineractEntityAccessUtil fineractEntityAccessUtil) {
-        this.context = context;
-        this.savingProductRepository = savingProductRepository;
-        this.fromApiJsonDataValidator = fromApiJsonDataValidator;
-        this.savingsProductAssembler = savingsProductAssembler;
-        this.logger = LoggerFactory.getLogger(SavingsProductWritePlatformServiceJpaRepositoryImpl.class);
-        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
+  @Autowired
+  public SavingsProductWritePlatformServiceJpaRepositoryImpl(
+      final PlatformSecurityContext context,
+      final SavingsProductRepository savingProductRepository,
+      final SavingsProductDataValidator fromApiJsonDataValidator,
+      final SavingsProductAssembler savingsProductAssembler,
+      final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
+      final FineractEntityAccessUtil fineractEntityAccessUtil) {
+    this.context = context;
+    this.savingProductRepository = savingProductRepository;
+    this.fromApiJsonDataValidator = fromApiJsonDataValidator;
+    this.savingsProductAssembler = savingsProductAssembler;
+    this.logger =
+        LoggerFactory.getLogger(SavingsProductWritePlatformServiceJpaRepositoryImpl.class);
+    this.accountMappingWritePlatformService = accountMappingWritePlatformService;
+    this.fineractEntityAccessUtil = fineractEntityAccessUtil;
+  }
+
+  /*
+   * Guaranteed to throw an exception no matter what the data integrity issue
+   * is.
+   */
+  private void handleDataIntegrityIssues(
+      final JsonCommand command, final Throwable realCause, final Exception dae) {
+
+    if (realCause.getMessage().contains("sp_unq_name")) {
+
+      final String name = command.stringValueOfParameterNamed("name");
+      throw new PlatformDataIntegrityException(
+          "error.msg.product.savings.duplicate.name",
+          "Savings product with name `" + name + "` already exists",
+          "name",
+          name);
+    } else if (realCause.getMessage().contains("sp_unq_short_name")) {
+
+      final String shortName = command.stringValueOfParameterNamed("shortName");
+      throw new PlatformDataIntegrityException(
+          "error.msg.product.savings.duplicate.short.name",
+          "Savings product with short name `" + shortName + "` already exists",
+          "shortName",
+          shortName);
     }
 
-    /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
-     */
-    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
+    logAsErrorUnexpectedDataIntegrityException(dae);
+    throw new PlatformDataIntegrityException(
+        "error.msg.savingsproduct.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource.");
+  }
 
-        if (realCause.getMessage().contains("sp_unq_name")) {
+  private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
+    this.logger.error("Error occured.", dae);
+  }
 
-            final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name", "Savings product with name `" + name
-                    + "` already exists", "name", name);
-        } else if (realCause.getMessage().contains("sp_unq_short_name")) {
+  @Transactional
+  @Override
+  public CommandProcessingResult create(final JsonCommand command) {
 
-            final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name", "Savings product with short name `"
-                    + shortName + "` already exists", "shortName", shortName);
+    try {
+      this.fromApiJsonDataValidator.validateForCreate(command.json());
+
+      final SavingsProduct product = this.savingsProductAssembler.assemble(command);
+
+      this.savingProductRepository.save(product);
+
+      // save accounting mappings
+      this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(
+          product.getId(), command, DepositAccountType.SAVINGS_DEPOSIT);
+
+      // check if the office specific products are enabled. If yes, then
+      // save this savings product against a specific office
+      // i.e. this savings product is specific for this office.
+      fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
+          FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, product.getId());
+
+      return new CommandProcessingResultBuilder() //
+          .withEntityId(product.getId()) //
+          .build();
+    } catch (final DataAccessException e) {
+      handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleDataIntegrityIssues(command, throwable, dve);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult update(final Long productId, final JsonCommand command) {
+
+    try {
+      this.context.authenticatedUser();
+      final SavingsProduct product =
+          this.savingProductRepository
+              .findById(productId)
+              .orElseThrow(() -> new SavingsProductNotFoundException(productId));
+
+      this.fromApiJsonDataValidator.validateForUpdate(command.json(), product);
+
+      final Map<String, Object> changes = product.update(command);
+
+      if (changes.containsKey(chargesParamName)) {
+        final Set<Charge> savingsProductCharges =
+            this.savingsProductAssembler.assembleListOfSavingsProductCharges(
+                command, product.currency().getCode());
+        final boolean updated = product.update(savingsProductCharges);
+        if (!updated) {
+          changes.remove(chargesParamName);
         }
+      }
 
-        logAsErrorUnexpectedDataIntegrityException(dae);
-        throw new PlatformDataIntegrityException("error.msg.savingsproduct.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
-    private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        this.logger.error("Error occured.", dae);
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult create(final JsonCommand command) {
-
-        try {
-            this.fromApiJsonDataValidator.validateForCreate(command.json());
-
-            final SavingsProduct product = this.savingsProductAssembler.assemble(command);
-
-            this.savingProductRepository.save(product);
-
-            // save accounting mappings
-            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
-                    DepositAccountType.SAVINGS_DEPOSIT);
-
-            // check if the office specific products are enabled. If yes, then
-            // save this savings product against a specific office
-            // i.e. this savings product is specific for this office.
-            fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-                    FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, product.getId());
-
-            return new CommandProcessingResultBuilder() //
-                    .withEntityId(product.getId()) //
-                    .build();
-        } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
-            return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
+      if (changes.containsKey(taxGroupIdParamName)) {
+        final TaxGroup taxGroup = this.savingsProductAssembler.assembleTaxGroup(command);
+        product.setTaxGroup(taxGroup);
+        if (product.withHoldTax() && product.getTaxGroup() == null) {
+          final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+          final DataValidatorBuilder baseDataValidator =
+              new DataValidatorBuilder(dataValidationErrors)
+                  .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
+          final Long taxGroupId = null;
+          baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
+          throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+      }
+
+      // accounting related changes
+      final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
+      final Map<String, Object> accountingMappingChanges =
+          this.accountMappingWritePlatformService.updateSavingsProductToGLAccountMapping(
+              product.getId(),
+              command,
+              accountingTypeChanged,
+              product.getAccountingType(),
+              DepositAccountType.SAVINGS_DEPOSIT);
+      changes.putAll(accountingMappingChanges);
+
+      if (!changes.isEmpty()) {
+        this.savingProductRepository.saveAndFlush(product);
+      }
+
+      return new CommandProcessingResultBuilder() //
+          .withEntityId(product.getId()) //
+          .with(changes)
+          .build();
+    } catch (final DataAccessException e) {
+      handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleDataIntegrityIssues(command, throwable, dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult update(final Long productId, final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult delete(final Long productId) {
 
-        try {
-            this.context.authenticatedUser();
-            final SavingsProduct product = this.savingProductRepository.findById(productId)
-                    .orElseThrow(() -> new SavingsProductNotFoundException(productId));
+    this.context.authenticatedUser();
+    final SavingsProduct product =
+        this.savingProductRepository
+            .findById(productId)
+            .orElseThrow(() -> new SavingsProductNotFoundException(productId));
 
-            this.fromApiJsonDataValidator.validateForUpdate(command.json(), product);
+    this.savingProductRepository.delete(product);
 
-            final Map<String, Object> changes = product.update(command);
-
-            if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command, product
-                        .currency().getCode());
-                final boolean updated = product.update(savingsProductCharges);
-                if (!updated) {
-                    changes.remove(chargesParamName);
-                }
-            }
-
-            if (changes.containsKey(taxGroupIdParamName)) {
-                final TaxGroup taxGroup = this.savingsProductAssembler.assembleTaxGroup(command);
-                product.setTaxGroup(taxGroup);
-                if (product.withHoldTax() && product.getTaxGroup() == null) {
-                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                            .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
-                    final Long taxGroupId = null;
-                    baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
-                    throw new PlatformApiDataValidationException(dataValidationErrors);
-                }
-            }
-
-            // accounting related changes
-            final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
-            final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(),
-                            DepositAccountType.SAVINGS_DEPOSIT);
-            changes.putAll(accountingMappingChanges);
-
-            if (!changes.isEmpty()) {
-                this.savingProductRepository.saveAndFlush(product);
-            }
-
-            return new CommandProcessingResultBuilder() //
-                    .withEntityId(product.getId()) //
-                    .with(changes).build();
-        } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
-            return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleDataIntegrityIssues(command, throwable, dve);
-            return CommandProcessingResult.empty();
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult delete(final Long productId) {
-
-        this.context.authenticatedUser();
-        final SavingsProduct product = this.savingProductRepository.findById(productId)
-                .orElseThrow(() -> new SavingsProductNotFoundException(productId));
-
-        this.savingProductRepository.delete(product);
-
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(product.getId()) //
-                .build();
-    }
-
+    return new CommandProcessingResultBuilder() //
+        .withEntityId(product.getId()) //
+        .build();
+  }
 }

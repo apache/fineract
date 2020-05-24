@@ -29,32 +29,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class LookupTableService {
 
-    private final PlatformSecurityContext securityContext;
-    private final LookupTableRepository lookupTableRepository;
+  private final PlatformSecurityContext securityContext;
+  private final LookupTableRepository lookupTableRepository;
 
-    @Autowired
-    public LookupTableService(final PlatformSecurityContext securityContext,
-                              final LookupTableRepository lookupTableRepository) {
-        super();
-        this.securityContext = securityContext;
-        this.lookupTableRepository = lookupTableRepository;
-    }
+  @Autowired
+  public LookupTableService(
+      final PlatformSecurityContext securityContext,
+      final LookupTableRepository lookupTableRepository) {
+    super();
+    this.securityContext = securityContext;
+    this.lookupTableRepository = lookupTableRepository;
+  }
 
-    public List<LookupTable> findByKey(final String key) {
-        this.securityContext.authenticatedUser();
+  public List<LookupTable> findByKey(final String key) {
+    this.securityContext.authenticatedUser();
 
-        return this.lookupTableRepository.findByKey(key);
-    }
+    return this.lookupTableRepository.findByKey(key);
+  }
 
-    public List<LookupTable> findBySurvey(final Survey survey) {
-        this.securityContext.authenticatedUser();
+  public List<LookupTable> findBySurvey(final Survey survey) {
+    this.securityContext.authenticatedUser();
 
-        return this.lookupTableRepository.findBySurvey(survey);
-    }
+    return this.lookupTableRepository.findBySurvey(survey);
+  }
 
-    public List<LookupTable> createLookupTable(final List<LookupTable> lookupTable) {
-        this.securityContext.authenticatedUser();
+  public List<LookupTable> createLookupTable(final List<LookupTable> lookupTable) {
+    this.securityContext.authenticatedUser();
 
-        return this.lookupTableRepository.saveAll(lookupTable);
-    }
+    return this.lookupTableRepository.saveAll(lookupTable);
+  }
 }

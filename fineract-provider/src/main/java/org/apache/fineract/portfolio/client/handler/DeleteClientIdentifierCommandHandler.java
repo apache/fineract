@@ -31,18 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENTIDENTIFIER", action = "DELETE")
 public class DeleteClientIdentifierCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
+  private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
 
-    @Autowired
-    public DeleteClientIdentifierCommandHandler(final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
-        this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
-    }
+  @Autowired
+  public DeleteClientIdentifierCommandHandler(
+      final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
+    this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.clientIdentifierWritePlatformService.deleteClientIdentifier(command.getClientId(), command.entityId(),
-                command.commandId());
-    }
+    return this.clientIdentifierWritePlatformService.deleteClientIdentifier(
+        command.getClientId(), command.entityId(), command.commandId());
+  }
 }

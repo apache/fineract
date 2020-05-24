@@ -23,10 +23,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface AccountNumberFormatWritePlatformService {
 
-    CommandProcessingResult createAccountNumberFormat(JsonCommand command);
+  CommandProcessingResult createAccountNumberFormat(JsonCommand command);
 
-    CommandProcessingResult updateAccountNumberFormat(Long accountNumberFormatId, JsonCommand command);
+  CommandProcessingResult updateAccountNumberFormat(
+      Long accountNumberFormatId, JsonCommand command);
 
-    CommandProcessingResult deleteAccountNumberFormat(Long accountNumberFormatId);
-
+  CommandProcessingResult deleteAccountNumberFormat(Long accountNumberFormatId);
 }

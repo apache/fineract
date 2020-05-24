@@ -27,61 +27,72 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class SelfUserDetailsApiResourceSwagger {
-    private SelfUserDetailsApiResourceSwagger() {
+  private SelfUserDetailsApiResourceSwagger() {}
+
+  @ApiModel(value = "GetSelfUserDetailsResponse")
+  public static final class GetSelfUserDetailsResponse {
+    private GetSelfUserDetailsResponse() {}
+
+    final class GetSelfUserDetailsOrganisationalRole {
+      private GetSelfUserDetailsOrganisationalRole() {}
+
+      @ApiModelProperty(example = "100")
+      public Integer id;
+
+      @ApiModelProperty(example = "staffOrganisationalRoleType.programDirector")
+      public String code;
+
+      @ApiModelProperty(example = "Program Director")
+      public String value;
     }
 
-    @ApiModel(value = "GetSelfUserDetailsResponse")
-    public final static class GetSelfUserDetailsResponse {
-        private GetSelfUserDetailsResponse() {
-        }
+    final class GetSelfUserDetailsRoles {
+      private GetSelfUserDetailsRoles() {}
 
-        final class GetSelfUserDetailsOrganisationalRole {
-            private GetSelfUserDetailsOrganisationalRole() {
-            }
+      @ApiModelProperty(example = "1")
+      public Integer id;
 
-            @ApiModelProperty(example = "100")
-            public Integer id;
-            @ApiModelProperty(example = "staffOrganisationalRoleType.programDirector")
-            public String code;
-            @ApiModelProperty(example = "Program Director")
-            public String value;
-        }
+      @ApiModelProperty(example = "Super user")
+      public String name;
 
-        final class GetSelfUserDetailsRoles {
-            private GetSelfUserDetailsRoles() {
-            }
-
-            @ApiModelProperty(example = "1")
-            public Integer id;
-            @ApiModelProperty(example = "Super user")
-            public String name;
-            @ApiModelProperty(example = "This role provides all application permissions.")
-            public String description;
-        }
-
-        @ApiModelProperty(example = "mifos")
-        public String username;
-        @ApiModelProperty(example = "1")
-        public Integer userId;
-        @ApiModelProperty(example = "bWlmb3M6cGFzc3dvcmQ=")
-        public String base64EncodedAuthenticationKey;
-        @ApiModelProperty(example = "true")
-        public Boolean authenticated;
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        @ApiModelProperty(example = "1")
-        public Integer staffId;
-        @ApiModelProperty(example = "Director, Program")
-        public String staffDisplayName;
-        public GetSelfUserDetailsOrganisationalRole organisationalRole;
-        public Set<GetSelfUserDetailsRoles> roles;
-        @ApiModelProperty(example = "ALL_FUNCTIONS")
-        public List<String> permissions;
-        @ApiModelProperty(example = "true")
-        public Boolean isSelfServiceUser;
-        @ApiModelProperty(example = "[1, 2, 3]")
-        public List<Integer> clients;
+      @ApiModelProperty(example = "This role provides all application permissions.")
+      public String description;
     }
+
+    @ApiModelProperty(example = "mifos")
+    public String username;
+
+    @ApiModelProperty(example = "1")
+    public Integer userId;
+
+    @ApiModelProperty(example = "bWlmb3M6cGFzc3dvcmQ=")
+    public String base64EncodedAuthenticationKey;
+
+    @ApiModelProperty(example = "true")
+    public Boolean authenticated;
+
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+
+    @ApiModelProperty(example = "1")
+    public Integer staffId;
+
+    @ApiModelProperty(example = "Director, Program")
+    public String staffDisplayName;
+
+    public GetSelfUserDetailsOrganisationalRole organisationalRole;
+    public Set<GetSelfUserDetailsRoles> roles;
+
+    @ApiModelProperty(example = "ALL_FUNCTIONS")
+    public List<String> permissions;
+
+    @ApiModelProperty(example = "true")
+    public Boolean isSelfServiceUser;
+
+    @ApiModelProperty(example = "[1, 2, 3]")
+    public List<Integer> clients;
+  }
 }

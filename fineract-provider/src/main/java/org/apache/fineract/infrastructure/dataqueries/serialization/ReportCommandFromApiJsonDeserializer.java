@@ -33,24 +33,35 @@ import org.springframework.stereotype.Component;
 @Component
 public final class ReportCommandFromApiJsonDeserializer {
 
-    /**
-     * The parameters supported for this command.
-     */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("reportName", "reportType", "reportSubType",
-            "reportCategory", "description", "reportSql", "useReport", "reportParameters"));
+  /**
+   * The parameters supported for this command.
+   */
+  private final Set<String> supportedParameters =
+      new HashSet<>(
+          Arrays.asList(
+              "reportName",
+              "reportType",
+              "reportSubType",
+              "reportCategory",
+              "description",
+              "reportSql",
+              "useReport",
+              "reportParameters"));
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public ReportCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public ReportCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validate(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-    }
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+  }
 }

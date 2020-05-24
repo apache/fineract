@@ -23,13 +23,13 @@ import org.apache.fineract.useradministration.data.RoleData;
 
 public interface RoleReadPlatformService {
 
-    Collection<RoleData> retrieveAll();
+  Collection<RoleData> retrieveAll();
 
-    Collection<RoleData> retrieveAllActiveRoles();
+  Collection<RoleData> retrieveAllActiveRoles();
 
-    Collection<RoleData> retrieveAllSelfServiceRoles();
+  Collection<RoleData> retrieveAllSelfServiceRoles();
 
-    RoleData retrieveOne(Long roleId);
+  RoleData retrieveOne(Long roleId);
 
-    Collection<RoleData> retrieveAppUserRoles(Long appUserId);
+  Collection<RoleData> retrieveAppUserRoles(Long appUserId);
 }

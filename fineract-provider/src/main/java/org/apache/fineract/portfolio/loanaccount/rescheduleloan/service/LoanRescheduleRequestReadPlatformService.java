@@ -23,50 +23,51 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanResched
 
 public interface LoanRescheduleRequestReadPlatformService {
 
-    /**
-     * get all loan reschedule requests by loan ID
-     *
-     * @param loanId
-     *            the loan identifier
-     * @return list of LoanRescheduleRequestData objects
-     **/
-    public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId);
+  /**
+   * get all loan reschedule requests by loan ID
+   *
+   * @param loanId
+   *            the loan identifier
+   * @return list of LoanRescheduleRequestData objects
+   **/
+  public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId);
 
-    /**
-     * get a single loan reschedule request by ID (primary key)
-     *
-     * @param requestId
-     *            the loan reschedule request identifier
-     * @return a LoanRescheduleRequestData object
-     **/
-    public LoanRescheduleRequestData readLoanRescheduleRequest(Long requestId);
+  /**
+   * get a single loan reschedule request by ID (primary key)
+   *
+   * @param requestId
+   *            the loan reschedule request identifier
+   * @return a LoanRescheduleRequestData object
+   **/
+  public LoanRescheduleRequestData readLoanRescheduleRequest(Long requestId);
 
-    /**
-     * get all loan reschedule requests filter by loan ID and status enum
-     *
-     * @param loanId
-     *            the loan identifier
-     * @return list of LoanRescheduleRequestData objects
-     **/
-    public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId, Integer statusEnum);
+  /**
+   * get all loan reschedule requests filter by loan ID and status enum
+   *
+   * @param loanId
+   *            the loan identifier
+   * @return list of LoanRescheduleRequestData objects
+   **/
+  public List<LoanRescheduleRequestData> readLoanRescheduleRequests(
+      Long loanId, Integer statusEnum);
 
-    /**
-     * get all loan reschedule reasons
-     *
-     * @param loanRescheduleReason
-     *            the loan reschedule reason
-     * @return list of LoanRescheduleRequestData objects
-     **/
-    public LoanRescheduleRequestData retrieveAllRescheduleReasons(String loanRescheduleReason);
-    /**
-     * get all loan reschedule request
-     *
-     * @param command
-     * all/null - give all request
-     * approved - give all approved request
-     * pending - give all  request which is pending for approval
-     * reject - give all rejected requests
-     * @return list of LoanRescheduleRequestData objects
-     **/
-    public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command);
+  /**
+   * get all loan reschedule reasons
+   *
+   * @param loanRescheduleReason
+   *            the loan reschedule reason
+   * @return list of LoanRescheduleRequestData objects
+   **/
+  public LoanRescheduleRequestData retrieveAllRescheduleReasons(String loanRescheduleReason);
+  /**
+   * get all loan reschedule request
+   *
+   * @param command
+   * all/null - give all request
+   * approved - give all approved request
+   * pending - give all  request which is pending for approval
+   * reject - give all rejected requests
+   * @return list of LoanRescheduleRequestData objects
+   **/
+  public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command);
 }

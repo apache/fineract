@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class SavingsAccountBlockedException extends AbstractPlatformDomainRuleException {
 
-    public SavingsAccountBlockedException(final Long accountId) {
-        super("error.msg.saving.account.blocked.transaction.not.allowed",
-                "Any transaction to " + accountId + " is not allowed, since the account is blocked", accountId);
-    }
+  public SavingsAccountBlockedException(final Long accountId) {
+    super(
+        "error.msg.saving.account.blocked.transaction.not.allowed",
+        "Any transaction to " + accountId + " is not allowed, since the account is blocked",
+        accountId);
+  }
 }

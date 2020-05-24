@@ -47,91 +47,95 @@ import org.springframework.security.core.userdetails.User;
 @RunWith(MockitoJUnitRunner.class)
 public class StorageTest {
 
-    private NotificationWritePlatformServiceImpl notificationWritePlatformServiceImpl;
+  private NotificationWritePlatformServiceImpl notificationWritePlatformServiceImpl;
 
-    @Mock
-    private NotificationGeneratorReadRepositoryWrapper notificationGeneratorReadRepositoryWrapper;
+  @Mock
+  private NotificationGeneratorReadRepositoryWrapper notificationGeneratorReadRepositoryWrapper;
 
-    @Mock
-    private NotificationGeneratorWritePlatformService notificationGeneratorWritePlatformService;
+  @Mock private NotificationGeneratorWritePlatformService notificationGeneratorWritePlatformService;
 
-    @Mock
-    private NotificationMapperWritePlatformService notificationMapperWritePlatformService;
+  @Mock private NotificationMapperWritePlatformService notificationMapperWritePlatformService;
 
-    @Mock
-    private AppUserRepository appUserRepository;
+  @Mock private AppUserRepository appUserRepository;
 
-    @Before
-    public void setUp() {
-        notificationWritePlatformServiceImpl = new NotificationWritePlatformServiceImpl(
-                notificationGeneratorWritePlatformService,
-                notificationGeneratorReadRepositoryWrapper,
-                appUserRepository,
-                notificationMapperWritePlatformService);
-    }
+  @Before
+  public void setUp() {
+    notificationWritePlatformServiceImpl =
+        new NotificationWritePlatformServiceImpl(
+            notificationGeneratorWritePlatformService,
+            notificationGeneratorReadRepositoryWrapper,
+            appUserRepository,
+            notificationMapperWritePlatformService);
+  }
 
-    @Test
-    @Ignore // TODO FINERACT-828
-    public void testNotificationStorage() {
-        Long userId = 1L;
-        String objectType = "CLIENT";
-        Long objectIdentifier = 1L;
-        String action = "created";
-        Long actor = 1L;
-        String notificationContent = "A client was created";
-        boolean isSystemGenerated = false;
-        String now = getCurrentDateTime();
+  @Test
+  @Ignore // TODO FINERACT-828
+  public void testNotificationStorage() {
+    Long userId = 1L;
+    String objectType = "CLIENT";
+    Long objectIdentifier = 1L;
+    String action = "created";
+    Long actor = 1L;
+    String notificationContent = "A client was created";
+    boolean isSystemGenerated = false;
+    String now = getCurrentDateTime();
 
-        Notification notification = new Notification(
-                objectType,
-                objectIdentifier,
-                action,
-                actor,
-                isSystemGenerated,
-                notificationContent,
-                now
-                );
+    Notification notification =
+        new Notification(
+            objectType,
+            objectIdentifier,
+            action,
+            actor,
+            isSystemGenerated,
+            notificationContent,
+            now);
 
-        AppUser appUser = new AppUser(null, new User("J.J.", "", true, true,
-                true, true, Collections.emptyList()),
-                null, "user@com", "John", "", null, false,
-                false, null);
+    AppUser appUser =
+        new AppUser(
+            null,
+            new User("J.J.", "", true, true, true, true, Collections.emptyList()),
+            null,
+            "user@com",
+            "John",
+            "",
+            null,
+            false,
+            false,
+            null);
 
-        NotificationMapper notificationMapper = new NotificationMapper(
-                notification,
-                appUser,
-                false,
-                now
-                );
+    NotificationMapper notificationMapper =
+        new NotificationMapper(notification, appUser, false, now);
 
-        when(this.notificationGeneratorWritePlatformService.create(refEq(notification))).thenReturn(1L);
+    when(this.notificationGeneratorWritePlatformService.create(refEq(notification))).thenReturn(1L);
 
-        when(this.appUserRepository.findById(userId)).thenReturn(Optional.of(appUser));
+    when(this.appUserRepository.findById(userId)).thenReturn(Optional.of(appUser));
 
-        when(this.notificationGeneratorReadRepositoryWrapper.findById(1L)).thenReturn(notification);
+    when(this.notificationGeneratorReadRepositoryWrapper.findById(1L)).thenReturn(notification);
 
-        when(this.notificationMapperWritePlatformService.create(refEq(notificationMapper))).thenReturn(1L);
+    when(this.notificationMapperWritePlatformService.create(refEq(notificationMapper)))
+        .thenReturn(1L);
 
-        Long actualGeneratedNotificationId =
-                notificationWritePlatformServiceImpl.notify(
-                        userId,
-                        objectType,
-                        objectIdentifier,
-                        action,
-                        actor,
-                        notificationContent,
-                        isSystemGenerated
-                        );
+    Long actualGeneratedNotificationId =
+        notificationWritePlatformServiceImpl.notify(
+            userId,
+            objectType,
+            objectIdentifier,
+            action,
+            actor,
+            notificationContent,
+            isSystemGenerated);
 
-        verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification, "createdAt"));
-        verify(this.notificationMapperWritePlatformService, times(1)).create(refEq(notificationMapper, "createdAt"));
-        verify(this.notificationGeneratorReadRepositoryWrapper, times(1)).findById(1L);
-        assertEquals(actualGeneratedNotificationId, Long.valueOf(1));
-    }
+    verify(this.notificationGeneratorWritePlatformService, times(1))
+        .create(refEq(notification, "createdAt"));
+    verify(this.notificationMapperWritePlatformService, times(1))
+        .create(refEq(notificationMapper, "createdAt"));
+    verify(this.notificationGeneratorReadRepositoryWrapper, times(1)).findById(1L);
+    assertEquals(actualGeneratedNotificationId, Long.valueOf(1));
+  }
 
-    private String getCurrentDateTime() {
-        Date date = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return formatter.format(date);
-    }
+  private String getCurrentDateTime() {
+    Date date = new Date();
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    return formatter.format(date);
+  }
 }

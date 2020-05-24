@@ -22,9 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class MultiDisbursementDataRequiredException extends AbstractPlatformDomainRuleException {
 
-    public MultiDisbursementDataRequiredException(final String entity, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg." + entity + ".required", defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public MultiDisbursementDataRequiredException(
+      final String entity,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super("error.msg." + entity + ".required", defaultUserMessage, defaultUserMessageArgs);
+  }
 }

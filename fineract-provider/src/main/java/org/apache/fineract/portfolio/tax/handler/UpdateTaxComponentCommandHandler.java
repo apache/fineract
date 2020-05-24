@@ -30,16 +30,15 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "TAXCOMPONENT", action = "UPDATE")
 public class UpdateTaxComponentCommandHandler implements NewCommandSourceHandler {
 
-    private final TaxWritePlatformService taxWritePlatformService;
+  private final TaxWritePlatformService taxWritePlatformService;
 
-    @Autowired
-    public UpdateTaxComponentCommandHandler(final TaxWritePlatformService taxWritePlatformService) {
-        this.taxWritePlatformService = taxWritePlatformService;
-    }
+  @Autowired
+  public UpdateTaxComponentCommandHandler(final TaxWritePlatformService taxWritePlatformService) {
+    this.taxWritePlatformService = taxWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.taxWritePlatformService.updateTaxComponent(jsonCommand.entityId(), jsonCommand);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.taxWritePlatformService.updateTaxComponent(jsonCommand.entityId(), jsonCommand);
+  }
 }

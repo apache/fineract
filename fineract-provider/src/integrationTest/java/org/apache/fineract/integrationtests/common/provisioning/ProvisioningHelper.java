@@ -30,73 +30,75 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class ProvisioningHelper {
 
-    public final static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
-            Account expense) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("loanProducts", addLoanProducts(loanProducts));
-        map.put("definitions", addProvisioningCategories(categories, liability, expense));
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        String formattedString = simple.format(Utils.getLocalDateOfTenant().toDate());
-        Random rand = new Random() ;
-        String criteriaName = "General Provisioning Criteria" + formattedString+rand.nextLong();
-        map.put("criteriaName", criteriaName);
-        map.put("locale", "en");
-       return map ;
-    }
+  public static final Map createProvisioingCriteriaJson(
+      ArrayList<Integer> loanProducts, ArrayList categories, Account liability, Account expense) {
+    final HashMap<String, Object> map = new HashMap<>();
+    map.put("loanProducts", addLoanProducts(loanProducts));
+    map.put("definitions", addProvisioningCategories(categories, liability, expense));
+    DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+    String formattedString = simple.format(Utils.getLocalDateOfTenant().toDate());
+    Random rand = new Random();
+    String criteriaName = "General Provisioning Criteria" + formattedString + rand.nextLong();
+    map.put("criteriaName", criteriaName);
+    map.put("locale", "en");
+    return map;
+  }
 
-    public final static String createProvisioningEntryJson() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("createjournalentries", Boolean.FALSE);
-        map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        map.put("date", simple.format(Utils.getLocalDateOfTenant().toDate()));
-        String provisioningEntryCreateJson = new Gson().toJson(map);
-        return provisioningEntryCreateJson;
-    }
+  public static final String createProvisioningEntryJson() {
+    final HashMap<String, Object> map = new HashMap<>();
+    map.put("createjournalentries", Boolean.FALSE);
+    map.put("locale", "en");
+    map.put("dateFormat", "dd MMMM yyyy");
+    DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+    map.put("date", simple.format(Utils.getLocalDateOfTenant().toDate()));
+    String provisioningEntryCreateJson = new Gson().toJson(map);
+    return provisioningEntryCreateJson;
+  }
 
-    public final static String createProvisioningEntryJsonWithJournalsEnabled() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("createjournalentries", Boolean.TRUE);
-        map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-        map.put("date", simple.format(Utils.getLocalDateOfTenant().toDate()));
-        String provisioningEntryCreateJson = new Gson().toJson(map);
-        return provisioningEntryCreateJson;
-    }
+  public static final String createProvisioningEntryJsonWithJournalsEnabled() {
+    final HashMap<String, Object> map = new HashMap<>();
+    map.put("createjournalentries", Boolean.TRUE);
+    map.put("locale", "en");
+    map.put("dateFormat", "dd MMMM yyyy");
+    DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+    map.put("date", simple.format(Utils.getLocalDateOfTenant().toDate()));
+    String provisioningEntryCreateJson = new Gson().toJson(map);
+    return provisioningEntryCreateJson;
+  }
 
-    private static ArrayList<HashMap<String, Integer>> addLoanProducts(ArrayList<Integer> loanProducts) {
-        ArrayList<HashMap<String, Integer>> list = new ArrayList<>();
-        for (int i = 0; i < loanProducts.size(); i++) {
-            HashMap<String, Integer> map = new HashMap<>();
-            map.put("id", loanProducts.get(i));
-            list.add(map);
-        }
-        return list;
+  private static ArrayList<HashMap<String, Integer>> addLoanProducts(
+      ArrayList<Integer> loanProducts) {
+    ArrayList<HashMap<String, Integer>> list = new ArrayList<>();
+    for (int i = 0; i < loanProducts.size(); i++) {
+      HashMap<String, Integer> map = new HashMap<>();
+      map.put("id", loanProducts.get(i));
+      list.add(map);
     }
+    return list;
+  }
 
-    public static ArrayList<HashMap<String, Object>> addProvisioningCategories(ArrayList categories, Account liability, Account expense) {
-        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
-        int minStart = 0;
-        int maxStart = 30;
+  public static ArrayList<HashMap<String, Object>> addProvisioningCategories(
+      ArrayList categories, Account liability, Account expense) {
+    ArrayList<HashMap<String, Object>> list = new ArrayList<>();
+    int minStart = 0;
+    int maxStart = 30;
 
-        for (int i = 0; i < categories.size(); i++) {
-            HashMap<String, Object> map = new HashMap<>();
-            HashMap category = (HashMap) categories.get(i);
-            map.put("categoryId", category.get("id"));
-            map.put("categoryName", category.get("categoryName"));
-            map.put("minAge", (i * 30) + 1);
-            if (i == categories.size() - 1) {
-                map.put("maxAge", 90000);
-            } else {
-                map.put("maxAge", (i+1) * 30);
-            }
-            map.put("provisioningPercentage", Float.valueOf((float)((i + 1) * 5.5)));
-            map.put("liabilityAccount", liability.getAccountID());
-            map.put("expenseAccount", expense.getAccountID());
-            list.add(map);
-        }
-        return list;
+    for (int i = 0; i < categories.size(); i++) {
+      HashMap<String, Object> map = new HashMap<>();
+      HashMap category = (HashMap) categories.get(i);
+      map.put("categoryId", category.get("id"));
+      map.put("categoryName", category.get("categoryName"));
+      map.put("minAge", (i * 30) + 1);
+      if (i == categories.size() - 1) {
+        map.put("maxAge", 90000);
+      } else {
+        map.put("maxAge", (i + 1) * 30);
+      }
+      map.put("provisioningPercentage", Float.valueOf((float) ((i + 1) * 5.5)));
+      map.put("liabilityAccount", liability.getAccountID());
+      map.put("expenseAccount", expense.getAccountID());
+      list.add(map);
     }
+    return list;
+  }
 }

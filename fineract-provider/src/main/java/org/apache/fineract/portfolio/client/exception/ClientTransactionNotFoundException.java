@@ -22,10 +22,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class ClientTransactionNotFoundException extends AbstractPlatformDomainRuleException {
 
-    public ClientTransactionNotFoundException(final Long clientId, final Long transactionId) {
-        super("error.msg.client.transaction.not.found.exception",
-                "The Transaction with id `" + transactionId + "` does not exist for a Client with id `" + clientId, transactionId,
-                clientId);
-    }
-
+  public ClientTransactionNotFoundException(final Long clientId, final Long transactionId) {
+    super(
+        "error.msg.client.transaction.not.found.exception",
+        "The Transaction with id `"
+            + transactionId
+            + "` does not exist for a Client with id `"
+            + clientId,
+        transactionId,
+        clientId);
+  }
 }

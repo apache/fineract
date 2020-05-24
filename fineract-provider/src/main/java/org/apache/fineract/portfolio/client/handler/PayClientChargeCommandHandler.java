@@ -29,20 +29,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME, action = ClientApiConstants.CLIENT_CHARGE_ACTION_PAY)
+@CommandType(
+    entity = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME,
+    action = ClientApiConstants.CLIENT_CHARGE_ACTION_PAY)
 public class PayClientChargeCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientChargeWritePlatformService writePlatformService;
+  private final ClientChargeWritePlatformService writePlatformService;
 
-    @Autowired
-    public PayClientChargeCommandHandler(final ClientChargeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public PayClientChargeCommandHandler(
+      final ClientChargeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.payCharge(command.getClientId(), command.entityId(), command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.payCharge(command.getClientId(), command.entityId(), command);
+  }
 }

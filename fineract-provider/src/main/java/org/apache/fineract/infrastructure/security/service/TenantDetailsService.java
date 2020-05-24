@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 
 public interface TenantDetailsService {
 
-    FineractPlatformTenant loadTenantById(String tenantId);
+  FineractPlatformTenant loadTenantById(String tenantId);
 
-    List<FineractPlatformTenant> findAllTenants();
+  List<FineractPlatformTenant> findAllTenants();
 }

@@ -22,7 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class AccountTransferNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public AccountTransferNotFoundException(final Long id) {
-        super("error.msg.accounttransfer.id.invalid", "Account transfer with identifier " + id + " does not exist", id);
-    }
+  public AccountTransferNotFoundException(final Long id) {
+    super(
+        "error.msg.accounttransfer.id.invalid",
+        "Account transfer with identifier " + id + " does not exist",
+        id);
+  }
 }

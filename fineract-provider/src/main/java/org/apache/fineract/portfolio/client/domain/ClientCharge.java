@@ -43,271 +43,277 @@ import org.joda.time.LocalDate;
 @Table(name = "m_client_charge")
 public class ClientCharge extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false)
-    private Client client;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false)
+  private Client client;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "charge_id", referencedColumnName = "id", nullable = false)
-    private Charge charge;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "charge_id", referencedColumnName = "id", nullable = false)
+  private Charge charge;
 
-    @Column(name = "charge_time_enum", nullable = false)
-    private Integer chargeTime;
+  @Column(name = "charge_time_enum", nullable = false)
+  private Integer chargeTime;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "charge_due_date")
-    private Date dueDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "charge_due_date")
+  private Date dueDate;
 
-    @Column(name = "charge_calculation_enum")
-    private Integer chargeCalculation;
+  @Column(name = "charge_calculation_enum")
+  private Integer chargeCalculation;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+  private BigDecimal amount;
 
-    @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal amountPaid;
+  @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
+  private BigDecimal amountPaid;
 
-    @Column(name = "amount_waived_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal amountWaived;
+  @Column(name = "amount_waived_derived", scale = 6, precision = 19, nullable = true)
+  private BigDecimal amountWaived;
 
-    @Column(name = "amount_writtenoff_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal amountWrittenOff;
+  @Column(name = "amount_writtenoff_derived", scale = 6, precision = 19, nullable = true)
+  private BigDecimal amountWrittenOff;
 
-    @Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amountOutstanding;
+  @Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
+  private BigDecimal amountOutstanding;
 
-    @Column(name = "is_penalty", nullable = false)
-    private boolean penaltyCharge = false;
+  @Column(name = "is_penalty", nullable = false)
+  private boolean penaltyCharge = false;
 
-    @Column(name = "is_paid_derived", nullable = false)
-    private boolean paid = false;
+  @Column(name = "is_paid_derived", nullable = false)
+  private boolean paid = false;
 
-    @Column(name = "waived", nullable = false)
-    private boolean waived = false;
+  @Column(name = "waived", nullable = false)
+  private boolean waived = false;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean status = true;
+  @Column(name = "is_active", nullable = false)
+  private boolean status = true;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "inactivated_on_date")
-    private Date inactivationDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "inactivated_on_date")
+  private Date inactivationDate;
 
-    @Transient
-    private OrganisationCurrency currency;
+  @Transient private OrganisationCurrency currency;
 
-    protected ClientCharge() {
-        //
+  protected ClientCharge() {
+    //
+  }
+
+  public static ClientCharge createNew(
+      final Client client, final Charge charge, final JsonCommand command) {
+    BigDecimal amount = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
+    final LocalDate dueDate =
+        command.localDateValueOfParameterNamed(ClientApiConstants.dueAsOfDateParamName);
+    final boolean status = true;
+    // Derive from charge definition if not passed in as a parameter
+    amount = (amount == null) ? charge.getAmount() : amount;
+    return new ClientCharge(client, charge, amount, dueDate, status);
+  }
+
+  private ClientCharge(
+      final Client client,
+      final Charge charge,
+      final BigDecimal amount,
+      final LocalDate dueDate,
+      final boolean status) {
+
+    this.client = client;
+    this.charge = charge;
+    this.penaltyCharge = charge.isPenalty();
+    this.chargeTime = charge.getChargeTimeType();
+    this.dueDate = (dueDate == null) ? null : dueDate.toDate();
+    this.chargeCalculation = charge.getChargeCalculation();
+
+    BigDecimal chargeAmount = charge.getAmount();
+    if (amount != null) {
+      chargeAmount = amount;
     }
 
-    public static ClientCharge createNew(final Client client, final Charge charge, final JsonCommand command) {
-        BigDecimal amount = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
-        final LocalDate dueDate = command.localDateValueOfParameterNamed(ClientApiConstants.dueAsOfDateParamName);
-        final boolean status = true;
-        // Derive from charge definition if not passed in as a parameter
-        amount = (amount == null) ? charge.getAmount() : amount;
-        return new ClientCharge(client, charge, amount, dueDate, status);
-    }
+    populateDerivedFields(chargeAmount);
 
-    private ClientCharge(final Client client, final Charge charge, final BigDecimal amount, final LocalDate dueDate, final boolean status) {
+    this.paid = determineIfFullyPaid();
+    this.status = status;
+  }
 
-        this.client = client;
-        this.charge = charge;
-        this.penaltyCharge = charge.isPenalty();
-        this.chargeTime = charge.getChargeTimeType();
-        this.dueDate = (dueDate == null) ? null : dueDate.toDate();
-        this.chargeCalculation = charge.getChargeCalculation();
+  public Money pay(final Money amountPaid) {
+    Money amountPaidToDate = Money.of(this.getCurrency(), this.amountPaid);
+    Money amountOutstanding = Money.of(this.getCurrency(), this.amountOutstanding);
+    amountPaidToDate = amountPaidToDate.plus(amountPaid);
+    amountOutstanding = amountOutstanding.minus(amountPaid);
+    this.amountPaid = amountPaidToDate.getAmount();
+    this.amountOutstanding = amountOutstanding.getAmount();
+    this.paid = determineIfFullyPaid();
+    return Money.of(this.getCurrency(), this.amountOutstanding);
+  }
 
-        BigDecimal chargeAmount = charge.getAmount();
-        if (amount != null) {
-            chargeAmount = amount;
-        }
+  public void undoPayment(final Money transactionAmount) {
+    Money amountPaid = getAmountPaid();
+    amountPaid = amountPaid.minus(transactionAmount);
+    this.amountPaid = amountPaid.getAmount();
+    this.amountOutstanding = calculateOutstanding();
+    this.paid = false;
+    this.status = true;
+  }
 
-        populateDerivedFields(chargeAmount);
+  public Money waive() {
+    Money amountWaivedToDate = getAmountWaived();
+    Money amountOutstanding = getAmountOutstanding();
+    Money totalAmountWaived = amountWaivedToDate.plus(amountOutstanding);
+    this.amountWaived = totalAmountWaived.getAmount();
+    this.amountOutstanding = BigDecimal.ZERO;
+    this.waived = true;
+    return totalAmountWaived;
+  }
 
-        this.paid = determineIfFullyPaid();
-        this.status = status;
-    }
+  public void undoWaiver(final Money transactionAmount) {
+    Money amountWaived = getAmountWaived();
+    amountWaived = amountWaived.minus(transactionAmount);
+    this.amountWaived = amountWaived.getAmount();
+    this.amountOutstanding = calculateOutstanding();
+    this.waived = false;
+    this.status = true;
+  }
 
-    public Money pay(final Money amountPaid) {
-        Money amountPaidToDate = Money.of(this.getCurrency(), this.amountPaid);
-        Money amountOutstanding = Money.of(this.getCurrency(), this.amountOutstanding);
-        amountPaidToDate = amountPaidToDate.plus(amountPaid);
-        amountOutstanding = amountOutstanding.minus(amountPaid);
-        this.amountPaid = amountPaidToDate.getAmount();
-        this.amountOutstanding = amountOutstanding.getAmount();
-        this.paid = determineIfFullyPaid();
-        return Money.of(this.getCurrency(), this.amountOutstanding);
-    }
-
-    public void undoPayment(final Money transactionAmount) {
-        Money amountPaid = getAmountPaid();
-        amountPaid = amountPaid.minus(transactionAmount);
-        this.amountPaid = amountPaid.getAmount();
-        this.amountOutstanding = calculateOutstanding();
-        this.paid = false;
-        this.status = true;
-    }
-
-    public Money waive() {
-        Money amountWaivedToDate = getAmountWaived();
-        Money amountOutstanding = getAmountOutstanding();
-        Money totalAmountWaived = amountWaivedToDate.plus(amountOutstanding);
-        this.amountWaived = totalAmountWaived.getAmount();
+  private void populateDerivedFields(final BigDecimal amount) {
+    switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
+      case INVALID:
+        this.amount = null;
+        this.amountPaid = null;
         this.amountOutstanding = BigDecimal.ZERO;
-        this.waived = true;
-        return totalAmountWaived;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        break;
+      case FLAT:
+        this.amount = amount;
+        this.amountPaid = null;
+        this.amountOutstanding = amount;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        break;
+      default:
+        break;
+    }
+  }
+
+  public boolean isOnSpecifiedDueDate() {
+    return ChargeTimeType.fromInt(this.chargeTime).isOnSpecifiedDueDate();
+  }
+
+  private boolean determineIfFullyPaid() {
+    return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
+  }
+
+  private BigDecimal calculateOutstanding() {
+    BigDecimal amountPaidLocal = BigDecimal.ZERO;
+    if (this.amountPaid != null) {
+      amountPaidLocal = this.amountPaid;
     }
 
-    public void undoWaiver(final Money transactionAmount) {
-        Money amountWaived = getAmountWaived();
-        amountWaived = amountWaived.minus(transactionAmount);
-        this.amountWaived = amountWaived.getAmount();
-        this.amountOutstanding = calculateOutstanding();
-        this.waived = false;
-        this.status = true;
+    BigDecimal amountWaivedLocal = BigDecimal.ZERO;
+    if (this.amountWaived != null) {
+      amountWaivedLocal = this.amountWaived;
     }
 
-    private void populateDerivedFields(final BigDecimal amount) {
-        switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
-            case INVALID:
-                this.amount = null;
-                this.amountPaid = null;
-                this.amountOutstanding = BigDecimal.ZERO;
-                this.amountWaived = null;
-                this.amountWrittenOff = null;
-            break;
-            case FLAT:
-                this.amount = amount;
-                this.amountPaid = null;
-                this.amountOutstanding = amount;
-                this.amountWaived = null;
-                this.amountWrittenOff = null;
-            break;
-            default:
-            break;
-        }
+    BigDecimal amountWrittenOffLocal = BigDecimal.ZERO;
+    if (this.amountWrittenOff != null) {
+      amountWrittenOffLocal = this.amountWrittenOff;
     }
 
-    public boolean isOnSpecifiedDueDate() {
-        return ChargeTimeType.fromInt(this.chargeTime).isOnSpecifiedDueDate();
+    final BigDecimal totalAccountedFor =
+        amountPaidLocal.add(amountWaivedLocal).add(amountWrittenOffLocal);
+
+    return this.amount.subtract(totalAccountedFor);
+  }
+
+  public LocalDate getDueLocalDate() {
+    LocalDate dueDate = null;
+    if (this.dueDate != null) {
+      dueDate = new LocalDate(this.dueDate);
     }
+    return dueDate;
+  }
 
-    private boolean determineIfFullyPaid() {
-        return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
-    }
+  public Client getClient() {
+    return this.client;
+  }
 
-    private BigDecimal calculateOutstanding() {
-        BigDecimal amountPaidLocal = BigDecimal.ZERO;
-        if (this.amountPaid != null) {
-            amountPaidLocal = this.amountPaid;
-        }
+  public Charge getCharge() {
+    return this.charge;
+  }
 
-        BigDecimal amountWaivedLocal = BigDecimal.ZERO;
-        if (this.amountWaived != null) {
-            amountWaivedLocal = this.amountWaived;
-        }
+  public Integer getChargeTime() {
+    return this.chargeTime;
+  }
 
-        BigDecimal amountWrittenOffLocal = BigDecimal.ZERO;
-        if (this.amountWrittenOff != null) {
-            amountWrittenOffLocal = this.amountWrittenOff;
-        }
+  public Date getDueDate() {
+    return this.dueDate;
+  }
 
-        final BigDecimal totalAccountedFor = amountPaidLocal.add(amountWaivedLocal).add(amountWrittenOffLocal);
+  public Integer getChargeCalculation() {
+    return this.chargeCalculation;
+  }
 
-        return this.amount.subtract(totalAccountedFor);
-    }
+  public boolean isPenaltyCharge() {
+    return this.penaltyCharge;
+  }
 
-    public LocalDate getDueLocalDate() {
-        LocalDate dueDate = null;
-        if (this.dueDate != null) {
-            dueDate = new LocalDate(this.dueDate);
-        }
-        return dueDate;
-    }
+  public boolean isPaid() {
+    return this.paid;
+  }
 
-    public Client getClient() {
-        return this.client;
-    }
+  public boolean isWaived() {
+    return this.waived;
+  }
 
-    public Charge getCharge() {
-        return this.charge;
-    }
+  public boolean isActive() {
+    return this.status;
+  }
 
-    public Integer getChargeTime() {
-        return this.chargeTime;
-    }
+  public boolean isNotActive() {
+    return !this.status;
+  }
 
-    public Date getDueDate() {
-        return this.dueDate;
-    }
+  public Date getInactivationDate() {
+    return this.inactivationDate;
+  }
 
-    public Integer getChargeCalculation() {
-        return this.chargeCalculation;
-    }
+  public Long getClientId() {
+    return client.getId();
+  }
 
-    public boolean isPenaltyCharge() {
-        return this.penaltyCharge;
-    }
+  public Long getOfficeId() {
+    return this.client.getOffice().getId();
+  }
 
-    public boolean isPaid() {
-        return this.paid;
-    }
+  public void setCurrency(OrganisationCurrency currency) {
+    this.currency = currency;
+  }
 
-    public boolean isWaived() {
-        return this.waived;
-    }
+  public MonetaryCurrency getCurrency() {
+    return this.currency.toMonetaryCurrency();
+  }
 
-    public boolean isActive() {
-        return this.status;
-    }
+  public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
+    final Money amountWaivedOrWrittenOff = getAmountWaived().plus(getAmountWrittenOff());
+    return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
+  }
 
-    public boolean isNotActive() {
-        return !this.status;
-    }
+  public Money getAmount() {
+    return Money.of(getCurrency(), this.amount);
+  }
 
-    public Date getInactivationDate() {
-        return this.inactivationDate;
-    }
+  public Money getAmountPaid() {
+    return Money.of(getCurrency(), this.amountPaid);
+  }
 
-    public Long getClientId() {
-        return client.getId();
-    }
+  public Money getAmountWaived() {
+    return Money.of(getCurrency(), this.amountWaived);
+  }
 
-    public Long getOfficeId() {
-        return this.client.getOffice().getId();
-    }
+  public Money getAmountWrittenOff() {
+    return Money.of(getCurrency(), this.amountWrittenOff);
+  }
 
-    public void setCurrency(OrganisationCurrency currency) {
-        this.currency = currency;
-    }
-
-    public MonetaryCurrency getCurrency() {
-        return this.currency.toMonetaryCurrency();
-    }
-
-    public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
-        final Money amountWaivedOrWrittenOff = getAmountWaived().plus(getAmountWrittenOff());
-        return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
-    }
-
-    public Money getAmount() {
-        return Money.of(getCurrency(), this.amount);
-    }
-
-    public Money getAmountPaid() {
-        return Money.of(getCurrency(), this.amountPaid);
-    }
-
-    public Money getAmountWaived() {
-        return Money.of(getCurrency(), this.amountWaived);
-    }
-
-    public Money getAmountWrittenOff() {
-        return Money.of(getCurrency(), this.amountWrittenOff);
-    }
-
-    public Money getAmountOutstanding() {
-        return Money.of(getCurrency(), this.amountOutstanding);
-    }
-
+  public Money getAmountOutstanding() {
+    return Money.of(getCurrency(), this.amountOutstanding);
+  }
 }

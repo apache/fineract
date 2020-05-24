@@ -20,9 +20,12 @@ package org.apache.fineract.infrastructure.campaigns.email.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public class EmailCampaignNotFound extends AbstractPlatformResourceNotFoundException{
+public class EmailCampaignNotFound extends AbstractPlatformResourceNotFoundException {
 
-    public EmailCampaignNotFound(final Long resourceId) {
-        super("error.msg.email.campaign.identifier.not.found", "EMAIL_CAMPAIGN with identifier `" + resourceId + "` does not exist", resourceId);
-    }
+  public EmailCampaignNotFound(final Long resourceId) {
+    super(
+        "error.msg.email.campaign.identifier.not.found",
+        "EMAIL_CAMPAIGN with identifier `" + resourceId + "` does not exist",
+        resourceId);
+  }
 }

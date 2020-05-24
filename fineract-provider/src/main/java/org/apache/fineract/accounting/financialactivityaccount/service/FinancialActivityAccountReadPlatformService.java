@@ -23,12 +23,12 @@ import org.apache.fineract.accounting.financialactivityaccount.data.FinancialAct
 
 public interface FinancialActivityAccountReadPlatformService {
 
-    List<FinancialActivityAccountData> retrieveAll();
+  List<FinancialActivityAccountData> retrieveAll();
 
-    FinancialActivityAccountData retrieve(Long mappingId);
+  FinancialActivityAccountData retrieve(Long mappingId);
 
-    FinancialActivityAccountData addTemplateDetails(FinancialActivityAccountData financialActivityAccountData);
+  FinancialActivityAccountData addTemplateDetails(
+      FinancialActivityAccountData financialActivityAccountData);
 
-    FinancialActivityAccountData getFinancialActivityAccountTemplate();
-
+  FinancialActivityAccountData getFinancialActivityAccountTemplate();
 }

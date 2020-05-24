@@ -22,24 +22,25 @@ import org.apache.fineract.commands.domain.CommandSource;
 
 public class RollbackTransactionAsCommandIsNotApprovedByCheckerException extends RuntimeException {
 
-    /**
-     * When maker-checker is configured globally and also for the current
-     * transaction.
-     *
-     * An initial save determines if there are any integrity rule or data
-     * problems.
-     *
-     * If there isn't... and the transaction is from a maker... then this roll
-     * back is issued and the commandSourceResult is used to write the audit
-     * entry.
-     */
-    private final CommandSource commandSourceResult;
+  /**
+   * When maker-checker is configured globally and also for the current
+   * transaction.
+   *
+   * An initial save determines if there are any integrity rule or data
+   * problems.
+   *
+   * If there isn't... and the transaction is from a maker... then this roll
+   * back is issued and the commandSourceResult is used to write the audit
+   * entry.
+   */
+  private final CommandSource commandSourceResult;
 
-    public RollbackTransactionAsCommandIsNotApprovedByCheckerException(final CommandSource commandSourceResult) {
-        this.commandSourceResult = commandSourceResult;
-    }
+  public RollbackTransactionAsCommandIsNotApprovedByCheckerException(
+      final CommandSource commandSourceResult) {
+    this.commandSourceResult = commandSourceResult;
+  }
 
-    public CommandSource getCommandSourceResult() {
-        return this.commandSourceResult;
-    }
+  public CommandSource getCommandSourceResult() {
+    return this.commandSourceResult;
+  }
 }

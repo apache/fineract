@@ -25,26 +25,33 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface TwoFactorConfigurationService {
 
+  Map<String, Object> retrieveAll();
 
-    Map<String, Object> retrieveAll();
+  boolean isSMSEnabled();
 
-    boolean isSMSEnabled();
-    Integer getSMSProviderId();
-    String getSmsText();
+  Integer getSMSProviderId();
 
-    boolean isEmailEnabled();
-    String getEmailSubject();
-    String getEmailBody();
+  String getSmsText();
 
-    String getFormattedEmailSubjectFor(AppUser user, OTPRequest request);
-    String getFormattedEmailBodyFor(AppUser user, OTPRequest request);
-    String getFormattedSmsTextFor(AppUser user, OTPRequest request);
+  boolean isEmailEnabled();
 
-    Integer getOTPTokenLength();
-    Integer getOTPTokenLiveTime();
+  String getEmailSubject();
 
-    Integer getAccessTokenLiveTime();
-    Integer getAccessTokenExtendedLiveTime();
+  String getEmailBody();
 
-    Map<String,Object> update(JsonCommand command);
+  String getFormattedEmailSubjectFor(AppUser user, OTPRequest request);
+
+  String getFormattedEmailBodyFor(AppUser user, OTPRequest request);
+
+  String getFormattedSmsTextFor(AppUser user, OTPRequest request);
+
+  Integer getOTPTokenLength();
+
+  Integer getOTPTokenLiveTime();
+
+  Integer getAccessTokenLiveTime();
+
+  Integer getAccessTokenExtendedLiveTime();
+
+  Map<String, Object> update(JsonCommand command);
 }

@@ -26,29 +26,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountingProcessorForLoanFactory {
 
-    private final ApplicationContext applicationContext;
+  private final ApplicationContext applicationContext;
 
-    @Autowired
-    public AccountingProcessorForLoanFactory(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+  @Autowired
+  public AccountingProcessorForLoanFactory(final ApplicationContext applicationContext) {
+    this.applicationContext = applicationContext;
+  }
+
+  public AccountingProcessorForLoan determineProcessor(final LoanDTO loanDTO) {
+
+    AccountingProcessorForLoan accountingProcessorForLoan = null;
+
+    if (loanDTO.isCashBasedAccountingEnabled()) {
+      accountingProcessorForLoan =
+          this.applicationContext.getBean(
+              "cashBasedAccountingProcessorForLoan", AccountingProcessorForLoan.class);
+    } else if (loanDTO.isUpfrontAccrualBasedAccountingEnabled()) {
+      accountingProcessorForLoan =
+          this.applicationContext.getBean(
+              "accrualBasedAccountingProcessorForLoan", AccountingProcessorForLoan.class);
+    } else if (loanDTO.isPeriodicAccrualBasedAccountingEnabled()) {
+      accountingProcessorForLoan =
+          this.applicationContext.getBean(
+              "accrualBasedAccountingProcessorForLoan", AccountingProcessorForLoan.class);
     }
 
-    public AccountingProcessorForLoan determineProcessor(final LoanDTO loanDTO) {
-
-        AccountingProcessorForLoan accountingProcessorForLoan = null;
-
-        if (loanDTO.isCashBasedAccountingEnabled()) {
-            accountingProcessorForLoan = this.applicationContext.getBean("cashBasedAccountingProcessorForLoan",
-                    AccountingProcessorForLoan.class);
-        } else if (loanDTO.isUpfrontAccrualBasedAccountingEnabled()) {
-            accountingProcessorForLoan = this.applicationContext.getBean("accrualBasedAccountingProcessorForLoan",
-                    AccountingProcessorForLoan.class);
-        } else if (loanDTO.isPeriodicAccrualBasedAccountingEnabled()) {
-            accountingProcessorForLoan = this.applicationContext.getBean("accrualBasedAccountingProcessorForLoan",
-                    AccountingProcessorForLoan.class);
-        }
-
-        return accountingProcessorForLoan;
-    }
-
+    return accountingProcessorForLoan;
+  }
 }

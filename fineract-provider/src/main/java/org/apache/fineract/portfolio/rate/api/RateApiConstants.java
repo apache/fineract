@@ -25,5 +25,4 @@ public class RateApiConstants {
   public static final String rateName = "name";
   public static final String ratePercentage = "percentage";
   public static final String rateProductApply = "productApply";
-
 }

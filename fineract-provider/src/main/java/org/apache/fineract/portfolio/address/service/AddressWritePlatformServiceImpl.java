@@ -41,253 +41,253 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AddressWritePlatformServiceImpl implements AddressWritePlatformService {
-    private final PlatformSecurityContext context;
-    private final CodeValueRepository codeValueRepository;
-    private final ClientAddressRepository clientAddressRepository;
-    private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final AddressRepository addressRepository;
-    private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
-    private final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+  private final PlatformSecurityContext context;
+  private final CodeValueRepository codeValueRepository;
+  private final ClientAddressRepository clientAddressRepository;
+  private final ClientRepositoryWrapper clientRepositoryWrapper;
+  private final AddressRepository addressRepository;
+  private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
+  private final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
-    public AddressWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final CodeValueRepository codeValueRepository, final ClientAddressRepository clientAddressRepository,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final AddressRepository addressRepository,
-            final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper,
-            final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-        this.context = context;
-        this.codeValueRepository = codeValueRepository;
-        this.clientAddressRepository = clientAddressRepository;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.addressRepository = addressRepository;
-        this.clientAddressRepositoryWrapper = clientAddressRepositoryWrapper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+  @Autowired
+  public AddressWritePlatformServiceImpl(
+      final PlatformSecurityContext context,
+      final CodeValueRepository codeValueRepository,
+      final ClientAddressRepository clientAddressRepository,
+      final ClientRepositoryWrapper clientRepositoryWrapper,
+      final AddressRepository addressRepository,
+      final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper,
+      final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+    this.context = context;
+    this.codeValueRepository = codeValueRepository;
+    this.clientAddressRepository = clientAddressRepository;
+    this.clientRepositoryWrapper = clientRepositoryWrapper;
+    this.addressRepository = addressRepository;
+    this.clientAddressRepositoryWrapper = clientAddressRepositoryWrapper;
+    this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+  }
 
+  @Override
+  public CommandProcessingResult addClientAddress(
+      final Long clientId, final Long addressTypeId, final JsonCommand command) {
+    CodeValue stateIdobj = null;
+    CodeValue countryIdObj = null;
+    long stateId;
+    long countryId;
+
+    this.context.authenticatedUser();
+    this.fromApiJsonDeserializer.validateForCreate(command.json(), true);
+
+    if (command.longValueOfParameterNamed("stateProvinceId") != null) {
+      stateId = command.longValueOfParameterNamed("stateProvinceId");
+      stateIdobj = this.codeValueRepository.getOne(stateId);
     }
 
-    @Override
-    public CommandProcessingResult addClientAddress(final Long clientId, final Long addressTypeId,
-            final JsonCommand command) {
-        CodeValue stateIdobj = null;
-        CodeValue countryIdObj = null;
-        long stateId;
-        long countryId;
+    if (command.longValueOfParameterNamed("countryId") != null) {
+      countryId = command.longValueOfParameterNamed("countryId");
+      countryIdObj = this.codeValueRepository.getOne(countryId);
+    }
 
-        this.context.authenticatedUser();
-        this.fromApiJsonDeserializer.validateForCreate(command.json(), true);
+    final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
 
-        if (command.longValueOfParameterNamed("stateProvinceId") != null) {
-            stateId = command.longValueOfParameterNamed("stateProvinceId");
-            stateIdobj = this.codeValueRepository.getOne(stateId);
+    final Address add = Address.fromJson(command, stateIdobj, countryIdObj);
+    add.setCreatedOn(LocalDate.now());
+    add.setUpdatedOn(LocalDate.now());
+    this.addressRepository.save(add);
+    final Long addressid = add.getId();
+    final Address addobj = this.addressRepository.getOne(addressid);
+
+    final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+    final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
+
+    final ClientAddress clientAddressobj =
+        ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
+    this.clientAddressRepository.save(clientAddressobj);
+
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .withEntityId(clientAddressobj.getId())
+        .build();
+  }
+
+  // following method is used for adding multiple addresses while creating new
+  // client
+
+  @Override
+  public CommandProcessingResult addNewClientAddress(
+      final Client client, final JsonCommand command) {
+    CodeValue stateIdobj = null;
+    CodeValue countryIdObj = null;
+    long stateId;
+    long countryId;
+    ClientAddress clientAddressobj = new ClientAddress();
+    final JsonArray addressArray = command.arrayOfParameterNamed("address");
+
+    if (addressArray != null) {
+      for (int i = 0; i < addressArray.size(); i++) {
+        final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
+
+        // validate every address
+        this.fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), true);
+
+        if (jsonObject.get("stateProvinceId") != null) {
+          stateId = jsonObject.get("stateProvinceId").getAsLong();
+          stateIdobj = this.codeValueRepository.getOne(stateId);
         }
 
-        if (command.longValueOfParameterNamed("countryId") != null) {
-            countryId = command.longValueOfParameterNamed("countryId");
-            countryIdObj = this.codeValueRepository.getOne(countryId);
+        if (jsonObject.get("countryId") != null) {
+          countryId = jsonObject.get("countryId").getAsLong();
+          countryIdObj = this.codeValueRepository.getOne(countryId);
         }
 
+        final long addressTypeId = jsonObject.get("addressTypeId").getAsLong();
         final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
 
-        final Address add = Address.fromJson(command, stateIdobj, countryIdObj);
+        final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
         add.setCreatedOn(LocalDate.now());
         add.setUpdatedOn(LocalDate.now());
         this.addressRepository.save(add);
         final Long addressid = add.getId();
         final Address addobj = this.addressRepository.getOne(addressid);
 
-        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
+        // final boolean isActive = jsonObject.get("isActive").getAsBoolean();
+        boolean isActive = false;
+        if (jsonObject.get("isActive") != null) {
+          isActive = jsonObject.get("isActive").getAsBoolean();
+        }
 
-        final ClientAddress clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
+        clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
         this.clientAddressRepository.save(clientAddressobj);
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientAddressobj.getId()).build();
+      }
     }
 
-    // following method is used for adding multiple addresses while creating new
-    // client
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .withEntityId(clientAddressobj.getId())
+        .build();
+  }
 
-    @Override
-    public CommandProcessingResult addNewClientAddress(final Client client, final JsonCommand command) {
-        CodeValue stateIdobj = null;
-        CodeValue countryIdObj = null;
-        long stateId;
-        long countryId;
-        ClientAddress clientAddressobj = new ClientAddress();
-        final JsonArray addressArray = command.arrayOfParameterNamed("address");
+  @Override
+  public CommandProcessingResult updateClientAddress(
+      final Long clientId, final JsonCommand command) {
+    this.context.authenticatedUser();
 
-        if(addressArray != null){
-            for (int i = 0; i < addressArray.size(); i++) {
-                final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
+    long stateId;
 
-                // validate every address
-                this.fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), true);
+    long countryId;
 
-                if (jsonObject.get("stateProvinceId") != null) {
-                    stateId = jsonObject.get("stateProvinceId").getAsLong();
-                    stateIdobj = this.codeValueRepository.getOne(stateId);
-                }
+    CodeValue stateIdobj;
 
-                if (jsonObject.get("countryId") != null) {
-                    countryId = jsonObject.get("countryId").getAsLong();
-                    countryIdObj = this.codeValueRepository.getOne(countryId);
-                }
+    CodeValue countryIdObj;
 
-                final long addressTypeId = jsonObject.get("addressTypeId").getAsLong();
-                final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
+    boolean is_address_update = false;
 
-                final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
-                add.setCreatedOn(LocalDate.now());
-                add.setUpdatedOn(LocalDate.now());
-                this.addressRepository.save(add);
-                final Long addressid = add.getId();
-                final Address addobj = this.addressRepository.getOne(addressid);
+    this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-                //final boolean isActive = jsonObject.get("isActive").getAsBoolean();
-                boolean isActive=false;
-                if(jsonObject.get("isActive")!= null)
-                {
-                    isActive= jsonObject.get("isActive").getAsBoolean();
-                }
+    final long addressId = command.longValueOfParameterNamed("addressId");
 
+    final ClientAddress clientAddressObj =
+        this.clientAddressRepositoryWrapper.findOneByClientIdAndAddressId(clientId, addressId);
 
-                clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
-                this.clientAddressRepository.save(clientAddressobj);
+    final Address addobj = this.addressRepository.getOne(addressId);
 
-            }
-        }
+    if (!(command.stringValueOfParameterNamed("street").isEmpty())) {
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientAddressobj.getId()).build();
+      is_address_update = true;
+      final String street = command.stringValueOfParameterNamed("street");
+      addobj.setStreet(street);
     }
 
-    @Override
-    public CommandProcessingResult updateClientAddress(final Long clientId, final JsonCommand command) {
-        this.context.authenticatedUser();
+    if (!(command.stringValueOfParameterNamed("addressLine1").isEmpty())) {
 
-        long stateId;
-
-        long countryId;
-
-        CodeValue stateIdobj;
-
-        CodeValue countryIdObj;
-
-        boolean is_address_update = false;
-
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
-        final long addressId = command.longValueOfParameterNamed("addressId");
-
-        final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper
-                .findOneByClientIdAndAddressId(clientId, addressId);
-
-        final Address addobj = this.addressRepository.getOne(addressId);
-
-        if (!(command.stringValueOfParameterNamed("street").isEmpty())) {
-
-            is_address_update = true;
-            final String street = command.stringValueOfParameterNamed("street");
-            addobj.setStreet(street);
-        }
-
-        if (!(command.stringValueOfParameterNamed("addressLine1").isEmpty())) {
-
-            is_address_update = true;
-            final String addressLine1 = command.stringValueOfParameterNamed("addressLine1");
-            addobj.setAddressLine1(addressLine1);
-
-        }
-
-        if (!(command.stringValueOfParameterNamed("addressLine2").isEmpty())) {
-
-            is_address_update = true;
-            final String addressLine2 = command.stringValueOfParameterNamed("addressLine2");
-            addobj.setAddressLine2(addressLine2);
-
-        }
-
-        if (!(command.stringValueOfParameterNamed("addressLine3").isEmpty())) {
-            is_address_update = true;
-            final String addressLine3 = command.stringValueOfParameterNamed("addressLine3");
-            addobj.setAddressLine3(addressLine3);
-
-        }
-
-        if (!(command.stringValueOfParameterNamed("townVillage").isEmpty())) {
-
-            is_address_update = true;
-            final String townVillage = command.stringValueOfParameterNamed("townVillage");
-            addobj.setTownVillage(townVillage);
-        }
-
-        if (!(command.stringValueOfParameterNamed("city").isEmpty())) {
-            is_address_update = true;
-            final String city = command.stringValueOfParameterNamed("city");
-            addobj.setCity(city);
-        }
-
-        if (!(command.stringValueOfParameterNamed("countyDistrict").isEmpty())) {
-            is_address_update = true;
-            final String countyDistrict = command.stringValueOfParameterNamed("countyDistrict");
-            addobj.setCountyDistrict(countyDistrict);
-        }
-
-        if ((command.longValueOfParameterNamed("stateProvinceId") != null)) {
-            if ((command.longValueOfParameterNamed("stateProvinceId") != 0)) {
-                is_address_update = true;
-                stateId = command.longValueOfParameterNamed("stateProvinceId");
-                stateIdobj = this.codeValueRepository.getOne(stateId);
-                addobj.setStateProvince(stateIdobj);
-            }
-
-        }
-        if ((command.longValueOfParameterNamed("countryId") != null)) {
-            if ((command.longValueOfParameterNamed("countryId") != 0)) {
-                is_address_update = true;
-                countryId = command.longValueOfParameterNamed("countryId");
-                countryIdObj = this.codeValueRepository.getOne(countryId);
-                addobj.setCountry(countryIdObj);
-            }
-
-        }
-
-        if (!(command.stringValueOfParameterNamed("postalCode").isEmpty())) {
-            is_address_update = true;
-            final String postalCode = command.stringValueOfParameterNamed("postalCode");
-            addobj.setPostalCode(postalCode);
-        }
-
-        if (command.bigDecimalValueOfParameterNamed("latitude") != null) {
-
-            is_address_update = true;
-            final BigDecimal latitude = command.bigDecimalValueOfParameterNamed("latitude");
-
-            addobj.setLatitude(latitude);
-        }
-        if (command.bigDecimalValueOfParameterNamed("longitude") != null) {
-            is_address_update = true;
-            final BigDecimal longitude = command.bigDecimalValueOfParameterNamed("longitude");
-            addobj.setLongitude(longitude);
-
-        }
-
-        if (is_address_update) {
-            addobj.setUpdatedOn(LocalDate.now());
-            this.addressRepository.save(addobj);
-
-        }
-
-        final Boolean testActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
-        if (testActive != null) {
-
-            final boolean active = command.booleanPrimitiveValueOfParameterNamed("isActive");
-            clientAddressObj.setIs_active(active);
-
-        }
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientAddressObj.getId()).build();
+      is_address_update = true;
+      final String addressLine1 = command.stringValueOfParameterNamed("addressLine1");
+      addobj.setAddressLine1(addressLine1);
     }
+
+    if (!(command.stringValueOfParameterNamed("addressLine2").isEmpty())) {
+
+      is_address_update = true;
+      final String addressLine2 = command.stringValueOfParameterNamed("addressLine2");
+      addobj.setAddressLine2(addressLine2);
+    }
+
+    if (!(command.stringValueOfParameterNamed("addressLine3").isEmpty())) {
+      is_address_update = true;
+      final String addressLine3 = command.stringValueOfParameterNamed("addressLine3");
+      addobj.setAddressLine3(addressLine3);
+    }
+
+    if (!(command.stringValueOfParameterNamed("townVillage").isEmpty())) {
+
+      is_address_update = true;
+      final String townVillage = command.stringValueOfParameterNamed("townVillage");
+      addobj.setTownVillage(townVillage);
+    }
+
+    if (!(command.stringValueOfParameterNamed("city").isEmpty())) {
+      is_address_update = true;
+      final String city = command.stringValueOfParameterNamed("city");
+      addobj.setCity(city);
+    }
+
+    if (!(command.stringValueOfParameterNamed("countyDistrict").isEmpty())) {
+      is_address_update = true;
+      final String countyDistrict = command.stringValueOfParameterNamed("countyDistrict");
+      addobj.setCountyDistrict(countyDistrict);
+    }
+
+    if ((command.longValueOfParameterNamed("stateProvinceId") != null)) {
+      if ((command.longValueOfParameterNamed("stateProvinceId") != 0)) {
+        is_address_update = true;
+        stateId = command.longValueOfParameterNamed("stateProvinceId");
+        stateIdobj = this.codeValueRepository.getOne(stateId);
+        addobj.setStateProvince(stateIdobj);
+      }
+    }
+    if ((command.longValueOfParameterNamed("countryId") != null)) {
+      if ((command.longValueOfParameterNamed("countryId") != 0)) {
+        is_address_update = true;
+        countryId = command.longValueOfParameterNamed("countryId");
+        countryIdObj = this.codeValueRepository.getOne(countryId);
+        addobj.setCountry(countryIdObj);
+      }
+    }
+
+    if (!(command.stringValueOfParameterNamed("postalCode").isEmpty())) {
+      is_address_update = true;
+      final String postalCode = command.stringValueOfParameterNamed("postalCode");
+      addobj.setPostalCode(postalCode);
+    }
+
+    if (command.bigDecimalValueOfParameterNamed("latitude") != null) {
+
+      is_address_update = true;
+      final BigDecimal latitude = command.bigDecimalValueOfParameterNamed("latitude");
+
+      addobj.setLatitude(latitude);
+    }
+    if (command.bigDecimalValueOfParameterNamed("longitude") != null) {
+      is_address_update = true;
+      final BigDecimal longitude = command.bigDecimalValueOfParameterNamed("longitude");
+      addobj.setLongitude(longitude);
+    }
+
+    if (is_address_update) {
+      addobj.setUpdatedOn(LocalDate.now());
+      this.addressRepository.save(addobj);
+    }
+
+    final Boolean testActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
+    if (testActive != null) {
+
+      final boolean active = command.booleanPrimitiveValueOfParameterNamed("isActive");
+      clientAddressObj.setIs_active(active);
+    }
+
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .withEntityId(clientAddressObj.getId())
+        .build();
+  }
 }

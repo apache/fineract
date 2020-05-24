@@ -29,27 +29,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AuditorAwareImpl implements AuditorAware<AppUser> {
 
-    @Autowired
-    private AppUserRepository userRepository;
+  @Autowired private AppUserRepository userRepository;
 
-    @Override
-    public Optional<AppUser> getCurrentAuditor() {
-        Optional<AppUser> currentUser;
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        if (securityContext != null) {
-            final Authentication authentication = securityContext.getAuthentication();
-            if (authentication != null) {
-                currentUser = Optional.ofNullable((AppUser) authentication.getPrincipal());
-            } else {
-                currentUser = retrieveSuperUser();
-            }
-        } else {
-            currentUser = retrieveSuperUser();
-        }
-        return currentUser;
+  @Override
+  public Optional<AppUser> getCurrentAuditor() {
+    Optional<AppUser> currentUser;
+    final SecurityContext securityContext = SecurityContextHolder.getContext();
+    if (securityContext != null) {
+      final Authentication authentication = securityContext.getAuthentication();
+      if (authentication != null) {
+        currentUser = Optional.ofNullable((AppUser) authentication.getPrincipal());
+      } else {
+        currentUser = retrieveSuperUser();
+      }
+    } else {
+      currentUser = retrieveSuperUser();
     }
+    return currentUser;
+  }
 
-    private Optional<AppUser> retrieveSuperUser() {
-        return this.userRepository.findById(Long.valueOf("1"));
-    }
+  private Optional<AppUser> retrieveSuperUser() {
+    return this.userRepository.findById(Long.valueOf("1"));
+  }
 }

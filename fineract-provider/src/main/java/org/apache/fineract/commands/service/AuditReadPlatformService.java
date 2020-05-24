@@ -27,13 +27,15 @@ import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 
 public interface AuditReadPlatformService {
 
-    Collection<AuditData> retrieveAuditEntries(SQLBuilder extraCriteria, boolean includeJson);
+  Collection<AuditData> retrieveAuditEntries(SQLBuilder extraCriteria, boolean includeJson);
 
-    Page<AuditData> retrievePaginatedAuditEntries(SQLBuilder extraCriteria, boolean includeJson, PaginationParameters parameters);
+  Page<AuditData> retrievePaginatedAuditEntries(
+      SQLBuilder extraCriteria, boolean includeJson, PaginationParameters parameters);
 
-    Collection<AuditData> retrieveAllEntriesToBeChecked(SQLBuilder extraCriteria, boolean includeJson);
+  Collection<AuditData> retrieveAllEntriesToBeChecked(
+      SQLBuilder extraCriteria, boolean includeJson);
 
-    AuditData retrieveAuditEntry(Long auditId);
+  AuditData retrieveAuditEntry(Long auditId);
 
-    AuditSearchData retrieveSearchTemplate(String useType);
+  AuditSearchData retrieveSearchTemplate(String useType);
 }

@@ -59,90 +59,138 @@ import org.springframework.stereotype.Component;
 @Profile("basicauth")
 @Path("/authentication")
 @Api(tags = {"Authentication HTTP Basic"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Authentication HTTP Basic",
+          description =
+              "An API capability that allows client applications to verify authentication details"
+                  + " using HTTP Basic Authentication.")
+    })
 public class AuthenticationApiResource {
 
-    public static class AuthenticateRequest {
-        public String username;
-        public String password;
+  public static class AuthenticateRequest {
+    public String username;
+    public String password;
+  }
+
+  private final DaoAuthenticationProvider customAuthenticationProvider;
+  private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
+  private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
+  private final TwoFactorUtils twoFactorUtils;
+
+  @Autowired
+  public AuthenticationApiResource(
+      @Qualifier("customAuthenticationProvider")
+          final DaoAuthenticationProvider customAuthenticationProvider,
+      final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,
+      final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext,
+      TwoFactorUtils twoFactorUtils) {
+    this.customAuthenticationProvider = customAuthenticationProvider;
+    this.apiJsonSerializerService = apiJsonSerializerService;
+    this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
+    this.twoFactorUtils = twoFactorUtils;
+  }
+
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Verify authentication",
+      notes =
+          "Authenticates the credentials provided and returns the set roles and permissions"
+              + " allowed.")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class),
+    @ApiResponse(code = 400, message = "Unauthenticated. Please login")
+  })
+  public String authenticate(final String apiRequestBodyAsJson) {
+    // TODO FINERACT-819: sort out Jersey so JSON conversion does not have to be done explicitly via
+    // GSON here, but implicit by arg
+    AuthenticateRequest request =
+        new Gson().fromJson(apiRequestBodyAsJson, AuthenticateRequest.class);
+    if (request == null) {
+      throw new IllegalArgumentException(
+          "Invalid JSON in BODY (no longer URL param; see FINERACT-726) of POST to"
+              + " /authentication: "
+              + apiRequestBodyAsJson);
+    }
+    if (request.username == null || request.password == null) {
+      throw new IllegalArgumentException(
+          "Username or Password is null in JSON (see FINERACT-726) of POST to /authentication: "
+              + apiRequestBodyAsJson
+              + "; username="
+              + request.username
+              + ", password="
+              + request.password);
     }
 
-    private final DaoAuthenticationProvider customAuthenticationProvider;
-    private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
-    private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
-    private final TwoFactorUtils twoFactorUtils;
+    final Authentication authentication =
+        new UsernamePasswordAuthenticationToken(request.username, request.password);
+    final Authentication authenticationCheck =
+        this.customAuthenticationProvider.authenticate(authentication);
 
-    @Autowired
-    public AuthenticationApiResource(
-            @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
-            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext, TwoFactorUtils twoFactorUtils) {
-        this.customAuthenticationProvider = customAuthenticationProvider;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
-        this.twoFactorUtils = twoFactorUtils;
+    final Collection<String> permissions = new ArrayList<>();
+    AuthenticatedUserData authenticatedUserData =
+        new AuthenticatedUserData(request.username, permissions);
+
+    if (authenticationCheck.isAuthenticated()) {
+      final Collection<GrantedAuthority> authorities =
+          new ArrayList<>(authenticationCheck.getAuthorities());
+      for (final GrantedAuthority grantedAuthority : authorities) {
+        permissions.add(grantedAuthority.getAuthority());
+      }
+
+      final byte[] base64EncodedAuthenticationKey =
+          Base64.encode(request.username + ":" + request.password);
+
+      final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
+      final Collection<RoleData> roles = new ArrayList<>();
+      final Set<Role> userRoles = principal.getRoles();
+      for (final Role role : userRoles) {
+        roles.add(role.toData());
+      }
+
+      final Long officeId = principal.getOffice().getId();
+      final String officeName = principal.getOffice().getName();
+
+      final Long staffId = principal.getStaffId();
+      final String staffDisplayName = principal.getStaffDisplayName();
+
+      final EnumOptionData organisationalRole = principal.organisationalRoleData();
+
+      boolean isTwoFactorRequired =
+          twoFactorUtils.isTwoFactorAuthEnabled()
+              && !principal.hasSpecificPermissionTo(
+                  TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
+      if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
+        authenticatedUserData =
+            new AuthenticatedUserData(
+                request.username,
+                principal.getId(),
+                new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8),
+                isTwoFactorRequired);
+      } else {
+
+        authenticatedUserData =
+            new AuthenticatedUserData(
+                request.username,
+                officeId,
+                officeName,
+                staffId,
+                staffDisplayName,
+                organisationalRole,
+                roles,
+                permissions,
+                principal.getId(),
+                new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8),
+                isTwoFactorRequired);
+      }
     }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Verify authentication", notes = "Authenticates the credentials provided and returns the set roles and permissions allowed.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = AuthenticationApiResourceSwagger.PostAuthenticationResponse.class), @ApiResponse(code = 400, message = "Unauthenticated. Please login")})
-    public String authenticate(final String apiRequestBodyAsJson) {
-        // TODO FINERACT-819: sort out Jersey so JSON conversion does not have to be done explicitly via GSON here, but implicit by arg
-        AuthenticateRequest request = new Gson().fromJson(apiRequestBodyAsJson, AuthenticateRequest.class);
-        if (request == null) {
-            throw new IllegalArgumentException("Invalid JSON in BODY (no longer URL param; see FINERACT-726) of POST to /authentication: " + apiRequestBodyAsJson);
-        }
-        if (request.username == null || request.password == null) {
-            throw new IllegalArgumentException("Username or Password is null in JSON (see FINERACT-726) of POST to /authentication: " + apiRequestBodyAsJson + "; username=" + request.username + ", password=" + request.password);
-        }
-
-        final Authentication authentication = new UsernamePasswordAuthenticationToken(request.username, request.password);
-        final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
-
-        final Collection<String> permissions = new ArrayList<>();
-        AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(request.username, permissions);
-
-        if (authenticationCheck.isAuthenticated()) {
-            final Collection<GrantedAuthority> authorities = new ArrayList<>(authenticationCheck.getAuthorities());
-            for (final GrantedAuthority grantedAuthority : authorities) {
-                permissions.add(grantedAuthority.getAuthority());
-            }
-
-            final byte[] base64EncodedAuthenticationKey = Base64.encode(request.username + ":" + request.password);
-
-            final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
-            final Collection<RoleData> roles = new ArrayList<>();
-            final Set<Role> userRoles = principal.getRoles();
-            for (final Role role : userRoles) {
-                roles.add(role.toData());
-            }
-
-            final Long officeId = principal.getOffice().getId();
-            final String officeName = principal.getOffice().getName();
-
-            final Long staffId = principal.getStaffId();
-            final String staffDisplayName = principal.getStaffDisplayName();
-
-            final EnumOptionData organisationalRole = principal.organisationalRoleData();
-
-            boolean isTwoFactorRequired = twoFactorUtils.isTwoFactorAuthEnabled() && !
-                    principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
-            if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedUserData(request.username, principal.getId(),
-                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
-            } else {
-
-                authenticatedUserData = new AuthenticatedUserData(request.username, officeId, officeName, staffId, staffDisplayName,
-                        organisationalRole, roles, permissions, principal.getId(),
-                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
-            }
-
-        }
-
-        return this.apiJsonSerializerService.serialize(authenticatedUserData);
-    }
+    return this.apiJsonSerializerService.serialize(authenticatedUserData);
+  }
 }

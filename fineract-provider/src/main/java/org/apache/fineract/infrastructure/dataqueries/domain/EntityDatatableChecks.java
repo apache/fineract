@@ -26,76 +26,77 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_entity_datatable_check")
-
 public class EntityDatatableChecks extends AbstractPersistableCustom {
 
-    @Column(name = "application_table_name", nullable = false)
-    private String entity;
+  @Column(name = "application_table_name", nullable = false)
+  private String entity;
 
-    @Column(name = "x_registered_table_name", nullable = false)
-    private String datatableName;
+  @Column(name = "x_registered_table_name", nullable = false)
+  private String datatableName;
 
-    @Column(name = "status_enum", nullable = false)
-    private Long status;
+  @Column(name = "status_enum", nullable = false)
+  private Long status;
 
-    @Column(name = "system_defined")
-    private boolean systemDefined = false;
+  @Column(name = "system_defined")
+  private boolean systemDefined = false;
 
-    @Column(name = "product_id", nullable = true)
-    private Long productId;
+  @Column(name = "product_id", nullable = true)
+  private Long productId;
 
-    public EntityDatatableChecks() {
+  public EntityDatatableChecks() {}
+
+  public EntityDatatableChecks(
+      final String entity,
+      final String datatableName,
+      final Long status,
+      final boolean systemDefined,
+      final Long productId) {
+
+    this.entity = entity;
+    this.status = status;
+    this.datatableName = datatableName;
+    this.systemDefined = systemDefined;
+    this.productId = productId;
+  }
+
+  public static EntityDatatableChecks fromJson(final JsonCommand command) {
+
+    final String entity = command.stringValueOfParameterNamed("entity");
+    final Long status = command.longValueOfParameterNamed("status");
+    final String datatableName = command.stringValueOfParameterNamed("datatableName");
+
+    boolean systemDefined = false;
+    if (command.parameterExists("systemDefined")) {
+      systemDefined = command.booleanObjectValueOfParameterNamed("systemDefined");
+    } else {
+      systemDefined = false;
     }
 
-    public EntityDatatableChecks(final String entity, final String datatableName, final Long status,
-            final boolean systemDefined, final Long productId) {
-
-        this.entity = entity;
-        this.status = status;
-        this.datatableName = datatableName;
-        this.systemDefined = systemDefined;
-        this.productId = productId;
+    Long productId = null;
+    if (command.parameterExists("productId")) {
+      productId = command.longValueOfParameterNamed("productId");
     }
 
-    public static EntityDatatableChecks fromJson(final JsonCommand command) {
+    return new EntityDatatableChecks(entity, datatableName, status, systemDefined, productId);
+  }
 
-        final String entity = command.stringValueOfParameterNamed("entity");
-        final Long status = command.longValueOfParameterNamed("status");
-        final String datatableName = command.stringValueOfParameterNamed("datatableName");
+  public String getEntity() {
+    return this.entity;
+  }
 
-        boolean systemDefined = false;
-        if (command.parameterExists("systemDefined")) {
-            systemDefined = command.booleanObjectValueOfParameterNamed("systemDefined");
-        } else {
-            systemDefined = false;
-        }
+  public Long getStatus() {
+    return this.status;
+  }
 
-        Long productId = null;
-        if (command.parameterExists("productId")) {
-            productId = command.longValueOfParameterNamed("productId");
-        }
+  public String getDatatableName() {
+    return this.datatableName;
+  }
 
-        return new EntityDatatableChecks(entity, datatableName, status, systemDefined, productId);
+  public boolean isSystemDefined() {
+    return this.systemDefined;
+  }
 
-    }
-
-    public String getEntity() {
-        return this.entity;
-    }
-
-    public Long getStatus() {
-        return this.status;
-    }
-
-    public String getDatatableName() {
-        return this.datatableName;
-    }
-
-    public boolean isSystemDefined() {
-        return this.systemDefined;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
+  public Long getProductId() {
+    return productId;
+  }
 }

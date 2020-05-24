@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertTrue;
@@ -29,19 +28,23 @@ import org.junit.Test;
 
 public class ActuatorIntegrationTest {
 
-    private final static String INFO_URL = "/fineract-provider/actuator/info";
+  private static final String INFO_URL = "/fineract-provider/actuator/info";
 
-    @Test
-    public void testActuatorGitBuildInfo() {
-        Response response = RestAssured.given()
-            .headers("Content-Type", ContentType.JSON, "Accept", ContentType.JSON).when()
-            .get(INFO_URL).then().contentType(ContentType.JSON).extract().response();
+  @Test
+  public void testActuatorGitBuildInfo() {
+    Response response =
+        RestAssured.given()
+            .headers("Content-Type", ContentType.JSON, "Accept", ContentType.JSON)
+            .when()
+            .get(INFO_URL)
+            .then()
+            .contentType(ContentType.JSON)
+            .extract()
+            .response();
 
-        Map<String, String> gitBuildInfo = response.jsonPath().getMap("git");
+    Map<String, String> gitBuildInfo = response.jsonPath().getMap("git");
 
-        assertTrue(gitBuildInfo.containsKey("branch"));
-        assertTrue(gitBuildInfo.containsKey("remote"));
-
-    }
-
+    assertTrue(gitBuildInfo.containsKey("branch"));
+    assertTrue(gitBuildInfo.containsKey("remote"));
+  }
 }

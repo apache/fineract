@@ -23,10 +23,16 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 /**
  * A {@link RuntimeException} thrown when Calendar resources are not found.
  */
-public class ChargeParameterUpdateNotSupportedException extends AbstractPlatformDomainRuleException {
+public class ChargeParameterUpdateNotSupportedException
+    extends AbstractPlatformDomainRuleException {
 
-    public ChargeParameterUpdateNotSupportedException(final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg.charge.update.of." + postFix + ".is.not.supported", defaultUserMessage, defaultUserMessageArgs);
-    }
+  public ChargeParameterUpdateNotSupportedException(
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg.charge.update.of." + postFix + ".is.not.supported",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

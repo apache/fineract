@@ -25,7 +25,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class CalendarNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public CalendarNotFoundException(final Long id) {
-        super("error.msg.calendar.id.invalid", "Calendar with identifier " + id + " does not exist", id);
-    }
+  public CalendarNotFoundException(final Long id) {
+    super(
+        "error.msg.calendar.id.invalid", "Calendar with identifier " + id + " does not exist", id);
+  }
 }

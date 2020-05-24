@@ -20,22 +20,21 @@ package org.apache.fineract.infrastructure.sms;
 
 public class SmsApiConstants {
 
-    public static final String RESOURCE_NAME = "sms";
+  public static final String RESOURCE_NAME = "sms";
 
-    // general
-    public static final String localeParamName = "locale";
-    public static final String dateFormatParamName = "dateFormat";
+  // general
+  public static final String localeParamName = "locale";
+  public static final String dateFormatParamName = "dateFormat";
 
-    // request parameters
-    public static final String idParamName = "id";
-    public static final String groupIdParamName = "groupId";
-    public static final String externalIdParamName = "externalId";
-    public static final String clientIdParamName = "clientId";
-    public static final String staffIdParamName = "staffId";
-    public static final String messageParamName = "message";
-    public static final String campaignIdParamName = "campaignId";
+  // request parameters
+  public static final String idParamName = "id";
+  public static final String groupIdParamName = "groupId";
+  public static final String externalIdParamName = "externalId";
+  public static final String clientIdParamName = "clientId";
+  public static final String staffIdParamName = "staffId";
+  public static final String messageParamName = "message";
+  public static final String campaignIdParamName = "campaignId";
 
-    // response parameters
-    public static final String statusParamName = "status";
-
+  // response parameters
+  public static final String statusParamName = "status";
 }

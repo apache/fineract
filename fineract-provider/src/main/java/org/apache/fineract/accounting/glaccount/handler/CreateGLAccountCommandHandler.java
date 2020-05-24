@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLACCOUNT", action = "CREATE")
 public class CreateGLAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final GLAccountWritePlatformService writePlatformService;
+  private final GLAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateGLAccountCommandHandler(final GLAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateGLAccountCommandHandler(final GLAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createGLAccount(command);
-    }
+    return this.writePlatformService.createGLAccount(command);
+  }
 }

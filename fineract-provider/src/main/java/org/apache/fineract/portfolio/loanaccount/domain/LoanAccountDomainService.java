@@ -27,50 +27,101 @@ import org.joda.time.LocalDate;
 
 public interface LoanAccountDomainService {
 
-    LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
-            final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidatDetailDto, Boolean isHolidayValidationDone);
+  LoanTransaction makeRepayment(
+      Loan loan,
+      CommandProcessingResultBuilder builderResult,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId,
+      final boolean isRecoveryRepayment,
+      boolean isAccountTransfer,
+      HolidayDetailDTO holidatDetailDto,
+      Boolean isHolidayValidationDone);
 
-    LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
+  LoanTransaction makeRefund(
+      Long accountId,
+      CommandProcessingResultBuilder builderResult,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId);
 
-    LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId, boolean isLoanToLoanTransfer);
+  LoanTransaction makeDisburseTransaction(
+      Long loanId,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId,
+      boolean isLoanToLoanTransfer);
 
-    void reverseTransfer(LoanTransaction loanTransaction);
+  void reverseTransfer(LoanTransaction loanTransaction);
 
-    LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber);
+  LoanTransaction makeChargePayment(
+      Loan loan,
+      Long chargeId,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId,
+      Integer transactionType,
+      Integer installmentNumber);
 
-    LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId);
+  LoanTransaction makeDisburseTransaction(
+      Long loanId,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId);
 
-    LoanTransaction makeRefundForActiveLoan(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
+  LoanTransaction makeRefundForActiveLoan(
+      Long accountId,
+      CommandProcessingResultBuilder builderResult,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId);
 
-    /**
-     * This method is to recalculate and accrue the income till the last accrued
-     * date. this method is used when the schedule changes due to interest
-     * recalculation
-     *
-     * @param loan
-     */
-    void recalculateAccruals(Loan loan);
+  /**
+   * This method is to recalculate and accrue the income till the last accrued
+   * date. this method is used when the schedule changes due to interest
+   * recalculation
+   *
+   * @param loan
+   */
+  void recalculateAccruals(Loan loan);
 
-    LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId, boolean isRecoveryRepayment,
-            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone, boolean isLoanToLoanTransfer);
+  LoanTransaction makeRepayment(
+      Loan loan,
+      CommandProcessingResultBuilder builderResult,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      String noteText,
+      String txnExternalId,
+      boolean isRecoveryRepayment,
+      boolean isAccountTransfer,
+      HolidayDetailDTO holidayDetailDto,
+      Boolean isHolidayValidationDone,
+      boolean isLoanToLoanTransfer);
 
-    void saveLoanWithDataIntegrityViolationChecks(Loan loan);
+  void saveLoanWithDataIntegrityViolationChecks(Loan loan);
 
-    Map<String, Object> foreCloseLoan(final Loan loan, final LocalDate foreClourseDate, String noteText);
+  Map<String, Object> foreCloseLoan(
+      final Loan loan, final LocalDate foreClourseDate, String noteText);
 
-    /**
-     * Disables all standing instructions linked to a closed loan
-     *
-     * @param loan {@link Loan} object
-     */
-    void disableStandingInstructionsLinkedToClosedLoan(Loan loan);
+  /**
+   * Disables all standing instructions linked to a closed loan
+   *
+   * @param loan {@link Loan} object
+   */
+  void disableStandingInstructionsLinkedToClosedLoan(Loan loan);
 
-    void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened);
+  void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened);
 }

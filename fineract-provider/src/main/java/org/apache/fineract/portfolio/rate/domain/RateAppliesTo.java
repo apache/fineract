@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.rate.domain;
 
 public enum RateAppliesTo {
-
   INVALID(0, "rateAppliesTo.invalid"),
   LOAN(1, "rateAppliesTo.loan");
 
@@ -62,6 +60,6 @@ public enum RateAppliesTo {
   }
 
   public static Object[] validValues() {
-    return new Object[]{RateAppliesTo.LOAN.getValue()};
+    return new Object[] {RateAppliesTo.LOAN.getValue()};
   }
 }

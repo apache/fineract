@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOANPRODUCT", action = "CREATE")
 public class CreateLoanProductCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanProductWritePlatformService writePlatformService;
+  private final LoanProductWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateLoanProductCommandHandler(final LoanProductWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateLoanProductCommandHandler(
+      final LoanProductWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createLoanProduct(command);
-    }
+    return this.writePlatformService.createLoanProduct(command);
+  }
 }

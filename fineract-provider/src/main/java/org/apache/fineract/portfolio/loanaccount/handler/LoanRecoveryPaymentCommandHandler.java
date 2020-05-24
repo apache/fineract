@@ -30,16 +30,17 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "RECOVERYPAYMENT")
 public class LoanRecoveryPaymentCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public LoanRecoveryPaymentCommandHandler(LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public LoanRecoveryPaymentCommandHandler(LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        final boolean isRecoveryRepayment = true;
-        return writePlatformService.makeLoanRepayment(command.getLoanId(), command, isRecoveryRepayment);
-    }
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    final boolean isRecoveryRepayment = true;
+    return writePlatformService.makeLoanRepayment(
+        command.getLoanId(), command, isRecoveryRepayment);
+  }
 }

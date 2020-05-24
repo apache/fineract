@@ -73,285 +73,331 @@ import org.springframework.util.ObjectUtils;
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
 
-    private final PlatformSecurityContext context;
-    private final UserDomainService userDomainService;
-    private final PlatformPasswordEncoder platformPasswordEncoder;
-    private final AppUserRepository appUserRepository;
-    private final OfficeRepositoryWrapper officeRepositoryWrapper;
-    private final RoleRepository roleRepository;
-    private final UserDataValidator fromApiJsonDeserializer;
-    private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
-    private final StaffRepositoryWrapper staffRepositoryWrapper;
-    private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final TopicDomainService topicDomainService;
+  private final PlatformSecurityContext context;
+  private final UserDomainService userDomainService;
+  private final PlatformPasswordEncoder platformPasswordEncoder;
+  private final AppUserRepository appUserRepository;
+  private final OfficeRepositoryWrapper officeRepositoryWrapper;
+  private final RoleRepository roleRepository;
+  private final UserDataValidator fromApiJsonDeserializer;
+  private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
+  private final StaffRepositoryWrapper staffRepositoryWrapper;
+  private final ClientRepositoryWrapper clientRepositoryWrapper;
+  private final TopicDomainService topicDomainService;
 
-    @Autowired
-    public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
-            final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
-            final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final TopicDomainService topicDomainService) {
-        this.context = context;
-        this.appUserRepository = appUserRepository;
-        this.userDomainService = userDomainService;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.roleRepository = roleRepository;
-        this.platformPasswordEncoder = platformPasswordEncoder;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
-        this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.topicDomainService = topicDomainService;
-    }
+  @Autowired
+  public AppUserWritePlatformServiceJpaRepositoryImpl(
+      final PlatformSecurityContext context,
+      final AppUserRepository appUserRepository,
+      final UserDomainService userDomainService,
+      final OfficeRepositoryWrapper officeRepositoryWrapper,
+      final RoleRepository roleRepository,
+      final PlatformPasswordEncoder platformPasswordEncoder,
+      final UserDataValidator fromApiJsonDeserializer,
+      final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository,
+      final StaffRepositoryWrapper staffRepositoryWrapper,
+      final ClientRepositoryWrapper clientRepositoryWrapper,
+      final TopicDomainService topicDomainService) {
+    this.context = context;
+    this.appUserRepository = appUserRepository;
+    this.userDomainService = userDomainService;
+    this.officeRepositoryWrapper = officeRepositoryWrapper;
+    this.roleRepository = roleRepository;
+    this.platformPasswordEncoder = platformPasswordEncoder;
+    this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+    this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
+    this.staffRepositoryWrapper = staffRepositoryWrapper;
+    this.clientRepositoryWrapper = clientRepositoryWrapper;
+    this.topicDomainService = topicDomainService;
+  }
 
-    @Transactional
-    @Override
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
-    public CommandProcessingResult createUser(final JsonCommand command) {
+  @Transactional
+  @Override
+  @Caching(
+      evict = {
+        @CacheEvict(value = "users", allEntries = true),
+        @CacheEvict(value = "usersByUsername", allEntries = true)
+      })
+  public CommandProcessingResult createUser(final JsonCommand command) {
 
-        try {
-            this.context.authenticatedUser();
+    try {
+      this.context.authenticatedUser();
 
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
+      this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final String officeIdParamName = "officeId";
-            final Long officeId = command.longValueOfParameterNamed(officeIdParamName);
+      final String officeIdParamName = "officeId";
+      final Long officeId = command.longValueOfParameterNamed(officeIdParamName);
 
-            final Office userOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
+      final Office userOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
 
-            final String[] roles = command.arrayValueOfParameterNamed("roles");
-            final Set<Role> allRoles = assembleSetOfRoles(roles);
+      final String[] roles = command.arrayValueOfParameterNamed("roles");
+      final Set<Role> allRoles = assembleSetOfRoles(roles);
 
-            AppUser appUser;
+      AppUser appUser;
 
-            final String staffIdParamName = "staffId";
-            final Long staffId = command.longValueOfParameterNamed(staffIdParamName);
+      final String staffIdParamName = "staffId";
+      final Long staffId = command.longValueOfParameterNamed(staffIdParamName);
 
-            Staff linkedStaff = null;
-            if (staffId != null) {
-                linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
-            }
+      Staff linkedStaff = null;
+      if (staffId != null) {
+        linkedStaff =
+            this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(
+                staffId, userOffice.getId());
+      }
 
-            Collection<Client> clients = null;
-            if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.hasParameter(AppUserConstants.CLIENTS)){
-                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
-                for(JsonElement clientElement : clientsArray){
-                    clientIds.add(clientElement.getAsLong());
-                }
-                clients = this.clientRepositoryWrapper.findAll(clientIds);
-            }
-
-            appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
-
-            final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
-            this.userDomainService.create(appUser, sendPasswordToEmail);
-
-            this.topicDomainService.subscribeUserToTopic(appUser);
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(appUser.getId()) //
-                    .withOfficeId(userOffice.getId()) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
-        } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleDataIntegrityIssues(command, throwable, dve);
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .build();
-        } catch (final PlatformEmailSendException e) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-            final String email = command.stringValueOfParameterNamed("email");
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid",
-                    "The parameter email is invalid.", "email", email);
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+      Collection<Client> clients = null;
+      if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
+          && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
+          && command.hasParameter(AppUserConstants.CLIENTS)) {
+        JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+        Collection<Long> clientIds = new HashSet<>();
+        for (JsonElement clientElement : clientsArray) {
+          clientIds.add(clientElement.getAsLong());
         }
+        clients = this.clientRepositoryWrapper.findAll(clientIds);
+      }
+
+      appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
+
+      final Boolean sendPasswordToEmail =
+          command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
+      this.userDomainService.create(appUser, sendPasswordToEmail);
+
+      this.topicDomainService.subscribeUserToTopic(appUser);
+
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .withEntityId(appUser.getId()) //
+          .withOfficeId(userOffice.getId()) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleDataIntegrityIssues(command, throwable, dve);
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .build();
+    } catch (final PlatformEmailSendException e) {
+      final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+      final String email = command.stringValueOfParameterNamed("email");
+      final ApiParameterError error =
+          ApiParameterError.parameterError(
+              "error.msg.user.email.invalid", "The parameter email is invalid.", "email", email);
+      dataValidationErrors.add(error);
+
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
+  }
 
-    @Transactional
-    @Override
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
-    public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
+  @Transactional
+  @Override
+  @Caching(
+      evict = {
+        @CacheEvict(value = "users", allEntries = true),
+        @CacheEvict(value = "usersByUsername", allEntries = true)
+      })
+  public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
 
-        try {
+    try {
 
-            this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
+      this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+      this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final AppUser userToUpdate = this.appUserRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
+      final AppUser userToUpdate =
+          this.appUserRepository
+              .findById(userId)
+              .orElseThrow(() -> new UserNotFoundException(userId));
 
-            final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
+      final AppUserPreviousPassword currentPasswordToSaveAsPreview =
+          getCurrentPasswordToSaveAsPreview(userToUpdate, command);
 
-            Collection<Client> clients = null;
-            boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
-            if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
-                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
-            }
+      Collection<Client> clients = null;
+      boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
+      if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)) {
+        isSelfServiceUser =
+            command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
+      }
 
-            if(isSelfServiceUser
-                    && command.hasParameter(AppUserConstants.CLIENTS)){
-                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-                Collection<Long> clientIds = new HashSet<>();
-                for(JsonElement clientElement : clientsArray){
-                    clientIds.add(clientElement.getAsLong());
-                }
-                clients = this.clientRepositoryWrapper.findAll(clientIds);
-            }
-
-            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
-
-            this.topicDomainService.updateUserSubscription(userToUpdate, changes);
-            if (changes.containsKey("officeId")) {
-                final Long officeId = (Long) changes.get("officeId");
-                final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
-                userToUpdate.changeOffice(office);
-            }
-
-            if (changes.containsKey("staffId")) {
-                final Long staffId = (Long) changes.get("staffId");
-                Staff linkedStaff = null;
-                if (staffId != null) {
-                    linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userToUpdate.getOffice().getId());
-                }
-                userToUpdate.changeStaff(linkedStaff);
-            }
-
-            if (changes.containsKey("roles")) {
-                final String[] roleIds = (String[]) changes.get("roles");
-                final Set<Role> allRoles = assembleSetOfRoles(roleIds);
-
-                userToUpdate.updateRoles(allRoles);
-            }
-
-            if (!changes.isEmpty()) {
-                this.appUserRepository.saveAndFlush(userToUpdate);
-
-                if (currentPasswordToSaveAsPreview != null) {
-                    this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);
-                }
-
-            }
-
-            return new CommandProcessingResultBuilder() //
-                    .withEntityId(userId) //
-                    .withOfficeId(userToUpdate.getOffice().getId()) //
-                    .with(changes) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
-        } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleDataIntegrityIssues(command, throwable, dve);
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .build();
+      if (isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
+        JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+        Collection<Long> clientIds = new HashSet<>();
+        for (JsonElement clientElement : clientsArray) {
+          clientIds.add(clientElement.getAsLong());
         }
-    }
+        clients = this.clientRepositoryWrapper.findAll(clientIds);
+      }
 
-    /**
-     * encode the new submitted password retrieve the last n used password check
-     * if the current submitted password, match with one of them
-     *
-     * @param user
-     * @param command
-     * @return
-     */
-    private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
+      final Map<String, Object> changes =
+          userToUpdate.update(command, this.platformPasswordEncoder, clients);
 
-        final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
+      this.topicDomainService.updateUserSubscription(userToUpdate, changes);
+      if (changes.containsKey("officeId")) {
+        final Long officeId = (Long) changes.get("officeId");
+        final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
+        userToUpdate.changeOffice(office);
+      }
 
-        AppUserPreviousPassword currentPasswordToSaveAsPreview = null;
-
-        if (passWordEncodedValue != null) {
-
-            PageRequest pageRequest = PageRequest.of(0, AppUserApiConstant.numberOfPreviousPasswords,
-                    Sort.Direction.DESC, "removalDate");
-
-            final List<AppUserPreviousPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
-                    pageRequest);
-
-            for (AppUserPreviousPassword aPreviewPassword : nLastUsedPasswords) {
-
-                if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
-
-                throw new PasswordPreviouslyUsedException();
-
-                }
-            }
-
-            currentPasswordToSaveAsPreview = new AppUserPreviousPassword(user);
-
+      if (changes.containsKey("staffId")) {
+        final Long staffId = (Long) changes.get("staffId");
+        Staff linkedStaff = null;
+        if (staffId != null) {
+          linkedStaff =
+              this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(
+                  staffId, userToUpdate.getOffice().getId());
         }
+        userToUpdate.changeStaff(linkedStaff);
+      }
 
-        return currentPasswordToSaveAsPreview;
+      if (changes.containsKey("roles")) {
+        final String[] roleIds = (String[]) changes.get("roles");
+        final Set<Role> allRoles = assembleSetOfRoles(roleIds);
 
-    }
+        userToUpdate.updateRoles(allRoles);
+      }
 
-    private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
+      if (!changes.isEmpty()) {
+        this.appUserRepository.saveAndFlush(userToUpdate);
 
-        final Set<Role> allRoles = new HashSet<>();
-
-        if (!ObjectUtils.isEmpty(rolesArray)) {
-            for (final String roleId : rolesArray) {
-                final Long id = Long.valueOf(roleId);
-                final Role role = this.roleRepository.findById(id)
-                        .orElseThrow(() -> new RoleNotFoundException(id));
-                allRoles.add(role);
-            }
+        if (currentPasswordToSaveAsPreview != null) {
+          this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);
         }
+      }
 
-        return allRoles;
+      return new CommandProcessingResultBuilder() //
+          .withEntityId(userId) //
+          .withOfficeId(userToUpdate.getOffice().getId()) //
+          .with(changes) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleDataIntegrityIssues(command, throwable, dve);
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .build();
     }
+  }
 
-    @Transactional
-    @Override
-    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
-    public CommandProcessingResult deleteUser(final Long userId) {
+  /**
+   * encode the new submitted password retrieve the last n used password check
+   * if the current submitted password, match with one of them
+   *
+   * @param user
+   * @param command
+   * @return
+   */
+  private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(
+      final AppUser user, final JsonCommand command) {
 
-        final AppUser user = this.appUserRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        if (user.isDeleted()) { throw new UserNotFoundException(userId); }
+    final String passWordEncodedValue =
+        user.getEncodedPassword(command, this.platformPasswordEncoder);
 
-        user.delete();
-        this.topicDomainService.unsubcribeUserFromTopic(user);
-        this.appUserRepository.save(user);
+    AppUserPreviousPassword currentPasswordToSaveAsPreview = null;
 
-        return new CommandProcessingResultBuilder().withEntityId(userId).withOfficeId(user.getOffice().getId()).build();
-    }
+    if (passWordEncodedValue != null) {
 
-    /*
-     * Guaranteed to throw an exception no matter what the data integrity issue
-     * is.
-     */
-    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        if (realCause.getMessage().contains("'username_org'")) {
-            final String username = command.stringValueOfParameterNamed("username");
-            final StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(username)
-                    .append(" already exists.");
-            throw new PlatformDataIntegrityException("error.msg.user.duplicate.username", defaultMessageBuilder.toString(), "username",
-                    username);
+      PageRequest pageRequest =
+          PageRequest.of(
+              0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC, "removalDate");
+
+      final List<AppUserPreviousPassword> nLastUsedPasswords =
+          this.appUserPreviewPasswordRepository.findByUserId(user.getId(), pageRequest);
+
+      for (AppUserPreviousPassword aPreviewPassword : nLastUsedPasswords) {
+
+        if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
+
+          throw new PasswordPreviouslyUsedException();
         }
+      }
 
-        if (realCause.getMessage().contains("'unique_self_client'")) {
-            throw new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist", "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
-        }
-
-        logger.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+      currentPasswordToSaveAsPreview = new AppUserPreviousPassword(user);
     }
+
+    return currentPasswordToSaveAsPreview;
+  }
+
+  private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
+
+    final Set<Role> allRoles = new HashSet<>();
+
+    if (!ObjectUtils.isEmpty(rolesArray)) {
+      for (final String roleId : rolesArray) {
+        final Long id = Long.valueOf(roleId);
+        final Role role =
+            this.roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
+        allRoles.add(role);
+      }
+    }
+
+    return allRoles;
+  }
+
+  @Transactional
+  @Override
+  @Caching(
+      evict = {
+        @CacheEvict(value = "users", allEntries = true),
+        @CacheEvict(value = "usersByUsername", allEntries = true)
+      })
+  public CommandProcessingResult deleteUser(final Long userId) {
+
+    final AppUser user =
+        this.appUserRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
+    if (user.isDeleted()) {
+      throw new UserNotFoundException(userId);
+    }
+
+    user.delete();
+    this.topicDomainService.unsubcribeUserFromTopic(user);
+    this.appUserRepository.save(user);
+
+    return new CommandProcessingResultBuilder()
+        .withEntityId(userId)
+        .withOfficeId(user.getOffice().getId())
+        .build();
+  }
+
+  /*
+   * Guaranteed to throw an exception no matter what the data integrity issue
+   * is.
+   */
+  private void handleDataIntegrityIssues(
+      final JsonCommand command, final Throwable realCause, final Exception dve) {
+    if (realCause.getMessage().contains("'username_org'")) {
+      final String username = command.stringValueOfParameterNamed("username");
+      final StringBuilder defaultMessageBuilder =
+          new StringBuilder("User with username ").append(username).append(" already exists.");
+      throw new PlatformDataIntegrityException(
+          "error.msg.user.duplicate.username",
+          defaultMessageBuilder.toString(),
+          "username",
+          username);
+    }
+
+    if (realCause.getMessage().contains("'unique_self_client'")) {
+      throw new PlatformDataIntegrityException(
+          "error.msg.user.self.service.user.already.exist",
+          "Self Service User Id is already created. Go to Admin->Users to edit or delete the"
+              + " self-service user.");
+    }
+
+    logger.error("Error occured.", dve);
+    throw new PlatformDataIntegrityException(
+        "error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+  }
 }

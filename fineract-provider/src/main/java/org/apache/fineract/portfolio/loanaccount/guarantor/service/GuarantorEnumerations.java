@@ -26,32 +26,38 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 
 public class GuarantorEnumerations {
 
-    public static EnumOptionData guarantorType(final int id) {
-        return guarantorType(GuarantorType.fromInt(id));
-    }
+  public static EnumOptionData guarantorType(final int id) {
+    return guarantorType(GuarantorType.fromInt(id));
+  }
 
-    public static EnumOptionData guarantorType(final GuarantorType guarantorType) {
-        final EnumOptionData optionData = new EnumOptionData(guarantorType.getValue().longValue(), guarantorType.getCode(),
-                guarantorType.toString());
-        return optionData;
-    }
+  public static EnumOptionData guarantorType(final GuarantorType guarantorType) {
+    final EnumOptionData optionData =
+        new EnumOptionData(
+            guarantorType.getValue().longValue(),
+            guarantorType.getCode(),
+            guarantorType.toString());
+    return optionData;
+  }
 
-    public static List<EnumOptionData> guarantorType(final GuarantorType[] guarantorTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<>();
-        for (final GuarantorType guarantorType : guarantorTypes) {
-            optionDatas.add(guarantorType(guarantorType));
-        }
-        return optionDatas;
+  public static List<EnumOptionData> guarantorType(final GuarantorType[] guarantorTypes) {
+    final List<EnumOptionData> optionDatas = new ArrayList<>();
+    for (final GuarantorType guarantorType : guarantorTypes) {
+      optionDatas.add(guarantorType(guarantorType));
     }
+    return optionDatas;
+  }
 
-    public static EnumOptionData guarantorFundStatusType(final int id) {
-        return guarantorFundStatusType(GuarantorFundStatusType.fromInt(id));
-    }
+  public static EnumOptionData guarantorFundStatusType(final int id) {
+    return guarantorFundStatusType(GuarantorFundStatusType.fromInt(id));
+  }
 
-    public static EnumOptionData guarantorFundStatusType(final GuarantorFundStatusType guarantorFundType) {
-        final EnumOptionData optionData = new EnumOptionData(guarantorFundType.getValue().longValue(), guarantorFundType.getCode(),
-                guarantorFundType.toString());
-        return optionData;
-    }
-
+  public static EnumOptionData guarantorFundStatusType(
+      final GuarantorFundStatusType guarantorFundType) {
+    final EnumOptionData optionData =
+        new EnumOptionData(
+            guarantorFundType.getValue().longValue(),
+            guarantorFundType.getCode(),
+            guarantorFundType.toString());
+    return optionData;
+  }
 }

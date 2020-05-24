@@ -41,185 +41,225 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 @Table(name = "acc_gl_journal_entry")
 public class JournalEntry extends AbstractAuditableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "office_id", nullable = false)
-    private Office office;
+  @ManyToOne
+  @JoinColumn(name = "office_id", nullable = false)
+  private Office office;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "payment_details_id", nullable = true)
-    private PaymentDetail paymentDetail;
+  @ManyToOne(optional = true)
+  @JoinColumn(name = "payment_details_id", nullable = true)
+  private PaymentDetail paymentDetail;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private GLAccount glAccount;
+  @ManyToOne
+  @JoinColumn(name = "account_id", nullable = false)
+  private GLAccount glAccount;
 
-    @Column(name = "currency_code", length = 3, nullable = false)
-    private String currencyCode;
+  @Column(name = "currency_code", length = 3, nullable = false)
+  private String currencyCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reversal_id")
-    private JournalEntry reversalJournalEntry;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "reversal_id")
+  private JournalEntry reversalJournalEntry;
 
-    @Column(name = "transaction_id", nullable = false, length = 50)
-    private String transactionId;
+  @Column(name = "transaction_id", nullable = false, length = 50)
+  private String transactionId;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_transaction_id", nullable = false)
-    private LoanTransaction loanTransaction;
+  @ManyToOne
+  @JoinColumn(name = "loan_transaction_id", nullable = false)
+  private LoanTransaction loanTransaction;
 
-    @ManyToOne
-    @JoinColumn(name = "savings_transaction_id", nullable = false)
-    private SavingsAccountTransaction savingsTransaction;
+  @ManyToOne
+  @JoinColumn(name = "savings_transaction_id", nullable = false)
+  private SavingsAccountTransaction savingsTransaction;
 
-    @ManyToOne
-    @JoinColumn(name = "client_transaction_id", nullable = false)
-    private ClientTransaction clientTransaction;
+  @ManyToOne
+  @JoinColumn(name = "client_transaction_id", nullable = false)
+  private ClientTransaction clientTransaction;
 
-    @Column(name = "share_transaction_id", nullable = true)
-    private Long shareTransactionId;
+  @Column(name = "share_transaction_id", nullable = true)
+  private Long shareTransactionId;
 
-    @Column(name = "reversed", nullable = false)
-    private boolean reversed = false;
+  @Column(name = "reversed", nullable = false)
+  private boolean reversed = false;
 
-    @Column(name = "manual_entry", nullable = false)
-    private boolean manualEntry = false;
+  @Column(name = "manual_entry", nullable = false)
+  private boolean manualEntry = false;
 
-    @Column(name = "entry_date")
-    @Temporal(TemporalType.DATE)
-    private Date transactionDate;
+  @Column(name = "entry_date")
+  @Temporal(TemporalType.DATE)
+  private Date transactionDate;
 
-    @Column(name = "type_enum", nullable = false)
-    private Integer type;
+  @Column(name = "type_enum", nullable = false)
+  private Integer type;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+  private BigDecimal amount;
 
-    @Column(name = "description", length = 500)
-    private String description;
+  @Column(name = "description", length = 500)
+  private String description;
 
-    @Column(name = "entity_type_enum", length = 50)
-    private Integer entityType;
+  @Column(name = "entity_type_enum", length = 50)
+  private Integer entityType;
 
-    @Column(name = "entity_id")
-    private Long entityId;
+  @Column(name = "entity_id")
+  private Long entityId;
 
-    @Column(name = "ref_num")
-    private String referenceNumber;
+  @Column(name = "ref_num")
+  private String referenceNumber;
 
-    public static JournalEntry createNew(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount,
-            final String currencyCode, final String transactionId, final boolean manualEntry, final Date transactionDate,
-            final JournalEntryType journalEntryType, final BigDecimal amount, final String description, final Integer entityType,
-            final Long entityId, final String referenceNumber, final LoanTransaction loanTransaction,
-            final SavingsAccountTransaction savingsTransaction, final ClientTransaction clientTransaction, Long shareTransactionId) {
-        return new JournalEntry(office, paymentDetail, glAccount, currencyCode, transactionId, manualEntry, transactionDate,
-                journalEntryType.getValue(), amount, description, entityType, entityId, referenceNumber, loanTransaction,
-                savingsTransaction, clientTransaction, shareTransactionId);
-    }
+  public static JournalEntry createNew(
+      final Office office,
+      final PaymentDetail paymentDetail,
+      final GLAccount glAccount,
+      final String currencyCode,
+      final String transactionId,
+      final boolean manualEntry,
+      final Date transactionDate,
+      final JournalEntryType journalEntryType,
+      final BigDecimal amount,
+      final String description,
+      final Integer entityType,
+      final Long entityId,
+      final String referenceNumber,
+      final LoanTransaction loanTransaction,
+      final SavingsAccountTransaction savingsTransaction,
+      final ClientTransaction clientTransaction,
+      Long shareTransactionId) {
+    return new JournalEntry(
+        office,
+        paymentDetail,
+        glAccount,
+        currencyCode,
+        transactionId,
+        manualEntry,
+        transactionDate,
+        journalEntryType.getValue(),
+        amount,
+        description,
+        entityType,
+        entityId,
+        referenceNumber,
+        loanTransaction,
+        savingsTransaction,
+        clientTransaction,
+        shareTransactionId);
+  }
 
-    protected JournalEntry() {
-        //
-    }
+  protected JournalEntry() {
+    //
+  }
 
-    public JournalEntry(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount, final String currencyCode,
-            final String transactionId, final boolean manualEntry, final Date transactionDate, final Integer type, final BigDecimal amount,
-            final String description, final Integer entityType, final Long entityId, final String referenceNumber,
-            final LoanTransaction loanTransaction, final SavingsAccountTransaction savingsTransaction,
-            final ClientTransaction clientTransaction, final Long shareTransactionId) {
-        this.office = office;
-        this.glAccount = glAccount;
-        this.reversalJournalEntry = null;
-        this.transactionId = transactionId;
-        this.reversed = false;
-        this.manualEntry = manualEntry;
-        this.transactionDate = transactionDate;
-        this.type = type;
-        this.amount = amount;
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.referenceNumber = referenceNumber;
-        this.currencyCode = currencyCode;
-        this.loanTransaction = loanTransaction;
-        this.savingsTransaction = savingsTransaction;
-        this.clientTransaction = clientTransaction;
-        this.paymentDetail = paymentDetail;
-        this.shareTransactionId = shareTransactionId;
-    }
+  public JournalEntry(
+      final Office office,
+      final PaymentDetail paymentDetail,
+      final GLAccount glAccount,
+      final String currencyCode,
+      final String transactionId,
+      final boolean manualEntry,
+      final Date transactionDate,
+      final Integer type,
+      final BigDecimal amount,
+      final String description,
+      final Integer entityType,
+      final Long entityId,
+      final String referenceNumber,
+      final LoanTransaction loanTransaction,
+      final SavingsAccountTransaction savingsTransaction,
+      final ClientTransaction clientTransaction,
+      final Long shareTransactionId) {
+    this.office = office;
+    this.glAccount = glAccount;
+    this.reversalJournalEntry = null;
+    this.transactionId = transactionId;
+    this.reversed = false;
+    this.manualEntry = manualEntry;
+    this.transactionDate = transactionDate;
+    this.type = type;
+    this.amount = amount;
+    this.description = StringUtils.defaultIfEmpty(description, null);
+    this.entityType = entityType;
+    this.entityId = entityId;
+    this.referenceNumber = referenceNumber;
+    this.currencyCode = currencyCode;
+    this.loanTransaction = loanTransaction;
+    this.savingsTransaction = savingsTransaction;
+    this.clientTransaction = clientTransaction;
+    this.paymentDetail = paymentDetail;
+    this.shareTransactionId = shareTransactionId;
+  }
 
-    public boolean isDebitEntry() {
-        return JournalEntryType.DEBIT.getValue().equals(this.type);
-    }
+  public boolean isDebitEntry() {
+    return JournalEntryType.DEBIT.getValue().equals(this.type);
+  }
 
-    public Integer getType() {
-        return this.type;
-    }
+  public Integer getType() {
+    return this.type;
+  }
 
-    public Office getOffice() {
-        return this.office;
-    }
+  public Office getOffice() {
+    return this.office;
+  }
 
-    public GLAccount getGlAccount() {
-        return this.glAccount;
-    }
+  public GLAccount getGlAccount() {
+    return this.glAccount;
+  }
 
-    public Date getTransactionDate() {
-        return this.transactionDate;
-    }
+  public Date getTransactionDate() {
+    return this.transactionDate;
+  }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-    public void setReversalJournalEntry(final JournalEntry reversalJournalEntry) {
-        this.reversalJournalEntry = reversalJournalEntry;
-    }
+  public void setAmount(BigDecimal amount) {
+    this.amount = amount;
+  }
 
-    public void setReversed(final boolean reversed) {
-        this.reversed = reversed;
-    }
+  public void setReversalJournalEntry(final JournalEntry reversalJournalEntry) {
+    this.reversalJournalEntry = reversalJournalEntry;
+  }
 
-    public String getReferenceNumber() {
-        return this.referenceNumber;
-    }
+  public void setReversed(final boolean reversed) {
+    this.reversed = reversed;
+  }
 
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
+  public String getReferenceNumber() {
+    return this.referenceNumber;
+  }
 
-    public LoanTransaction getLoanTransaction() {
-        return this.loanTransaction;
-    }
+  public String getCurrencyCode() {
+    return this.currencyCode;
+  }
 
-    public SavingsAccountTransaction getSavingsTransaction() {
-        return this.savingsTransaction;
-    }
+  public LoanTransaction getLoanTransaction() {
+    return this.loanTransaction;
+  }
 
-    public PaymentDetail getPaymentDetails() {
-        return this.paymentDetail;
-    }
+  public SavingsAccountTransaction getSavingsTransaction() {
+    return this.savingsTransaction;
+  }
 
-    public String getTransactionId() {
-        return transactionId;
-    }
+  public PaymentDetail getPaymentDetails() {
+    return this.paymentDetail;
+  }
 
-    public ClientTransaction getClientTransaction() {
-        return this.clientTransaction;
-    }
+  public String getTransactionId() {
+    return transactionId;
+  }
 
-    public Long getEntityId() {
-        return this.entityId;
-    }
+  public ClientTransaction getClientTransaction() {
+    return this.clientTransaction;
+  }
 
-    public Integer getEntityType() {
-        return this.entityType;
-    }
+  public Long getEntityId() {
+    return this.entityId;
+  }
 
+  public Integer getEntityType() {
+    return this.entityType;
+  }
 
-    public Long getShareTransactionId() {
-        return this.shareTransactionId;
-    }
-
+  public Long getShareTransactionId() {
+    return this.shareTransactionId;
+  }
 }

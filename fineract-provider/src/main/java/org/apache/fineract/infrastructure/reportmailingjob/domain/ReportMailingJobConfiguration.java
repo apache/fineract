@@ -25,49 +25,55 @@ import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "m_report_mailing_job_configuration", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unique_name") })
+@Table(
+    name = "m_report_mailing_job_configuration",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"name"},
+          name = "unique_name")
+    })
 public class ReportMailingJobConfiguration extends AbstractPersistableCustom {
-    private static final long serialVersionUID = 3099279770861263184L;
+  private static final long serialVersionUID = 3099279770861263184L;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+  @Column(name = "name", nullable = false)
+  private String name;
 
-    @Column(name = "value", nullable = false)
-    private String value;
+  @Column(name = "value", nullable = false)
+  private String value;
 
-    /**
-     * ReportMailingJobConfiguration protected constructor
-     **/
-    protected ReportMailingJobConfiguration() { }
+  /**
+   * ReportMailingJobConfiguration protected constructor
+   **/
+  protected ReportMailingJobConfiguration() {}
 
-    /**
-     * ReportMailingJobConfiguration private constructor
-     **/
-    private ReportMailingJobConfiguration(final String name, final String value) {
-        this.name = name;
-        this.value = value;
-    }
+  /**
+   * ReportMailingJobConfiguration private constructor
+   **/
+  private ReportMailingJobConfiguration(final String name, final String value) {
+    this.name = name;
+    this.value = value;
+  }
 
-    /**
-     * creates an instance of the ReportMailingJobConfiguration class
-     *
-     * @return ReportMailingJobConfiguration object
-     **/
-    public static ReportMailingJobConfiguration newInstance(final String name, final String value) {
-        return new ReportMailingJobConfiguration(name, value);
-    }
+  /**
+   * creates an instance of the ReportMailingJobConfiguration class
+   *
+   * @return ReportMailingJobConfiguration object
+   **/
+  public static ReportMailingJobConfiguration newInstance(final String name, final String value) {
+    return new ReportMailingJobConfiguration(name, value);
+  }
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
+  /**
+   * @return the name
+   */
+  public String getName() {
+    return name;
+  }
 
-    /**
-     * @return the value
-     */
-    public String getValue() {
-        return value;
-    }
+  /**
+   * @return the value
+   */
+  public String getValue() {
+    return value;
+  }
 }

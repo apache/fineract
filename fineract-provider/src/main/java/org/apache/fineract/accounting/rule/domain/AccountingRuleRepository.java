@@ -23,8 +23,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AccountingRuleRepository extends JpaRepository<AccountingRule, Long>, JpaSpecificationExecutor<AccountingRule> {
+public interface AccountingRuleRepository
+    extends JpaRepository<AccountingRule, Long>, JpaSpecificationExecutor<AccountingRule> {
 
-    @Query("select accountingRule from AccountingRule accountingRule where accountingRule.office is null or accountingRule.office.id =:officeId")
-    AccountingRule getAccountingRuleByOfficeId(@Param("officeId") Long officeId);
+  @Query(
+      "select accountingRule from AccountingRule accountingRule where accountingRule.office is"
+          + " null or accountingRule.office.id =:officeId")
+  AccountingRule getAccountingRuleByOfficeId(@Param("officeId") Long officeId);
 }

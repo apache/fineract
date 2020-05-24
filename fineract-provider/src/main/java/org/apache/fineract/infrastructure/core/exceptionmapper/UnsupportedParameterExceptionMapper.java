@@ -38,26 +38,36 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class UnsupportedParameterExceptionMapper implements ExceptionMapper<UnsupportedParameterException> {
+public class UnsupportedParameterExceptionMapper
+    implements ExceptionMapper<UnsupportedParameterException> {
 
-    @Override
-    public Response toResponse(final UnsupportedParameterException exception) {
+  @Override
+  public Response toResponse(final UnsupportedParameterException exception) {
 
-        final List<ApiParameterError> errors = new ArrayList<>();
+    final List<ApiParameterError> errors = new ArrayList<>();
 
-        for (final String parameterName : exception.getUnsupportedParameters()) {
-            final StringBuilder validationErrorCode = new StringBuilder("error.msg.parameter.unsupported");
-            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameterName).append(
-                    " is not supported.");
-            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
-                    defaultEnglishMessage.toString(), parameterName, parameterName);
+    for (final String parameterName : exception.getUnsupportedParameters()) {
+      final StringBuilder validationErrorCode =
+          new StringBuilder("error.msg.parameter.unsupported");
+      final StringBuilder defaultEnglishMessage =
+          new StringBuilder("The parameter ").append(parameterName).append(" is not supported.");
+      final ApiParameterError error =
+          ApiParameterError.parameterError(
+              validationErrorCode.toString(),
+              defaultEnglishMessage.toString(),
+              parameterName,
+              parameterName);
 
-            errors.add(error);
-        }
-
-        final ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse.badClientRequest(
-                "validation.msg.validation.errors.exist", "Validation errors exist.", errors);
-
-        return Response.status(Status.BAD_REQUEST).entity(invalidParameterError).type(MediaType.APPLICATION_JSON).build();
+      errors.add(error);
     }
+
+    final ApiGlobalErrorResponse invalidParameterError =
+        ApiGlobalErrorResponse.badClientRequest(
+            "validation.msg.validation.errors.exist", "Validation errors exist.", errors);
+
+    return Response.status(Status.BAD_REQUEST)
+        .entity(invalidParameterError)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

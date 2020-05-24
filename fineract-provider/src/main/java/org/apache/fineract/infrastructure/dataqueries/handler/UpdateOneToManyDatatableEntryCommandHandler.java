@@ -30,29 +30,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UpdateOneToManyDatatableEntryCommandHandler implements NewCommandSourceHandler {
 
-    private final ReadWriteNonCoreDataService writePlatformService;
+  private final ReadWriteNonCoreDataService writePlatformService;
 
-    @Autowired
-    public UpdateOneToManyDatatableEntryCommandHandler(final ReadWriteNonCoreDataService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateOneToManyDatatableEntryCommandHandler(
+      final ReadWriteNonCoreDataService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final CommandProcessingResult commandProcessingResult = this.writePlatformService.updateDatatableEntryOneToMany(
-                command.entityName(), command.entityId(), command.subentityId(), command);
+    final CommandProcessingResult commandProcessingResult =
+        this.writePlatformService.updateDatatableEntryOneToMany(
+            command.entityName(), command.entityId(), command.subentityId(), command);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
-                .withOfficeId(commandProcessingResult.getOfficeId()) //
-                .withGroupId(commandProcessingResult.getGroupId()) //
-                .withClientId(commandProcessingResult.getClientId()) //
-                .withSavingsId(commandProcessingResult.getSavingsId()) //
-                .withLoanId(commandProcessingResult.getLoanId()) //
-                .with(commandProcessingResult.getChanges()) //
-                .build();
-    }
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(command.entityId()) //
+        .withOfficeId(commandProcessingResult.getOfficeId()) //
+        .withGroupId(commandProcessingResult.getGroupId()) //
+        .withClientId(commandProcessingResult.getClientId()) //
+        .withSavingsId(commandProcessingResult.getSavingsId()) //
+        .withLoanId(commandProcessingResult.getLoanId()) //
+        .with(commandProcessingResult.getChanges()) //
+        .build();
+  }
 }

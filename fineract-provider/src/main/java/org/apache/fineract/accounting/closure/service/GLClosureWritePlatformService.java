@@ -23,10 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface GLClosureWritePlatformService {
 
-    CommandProcessingResult createGLClosure(JsonCommand command);
+  CommandProcessingResult createGLClosure(JsonCommand command);
 
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
+  CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
 
-    CommandProcessingResult deleteGLClosure(Long glClosureId);
-
+  CommandProcessingResult deleteGLClosure(Long glClosureId);
 }

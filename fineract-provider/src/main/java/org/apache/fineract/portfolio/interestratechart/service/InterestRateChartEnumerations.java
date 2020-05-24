@@ -25,45 +25,60 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public class InterestRateChartEnumerations {
 
-    public static EnumOptionData periodType(final Integer type) {
-        return periodType(PeriodFrequencyType.fromInt(type));
+  public static EnumOptionData periodType(final Integer type) {
+    return periodType(PeriodFrequencyType.fromInt(type));
+  }
+
+  public static EnumOptionData periodType(final PeriodFrequencyType type) {
+    EnumOptionData optionData =
+        new EnumOptionData(
+            PeriodFrequencyType.INVALID.getValue().longValue(),
+            PeriodFrequencyType.INVALID.getCode(),
+            "Invalid");
+
+    switch (type) {
+      case INVALID:
+        break;
+      case DAYS:
+        optionData =
+            new EnumOptionData(
+                PeriodFrequencyType.DAYS.getValue().longValue(),
+                PeriodFrequencyType.DAYS.getCode(),
+                "Days");
+        break;
+      case WEEKS:
+        optionData =
+            new EnumOptionData(
+                PeriodFrequencyType.WEEKS.getValue().longValue(),
+                PeriodFrequencyType.WEEKS.getCode(),
+                "Weeks");
+        break;
+      case MONTHS:
+        optionData =
+            new EnumOptionData(
+                PeriodFrequencyType.MONTHS.getValue().longValue(),
+                PeriodFrequencyType.MONTHS.getCode(),
+                "Months");
+        break;
+      case YEARS:
+        optionData =
+            new EnumOptionData(
+                PeriodFrequencyType.YEARS.getValue().longValue(),
+                PeriodFrequencyType.YEARS.getCode(),
+                "Years");
+        break;
     }
 
-    public static EnumOptionData periodType(final PeriodFrequencyType type) {
-        EnumOptionData optionData = new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(),
-                PeriodFrequencyType.INVALID.getCode(), "Invalid");
+    return optionData;
+  }
 
-        switch (type) {
-            case INVALID:
-            break;
-            case DAYS:
-                optionData = new EnumOptionData(PeriodFrequencyType.DAYS.getValue().longValue(),
-                        PeriodFrequencyType.DAYS.getCode(), "Days");
-            break;
-            case WEEKS:
-                optionData = new EnumOptionData(PeriodFrequencyType.WEEKS.getValue().longValue(),
-                        PeriodFrequencyType.WEEKS.getCode(), "Weeks");
-            break;
-            case MONTHS:
-                optionData = new EnumOptionData(PeriodFrequencyType.MONTHS.getValue().longValue(),
-                        PeriodFrequencyType.MONTHS.getCode(), "Months");
-            break;
-            case YEARS:
-                optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
-                        PeriodFrequencyType.YEARS.getCode(), "Years");
-            break;
-        }
-
-        return optionData;
+  public static List<EnumOptionData> periodType(final PeriodFrequencyType[] periodTypes) {
+    final List<EnumOptionData> optionDatas = new ArrayList<>();
+    for (final PeriodFrequencyType periodType : periodTypes) {
+      if (!periodType.isInvalid()) {
+        optionDatas.add(periodType(periodType));
+      }
     }
-
-    public static List<EnumOptionData> periodType(final PeriodFrequencyType[] periodTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<>();
-        for (final PeriodFrequencyType periodType : periodTypes) {
-            if (!periodType.isInvalid()) {
-                optionDatas.add(periodType(periodType));
-            }
-        }
-        return optionDatas;
-    }
+    return optionDatas;
+  }
 }

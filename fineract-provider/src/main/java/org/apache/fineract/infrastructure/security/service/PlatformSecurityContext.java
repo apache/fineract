@@ -23,24 +23,24 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface PlatformSecurityContext {
 
-    AppUser authenticatedUser();
+  AppUser authenticatedUser();
 
-    /**
-     * Convenience method returns null (does not throw an exception) if an
-     * authenticated user is not present
-     *
-     * To be used only in service layer methods that can be triggered via both
-     * the API and batch Jobs (which do not have an authenticated user)
-     *
-     * @return
-     */
-    AppUser getAuthenticatedUserIfPresent();
+  /**
+   * Convenience method returns null (does not throw an exception) if an
+   * authenticated user is not present
+   *
+   * To be used only in service layer methods that can be triggered via both
+   * the API and batch Jobs (which do not have an authenticated user)
+   *
+   * @return
+   */
+  AppUser getAuthenticatedUserIfPresent();
 
-    void validateAccessRights(String resourceOfficeHierarchy);
+  void validateAccessRights(String resourceOfficeHierarchy);
 
-    String officeHierarchy();
+  String officeHierarchy();
 
-    boolean doesPasswordHasToBeRenewed(AppUser currentUser);
+  boolean doesPasswordHasToBeRenewed(AppUser currentUser);
 
-    AppUser authenticatedUser(CommandWrapper commandWrapper);
+  AppUser authenticatedUser(CommandWrapper commandWrapper);
 }

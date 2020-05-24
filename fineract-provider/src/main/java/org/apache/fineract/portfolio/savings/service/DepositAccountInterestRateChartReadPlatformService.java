@@ -22,13 +22,14 @@ import org.apache.fineract.portfolio.savings.data.DepositAccountInterestRateChar
 
 public interface DepositAccountInterestRateChartReadPlatformService {
 
-    DepositAccountInterestRateChartData retrieveOne(Long interestChartId);
+  DepositAccountInterestRateChartData retrieveOne(Long interestChartId);
 
-    DepositAccountInterestRateChartData retrieveOneWithSlabs(Long interestChartId);
+  DepositAccountInterestRateChartData retrieveOneWithSlabs(Long interestChartId);
 
-    DepositAccountInterestRateChartData retrieveWithTemplate(DepositAccountInterestRateChartData DepositAccountInterestRateChartData);
+  DepositAccountInterestRateChartData retrieveWithTemplate(
+      DepositAccountInterestRateChartData DepositAccountInterestRateChartData);
 
-    DepositAccountInterestRateChartData retrieveOneWithSlabsOnAccountId(Long accountId);
+  DepositAccountInterestRateChartData retrieveOneWithSlabsOnAccountId(Long accountId);
 
-    DepositAccountInterestRateChartData template();
+  DepositAccountInterestRateChartData template();
 }

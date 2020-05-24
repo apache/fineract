@@ -30,21 +30,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UpdateDatatableCommandHandler implements NewCommandSourceHandler {
 
-    private final ReadWriteNonCoreDataService writePlatformService;
+  private final ReadWriteNonCoreDataService writePlatformService;
 
-    @Autowired
-    public UpdateDatatableCommandHandler(final ReadWriteNonCoreDataService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateDatatableCommandHandler(final ReadWriteNonCoreDataService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final String datatableName = command.getUrl().replaceAll("/datatables/", "");
+    final String datatableName = command.getUrl().replaceAll("/datatables/", "");
 
-        this.writePlatformService.updateDatatable(datatableName, command);
+    this.writePlatformService.updateDatatable(datatableName, command);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
-    }
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .withResourceIdAsString(datatableName)
+        .build();
+  }
 }

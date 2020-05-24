@@ -32,51 +32,55 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PasswordValidationPolicyReadPlatformServiceImpl implements PasswordValidationPolicyReadPlatformService {
+public class PasswordValidationPolicyReadPlatformServiceImpl
+    implements PasswordValidationPolicyReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final PasswordValidationPolicyMapper passwordValidationPolicyMapper;
+  private final JdbcTemplate jdbcTemplate;
+  private final PasswordValidationPolicyMapper passwordValidationPolicyMapper;
 
-    @Autowired
-    public PasswordValidationPolicyReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.passwordValidationPolicyMapper = new PasswordValidationPolicyMapper();
+  @Autowired
+  public PasswordValidationPolicyReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.passwordValidationPolicyMapper = new PasswordValidationPolicyMapper();
+  }
+
+  @Override
+  public Collection<PasswordValidationPolicyData> retrieveAll() {
+    final String sql =
+        "select " + this.passwordValidationPolicyMapper.schema() + " order by pvp.id";
+
+    return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper);
+  }
+
+  @Override
+  public PasswordValidationPolicyData retrieveActiveValidationPolicy() {
+    try {
+      final String sql =
+          "select " + this.passwordValidationPolicyMapper.schema() + " where pvp.active = true";
+      return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper);
+    } catch (final EmptyResultDataAccessException e) {
+      throw new PasswordValidationPolicyNotFoundException();
     }
+  }
+
+  protected static final class PasswordValidationPolicyMapper
+      implements RowMapper<PasswordValidationPolicyData> {
 
     @Override
-    public Collection<PasswordValidationPolicyData> retrieveAll() {
-        final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " order by pvp.id";
+    public PasswordValidationPolicyData mapRow(
+        final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-        return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper);
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final Boolean active = rs.getBoolean("active");
+      final String description = rs.getString("description");
+      final String key = rs.getString("key");
+
+      return new PasswordValidationPolicyData(id, active, description, key);
     }
 
-    @Override
-    public PasswordValidationPolicyData retrieveActiveValidationPolicy() {
-        try {
-            final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " where pvp.active = true";
-            return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper);
-        } catch (final EmptyResultDataAccessException e) {
-            throw new PasswordValidationPolicyNotFoundException();
-        }
+    public String schema() {
+      return " pvp.id as id, pvp.active as active, pvp.description as description, pvp.`key` as"
+          + " `key` from m_password_validation_policy pvp";
     }
-
-    protected static final class PasswordValidationPolicyMapper implements RowMapper<PasswordValidationPolicyData> {
-
-        @Override
-        public PasswordValidationPolicyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Boolean active = rs.getBoolean("active");
-            final String description = rs.getString("description");
-            final String key = rs.getString("key");
-
-            return new PasswordValidationPolicyData(id, active, description, key);
-        }
-
-        public String schema() {
-            return " pvp.id as id, pvp.active as active, pvp.description as description, pvp.`key` as `key`"
-                    + " from m_password_validation_policy pvp";
-        }
-    }
-
+  }
 }

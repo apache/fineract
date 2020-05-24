@@ -32,42 +32,45 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoanRepaymentScheduleTransactionProcessorFactory {
 
-    public LoanRepaymentScheduleTransactionProcessor determineProcessor(
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy) {
+  public LoanRepaymentScheduleTransactionProcessor determineProcessor(
+      final LoanTransactionProcessingStrategy transactionProcessingStrategy) {
 
-        LoanRepaymentScheduleTransactionProcessor processor = new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
+    LoanRepaymentScheduleTransactionProcessor processor =
+        new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
 
-        if (transactionProcessingStrategy != null) {
+    if (transactionProcessingStrategy != null) {
 
-            if (transactionProcessingStrategy.isStandardStrategy()) {
-                processor = new FineractStyleLoanRepaymentScheduleTransactionProcessor();
-            }
+      if (transactionProcessingStrategy.isStandardStrategy()) {
+        processor = new FineractStyleLoanRepaymentScheduleTransactionProcessor();
+      }
 
-            if (transactionProcessingStrategy.isHeavensfamilyStrategy()) {
-                processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
-            }
+      if (transactionProcessingStrategy.isHeavensfamilyStrategy()) {
+        processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
+      }
 
-            if (transactionProcessingStrategy.isEarlyPaymentStrategy()) {
-                processor = new EarlyPaymentLoanRepaymentScheduleTransactionProcessor();
-            }
+      if (transactionProcessingStrategy.isEarlyPaymentStrategy()) {
+        processor = new EarlyPaymentLoanRepaymentScheduleTransactionProcessor();
+      }
 
-            if (transactionProcessingStrategy.isCreocoreStrategy()) {
-                processor = new CreocoreLoanRepaymentScheduleTransactionProcessor();
-            }
+      if (transactionProcessingStrategy.isCreocoreStrategy()) {
+        processor = new CreocoreLoanRepaymentScheduleTransactionProcessor();
+      }
 
-            if (transactionProcessingStrategy.isIndianRBIStrategy()) {
-                processor = new RBILoanRepaymentScheduleTransactionProcessor();
-            }
+      if (transactionProcessingStrategy.isIndianRBIStrategy()) {
+        processor = new RBILoanRepaymentScheduleTransactionProcessor();
+      }
 
-            if (transactionProcessingStrategy.isPrincipalInterestPenaltiesFeesOrderStrategy()) {
-                processor = new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
-            }
+      if (transactionProcessingStrategy.isPrincipalInterestPenaltiesFeesOrderStrategy()) {
+        processor =
+            new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
+      }
 
-            if (transactionProcessingStrategy.isInterestPrincipalPenaltiesFeesOrderStrategy()) {
-                processor = new InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
-            }
-        }
-
-        return processor;
+      if (transactionProcessingStrategy.isInterestPrincipalPenaltiesFeesOrderStrategy()) {
+        processor =
+            new InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
+      }
     }
+
+    return processor;
+  }
 }

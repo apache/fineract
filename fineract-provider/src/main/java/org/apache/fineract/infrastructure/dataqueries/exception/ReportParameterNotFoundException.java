@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class ReportParameterNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ReportParameterNotFoundException(final Long id) {
-        super("error.msg.report.parameter.id.invalid", "Report Parameter with identifier " + id + " does not exist", id);
-    }
+  public ReportParameterNotFoundException(final Long id) {
+    super(
+        "error.msg.report.parameter.id.invalid",
+        "Report Parameter with identifier " + id + " does not exist",
+        id);
+  }
 }

@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.notification.domain;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -31,56 +30,66 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "notification_mapper")
 public class NotificationMapper extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "notification_id")
-    private Notification notification;
+  @ManyToOne
+  @JoinColumn(name = "notification_id")
+  private Notification notification;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private AppUser userId;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private AppUser userId;
 
-    @Column(name = "is_read")
-    private boolean isRead;
+  @Column(name = "is_read")
+  private boolean isRead;
 
-    @Column(name = "created_at")
-    private String createdAt;
+  @Column(name = "created_at")
+  private String createdAt;
 
-    public NotificationMapper() {}
+  public NotificationMapper() {}
 
-    public NotificationMapper(Notification notification, AppUser userId, boolean isRead, String createdAt) {
-        this.notification = notification;
-        this.userId = userId;
-        this.isRead = isRead;
-        this.createdAt = createdAt;
-    }
+  public NotificationMapper(
+      Notification notification, AppUser userId, boolean isRead, String createdAt) {
+    this.notification = notification;
+    this.userId = userId;
+    this.isRead = isRead;
+    this.createdAt = createdAt;
+  }
 
-    public Notification getNotification() {
-        return notification;
-    }
+  public Notification getNotification() {
+    return notification;
+  }
 
-    public void setNotification(Notification notification) {
-        this.notification = notification;
-    }
+  public void setNotification(Notification notification) {
+    this.notification = notification;
+  }
 
-    public AppUser getUserId() {
-        return userId;
-    }
+  public AppUser getUserId() {
+    return userId;
+  }
 
-    public void setUserId(AppUser userId) {
-        this.userId = userId;
-    }
+  public void setUserId(AppUser userId) {
+    this.userId = userId;
+  }
 
-    public boolean isRead() {
-        return isRead;
-    }
+  public boolean isRead() {
+    return isRead;
+  }
 
-    public void setRead(boolean read) {
-        isRead = read;
-    }
+  public void setRead(boolean read) {
+    isRead = read;
+  }
 
-    @Override
-    public String toString() {
-        return "NotificationMapper [notification=" + this.notification + ", userId=" + this.userId + ", isRead=" + this.isRead
-                + ", createdAt=" + this.createdAt + ", getId()=" + this.getId() + "]";
-    }
+  @Override
+  public String toString() {
+    return "NotificationMapper [notification="
+        + this.notification
+        + ", userId="
+        + this.userId
+        + ", isRead="
+        + this.isRead
+        + ", createdAt="
+        + this.createdAt
+        + ", getId()="
+        + this.getId()
+        + "]";
+  }
 }

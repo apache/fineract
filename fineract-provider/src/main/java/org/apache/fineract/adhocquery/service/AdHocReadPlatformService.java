@@ -23,11 +23,11 @@ import org.apache.fineract.adhocquery.data.AdHocData;
 
 public interface AdHocReadPlatformService {
 
-    Collection<AdHocData> retrieveAllAdHocQuery();
+  Collection<AdHocData> retrieveAllAdHocQuery();
 
-    Collection<AdHocData> retrieveAllActiveAdHocQuery();
+  Collection<AdHocData> retrieveAllActiveAdHocQuery();
 
-    AdHocData retrieveOne(Long adHocId);
-    AdHocData retrieveNewAdHocDetails();
+  AdHocData retrieveOne(Long adHocId);
 
+  AdHocData retrieveNewAdHocDetails();
 }

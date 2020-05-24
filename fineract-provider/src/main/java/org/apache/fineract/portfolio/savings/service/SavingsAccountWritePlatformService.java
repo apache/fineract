@@ -30,83 +30,90 @@ import org.joda.time.format.DateTimeFormatter;
 
 public interface SavingsAccountWritePlatformService {
 
-    CommandProcessingResult activate(Long savingsId, JsonCommand command);
+  CommandProcessingResult activate(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult deposit(Long savingsId, JsonCommand command);
+  CommandProcessingResult deposit(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
+  CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult applyAnnualFee(final Long savingsAccountChargeId, final Long accountId);
+  CommandProcessingResult applyAnnualFee(final Long savingsAccountChargeId, final Long accountId);
 
-    CommandProcessingResult calculateInterest(Long savingsId);
+  CommandProcessingResult calculateInterest(Long savingsId);
 
-    CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
+  CommandProcessingResult undoTransaction(
+      Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
-    CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
+  CommandProcessingResult adjustSavingsTransaction(
+      Long savingsId, Long transactionId, JsonCommand command);
 
-    CommandProcessingResult close(Long savingsId, JsonCommand command);
+  CommandProcessingResult close(Long savingsId, JsonCommand command);
 
-    SavingsAccountTransaction initiateSavingsTransfer(SavingsAccount account, LocalDate transferDate);
+  SavingsAccountTransaction initiateSavingsTransfer(SavingsAccount account, LocalDate transferDate);
 
-    SavingsAccountTransaction withdrawSavingsTransfer(SavingsAccount account, LocalDate transferDate);
+  SavingsAccountTransaction withdrawSavingsTransfer(SavingsAccount account, LocalDate transferDate);
 
-    void rejectSavingsTransfer(SavingsAccount account);
+  void rejectSavingsTransfer(SavingsAccount account);
 
-    SavingsAccountTransaction acceptSavingsTransfer(SavingsAccount account, LocalDate transferDate, Office acceptedInOffice, Staff staff);
+  SavingsAccountTransaction acceptSavingsTransfer(
+      SavingsAccount account, LocalDate transferDate, Office acceptedInOffice, Staff staff);
 
-    CommandProcessingResult addSavingsAccountCharge(JsonCommand command);
+  CommandProcessingResult addSavingsAccountCharge(JsonCommand command);
 
-    CommandProcessingResult updateSavingsAccountCharge(JsonCommand command);
+  CommandProcessingResult updateSavingsAccountCharge(JsonCommand command);
 
-    CommandProcessingResult deleteSavingsAccountCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
+  CommandProcessingResult deleteSavingsAccountCharge(
+      Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
 
-    CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId);
+  CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId);
 
-    CommandProcessingResult payCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
+  CommandProcessingResult payCharge(
+      Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
 
-    CommandProcessingResult inactivateCharge(Long savingsAccountId, Long savingsAccountChargeId);
+  CommandProcessingResult inactivateCharge(Long savingsAccountId, Long savingsAccountChargeId);
 
-    CommandProcessingResult assignFieldOfficer(Long savingsAccountId, JsonCommand command);
+  CommandProcessingResult assignFieldOfficer(Long savingsAccountId, JsonCommand command);
 
-    CommandProcessingResult unassignFieldOfficer(Long savingsAccountId, JsonCommand command);
+  CommandProcessingResult unassignFieldOfficer(Long savingsAccountId, JsonCommand command);
 
-    void applyChargeDue(final Long savingsAccountChargeId, final Long accountId);
+  void applyChargeDue(final Long savingsAccountChargeId, final Long accountId);
 
-    void processPostActiveActions(SavingsAccount account, DateTimeFormatter fmt, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds);
+  void processPostActiveActions(
+      SavingsAccount account,
+      DateTimeFormatter fmt,
+      Set<Long> existingTransactionIds,
+      Set<Long> existingReversedTransactionIds);
 
+  CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
 
-    CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
+  void setSubStatusInactive(Long savingsId);
 
-    void setSubStatusInactive(Long savingsId);
+  void setSubStatusDormant(Long savingsId);
 
-    void setSubStatusDormant(Long savingsId);
+  void escheat(Long savingsId);
 
-    void escheat(Long savingsId);
+  CommandProcessingResult postInterest(JsonCommand command);
 
-    CommandProcessingResult postInterest(JsonCommand command);
+  void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate);
 
-    void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate);
+  CommandProcessingResult blockAccount(Long savingsId);
 
-    CommandProcessingResult blockAccount(Long savingsId);
+  CommandProcessingResult unblockAccount(Long savingsId);
 
-    CommandProcessingResult unblockAccount(Long savingsId);
+  CommandProcessingResult holdAmount(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult holdAmount(Long savingsId, JsonCommand command);
+  CommandProcessingResult blockCredits(Long savingsId);
 
-    CommandProcessingResult blockCredits(Long savingsId);
+  CommandProcessingResult unblockCredits(Long savingsId);
 
-    CommandProcessingResult unblockCredits(Long savingsId);
+  CommandProcessingResult blockDebits(Long savingsId);
 
-    CommandProcessingResult blockDebits(Long savingsId);
+  CommandProcessingResult unblockDebits(Long savingsId);
 
-    CommandProcessingResult unblockDebits(Long savingsId);
+  CommandProcessingResult releaseAmount(Long savingsId, Long transactionId);
 
-    CommandProcessingResult releaseAmount(Long savingsId, Long transactionId);
+  CommandProcessingResult gsimActivate(Long gsimId, JsonCommand command);
 
-    CommandProcessingResult gsimActivate(Long gsimId, JsonCommand command);
+  CommandProcessingResult gsimDeposit(Long gsimId, JsonCommand command);
 
-    CommandProcessingResult gsimDeposit(Long gsimId, JsonCommand command);
-
-    CommandProcessingResult bulkGSIMClose(Long gsimId, JsonCommand command);
+  CommandProcessingResult bulkGSIMClose(Long gsimId, JsonCommand command);
 }

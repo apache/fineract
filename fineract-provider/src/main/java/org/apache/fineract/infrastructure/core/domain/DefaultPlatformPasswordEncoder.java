@@ -30,15 +30,15 @@ import org.springframework.stereotype.Service;
 @Scope("singleton")
 public class DefaultPlatformPasswordEncoder implements PlatformPasswordEncoder {
 
-    private final PasswordEncoder passwordEncoder;
+  private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public DefaultPlatformPasswordEncoder(final PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+  @Autowired
+  public DefaultPlatformPasswordEncoder(final PasswordEncoder passwordEncoder) {
+    this.passwordEncoder = passwordEncoder;
+  }
 
-    @Override
-    public String encode(final PlatformUser appUser) {
-        return this.passwordEncoder.encode(appUser.getPassword());
-    }
+  @Override
+  public String encode(final PlatformUser appUser) {
+    return this.passwordEncoder.encode(appUser.getPassword());
+  }
 }

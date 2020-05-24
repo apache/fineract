@@ -56,121 +56,152 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"AdhocQuery Api"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "AdhocQuery Api", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "AdhocQuery Api", description = "")})
 public class AdHocApiResource {
 
-    /**
-     * The set of parameters that are supported in response for {@link AdhocData}
-     */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName","tableField","isActive","createdBy","createdOn","createdById","updatedById","updatedOn","email"));
+  /**
+   * The set of parameters that are supported in response for {@link AdhocData}
+   */
+  private final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              "id",
+              "name",
+              "query",
+              "tableName",
+              "tableField",
+              "isActive",
+              "createdBy",
+              "createdOn",
+              "createdById",
+              "updatedById",
+              "updatedOn",
+              "email"));
 
-    private final PlatformSecurityContext context;
-    private final AdHocReadPlatformService adHocReadPlatformService;
-    private final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext context;
+  private final AdHocReadPlatformService adHocReadPlatformService;
+  private final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public AdHocApiResource(final PlatformSecurityContext context, final AdHocReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.adHocReadPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+  @Autowired
+  public AdHocApiResource(
+      final PlatformSecurityContext context,
+      final AdHocReadPlatformService readPlatformService,
+      final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.adHocReadPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser();
-        final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllAdHocQuery();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, adhocs, this.RESPONSE_DATA_PARAMETERS);
-    }
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Path("template")
-    public String template(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser();
-        final AdHocData user = this.adHocReadPlatformService.retrieveNewAdHocDetails();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
-    }
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createAdHocQuery(final String apiRequestBodyAsJson) {
+    this.context.authenticatedUser();
+    final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllAdHocQuery();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, adhocs, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createAdHoc() //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @Path("template")
+  public String template(@Context final UriInfo uriInfo) {
+    this.context.authenticatedUser();
+    final AdHocData user = this.adHocReadPlatformService.retrieveNewAdHocDetails();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String createAdHocQuery(final String apiRequestBodyAsJson) {
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .createAdHoc() //
+            .withJson(apiRequestBodyAsJson) //
+            .build();
 
-    @GET
-    @Path("{adHocId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAdHocQuery(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId, @Context final UriInfo uriInfo) {
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        this.context.authenticatedUser();
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+  @GET
+  @Path("{adHocId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAdHocQuery(
+      @PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId,
+      @Context final UriInfo uriInfo) {
 
-        final AdHocData adhoc = this.adHocReadPlatformService.retrieveOne(adHocId);
+    this.context.authenticatedUser();
 
-        return this.toApiJsonSerializer.serialize(settings, adhoc, this.RESPONSE_DATA_PARAMETERS);
-    }
-    @PUT
-    @Path("{adHocId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId, final String apiRequestBodyAsJson) {
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateAdHoc(adHocId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+    final AdHocData adhoc = this.adHocReadPlatformService.retrieveOne(adHocId);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    return this.toApiJsonSerializer.serialize(settings, adhoc, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
-     /**
-     * Delete AdHocQuery
-     *
-     * @param adHocId
-     * @return
-     */
-    @DELETE
-    @Path("{adHocId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteAdHocQuery(@PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId) {
+  @PUT
+  @Path("{adHocId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String update(
+      @PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId,
+      final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteAdHoc(adHocId) //
-                .build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .updateAdHoc(adHocId) //
+            .withJson(apiRequestBodyAsJson) //
+            .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
+  /**
+   * Delete AdHocQuery
+   *
+   * @param adHocId
+   * @return
+   */
+  @DELETE
+  @Path("{adHocId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String deleteAdHocQuery(
+      @PathParam("adHocId") @ApiParam(value = "adHocId") final Long adHocId) {
 
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .deleteAdHoc(adHocId) //
+            .build();
 
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+    return this.toApiJsonSerializer.serialize(result);
+  }
+
+  private boolean is(final String commandParam, final String commandValue) {
+    return StringUtils.isNotBlank(commandParam)
+        && commandParam.trim().equalsIgnoreCase(commandValue);
+  }
 }

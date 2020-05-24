@@ -27,130 +27,142 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/04/17.
  */
 final class InterestRateChartsApiResourceSwagger {
-    private InterestRateChartsApiResourceSwagger() {
+  private InterestRateChartsApiResourceSwagger() {}
+
+  @ApiModel(value = "GetInterestRateChartsTemplateResponse")
+  public static final class GetInterestRateChartsTemplateResponse {
+    private GetInterestRateChartsTemplateResponse() {}
+
+    final class GetInterestRateChartsTemplatePeriodTypes {
+      private GetInterestRateChartsTemplatePeriodTypes() {}
+
+      @ApiModelProperty(example = "0")
+      public Integer id;
+
+      @ApiModelProperty(example = "interestChartPeriodType.days")
+      public String code;
+
+      @ApiModelProperty(example = "Days")
+      public String value;
     }
 
-    @ApiModel(value = "GetInterestRateChartsTemplateResponse")
-    public final static class GetInterestRateChartsTemplateResponse {
-        private GetInterestRateChartsTemplateResponse() {
-        }
+    public Set<GetInterestRateChartsTemplatePeriodTypes> periodTypes;
+  }
 
-        final class GetInterestRateChartsTemplatePeriodTypes {
-            private GetInterestRateChartsTemplatePeriodTypes() {
-            }
+  @ApiModel(value = "GetInterestRateChartsResponse")
+  public static final class GetInterestRateChartsResponse {
+    private GetInterestRateChartsResponse() {}
 
-            @ApiModelProperty(example = "0")
-            public Integer id;
-            @ApiModelProperty(example = "interestChartPeriodType.days")
-            public String code;
-            @ApiModelProperty(example = "Days")
-            public String value;
-        }
+    final class GetInterestRateChartsChartSlabs {
+      private GetInterestRateChartsChartSlabs() {}
 
-        public Set<GetInterestRateChartsTemplatePeriodTypes> periodTypes;
+      @ApiModelProperty(example = "1")
+      public Integer id;
+
+      public GetInterestRateChartsTemplateResponse.GetInterestRateChartsTemplatePeriodTypes
+          periodTypes;
+
+      @ApiModelProperty(example = "1")
+      public Integer fromPeriod;
+
+      @ApiModelProperty(example = "6")
+      public Integer annualInterestRate;
+
+      public GetInterestRateChartsCurrency currency;
     }
 
-    @ApiModel(value = "GetInterestRateChartsResponse")
-    public static final class GetInterestRateChartsResponse {
-        private GetInterestRateChartsResponse() {
-        }
+    final class GetInterestRateChartsCurrency {
+      private GetInterestRateChartsCurrency() {}
 
-        final class GetInterestRateChartsChartSlabs {
-            private GetInterestRateChartsChartSlabs() {
-            }
+      @ApiModelProperty(example = "USD")
+      public String code;
 
-            @ApiModelProperty(example = "1")
-            public Integer id;
-            public GetInterestRateChartsTemplateResponse.GetInterestRateChartsTemplatePeriodTypes periodTypes;
-            @ApiModelProperty(example = "1")
-            public Integer fromPeriod;
-            @ApiModelProperty(example = "6")
-            public Integer annualInterestRate;
-            public GetInterestRateChartsCurrency currency;
-        }
+      @ApiModelProperty(example = "US Dollar")
+      public String name;
 
-        final class GetInterestRateChartsCurrency {
-            private GetInterestRateChartsCurrency() {
-            }
+      @ApiModelProperty(example = "2")
+      public Integer decimalPlaces;
 
-            @ApiModelProperty(example = "USD")
-            public String code;
-            @ApiModelProperty(example = "US Dollar")
-            public String name;
-            @ApiModelProperty(example = "2")
-            public Integer decimalPlaces;
-            @ApiModelProperty(example = "$")
-            public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
-            public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
-            public String displayLabel;
-        }
+      @ApiModelProperty(example = "$")
+      public String displaySymbol;
 
-        @ApiModelProperty(example = "1")
-        public Integer id;
-        @ApiModelProperty(example = "[2014, 1, 1]")
-        public LocalDate fromDate;
-        @ApiModelProperty(example = "1")
-        public Integer savingsProductId;
-        @ApiModelProperty(example = "Fixed Deposit Product 001")
-        public String savingsProductName;
-        public Set<GetInterestRateChartsChartSlabs> chartSlabs;
+      @ApiModelProperty(example = "currency.USD")
+      public String nameCode;
+
+      @ApiModelProperty(example = "US Dollar ($)")
+      public String displayLabel;
     }
 
-    @ApiModel(value = "PostInterestRateChartsRequest")
-    public static final class PostInterestRateChartsRequest {
-        private PostInterestRateChartsRequest() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer id;
 
-        @ApiModelProperty(example = "Chart - 2014")
-        public String name;
-        @ApiModelProperty(example = "This chart is applicable for year 2014")
-        public String description;
-        @ApiModelProperty(example = "Document")
-        public String type;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "01 Jan 2014")
-        public String fromDate;
-    }
+    @ApiModelProperty(example = "[2014, 1, 1]")
+    public LocalDate fromDate;
 
-    @ApiModel(value = "PostInterestRateChartsResponse")
-    public static final class PostInterestRateChartsResponse {
-        private PostInterestRateChartsResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer savingsProductId;
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "Fixed Deposit Product 001")
+    public String savingsProductName;
 
-    @ApiModel(value = "PutInterestRateChartsChartIdRequest")
-    public static final class PutInterestRateChartsChartIdRequest {
-        private PutInterestRateChartsChartIdRequest() {
-        }
-        @ApiModelProperty(example = "Interest rate chart for 2014")
-        public String name;
-        @ApiModelProperty(example = "Interest rate chart for 2014")
-        public String description;
-    }
+    public Set<GetInterestRateChartsChartSlabs> chartSlabs;
+  }
 
-    @ApiModel(value = "PutInterestRateChartsChartIdResponse")
-    public static final class PutInterestRateChartsChartIdResponse {
-        private PutInterestRateChartsChartIdResponse() {
-        }
+  @ApiModel(value = "PostInterestRateChartsRequest")
+  public static final class PostInterestRateChartsRequest {
+    private PostInterestRateChartsRequest() {}
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "Chart - 2014")
+    public String name;
 
-    @ApiModel(value = "DeleteInterestRateChartsChartIdResponse")
-    public static final class DeleteInterestRateChartsChartIdResponse {
-        private DeleteInterestRateChartsChartIdResponse() {
-        }
+    @ApiModelProperty(example = "This chart is applicable for year 2014")
+    public String description;
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "Document")
+    public String type;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "01 Jan 2014")
+    public String fromDate;
+  }
+
+  @ApiModel(value = "PostInterestRateChartsResponse")
+  public static final class PostInterestRateChartsResponse {
+    private PostInterestRateChartsResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "PutInterestRateChartsChartIdRequest")
+  public static final class PutInterestRateChartsChartIdRequest {
+    private PutInterestRateChartsChartIdRequest() {}
+
+    @ApiModelProperty(example = "Interest rate chart for 2014")
+    public String name;
+
+    @ApiModelProperty(example = "Interest rate chart for 2014")
+    public String description;
+  }
+
+  @ApiModel(value = "PutInterestRateChartsChartIdResponse")
+  public static final class PutInterestRateChartsChartIdResponse {
+    private PutInterestRateChartsChartIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "DeleteInterestRateChartsChartIdResponse")
+  public static final class DeleteInterestRateChartsChartIdResponse {
+    private DeleteInterestRateChartsChartIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
 }

@@ -23,16 +23,15 @@ import org.apache.fineract.portfolio.collateral.data.CollateralData;
 
 public interface CollateralReadPlatformService {
 
-    /**
-     * Validates the passed in loanId before retrieving Collaterals for the same
-     *
-     * @param loanId
-     * @return
-     */
-    List<CollateralData> retrieveCollateralsForValidLoan(Long loanId);
+  /**
+   * Validates the passed in loanId before retrieving Collaterals for the same
+   *
+   * @param loanId
+   * @return
+   */
+  List<CollateralData> retrieveCollateralsForValidLoan(Long loanId);
 
-    List<CollateralData> retrieveCollaterals(Long loanId);
+  List<CollateralData> retrieveCollaterals(Long loanId);
 
-    CollateralData retrieveCollateral(Long loanId, Long collateralId);
-
+  CollateralData retrieveCollateral(Long loanId, Long collateralId);
 }

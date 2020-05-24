@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
  */
 public interface WriteSurveyService {
 
-    CommandProcessingResult registerSurvey(JsonCommand command);
+  CommandProcessingResult registerSurvey(JsonCommand command);
 
-    CommandProcessingResult fullFillSurvey(String datatable, Long appTableId, JsonCommand command);
+  CommandProcessingResult fullFillSurvey(String datatable, Long appTableId, JsonCommand command);
 }

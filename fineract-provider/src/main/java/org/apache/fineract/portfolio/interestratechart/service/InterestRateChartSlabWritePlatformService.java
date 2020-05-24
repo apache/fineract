@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface InterestRateChartSlabWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+  CommandProcessingResult create(JsonCommand command);
 
-    CommandProcessingResult update(Long chartSlabId, Long interestChartId, JsonCommand command);
+  CommandProcessingResult update(Long chartSlabId, Long interestChartId, JsonCommand command);
 
-    CommandProcessingResult deleteChartSlab(Long chartSlabId, Long interestRateChartId);
+  CommandProcessingResult deleteChartSlab(Long chartSlabId, Long interestRateChartId);
 }

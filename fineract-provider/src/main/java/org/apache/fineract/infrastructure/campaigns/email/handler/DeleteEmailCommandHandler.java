@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "EMAIL", action = "DELETE")
 public class DeleteEmailCommandHandler implements NewCommandSourceHandler {
 
-    private final EmailWritePlatformService writePlatformService;
+  private final EmailWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteEmailCommandHandler(final EmailWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteEmailCommandHandler(final EmailWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.delete(command.entityId());
-    }
+    return this.writePlatformService.delete(command.entityId());
+  }
 }

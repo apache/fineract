@@ -29,16 +29,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataSourceForTenants implements RoutingDataSourceService {
 
-    private final DataSource tenantDataSource;
+  private final DataSource tenantDataSource;
 
-    @Autowired
-    public DataSourceForTenants(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
-        this.tenantDataSource = tenantDataSource;
-    }
+  @Autowired
+  public DataSourceForTenants(
+      final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
+    this.tenantDataSource = tenantDataSource;
+  }
 
-    @Override
-    public DataSource retrieveDataSource() {
-        return this.tenantDataSource;
-    }
-
+  @Override
+  public DataSource retrieveDataSource() {
+    return this.tenantDataSource;
+  }
 }

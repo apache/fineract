@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "CLOSE")
 public class CloseClientCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientWritePlatformService clientWritePlatformService;
+  private final ClientWritePlatformService clientWritePlatformService;
 
-    @Autowired
-    public CloseClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
-        this.clientWritePlatformService = clientWritePlatformService;
-    }
+  @Autowired
+  public CloseClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
+    this.clientWritePlatformService = clientWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.clientWritePlatformService.closeClient(command.entityId(), command);
-    }
+    return this.clientWritePlatformService.closeClient(command.entityId(), command);
+  }
 }

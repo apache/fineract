@@ -20,10 +20,10 @@ package org.apache.fineract.accounting.accrual.api;
 
 public class AccrualAccountingConstants {
 
-    public static final String accrueTillParamName = "tillDate";
-    public static final String localeParamName = "locale";
-    public static final String dateFormatParamName = "dateFormat";
+  public static final String accrueTillParamName = "tillDate";
+  public static final String localeParamName = "locale";
+  public static final String dateFormatParamName = "dateFormat";
 
-    public static final String PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME = "periodicaccrual";
-    public static final String PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE = "execution.failed";
+  public static final String PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME = "periodicaccrual";
+  public static final String PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE = "execution.failed";
 }

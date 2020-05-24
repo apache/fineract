@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "WAIVEINTERESTPORTION")
 public class WaiveInterestPortionOnLoanCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public WaiveInterestPortionOnLoanCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public WaiveInterestPortionOnLoanCommandHandler(
+      final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.waiveInterestOnLoan(command.getLoanId(), command);
-    }
+    return this.writePlatformService.waiveInterestOnLoan(command.getLoanId(), command);
+  }
 }

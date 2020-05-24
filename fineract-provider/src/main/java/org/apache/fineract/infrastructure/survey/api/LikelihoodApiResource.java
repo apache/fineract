@@ -48,65 +48,72 @@ import org.springframework.stereotype.Component;
 @Api(value = "Likelihood")
 public class LikelihoodApiResource {
 
-    private final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer;
-    private final PlatformSecurityContext context;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final ReadLikelihoodService readService;
+  private final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer;
+  private final PlatformSecurityContext context;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final ReadLikelihoodService readService;
 
-    @Autowired
-    LikelihoodApiResource(final PlatformSecurityContext context,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer, final ReadLikelihoodService readService) {
+  @Autowired
+  LikelihoodApiResource(
+      final PlatformSecurityContext context,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+      final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer,
+      final ReadLikelihoodService readService) {
 
-        this.context = context;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.readService = readService;
+    this.context = context;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.readService = readService;
+  }
 
-    }
+  @GET
+  @Path("{ppiName}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(@PathParam("ppiName") final String ppiName) {
 
-    @GET
-    @Path("{ppiName}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@PathParam("ppiName") final String ppiName) {
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
 
-        this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
+    List<LikelihoodData> likelihoodData = this.readService.retrieveAll(ppiName);
+    return this.toApiJsonSerializer.serialize(likelihoodData);
+  }
 
-        List<LikelihoodData> likelihoodData = this.readService.retrieveAll(ppiName);
-        return this.toApiJsonSerializer.serialize(likelihoodData);
+  @GET
+  @Path("{ppiName}/{likelihoodId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieve(@PathParam("likelihoodId") final Long likelihoodId) {
 
-    }
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
 
-    @GET
-    @Path("{ppiName}/{likelihoodId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieve(@PathParam("likelihoodId") final Long likelihoodId) {
+    LikelihoodData likelihoodData = this.readService.retrieve(likelihoodId);
+    return this.toApiJsonSerializer.serialize(likelihoodData);
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
+  @PUT
+  @Path("{ppiName}/{likelihoodId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String update(
+      @PathParam("likelihoodId") final Long likelihoodId, final String apiRequestBodyAsJson) {
 
-        LikelihoodData likelihoodData = this.readService.retrieve(likelihoodId);
-        return this.toApiJsonSerializer.serialize(likelihoodData);
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
 
-    }
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .updateLikelihood(likelihoodId) //
+            .withJson(apiRequestBodyAsJson) //
+            .build();
 
-    @PUT
-    @Path("{ppiName}/{likelihoodId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("likelihoodId") final Long likelihoodId, final String apiRequestBodyAsJson) {
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateLikelihood(likelihoodId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

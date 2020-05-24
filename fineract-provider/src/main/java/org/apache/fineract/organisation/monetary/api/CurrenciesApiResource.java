@@ -56,63 +56,108 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Currency"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Currency",
+          description =
+              "Application related configuration around viewing/updating the currencies permitted"
+                  + " for use within the MFI.")
+    })
 public class CurrenciesApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+  private final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 
-    private final String resourceNameForPermissions = "CURRENCY";
+  private final String resourceNameForPermissions = "CURRENCY";
 
-    private final PlatformSecurityContext context;
-    private final OrganisationCurrencyReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext context;
+  private final OrganisationCurrencyReadPlatformService readPlatformService;
+  private final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData>
+      toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public CurrenciesApiResource(final PlatformSecurityContext context, final OrganisationCurrencyReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+  @Autowired
+  public CurrenciesApiResource(
+      final PlatformSecurityContext context,
+      final OrganisationCurrencyReadPlatformService readPlatformService,
+      final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.readPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Currency Configuration", notes = "Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).\n" + "\n" + "Example Requests:\n" + "\n" + "currencies\n" + "\n" + "\n" + "currencies?fields=selectedCurrencyOptions")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CurrenciesApiResourceSwagger.GetCurrenciesResponse.class)})
-    public String retrieveCurrencies(@Context final UriInfo uriInfo) {
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve Currency Configuration",
+      notes =
+          "Returns the list of currencies permitted for use AND the list of currencies not"
+              + " selected (but available for selection).\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "currencies\n"
+              + "\n"
+              + "\n"
+              + "currencies?fields=selectedCurrencyOptions")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CurrenciesApiResourceSwagger.GetCurrenciesResponse.class)
+  })
+  public String retrieveCurrencies(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final ApplicationCurrencyConfigurationData configurationData = this.readPlatformService.retrieveCurrencyConfiguration();
+    final ApplicationCurrencyConfigurationData configurationData =
+        this.readPlatformService.retrieveCurrencyConfiguration();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
-    }
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(
+        settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-    @PUT
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update Currency Configuration", notes = "Updates the list of currencies permitted for use.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CurrenciesApiResourceSwagger.PutCurrenciesRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CurrenciesApiResourceSwagger.PutCurrenciesResponse.class)})
-    public String updateCurrencies(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+  @PUT
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Update Currency Configuration",
+      notes = "Updates the list of currencies permitted for use.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = CurrenciesApiResourceSwagger.PutCurrenciesRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CurrenciesApiResourceSwagger.PutCurrenciesResponse.class)
+  })
+  public String updateCurrencies(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateCurrencies() //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder() //
+            .updateCurrencies() //
+            .withJson(apiRequestBodyAsJson) //
+            .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

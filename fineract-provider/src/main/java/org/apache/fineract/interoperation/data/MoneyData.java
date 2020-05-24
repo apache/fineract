@@ -34,52 +34,64 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 
 public class MoneyData {
 
-    public static final String[] PARAMS = {PARAM_AMOUNT, PARAM_CURRENCY, PARAM_LOCALE};
+  public static final String[] PARAMS = {PARAM_AMOUNT, PARAM_CURRENCY, PARAM_LOCALE};
 
-    @NotNull
-    private final BigDecimal amount;
-    @NotNull
-    private final String currency;
+  @NotNull private final BigDecimal amount;
+  @NotNull private final String currency;
 
-    MoneyData(BigDecimal amount, String currency) {
-        this.amount = amount;
-        this.currency = currency;
-    }
+  MoneyData(BigDecimal amount, String currency) {
+    this.amount = amount;
+    this.currency = currency;
+  }
 
-    public static MoneyData build(BigDecimal amount, String currency) {
-        return new MoneyData(amount, currency);
-    }
+  public static MoneyData build(BigDecimal amount, String currency) {
+    return new MoneyData(amount, currency);
+  }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+  public BigDecimal getAmount() {
+    return amount;
+  }
 
-    public String getCurrency() {
-        return currency;
-    }
+  public String getCurrency() {
+    return currency;
+  }
 
-    public void normalizeAmount(@NotNull MonetaryCurrency currency) {
-        if (!currency.getCode().equals(this.currency))
-            throw new UnsupportedOperationException("Internal error: Invalid currency " + currency.getCode());
-        MathUtil.normalizeAmount(amount, currency);
-    }
+  public void normalizeAmount(@NotNull MonetaryCurrency currency) {
+    if (!currency.getCode().equals(this.currency))
+      throw new UnsupportedOperationException(
+          "Internal error: Invalid currency " + currency.getCode());
+    MathUtil.normalizeAmount(amount, currency);
+  }
 
-    public static MoneyData validateAndParse(DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
-        if (element == null)
-            return null;
+  public static MoneyData validateAndParse(
+      DataValidatorBuilder dataValidator, JsonObject element, FromJsonHelper jsonHelper) {
+    if (element == null) return null;
 
-        jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
+    jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 
-        String locale = jsonHelper.extractStringNamed(PARAM_LOCALE, element);
-        BigDecimal amount = locale == null
-                ? jsonHelper.extractBigDecimalNamed(PARAM_AMOUNT, element, DEFAULT_LOCALE)
-                : jsonHelper.extractBigDecimalWithLocaleNamed(PARAM_AMOUNT, element);
-        DataValidatorBuilder  dataValidatorCopy = dataValidator.reset().parameter(PARAM_AMOUNT).value(amount).notBlank().zeroOrPositiveAmount();
+    String locale = jsonHelper.extractStringNamed(PARAM_LOCALE, element);
+    BigDecimal amount =
+        locale == null
+            ? jsonHelper.extractBigDecimalNamed(PARAM_AMOUNT, element, DEFAULT_LOCALE)
+            : jsonHelper.extractBigDecimalWithLocaleNamed(PARAM_AMOUNT, element);
+    DataValidatorBuilder dataValidatorCopy =
+        dataValidator
+            .reset()
+            .parameter(PARAM_AMOUNT)
+            .value(amount)
+            .notBlank()
+            .zeroOrPositiveAmount();
 
-        String currency = jsonHelper.extractStringNamed(PARAM_CURRENCY, element);
-        dataValidatorCopy = dataValidatorCopy.reset().parameter(PARAM_CURRENCY).value(currency).notBlank().notExceedingLengthOf(3);
+    String currency = jsonHelper.extractStringNamed(PARAM_CURRENCY, element);
+    dataValidatorCopy =
+        dataValidatorCopy
+            .reset()
+            .parameter(PARAM_CURRENCY)
+            .value(currency)
+            .notBlank()
+            .notExceedingLengthOf(3);
 
-        dataValidator.merge(dataValidatorCopy);
-        return dataValidator.hasError() ? null : new MoneyData(amount, currency);
-    }
+    dataValidator.merge(dataValidatorCopy);
+    return dataValidator.hasError() ? null : new MoneyData(amount, currency);
+  }
 }

@@ -25,7 +25,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class IssueableSharesExceededException extends AbstractPlatformResourceNotFoundException {
 
-    public IssueableSharesExceededException() {
-        super("error.msg.shares.issuable.shares.exceeded", "Issueable Shares exceeded than product definition");
-    }
+  public IssueableSharesExceededException() {
+    super(
+        "error.msg.shares.issuable.shares.exceeded",
+        "Issueable Shares exceeded than product definition");
+  }
 }

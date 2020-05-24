@@ -25,20 +25,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class FineractEntityToEntityMappingRepositoryWrapper {
 
-    private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
+  private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
 
-    @Autowired
-    public FineractEntityToEntityMappingRepositoryWrapper(final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository) {
-        this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
-    }
+  @Autowired
+  public FineractEntityToEntityMappingRepositoryWrapper(
+      final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository) {
+    this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
+  }
 
-    public FineractEntityToEntityMapping findOneWithNotFoundDetection(final Long id) {
-        return this.fineractEntityToEntityMappingRepository.findById(id)
-                .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
-    }
+  public FineractEntityToEntityMapping findOneWithNotFoundDetection(final Long id) {
+    return this.fineractEntityToEntityMappingRepository
+        .findById(id)
+        .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
+  }
 
-    public void delete(final FineractEntityToEntityMapping mapId) {
-        this.fineractEntityToEntityMappingRepository.delete(mapId);
-    }
-
+  public void delete(final FineractEntityToEntityMapping mapId) {
+    this.fineractEntityToEntityMappingRepository.delete(mapId);
+  }
 }

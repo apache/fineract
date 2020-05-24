@@ -46,47 +46,47 @@ import org.springframework.stereotype.Component;
 @Component
 public class DisburseLoanCommandStrategy implements CommandStrategy {
 
-    private final LoansApiResource loansApiResource;
+  private final LoansApiResource loansApiResource;
 
-    @Autowired
-    public DisburseLoanCommandStrategy(final LoansApiResource loansApiResource) {
-        this.loansApiResource = loansApiResource;
+  @Autowired
+  public DisburseLoanCommandStrategy(final LoansApiResource loansApiResource) {
+    this.loansApiResource = loansApiResource;
+  }
+
+  @Override
+  public BatchResponse execute(
+      final BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
+
+    final BatchResponse response = new BatchResponse();
+    final String responseBody;
+
+    response.setRequestId(request.getRequestId());
+    response.setHeaders(request.getHeaders());
+
+    final String[] pathParameters = request.getRelativeUrl().split("/");
+    Long loanId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
+
+    // Try-catch blocks to map exceptions to appropriate status codes
+    try {
+
+      // Calls 'disburse' function from 'LoansApiResource' to disburse a loan
+      responseBody = loansApiResource.stateTransitions(loanId, "disburse", request.getBody());
+
+      response.setStatusCode(200);
+
+      // Sets the body of the response after the successful disbursal of the loan
+      response.setBody(responseBody);
+
+    } catch (RuntimeException e) {
+
+      // Gets an object of type ErrorInfo, containing information about
+      // raised exception
+      ErrorInfo ex = ErrorHandler.handler(e);
+
+      response.setStatusCode(ex.getStatusCode());
+      response.setBody(ex.getMessage());
     }
 
-    @Override
-    public BatchResponse execute(final BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
-
-        final BatchResponse response = new BatchResponse();
-        final String responseBody;
-
-        response.setRequestId(request.getRequestId());
-        response.setHeaders(request.getHeaders());
-
-        final String[] pathParameters = request.getRelativeUrl().split("/");
-        Long loanId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
-
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
-
-            // Calls 'disburse' function from 'LoansApiResource' to disburse a loan
-            responseBody = loansApiResource.stateTransitions(loanId, "disburse", request.getBody());
-
-            response.setStatusCode(200);
-
-            // Sets the body of the response after the successful disbursal of the loan
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
-
-        return response;
-    }
-
+    return response;
+  }
 }

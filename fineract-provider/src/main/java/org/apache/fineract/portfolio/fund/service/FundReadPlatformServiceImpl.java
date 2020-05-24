@@ -35,58 +35,64 @@ import org.springframework.stereotype.Service;
 @Service
 public class FundReadPlatformServiceImpl implements FundReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
+  private final JdbcTemplate jdbcTemplate;
+  private final PlatformSecurityContext context;
 
-    @Autowired
-    public FundReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
-        this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
+  @Autowired
+  public FundReadPlatformServiceImpl(
+      final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    this.context = context;
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
 
-    private static final class FundMapper implements RowMapper<FundData> {
+  private static final class FundMapper implements RowMapper<FundData> {
 
-        public String schema() {
-            return " f.id as id, f.name as name, f.external_id as externalId from m_fund f ";
-        }
-
-        @Override
-        public FundData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String name = rs.getString("name");
-            final String externalId = rs.getString("externalId");
-
-            return FundData.instance(id, name, externalId);
-        }
+    public String schema() {
+      return " f.id as id, f.name as name, f.external_id as externalId from m_fund f ";
     }
 
     @Override
-    @Cacheable(value = "funds", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
-    public Collection<FundData> retrieveAllFunds() {
+    public FundData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        throws SQLException {
 
-        this.context.authenticatedUser();
+      final Long id = rs.getLong("id");
+      final String name = rs.getString("name");
+      final String externalId = rs.getString("externalId");
 
-        final FundMapper rm = new FundMapper();
-        final String sql = "select " + rm.schema() + " order by f.name";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+      return FundData.instance(id, name, externalId);
     }
+  }
 
-    @Override
-    public FundData retrieveFund(final Long fundId) {
+  @Override
+  @Cacheable(
+      value = "funds",
+      key =
+          "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
+  public Collection<FundData> retrieveAllFunds() {
 
-        try {
-            this.context.authenticatedUser();
+    this.context.authenticatedUser();
 
-            final FundMapper rm = new FundMapper();
-            final String sql = "select " + rm.schema() + " where f.id = ?";
+    final FundMapper rm = new FundMapper();
+    final String sql = "select " + rm.schema() + " order by f.name";
 
-            final FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { fundId });
+    return this.jdbcTemplate.query(sql, rm, new Object[] {});
+  }
 
-            return selectedFund;
-        } catch (final EmptyResultDataAccessException e) {
-            throw new FundNotFoundException(fundId);
-        }
+  @Override
+  public FundData retrieveFund(final Long fundId) {
+
+    try {
+      this.context.authenticatedUser();
+
+      final FundMapper rm = new FundMapper();
+      final String sql = "select " + rm.schema() + " where f.id = ?";
+
+      final FundData selectedFund =
+          this.jdbcTemplate.queryForObject(sql, rm, new Object[] {fundId});
+
+      return selectedFund;
+    } catch (final EmptyResultDataAccessException e) {
+      throw new FundNotFoundException(fundId);
     }
+  }
 }

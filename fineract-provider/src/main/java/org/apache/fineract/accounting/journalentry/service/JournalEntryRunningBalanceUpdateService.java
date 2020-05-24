@@ -23,8 +23,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface JournalEntryRunningBalanceUpdateService {
 
-    void updateRunningBalance();
+  void updateRunningBalance();
 
-    CommandProcessingResult updateOfficeRunningBalance(JsonCommand command);
-
+  CommandProcessingResult updateOfficeRunningBalance(JsonCommand command);
 }

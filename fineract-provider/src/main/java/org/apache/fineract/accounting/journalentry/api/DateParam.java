@@ -31,15 +31,17 @@ import org.joda.time.LocalDate;
  */
 public class DateParam {
 
-    private final String dateAsString;
+  private final String dateAsString;
 
-    public DateParam(final String dateStr) throws WebApplicationException {
-        this.dateAsString = dateStr;
-    }
+  public DateParam(final String dateStr) throws WebApplicationException {
+    this.dateAsString = dateStr;
+  }
 
-    public Date getDate(final String parameterName, final String dateFormat, final String localeAsString) {
-        final Locale locale = JsonParserHelper.localeFromString(localeAsString);
-        final LocalDate localDate = JsonParserHelper.convertFrom(this.dateAsString, parameterName, dateFormat, locale);
-        return localDate.toDate();
-    }
+  public Date getDate(
+      final String parameterName, final String dateFormat, final String localeAsString) {
+    final Locale locale = JsonParserHelper.localeFromString(localeAsString);
+    final LocalDate localDate =
+        JsonParserHelper.convertFrom(this.dateAsString, parameterName, dateFormat, locale);
+    return localDate.toDate();
+  }
 }

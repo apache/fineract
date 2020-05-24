@@ -28,16 +28,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommandSerializerDefaultToJson implements CommandSerializer {
 
-    private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff;
+  private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson
+      excludeNothingWithPrettyPrintingOff;
 
-    @Autowired
-    public CommandSerializerDefaultToJson(
-            final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff) {
-        this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
-    }
+  @Autowired
+  public CommandSerializerDefaultToJson(
+      final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson
+          excludeNothingWithPrettyPrintingOff) {
+    this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
+  }
 
-    @Override
-    public String serializeCommandToJson(final Object command) {
-        return this.excludeNothingWithPrettyPrintingOff.serialize(command);
-    }
+  @Override
+  public String serializeCommandToJson(final Object command) {
+    return this.excludeNothingWithPrettyPrintingOff.serialize(command);
+  }
 }

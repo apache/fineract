@@ -29,19 +29,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "ADJUSTTRANSACTION")
-public class RecurringDepositTransactionAdjustmentCommandHandler implements NewCommandSourceHandler {
+public class RecurringDepositTransactionAdjustmentCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public RecurringDepositTransactionAdjustmentCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public RecurringDepositTransactionAdjustmentCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.depositAccountWritePlatformService.adjustRDTransaction(command.entityId(), transactionId, command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    final Long transactionId = Long.valueOf(command.getTransactionId());
+    return this.depositAccountWritePlatformService.adjustRDTransaction(
+        command.entityId(), transactionId, command);
+  }
 }

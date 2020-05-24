@@ -22,10 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class ChargeCannotBeDeletedException extends AbstractPlatformDomainRuleException {
 
-    public ChargeCannotBeDeletedException(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
+  public ChargeCannotBeDeletedException(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
 
-        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-    }
-
+    super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+  }
 }

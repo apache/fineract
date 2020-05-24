@@ -28,14 +28,13 @@ import org.apache.fineract.infrastructure.survey.data.SurveyDataTableData;
  */
 public interface ReadSurveyService {
 
-    List<SurveyDataTableData> retrieveAllSurveys();
+  List<SurveyDataTableData> retrieveAllSurveys();
 
-    SurveyDataTableData retrieveSurvey(String surveyName);
+  SurveyDataTableData retrieveSurvey(String surveyName);
 
-    List<ClientScoresOverview> retrieveClientSurveyScoreOverview(String surveyName, Long clientId);
+  List<ClientScoresOverview> retrieveClientSurveyScoreOverview(String surveyName, Long clientId);
 
-    List<ClientScoresOverview> retrieveClientSurveyScoreOverview(Long clientId);
+  List<ClientScoresOverview> retrieveClientSurveyScoreOverview(Long clientId);
 
-    GenericResultsetData retrieveSurveyEntry(String surveyName, Long clientId, Long entryId);
-
+  GenericResultsetData retrieveSurveyEntry(String surveyName, Long clientId, Long entryId);
 }

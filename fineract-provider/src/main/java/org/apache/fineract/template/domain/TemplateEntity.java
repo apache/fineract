@@ -23,32 +23,32 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 @JsonSerialize(using = TemplateEntitySerializer.class)
 public enum TemplateEntity {
+  @SerializedName("client")
+  CLIENT(0, "client"),
+  @SerializedName("loan")
+  LOAN(1, "loan");
 
-    @SerializedName("client")
-    CLIENT(0, "client"), @SerializedName("loan")
-    LOAN(1, "loan");
+  private int id;
+  private String name;
 
-    private int id;
-    private String name;
+  private TemplateEntity(final int id, final String name) {
+    this.id = id;
+    this.name = name;
+  }
 
-    private TemplateEntity(final int id, final String name) {
-        this.id = id;
-        this.name = name;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
+  public int getId() {
+    return this.id;
+  }
 
-    public int getId() {
-        return this.id;
-    }
-
-    public void setId(final int id) {
-        this.id = id;
-    }
+  public void setId(final int id) {
+    this.id = id;
+  }
 }

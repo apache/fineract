@@ -28,90 +28,91 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
  * Created by sanyam on 18/8/17.
  */
 final class ProvisioningCriteriaApiResourceSwagger {
-    private ProvisioningCriteriaApiResourceSwagger() {
+  private ProvisioningCriteriaApiResourceSwagger() {}
 
+  @ApiModel(value = "PostProvisioningCriteriaRequest")
+  public static final class PostProvisioningCriteriaRequest {
+    private PostProvisioningCriteriaRequest() {}
+
+    @ApiModelProperty(example = "High Risk Products Criteria")
+    public String criteriaName;
+
+    public Collection<LoanProductData> loanProducts;
+    public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
+  }
+
+  @ApiModel(value = "PostProvisioningCriteriaResponse")
+  public static final class PostProvisioningCriteriaResponse {
+    private PostProvisioningCriteriaResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "GetProvisioningCriteriaResponse")
+  public static final class GetProvisioningCriteriaResponse {
+    private GetProvisioningCriteriaResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long criteriaId;
+
+    @ApiModelProperty(example = "High Risk Products Criteria")
+    public String criteriaName;
+
+    @ApiModelProperty(example = "mifos")
+    public String createdBy;
+  }
+
+  @ApiModel(value = "GetProvisioningCriteriaCriteriaIdResponse")
+  public static final class GetProvisioningCriteriaCriteriaIdResponse {
+    private GetProvisioningCriteriaCriteriaIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long criteriaId;
+
+    @ApiModelProperty(example = "High Risk Products Criteria")
+    public String criteriaName;
+
+    @ApiModelProperty(example = "mifos")
+    public String createdBy;
+
+    public Collection<LoanProductData> loanProducts;
+    public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
+  }
+
+  @ApiModel(value = "PutProvisioningCriteriaRequest")
+  public static final class PutProvisioningCriteriaRequest {
+    private PutProvisioningCriteriaRequest() {}
+
+    @ApiModelProperty(example = "High Risk Products Criteria")
+    public String criteriaName;
+
+    public Collection<LoanProductData> loanProducts;
+    public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
+  }
+
+  @ApiModel(value = "PutProvisioningCriteriaResponse")
+  public static final class PutProvisioningCriteriaResponse {
+    private PutProvisioningCriteriaResponse() {}
+
+    final class PutProvisioningCriteriaResponseChanges {
+      private PutProvisioningCriteriaResponseChanges() {}
+
+      @ApiModelProperty(example = "High Risk Products Criteria")
+      public String criteriaName;
     }
 
-    @ApiModel(value = "PostProvisioningCriteriaRequest")
-    public static final class PostProvisioningCriteriaRequest {
-        private PostProvisioningCriteriaRequest() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
 
-        }
-        @ApiModelProperty(example = "High Risk Products Criteria")
-        public String criteriaName;
-        public Collection<LoanProductData> loanProducts;
-        public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
-    }
+    public PutProvisioningCriteriaResponseChanges changes;
+  }
 
-    @ApiModel(value = "PostProvisioningCriteriaResponse")
-    public static final class PostProvisioningCriteriaResponse {
-        private PostProvisioningCriteriaResponse() {
+  @ApiModel(value = "DeleteProvisioningCriteriaResponse")
+  public static final class DeleteProvisioningCriteriaResponse {
+    private DeleteProvisioningCriteriaResponse() {}
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
-
-    @ApiModel(value = "GetProvisioningCriteriaResponse")
-    public static final class GetProvisioningCriteriaResponse {
-        private GetProvisioningCriteriaResponse() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long criteriaId;
-        @ApiModelProperty(example = "High Risk Products Criteria")
-        public String criteriaName;
-        @ApiModelProperty(example = "mifos")
-        public String createdBy;
-    }
-
-    @ApiModel(value = "GetProvisioningCriteriaCriteriaIdResponse")
-    public static final class GetProvisioningCriteriaCriteriaIdResponse {
-        private GetProvisioningCriteriaCriteriaIdResponse() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long criteriaId;
-        @ApiModelProperty(example = "High Risk Products Criteria")
-        public String criteriaName;
-        @ApiModelProperty(example = "mifos")
-        public String createdBy;
-        public Collection<LoanProductData> loanProducts;
-        public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
-    }
-
-    @ApiModel(value = "PutProvisioningCriteriaRequest")
-    public static final class PutProvisioningCriteriaRequest {
-        private PutProvisioningCriteriaRequest() {
-
-        }
-        @ApiModelProperty(example = "High Risk Products Criteria")
-        public String criteriaName;
-        public Collection<LoanProductData> loanProducts;
-        public Collection<ProvisioningCriteriaDefinitionData> provisioningcriteria;
-    }
-
-    @ApiModel(value = "PutProvisioningCriteriaResponse")
-    public static final class PutProvisioningCriteriaResponse {
-        private PutProvisioningCriteriaResponse() {
-
-        }
-        final class PutProvisioningCriteriaResponseChanges{
-            private PutProvisioningCriteriaResponseChanges(){}
-            @ApiModelProperty(example = "High Risk Products Criteria")
-            public String criteriaName;
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        public PutProvisioningCriteriaResponseChanges changes;
-    }
-
-    @ApiModel(value = "DeleteProvisioningCriteriaResponse")
-    public static final class DeleteProvisioningCriteriaResponse {
-        private DeleteProvisioningCriteriaResponse() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 }

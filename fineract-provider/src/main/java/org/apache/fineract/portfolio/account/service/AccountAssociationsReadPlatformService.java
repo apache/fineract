@@ -24,11 +24,12 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 
 public interface AccountAssociationsReadPlatformService {
 
-    public PortfolioAccountData retriveLoanLinkedAssociation(final Long loanId);
+  public PortfolioAccountData retriveLoanLinkedAssociation(final Long loanId);
 
-    public boolean isLinkedWithAnyActiveAccount(final Long savingsId);
+  public boolean isLinkedWithAnyActiveAccount(final Long savingsId);
 
-    public PortfolioAccountData retriveSavingsLinkedAssociation(final Long savingsId);
+  public PortfolioAccountData retriveSavingsLinkedAssociation(final Long savingsId);
 
-    public Collection<AccountAssociationsData> retriveLoanAssociations(Long loanId, Integer associationType);
+  public Collection<AccountAssociationsData> retriveLoanAssociations(
+      Long loanId, Integer associationType);
 }

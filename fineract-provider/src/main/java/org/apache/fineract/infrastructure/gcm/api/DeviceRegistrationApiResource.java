@@ -48,110 +48,117 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DeviceRegistrationApiResource {
 
-    private final PlatformSecurityContext context;
-    private final DeviceRegistrationWritePlatformService deviceRegistrationWritePlatformService;
-    private final DefaultToApiJsonSerializer<DeviceRegistrationData> toApiJsonSerializer;
-    private final DeviceRegistrationReadPlatformService deviceRegistrationReadPlatformService;
+  private final PlatformSecurityContext context;
+  private final DeviceRegistrationWritePlatformService deviceRegistrationWritePlatformService;
+  private final DefaultToApiJsonSerializer<DeviceRegistrationData> toApiJsonSerializer;
+  private final DeviceRegistrationReadPlatformService deviceRegistrationReadPlatformService;
 
-    @Autowired
-    public DeviceRegistrationApiResource(PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<DeviceRegistrationData> toApiJsonSerializer,
-            final DeviceRegistrationReadPlatformService deviceRegistrationReadPlatformService,
-            final DeviceRegistrationWritePlatformService deviceRegistrationWritePlatformService) {
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.deviceRegistrationReadPlatformService = deviceRegistrationReadPlatformService;
-        this.deviceRegistrationWritePlatformService = deviceRegistrationWritePlatformService;
-    }
+  @Autowired
+  public DeviceRegistrationApiResource(
+      PlatformSecurityContext context,
+      final DefaultToApiJsonSerializer<DeviceRegistrationData> toApiJsonSerializer,
+      final DeviceRegistrationReadPlatformService deviceRegistrationReadPlatformService,
+      final DeviceRegistrationWritePlatformService deviceRegistrationWritePlatformService) {
+    this.context = context;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.deviceRegistrationReadPlatformService = deviceRegistrationReadPlatformService;
+    this.deviceRegistrationWritePlatformService = deviceRegistrationWritePlatformService;
+  }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String registerDevice(final String apiRequestBodyAsJson) {
-        this.context.authenticatedUser();
-        Gson gson = new Gson();
-        JsonObject json = new Gson().fromJson(apiRequestBodyAsJson, JsonObject.class);
-        Long clientId = json.get(DeviceRegistrationApiConstants.clientIdParamName).getAsLong();
-        String registrationId = json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
-        DeviceRegistration deviceRegistration = this.deviceRegistrationWritePlatformService.registerDevice(clientId, registrationId);
-        String response = gson.toJson(deviceRegistration.getId());
-        return response;
-    }
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String registerDevice(final String apiRequestBodyAsJson) {
+    this.context.authenticatedUser();
+    Gson gson = new Gson();
+    JsonObject json = new Gson().fromJson(apiRequestBodyAsJson, JsonObject.class);
+    Long clientId = json.get(DeviceRegistrationApiConstants.clientIdParamName).getAsLong();
+    String registrationId =
+        json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
+    DeviceRegistration deviceRegistration =
+        this.deviceRegistrationWritePlatformService.registerDevice(clientId, registrationId);
+    String response = gson.toJson(deviceRegistration.getId());
+    return response;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllDeviceRegistrations(@Context final UriInfo uriInfo) {
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAllDeviceRegistrations(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser();
+    this.context.authenticatedUser();
 
-        Collection<DeviceRegistrationData> deviceRegistrationDataList = this.deviceRegistrationReadPlatformService
-                .retrieveAllDeviceRegiistrations();
+    Collection<DeviceRegistrationData> deviceRegistrationDataList =
+        this.deviceRegistrationReadPlatformService.retrieveAllDeviceRegiistrations();
 
-        return this.toApiJsonSerializer.serialize(deviceRegistrationDataList);
-    }
+    return this.toApiJsonSerializer.serialize(deviceRegistrationDataList);
+  }
 
-    @GET
-    @Path("client/{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveDeviceRegistrationByClientId(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+  @GET
+  @Path("client/{clientId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveDeviceRegistrationByClientId(
+      @PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser();
+    this.context.authenticatedUser();
 
-        DeviceRegistrationData deviceRegistrationData = this.deviceRegistrationReadPlatformService
-                .retrieveDeviceRegiistrationByClientId(clientId);
+    DeviceRegistrationData deviceRegistrationData =
+        this.deviceRegistrationReadPlatformService.retrieveDeviceRegiistrationByClientId(clientId);
 
-        return this.toApiJsonSerializer.serialize(deviceRegistrationData);
-    }
+    return this.toApiJsonSerializer.serialize(deviceRegistrationData);
+  }
 
-    @GET
-    @Path("{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveDeviceRegiistration(@PathParam("id") final Long id, @Context final UriInfo uriInfo) {
+  @GET
+  @Path("{id}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveDeviceRegiistration(
+      @PathParam("id") final Long id, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser();
+    this.context.authenticatedUser();
 
-        DeviceRegistrationData deviceRegistrationData = this.deviceRegistrationReadPlatformService.retrieveDeviceRegiistration(id);
+    DeviceRegistrationData deviceRegistrationData =
+        this.deviceRegistrationReadPlatformService.retrieveDeviceRegiistration(id);
 
-        return this.toApiJsonSerializer.serialize(deviceRegistrationData);
-    }
+    return this.toApiJsonSerializer.serialize(deviceRegistrationData);
+  }
 
-    @PUT
-    @Path("{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDeviceRegistration(@PathParam("id") final Long id, final String apiRequestBodyAsJson) {
+  @PUT
+  @Path("{id}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String updateDeviceRegistration(
+      @PathParam("id") final Long id, final String apiRequestBodyAsJson) {
 
-        this.context.authenticatedUser();
+    this.context.authenticatedUser();
 
-        Gson gson = new Gson();
-        JsonObject json = new Gson().fromJson(apiRequestBodyAsJson, JsonObject.class);
-        Long clientId = json.get(DeviceRegistrationApiConstants.clientIdParamName).getAsLong();
-        String registrationId = json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
-        DeviceRegistration deviceRegistration = this.deviceRegistrationWritePlatformService.updateDeviceRegistration(id, clientId,
-                registrationId);
-        String response = gson.toJson(deviceRegistration.getId());
-        return response;
-    }
+    Gson gson = new Gson();
+    JsonObject json = new Gson().fromJson(apiRequestBodyAsJson, JsonObject.class);
+    Long clientId = json.get(DeviceRegistrationApiConstants.clientIdParamName).getAsLong();
+    String registrationId =
+        json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
+    DeviceRegistration deviceRegistration =
+        this.deviceRegistrationWritePlatformService.updateDeviceRegistration(
+            id, clientId, registrationId);
+    String response = gson.toJson(deviceRegistration.getId());
+    return response;
+  }
 
-    @DELETE
-    @Path("{id}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("id") final Long id) {
+  @DELETE
+  @Path("{id}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String delete(@PathParam("id") final Long id) {
 
-        this.context.authenticatedUser();
-        this.deviceRegistrationWritePlatformService.deleteDeviceRegistration(id);
-        return responseMap(id);
+    this.context.authenticatedUser();
+    this.deviceRegistrationWritePlatformService.deleteDeviceRegistration(id);
+    return responseMap(id);
+  }
 
-    }
-
-    public String responseMap(Long id){
-        HashMap<String, Object> responseMap = new HashMap<>();
-        responseMap.put("resource", id);
-        return new Gson().toJson(responseMap);
-    }
-
+  public String responseMap(Long id) {
+    HashMap<String, Object> responseMap = new HashMap<>();
+    responseMap.put("resource", id);
+    return new Gson().toJson(responseMap);
+  }
 }

@@ -28,34 +28,40 @@ import org.apache.fineract.useradministration.data.RoleData;
  * Created by sanyam on 13/8/17.
  */
 final class UserDetailsApiResourceSwagger {
-    private UserDetailsApiResourceSwagger() {
+  private UserDetailsApiResourceSwagger() {}
 
-    }
+  @ApiModel(value = "GetUserDetailsResponse")
+  public static final class GetUserDetailsResponse {
+    private GetUserDetailsResponse() {}
 
-    @ApiModel(value = "GetUserDetailsResponse")
-    public static final class GetUserDetailsResponse {
-        private GetUserDetailsResponse(){
+    @ApiModelProperty(example = "mifos")
+    public String username;
 
-        }
-        @ApiModelProperty(example = "mifos")
-        public String username;
-        @ApiModelProperty(example = "1")
-        public Long userId;
-        @ApiModelProperty(example = "bWlmb3M6cGFzc3dvcmQ=")
-        public String accessToken;
-        @ApiModelProperty(example = "true")
-        public boolean authenticated;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        @ApiModelProperty(example = "1")
-        public Long staffId;
-        @ApiModelProperty(example = "mifosStaffDisplayName")
-        public String staffDisplayName;
-        public EnumOptionData organisationalRole;
-        public Collection<RoleData> roles;
-        @ApiModelProperty(example = "ALL_FUNCTIONS")
-        public Collection<String> permissions;
-    }
+    @ApiModelProperty(example = "1")
+    public Long userId;
+
+    @ApiModelProperty(example = "bWlmb3M6cGFzc3dvcmQ=")
+    public String accessToken;
+
+    @ApiModelProperty(example = "true")
+    public boolean authenticated;
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+
+    @ApiModelProperty(example = "1")
+    public Long staffId;
+
+    @ApiModelProperty(example = "mifosStaffDisplayName")
+    public String staffDisplayName;
+
+    public EnumOptionData organisationalRole;
+    public Collection<RoleData> roles;
+
+    @ApiModelProperty(example = "ALL_FUNCTIONS")
+    public Collection<String> permissions;
+  }
 }

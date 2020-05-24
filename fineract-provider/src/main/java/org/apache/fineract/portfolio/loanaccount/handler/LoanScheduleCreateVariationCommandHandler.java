@@ -30,16 +30,17 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "CREATESCHEDULEEXCEPTIONS")
 public class LoanScheduleCreateVariationCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanScheduleWritePlatformService loanScheduleWritePlatformService;
+  private final LoanScheduleWritePlatformService loanScheduleWritePlatformService;
 
-    @Autowired
-    public LoanScheduleCreateVariationCommandHandler(final LoanScheduleWritePlatformService loanScheduleWritePlatformService) {
-        this.loanScheduleWritePlatformService = loanScheduleWritePlatformService;
-    }
+  @Autowired
+  public LoanScheduleCreateVariationCommandHandler(
+      final LoanScheduleWritePlatformService loanScheduleWritePlatformService) {
+    this.loanScheduleWritePlatformService = loanScheduleWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.loanScheduleWritePlatformService.addLoanScheduleVariations(command.getLoanId(), command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.loanScheduleWritePlatformService.addLoanScheduleVariations(
+        command.getLoanId(), command);
+  }
 }

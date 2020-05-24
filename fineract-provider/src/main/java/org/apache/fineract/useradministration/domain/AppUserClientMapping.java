@@ -30,50 +30,47 @@ import org.apache.fineract.portfolio.client.domain.Client;
 @Table(name = "m_selfservice_user_client_mapping")
 public class AppUserClientMapping extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+  @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
+  @JoinColumn(name = "client_id", nullable = false)
+  private Client client;
 
-    public AppUserClientMapping(){
+  public AppUserClientMapping() {}
 
+  public AppUserClientMapping(Client client) {
+    this.client = client;
+  }
+
+  public Client getClient() {
+    return this.client;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+
+    if (null == obj) {
+      return false;
     }
 
-    public AppUserClientMapping(Client client){
-        this.client = client;
+    if (this == obj) {
+      return true;
     }
 
-    public Client getClient() {
-        return this.client;
+    if (!getClass().equals(obj.getClass())) {
+      return false;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    AppUserClientMapping that = (AppUserClientMapping) obj;
 
-        if (null == obj) {
-            return false;
-        }
+    return null == this.client.getId() ? false : this.client.getId().equals(that.client.getId());
+  }
 
-        if (this == obj) {
-            return true;
-        }
+  @Override
+  public int hashCode() {
 
-        if (!getClass().equals(obj.getClass())) {
-            return false;
-        }
+    int hashCode = 17;
 
-        AppUserClientMapping that = (AppUserClientMapping) obj;
+    hashCode += null == this.client ? 0 : this.client.getId().hashCode() * 31;
 
-        return null == this.client.getId() ? false : this.client.getId().equals(that.client.getId());
-    }
-
-    @Override
-    public int hashCode() {
-
-        int hashCode = 17;
-
-        hashCode += null == this.client ? 0 : this.client.getId().hashCode() * 31;
-
-        return hashCode;
-    }
-
+    return hashCode;
+  }
 }

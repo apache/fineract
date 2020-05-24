@@ -31,28 +31,25 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 @Table(name = "m_appuser_previous_password")
 public class AppUserPreviousPassword extends AbstractPersistableCustom {
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+  @Column(name = "user_id", nullable = false)
+  private Long userId;
 
-    @Column(name = "removal_date")
-    @Temporal(TemporalType.DATE)
-    private Date removalDate;
+  @Column(name = "removal_date")
+  @Temporal(TemporalType.DATE)
+  private Date removalDate;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+  @Column(name = "password", nullable = false)
+  private String password;
 
-    protected AppUserPreviousPassword() {
+  protected AppUserPreviousPassword() {}
 
-    }
+  public AppUserPreviousPassword(final AppUser user) {
+    this.userId = user.getId();
+    this.password = user.getPassword().trim();
+    this.removalDate = DateUtils.getDateOfTenant();
+  }
 
-    public AppUserPreviousPassword(final AppUser user) {
-        this.userId = user.getId();
-        this.password = user.getPassword().trim();
-        this.removalDate = DateUtils.getDateOfTenant();
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
+  public String getPassword() {
+    return this.password;
+  }
 }

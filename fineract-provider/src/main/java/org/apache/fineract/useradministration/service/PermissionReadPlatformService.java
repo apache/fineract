@@ -23,9 +23,9 @@ import org.apache.fineract.useradministration.data.PermissionData;
 
 public interface PermissionReadPlatformService {
 
-    Collection<PermissionData> retrieveAllPermissions();
+  Collection<PermissionData> retrieveAllPermissions();
 
-    Collection<PermissionData> retrieveAllMakerCheckerablePermissions();
+  Collection<PermissionData> retrieveAllMakerCheckerablePermissions();
 
-    Collection<PermissionData> retrieveAllRolePermissions(Long roleId);
+  Collection<PermissionData> retrieveAllRolePermissions(Long roleId);
 }

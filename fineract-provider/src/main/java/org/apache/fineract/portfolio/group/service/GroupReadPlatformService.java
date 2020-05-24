@@ -26,15 +26,18 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 
 public interface GroupReadPlatformService {
 
-    GroupGeneralData retrieveTemplate(Long officeId, boolean isCenterGroup, boolean staffInSelectedOfficeOnly);
+  GroupGeneralData retrieveTemplate(
+      Long officeId, boolean isCenterGroup, boolean staffInSelectedOfficeOnly);
 
-    Page<GroupGeneralData> retrievePagedAll(SearchParameters searchParameters, PaginationParameters parameters);
+  Page<GroupGeneralData> retrievePagedAll(
+      SearchParameters searchParameters, PaginationParameters parameters);
 
-    Collection<GroupGeneralData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters);
+  Collection<GroupGeneralData> retrieveAll(
+      SearchParameters searchParameters, PaginationParameters parameters);
 
-    GroupGeneralData retrieveOne(Long groupId);
+  GroupGeneralData retrieveOne(Long groupId);
 
-    Collection<GroupGeneralData> retrieveGroupsForLookup(Long officeId);
+  Collection<GroupGeneralData> retrieveGroupsForLookup(Long officeId);
 
-    GroupGeneralData retrieveGroupWithClosureReasons();
+  GroupGeneralData retrieveGroupWithClosureReasons();
 }

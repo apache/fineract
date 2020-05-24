@@ -26,7 +26,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class NotSupportedLoanTemplateTypeException extends AbstractPlatformDomainRuleException {
 
-    public NotSupportedLoanTemplateTypeException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.loan.template.type.not.supported", defaultUserMessage, defaultUserMessageArgs);
-    }
+  public NotSupportedLoanTemplateTypeException(
+      final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+    super("error.msg.loan.template.type.not.supported", defaultUserMessage, defaultUserMessageArgs);
+  }
 }

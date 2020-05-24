@@ -37,85 +37,96 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FinancialActivityAccountReadPlatformServiceImpl implements FinancialActivityAccountReadPlatformService {
+public class FinancialActivityAccountReadPlatformServiceImpl
+    implements FinancialActivityAccountReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final FinancialActivityAccountMapper financialActivityAccountMapper;
-    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
+  private final JdbcTemplate jdbcTemplate;
+  private final FinancialActivityAccountMapper financialActivityAccountMapper;
+  private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
 
-    @Autowired
-    public FinancialActivityAccountReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
-        financialActivityAccountMapper = new FinancialActivityAccountMapper();
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
+  @Autowired
+  public FinancialActivityAccountReadPlatformServiceImpl(
+      final RoutingDataSource dataSource,
+      final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
+    financialActivityAccountMapper = new FinancialActivityAccountMapper();
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
+  }
+
+  @Override
+  public List<FinancialActivityAccountData> retrieveAll() {
+    String sql = "select " + financialActivityAccountMapper.schema();
+    return this.jdbcTemplate.query(sql, financialActivityAccountMapper, new Object[] {});
+  }
+
+  @Override
+  public FinancialActivityAccountData retrieve(Long financialActivityAccountId) {
+    try {
+      StringBuilder sqlBuilder = new StringBuilder(200);
+      sqlBuilder.append("select ");
+      sqlBuilder.append(this.financialActivityAccountMapper.schema());
+      sqlBuilder.append(" where faa.id=?");
+      return this.jdbcTemplate.queryForObject(
+          sqlBuilder.toString(),
+          this.financialActivityAccountMapper,
+          new Object[] {financialActivityAccountId});
+    } catch (final EmptyResultDataAccessException e) {
+      throw new FinancialActivityAccountNotFoundException(financialActivityAccountId);
+    }
+  }
+
+  @Override
+  public FinancialActivityAccountData addTemplateDetails(
+      FinancialActivityAccountData financialActivityAccountData) {
+    final Map<String, List<GLAccountData>> accountOptions =
+        this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions();
+    financialActivityAccountData.setAccountingMappingOptions(accountOptions);
+    financialActivityAccountData.setFinancialActivityOptions(
+        FinancialActivity.getAllFinancialActivities());
+    return financialActivityAccountData;
+  }
+
+  @Override
+  public FinancialActivityAccountData getFinancialActivityAccountTemplate() {
+    FinancialActivityAccountData financialActivityAccountData = new FinancialActivityAccountData();
+    return addTemplateDetails(financialActivityAccountData);
+  }
+
+  private static final class FinancialActivityAccountMapper
+      implements RowMapper<FinancialActivityAccountData> {
+
+    private final String sql;
+
+    public FinancialActivityAccountMapper() {
+      StringBuilder sb = new StringBuilder(300);
+      sb.append(
+          " faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as"
+              + " glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");
+      sb.append(" from acc_gl_financial_activity_account faa ");
+      sb.append(" join acc_gl_account glaccount on glaccount.id = faa.gl_account_id");
+      sql = sb.toString();
+    }
+
+    public String schema() {
+      return sql;
     }
 
     @Override
-    public List<FinancialActivityAccountData> retrieveAll() {
-        String sql = "select " + financialActivityAccountMapper.schema();
-        return this.jdbcTemplate.query(sql, financialActivityAccountMapper, new Object[] {});
+    public FinancialActivityAccountData mapRow(
+        final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final Long glAccountId = JdbcSupport.getLong(rs, "glAccountId");
+      final Integer financialActivityId = JdbcSupport.getInteger(rs, "financialActivityId");
+      final String glAccountName = rs.getString("glAccountName");
+      final String glCode = rs.getString("glCode");
+
+      final GLAccountData glAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
+      final FinancialActivityData financialActivityData =
+          FinancialActivity.toFinancialActivityData(financialActivityId);
+
+      final FinancialActivityAccountData financialActivityAccountData =
+          new FinancialActivityAccountData(id, financialActivityData, glAccountData);
+      return financialActivityAccountData;
     }
-
-    @Override
-    public FinancialActivityAccountData retrieve(Long financialActivityAccountId) {
-        try {
-            StringBuilder sqlBuilder = new StringBuilder(200);
-            sqlBuilder.append("select ");
-            sqlBuilder.append(this.financialActivityAccountMapper.schema());
-            sqlBuilder.append(" where faa.id=?");
-            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), this.financialActivityAccountMapper,
-                    new Object[] { financialActivityAccountId });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new FinancialActivityAccountNotFoundException(financialActivityAccountId);
-        }
-    }
-
-    @Override
-    public FinancialActivityAccountData addTemplateDetails(FinancialActivityAccountData financialActivityAccountData) {
-        final Map<String, List<GLAccountData>> accountOptions = this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions();
-        financialActivityAccountData.setAccountingMappingOptions(accountOptions);
-        financialActivityAccountData.setFinancialActivityOptions(FinancialActivity.getAllFinancialActivities());
-        return financialActivityAccountData;
-    }
-
-    @Override
-    public FinancialActivityAccountData getFinancialActivityAccountTemplate() {
-        FinancialActivityAccountData financialActivityAccountData = new FinancialActivityAccountData();
-        return addTemplateDetails(financialActivityAccountData);
-    }
-
-    private static final class FinancialActivityAccountMapper implements RowMapper<FinancialActivityAccountData> {
-
-        private final String sql;
-
-        public FinancialActivityAccountMapper() {
-            StringBuilder sb = new StringBuilder(300);
-            sb.append(" faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");
-            sb.append(" from acc_gl_financial_activity_account faa ");
-            sb.append(" join acc_gl_account glaccount on glaccount.id = faa.gl_account_id");
-            sql = sb.toString();
-        }
-
-        public String schema() {
-            return sql;
-        }
-
-        @Override
-        public FinancialActivityAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Long glAccountId = JdbcSupport.getLong(rs, "glAccountId");
-            final Integer financialActivityId = JdbcSupport.getInteger(rs, "financialActivityId");
-            final String glAccountName = rs.getString("glAccountName");
-            final String glCode = rs.getString("glCode");
-
-            final GLAccountData glAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
-            final FinancialActivityData financialActivityData = FinancialActivity.toFinancialActivityData(financialActivityId);
-
-            final FinancialActivityAccountData financialActivityAccountData = new FinancialActivityAccountData(id, financialActivityData,
-                    glAccountData);
-            return financialActivityAccountData;
-        }
-    }
-
+  }
 }

@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class GLAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public GLAccountNotFoundException(final Long id) {
-        super("error.msg.glaccount.id.invalid", "General Ledger account with identifier " + id + " does not exist ", id);
-    }
+  public GLAccountNotFoundException(final Long id) {
+    super(
+        "error.msg.glaccount.id.invalid",
+        "General Ledger account with identifier " + id + " does not exist ",
+        id);
+  }
 }

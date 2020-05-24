@@ -42,66 +42,70 @@ import org.springframework.stereotype.Service;
 @Service
 public final class GoogleGsonSerializerHelper {
 
-    public Gson createGsonBuilder(final boolean prettyPrint) {
-        final GsonBuilder builder = new GsonBuilder();
-        registerTypeAdapters(builder);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
-        return builder.create();
+  public Gson createGsonBuilder(final boolean prettyPrint) {
+    final GsonBuilder builder = new GsonBuilder();
+    registerTypeAdapters(builder);
+    if (prettyPrint) {
+      builder.setPrettyPrinting();
+    }
+    return builder.create();
+  }
+
+  public Gson createGsonBuilderForPartialResponseFiltering(
+      final boolean prettyPrint, final Set<String> responseParameters) {
+    final ExclusionStrategy strategy = new ParameterListInclusionStrategy(responseParameters);
+
+    final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+    registerTypeAdapters(builder);
+    if (prettyPrint) {
+      builder.setPrettyPrinting();
+    }
+    return builder.create();
+  }
+
+  public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(
+      final Set<String> supportedParameters,
+      final boolean prettyPrint,
+      final Set<String> responseParameters) {
+
+    final Set<String> parameterNamesToSkip = new HashSet<>();
+
+    if (!responseParameters.isEmpty()) {
+      // strip out all known support parameters from expected response to
+      // see if unsupported parameters requested for response.
+      final Set<String> differentParametersDetectedSet = new HashSet<>(responseParameters);
+      differentParametersDetectedSet.removeAll(supportedParameters);
+
+      if (!differentParametersDetectedSet.isEmpty()) {
+        throw new UnsupportedParameterException(new ArrayList<>(differentParametersDetectedSet));
+      }
+
+      parameterNamesToSkip.addAll(supportedParameters);
+      parameterNamesToSkip.removeAll(responseParameters);
     }
 
-    public Gson createGsonBuilderForPartialResponseFiltering(final boolean prettyPrint, final Set<String> responseParameters) {
-        final ExclusionStrategy strategy = new ParameterListInclusionStrategy(responseParameters);
+    final ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
 
-        final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-        registerTypeAdapters(builder);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
-        return builder.create();
+    final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
+    registerTypeAdapters(builder);
+    if (prettyPrint) {
+      builder.setPrettyPrinting();
     }
+    return builder.create();
+  }
 
-    public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(final Set<String> supportedParameters,
-            final boolean prettyPrint, final Set<String> responseParameters) {
+  public String serializedJsonFrom(final Gson serializer, final Object[] dataObjects) {
+    return serializer.toJson(dataObjects);
+  }
 
-        final Set<String> parameterNamesToSkip = new HashSet<>();
+  public String serializedJsonFrom(final Gson serializer, final Object singleDataObject) {
+    return serializer.toJson(singleDataObject);
+  }
 
-        if (!responseParameters.isEmpty()) {
-            // strip out all known support parameters from expected response to
-            // see if unsupported parameters requested for response.
-            final Set<String> differentParametersDetectedSet = new HashSet<>(responseParameters);
-            differentParametersDetectedSet.removeAll(supportedParameters);
-
-            if (!differentParametersDetectedSet.isEmpty()) { throw new UnsupportedParameterException(new ArrayList<>(
-                    differentParametersDetectedSet)); }
-
-            parameterNamesToSkip.addAll(supportedParameters);
-            parameterNamesToSkip.removeAll(responseParameters);
-        }
-
-        final ExclusionStrategy strategy = new ParameterListExclusionStrategy(parameterNamesToSkip);
-
-        final GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(strategy);
-        registerTypeAdapters(builder);
-        if (prettyPrint) {
-            builder.setPrettyPrinting();
-        }
-        return builder.create();
-    }
-
-    public String serializedJsonFrom(final Gson serializer, final Object[] dataObjects) {
-        return serializer.toJson(dataObjects);
-    }
-
-    public String serializedJsonFrom(final Gson serializer, final Object singleDataObject) {
-        return serializer.toJson(singleDataObject);
-    }
-
-    public static void registerTypeAdapters(final GsonBuilder builder) {
-        builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
-        builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
-        builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
-        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
-    }
+  public static void registerTypeAdapters(final GsonBuilder builder) {
+    builder.registerTypeAdapter(java.util.Date.class, new DateAdapter());
+    builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
+    builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+    builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
+  }
 }

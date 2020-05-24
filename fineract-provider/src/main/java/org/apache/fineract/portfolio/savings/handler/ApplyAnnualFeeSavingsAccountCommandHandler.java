@@ -32,24 +32,26 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "APPLYANNUALFEE")
 public class ApplyAnnualFeeSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
+  @SuppressWarnings("unused")
+  private final SavingsAccountWritePlatformService writePlatformService;
+
+  @Autowired
+  public ApplyAnnualFeeSavingsAccountCommandHandler(
+      final SavingsAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+
     @SuppressWarnings("unused")
-    private final SavingsAccountWritePlatformService writePlatformService;
+    final LocalDate annualFeeTransactionDate =
+        command.localDateValueOfParameterNamed("annualFeeTransactionDate");
 
-    @Autowired
-    public ApplyAnnualFeeSavingsAccountCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        @SuppressWarnings("unused")
-        final LocalDate annualFeeTransactionDate = command.localDateValueOfParameterNamed("annualFeeTransactionDate");
-
-        // return
-        // this.writePlatformService.applyAnnualFee(command.getSavingsId(),
-        // annualFeeTransactionDate);
-        return null;
-    }
+    // return
+    // this.writePlatformService.applyAnnualFee(command.getSavingsId(),
+    // annualFeeTransactionDate);
+    return null;
+  }
 }

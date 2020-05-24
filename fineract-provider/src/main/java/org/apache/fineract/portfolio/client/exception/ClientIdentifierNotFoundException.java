@@ -26,7 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class ClientIdentifierNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ClientIdentifierNotFoundException(final Long id) {
-        super("error.msg.clientIdentifier.id.invalid", "Client Identifier with the primary key " + id + " does not exist", id);
-    }
+  public ClientIdentifierNotFoundException(final Long id) {
+    super(
+        "error.msg.clientIdentifier.id.invalid",
+        "Client Identifier with the primary key " + id + " does not exist",
+        id);
+  }
 }

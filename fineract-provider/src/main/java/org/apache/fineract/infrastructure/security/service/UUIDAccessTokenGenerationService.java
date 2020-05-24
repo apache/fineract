@@ -24,8 +24,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UUIDAccessTokenGenerationService implements AccessTokenGenerationService {
 
-    @Override
-    public String generateRandomToken() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
-    }
+  @Override
+  public String generateRandomToken() {
+    return UUID.randomUUID().toString().replaceAll("-", "");
+  }
 }

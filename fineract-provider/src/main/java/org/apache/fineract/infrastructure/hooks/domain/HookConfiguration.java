@@ -29,56 +29,54 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_hook_configuration")
 public class HookConfiguration extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "hook_id", referencedColumnName = "id", nullable = false)
-    private Hook hook;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "hook_id", referencedColumnName = "id", nullable = false)
+  private Hook hook;
 
-    @Column(name = "field_type", nullable = false, length = 20)
-    private String fieldType;
+  @Column(name = "field_type", nullable = false, length = 20)
+  private String fieldType;
 
-    @Column(name = "field_name", nullable = false, length = 100)
-    private String fieldName;
+  @Column(name = "field_name", nullable = false, length = 100)
+  private String fieldName;
 
-    @Column(name = "field_value", nullable = false, length = 100)
-    private String fieldValue;
+  @Column(name = "field_value", nullable = false, length = 100)
+  private String fieldValue;
 
-    public static HookConfiguration createNewWithoutHook(
-            final String fieldType, final String fieldName,
-            final String fieldValue) {
-        return new HookConfiguration(null, fieldType, fieldName, fieldValue);
-    }
+  public static HookConfiguration createNewWithoutHook(
+      final String fieldType, final String fieldName, final String fieldValue) {
+    return new HookConfiguration(null, fieldType, fieldName, fieldValue);
+  }
 
-    public static HookConfiguration createNew(final Hook hook, final String fieldType,
-            final String fieldName, final String fieldValue) {
-        return new HookConfiguration(hook, fieldType, fieldName, fieldValue);
-    }
+  public static HookConfiguration createNew(
+      final Hook hook, final String fieldType, final String fieldName, final String fieldValue) {
+    return new HookConfiguration(hook, fieldType, fieldName, fieldValue);
+  }
 
-    protected HookConfiguration() {
-        //
-    }
+  protected HookConfiguration() {
+    //
+  }
 
-    private HookConfiguration(final Hook hook, final String fieldType,
-            final String fieldName, final String fieldValue) {
-        this.hook = hook;
-        this.fieldType = fieldType;
-        this.fieldName = fieldName;
-        this.fieldValue = fieldValue;
-    }
+  private HookConfiguration(
+      final Hook hook, final String fieldType, final String fieldName, final String fieldValue) {
+    this.hook = hook;
+    this.fieldType = fieldType;
+    this.fieldName = fieldName;
+    this.fieldValue = fieldValue;
+  }
 
-    public String getFieldName() {
-        return this.fieldName;
-    }
+  public String getFieldName() {
+    return this.fieldName;
+  }
 
-    public String getFieldType() {
-        return this.fieldType;
-    }
+  public String getFieldType() {
+    return this.fieldType;
+  }
 
-    public String getFieldValue() {
-        return this.fieldValue;
-    }
+  public String getFieldValue() {
+    return this.fieldValue;
+  }
 
-    public void update(final Hook hook) {
-        this.hook = hook;
-    }
-
+  public void update(final Hook hook) {
+    this.hook = hook;
+  }
 }

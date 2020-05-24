@@ -24,15 +24,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CashierRepositoryWrapper {
-    private final CashierRepository repository;
+  private final CashierRepository repository;
 
-    @Autowired
-    public CashierRepositoryWrapper(final CashierRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public CashierRepositoryWrapper(final CashierRepository repository) {
+    this.repository = repository;
+  }
 
-    public Cashier findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new TellerNotFoundException(id));
-    }
+  public Cashier findOneWithNotFoundDetection(final Long id) {
+    return this.repository.findById(id).orElseThrow(() -> new TellerNotFoundException(id));
+  }
 }

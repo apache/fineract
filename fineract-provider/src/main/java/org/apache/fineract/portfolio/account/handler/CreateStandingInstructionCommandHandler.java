@@ -30,16 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "STANDINGINSTRUCTION", action = "CREATE")
 public class CreateStandingInstructionCommandHandler implements NewCommandSourceHandler {
 
-    private StandingInstructionWritePlatformService standingInstructionWritePlatformService;
+  private StandingInstructionWritePlatformService standingInstructionWritePlatformService;
 
-    @Autowired
-    public CreateStandingInstructionCommandHandler(StandingInstructionWritePlatformService standingInstructionWritePlatformService) {
-        this.standingInstructionWritePlatformService = standingInstructionWritePlatformService;
-    }
+  @Autowired
+  public CreateStandingInstructionCommandHandler(
+      StandingInstructionWritePlatformService standingInstructionWritePlatformService) {
+    this.standingInstructionWritePlatformService = standingInstructionWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.standingInstructionWritePlatformService.create(command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.standingInstructionWritePlatformService.create(command);
+  }
 }

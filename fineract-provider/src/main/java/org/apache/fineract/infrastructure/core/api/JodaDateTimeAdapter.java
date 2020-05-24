@@ -31,14 +31,15 @@ import org.joda.time.DateTime;
  */
 public class JodaDateTimeAdapter implements JsonSerializer<DateTime> {
 
-    @Override
-    @SuppressWarnings("unused")
-    public JsonElement serialize(final DateTime src, final Type typeOfSrc, final JsonSerializationContext context) {
-        JsonElement element = null;
-        if (src != null) {
-            element = new JsonPrimitive(src.getMillis());
-        }
-
-        return element;
+  @Override
+  @SuppressWarnings("unused")
+  public JsonElement serialize(
+      final DateTime src, final Type typeOfSrc, final JsonSerializationContext context) {
+    JsonElement element = null;
+    if (src != null) {
+      element = new JsonPrimitive(src.getMillis());
     }
+
+    return element;
+  }
 }

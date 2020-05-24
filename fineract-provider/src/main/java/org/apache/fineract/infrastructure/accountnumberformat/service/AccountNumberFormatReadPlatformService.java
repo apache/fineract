@@ -24,10 +24,9 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccou
 
 public interface AccountNumberFormatReadPlatformService {
 
-    List<AccountNumberFormatData> getAllAccountNumberFormats();
+  List<AccountNumberFormatData> getAllAccountNumberFormats();
 
-    AccountNumberFormatData getAccountNumberFormat(Long id);
+  AccountNumberFormatData getAccountNumberFormat(Long id);
 
-    AccountNumberFormatData retrieveTemplate(EntityAccountType entityAccountTypeForTemplate);
-
+  AccountNumberFormatData retrieveTemplate(EntityAccountType entityAccountTypeForTemplate);
 }

@@ -24,11 +24,11 @@ import org.apache.fineract.notification.data.NotificationData;
 
 public interface NotificationReadPlatformService {
 
-    boolean hasUnreadNotifications(Long appUserId);
+  boolean hasUnreadNotifications(Long appUserId);
 
-    Page<NotificationData> getAllUnreadNotifications(SearchParameters searchParameters);
+  Page<NotificationData> getAllUnreadNotifications(SearchParameters searchParameters);
 
-    Page<NotificationData> getAllNotifications(SearchParameters searchParameters);
+  Page<NotificationData> getAllNotifications(SearchParameters searchParameters);
 
-    void updateNotificationReadStatus();
+  void updateNotificationReadStatus();
 }

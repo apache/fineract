@@ -19,92 +19,93 @@
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
 public enum ReportMailingJobEmailAttachmentFileFormat {
-    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.invalid", "invalid"),
-    XLS(1, "ReportMailingJobEmailAttachmentFileFormat.xls", "xls"),
-    PDF(2, "ReportMailingJobEmailAttachmentFileFormat.pdf", "pdf"),
-    CSV(3, "ReportMailingJobEmailAttachmentFileFormat.csv", "csv");
+  INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.invalid", "invalid"),
+  XLS(1, "ReportMailingJobEmailAttachmentFileFormat.xls", "xls"),
+  PDF(2, "ReportMailingJobEmailAttachmentFileFormat.pdf", "pdf"),
+  CSV(3, "ReportMailingJobEmailAttachmentFileFormat.csv", "csv");
 
-    private String code;
-    private String value;
-    private Integer id;
+  private String code;
+  private String value;
+  private Integer id;
 
-    private ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
-        this.value = value;
-        this.code = code;
-        this.id = id;
+  private ReportMailingJobEmailAttachmentFileFormat(
+      final Integer id, final String code, final String value) {
+    this.value = value;
+    this.code = code;
+    this.id = id;
+  }
+
+  public static ReportMailingJobEmailAttachmentFileFormat instance(final String value) {
+    ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
+
+    switch (value) {
+      case "xls":
+        emailAttachmentFileFormat = XLS;
+        break;
+
+      case "pdf":
+        emailAttachmentFileFormat = PDF;
+        break;
+
+      case "csv":
+        emailAttachmentFileFormat = CSV;
+        break;
+
+      default:
+        break;
     }
 
-    public static ReportMailingJobEmailAttachmentFileFormat instance(final String value) {
-        ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
+    return emailAttachmentFileFormat;
+  }
 
-        switch (value) {
-            case "xls":
-                emailAttachmentFileFormat = XLS;
-                break;
+  public static ReportMailingJobEmailAttachmentFileFormat instance(final Integer id) {
+    ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
 
-            case "pdf":
-                emailAttachmentFileFormat = PDF;
-                break;
+    switch (id) {
+      case 1:
+        emailAttachmentFileFormat = XLS;
+        break;
 
-            case "csv":
-                emailAttachmentFileFormat = CSV;
-                break;
+      case 2:
+        emailAttachmentFileFormat = PDF;
+        break;
 
-            default:
-                break;
-        }
+      case 3:
+        emailAttachmentFileFormat = CSV;
+        break;
 
-        return emailAttachmentFileFormat;
+      default:
+        break;
     }
 
-    public static ReportMailingJobEmailAttachmentFileFormat instance(final Integer id) {
-        ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
+    return emailAttachmentFileFormat;
+  }
 
-        switch (id) {
-            case 1:
-                emailAttachmentFileFormat = XLS;
-                break;
+  /**
+   * @return the code
+   */
+  public String getCode() {
+    return code;
+  }
 
-            case 2:
-                emailAttachmentFileFormat = PDF;
-                break;
+  /**
+   * @return the value
+   */
+  public String getValue() {
+    return value;
+  }
 
-            case 3:
-                emailAttachmentFileFormat = CSV;
-                break;
+  /**
+   * @return the id
+   */
+  public Integer getId() {
+    return id;
+  }
 
-            default:
-                break;
-        }
-
-        return emailAttachmentFileFormat;
-    }
-
-    /**
-     * @return the code
-     */
-    public String getCode() {
-        return code;
-    }
-
-    /**
-     * @return the value
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * @return the id
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * @return list of valid ReportMailingJobEmailAttachmentFileFormat ids
-     **/
-    public static Object[] validValues() {
-        return new Object[] { XLS.getId(), PDF.getId(), CSV.getId() };
-    }
+  /**
+   * @return list of valid ReportMailingJobEmailAttachmentFileFormat ids
+   **/
+  public static Object[] validValues() {
+    return new Object[] {XLS.getId(), PDF.getId(), CSV.getId()};
+  }
 }

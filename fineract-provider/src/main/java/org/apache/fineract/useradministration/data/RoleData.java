@@ -26,38 +26,41 @@ import java.util.Collection;
  */
 public class RoleData implements Serializable {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final Boolean disabled;
+  private final Long id;
+  private final String name;
+  private final String description;
+  private final Boolean disabled;
 
-    public RolePermissionsData toRolePermissionData(final Collection<PermissionData> permissionUsageData) {
-        return new RolePermissionsData(this.id, this.name, this.description, this.disabled, permissionUsageData);
-    }
+  public RolePermissionsData toRolePermissionData(
+      final Collection<PermissionData> permissionUsageData) {
+    return new RolePermissionsData(
+        this.id, this.name, this.description, this.disabled, permissionUsageData);
+  }
 
-    public RoleData(final Long id, final String name, final String description, final Boolean disabled) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.disabled = disabled;
-    }
+  public RoleData(
+      final Long id, final String name, final String description, final Boolean disabled) {
+    this.id = id;
+    this.name = name;
+    this.description = description;
+    this.disabled = disabled;
+  }
 
-    @Override
-    public boolean equals(final Object obj) {
-        final RoleData role = (RoleData) obj;
-        return this.id.equals(role.id);
-    }
+  @Override
+  public boolean equals(final Object obj) {
+    final RoleData role = (RoleData) obj;
+    return this.id.equals(role.id);
+  }
 
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return this.id.hashCode();
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }

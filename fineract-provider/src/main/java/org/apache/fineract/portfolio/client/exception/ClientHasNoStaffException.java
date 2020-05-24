@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class ClientHasNoStaffException extends AbstractPlatformResourceNotFoundException {
 
-    public ClientHasNoStaffException(final Long clientId) {
-        super("error.msg.client.has.no.staff", "Client with identifier " + clientId + " does not have staff", clientId);
-    }
-
+  public ClientHasNoStaffException(final Long clientId) {
+    super(
+        "error.msg.client.has.no.staff",
+        "Client with identifier " + clientId + " does not have staff",
+        clientId);
+  }
 }

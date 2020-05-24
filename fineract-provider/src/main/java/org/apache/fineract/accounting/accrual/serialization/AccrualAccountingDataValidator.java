@@ -51,34 +51,49 @@ import org.springframework.stereotype.Component;
 @Component
 public final class AccrualAccountingDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(accrueTillParamName, AccrualAccountingConstants.localeParamName,
-                    AccrualAccountingConstants.dateFormatParamName));
+  private final FromJsonHelper fromApiJsonHelper;
+  private static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              accrueTillParamName,
+              AccrualAccountingConstants.localeParamName,
+              AccrualAccountingConstants.dateFormatParamName));
 
-    @Autowired
-    public AccrualAccountingDataValidator(final FromJsonHelper fromApiJsonfromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonfromApiJsonHelper;
+  @Autowired
+  public AccrualAccountingDataValidator(final FromJsonHelper fromApiJsonfromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonfromApiJsonHelper;
+  }
+
+  public void validateLoanPeriodicAccrualData(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, LOAN_PERIODIC_REQUEST_DATA_PARAMETERS);
 
-    public void validateLoanPeriodicAccrualData(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, LOAN_PERIODIC_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
+    final LocalDate date =
+        this.fromApiJsonHelper.extractLocalDateNamed(accrueTillParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(accrueTillParamName)
+        .value(date)
+        .notNull()
+        .validateDateBefore(DateUtils.getLocalDateOfTenant());
 
-        final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(accrueTillParamName, element);
-        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(DateUtils.getLocalDateOfTenant());
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
+  public void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
-
-    public void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
+  }
 }

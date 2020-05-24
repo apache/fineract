@@ -59,194 +59,307 @@ import org.springframework.stereotype.Component;
 @Component
 public class DepositAccountTransactionDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
-            transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-            routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+  private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              DepositsApiConstants.localeParamName,
+              DepositsApiConstants.dateFormatParamName,
+              transactionDateParamName,
+              transactionAmountParamName,
+              paymentTypeIdParamName,
+              transactionAccountNumberParamName,
+              checkNumberParamName,
+              routingCodeParamName,
+              receiptNumberParamName,
+              bankNumberParamName));
 
-    private static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
-                    DepositsApiConstants.mandatoryRecommendedDepositAmountParamName,
-                    DepositsApiConstants.effectiveDateParamName));
+  private static final Set<String>
+      DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS =
+          new HashSet<>(
+              Arrays.asList(
+                  DepositsApiConstants.localeParamName,
+                  DepositsApiConstants.dateFormatParamName,
+                  DepositsApiConstants.mandatoryRecommendedDepositAmountParamName,
+                  DepositsApiConstants.effectiveDateParamName));
 
-    private static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, closedOnDateParamName,
-            DepositsApiConstants.noteParamName, onAccountClosureIdParamName, paymentTypeIdParamName,
-            transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName,
-            bankNumberParamName, DepositsApiConstants.transferDescriptionParamName, toSavingsAccountIdParamName));
+  private static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              DepositsApiConstants.localeParamName,
+              DepositsApiConstants.dateFormatParamName,
+              closedOnDateParamName,
+              DepositsApiConstants.noteParamName,
+              onAccountClosureIdParamName,
+              paymentTypeIdParamName,
+              transactionAccountNumberParamName,
+              checkNumberParamName,
+              routingCodeParamName,
+              receiptNumberParamName,
+              bankNumberParamName,
+              DepositsApiConstants.transferDescriptionParamName,
+              toSavingsAccountIdParamName));
 
-    private static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
-                    closedOnDateParamName));
+  private static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              DepositsApiConstants.localeParamName,
+              DepositsApiConstants.dateFormatParamName,
+              closedOnDateParamName));
 
+  @Autowired
+  public DepositAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
 
-    @Autowired
-    public DepositAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  public void validate(final JsonCommand command, DepositAccountType depositAccountType) {
+
+    final String json = command.json();
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validate(final JsonCommand command, DepositAccountType depositAccountType) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
 
-        final String json = command.json();
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType.resourceName());
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final JsonElement element = command.parsedJson();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
+    final LocalDate transactionDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+    baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
-                .resourceName());
+    final BigDecimal transactionAmount =
+        this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+            transactionAmountParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(transactionAmountParamName)
+        .value(transactionAmount)
+        .notNull()
+        .positiveAmount();
 
-        final JsonElement element = command.parsedJson();
-
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
-        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
-
-        final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
-        baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().positiveAmount();
-
-        // Validate all string payment detail fields for max length
-        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
-        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
-                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
-        for (final String paymentDetailParameterName : paymentDetailParameters) {
-            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
-            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
-                    .notExceedingLengthOf(50);
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    // Validate all string payment detail fields for max length
+    final Integer paymentTypeId =
+        this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(paymentTypeIdParamName)
+        .value(paymentTypeId)
+        .ignoreIfNull()
+        .integerGreaterThanZero();
+    final Set<String> paymentDetailParameters =
+        new HashSet<>(
+            Arrays.asList(
+                transactionAccountNumberParamName,
+                checkNumberParamName,
+                routingCodeParamName,
+                receiptNumberParamName,
+                bankNumberParamName));
+    for (final String paymentDetailParameterName : paymentDetailParameters) {
+      final String paymentDetailParameterValue =
+          this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+      baseDataValidator
+          .reset()
+          .parameter(paymentDetailParameterName)
+          .value(paymentDetailParameterValue)
+          .ignoreIfNull()
+          .notExceedingLengthOf(50);
     }
 
-    public void validateDepositAmountUpdate(final JsonCommand command) {
-        final String json = command.json();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+  public void validateDepositAmountUpdate(final JsonCommand command) {
+    final String json = command.json();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        final JsonElement element = command.parsedJson();
-
-        final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(DepositsApiConstants.effectiveDateParamName, element);
-        baseDataValidator.reset().parameter(DepositsApiConstants.effectiveDateParamName).value(effectiveDate).notNull();
-
-        final BigDecimal mandatoryRecommendedDepositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                DepositsApiConstants.mandatoryRecommendedDepositAmountParamName, element);
-        baseDataValidator.reset().parameter(DepositsApiConstants.mandatoryRecommendedDepositAmountParamName)
-                .value(mandatoryRecommendedDepositAmount).notNull().positiveAmount();
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateActivation(final JsonCommand command) {
-        final String json = command.json();
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                SavingsAccountConstant.SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = command.parsedJson();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+    final LocalDate effectiveDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(
+            DepositsApiConstants.effectiveDateParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(DepositsApiConstants.effectiveDateParamName)
+        .value(effectiveDate)
+        .notNull();
 
-        final JsonElement element = command.parsedJson();
+    final BigDecimal mandatoryRecommendedDepositAmount =
+        this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+            DepositsApiConstants.mandatoryRecommendedDepositAmountParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(DepositsApiConstants.mandatoryRecommendedDepositAmountParamName)
+        .value(mandatoryRecommendedDepositAmount)
+        .notNull()
+        .positiveAmount();
 
-        final LocalDate activationDate = this.fromApiJsonHelper.extractLocalDateNamed(activatedOnDateParamName, element);
-        baseDataValidator.reset().parameter(activatedOnDateParamName).value(activationDate).notNull();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validateActivation(final JsonCommand command) {
+    final String json = command.json();
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validatePreMatureAmountCalculation(final String json, final DepositAccountType depositAccountType) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, SavingsAccountConstant.SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = command.parsedJson();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
-                .resourceName());
+    final LocalDate activationDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(activatedOnDateParamName, element);
+    baseDataValidator.reset().parameter(activatedOnDateParamName).value(activationDate).notNull();
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final LocalDate closeDate = this.fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
-        baseDataValidator.reset().parameter(closedOnDateParamName).value(closeDate).notNull();
+  public void validatePreMatureAmountCalculation(
+      final String json, final DepositAccountType depositAccountType) {
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateClosing(final JsonCommand command, DepositAccountType depositAccountType, final boolean isPreMatureClose) {
-        final String json = command.json();
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType.resourceName());
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
-                .resourceName());
+    final LocalDate closeDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
+    baseDataValidator.reset().parameter(closedOnDateParamName).value(closeDate).notNull();
 
-        final JsonElement element = command.parsedJson();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final LocalDate activationDate = this.fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
-        baseDataValidator.reset().parameter(closedOnDateParamName).value(activationDate).notNull();
+  public void validateClosing(
+      final JsonCommand command,
+      DepositAccountType depositAccountType,
+      final boolean isPreMatureClose) {
+    final String json = command.json();
 
-        final Integer onAccountClosureId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(onAccountClosureIdParamName, element);
-        baseDataValidator.reset().parameter(onAccountClosureIdParamName).value(onAccountClosureId).notBlank()
-                .isOneOfTheseValues(DepositAccountOnClosureType.integerValues());
-
-        if (onAccountClosureId != null) {
-            final DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
-            if (accountOnClosureType.isTransferToSavings()) {
-                final Long toSavingsAccountId = this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName, element);
-                baseDataValidator
-                        .reset()
-                        .parameter(toSavingsAccountIdParamName)
-                        .value(toSavingsAccountId)
-                        .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName,
-                                DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());
-            } else if (accountOnClosureType.isReinvest() && isPreMatureClose) {
-                baseDataValidator.reset().parameter(onAccountClosureIdParamName).value(onAccountClosureId)
-                        .failWithCode("reinvest.not.allowed", "Re-Invest is not supported for account pre mature close");
-            }
-        }
-
-        // Validate all string payment detail fields for max length
-        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
-        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
-                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
-        for (final String paymentDetailParameterName : paymentDetailParameters) {
-            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
-            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
-                    .notExceedingLengthOf(50);
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            //
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
-        }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType.resourceName());
+
+    final JsonElement element = command.parsedJson();
+
+    final LocalDate activationDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
+    baseDataValidator.reset().parameter(closedOnDateParamName).value(activationDate).notNull();
+
+    final Integer onAccountClosureId =
+        this.fromApiJsonHelper.extractIntegerSansLocaleNamed(onAccountClosureIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(onAccountClosureIdParamName)
+        .value(onAccountClosureId)
+        .notBlank()
+        .isOneOfTheseValues(DepositAccountOnClosureType.integerValues());
+
+    if (onAccountClosureId != null) {
+      final DepositAccountOnClosureType accountOnClosureType =
+          DepositAccountOnClosureType.fromInt(onAccountClosureId);
+      if (accountOnClosureType.isTransferToSavings()) {
+        final Long toSavingsAccountId =
+            this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName, element);
+        baseDataValidator
+            .reset()
+            .parameter(toSavingsAccountIdParamName)
+            .value(toSavingsAccountId)
+            .cantBeBlankWhenParameterProvidedIs(
+                onAccountClosureIdParamName,
+                DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());
+      } else if (accountOnClosureType.isReinvest() && isPreMatureClose) {
+        baseDataValidator
+            .reset()
+            .parameter(onAccountClosureIdParamName)
+            .value(onAccountClosureId)
+            .failWithCode(
+                "reinvest.not.allowed", "Re-Invest is not supported for account pre mature close");
+      }
     }
+
+    // Validate all string payment detail fields for max length
+    final Integer paymentTypeId =
+        this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(paymentTypeIdParamName)
+        .value(paymentTypeId)
+        .ignoreIfNull()
+        .integerGreaterThanZero();
+    final Set<String> paymentDetailParameters =
+        new HashSet<>(
+            Arrays.asList(
+                transactionAccountNumberParamName,
+                checkNumberParamName,
+                routingCodeParamName,
+                receiptNumberParamName,
+                bankNumberParamName));
+    for (final String paymentDetailParameterName : paymentDetailParameters) {
+      final String paymentDetailParameterValue =
+          this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+      baseDataValidator
+          .reset()
+          .parameter(paymentDetailParameterName)
+          .value(paymentDetailParameterValue)
+          .ignoreIfNull()
+          .notExceedingLengthOf(50);
+    }
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      //
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
+    }
+  }
 }

@@ -30,19 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "FIXEDDEPOSITACCOUNT", action = "APPROVE")
-public class FixedDepositAccountApplicationApprovalCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositAccountApplicationApprovalCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+  private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public FixedDepositAccountApplicationApprovalCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public FixedDepositAccountApplicationApprovalCommandHandler(
+      final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.approveApplication(command.entityId(), command, DepositAccountType.FIXED_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.approveApplication(
+        command.entityId(), command, DepositAccountType.FIXED_DEPOSIT);
+  }
 }

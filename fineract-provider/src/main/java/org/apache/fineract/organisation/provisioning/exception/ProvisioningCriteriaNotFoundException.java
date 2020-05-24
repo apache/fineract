@@ -20,9 +20,13 @@ package org.apache.fineract.organisation.provisioning.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public class ProvisioningCriteriaNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class ProvisioningCriteriaNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public ProvisioningCriteriaNotFoundException(final Long id) {
-        super("error.msg.provisioning.criteria.id.invalid", "Provisioning Criteria with identifier " + id + " does not exist", id);
-    }
+  public ProvisioningCriteriaNotFoundException(final Long id) {
+    super(
+        "error.msg.provisioning.criteria.id.invalid",
+        "Provisioning Criteria with identifier " + id + " does not exist",
+        id);
+  }
 }

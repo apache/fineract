@@ -36,24 +36,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("twofactor")
 public class UpdateTwoFactorConfigCommandHandler implements NewCommandSourceHandler {
 
-    private final TwoFactorConfigurationService configurationService;
-    private final TwoFactorConfigurationValidator dataValidator;
+  private final TwoFactorConfigurationService configurationService;
+  private final TwoFactorConfigurationValidator dataValidator;
 
-    @Autowired
-    public UpdateTwoFactorConfigCommandHandler(TwoFactorConfigurationService configurationService,
-                                               TwoFactorConfigurationValidator dataValidator) {
-        this.configurationService = configurationService;
-        this.dataValidator = dataValidator;
-    }
+  @Autowired
+  public UpdateTwoFactorConfigCommandHandler(
+      TwoFactorConfigurationService configurationService,
+      TwoFactorConfigurationValidator dataValidator) {
+    this.configurationService = configurationService;
+    this.dataValidator = dataValidator;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        this.dataValidator.validateForUpdate(command.json());
-        final Map<String, Object> changes = configurationService.update(command);
-        return new CommandProcessingResultBuilder()
-                .withCommandId(command.commandId())
-                .with(changes)
-                .build();
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    this.dataValidator.validateForUpdate(command.json());
+    final Map<String, Object> changes = configurationService.update(command);
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .with(changes)
+        .build();
+  }
 }

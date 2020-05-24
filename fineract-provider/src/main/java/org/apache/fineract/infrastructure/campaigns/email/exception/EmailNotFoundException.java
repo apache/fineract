@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class EmailNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public EmailNotFoundException(final Long resourceId) {
-        super("error.msg.email.identifier.not.found", "Email with identifier `" + resourceId + "` does not exist", resourceId);
-    }
+  public EmailNotFoundException(final Long resourceId) {
+    super(
+        "error.msg.email.identifier.not.found",
+        "Email with identifier `" + resourceId + "` does not exist",
+        resourceId);
+  }
 }

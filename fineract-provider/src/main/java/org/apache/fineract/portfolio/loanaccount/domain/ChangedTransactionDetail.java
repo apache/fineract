@@ -29,10 +29,9 @@ import java.util.Map;
  */
 public class ChangedTransactionDetail {
 
-    private final Map<Long, LoanTransaction> newTransactionMappings = new HashMap<>();
+  private final Map<Long, LoanTransaction> newTransactionMappings = new HashMap<>();
 
-    public Map<Long, LoanTransaction> getNewTransactionMappings() {
-        return this.newTransactionMappings;
-    }
-
+  public Map<Long, LoanTransaction> getNewTransactionMappings() {
+    return this.newTransactionMappings;
+  }
 }

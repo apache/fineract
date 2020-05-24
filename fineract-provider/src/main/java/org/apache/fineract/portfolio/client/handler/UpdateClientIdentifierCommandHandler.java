@@ -31,16 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENTIDENTIFIER", action = "UPDATE")
 public class UpdateClientIdentifierCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
+  private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
 
-    @Autowired
-    public UpdateClientIdentifierCommandHandler(final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
-        this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
-    }
+  @Autowired
+  public UpdateClientIdentifierCommandHandler(
+      final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
+    this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.clientIdentifierWritePlatformService.updateClientIdentifier(command.getClientId(), command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.clientIdentifierWritePlatformService.updateClientIdentifier(
+        command.getClientId(), command.entityId(), command);
+  }
 }

@@ -39,141 +39,157 @@ import org.joda.time.LocalDate;
 @Table(name = "m_loan_term_variations")
 public class LoanTermVariations extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_id", nullable = false)
-    private Loan loan;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "loan_id", nullable = false)
+  private Loan loan;
 
-    @Column(name = "term_type", nullable = false)
-    private Integer termType;
+  @Column(name = "term_type", nullable = false)
+  private Integer termType;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "applicable_date", nullable = false)
-    private Date termApplicableFrom;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "applicable_date", nullable = false)
+  private Date termApplicableFrom;
 
-    @Column(name = "decimal_value", scale = 6, precision = 19)
-    private BigDecimal decimalValue;
+  @Column(name = "decimal_value", scale = 6, precision = 19)
+  private BigDecimal decimalValue;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "date_value")
-    private Date dateValue;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "date_value")
+  private Date dateValue;
 
-    @Column(name = "is_specific_to_installment", nullable = false)
-    private boolean isSpecificToInstallment;
+  @Column(name = "is_specific_to_installment", nullable = false)
+  private boolean isSpecificToInstallment;
 
-    @Column(name = "applied_on_loan_status", nullable = false)
-    private Integer onLoanStatus;
+  @Column(name = "applied_on_loan_status", nullable = false)
+  private Integer onLoanStatus;
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive;
+  @Column(name = "is_active", nullable = false)
+  private Boolean isActive;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private LoanTermVariations parent;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "parent_id")
+  private LoanTermVariations parent;
 
-    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
-            final boolean isSpecificToInstallment, final Loan loan) {
-        this.loan = loan;
-        this.termApplicableFrom = termApplicableFrom;
-        this.termType = termType;
-        this.decimalValue = decimalValue;
-        this.dateValue = dateValue;
-        this.isSpecificToInstallment = isSpecificToInstallment;
-        this.onLoanStatus = loan.status().getValue();
-        this.isActive = true;
-        this.parent = null;
+  public LoanTermVariations(
+      final Integer termType,
+      final Date termApplicableFrom,
+      final BigDecimal decimalValue,
+      final Date dateValue,
+      final boolean isSpecificToInstallment,
+      final Loan loan) {
+    this.loan = loan;
+    this.termApplicableFrom = termApplicableFrom;
+    this.termType = termType;
+    this.decimalValue = decimalValue;
+    this.dateValue = dateValue;
+    this.isSpecificToInstallment = isSpecificToInstallment;
+    this.onLoanStatus = loan.status().getValue();
+    this.isActive = true;
+    this.parent = null;
+  }
+
+  public LoanTermVariations(
+      final Integer termType,
+      final Date termApplicableFrom,
+      final BigDecimal decimalValue,
+      final Date dateValue,
+      final boolean isSpecificToInstallment,
+      final Loan loan,
+      final Integer loanStatus) {
+    this.loan = loan;
+    this.termApplicableFrom = termApplicableFrom;
+    this.termType = termType;
+    this.decimalValue = decimalValue;
+    this.dateValue = dateValue;
+    this.isSpecificToInstallment = isSpecificToInstallment;
+    this.onLoanStatus = loanStatus;
+    this.isActive = true;
+    this.parent = null;
+  }
+
+  public LoanTermVariations(
+      final Integer termType,
+      final Date termApplicableFrom,
+      final BigDecimal decimalValue,
+      final Date dateValue,
+      final boolean isSpecificToInstallment,
+      final Loan loan,
+      final Integer loanStatus,
+      final Boolean isActive,
+      final LoanTermVariations parent) {
+    this.loan = loan;
+    this.termApplicableFrom = termApplicableFrom;
+    this.termType = termType;
+    this.decimalValue = decimalValue;
+    this.dateValue = dateValue;
+    this.isSpecificToInstallment = isSpecificToInstallment;
+    this.onLoanStatus = loanStatus;
+    this.isActive = isActive;
+    this.parent = parent;
+  }
+
+  protected LoanTermVariations() {}
+
+  public LoanTermVariationType getTermType() {
+    return LoanTermVariationType.fromInt(this.termType);
+  }
+
+  public LoanTermVariationsData toData() {
+    LocalDate termStartDate = new LocalDate(this.termApplicableFrom);
+    LocalDate dateValue = null;
+    if (this.dateValue != null) {
+      dateValue = new LocalDate(this.dateValue);
     }
+    EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
+    return new LoanTermVariationsData(
+        getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment);
+  }
 
-    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
-            final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus) {
-        this.loan = loan;
-        this.termApplicableFrom = termApplicableFrom;
-        this.termType = termType;
-        this.decimalValue = decimalValue;
-        this.dateValue = dateValue;
-        this.isSpecificToInstallment = isSpecificToInstallment;
-        this.onLoanStatus = loanStatus;
-        this.isActive = true;
-        this.parent = null;
-    }
+  public Date getTermApplicableFrom() {
+    return this.termApplicableFrom;
+  }
 
-    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
-            final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus, final Boolean isActive, final LoanTermVariations parent) {
-        this.loan = loan;
-        this.termApplicableFrom = termApplicableFrom;
-        this.termType = termType;
-        this.decimalValue = decimalValue;
-        this.dateValue = dateValue;
-        this.isSpecificToInstallment = isSpecificToInstallment;
-        this.onLoanStatus = loanStatus;
-        this.isActive = isActive;
-        this.parent = parent;
-    }
+  public LocalDate fetchTermApplicaDate() {
+    return new LocalDate(this.termApplicableFrom);
+  }
 
-    protected LoanTermVariations() {
+  public BigDecimal getTermValue() {
+    return this.decimalValue;
+  }
 
-    }
+  public Date getDateValue() {
+    return this.dateValue;
+  }
 
-    public LoanTermVariationType getTermType() {
-        return LoanTermVariationType.fromInt(this.termType);
-    }
+  public LocalDate fetchDateValue() {
+    return this.dateValue == null ? null : new LocalDate(this.dateValue);
+  }
 
-    public LoanTermVariationsData toData() {
-        LocalDate termStartDate = new LocalDate(this.termApplicableFrom);
-        LocalDate dateValue = null;
-        if (this.dateValue != null) {
-            dateValue = new LocalDate(this.dateValue);
-        }
-        EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
-        return new LoanTermVariationsData(getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment);
-    }
+  public void setTermApplicableFrom(Date termApplicableFrom) {
+    this.termApplicableFrom = termApplicableFrom;
+  }
 
-    public Date getTermApplicableFrom() {
-        return this.termApplicableFrom;
-    }
+  public void setDecimalValue(BigDecimal decimalValue) {
+    this.decimalValue = decimalValue;
+  }
 
-    public LocalDate fetchTermApplicaDate() {
-        return new LocalDate(this.termApplicableFrom);
-    }
+  public Integer getOnLoanStatus() {
+    return this.onLoanStatus;
+  }
 
-    public BigDecimal getTermValue() {
-        return this.decimalValue;
-    }
+  public Boolean isActive() {
+    return this.isActive;
+  }
 
-    public Date getDateValue() {
-        return this.dateValue;
-    }
+  public LoanTermVariations parent() {
+    return this.parent;
+  }
 
-    public LocalDate fetchDateValue() {
-        return this.dateValue == null ? null : new LocalDate(this.dateValue);
-    }
+  public void updateIsActive(final Boolean isActive) {
+    this.isActive = isActive;
+  }
 
-    public void setTermApplicableFrom(Date termApplicableFrom) {
-        this.termApplicableFrom = termApplicableFrom;
-    }
-
-    public void setDecimalValue(BigDecimal decimalValue) {
-        this.decimalValue = decimalValue;
-    }
-
-
-    public Integer getOnLoanStatus() {
-        return this.onLoanStatus;
-    }
-
-    public Boolean isActive() {
-        return this.isActive;
-    }
-
-    public LoanTermVariations parent() {
-        return this.parent;
-    }
-
-    public void updateIsActive(final Boolean isActive){
-        this.isActive = isActive;
-    }
-
-    public void markAsInactive() {
-        this.isActive = false;
-    }
-
+  public void markAsInactive() {
+    this.isActive = false;
+  }
 }

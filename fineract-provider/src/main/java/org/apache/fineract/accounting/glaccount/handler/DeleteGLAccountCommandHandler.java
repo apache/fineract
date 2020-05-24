@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLACCOUNT", action = "DELETE")
 public class DeleteGLAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final GLAccountWritePlatformService writePlatformService;
+  private final GLAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteGLAccountCommandHandler(final GLAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteGLAccountCommandHandler(final GLAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteGLAccount(command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteGLAccount(command.entityId());
+  }
 }

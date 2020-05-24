@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PAYMENTTYPE", action = "CREATE")
 public class CreatePaymentTypeCommandHandler implements NewCommandSourceHandler {
 
-    private final PaymentTypeWriteService paymentTypeWriteService;
+  private final PaymentTypeWriteService paymentTypeWriteService;
 
-    @Autowired
-    public CreatePaymentTypeCommandHandler(final PaymentTypeWriteService paymentTypeWriteService) {
-        this.paymentTypeWriteService = paymentTypeWriteService;
-    }
+  @Autowired
+  public CreatePaymentTypeCommandHandler(final PaymentTypeWriteService paymentTypeWriteService) {
+    this.paymentTypeWriteService = paymentTypeWriteService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.paymentTypeWriteService.createPaymentType(command);
-    }
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.paymentTypeWriteService.createPaymentType(command);
+  }
 }

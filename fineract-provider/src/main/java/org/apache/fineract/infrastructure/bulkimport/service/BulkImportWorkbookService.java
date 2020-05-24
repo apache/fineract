@@ -28,12 +28,16 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 
 public interface BulkImportWorkbookService {
 
-    public Long importWorkbook(String entityType, InputStream inputStream, FormDataContentDisposition fileDetail,
-            final String locale, final String dateFormat);
-    public Collection<ImportData> getImports(GlobalEntityType type);
+  public Long importWorkbook(
+      String entityType,
+      InputStream inputStream,
+      FormDataContentDisposition fileDetail,
+      final String locale,
+      final String dateFormat);
 
-    public DocumentData getOutputTemplateLocation(String importDocumentId);
+  public Collection<ImportData> getImports(GlobalEntityType type);
 
-    public Response getOutputTemplate(String importDocumentId);
+  public DocumentData getOutputTemplateLocation(String importDocumentId);
 
+  public Response getOutputTemplate(String importDocumentId);
 }

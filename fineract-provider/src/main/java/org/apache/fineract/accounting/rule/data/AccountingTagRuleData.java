@@ -23,20 +23,22 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class AccountingTagRuleData {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    private final CodeValueData tag;
-    @SuppressWarnings("unused")
-    private final EnumOptionData transactionType;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public AccountingTagRuleData(final Long id, final CodeValueData tag, final EnumOptionData transactionType) {
-        this.id = id;
-        this.tag = tag;
-        this.transactionType = transactionType;
-    }
+  private final CodeValueData tag;
 
-    public CodeValueData getTag() {
-        return this.tag;
-    }
+  @SuppressWarnings("unused")
+  private final EnumOptionData transactionType;
 
+  public AccountingTagRuleData(
+      final Long id, final CodeValueData tag, final EnumOptionData transactionType) {
+    this.id = id;
+    this.tag = tag;
+    this.transactionType = transactionType;
+  }
+
+  public CodeValueData getTag() {
+    return this.tag;
+  }
 }

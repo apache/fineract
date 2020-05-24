@@ -31,17 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ROLE", action = "ENABLE")
 public class EnableRoleCommandHandler implements NewCommandSourceHandler {
 
-    private final RoleWritePlatformService writePlatformService;
+  private final RoleWritePlatformService writePlatformService;
 
-    @Autowired
-    public EnableRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public EnableRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.enableRole(command.entityId());
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.writePlatformService.enableRole(command.entityId());
+  }
 }

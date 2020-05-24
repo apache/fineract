@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ACCOUNTNUMBERFORMAT", action = "CREATE")
 public class CreateAccountNumberFormatCommandHandler implements NewCommandSourceHandler {
 
-    private final AccountNumberFormatWritePlatformService accountNumberFormatWritePlatformService;
+  private final AccountNumberFormatWritePlatformService accountNumberFormatWritePlatformService;
 
-    @Autowired
-    public CreateAccountNumberFormatCommandHandler(final AccountNumberFormatWritePlatformService accountNumberFormatWritePlatformService) {
-        this.accountNumberFormatWritePlatformService = accountNumberFormatWritePlatformService;
-    }
+  @Autowired
+  public CreateAccountNumberFormatCommandHandler(
+      final AccountNumberFormatWritePlatformService accountNumberFormatWritePlatformService) {
+    this.accountNumberFormatWritePlatformService = accountNumberFormatWritePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.accountNumberFormatWritePlatformService.createAccountNumberFormat(command);
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.accountNumberFormatWritePlatformService.createAccountNumberFormat(command);
+  }
 }

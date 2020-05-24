@@ -26,118 +26,126 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/13/18.
  */
 final class ClientIdentifiersApiResourceSwagger {
-    private ClientIdentifiersApiResourceSwagger() {
+  private ClientIdentifiersApiResourceSwagger() {}
+
+  @ApiModel(value = "GetClientsClientIdIdentifiersResponse")
+  public static final class GetClientsClientIdIdentifiersResponse {
+    private GetClientsClientIdIdentifiersResponse() {}
+
+    final class GetClientsDocumentType {
+      private GetClientsDocumentType() {}
+
+      @ApiModelProperty(example = "3")
+      public Integer id;
+
+      @ApiModelProperty(example = "Drivers License")
+      public String name;
     }
 
-    @ApiModel(value = "GetClientsClientIdIdentifiersResponse")
-    public final static class GetClientsClientIdIdentifiersResponse {
-        private GetClientsClientIdIdentifiersResponse() {
-        }
+    @ApiModelProperty(example = "2")
+    public Integer id;
 
-        final class GetClientsDocumentType {
-            private GetClientsDocumentType() {
-            }
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
 
-            @ApiModelProperty(example = "3")
-            public Integer id;
-            @ApiModelProperty(example = "Drivers License")
-            public String name;
-        }
+    public GetClientsDocumentType documentType;
 
-        @ApiModelProperty(example = "2")
-        public Integer id;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        public GetClientsDocumentType documentType;
-        @ApiModelProperty(example = "12345")
-        public String documentKey;
-        @ApiModelProperty(example = "Issued in the year 2--7")
-        public String description;
+    @ApiModelProperty(example = "12345")
+    public String documentKey;
+
+    @ApiModelProperty(example = "Issued in the year 2--7")
+    public String description;
+  }
+
+  @ApiModel(value = "GetClientsClientIdIdentifiersTemplateResponse")
+  public static final class GetClientsClientIdIdentifiersTemplateResponse {
+    private GetClientsClientIdIdentifiersTemplateResponse() {}
+
+    final class GetClientsAllowedDocumentTypes {
+      private GetClientsAllowedDocumentTypes() {}
+
+      @ApiModelProperty(example = "1")
+      public Integer id;
+
+      @ApiModelProperty(example = "Passport")
+      public String name;
+
+      @ApiModelProperty(example = "0")
+      public Integer position;
     }
 
-    @ApiModel(value = "GetClientsClientIdIdentifiersTemplateResponse")
-    public final static class GetClientsClientIdIdentifiersTemplateResponse {
-        private GetClientsClientIdIdentifiersTemplateResponse() {
-        }
+    public Set<GetClientsAllowedDocumentTypes> allowedDocumentTypes;
+  }
 
-        final class GetClientsAllowedDocumentTypes {
-            private GetClientsAllowedDocumentTypes() {
-            }
+  @ApiModel(value = "PostClientsClientIdIdentifiersRequest")
+  public static final class PostClientsClientIdIdentifiersRequest {
+    private PostClientsClientIdIdentifiersRequest() {}
 
-            @ApiModelProperty(example = "1")
-            public Integer id;
-            @ApiModelProperty(example = "Passport")
-            public String name;
-            @ApiModelProperty(example = "0")
-            public Integer position;
-        }
+    @ApiModelProperty(example = "1")
+    public Integer documentTypeId;
 
-        public Set<GetClientsAllowedDocumentTypes> allowedDocumentTypes;
-    }
+    @ApiModelProperty(example = "KA-54677")
+    public String documentKey;
 
-    @ApiModel(value = "PostClientsClientIdIdentifiersRequest")
-    public final static class PostClientsClientIdIdentifiersRequest {
-        private PostClientsClientIdIdentifiersRequest() {
-        }
+    @ApiModelProperty(example = "Document has been verified")
+    public String description;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer documentTypeId;
-        @ApiModelProperty(example = "KA-54677")
-        public String documentKey;
-        @ApiModelProperty(example = "Document has been verified")
-        public String description;
-    }
+  @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdRequest")
+  public static final class PutClientsClientIdIdentifiersIdentifierIdRequest {
+    private PutClientsClientIdIdentifiersIdentifierIdRequest() {}
 
-    @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdRequest")
-    public final static class PutClientsClientIdIdentifiersIdentifierIdRequest {
-        private PutClientsClientIdIdentifiersIdentifierIdRequest() {
-        }
+    @ApiModelProperty(example = "4")
+    public Integer documentTypeId;
 
-        @ApiModelProperty(example = "4")
-        public Integer documentTypeId;
-        @ApiModelProperty(example = "KA-94667")
-        public String documentKey;
-        @ApiModelProperty(example = "Document has been updated")
-        public String description;
-    }
+    @ApiModelProperty(example = "KA-94667")
+    public String documentKey;
 
-    @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdResponse")
-    public final static class PutClientsClientIdIdentifiersIdentifierIdResponse {
-        private PutClientsClientIdIdentifiersIdentifierIdResponse() {
-        }
+    @ApiModelProperty(example = "Document has been updated")
+    public String description;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        @ApiModelProperty(example = "3")
-        public Integer resourceId;
-        public PutClientsClientIdIdentifiersIdentifierIdRequest changes;
-    }
+  @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdResponse")
+  public static final class PutClientsClientIdIdentifiersIdentifierIdResponse {
+    private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
 
-    @ApiModel(value = "PostClientsClientIdIdentifiersResponse")
-    public final static class PostClientsClientIdIdentifiersResponse {
-        private PostClientsClientIdIdentifiersResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        @ApiModelProperty(example = "3")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
 
-    @ApiModel(value = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
-    public final static class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
-        private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {
-        }
+    @ApiModelProperty(example = "3")
+    public Integer resourceId;
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        @ApiModelProperty(example = "3")
-        public Integer resourceId;
-    }
+    public PutClientsClientIdIdentifiersIdentifierIdRequest changes;
+  }
+
+  @ApiModel(value = "PostClientsClientIdIdentifiersResponse")
+  public static final class PostClientsClientIdIdentifiersResponse {
+    private PostClientsClientIdIdentifiersResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
+
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
+
+    @ApiModelProperty(example = "3")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
+  public static final class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
+    private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
+
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
+
+    @ApiModelProperty(example = "3")
+    public Integer resourceId;
+  }
 }

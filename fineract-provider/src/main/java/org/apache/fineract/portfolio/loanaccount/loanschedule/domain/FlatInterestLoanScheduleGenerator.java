@@ -28,40 +28,65 @@ import org.joda.time.LocalDate;
 
 public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGenerator {
 
-    @Override
-    public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
-            final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
-            Money totalCumulativeInterest, Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
-            @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,
-            @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
-            @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
+  @Override
+  public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(
+      final PaymentPeriodsInOneYearCalculator calculator,
+      final double interestCalculationGraceOnRepaymentPeriodFraction,
+      final Money totalCumulativePrincipal,
+      Money totalCumulativeInterest,
+      Money totalInterestDueForLoan,
+      final Money cumulatingInterestPaymentDueToGrace,
+      final Money outstandingBalance,
+      final LoanApplicationTerms loanApplicationTerms,
+      final int periodNumber,
+      final MathContext mc,
+      @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,
+      @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap,
+      LocalDate periodStartDate,
+      LocalDate periodEndDate,
+      @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
 
-        final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,
-                outstandingBalance, periodStartDate, periodEndDate);
-        Money interestForThisInstallment = result.interest();
+    final PrincipalInterest result =
+        loanApplicationTerms.calculateTotalInterestForPeriod(
+            calculator,
+            interestCalculationGraceOnRepaymentPeriodFraction,
+            periodNumber,
+            mc,
+            cumulatingInterestPaymentDueToGrace,
+            outstandingBalance,
+            periodStartDate,
+            periodEndDate);
+    Money interestForThisInstallment = result.interest();
 
-        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
-                periodNumber, mc, interestForThisInstallment);
+    Money principalForThisInstallment =
+        loanApplicationTerms.calculateTotalPrincipalForPeriod(
+            calculator, outstandingBalance, periodNumber, mc, interestForThisInstallment);
 
-        // update cumulative fields for principal & interest
-        final Money interestBroughtForwardDueToGrace = result.interestPaymentDueToGrace();
-        final Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
-        final Money totalCumulativeInterestToDate = totalCumulativeInterest.plus(interestForThisInstallment);
+    // update cumulative fields for principal & interest
+    final Money interestBroughtForwardDueToGrace = result.interestPaymentDueToGrace();
+    final Money totalCumulativePrincipalToDate =
+        totalCumulativePrincipal.plus(principalForThisInstallment);
+    final Money totalCumulativeInterestToDate =
+        totalCumulativeInterest.plus(interestForThisInstallment);
 
-        // adjust if needed
-        principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,
-                totalCumulativePrincipalToDate, periodNumber);
+    // adjust if needed
+    principalForThisInstallment =
+        loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(
+            principalForThisInstallment, totalCumulativePrincipalToDate, periodNumber);
 
-        // totalCumulativeInterest from partial schedule generation for multi rescheduling
-        /*if (loanApplicationTerms.getPartialTotalCumulativeInterest() != null && loanApplicationTerms.getTotalInterestDue() != null) {
-            totalInterestDueForLoan = loanApplicationTerms.getTotalInterestDue();
-            totalInterestDueForLoan = totalInterestDueForLoan.plus(loanApplicationTerms.getPartialTotalCumulativeInterest());
-        }*/
-        interestForThisInstallment = loanApplicationTerms.adjustInterestIfLastRepaymentPeriod(interestForThisInstallment,
-                totalCumulativeInterestToDate, totalInterestDueForLoan, periodNumber);
+    // totalCumulativeInterest from partial schedule generation for multi rescheduling
+    /*if (loanApplicationTerms.getPartialTotalCumulativeInterest() != null && loanApplicationTerms.getTotalInterestDue() != null) {
+        totalInterestDueForLoan = loanApplicationTerms.getTotalInterestDue();
+        totalInterestDueForLoan = totalInterestDueForLoan.plus(loanApplicationTerms.getPartialTotalCumulativeInterest());
+    }*/
+    interestForThisInstallment =
+        loanApplicationTerms.adjustInterestIfLastRepaymentPeriod(
+            interestForThisInstallment,
+            totalCumulativeInterestToDate,
+            totalInterestDueForLoan,
+            periodNumber);
 
-        return new PrincipalInterest(principalForThisInstallment, interestForThisInstallment, interestBroughtForwardDueToGrace);
-    }
+    return new PrincipalInterest(
+        principalForThisInstallment, interestForThisInstallment, interestBroughtForwardDueToGrace);
+  }
 }

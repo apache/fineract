@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "OFFICETRANSACTION", action = "CREATE")
 public class CreateOfficeTransactionCommandHandler implements NewCommandSourceHandler {
 
-    private final OfficeWritePlatformService writePlatformService;
+  private final OfficeWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateOfficeTransactionCommandHandler(final OfficeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateOfficeTransactionCommandHandler(
+      final OfficeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.officeTransaction(command);
-    }
+    return this.writePlatformService.officeTransaction(command);
+  }
 }

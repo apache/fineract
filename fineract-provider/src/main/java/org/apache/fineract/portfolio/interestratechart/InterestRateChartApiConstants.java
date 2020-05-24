@@ -20,42 +20,43 @@ package org.apache.fineract.portfolio.interestratechart;
 
 public class InterestRateChartApiConstants {
 
-    public static final String INTERESTRATE_CHART_RESOURCE_NAME = "interestchart";
+  public static final String INTERESTRATE_CHART_RESOURCE_NAME = "interestchart";
 
-    // actions
-    public static final String summitalAction = ".summital";
+  // actions
+  public static final String summitalAction = ".summital";
 
-    // command
-    public static final String COMMAND_UNDO_TRANSACTION = "undo";
+  // command
+  public static final String COMMAND_UNDO_TRANSACTION = "undo";
 
-    // general
-    public static final String localeParamName = "locale";
-    public static final String dateFormatParamName = "dateFormat";
+  // general
+  public static final String localeParamName = "locale";
+  public static final String dateFormatParamName = "dateFormat";
 
-    // interest rate chart parameters
-    public static final String idParamName = "id";
-    public static final String nameParamName = "name";
-    public static final String descriptionParamName = "description";
-    public static final String fromDateParamName = "fromDate";
-    public static final String endDateParamName = "endDate";
-    public static final String productIdParamName = "productId";
-    public static final String productNameParamName = "productName";
-    public static final String isPrimaryGroupingByAmountParamName = "isPrimaryGroupingByAmount";
+  // interest rate chart parameters
+  public static final String idParamName = "id";
+  public static final String nameParamName = "name";
+  public static final String descriptionParamName = "description";
+  public static final String fromDateParamName = "fromDate";
+  public static final String endDateParamName = "endDate";
+  public static final String productIdParamName = "productId";
+  public static final String productNameParamName = "productName";
+  public static final String isPrimaryGroupingByAmountParamName = "isPrimaryGroupingByAmount";
 
-    // interest rate chart Slabs parameters
-//    public static final String periodTypeParamName = "periodType";
-//    public static final String fromPeriodParamName = "fromPeriod";
-//    public static final String toPeriodParamName = "toPeriod";
-//    public static final String amountRangeFromParamName = "amountRangeFrom";
-//    public static final String amountRangeToParamName = "amountRangeTo";
-//    public static final String annualInterestRateParamName = "annualInterestRate";
-//    public static final String interestRateForFemaleParamName = "interestRateForFemale";
-//    public static final String interestRateForChildrenParamName = "interestRateForChildren";
-//    public static final String interestRateForSeniorCitizenParamName = "interestRateForSeniorCitizen";
+  // interest rate chart Slabs parameters
+  //    public static final String periodTypeParamName = "periodType";
+  //    public static final String fromPeriodParamName = "fromPeriod";
+  //    public static final String toPeriodParamName = "toPeriod";
+  //    public static final String amountRangeFromParamName = "amountRangeFrom";
+  //    public static final String amountRangeToParamName = "amountRangeTo";
+  //    public static final String annualInterestRateParamName = "annualInterestRate";
+  //    public static final String interestRateForFemaleParamName = "interestRateForFemale";
+  //    public static final String interestRateForChildrenParamName = "interestRateForChildren";
+  //    public static final String interestRateForSeniorCitizenParamName =
+  // "interestRateForSeniorCitizen";
 
-    // associations
-    public static final String chartSlabs = "chartSlabs";
+  // associations
+  public static final String chartSlabs = "chartSlabs";
 
-    // to delete chart Slabs from chart
-    public static final String deleteParamName = "delete";
+  // to delete chart Slabs from chart
+  public static final String deleteParamName = "delete";
 }

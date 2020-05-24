@@ -25,15 +25,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaxGroupRepositoryWrapper {
 
-    private final TaxGroupRepository repository;
+  private final TaxGroupRepository repository;
 
-    @Autowired
-    public TaxGroupRepositoryWrapper(final TaxGroupRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public TaxGroupRepositoryWrapper(final TaxGroupRepository repository) {
+    this.repository = repository;
+  }
 
-    public TaxGroup findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new TaxGroupNotFoundException(id));
-    }
+  public TaxGroup findOneWithNotFoundDetection(final Long id) {
+    return this.repository.findById(id).orElseThrow(() -> new TaxGroupNotFoundException(id));
+  }
 }

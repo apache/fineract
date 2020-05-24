@@ -45,132 +45,161 @@ import org.joda.time.LocalDate;
 @Table(name = "m_deposit_account_recurring_detail")
 public class DepositAccountRecurringDetail extends AbstractPersistableCustom {
 
-    @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal mandatoryRecommendedDepositAmount;
+  @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal mandatoryRecommendedDepositAmount;
 
-    @Column(name = "total_overdue_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal totalOverdueAmount;
+  @Column(name = "total_overdue_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal totalOverdueAmount;
 
-    @Column(name = "is_calendar_inherited", nullable = false)
-    private boolean isCalendarInherited;
+  @Column(name = "is_calendar_inherited", nullable = false)
+  private boolean isCalendarInherited;
 
-    @Column(name = "no_of_overdue_installments", nullable = true)
-    private Integer noOfOverdueInstallments;
+  @Column(name = "no_of_overdue_installments", nullable = true)
+  private Integer noOfOverdueInstallments;
 
-    @Embedded
-    private DepositRecurringDetail recurringDetail;
+  @Embedded private DepositRecurringDetail recurringDetail;
 
-    @OneToOne
-    @JoinColumn(name = "savings_account_id", nullable = false)
-    private SavingsAccount account;
+  @OneToOne
+  @JoinColumn(name = "savings_account_id", nullable = false)
+  private SavingsAccount account;
 
-    /**
-     *
-     */
-    public DepositAccountRecurringDetail() {
-        this.noOfOverdueInstallments = 0;
-        this.isCalendarInherited = false;
+  /**
+   *
+   */
+  public DepositAccountRecurringDetail() {
+    this.noOfOverdueInstallments = 0;
+    this.isCalendarInherited = false;
+  }
+
+  public static DepositAccountRecurringDetail createNew(
+      final BigDecimal mandatoryRecommendedDepositAmount,
+      final DepositRecurringDetail recurringDetail,
+      final SavingsAccount account,
+      final boolean isCalendarInherited) {
+    final BigDecimal totalOverdueAmount = null;
+    final Integer noOfOverdueInstallments = null;
+    return new DepositAccountRecurringDetail(
+        mandatoryRecommendedDepositAmount,
+        totalOverdueAmount,
+        noOfOverdueInstallments,
+        recurringDetail,
+        account,
+        isCalendarInherited);
+  }
+
+  /**
+   * @param mandatoryRecommendedDepositAmount
+   * @param totalOverdueAmount
+   * @param noOfOverdueInstallments
+   * @param recurringDetail
+   * @param account
+   */
+  protected DepositAccountRecurringDetail(
+      final BigDecimal mandatoryRecommendedDepositAmount,
+      final BigDecimal totalOverdueAmount,
+      final Integer noOfOverdueInstallments,
+      final DepositRecurringDetail recurringDetail,
+      final SavingsAccount account,
+      final boolean isCalendarInherited) {
+    this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
+    this.totalOverdueAmount = totalOverdueAmount;
+    this.noOfOverdueInstallments = noOfOverdueInstallments;
+    this.recurringDetail = recurringDetail;
+    this.account = account;
+    this.isCalendarInherited = isCalendarInherited;
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
+    if (command.isChangeInBigDecimalParameterNamed(
+        mandatoryRecommendedDepositAmountParamName, this.mandatoryRecommendedDepositAmount)) {
+      final BigDecimal newValue =
+          command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
+      actualChanges.put(mandatoryRecommendedDepositAmountParamName, newValue);
+      this.mandatoryRecommendedDepositAmount = newValue;
     }
-
-    public static DepositAccountRecurringDetail createNew(final BigDecimal mandatoryRecommendedDepositAmount,
-            final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
-        final BigDecimal totalOverdueAmount = null;
-        final Integer noOfOverdueInstallments = null;
-        return new DepositAccountRecurringDetail(mandatoryRecommendedDepositAmount, totalOverdueAmount, noOfOverdueInstallments,
-                recurringDetail, account, isCalendarInherited);
+    if (this.recurringDetail != null) {
+      actualChanges.putAll(this.recurringDetail.update(command));
     }
+    return actualChanges;
+  }
 
-    /**
-     * @param mandatoryRecommendedDepositAmount
-     * @param totalOverdueAmount
-     * @param noOfOverdueInstallments
-     * @param recurringDetail
-     * @param account
-     */
-    protected DepositAccountRecurringDetail(final BigDecimal mandatoryRecommendedDepositAmount, final BigDecimal totalOverdueAmount,
-            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account,
-            final boolean isCalendarInherited) {
-        this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
-        this.totalOverdueAmount = totalOverdueAmount;
-        this.noOfOverdueInstallments = noOfOverdueInstallments;
-        this.recurringDetail = recurringDetail;
-        this.account = account;
-        this.isCalendarInherited = isCalendarInherited;
+  public Map<String, Object> updateMandatoryRecommendedDepositAmount(
+      BigDecimal newMandatoryRecommendedDepositAmount,
+      LocalDate effectiveDate,
+      Boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+      Integer financialYearBeginningMonth) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
+    actualChanges.put(
+        mandatoryRecommendedDepositAmountParamName, newMandatoryRecommendedDepositAmount);
+    this.mandatoryRecommendedDepositAmount = newMandatoryRecommendedDepositAmount;
+    RecurringDepositAccount depositAccount = (RecurringDepositAccount) this.account;
+    if (depositAccount.isNotActive()) {
+      final String defaultUserMessage =
+          "Updates to the recommended deposit amount are allowed only when the underlying account"
+              + " is active.";
+      final ApiParameterError error =
+          ApiParameterError.generalError(
+              "error.msg."
+                  + DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME
+                  + ".is.not.active",
+              defaultUserMessage);
+      final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+      dataValidationErrors.add(error);
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
+    depositAccount.updateScheduleInstallmentsWithNewRecommendedDepositAmount(
+        newMandatoryRecommendedDepositAmount, effectiveDate);
+    depositAccount.updateOverduePayments(DateUtils.getLocalDateOfTenant());
+    MathContext mc = MathContext.DECIMAL64;
+    Boolean isPreMatureClosure = false;
+    depositAccount.updateMaturityDateAndAmount(
+        mc,
+        isPreMatureClosure,
+        isSavingsInterestPostingAtCurrentPeriodEnd,
+        financialYearBeginningMonth);
+    return actualChanges;
+  }
 
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
-        if (command.isChangeInBigDecimalParameterNamed(mandatoryRecommendedDepositAmountParamName, this.mandatoryRecommendedDepositAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
-            actualChanges.put(mandatoryRecommendedDepositAmountParamName, newValue);
-            this.mandatoryRecommendedDepositAmount = newValue;
-        }
-        if (this.recurringDetail != null) {
-            actualChanges.putAll(this.recurringDetail.update(command));
-        }
-        return actualChanges;
-    }
+  public DepositRecurringDetail recurringDetail() {
+    return this.recurringDetail;
+  }
 
-    public Map<String, Object> updateMandatoryRecommendedDepositAmount(BigDecimal newMandatoryRecommendedDepositAmount,
-            LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
-        actualChanges.put(mandatoryRecommendedDepositAmountParamName, newMandatoryRecommendedDepositAmount);
-        this.mandatoryRecommendedDepositAmount = newMandatoryRecommendedDepositAmount;
-        RecurringDepositAccount depositAccount = (RecurringDepositAccount) this.account;
-        if (depositAccount.isNotActive()) {
-            final String defaultUserMessage = "Updates to the recommended deposit amount are allowed only when the underlying account is active.";
-            final ApiParameterError error = ApiParameterError.generalError("error.msg."
-                    + DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME + ".is.not.active", defaultUserMessage);
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            dataValidationErrors.add(error);
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        depositAccount.updateScheduleInstallmentsWithNewRecommendedDepositAmount(newMandatoryRecommendedDepositAmount, effectiveDate);
-        depositAccount.updateOverduePayments(DateUtils.getLocalDateOfTenant());
-        MathContext mc = MathContext.DECIMAL64;
-        Boolean isPreMatureClosure = false;
-        depositAccount.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
-        return actualChanges;
-    }
+  public void updateAccountReference(final SavingsAccount account) {
+    this.account = account;
+  }
 
-    public DepositRecurringDetail recurringDetail() {
-        return this.recurringDetail;
-    }
+  public boolean isMandatoryDeposit() {
+    return this.recurringDetail.isMandatoryDeposit();
+  }
 
-    public void updateAccountReference(final SavingsAccount account) {
-        this.account = account;
-    }
+  public boolean allowWithdrawal() {
+    return this.recurringDetail.allowWithdrawal();
+  }
 
-    public boolean isMandatoryDeposit() {
-        return this.recurringDetail.isMandatoryDeposit();
-    }
+  public boolean adjustAdvanceTowardsFuturePayments() {
+    return this.recurringDetail.adjustAdvanceTowardsFuturePayments();
+  }
 
-    public boolean allowWithdrawal() {
-        return this.recurringDetail.allowWithdrawal();
-    }
+  public BigDecimal mandatoryRecommendedDepositAmount() {
+    return this.mandatoryRecommendedDepositAmount;
+  }
 
-    public boolean adjustAdvanceTowardsFuturePayments() {
-        return this.recurringDetail.adjustAdvanceTowardsFuturePayments();
-    }
+  public boolean isCalendarInherited() {
+    return this.isCalendarInherited;
+  }
 
-    public BigDecimal mandatoryRecommendedDepositAmount() {
-        return this.mandatoryRecommendedDepositAmount;
-    }
+  public DepositAccountRecurringDetail copy() {
+    final BigDecimal mandatoryRecommendedDepositAmount = this.mandatoryRecommendedDepositAmount;
+    final DepositRecurringDetail recurringDetail = this.recurringDetail.copy();
+    final boolean isCalendarInherited = this.isCalendarInherited;
+    return DepositAccountRecurringDetail.createNew(
+        mandatoryRecommendedDepositAmount, recurringDetail, null, isCalendarInherited);
+  }
 
-    public boolean isCalendarInherited() {
-        return this.isCalendarInherited;
-    }
-
-    public DepositAccountRecurringDetail copy() {
-        final BigDecimal mandatoryRecommendedDepositAmount = this.mandatoryRecommendedDepositAmount;
-        final DepositRecurringDetail recurringDetail = this.recurringDetail.copy();
-        final boolean isCalendarInherited = this.isCalendarInherited;
-        return DepositAccountRecurringDetail.createNew(mandatoryRecommendedDepositAmount, recurringDetail, null, isCalendarInherited);
-    }
-
-    public void updateOverdueDetails(final int noOfOverdueInstallments, final Money totalOverdueAmount) {
-        this.noOfOverdueInstallments = noOfOverdueInstallments;
-        this.totalOverdueAmount = totalOverdueAmount.getAmount();
-    }
+  public void updateOverdueDetails(
+      final int noOfOverdueInstallments, final Money totalOverdueAmount) {
+    this.noOfOverdueInstallments = noOfOverdueInstallments;
+    this.totalOverdueAmount = totalOverdueAmount.getAmount();
+  }
 }

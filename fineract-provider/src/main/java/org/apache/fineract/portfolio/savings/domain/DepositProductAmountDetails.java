@@ -32,74 +32,83 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 @Embeddable
 public class DepositProductAmountDetails {
 
-    @Column(name = "min_deposit_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal minDepositAmount;
+  @Column(name = "min_deposit_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal minDepositAmount;
 
-    @Column(name = "max_deposit_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal maxDepositAmount;
+  @Column(name = "max_deposit_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal maxDepositAmount;
 
-    @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = false)
-    private BigDecimal depositAmount;
+  @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = false)
+  private BigDecimal depositAmount;
 
-    public static DepositProductAmountDetails createFrom(final BigDecimal minDepositAmount, final BigDecimal depositAmount,
-            final BigDecimal maxDepositAmount) {
+  public static DepositProductAmountDetails createFrom(
+      final BigDecimal minDepositAmount,
+      final BigDecimal depositAmount,
+      final BigDecimal maxDepositAmount) {
 
-        return new DepositProductAmountDetails(minDepositAmount, depositAmount, maxDepositAmount);
+    return new DepositProductAmountDetails(minDepositAmount, depositAmount, maxDepositAmount);
+  }
+
+  protected DepositProductAmountDetails() {
+    //
+  }
+
+  public DepositProductAmountDetails(
+      final BigDecimal minDepositAmount,
+      final BigDecimal depositAmount,
+      final BigDecimal maxDepositAmount) {
+    this.minDepositAmount = minDepositAmount;
+    this.depositAmount = depositAmount;
+    this.maxDepositAmount = maxDepositAmount;
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
+
+    final String localeAsInput = command.locale();
+
+    final String minDepositAmountParamName = "minDepositAmount";
+    if (command.isChangeInBigDecimalParameterNamedWithNullCheck(
+        minDepositAmountParamName, this.minDepositAmount)) {
+      final BigDecimal newValue =
+          command.bigDecimalValueOfParameterNamed(minDepositAmountParamName);
+      actualChanges.put(minDepositAmountParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.minDepositAmount = newValue;
     }
 
-    protected DepositProductAmountDetails() {
-        //
+    final String maxDepositAmountParamName = "maxDepositAmount";
+    if (command.isChangeInBigDecimalParameterNamedWithNullCheck(
+        maxDepositAmountParamName, this.maxDepositAmount)) {
+      final BigDecimal newValue =
+          command.bigDecimalValueOfParameterNamed(maxDepositAmountParamName);
+      actualChanges.put(maxDepositAmountParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.maxDepositAmount = newValue;
     }
 
-    public DepositProductAmountDetails(final BigDecimal minDepositAmount, final BigDecimal depositAmount, final BigDecimal maxDepositAmount) {
-        this.minDepositAmount = minDepositAmount;
-        this.depositAmount = depositAmount;
-        this.maxDepositAmount = maxDepositAmount;
+    final String depositAmountParamName = "depositAmount";
+    if (command.isChangeInBigDecimalParameterNamedWithNullCheck(
+        depositAmountParamName, this.depositAmount)) {
+      final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
+      actualChanges.put(depositAmountParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.depositAmount = newValue;
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    return actualChanges;
+  }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
+  public BigDecimal getMinDepositAmount() {
+    return this.minDepositAmount;
+  }
 
-        final String localeAsInput = command.locale();
+  public BigDecimal getMaxDepositAmount() {
+    return this.maxDepositAmount;
+  }
 
-        final String minDepositAmountParamName = "minDepositAmount";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(minDepositAmountParamName, this.minDepositAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minDepositAmountParamName);
-            actualChanges.put(minDepositAmountParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.minDepositAmount = newValue;
-        }
-
-        final String maxDepositAmountParamName = "maxDepositAmount";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(maxDepositAmountParamName, this.maxDepositAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxDepositAmountParamName);
-            actualChanges.put(maxDepositAmountParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.maxDepositAmount = newValue;
-        }
-
-        final String depositAmountParamName = "depositAmount";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(depositAmountParamName, this.depositAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
-            actualChanges.put(depositAmountParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.depositAmount = newValue;
-        }
-
-        return actualChanges;
-    }
-
-    public BigDecimal getMinDepositAmount() {
-        return this.minDepositAmount;
-    }
-
-    public BigDecimal getMaxDepositAmount() {
-        return this.maxDepositAmount;
-    }
-
-    public BigDecimal getDepositAmount() {
-        return this.depositAmount;
-    }
-
+  public BigDecimal getDepositAmount() {
+    return this.depositAmount;
+  }
 }

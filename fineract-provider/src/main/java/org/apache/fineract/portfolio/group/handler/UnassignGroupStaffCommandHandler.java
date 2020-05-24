@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "UNASSIGNSTAFF")
 public class UnassignGroupStaffCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+  private final GroupingTypesWritePlatformService groupWritePlatformService;
 
-    @Autowired
-    public UnassignGroupStaffCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public UnassignGroupStaffCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.groupWritePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.groupWritePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
+  }
 }

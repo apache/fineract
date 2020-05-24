@@ -32,20 +32,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ReadTaxonomyMappingServiceImplTest {
 
-    private XBRLResultServiceImpl readService;
+  private XBRLResultServiceImpl readService;
 
-    @Before
-    public void setUp() throws Exception {
-        final RoutingDataSource dataSource = Mockito.mock(RoutingDataSource.class);
-        this.readService = new XBRLResultServiceImpl(dataSource, null, null);
+  @Before
+  public void setUp() throws Exception {
+    final RoutingDataSource dataSource = Mockito.mock(RoutingDataSource.class);
+    this.readService = new XBRLResultServiceImpl(dataSource, null, null);
+  }
 
-    }
-
-    @Test
-    public void shouldCorrectlyGetGLCode() {
-        final ArrayList<String> result = this.readService.getGLCodes("{12000}+{11000}");
-        assertEquals("12000", result.get(0));
-        assertEquals("11000", result.get(1));
-    }
-
+  @Test
+  public void shouldCorrectlyGetGLCode() {
+    final ArrayList<String> result = this.readService.getGLCodes("{12000}+{11000}");
+    assertEquals("12000", result.get(0));
+    assertEquals("11000", result.get(1));
+  }
 }

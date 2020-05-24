@@ -37,74 +37,81 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
 
-    private final TaxValidator validator;
-    private final TaxAssembler taxAssembler;
-    private final TaxComponentRepository taxComponentRepository;
-    private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
-    private final TaxGroupRepository taxGroupRepository;
-    private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
+  private final TaxValidator validator;
+  private final TaxAssembler taxAssembler;
+  private final TaxComponentRepository taxComponentRepository;
+  private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
+  private final TaxGroupRepository taxGroupRepository;
+  private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
 
-    @Autowired
-    public TaxWritePlatformServiceImpl(final TaxValidator validator, final TaxAssembler taxAssembler,
-            final TaxComponentRepository taxComponentRepository, final TaxGroupRepository taxGroupRepository,
-            final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper, final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper) {
-        this.validator = validator;
-        this.taxAssembler = taxAssembler;
-        this.taxComponentRepository = taxComponentRepository;
-        this.taxGroupRepository = taxGroupRepository;
-        this.taxComponentRepositoryWrapper = taxComponentRepositoryWrapper;
-        this.taxGroupRepositoryWrapper = taxGroupRepositoryWrapper;
-    }
+  @Autowired
+  public TaxWritePlatformServiceImpl(
+      final TaxValidator validator,
+      final TaxAssembler taxAssembler,
+      final TaxComponentRepository taxComponentRepository,
+      final TaxGroupRepository taxGroupRepository,
+      final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper,
+      final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper) {
+    this.validator = validator;
+    this.taxAssembler = taxAssembler;
+    this.taxComponentRepository = taxComponentRepository;
+    this.taxGroupRepository = taxGroupRepository;
+    this.taxComponentRepositoryWrapper = taxComponentRepositoryWrapper;
+    this.taxGroupRepositoryWrapper = taxGroupRepositoryWrapper;
+  }
 
-    @Override
-    public CommandProcessingResult createTaxComponent(final JsonCommand command) {
-        this.validator.validateForTaxComponentCreate(command.json());
-        TaxComponent taxComponent = this.taxAssembler.assembleTaxComponentFrom(command);
-        this.taxComponentRepository.save(taxComponent);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(taxComponent.getId()) //
-                .build();
-    }
+  @Override
+  public CommandProcessingResult createTaxComponent(final JsonCommand command) {
+    this.validator.validateForTaxComponentCreate(command.json());
+    TaxComponent taxComponent = this.taxAssembler.assembleTaxComponentFrom(command);
+    this.taxComponentRepository.save(taxComponent);
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(taxComponent.getId()) //
+        .build();
+  }
 
-    @Override
-    public CommandProcessingResult updateTaxComponent(final Long id, final JsonCommand command) {
-        this.validator.validateForTaxComponentUpdate(command.json());
-        final TaxComponent taxComponent = this.taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id);
-        this.validator.validateStartDate(taxComponent.startDate(), command);
-        Map<String, Object> changes = taxComponent.update(command);
-        this.validator.validateTaxComponentForUpdate(taxComponent);
-        this.taxComponentRepository.save(taxComponent);
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(id) //
-                .with(changes).build();
-    }
+  @Override
+  public CommandProcessingResult updateTaxComponent(final Long id, final JsonCommand command) {
+    this.validator.validateForTaxComponentUpdate(command.json());
+    final TaxComponent taxComponent =
+        this.taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id);
+    this.validator.validateStartDate(taxComponent.startDate(), command);
+    Map<String, Object> changes = taxComponent.update(command);
+    this.validator.validateTaxComponentForUpdate(taxComponent);
+    this.taxComponentRepository.save(taxComponent);
+    return new CommandProcessingResultBuilder() //
+        .withEntityId(id) //
+        .with(changes)
+        .build();
+  }
 
-    @Override
-    public CommandProcessingResult createTaxGroup(final JsonCommand command) {
-        this.validator.validateForTaxGroupCreate(command.json());
-        final TaxGroup taxGroup = this.taxAssembler.assembleTaxGroupFrom(command);
-        this.validator.validateTaxGroup(taxGroup);
-        this.taxGroupRepository.save(taxGroup);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(taxGroup.getId()) //
-                .build();
-    }
+  @Override
+  public CommandProcessingResult createTaxGroup(final JsonCommand command) {
+    this.validator.validateForTaxGroupCreate(command.json());
+    final TaxGroup taxGroup = this.taxAssembler.assembleTaxGroupFrom(command);
+    this.validator.validateTaxGroup(taxGroup);
+    this.taxGroupRepository.save(taxGroup);
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(taxGroup.getId()) //
+        .build();
+  }
 
-    @Override
-    public CommandProcessingResult updateTaxGroup(final Long id, final JsonCommand command) {
-        this.validator.validateForTaxGroupUpdate(command.json());
-        final TaxGroup taxGroup = this.taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id);
-        final boolean isUpdate = true;
-        Set<TaxGroupMappings> groupMappings = this.taxAssembler.assembleTaxGroupMappingsFrom(command, isUpdate);
-        this.validator.validateTaxGroupEndDateAndTaxComponent(taxGroup, groupMappings);
-        Map<String, Object> changes = taxGroup.update(command, groupMappings);
-        this.validator.validateTaxGroup(taxGroup);
-        this.taxGroupRepository.save(taxGroup);
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(id) //
-                .with(changes).build();
-    }
-
+  @Override
+  public CommandProcessingResult updateTaxGroup(final Long id, final JsonCommand command) {
+    this.validator.validateForTaxGroupUpdate(command.json());
+    final TaxGroup taxGroup = this.taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id);
+    final boolean isUpdate = true;
+    Set<TaxGroupMappings> groupMappings =
+        this.taxAssembler.assembleTaxGroupMappingsFrom(command, isUpdate);
+    this.validator.validateTaxGroupEndDateAndTaxComponent(taxGroup, groupMappings);
+    Map<String, Object> changes = taxGroup.update(command, groupMappings);
+    this.validator.validateTaxGroup(taxGroup);
+    this.taxGroupRepository.save(taxGroup);
+    return new CommandProcessingResultBuilder() //
+        .withEntityId(id) //
+        .with(changes)
+        .build();
+  }
 }

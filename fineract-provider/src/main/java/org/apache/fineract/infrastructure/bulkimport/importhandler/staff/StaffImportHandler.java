@@ -45,85 +45,106 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class StaffImportHandler implements ImportHandler {
-    private final static Logger LOG = LoggerFactory.getLogger(StaffImportHandler.class);
-    private List<StaffData> staffList;
-    private Workbook workbook;
+  private static final Logger LOG = LoggerFactory.getLogger(StaffImportHandler.class);
+  private List<StaffData> staffList;
+  private Workbook workbook;
 
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public StaffImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  @Autowired
+  public StaffImportHandler(
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
+
+  @Override
+  public Count process(Workbook workbook, String locale, String dateFormat) {
+    this.workbook = workbook;
+    this.staffList = new ArrayList<>();
+    readExcelFile(locale, dateFormat);
+    return importEntity(dateFormat);
+  }
+
+  public void readExcelFile(String locale, String dateFormat) {
+    Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
+    Integer noOfEntries =
+        ImportHandlerUtils.getNumberOfRows(
+            staffSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
+    for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
+      Row row;
+      row = staffSheet.getRow(rowIndex);
+      if (ImportHandlerUtils.isNotImported(row, StaffConstants.STATUS_COL)) {
+        staffList.add(readStaff(row, locale, dateFormat));
+      }
     }
+  }
 
-    @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook=workbook;
-        this.staffList=new ArrayList<>();
-        readExcelFile(locale,dateFormat);
-        return importEntity(dateFormat);
+  private StaffData readStaff(Row row, String locale, String dateFormat) {
+    String officeName = ImportHandlerUtils.readAsString(StaffConstants.OFFICE_NAME_COL, row);
+    Long officeId =
+        ImportHandlerUtils.getIdByName(
+            workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
+    String firstName = ImportHandlerUtils.readAsString(StaffConstants.FIRST_NAME_COL, row);
+    String lastName = ImportHandlerUtils.readAsString(StaffConstants.LAST_NAME_COL, row);
+    Boolean isLoanOfficer = ImportHandlerUtils.readAsBoolean(StaffConstants.IS_LOAN_OFFICER, row);
+    String mobileNo = null;
+    if (ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row) != null)
+      mobileNo = ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row).toString();
+    LocalDate joinedOnDate = ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL, row);
+    String externalId = ImportHandlerUtils.readAsString(StaffConstants.EXTERNAL_ID_COL, row);
+    Boolean isActive = ImportHandlerUtils.readAsBoolean(StaffConstants.IS_ACTIVE_COL, row);
+
+    return StaffData.importInstance(
+        externalId,
+        firstName,
+        lastName,
+        mobileNo,
+        officeId,
+        isLoanOfficer,
+        isActive,
+        joinedOnDate,
+        row.getRowNum(),
+        locale,
+        dateFormat);
+  }
+
+  public Count importEntity(String dateFormat) {
+    Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
+    int successCount = 0;
+    int errorCount = 0;
+    String errorMessage = "";
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+    for (StaffData staff : staffList) {
+      try {
+        String payload = gsonBuilder.create().toJson(staff);
+        final CommandWrapper commandRequest =
+            new CommandWrapperBuilder() //
+                .createStaff() //
+                .withJson(payload) //
+                .build(); //
+        final CommandProcessingResult result =
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        successCount++;
+        Cell statusCell =
+            staffSheet.getRow(staff.getRowIndex()).createCell(StaffConstants.STATUS_COL);
+        statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
+        statusCell.setCellStyle(
+            ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
+      } catch (RuntimeException ex) {
+        errorCount++;
+        LOG.error("Problem occurred in importEntity function", ex);
+        errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+        ImportHandlerUtils.writeErrorMessage(
+            staffSheet, staff.getRowIndex(), errorMessage, StaffConstants.STATUS_COL);
+      }
     }
-    public void readExcelFile(String locale, String dateFormat) {
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
-        Integer noOfEntries= ImportHandlerUtils.getNumberOfRows(staffSheet,TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
-        for (int rowIndex=1;rowIndex<=noOfEntries;rowIndex++){
-            Row row;
-                row=staffSheet.getRow(rowIndex);
-                if ( ImportHandlerUtils.isNotImported(row, StaffConstants.STATUS_COL)){
-                    staffList.add(readStaff(row,locale,dateFormat));
-                }
-
-        }
-    }
-
-    private StaffData readStaff(Row row,String locale, String dateFormat) {
-        String officeName = ImportHandlerUtils.readAsString( StaffConstants.OFFICE_NAME_COL, row);
-        Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
-        String firstName = ImportHandlerUtils.readAsString(StaffConstants.FIRST_NAME_COL, row);
-        String lastName = ImportHandlerUtils.readAsString(StaffConstants.LAST_NAME_COL, row);
-        Boolean isLoanOfficer=ImportHandlerUtils.readAsBoolean(StaffConstants.IS_LOAN_OFFICER,row);
-        String mobileNo=null;
-        if (ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL,row)!=null)
-            mobileNo=ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL,row).toString();
-        LocalDate joinedOnDate=ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL,row);
-        String externalId=ImportHandlerUtils.readAsString(StaffConstants.EXTERNAL_ID_COL,row);
-        Boolean isActive=ImportHandlerUtils.readAsBoolean(StaffConstants.IS_ACTIVE_COL,row);
-
-        return StaffData.importInstance(externalId,firstName,lastName,mobileNo,officeId,isLoanOfficer,isActive,
-                joinedOnDate,row.getRowNum(),locale,dateFormat);
-    }
-
-    public Count importEntity(String dateFormat) {
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
-        int successCount=0;
-        int errorCount=0;
-        String errorMessage="";
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-        for (StaffData staff: staffList) {
-            try {
-                String payload=gsonBuilder.create().toJson(staff);
-                final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                        .createStaff()//
-                        .withJson(payload) //
-                        .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-                successCount++;
-                Cell statusCell = staffSheet.getRow(staff.getRowIndex()).createCell(StaffConstants.STATUS_COL);
-                statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
-                statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
-                errorCount++;
-                LOG.error("Problem occurred in importEntity function",ex);
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(staffSheet,staff.getRowIndex(),errorMessage,StaffConstants.STATUS_COL);
-            }
-        }
-        staffSheet.setColumnWidth(StaffConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        ImportHandlerUtils.writeString(StaffConstants.STATUS_COL, staffSheet.getRow(0), TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
-        return Count.instance(successCount,errorCount);
-    }
-
-
+    staffSheet.setColumnWidth(
+        StaffConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+    ImportHandlerUtils.writeString(
+        StaffConstants.STATUS_COL,
+        staffSheet.getRow(0),
+        TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
+    return Count.instance(successCount, errorCount);
+  }
 }

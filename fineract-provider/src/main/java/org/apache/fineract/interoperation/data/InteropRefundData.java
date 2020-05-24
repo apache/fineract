@@ -23,9 +23,10 @@ import javax.validation.constraints.Size;
 
 public class InteropRefundData {
 
-    @Size(max = 36)
-    @NotNull
-    private String originalTransactionId; // mandatory payment id
-    @Size(max = 128)
-    private String refundReason; // optional, 128
+  @Size(max = 36)
+  @NotNull
+  private String originalTransactionId; // mandatory payment id
+
+  @Size(max = 128)
+  private String refundReason; // optional, 128
 }

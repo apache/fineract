@@ -28,26 +28,26 @@ import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncenti
 import org.springframework.stereotype.Service;
 
 @Service
-public class InterestIncentivesDropdownReadPlatformServiceImpl implements InterestIncentiveDropdownReadPlatformService {
+public class InterestIncentivesDropdownReadPlatformServiceImpl
+    implements InterestIncentiveDropdownReadPlatformService {
 
-    @Override
-    public Collection<EnumOptionData> retrieveEntityTypeOptions() {
-        return InterestIncentivesEnumerations.entityType(InterestIncentiveEntityType.values());
-    }
+  @Override
+  public Collection<EnumOptionData> retrieveEntityTypeOptions() {
+    return InterestIncentivesEnumerations.entityType(InterestIncentiveEntityType.values());
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveAttributeNameOptions() {
-        return InterestIncentivesEnumerations.attributeName(InterestIncentiveAttributeName.values());
-    }
+  @Override
+  public Collection<EnumOptionData> retrieveAttributeNameOptions() {
+    return InterestIncentivesEnumerations.attributeName(InterestIncentiveAttributeName.values());
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveConditionTypeOptions() {
-        return CommonEnumerations.conditionType(ConditionType.values(), "incentive");
-    }
+  @Override
+  public Collection<EnumOptionData> retrieveConditionTypeOptions() {
+    return CommonEnumerations.conditionType(ConditionType.values(), "incentive");
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveIncentiveTypeOptions() {
-        return InterestIncentivesEnumerations.incentiveType(InterestIncentiveType.values());
-    }
-
+  @Override
+  public Collection<EnumOptionData> retrieveIncentiveTypeOptions() {
+    return InterestIncentivesEnumerations.incentiveType(InterestIncentiveType.values());
+  }
 }

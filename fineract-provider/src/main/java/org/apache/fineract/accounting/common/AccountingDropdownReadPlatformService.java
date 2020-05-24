@@ -25,22 +25,21 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface AccountingDropdownReadPlatformService {
 
-    public List<EnumOptionData> retrieveGLAccountTypeOptions();
+  public List<EnumOptionData> retrieveGLAccountTypeOptions();
 
-    public List<EnumOptionData> retrieveGLAccountUsageOptions();
+  public List<EnumOptionData> retrieveGLAccountUsageOptions();
 
-    public List<EnumOptionData> retrieveJournalEntryTypeOptions();
+  public List<EnumOptionData> retrieveJournalEntryTypeOptions();
 
-    public List<EnumOptionData> retrieveAccountingRuleTypeOptions();
+  public List<EnumOptionData> retrieveAccountingRuleTypeOptions();
 
-    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForLoanProducts();
+  public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForLoanProducts();
 
-    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForSavingsProducts();
+  public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForSavingsProducts();
 
-    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForCharges();
+  public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForCharges();
 
-    public Map<String, List<GLAccountData>> retrieveAccountMappingOptions();
+  public Map<String, List<GLAccountData>> retrieveAccountMappingOptions();
 
-    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForShareProducts();
-
+  public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForShareProducts();
 }

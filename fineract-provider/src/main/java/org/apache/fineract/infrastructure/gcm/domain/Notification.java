@@ -52,279 +52,277 @@ import java.util.List;
  */
 public final class Notification implements Serializable {
 
-    private final String title;
-    private final String body;
+  private final String title;
+  private final String body;
+  private final String icon;
+  private final String sound;
+  private final Integer badge;
+  private final String tag;
+  private final String color;
+  private final String clickAction;
+  private final String bodyLocKey;
+  private final List<String> bodyLocArgs;
+  private final String titleLocKey;
+  private final List<String> titleLocArgs;
+
+  public static final class Builder {
+
+    // required parameters
     private final String icon;
-    private final String sound;
-    private final Integer badge;
-    private final String tag;
-    private final String color;
-    private final String clickAction;
-    private final String bodyLocKey;
-    private final List<String> bodyLocArgs;
-    private final String titleLocKey;
-    private final List<String> titleLocArgs;
 
-    public static final class Builder {
+    // optional parameters
+    private String title;
+    private String body;
+    private String sound;
+    private Integer badge;
+    private String tag;
+    private String color;
+    private String clickAction;
+    private String bodyLocKey;
+    private List<String> bodyLocArgs;
+    private String titleLocKey;
+    private List<String> titleLocArgs;
 
-        // required parameters
-        private final String icon;
-
-        // optional parameters
-        private String title;
-        private String body;
-        private String sound;
-        private Integer badge;
-        private String tag;
-        private String color;
-        private String clickAction;
-        private String bodyLocKey;
-        private List<String> bodyLocArgs;
-        private String titleLocKey;
-        private List<String> titleLocArgs;
-
-        public Builder(String icon) {
-            this.icon = icon;
-            this.sound = "default"; // the only currently supported value
-        }
-
-        /**
-         * Sets the title property.
-         */
-        public Builder title(String value) {
-            title = value;
-            return this;
-        }
-
-        /**
-         * Sets the body property.
-         */
-        public Builder body(String value) {
-            body = value;
-            return this;
-        }
-
-        /**
-         * Sets the sound property (default value is {@literal default}).
-         */
-        public Builder sound(String value) {
-            sound = value;
-            return this;
-        }
-
-        /**
-         * Sets the badge property.
-         */
-        public Builder badge(int value) {
-            badge = value;
-            return this;
-        }
-
-        /**
-         * Sets the tag property.
-         */
-        public Builder tag(String value) {
-            tag = value;
-            return this;
-        }
-
-        /**
-         * Sets the color property in {@literal #rrggbb} format.
-         */
-        public Builder color(String value) {
-            color = value;
-            return this;
-        }
-
-        /**
-         * Sets the click action property.
-         */
-        public Builder clickAction(String value) {
-            clickAction = value;
-            return this;
-        }
-
-        /**
-         * Sets the body localization key property.
-         */
-        public Builder bodyLocKey(String value) {
-            bodyLocKey = value;
-            return this;
-        }
-
-        /**
-         * Sets the body localization values property.
-         */
-        public Builder bodyLocArgs(List<String> value) {
-            bodyLocArgs = Collections.unmodifiableList(value);
-            return this;
-        }
-
-        /**
-         * Sets the title localization key property.
-         */
-        public Builder titleLocKey(String value) {
-            titleLocKey = value;
-            return this;
-        }
-
-        /**
-         * Sets the title localization values property.
-         */
-        public Builder titleLocArgs(List<String> value) {
-            titleLocArgs = Collections.unmodifiableList(value);
-            return this;
-        }
-
-        public Notification build() {
-            return new Notification(this);
-        }
-
-    }
-
-    private Notification(Builder builder) {
-        title = builder.title;
-        body = builder.body;
-        icon = builder.icon;
-        sound = builder.sound;
-        badge = builder.badge;
-        tag = builder.tag;
-        color = builder.color;
-        clickAction = builder.clickAction;
-        bodyLocKey = builder.bodyLocKey;
-        bodyLocArgs = builder.bodyLocArgs;
-        titleLocKey = builder.titleLocKey;
-        titleLocArgs = builder.titleLocArgs;
+    public Builder(String icon) {
+      this.icon = icon;
+      this.sound = "default"; // the only currently supported value
     }
 
     /**
-     * Gets the title.
+     * Sets the title property.
      */
-    public String getTitle() {
-        return title;
+    public Builder title(String value) {
+      title = value;
+      return this;
     }
 
     /**
-     * Gets the body.
+     * Sets the body property.
      */
-    public String getBody() {
-        return body;
+    public Builder body(String value) {
+      body = value;
+      return this;
     }
 
     /**
-     * Gets the icon.
+     * Sets the sound property (default value is {@literal default}).
      */
-    public String getIcon() {
-        return icon;
+    public Builder sound(String value) {
+      sound = value;
+      return this;
     }
 
     /**
-     * Gets the sound.
+     * Sets the badge property.
      */
-    public String getSound() {
-        return sound;
+    public Builder badge(int value) {
+      badge = value;
+      return this;
     }
 
     /**
-     * Gets the badge.
+     * Sets the tag property.
      */
-    public Integer getBadge() {
-        return badge;
+    public Builder tag(String value) {
+      tag = value;
+      return this;
     }
 
     /**
-     * Gets the tag.
+     * Sets the color property in {@literal #rrggbb} format.
      */
-    public String getTag() {
-        return tag;
+    public Builder color(String value) {
+      color = value;
+      return this;
     }
 
     /**
-     * Gets the color.
+     * Sets the click action property.
      */
-    public String getColor() {
-        return color;
+    public Builder clickAction(String value) {
+      clickAction = value;
+      return this;
     }
 
     /**
-     * Gets the click action.
+     * Sets the body localization key property.
      */
-    public String getClickAction() {
-        return clickAction;
+    public Builder bodyLocKey(String value) {
+      bodyLocKey = value;
+      return this;
     }
 
     /**
-     * Gets the body localization key.
+     * Sets the body localization values property.
      */
-    public String getBodyLocKey() {
-        return bodyLocKey;
+    public Builder bodyLocArgs(List<String> value) {
+      bodyLocArgs = Collections.unmodifiableList(value);
+      return this;
     }
 
     /**
-     * Gets the body localization values list, which is immutable.
+     * Sets the title localization key property.
      */
-    public List<String> getBodyLocArgs() {
-        return bodyLocArgs;
+    public Builder titleLocKey(String value) {
+      titleLocKey = value;
+      return this;
     }
 
     /**
-     * Gets the title localization key.
+     * Sets the title localization values property.
      */
-    public String getTitleLocKey() {
-        return titleLocKey;
+    public Builder titleLocArgs(List<String> value) {
+      titleLocArgs = Collections.unmodifiableList(value);
+      return this;
     }
 
-    /**
-     * Gets the title localization values list, which is immutable.
-     */
-    public List<String> getTitleLocArgs() {
-        return titleLocArgs;
+    public Notification build() {
+      return new Notification(this);
     }
+  }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder("Notification(");
-        if (title != null) {
-            builder.append("title=").append(title).append(", ");
-        }
-        if (body != null) {
-            builder.append("body=").append(body).append(", ");
-        }
-        if (icon != null) {
-            builder.append("icon=").append(icon).append(", ");
-        }
-        if (sound != null) {
-            builder.append("sound=").append(sound).append(", ");
-        }
-        if (badge != null) {
-            builder.append("badge=").append(badge).append(", ");
-        }
-        if (tag != null) {
-            builder.append("tag=").append(tag).append(", ");
-        }
-        if (color != null) {
-            builder.append("color=").append(color).append(", ");
-        }
-        if (clickAction != null) {
-            builder.append("clickAction=").append(clickAction).append(", ");
-        }
-        if (bodyLocKey != null) {
-            builder.append("bodyLocKey=").append(bodyLocKey).append(", ");
-        }
-        if (bodyLocArgs != null) {
-            builder.append("bodyLocArgs=").append(bodyLocArgs).append(", ");
-        }
-        if (titleLocKey != null) {
-            builder.append("titleLocKey=").append(titleLocKey).append(", ");
-        }
-        if (titleLocArgs != null) {
-            builder.append("titleLocArgs=").append(titleLocArgs).append(", ");
-        }
-        if (builder.charAt(builder.length() - 1) == ' ') {
-            builder.delete(builder.length() - 2, builder.length());
-        }
-        builder.append(")");
-        return builder.toString();
+  private Notification(Builder builder) {
+    title = builder.title;
+    body = builder.body;
+    icon = builder.icon;
+    sound = builder.sound;
+    badge = builder.badge;
+    tag = builder.tag;
+    color = builder.color;
+    clickAction = builder.clickAction;
+    bodyLocKey = builder.bodyLocKey;
+    bodyLocArgs = builder.bodyLocArgs;
+    titleLocKey = builder.titleLocKey;
+    titleLocArgs = builder.titleLocArgs;
+  }
+
+  /**
+   * Gets the title.
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * Gets the body.
+   */
+  public String getBody() {
+    return body;
+  }
+
+  /**
+   * Gets the icon.
+   */
+  public String getIcon() {
+    return icon;
+  }
+
+  /**
+   * Gets the sound.
+   */
+  public String getSound() {
+    return sound;
+  }
+
+  /**
+   * Gets the badge.
+   */
+  public Integer getBadge() {
+    return badge;
+  }
+
+  /**
+   * Gets the tag.
+   */
+  public String getTag() {
+    return tag;
+  }
+
+  /**
+   * Gets the color.
+   */
+  public String getColor() {
+    return color;
+  }
+
+  /**
+   * Gets the click action.
+   */
+  public String getClickAction() {
+    return clickAction;
+  }
+
+  /**
+   * Gets the body localization key.
+   */
+  public String getBodyLocKey() {
+    return bodyLocKey;
+  }
+
+  /**
+   * Gets the body localization values list, which is immutable.
+   */
+  public List<String> getBodyLocArgs() {
+    return bodyLocArgs;
+  }
+
+  /**
+   * Gets the title localization key.
+   */
+  public String getTitleLocKey() {
+    return titleLocKey;
+  }
+
+  /**
+   * Gets the title localization values list, which is immutable.
+   */
+  public List<String> getTitleLocArgs() {
+    return titleLocArgs;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder("Notification(");
+    if (title != null) {
+      builder.append("title=").append(title).append(", ");
     }
-
+    if (body != null) {
+      builder.append("body=").append(body).append(", ");
+    }
+    if (icon != null) {
+      builder.append("icon=").append(icon).append(", ");
+    }
+    if (sound != null) {
+      builder.append("sound=").append(sound).append(", ");
+    }
+    if (badge != null) {
+      builder.append("badge=").append(badge).append(", ");
+    }
+    if (tag != null) {
+      builder.append("tag=").append(tag).append(", ");
+    }
+    if (color != null) {
+      builder.append("color=").append(color).append(", ");
+    }
+    if (clickAction != null) {
+      builder.append("clickAction=").append(clickAction).append(", ");
+    }
+    if (bodyLocKey != null) {
+      builder.append("bodyLocKey=").append(bodyLocKey).append(", ");
+    }
+    if (bodyLocArgs != null) {
+      builder.append("bodyLocArgs=").append(bodyLocArgs).append(", ");
+    }
+    if (titleLocKey != null) {
+      builder.append("titleLocKey=").append(titleLocKey).append(", ");
+    }
+    if (titleLocArgs != null) {
+      builder.append("titleLocArgs=").append(titleLocArgs).append(", ");
+    }
+    if (builder.charAt(builder.length() - 1) == ' ') {
+      builder.delete(builder.length() - 2, builder.length());
+    }
+    builder.append(")");
+    return builder.toString();
+  }
 }

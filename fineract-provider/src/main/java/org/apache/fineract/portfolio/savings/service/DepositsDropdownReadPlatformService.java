@@ -23,16 +23,16 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface DepositsDropdownReadPlatformService {
 
-    // fixed deposit product dropdowns
+  // fixed deposit product dropdowns
 
-    Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions();
+  Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions();
 
-    /*
-     * Collection<EnumOptionData> retrieveDepositTermTypeOptions();
-     *
-     * Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions();
-     *
-     * Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();
-     */
+  /*
+   * Collection<EnumOptionData> retrieveDepositTermTypeOptions();
+   *
+   * Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions();
+   *
+   * Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();
+   */
 
 }

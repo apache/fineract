@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CURRENCY", action = "UPDATE")
 public class UpdateCurrencyCommandHandler implements NewCommandSourceHandler {
 
-    private final CurrencyWritePlatformService writePlatformService;
+  private final CurrencyWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateCurrencyCommandHandler(final CurrencyWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateCurrencyCommandHandler(final CurrencyWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateAllowedCurrencies(command);
-    }
+    return this.writePlatformService.updateAllowedCurrencies(command);
+  }
 }

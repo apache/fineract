@@ -23,6 +23,6 @@ package org.apache.fineract.infrastructure.survey.data;
  */
 public class LikelihoodStatus {
 
-    public final static long  ENABLED = 200;
-    public final static long DISABLED =100;
+  public static final long ENABLED = 200;
+  public static final long DISABLED = 100;
 }

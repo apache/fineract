@@ -59,73 +59,94 @@ import org.springframework.stereotype.Component;
 @Profile("oauth")
 @Scope("singleton")
 @Api(tags = {"Fetch authenticated user details"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Fetch authenticated user details", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Fetch authenticated user details", description = "")})
 public class UserDetailsApiResource {
 
-    private final ResourceServerTokenServices tokenServices;
-    private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
-    private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
-    private final TwoFactorUtils twoFactorUtils;
+  private final ResourceServerTokenServices tokenServices;
+  private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
+  private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
+  private final TwoFactorUtils twoFactorUtils;
 
-    @Autowired
-    public UserDetailsApiResource(@Qualifier("tokenServices") final ResourceServerTokenServices tokenServices,
-            final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext,
-            final TwoFactorUtils twoFactorUtils) {
-        this.tokenServices = tokenServices;
-        this.apiJsonSerializerService = apiJsonSerializerService;
-        this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
-        this.twoFactorUtils = twoFactorUtils;
+  @Autowired
+  public UserDetailsApiResource(
+      @Qualifier("tokenServices") final ResourceServerTokenServices tokenServices,
+      final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
+      final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext,
+      final TwoFactorUtils twoFactorUtils) {
+    this.tokenServices = tokenServices;
+    this.apiJsonSerializerService = apiJsonSerializerService;
+    this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
+    this.twoFactorUtils = twoFactorUtils;
+  }
+
+  @GET
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Fetch authenticated user details\n",
+      notes = "checks the Authentication and returns the set roles and permissions allowed.")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class)
+  })
+  public String fetchAuthenticatedUserData(
+      @QueryParam("access_token") @ApiParam(value = "access_token") final String accessToken) {
+
+    final Authentication authentication = this.tokenServices.loadAuthentication(accessToken);
+    if (authentication.isAuthenticated()) {
+      final AppUser principal = (AppUser) authentication.getPrincipal();
+
+      final Collection<String> permissions = new ArrayList<>();
+      AuthenticatedOauthUserData authenticatedUserData =
+          new AuthenticatedOauthUserData(principal.getUsername(), permissions);
+
+      final Collection<GrantedAuthority> authorities =
+          new ArrayList<>(authentication.getAuthorities());
+      for (final GrantedAuthority grantedAuthority : authorities) {
+        permissions.add(grantedAuthority.getAuthority());
+      }
+
+      final Collection<RoleData> roles = new ArrayList<>();
+      final Set<Role> userRoles = principal.getRoles();
+      for (final Role role : userRoles) {
+        roles.add(role.toData());
+      }
+
+      final Long officeId = principal.getOffice().getId();
+      final String officeName = principal.getOffice().getName();
+
+      final Long staffId = principal.getStaffId();
+      final String staffDisplayName = principal.getStaffDisplayName();
+
+      final EnumOptionData organisationalRole = principal.organisationalRoleData();
+
+      final boolean requireTwoFactorAuth =
+          twoFactorUtils.isTwoFactorAuthEnabled()
+              && !principal.hasSpecificPermissionTo(
+                  TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
+      if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
+        authenticatedUserData =
+            new AuthenticatedOauthUserData(
+                principal.getUsername(), principal.getId(), accessToken, requireTwoFactorAuth);
+      } else {
+
+        authenticatedUserData =
+            new AuthenticatedOauthUserData(
+                principal.getUsername(),
+                officeId,
+                officeName,
+                staffId,
+                staffDisplayName,
+                organisationalRole,
+                roles,
+                permissions,
+                principal.getId(),
+                accessToken,
+                requireTwoFactorAuth);
+      }
+      return this.apiJsonSerializerService.serialize(authenticatedUserData);
     }
-
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Fetch authenticated user details\n", notes = "checks the Authentication and returns the set roles and permissions allowed.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class)})
-    public String fetchAuthenticatedUserData(@QueryParam("access_token") @ApiParam(value = "access_token") final String accessToken) {
-
-        final Authentication authentication = this.tokenServices.loadAuthentication(accessToken);
-        if (authentication.isAuthenticated()) {
-            final AppUser principal = (AppUser) authentication.getPrincipal();
-
-            final Collection<String> permissions = new ArrayList<>();
-            AuthenticatedOauthUserData authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), permissions);
-
-            final Collection<GrantedAuthority> authorities = new ArrayList<>(authentication.getAuthorities());
-            for (final GrantedAuthority grantedAuthority : authorities) {
-                permissions.add(grantedAuthority.getAuthority());
-            }
-
-            final Collection<RoleData> roles = new ArrayList<>();
-            final Set<Role> userRoles = principal.getRoles();
-            for (final Role role : userRoles) {
-                roles.add(role.toData());
-            }
-
-            final Long officeId = principal.getOffice().getId();
-            final String officeName = principal.getOffice().getName();
-
-            final Long staffId = principal.getStaffId();
-            final String staffDisplayName = principal.getStaffDisplayName();
-
-            final EnumOptionData organisationalRole = principal.organisationalRoleData();
-
-            final boolean requireTwoFactorAuth = twoFactorUtils.isTwoFactorAuthEnabled()
-                    && !principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
-            if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(),
-                        principal.getId(), accessToken, requireTwoFactorAuth);
-            } else {
-
-                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(),
-                        officeId, officeName, staffId, staffDisplayName, organisationalRole, roles,
-                        permissions, principal.getId(), accessToken, requireTwoFactorAuth);
-            }
-            return this.apiJsonSerializerService.serialize(authenticatedUserData);
-        }
-        return null;
-
-    }
+    return null;
+  }
 }

@@ -40,40 +40,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class PasswordPreferencesDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID));
+  private final FromJsonHelper fromApiJsonHelper;
+  private static final Set<String> REQUEST_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID));
 
-    @Autowired
-    public PasswordPreferencesDataValidator(FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public PasswordPreferencesDataValidator(FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateForUpdate(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(PasswordPreferencesApiConstants.RESOURCE_NAME);
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(PasswordPreferencesApiConstants.RESOURCE_NAME);
+    final Long repaymentRescheduleType =
+        this.fromApiJsonHelper.extractLongNamed(
+            PasswordPreferencesApiConstants.VALIDATION_POLICY_ID, element);
+    baseDataValidator
+        .reset()
+        .parameter(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID)
+        .value(repaymentRescheduleType)
+        .notNull()
+        .integerGreaterThanZero();
 
-        final Long repaymentRescheduleType = this.fromApiJsonHelper.extractLongNamed(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID,
-                element);
-        baseDataValidator.reset().parameter(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID).value(repaymentRescheduleType).notNull()
-                .integerGreaterThanZero();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      //
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
-
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            //
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-    }
+  }
 }

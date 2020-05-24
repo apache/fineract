@@ -19,66 +19,69 @@
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
 public enum PurchasedSharesStatusType {
-    INVALID(0, "purchasedSharesStatusType.invalid"), APPLIED(100, "purchasedSharesStatusType.applied"), APPROVED(300,
-            "purchasedSharesStatusType.approved"), REJECTED(400, "purchasedSharesStatusType.rejected"), PURCHASED(500,
-            "purchasedSharesType.purchased"), REDEEMED(600, "purchasedSharesType.redeemed"),
-            CHARGE_PAYMENT(700, "charge.payment");
+  INVALID(0, "purchasedSharesStatusType.invalid"),
+  APPLIED(100, "purchasedSharesStatusType.applied"),
+  APPROVED(300, "purchasedSharesStatusType.approved"),
+  REJECTED(400, "purchasedSharesStatusType.rejected"),
+  PURCHASED(500, "purchasedSharesType.purchased"),
+  REDEEMED(600, "purchasedSharesType.redeemed"),
+  CHARGE_PAYMENT(700, "charge.payment");
 
-    private final Integer value;
-    private final String code;
+  private final Integer value;
+  private final String code;
 
-    private PurchasedSharesStatusType(final Integer value, final String code) {
-        this.value = value;
-        this.code = code;
+  private PurchasedSharesStatusType(final Integer value, final String code) {
+    this.value = value;
+    this.code = code;
+  }
+
+  public static PurchasedSharesStatusType fromInt(final Integer type) {
+
+    PurchasedSharesStatusType enumeration = PurchasedSharesStatusType.INVALID;
+    switch (type) {
+      case 100:
+        enumeration = PurchasedSharesStatusType.APPLIED;
+        break;
+      case 300:
+        enumeration = PurchasedSharesStatusType.APPROVED;
+        break;
+      case 400:
+        enumeration = PurchasedSharesStatusType.REJECTED;
+        break;
+      case 500:
+        enumeration = PurchasedSharesStatusType.PURCHASED;
+        break;
+      case 600:
+        enumeration = PurchasedSharesStatusType.REDEEMED;
+        break;
+      case 700:
+        enumeration = PurchasedSharesStatusType.CHARGE_PAYMENT;
+        break;
     }
+    return enumeration;
+  }
 
-    public static PurchasedSharesStatusType fromInt(final Integer type) {
+  public Integer getValue() {
+    return this.value;
+  }
 
-        PurchasedSharesStatusType enumeration = PurchasedSharesStatusType.INVALID;
-        switch (type) {
-            case 100:
-                enumeration = PurchasedSharesStatusType.APPLIED;
-            break;
-            case 300:
-                enumeration = PurchasedSharesStatusType.APPROVED;
-            break;
-            case 400:
-                enumeration = PurchasedSharesStatusType.REJECTED;
-            break;
-            case 500:
-                enumeration = PurchasedSharesStatusType.PURCHASED;
-            break;
-            case 600:
-                enumeration = PurchasedSharesStatusType.REDEEMED;
-            break;
-            case 700:
-                enumeration = PurchasedSharesStatusType.CHARGE_PAYMENT;
-                break ;
-        }
-        return enumeration;
-    }
+  public String getCode() {
+    return this.code;
+  }
 
-    public Integer getValue() {
-        return this.value;
-    }
+  public boolean isApproved() {
+    return this.value.equals(PurchasedSharesStatusType.APPROVED.getValue());
+  }
 
-    public String getCode() {
-        return this.code;
-    }
+  public boolean isRejected() {
+    return this.value.equals(PurchasedSharesStatusType.REJECTED.getValue());
+  }
 
-    public boolean isApproved() {
-        return this.value.equals(PurchasedSharesStatusType.APPROVED.getValue());
-    }
+  public boolean isPurchased() {
+    return this.value.equals(PurchasedSharesStatusType.PURCHASED.getValue());
+  }
 
-    public boolean isRejected() {
-        return this.value.equals(PurchasedSharesStatusType.REJECTED.getValue());
-    }
-
-    public boolean isPurchased() {
-        return this.value.equals(PurchasedSharesStatusType.PURCHASED.getValue());
-    }
-
-    public boolean isChargePayment() {
-        return this.value.equals(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue());
-    }
+  public boolean isChargePayment() {
+    return this.value.equals(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue());
+  }
 }

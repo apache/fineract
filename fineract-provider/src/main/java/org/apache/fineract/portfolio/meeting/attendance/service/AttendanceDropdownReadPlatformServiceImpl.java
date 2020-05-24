@@ -24,11 +24,11 @@ import org.apache.fineract.portfolio.meeting.attendance.AttendanceType;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AttendanceDropdownReadPlatformServiceImpl implements AttendanceDropdownReadPlatformService {
+public class AttendanceDropdownReadPlatformServiceImpl
+    implements AttendanceDropdownReadPlatformService {
 
-    @Override
-    public List<EnumOptionData> retrieveAttendanceTypeOptions() {
-        return AttendanceEnumerations.attendanceType(AttendanceType.values());
-    }
-
+  @Override
+  public List<EnumOptionData> retrieveAttendanceTypeOptions() {
+    return AttendanceEnumerations.attendanceType(AttendanceType.values());
+  }
 }

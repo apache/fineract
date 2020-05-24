@@ -25,11 +25,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SpringEventPublisher {
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+  @Autowired private ApplicationEventPublisher applicationEventPublisher;
 
-    public void broadcastNotification(final NotificationData notificationData) {
-        SpringEvent event = new SpringEvent(this, notificationData);
-        applicationEventPublisher.publishEvent(event);
-    }
+  public void broadcastNotification(final NotificationData notificationData) {
+    SpringEvent event = new SpringEvent(this, notificationData);
+    applicationEventPublisher.publishEvent(event);
+  }
 }

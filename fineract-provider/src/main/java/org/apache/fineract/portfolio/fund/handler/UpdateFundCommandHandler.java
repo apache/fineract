@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "FUND", action = "UPDATE")
 public class UpdateFundCommandHandler implements NewCommandSourceHandler {
 
-    private final FundWritePlatformService writePlatformService;
+  private final FundWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateFundCommandHandler(final FundWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateFundCommandHandler(final FundWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateFund(command.entityId(), command);
-    }
+    return this.writePlatformService.updateFund(command.entityId(), command);
+  }
 }

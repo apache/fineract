@@ -35,29 +35,28 @@ import org.springframework.context.annotation.Configuration;
 @EnableCaching
 public class PlatformCacheConfiguration implements CachingConfigurer {
 
-    @Autowired
-    private RuntimeDelegatingCacheManager delegatingCacheManager;
+  @Autowired private RuntimeDelegatingCacheManager delegatingCacheManager;
 
-    @Bean
-    @Override
-    public CacheManager cacheManager() {
-        return this.delegatingCacheManager;
-    }
+  @Bean
+  @Override
+  public CacheManager cacheManager() {
+    return this.delegatingCacheManager;
+  }
 
-    @Override
-    public CacheResolver cacheResolver() {
-        //TODO https://issues.apache.org/jira/browse/FINERACT-705
-        return null;
-    }
+  @Override
+  public CacheResolver cacheResolver() {
+    // TODO https://issues.apache.org/jira/browse/FINERACT-705
+    return null;
+  }
 
-    @Override
-    public KeyGenerator keyGenerator() {
-        return new SimpleKeyGenerator();
-    }
+  @Override
+  public KeyGenerator keyGenerator() {
+    return new SimpleKeyGenerator();
+  }
 
-    @Override
-    public CacheErrorHandler errorHandler() {
-        //TODO https://issues.apache.org/jira/browse/FINERACT-705
-        return null;
-    }
+  @Override
+  public CacheErrorHandler errorHandler() {
+    // TODO https://issues.apache.org/jira/browse/FINERACT-705
+    return null;
+  }
 }

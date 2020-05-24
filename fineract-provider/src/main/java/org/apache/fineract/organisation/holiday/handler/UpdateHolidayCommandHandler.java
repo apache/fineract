@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "HOLIDAY", action = "UPDATE")
 public class UpdateHolidayCommandHandler implements NewCommandSourceHandler {
 
-    private final HolidayWritePlatformService holidayWritePlatformService;
+  private final HolidayWritePlatformService holidayWritePlatformService;
 
-    @Autowired
-    public UpdateHolidayCommandHandler(final HolidayWritePlatformService holidayWritePlatformService) {
-        this.holidayWritePlatformService = holidayWritePlatformService;
-    }
+  @Autowired
+  public UpdateHolidayCommandHandler(
+      final HolidayWritePlatformService holidayWritePlatformService) {
+    this.holidayWritePlatformService = holidayWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.holidayWritePlatformService.updateHoliday(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.holidayWritePlatformService.updateHoliday(command);
+  }
 }

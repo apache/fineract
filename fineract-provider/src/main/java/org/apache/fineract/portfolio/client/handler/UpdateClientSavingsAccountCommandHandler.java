@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "UPDATESAVINGSACCOUNT")
 public class UpdateClientSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientWritePlatformService clientWritePlatformService;
+  private final ClientWritePlatformService clientWritePlatformService;
 
-    @Autowired
-    public UpdateClientSavingsAccountCommandHandler(final ClientWritePlatformService clientWritePlatformService){
-        this.clientWritePlatformService = clientWritePlatformService;
-    }
+  @Autowired
+  public UpdateClientSavingsAccountCommandHandler(
+      final ClientWritePlatformService clientWritePlatformService) {
+    this.clientWritePlatformService = clientWritePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.clientWritePlatformService.updateDefaultSavingsAccount(command.entityId(), command);
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.clientWritePlatformService.updateDefaultSavingsAccount(command.entityId(), command);
+  }
 }

@@ -26,5 +26,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
  */
 public interface WriteLikelihoodService {
 
-    CommandProcessingResult update(Long likelihoodId, JsonCommand command);
+  CommandProcessingResult update(Long likelihoodId, JsonCommand command);
 }

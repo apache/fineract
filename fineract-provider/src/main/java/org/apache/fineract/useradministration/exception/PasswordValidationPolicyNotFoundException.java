@@ -23,13 +23,19 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 /**
  * A {@link RuntimeException} thrown when role resources are not found.
  */
-public class PasswordValidationPolicyNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class PasswordValidationPolicyNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public PasswordValidationPolicyNotFoundException(final Long id) {
-        super("error.msg.password.validation.policy.id.invalid", "Password Validation Policy with identifier " + id + " does not exist", id);
-    }
+  public PasswordValidationPolicyNotFoundException(final Long id) {
+    super(
+        "error.msg.password.validation.policy.id.invalid",
+        "Password Validation Policy with identifier " + id + " does not exist",
+        id);
+  }
 
-    public PasswordValidationPolicyNotFoundException() {
-        super("error.msg.password.validation.policy.not.found", "An active password validation policy was not found");
-    }
+  public PasswordValidationPolicyNotFoundException() {
+    super(
+        "error.msg.password.validation.policy.not.found",
+        "An active password validation policy was not found");
+  }
 }

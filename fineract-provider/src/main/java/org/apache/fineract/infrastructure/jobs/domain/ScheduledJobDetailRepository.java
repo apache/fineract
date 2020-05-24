@@ -25,16 +25,16 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ScheduledJobDetailRepository extends JpaRepository<ScheduledJobDetail, Long>, JpaSpecificationExecutor<ScheduledJobDetail> {
+public interface ScheduledJobDetailRepository
+    extends JpaRepository<ScheduledJobDetail, Long>, JpaSpecificationExecutor<ScheduledJobDetail> {
 
-    @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.jobKey = :jobKey")
-    ScheduledJobDetail findByJobKey(@Param("jobKey") String jobKey);
+  @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.jobKey = :jobKey")
+  ScheduledJobDetail findByJobKey(@Param("jobKey") String jobKey);
 
-    @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.id=:jobId")
-    ScheduledJobDetail findByJobId(@Param("jobId") Long jobId);
+  @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.id=:jobId")
+  ScheduledJobDetail findByJobId(@Param("jobId") Long jobId);
 
-    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
-    @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.jobKey = :jobKey")
-    ScheduledJobDetail findByJobKeyWithLock(@Param("jobKey") String jobKey);
-
+  @Lock(value = LockModeType.PESSIMISTIC_WRITE)
+  @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.jobKey = :jobKey")
+  ScheduledJobDetail findByJobKeyWithLock(@Param("jobKey") String jobKey);
 }

@@ -40,75 +40,92 @@ import org.springframework.stereotype.Service;
 @Service
 public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final ContentRepositoryFactory contentRepositoryFactory;
-    private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final StaffRepositoryWrapper staffRepositoryWrapper;
+  private final JdbcTemplate jdbcTemplate;
+  private final ContentRepositoryFactory contentRepositoryFactory;
+  private final ClientRepositoryWrapper clientRepositoryWrapper;
+  private final StaffRepositoryWrapper staffRepositoryWrapper;
 
-    @Autowired
-    public ImageReadPlatformServiceImpl(final RoutingDataSource dataSource, final ContentRepositoryFactory documentStoreFactory,
-            final ClientRepositoryWrapper clientRepositoryWrapper, StaffRepositoryWrapper staffRepositoryWrapper) {
-        this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.contentRepositoryFactory = documentStoreFactory;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
+  @Autowired
+  public ImageReadPlatformServiceImpl(
+      final RoutingDataSource dataSource,
+      final ContentRepositoryFactory documentStoreFactory,
+      final ClientRepositoryWrapper clientRepositoryWrapper,
+      StaffRepositoryWrapper staffRepositoryWrapper) {
+    this.staffRepositoryWrapper = staffRepositoryWrapper;
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.contentRepositoryFactory = documentStoreFactory;
+    this.clientRepositoryWrapper = clientRepositoryWrapper;
+  }
+
+  private static final class ImageMapper implements RowMapper<ImageData> {
+
+    private final String entityDisplayName;
+
+    public ImageMapper(final String entityDisplayName) {
+      this.entityDisplayName = entityDisplayName;
     }
 
-    private static final class ImageMapper implements RowMapper<ImageData> {
-
-        private final String entityDisplayName;
-
-        public ImageMapper(final String entityDisplayName) {
-            this.entityDisplayName = entityDisplayName;
-        }
-
-        public String schema(String entityType) {
-            StringBuilder builder = new StringBuilder("image.id as id, image.location as location, image.storage_type_enum as storageType ");
-            if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
-                builder.append(" from m_image image , m_client client " + " where client.image_id = image.id and client.id=?");
-            } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
-                builder.append("from m_image image , m_staff staff " + " where staff.image_id = image.id and staff.id=?");
-            }
-            return builder.toString();
-        }
-
-        @Override
-        public ImageData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String location = rs.getString("location");
-            final Integer storageType = JdbcSupport.getInteger(rs, "storageType");
-            return new ImageData(id, location, storageType, this.entityDisplayName);
-        }
+    public String schema(String entityType) {
+      StringBuilder builder =
+          new StringBuilder(
+              "image.id as id, image.location as location, image.storage_type_enum as"
+                  + " storageType ");
+      if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
+        builder.append(
+            " from m_image image , m_client client "
+                + " where client.image_id = image.id and client.id=?");
+      } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
+        builder.append(
+            "from m_image image , m_staff staff "
+                + " where staff.image_id = image.id and staff.id=?");
+      }
+      return builder.toString();
     }
 
     @Override
-    public ImageData retrieveImage(String entityType, final Long entityId) {
-        try {
-            Object owner;
-            String displayName = null;
-            if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
-                owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-                displayName = ((Client) owner).getDisplayName();
-            } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
-                owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-                displayName = ((Staff) owner).displayName();
-            }
-            final ImageMapper imageMapper = new ImageMapper(displayName);
+    public ImageData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        throws SQLException {
 
-            final String sql = "select " + imageMapper.schema(entityType);
-
-            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, new Object[] { entityId });
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
-            final ImageData result = contentRepository.fetchImage(imageData);
-
-          //Once we read content EofSensorInputStream, the wrappedStream object is becoming null. So further image source is becoming null
-            //For Amazon S3. If file is not present, already S3ContentRepository would have thrown this exception.
-            if (!result.available()) { throw new ImageNotFoundException(entityType, entityId); }
-
-            return result;
-        } catch (final EmptyResultDataAccessException e) {
-            throw new ImageNotFoundException("clients", entityId);
-        }
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final String location = rs.getString("location");
+      final Integer storageType = JdbcSupport.getInteger(rs, "storageType");
+      return new ImageData(id, location, storageType, this.entityDisplayName);
     }
+  }
+
+  @Override
+  public ImageData retrieveImage(String entityType, final Long entityId) {
+    try {
+      Object owner;
+      String displayName = null;
+      if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
+        owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
+        displayName = ((Client) owner).getDisplayName();
+      } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
+        owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
+        displayName = ((Staff) owner).displayName();
+      }
+      final ImageMapper imageMapper = new ImageMapper(displayName);
+
+      final String sql = "select " + imageMapper.schema(entityType);
+
+      final ImageData imageData =
+          this.jdbcTemplate.queryForObject(sql, imageMapper, new Object[] {entityId});
+      final ContentRepository contentRepository =
+          this.contentRepositoryFactory.getRepository(imageData.storageType());
+      final ImageData result = contentRepository.fetchImage(imageData);
+
+      // Once we read content EofSensorInputStream, the wrappedStream object is becoming null. So
+      // further image source is becoming null
+      // For Amazon S3. If file is not present, already S3ContentRepository would have thrown this
+      // exception.
+      if (!result.available()) {
+        throw new ImageNotFoundException(entityType, entityId);
+      }
+
+      return result;
+    } catch (final EmptyResultDataAccessException e) {
+      throw new ImageNotFoundException("clients", entityId);
+    }
+  }
 }

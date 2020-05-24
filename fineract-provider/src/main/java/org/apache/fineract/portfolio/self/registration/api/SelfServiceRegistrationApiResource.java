@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.self.registration.api;
 
 import io.swagger.annotations.Api;
@@ -39,35 +38,36 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Self Service Registration"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Self Service Registration", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Self Service Registration", description = "")})
 public class SelfServiceRegistrationApiResource {
 
-    private final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService;
-    private final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer;
+  private final SelfServiceRegistrationWritePlatformService
+      selfServiceRegistrationWritePlatformService;
+  private final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer;
 
-    @Autowired
-    public SelfServiceRegistrationApiResource(
-            final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService,
-            final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer) {
-        this.selfServiceRegistrationWritePlatformService = selfServiceRegistrationWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-    }
+  @Autowired
+  public SelfServiceRegistrationApiResource(
+      final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService,
+      final DefaultToApiJsonSerializer<AppUser> toApiJsonSerializer) {
+    this.selfServiceRegistrationWritePlatformService = selfServiceRegistrationWritePlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+  }
 
-    @POST
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createSelfServiceRegistrationRequest(final String apiRequestBodyAsJson) {
-        this.selfServiceRegistrationWritePlatformService.createRegistrationRequest(apiRequestBodyAsJson);
-        return SelfServiceApiConstants.createRequestSuccessMessage;
-    }
+  @POST
+  @Produces({MediaType.APPLICATION_JSON})
+  public String createSelfServiceRegistrationRequest(final String apiRequestBodyAsJson) {
+    this.selfServiceRegistrationWritePlatformService.createRegistrationRequest(
+        apiRequestBodyAsJson);
+    return SelfServiceApiConstants.createRequestSuccessMessage;
+  }
 
-    @POST
-    @Path("user")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createSelfServiceUser(final String apiRequestBodyAsJson) {
-        AppUser user = this.selfServiceRegistrationWritePlatformService.createUser(apiRequestBodyAsJson);
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(user.getId(), null));
-    }
-
+  @POST
+  @Path("user")
+  @Produces({MediaType.APPLICATION_JSON})
+  public String createSelfServiceUser(final String apiRequestBodyAsJson) {
+    AppUser user =
+        this.selfServiceRegistrationWritePlatformService.createUser(apiRequestBodyAsJson);
+    return this.toApiJsonSerializer.serialize(
+        CommandProcessingResult.resourceResult(user.getId(), null));
+  }
 }

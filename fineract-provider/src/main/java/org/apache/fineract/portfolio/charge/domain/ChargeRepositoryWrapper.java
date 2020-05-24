@@ -38,19 +38,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChargeRepositoryWrapper {
 
-    private final ChargeRepository repository;
+  private final ChargeRepository repository;
 
-    @Autowired
-    public ChargeRepositoryWrapper(final ChargeRepository repository) {
-        this.repository = repository;
+  @Autowired
+  public ChargeRepositoryWrapper(final ChargeRepository repository) {
+    this.repository = repository;
+  }
+
+  public Charge findOneWithNotFoundDetection(final Long id) {
+
+    final Charge chargeDefinition =
+        this.repository.findById(id).orElseThrow(() -> new ChargeNotFoundException(id));
+    if (chargeDefinition.isDeleted()) {
+      throw new ChargeNotFoundException(id);
+    }
+    if (!chargeDefinition.isActive()) {
+      throw new ChargeIsNotActiveException(id, chargeDefinition.getName());
     }
 
-    public Charge findOneWithNotFoundDetection(final Long id) {
-
-        final Charge chargeDefinition = this.repository.findById(id).orElseThrow(() -> new ChargeNotFoundException(id));
-        if (chargeDefinition.isDeleted()) { throw new ChargeNotFoundException(id); }
-        if (!chargeDefinition.isActive()) { throw new ChargeIsNotActiveException(id, chargeDefinition.getName()); }
-
-        return chargeDefinition;
-    }
+    return chargeDefinition;
+  }
 }

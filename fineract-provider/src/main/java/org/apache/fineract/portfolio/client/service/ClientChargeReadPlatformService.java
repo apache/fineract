@@ -24,8 +24,8 @@ import org.apache.fineract.portfolio.client.data.ClientChargeData;
 
 public interface ClientChargeReadPlatformService {
 
-    Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean pendingPayment, SearchParameters parameters);
+  Page<ClientChargeData> retrieveClientCharges(
+      Long clientId, String status, Boolean pendingPayment, SearchParameters parameters);
 
-    ClientChargeData retrieveClientCharge(Long clientId, Long clientChargeId);
-
+  ClientChargeData retrieveClientCharge(Long clientId, Long clientChargeId);
 }

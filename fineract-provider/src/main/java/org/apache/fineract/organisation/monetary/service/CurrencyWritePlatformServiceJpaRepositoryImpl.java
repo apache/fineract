@@ -44,70 +44,78 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWritePlatformService {
 
-    private final PlatformSecurityContext context;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-    private final OrganisationCurrencyRepository organisationCurrencyRepository;
-    private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final LoanProductReadPlatformService loanProductService;
-    private final SavingsProductReadPlatformService savingsProductService;
-    private final ChargeReadPlatformService chargeService;
+  private final PlatformSecurityContext context;
+  private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
+  private final OrganisationCurrencyRepository organisationCurrencyRepository;
+  private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+  private final LoanProductReadPlatformService loanProductService;
+  private final SavingsProductReadPlatformService savingsProductService;
+  private final ChargeReadPlatformService chargeService;
 
-    @Autowired
-    public CurrencyWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final OrganisationCurrencyRepository organisationCurrencyRepository, final LoanProductReadPlatformService loanProductService,
-            final SavingsProductReadPlatformService savingsProductService, final ChargeReadPlatformService chargeService) {
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.organisationCurrencyRepository = organisationCurrencyRepository;
-        this.loanProductService = loanProductService;
-        this.savingsProductService = savingsProductService;
-        this.chargeService = chargeService;
+  @Autowired
+  public CurrencyWritePlatformServiceJpaRepositoryImpl(
+      final PlatformSecurityContext context,
+      final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+      final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+      final OrganisationCurrencyRepository organisationCurrencyRepository,
+      final LoanProductReadPlatformService loanProductService,
+      final SavingsProductReadPlatformService savingsProductService,
+      final ChargeReadPlatformService chargeService) {
+    this.context = context;
+    this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+    this.applicationCurrencyRepository = applicationCurrencyRepository;
+    this.organisationCurrencyRepository = organisationCurrencyRepository;
+    this.loanProductService = loanProductService;
+    this.savingsProductService = savingsProductService;
+    this.chargeService = chargeService;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult updateAllowedCurrencies(final JsonCommand command) {
+
+    this.context.authenticatedUser();
+
+    this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+    final String[] currencies = command.arrayValueOfParameterNamed("currencies");
+
+    final Map<String, Object> changes = new LinkedHashMap<>();
+    final List<String> allowedCurrencyCodes = new ArrayList<>();
+    final Set<OrganisationCurrency> allowedCurrencies = new HashSet<>();
+    for (final String currencyCode : currencies) {
+
+      final ApplicationCurrency currency =
+          this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
+
+      final OrganisationCurrency allowedCurrency = currency.toOrganisationCurrency();
+
+      allowedCurrencyCodes.add(currencyCode);
+      allowedCurrencies.add(allowedCurrency);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult updateAllowedCurrencies(final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
-        final String[] currencies = command.arrayValueOfParameterNamed("currencies");
-
-        final Map<String, Object> changes = new LinkedHashMap<>();
-        final List<String> allowedCurrencyCodes = new ArrayList<>();
-        final Set<OrganisationCurrency> allowedCurrencies = new HashSet<>();
-        for (final String currencyCode : currencies) {
-
-            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
-
-            final OrganisationCurrency allowedCurrency = currency.toOrganisationCurrency();
-
-            allowedCurrencyCodes.add(currencyCode);
-            allowedCurrencies.add(allowedCurrency);
+    for (OrganisationCurrency priorCurrency : this.organisationCurrencyRepository.findAll()) {
+      if (!allowedCurrencyCodes.contains(priorCurrency.getCode())) {
+        // Check if it's safe to remove this currency.
+        if (!loanProductService
+                .retrieveAllLoanProductsForCurrency(priorCurrency.getCode())
+                .isEmpty()
+            || !savingsProductService.retrieveAllForCurrency(priorCurrency.getCode()).isEmpty()
+            || !chargeService.retrieveAllChargesForCurrency(priorCurrency.getCode()).isEmpty()) {
+          throw new CurrencyInUseException(priorCurrency.getCode());
         }
-
-        for (OrganisationCurrency priorCurrency : this.organisationCurrencyRepository.findAll()) {
-            if (!allowedCurrencyCodes.contains(priorCurrency.getCode())) {
-                // Check if it's safe to remove this currency.
-                if (!loanProductService.retrieveAllLoanProductsForCurrency(priorCurrency.getCode()).isEmpty()
-                        || !savingsProductService.retrieveAllForCurrency(priorCurrency.getCode()).isEmpty()
-                        || !chargeService.retrieveAllChargesForCurrency(priorCurrency.getCode()).isEmpty()) { throw new CurrencyInUseException(
-                        priorCurrency.getCode()); }
-            }
-        }
-
-        changes.put("currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
-
-        this.organisationCurrencyRepository.deleteAll();
-        this.organisationCurrencyRepository.saveAll(allowedCurrencies);
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .with(changes) //
-                .build();
+      }
     }
+
+    changes.put(
+        "currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
+
+    this.organisationCurrencyRepository.deleteAll();
+    this.organisationCurrencyRepository.saveAll(allowedCurrencies);
+
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .with(changes) //
+        .build();
+  }
 }

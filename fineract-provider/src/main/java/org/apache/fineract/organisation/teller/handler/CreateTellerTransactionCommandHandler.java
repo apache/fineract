@@ -26,16 +26,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class CreateTellerTransactionCommandHandler implements NewCommandSourceHandler {
 
-    private final TellerTransactionWritePlatformService writePlatformService;
+  private final TellerTransactionWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateTellerTransactionCommandHandler(final TellerTransactionWritePlatformService writePlatformService) {
-        super();
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateTellerTransactionCommandHandler(
+      final TellerTransactionWritePlatformService writePlatformService) {
+    super();
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.createTellerTransaction(command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.createTellerTransaction(command);
+  }
 }

@@ -34,47 +34,52 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 @Table(name = "c_external_service_properties")
 public class ExternalServicesProperties {
 
-    @EmbeddedId
-    ExternalServicePropertiesPK externalServicePropertiesPK;
+  @EmbeddedId ExternalServicePropertiesPK externalServicePropertiesPK;
 
-    @Column(name = "value", length = 250)
-    private String value;
+  @Column(name = "value", length = 250)
+  private String value;
 
-    protected ExternalServicesProperties() {
+  protected ExternalServicesProperties() {}
 
+  private ExternalServicesProperties(
+      final ExternalServicePropertiesPK externalServicePropertiesPK, final String value) {
+    this.externalServicePropertiesPK = externalServicePropertiesPK;
+
+    this.value = value;
+  }
+
+  public static ExternalServicesProperties fromJson(
+      final ExternalService externalService, final JsonCommand command) {
+    final String name =
+        command.stringValueOfParameterNamed(
+            ExternalservicePropertiesJSONinputParams.NAME.getValue());
+    final String value =
+        command.stringValueOfParameterNamed(
+            ExternalservicePropertiesJSONinputParams.VALUE.getValue());
+    return new ExternalServicesProperties(
+        new ExternalServicePropertiesPK(externalService.getId(), name), value);
+  }
+
+  public Map<String, Object> update(final JsonCommand command, String paramName) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
+
+    final String valueParamName = ExternalservicePropertiesJSONinputParams.VALUE.getValue();
+    if (command.isChangeInStringParameterNamed(paramName, this.value)) {
+      final String newValue = command.stringValueOfParameterNamed(paramName);
+      if (paramName.equals(SMTPJSONinputParams.PASSWORD.getValue()) && newValue.equals("XXXX")) {
+        // If Param Name is Password and ParamValue is XXXX that means
+        // the password has not been changed.
+      } else {
+        actualChanges.put(valueParamName, newValue);
+      }
+      this.value = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    private ExternalServicesProperties(final ExternalServicePropertiesPK externalServicePropertiesPK, final String value) {
-        this.externalServicePropertiesPK = externalServicePropertiesPK;
+    return actualChanges;
+  }
 
-        this.value = value;
-
-    }
-    public static ExternalServicesProperties fromJson(final ExternalService externalService, final JsonCommand command) {
-        final String name = command.stringValueOfParameterNamed(ExternalservicePropertiesJSONinputParams.NAME.getValue());
-        final String value = command.stringValueOfParameterNamed(ExternalservicePropertiesJSONinputParams.VALUE.getValue());
-        return new ExternalServicesProperties(new ExternalServicePropertiesPK(externalService.getId(), name), value);
-    }
-
-    public Map<String, Object> update(final JsonCommand command, String paramName) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
-
-        final String valueParamName = ExternalservicePropertiesJSONinputParams.VALUE.getValue();
-        if (command.isChangeInStringParameterNamed(paramName, this.value)) {
-            final String newValue = command.stringValueOfParameterNamed(paramName);
-            if (paramName.equals(SMTPJSONinputParams.PASSWORD.getValue()) && newValue.equals("XXXX")) {
-                // If Param Name is Password and ParamValue is XXXX that means
-                // the password has not been changed.
-            } else {
-                actualChanges.put(valueParamName, newValue);
-            }
-            this.value = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        return actualChanges;
-    }
-
-    public ExternalServicesPropertiesData toData() {
-        return new ExternalServicesPropertiesData(this.externalServicePropertiesPK.getName(), this.value);
-    }
+  public ExternalServicesPropertiesData toData() {
+    return new ExternalServicesPropertiesData(
+        this.externalServicePropertiesPK.getName(), this.value);
+  }
 }

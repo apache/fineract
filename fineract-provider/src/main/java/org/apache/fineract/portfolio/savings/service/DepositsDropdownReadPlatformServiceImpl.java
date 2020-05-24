@@ -24,28 +24,30 @@ import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DepositsDropdownReadPlatformServiceImpl implements DepositsDropdownReadPlatformService {
+public class DepositsDropdownReadPlatformServiceImpl
+    implements DepositsDropdownReadPlatformService {
 
-    @Override
-    public Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions() {
-        return SavingsEnumerations.preClosurePenaltyInterestOnType(PreClosurePenalInterestOnType.values());
-    }
+  @Override
+  public Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions() {
+    return SavingsEnumerations.preClosurePenaltyInterestOnType(
+        PreClosurePenalInterestOnType.values());
+  }
 
-    /*
-     * @Override public Collection<EnumOptionData>
-     * retrieveDepositTermTypeOptions() { return
-     * SavingsEnumerations.recurringDepositFrequencyType
-     * (SavingsPeriodFrequencyType.values()); }
-     *
-     * @Override public Collection<EnumOptionData>
-     * retrieveDepositPeriodFrequencyOptions() { return
-     * SavingsEnumerations.depositPeriodFrequency
-     * (SavingsPeriodFrequencyType.values()); }
-     *
-     * @Override public Collection<EnumOptionData>
-     * retrieveInMultiplesOfDepositTermTypeOptions() { return
-     * SavingsEnumerations
-     * .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
-     */
+  /*
+   * @Override public Collection<EnumOptionData>
+   * retrieveDepositTermTypeOptions() { return
+   * SavingsEnumerations.recurringDepositFrequencyType
+   * (SavingsPeriodFrequencyType.values()); }
+   *
+   * @Override public Collection<EnumOptionData>
+   * retrieveDepositPeriodFrequencyOptions() { return
+   * SavingsEnumerations.depositPeriodFrequency
+   * (SavingsPeriodFrequencyType.values()); }
+   *
+   * @Override public Collection<EnumOptionData>
+   * retrieveInMultiplesOfDepositTermTypeOptions() { return
+   * SavingsEnumerations
+   * .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
+   */
 
 }

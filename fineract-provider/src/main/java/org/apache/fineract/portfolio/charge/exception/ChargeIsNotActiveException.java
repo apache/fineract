@@ -25,7 +25,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class ChargeIsNotActiveException extends AbstractPlatformDomainRuleException {
 
-    public ChargeIsNotActiveException(final Long id, final String name) {
-        super("error.msg.charge.is.not.active", "Charge '" + name + "' with identifier " + id + " is not active", name, id);
-    }
+  public ChargeIsNotActiveException(final Long id, final String name) {
+    super(
+        "error.msg.charge.is.not.active",
+        "Charge '" + name + "' with identifier " + id + " is not active",
+        name,
+        id);
+  }
 }

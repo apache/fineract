@@ -22,22 +22,28 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class CollateralCannotBeUpdatedException extends AbstractPlatformDomainRuleException {
 
-    /*** enum of reasons of why Loan Charge cannot be waived **/
-    public static enum LoanCollateralCannotBeUpdatedReason {
-        LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
+  /*** enum of reasons of why Loan Charge cannot be waived **/
+  public static enum LoanCollateralCannotBeUpdatedReason {
+    LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
-        public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { return "This collateral cannot be updated as the loan it is associated with is not in submitted and pending approval stage"; }
-            return name().toString();
-        }
-
-        public String errorCode() {
-            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { return "error.msg.loan.collateral.associated.loan.not.in.submitted.and.pending.approval.stage"; }
-            return name().toString();
-        }
+    public String errorMessage() {
+      if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+        return "This collateral cannot be updated as the loan it is associated with is not in"
+            + " submitted and pending approval stage";
+      }
+      return name().toString();
     }
 
-    public CollateralCannotBeUpdatedException(final LoanCollateralCannotBeUpdatedReason reason, final Long loanCollateralId) {
-        super(reason.errorCode(), reason.errorMessage(), loanCollateralId);
+    public String errorCode() {
+      if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+        return "error.msg.loan.collateral.associated.loan.not.in.submitted.and.pending.approval.stage";
+      }
+      return name().toString();
     }
+  }
+
+  public CollateralCannotBeUpdatedException(
+      final LoanCollateralCannotBeUpdatedReason reason, final Long loanCollateralId) {
+    super(reason.errorCode(), reason.errorMessage(), loanCollateralId);
+  }
 }

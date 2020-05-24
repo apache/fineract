@@ -31,15 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SMSCAMPAIGN", action = "DELETE")
 public class DeleteSmsCampaignCommandHandler implements NewCommandSourceHandler {
 
-    private final SmsCampaignWritePlatformService smsCampaignWritePlatformService;
+  private final SmsCampaignWritePlatformService smsCampaignWritePlatformService;
 
-    @Autowired
-    public DeleteSmsCampaignCommandHandler(SmsCampaignWritePlatformService smsCampaignWritePlatformService) {
-        this.smsCampaignWritePlatformService = smsCampaignWritePlatformService;
-    }
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-       return this.smsCampaignWritePlatformService.delete(command.entityId());
-    }
+  @Autowired
+  public DeleteSmsCampaignCommandHandler(
+      SmsCampaignWritePlatformService smsCampaignWritePlatformService) {
+    this.smsCampaignWritePlatformService = smsCampaignWritePlatformService;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.smsCampaignWritePlatformService.delete(command.entityId());
+  }
 }

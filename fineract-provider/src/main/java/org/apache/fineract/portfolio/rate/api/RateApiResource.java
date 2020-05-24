@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.rate.api;
 
 import java.util.Arrays;
@@ -50,14 +49,13 @@ import org.springframework.stereotype.Component;
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
-
 @Path("/rates")
 @Component
 @Scope("singleton")
 public class RateApiResource {
 
-  private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-      Arrays.asList("id", "name", "percentage", "productApply", "active"));
+  private final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList("id", "name", "percentage", "productApply", "active"));
   private final String resourceNameForPermissions = "RATE";
   private final PlatformSecurityContext context;
   private final RateReadService readPlatformService;
@@ -66,7 +64,8 @@ public class RateApiResource {
   private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
   @Autowired
-  public RateApiResource(final PlatformSecurityContext context,
+  public RateApiResource(
+      final PlatformSecurityContext context,
       final RateReadService rateReadService,
       final DefaultToApiJsonSerializer<RateData> toApiJsonSerializer,
       final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -88,8 +87,8 @@ public class RateApiResource {
 
     final RateData rate = this.readPlatformService.retrieveOne(rateId);
 
-    final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-        .process(uriInfo.getQueryParameters());
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
     return this.toApiJsonSerializer.serialize(settings, rate, this.RESPONSE_DATA_PARAMETERS);
   }
@@ -98,14 +97,13 @@ public class RateApiResource {
   @Consumes({MediaType.APPLICATION_JSON})
   @Produces({MediaType.APPLICATION_JSON})
   public String createRate(final String apiRequestBodyAsJson) {
-    final CommandWrapper commandRequest = new CommandWrapperBuilder().createRate()
-        .withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().createRate().withJson(apiRequestBodyAsJson).build();
 
-    final CommandProcessingResult result = this.commandsSourceWritePlatformService
-        .logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
     return this.toApiJsonSerializer.serialize(result);
-
   }
 
   @GET
@@ -117,8 +115,8 @@ public class RateApiResource {
 
     Collection<RateData> rates = this.readPlatformService.retrieveAllRates();
 
-    final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-        .process(uriInfo.getQueryParameters());
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
     return this.toApiJsonSerializer.serialize(settings, rates, this.RESPONSE_DATA_PARAMETERS);
   }
@@ -128,14 +126,12 @@ public class RateApiResource {
   @Consumes({MediaType.APPLICATION_JSON})
   @Produces({MediaType.APPLICATION_JSON})
   public String updateRate(@PathParam("rateId") Long rateId, final String apiRequestBodyAsJson) {
-    final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRate(rateId)
-        .withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().updateRate(rateId).withJson(apiRequestBodyAsJson).build();
 
-    final CommandProcessingResult result = this.commandsSourceWritePlatformService
-        .logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
     return this.toApiJsonSerializer.serialize(result);
   }
-
-
 }

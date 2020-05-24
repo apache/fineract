@@ -36,21 +36,21 @@ import org.springframework.util.StringUtils;
 @CommandType(entity = ENTITY_NAME_IDENTIFIER, action = "CREATE")
 public class CreateInteropIdentifierHandler implements NewCommandSourceHandler {
 
-    private final InteropService interopService;
+  private final InteropService interopService;
 
-    @Autowired
-    public CreateInteropIdentifierHandler(InteropService interopService) {
-        this.interopService = interopService;
-    }
+  @Autowired
+  public CreateInteropIdentifierHandler(InteropService interopService) {
+    this.interopService = interopService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        String[] split = command.getUrl().split("/");
-        int length = split.length;
-        String subIdOrType = Strings.emptyToNull(StringUtils.trimWhitespace(split[length - 1]));
-        String idValue = split[length - 2];
-        InteropIdentifierType idType = InteropIdentifierType.valueOf(split[length - 3].toUpperCase());
-        return this.interopService.registerAccountIdentifier(idType, idValue, subIdOrType, command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    String[] split = command.getUrl().split("/");
+    int length = split.length;
+    String subIdOrType = Strings.emptyToNull(StringUtils.trimWhitespace(split[length - 1]));
+    String idValue = split[length - 2];
+    InteropIdentifierType idType = InteropIdentifierType.valueOf(split[length - 3].toUpperCase());
+    return this.interopService.registerAccountIdentifier(idType, idValue, subIdOrType, command);
+  }
 }

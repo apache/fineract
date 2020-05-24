@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ACCOUNTINGRULE", action = "UPDATE")
 public class UpdateAccountingRuleCommandHandler implements NewCommandSourceHandler {
 
-    private final AccountingRuleWritePlatformService writePlatformService;
+  private final AccountingRuleWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateAccountingRuleCommandHandler(final AccountingRuleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateAccountingRuleCommandHandler(
+      final AccountingRuleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateAccountingRule(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.updateAccountingRule(command.entityId(), command);
+  }
 }

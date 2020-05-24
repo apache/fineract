@@ -22,6 +22,5 @@ import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
 
 public interface AccountingProcessorForSavings {
 
-    void createJournalEntriesForSavings(SavingsDTO savingsDTO);
-
+  void createJournalEntriesForSavings(SavingsDTO savingsDTO);
 }

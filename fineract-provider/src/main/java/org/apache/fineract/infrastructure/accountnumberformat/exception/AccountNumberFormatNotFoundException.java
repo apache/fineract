@@ -24,11 +24,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 /**
  * A {@link RuntimeException} thrown when client resources are not found.
  */
-public class AccountNumberFormatNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class AccountNumberFormatNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public AccountNumberFormatNotFoundException(final Long id) {
-        super(AccountNumberFormatConstants.EXCEPTION_ACCOUNT_NUMBER_FORMAT_NOT_FOUND, "AccountNumber format with identifier " + id
-                + " does not exist", id);
-    }
-
+  public AccountNumberFormatNotFoundException(final Long id) {
+    super(
+        AccountNumberFormatConstants.EXCEPTION_ACCOUNT_NUMBER_FORMAT_NOT_FOUND,
+        "AccountNumber format with identifier " + id + " does not exist",
+        id);
+  }
 }

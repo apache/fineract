@@ -30,15 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "INTERESTRATECHART", action = "DELETE")
 public class DeleteInterestRateChartCommandHandler implements NewCommandSourceHandler {
 
-    private final InterestRateChartWritePlatformService writePlatformService;
+  private final InterestRateChartWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteInterestRateChartCommandHandler(final InterestRateChartWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteInterestRateChartCommandHandler(
+      final InterestRateChartWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteChart(command.entityId());
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteChart(command.entityId());
+  }
 }

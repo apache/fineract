@@ -26,30 +26,27 @@ import java.util.List;
  * Created by Chirag Gupta on 12/30/17.
  */
 final class LoanScheduleApiResourceSwagger {
-    private LoanScheduleApiResourceSwagger() {
+  private LoanScheduleApiResourceSwagger() {}
+
+  @ApiModel(value = "PostLoansLoanIdScheduleRequest")
+  public static final class PostLoansLoanIdScheduleRequest {
+    private PostLoansLoanIdScheduleRequest() {}
+  }
+
+  @ApiModel(value = "PostLoansLoanIdScheduleResponse")
+  public static final class PostLoansLoanIdScheduleResponse {
+    private PostLoansLoanIdScheduleResponse() {}
+
+    final class PostLoanChanges {
+      private PostLoanChanges() {}
+
+      @ApiModelProperty(example = "[21, 22]")
+      public List<Integer> removedEntityIds;
     }
 
-    @ApiModel(value = "PostLoansLoanIdScheduleRequest")
-    public final static class PostLoansLoanIdScheduleRequest {
-        private PostLoansLoanIdScheduleRequest() {
-        }
-    }
+    @ApiModelProperty(example = "1")
+    public Integer loanId;
 
-    @ApiModel(value = "PostLoansLoanIdScheduleResponse")
-    public final static class PostLoansLoanIdScheduleResponse {
-        private PostLoansLoanIdScheduleResponse() {
-        }
-
-        final class PostLoanChanges {
-            private PostLoanChanges() {
-            }
-
-            @ApiModelProperty(example = "[21, 22]")
-            public List<Integer> removedEntityIds;
-        }
-
-        @ApiModelProperty(example = "1")
-        public Integer loanId;
-        public PostLoanChanges changes;
-    }
+    public PostLoanChanges changes;
+  }
 }

@@ -39,58 +39,58 @@ import org.joda.time.LocalDate;
 @Table(name = "m_share_product_dividend_pay_out")
 public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
 
-    @Column(name = "product_id", nullable = true)
-    private Long shareProductId;
+  @Column(name = "product_id", nullable = true)
+  private Long shareProductId;
 
-    @Column(name = "amount", scale = 6, precision = 19)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19)
+  private BigDecimal amount;
 
-    @Column(name = "dividend_period_start_date")
-    @Temporal(TemporalType.DATE)
-    private Date dividendPeriodStartDate;
+  @Column(name = "dividend_period_start_date")
+  @Temporal(TemporalType.DATE)
+  private Date dividendPeriodStartDate;
 
-    @Column(name = "dividend_period_end_date")
-    @Temporal(TemporalType.DATE)
-    private Date dividendPeriodEndDate;
+  @Column(name = "dividend_period_end_date")
+  @Temporal(TemporalType.DATE)
+  private Date dividendPeriodEndDate;
 
-    @Column(name = "status", nullable = false)
-    private Integer status;
+  @Column(name = "status", nullable = false)
+  private Integer status;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "dividend_pay_out_id", referencedColumnName = "id", nullable = false)
-    private List<ShareAccountDividendDetails> accountDividendDetails = new ArrayList<>();
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "dividend_pay_out_id", referencedColumnName = "id", nullable = false)
+  private List<ShareAccountDividendDetails> accountDividendDetails = new ArrayList<>();
 
-    protected ShareProductDividendPayOutDetails() {
+  protected ShareProductDividendPayOutDetails() {}
 
+  public ShareProductDividendPayOutDetails(
+      final Long shareProductId,
+      final BigDecimal amount,
+      final Date dividendPeriodStartDate,
+      final Date dividendPeriodEndDate) {
+    this.shareProductId = shareProductId;
+    this.amount = amount;
+    this.dividendPeriodStartDate = dividendPeriodStartDate;
+    this.dividendPeriodEndDate = dividendPeriodEndDate;
+    this.status = ShareProductDividendStatusType.INITIATED.getValue();
+  }
+
+  public LocalDate getDividendPeriodEndDateAsLocalDate() {
+    LocalDate dividendPeriodEndDate = null;
+    if (this.dividendPeriodEndDate != null) {
+      dividendPeriodEndDate = new LocalDate(this.dividendPeriodEndDate);
     }
+    return dividendPeriodEndDate;
+  }
 
-    public ShareProductDividendPayOutDetails(final Long shareProductId, final BigDecimal amount, final Date dividendPeriodStartDate,
-            final Date dividendPeriodEndDate) {
-        this.shareProductId = shareProductId;
-        this.amount = amount;
-        this.dividendPeriodStartDate = dividendPeriodStartDate;
-        this.dividendPeriodEndDate = dividendPeriodEndDate;
-        this.status = ShareProductDividendStatusType.INITIATED.getValue();
-    }
+  public List<ShareAccountDividendDetails> getAccountDividendDetails() {
+    return this.accountDividendDetails;
+  }
 
-    public LocalDate getDividendPeriodEndDateAsLocalDate() {
-        LocalDate dividendPeriodEndDate = null;
-        if (this.dividendPeriodEndDate != null) {
-            dividendPeriodEndDate = new LocalDate(this.dividendPeriodEndDate);
-        }
-        return dividendPeriodEndDate;
-    }
+  public void approveDividendPayout() {
+    this.status = ShareProductDividendStatusType.APPROVED.getValue();
+  }
 
-    public List<ShareAccountDividendDetails> getAccountDividendDetails() {
-        return this.accountDividendDetails;
-    }
-
-    public void approveDividendPayout() {
-        this.status = ShareProductDividendStatusType.APPROVED.getValue();
-    }
-
-    public ShareProductDividendStatusType getStatus() {
-        return ShareProductDividendStatusType.fromInt(this.status);
-    }
-
+  public ShareProductDividendStatusType getStatus() {
+    return ShareProductDividendStatusType.fromInt(this.status);
+  }
 }

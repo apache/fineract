@@ -38,15 +38,22 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<PlatformDataIntegrityException> {
+public class PlatformDataIntegrityExceptionMapper
+    implements ExceptionMapper<PlatformDataIntegrityException> {
 
-    @Override
-    public Response toResponse(final PlatformDataIntegrityException exception) {
+  @Override
+  public Response toResponse(final PlatformDataIntegrityException exception) {
 
-        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(
-                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getParameterName(),
-                exception.getDefaultUserMessageArgs());
+    final ApiGlobalErrorResponse dataIntegrityError =
+        ApiGlobalErrorResponse.dataIntegrityError(
+            exception.getGlobalisationMessageCode(),
+            exception.getDefaultUserMessage(),
+            exception.getParameterName(),
+            exception.getDefaultUserMessageArgs());
 
-        return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
-    }
+    return Response.status(Status.FORBIDDEN)
+        .entity(dataIntegrityError)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

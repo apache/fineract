@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface LoanProductWritePlatformService {
 
-    CommandProcessingResult createLoanProduct(JsonCommand command);
+  CommandProcessingResult createLoanProduct(JsonCommand command);
 
-    CommandProcessingResult updateLoanProduct(Long loanProductId, JsonCommand command);
+  CommandProcessingResult updateLoanProduct(Long loanProductId, JsonCommand command);
 }

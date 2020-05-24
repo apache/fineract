@@ -36,105 +36,113 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_surveys")
 public class Survey extends AbstractPersistableCustom {
 
-    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval=true)
-    @OrderBy("sequenceNo")
-    private List<Component> components;
+  @OneToMany(
+      mappedBy = "survey",
+      fetch = FetchType.EAGER,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  @OrderBy("sequenceNo")
+  private List<Component> components;
 
-    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval=true)
-    @OrderBy("sequenceNo")
-    private List<Question> questions;
+  @OneToMany(
+      mappedBy = "survey",
+      fetch = FetchType.EAGER,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  @OrderBy("sequenceNo")
+  private List<Question> questions;
 
-    @Column(name = "a_key", length = 32)
-    private String key;
+  @Column(name = "a_key", length = 32)
+  private String key;
 
-    @Column(name = "a_name", length = 255)
-    private String name;
+  @Column(name = "a_name", length = 255)
+  private String name;
 
-    @Column(name = "description", length = 4096)
-    private String description;
+  @Column(name = "description", length = 4096)
+  private String description;
 
-    @Column(name = "country_code", length = 2)
-    private String countryCode;
+  @Column(name = "country_code", length = 2)
+  private String countryCode;
 
-    @Column(name = "valid_from")
-    @Temporal(value = TemporalType.TIMESTAMP)
-    private Date validFrom;
+  @Column(name = "valid_from")
+  @Temporal(value = TemporalType.TIMESTAMP)
+  private Date validFrom;
 
-    @Column(name = "valid_to")
-    @Temporal(value = TemporalType.TIMESTAMP)
-    private Date validTo;
+  @Column(name = "valid_to")
+  @Temporal(value = TemporalType.TIMESTAMP)
+  private Date validTo;
 
-    public Survey() {
-        super();
+  public Survey() {
+    super();
+  }
+
+  public List<Component> getComponents() {
+    return components;
+  }
+
+  public void setComponents(List<Component> components) {
+    this.components = components;
+  }
+
+  public List<Question> getQuestions() {
+    return questions;
+  }
+
+  public void setQuestions(List<Question> questions) {
+    if (this.questions != null) {
+      this.questions.clear();
+    } else {
+      this.questions = new ArrayList<>();
     }
 
-    public List<Component> getComponents() {
-        return components;
-    }
+    this.questions.addAll(questions);
+  }
 
-    public void setComponents(List<Component> components) {
-        this.components = components;
-    }
+  public String getKey() {
+    return key;
+  }
 
-    public List<Question> getQuestions() {
-        return questions;
-    }
+  public void setKey(String key) {
+    this.key = key;
+  }
 
-    public void setQuestions(List<Question> questions) {
-        if(this.questions != null){
-            this.questions.clear();
-        }else{
-            this.questions = new ArrayList<>();
-        }
+  public String getName() {
+    return name;
+  }
 
-        this.questions.addAll(questions);
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getKey() {
-        return key;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getCountryCode() {
+    return countryCode;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public Date getValidFrom() {
+    return validFrom;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setValidFrom(Date validFrom) {
+    this.validFrom = validFrom;
+  }
 
-    public String getCountryCode() {
-        return countryCode;
-    }
+  public Date getValidTo() {
+    return validTo;
+  }
 
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
-    }
-
-    public Date getValidFrom() {
-        return validFrom;
-    }
-
-    public void setValidFrom(Date validFrom) {
-        this.validFrom = validFrom;
-    }
-
-    public Date getValidTo() {
-        return validTo;
-    }
-
-    public void setValidTo(Date validTo) {
-        this.validTo = validTo;
-    }
+  public void setValidTo(Date validTo) {
+    this.validTo = validTo;
+  }
 }

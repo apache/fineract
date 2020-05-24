@@ -29,19 +29,19 @@ import org.junit.Test;
 
 public class ApiDocsTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
 
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
-    @Test
-    public void testApiDocsAccess() {
-        Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/api-docs/apiLive.htm", null);
-    }
-
+  @Test
+  public void testApiDocsAccess() {
+    Utils.performServerGet(
+        requestSpec, responseSpec, "/fineract-provider/api-docs/apiLive.htm", null);
+  }
 }

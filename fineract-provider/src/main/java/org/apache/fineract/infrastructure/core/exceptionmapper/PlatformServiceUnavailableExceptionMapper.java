@@ -36,18 +36,22 @@ import org.springframework.stereotype.Component;
  * The {@link AbstractPlatformServiceUnavailableException} is thrown when an api
  * call for a resource that is expected to exist does not.
  */
-
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformServiceUnavailableExceptionMapper implements ExceptionMapper<AbstractPlatformServiceUnavailableException> {
+public class PlatformServiceUnavailableExceptionMapper
+    implements ExceptionMapper<AbstractPlatformServiceUnavailableException> {
 
-    @Override
-    public Response toResponse(final AbstractPlatformServiceUnavailableException exception) {
-        final ApiGlobalErrorResponse serviceUnavailableExceptionResponse = ApiGlobalErrorResponse.serviceUnavailable(
-                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
-        return Response.status(Status.SERVICE_UNAVAILABLE).entity(serviceUnavailableExceptionResponse).type(MediaType.APPLICATION_JSON)
-                .build();
-    }
-
+  @Override
+  public Response toResponse(final AbstractPlatformServiceUnavailableException exception) {
+    final ApiGlobalErrorResponse serviceUnavailableExceptionResponse =
+        ApiGlobalErrorResponse.serviceUnavailable(
+            exception.getGlobalisationMessageCode(),
+            exception.getDefaultUserMessage(),
+            exception.getDefaultUserMessageArgs());
+    return Response.status(Status.SERVICE_UNAVAILABLE)
+        .entity(serviceUnavailableExceptionResponse)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

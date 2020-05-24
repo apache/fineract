@@ -25,26 +25,36 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeTo
 
 public interface ProductToGLAccountMappingReadPlatformService {
 
-    public Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType);
+  public Map<String, Object> fetchAccountMappingDetailsForLoanProduct(
+      final Long loanProductId, final Integer accountingType);
 
-    public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(final Long loanProductId);
+  public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(
+      final Long loanProductId);
 
-    public List<ChargeToGLAccountMapper> fetchFeeToIncomeOrLiabilityAccountMappingsForLoanProduct(final Long loanProductId);
+  public List<ChargeToGLAccountMapper> fetchFeeToIncomeOrLiabilityAccountMappingsForLoanProduct(
+      final Long loanProductId);
 
-    public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForLoanProduct(final Long loanProductId);
+  public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForLoanProduct(
+      final Long loanProductId);
 
-    public Map<String, Object> fetchAccountMappingDetailsForSavingsProduct(final Long savingsProductId, final Integer accountingType);
+  public Map<String, Object> fetchAccountMappingDetailsForSavingsProduct(
+      final Long savingsProductId, final Integer accountingType);
 
-    public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForSavingsProduct(final Long savingsProductId);
+  public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForSavingsProduct(
+      final Long savingsProductId);
 
-    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForSavingsProduct(final Long savingsProductId);
+  public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForSavingsProduct(
+      final Long savingsProductId);
 
-    public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForSavingsProduct(final Long savingsProductId);
+  public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForSavingsProduct(
+      final Long savingsProductId);
 
-    public Map<String, Object> fetchAccountMappingDetailsForShareProduct(final Long productId, final Integer accountingType);
+  public Map<String, Object> fetchAccountMappingDetailsForShareProduct(
+      final Long productId, final Integer accountingType);
 
-    public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForShareProduct(final Long productId);
+  public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForShareProduct(
+      final Long productId);
 
-    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForShareProduct(final Long productId);
-
+  public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForShareProduct(
+      final Long productId);
 }

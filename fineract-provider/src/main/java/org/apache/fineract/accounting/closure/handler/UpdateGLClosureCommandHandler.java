@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLCLOSURE", action = "UPDATE")
 public class UpdateGLClosureCommandHandler implements NewCommandSourceHandler {
 
-    private final GLClosureWritePlatformService writePlatformService;
+  private final GLClosureWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateGLClosureCommandHandler(final GLClosureWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateGLClosureCommandHandler(final GLClosureWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateGLClosure(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.updateGLClosure(command.entityId(), command);
+  }
 }

@@ -24,12 +24,11 @@ import org.apache.fineract.portfolio.accounts.data.AccountData;
 
 public interface AccountReadPlatformService {
 
-    public AccountData retrieveTemplate(final Long clientId, final Long productId);
+  public AccountData retrieveTemplate(final Long clientId, final Long productId);
 
-    public AccountData retrieveOne(Long id, boolean includeTemplate);
+  public AccountData retrieveOne(Long id, boolean includeTemplate);
 
-    public Page<AccountData> retrieveAll(final Integer offSet, final Integer limit);
+  public Page<AccountData> retrieveAll(final Integer offSet, final Integer limit);
 
-    public Set<String> getResponseDataParams();
-
+  public Set<String> getResponseDataParams();
 }

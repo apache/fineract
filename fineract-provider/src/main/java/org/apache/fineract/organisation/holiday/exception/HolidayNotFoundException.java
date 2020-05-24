@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class HolidayNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public HolidayNotFoundException(final Long id) {
-        super("error.msg.holiday.id.invalid", "Holiday with identifier " + id + " does not exist", id);
-    }
+  public HolidayNotFoundException(final Long id) {
+    super("error.msg.holiday.id.invalid", "Holiday with identifier " + id + " does not exist", id);
+  }
 }

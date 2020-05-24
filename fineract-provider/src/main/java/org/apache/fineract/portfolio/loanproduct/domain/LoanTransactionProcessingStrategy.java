@@ -28,48 +28,50 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 @Table(name = "ref_loan_transaction_processing_strategy")
 public class LoanTransactionProcessingStrategy extends AbstractPersistableCustom {
 
-    @Column(name = "code", unique = true)
-    private String code;
+  @Column(name = "code", unique = true)
+  private String code;
 
-    @Column(name = "name")
-    private String name;
+  @Column(name = "name")
+  private String name;
 
-    @Column(name = "sort_order")
-    private Integer sortOrder ; //Don't change this name as this property name is used as sort order while retrieving this objects
+  @Column(name = "sort_order")
+  private Integer
+      sortOrder; // Don't change this name as this property name is used as sort order while
+  // retrieving this objects
 
-    protected LoanTransactionProcessingStrategy() {
-        //
-    }
+  protected LoanTransactionProcessingStrategy() {
+    //
+  }
 
-    public TransactionProcessingStrategyData toData() {
-        return new TransactionProcessingStrategyData(getId(), this.code, this.name);
-    }
+  public TransactionProcessingStrategyData toData() {
+    return new TransactionProcessingStrategyData(getId(), this.code, this.name);
+  }
 
-    public boolean isStandardStrategy() {
-        return "mifos-standard-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isStandardStrategy() {
+    return "mifos-standard-strategy".equalsIgnoreCase(this.code);
+  }
 
-    public boolean isHeavensfamilyStrategy() {
-        return "heavensfamily-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isHeavensfamilyStrategy() {
+    return "heavensfamily-strategy".equalsIgnoreCase(this.code);
+  }
 
-    public boolean isEarlyPaymentStrategy() {
-        return "early-repayment-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isEarlyPaymentStrategy() {
+    return "early-repayment-strategy".equalsIgnoreCase(this.code);
+  }
 
-    public boolean isCreocoreStrategy() {
-        return "creocore-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isCreocoreStrategy() {
+    return "creocore-strategy".equalsIgnoreCase(this.code);
+  }
 
-    public boolean isIndianRBIStrategy() {
-        return "rbi-india-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isIndianRBIStrategy() {
+    return "rbi-india-strategy".equalsIgnoreCase(this.code);
+  }
 
-    public boolean isPrincipalInterestPenaltiesFeesOrderStrategy() {
-        return "principal-interest-penalties-fees-order-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isPrincipalInterestPenaltiesFeesOrderStrategy() {
+    return "principal-interest-penalties-fees-order-strategy".equalsIgnoreCase(this.code);
+  }
 
-    public boolean isInterestPrincipalPenaltiesFeesOrderStrategy() {
-        return "interest-principal-penalties-fees-order-strategy".equalsIgnoreCase(this.code);
-    }
+  public boolean isInterestPrincipalPenaltiesFeesOrderStrategy() {
+    return "interest-principal-penalties-fees-order-strategy".equalsIgnoreCase(this.code);
+  }
 }

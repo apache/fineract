@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "XBRLMAPPING", action = "UPDATE")
 public class UpdateTaxonomyMappingCommandHandler implements NewCommandSourceHandler {
 
-    private final MixTaxonomyMappingWritePlatformService writeTaxonomyService;
+  private final MixTaxonomyMappingWritePlatformService writeTaxonomyService;
 
-    @Autowired
-    public UpdateTaxonomyMappingCommandHandler(final MixTaxonomyMappingWritePlatformService writeTaxonomyService) {
-        this.writeTaxonomyService = writeTaxonomyService;
-    }
+  @Autowired
+  public UpdateTaxonomyMappingCommandHandler(
+      final MixTaxonomyMappingWritePlatformService writeTaxonomyService) {
+    this.writeTaxonomyService = writeTaxonomyService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writeTaxonomyService.updateMapping(command.entityId(), command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writeTaxonomyService.updateMapping(command.entityId(), command);
+  }
 }

@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "OFFICE", action = "UPDATE")
 public class UpdateOfficeCommandHandler implements NewCommandSourceHandler {
 
-    private final OfficeWritePlatformService writePlatformService;
+  private final OfficeWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateOfficeCommandHandler(final OfficeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateOfficeCommandHandler(final OfficeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateOffice(command.entityId(), command);
-    }
+    return this.writePlatformService.updateOffice(command.entityId(), command);
+  }
 }

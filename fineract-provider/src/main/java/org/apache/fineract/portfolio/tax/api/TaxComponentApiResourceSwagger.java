@@ -27,122 +27,134 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class TaxComponentApiResourceSwagger {
-    private TaxComponentApiResourceSwagger() {
+  private TaxComponentApiResourceSwagger() {}
+
+  @ApiModel(value = "GetTaxesComponentsResponse")
+  public static final class GetTaxesComponentsResponse {
+    private GetTaxesComponentsResponse() {}
+
+    final class GetTaxesComponentsCreditAccountType {
+      private GetTaxesComponentsCreditAccountType() {}
+
+      @ApiModelProperty(example = "2")
+      public Integer id;
+
+      @ApiModelProperty(example = "accountType.liability")
+      public String code;
+
+      @ApiModelProperty(example = "LIABILITY")
+      public String value;
     }
 
-    @ApiModel(value = "GetTaxesComponentsResponse")
-    public final static class GetTaxesComponentsResponse {
-        private GetTaxesComponentsResponse() {
-        }
+    final class GetTaxesComponentsCreditAccount {
+      private GetTaxesComponentsCreditAccount() {}
 
-        final class GetTaxesComponentsCreditAccountType {
-            private GetTaxesComponentsCreditAccountType() {
-            }
+      @ApiModelProperty(example = "4")
+      public Integer id;
 
-            @ApiModelProperty(example = "2")
-            public Integer id;
-            @ApiModelProperty(example = "accountType.liability")
-            public String code;
-            @ApiModelProperty(example = "LIABILITY")
-            public String value;
-        }
+      @ApiModelProperty(example = "ACCOUNT_NAME_7BR9C")
+      public String name;
 
-        final class GetTaxesComponentsCreditAccount {
-            private GetTaxesComponentsCreditAccount() {
-            }
-
-            @ApiModelProperty(example = "4")
-            public Integer id;
-            @ApiModelProperty(example = "ACCOUNT_NAME_7BR9C")
-            public String name;
-            @ApiModelProperty(example = "LIABILITY_PA1460364665046")
-            public String glCode;
-        }
-
-        final class GetTaxesComponentsHistories {
-            private GetTaxesComponentsHistories() {
-            }
-        }
-
-        @ApiModelProperty(example = "1")
-        public Integer id;
-        @ApiModelProperty(example = "tax component 1")
-        public String name;
-        @ApiModelProperty(example = "10.000000")
-        public Float percentage;
-        public GetTaxesComponentsCreditAccountType creditAccountType;
-        public GetTaxesComponentsCreditAccount creditAccount;
-        @ApiModelProperty(example = "[2016, 4, 11]")
-        public LocalDate startDate;
-        public Set<GetTaxesComponentsHistories> taxComponentsHistories;
+      @ApiModelProperty(example = "LIABILITY_PA1460364665046")
+      public String glCode;
     }
 
-    @ApiModel(value = "PostTaxesComponentsRequest")
-    public final static class PostTaxesComponentsRequest {
-        private PostTaxesComponentsRequest() {
-        }
-
-        @ApiModelProperty(example = "tax component 1")
-        public String name;
-        @ApiModelProperty(example = "10")
-        public Float percentage;
-        @ApiModelProperty(example = "2")
-        public Integer creditAccountType;
-        @ApiModelProperty(example = "4")
-        public Integer creditAcountId;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "11 April 2016")
-        public String startDate;
+    final class GetTaxesComponentsHistories {
+      private GetTaxesComponentsHistories() {}
     }
 
-    @ApiModel(value = "PostTaxesComponentsResponse")
-    public final static class PostTaxesComponentsResponse {
-        private PostTaxesComponentsResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer id;
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
+    @ApiModelProperty(example = "tax component 1")
+    public String name;
+
+    @ApiModelProperty(example = "10.000000")
+    public Float percentage;
+
+    public GetTaxesComponentsCreditAccountType creditAccountType;
+    public GetTaxesComponentsCreditAccount creditAccount;
+
+    @ApiModelProperty(example = "[2016, 4, 11]")
+    public LocalDate startDate;
+
+    public Set<GetTaxesComponentsHistories> taxComponentsHistories;
+  }
+
+  @ApiModel(value = "PostTaxesComponentsRequest")
+  public static final class PostTaxesComponentsRequest {
+    private PostTaxesComponentsRequest() {}
+
+    @ApiModelProperty(example = "tax component 1")
+    public String name;
+
+    @ApiModelProperty(example = "10")
+    public Float percentage;
+
+    @ApiModelProperty(example = "2")
+    public Integer creditAccountType;
+
+    @ApiModelProperty(example = "4")
+    public Integer creditAcountId;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "11 April 2016")
+    public String startDate;
+  }
+
+  @ApiModel(value = "PostTaxesComponentsResponse")
+  public static final class PostTaxesComponentsResponse {
+    private PostTaxesComponentsResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "PutTaxesComponentsTaxComponentIdRequest")
+  public static final class PutTaxesComponentsTaxComponentIdRequest {
+    private PutTaxesComponentsTaxComponentIdRequest() {}
+
+    @ApiModelProperty(example = "tax component 2")
+    public String name;
+
+    @ApiModelProperty(example = "15")
+    public Float percentage;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "15 April 2016")
+    public String startDate;
+  }
+
+  @ApiModel(value = "PutTaxesComponentsTaxComponentIdResponse")
+  public static final class PutTaxesComponentsTaxComponentIdResponse {
+    private PutTaxesComponentsTaxComponentIdResponse() {}
+
+    final class PutTaxesComponentsChanges {
+      private PutTaxesComponentsChanges() {}
+
+      @ApiModelProperty(example = "15")
+      public Float percentage;
+
+      @ApiModelProperty(example = "tax component 2")
+      public String name;
+
+      @ApiModelProperty(example = "[2016, 4, 15]")
+      public LocalDate startDate;
     }
 
-    @ApiModel(value = "PutTaxesComponentsTaxComponentIdRequest")
-    public final static class PutTaxesComponentsTaxComponentIdRequest {
-        private PutTaxesComponentsTaxComponentIdRequest() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
 
-        @ApiModelProperty(example = "tax component 2")
-        public String name;
-        @ApiModelProperty(example = "15")
-        public Float percentage;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "15 April 2016")
-        public String startDate;
-    }
-
-    @ApiModel(value = "PutTaxesComponentsTaxComponentIdResponse")
-    public final static class PutTaxesComponentsTaxComponentIdResponse {
-        private PutTaxesComponentsTaxComponentIdResponse() {
-        }
-
-        final class PutTaxesComponentsChanges {
-            private PutTaxesComponentsChanges() {
-            }
-
-            @ApiModelProperty(example = "15")
-            public Float percentage;
-            @ApiModelProperty(example = "tax component 2")
-            public String name;
-            @ApiModelProperty(example = "[2016, 4, 15]")
-            public LocalDate startDate;
-        }
-
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-        public PutTaxesComponentsChanges changes;
-    }
+    public PutTaxesComponentsChanges changes;
+  }
 }

@@ -26,115 +26,120 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/22/17.
  */
 final class SelfBeneficiariesTPTApiResourceSwagger {
-    private SelfBeneficiariesTPTApiResourceSwagger() {
+  private SelfBeneficiariesTPTApiResourceSwagger() {}
+
+  @ApiModel(value = "GetSelfBeneficiariesTPTTemplateResponse")
+  public static final class GetSelfBeneficiariesTPTTemplateResponse {
+    private GetSelfBeneficiariesTPTTemplateResponse() {}
+
+    final class GetSelfBeneficiariesAccountOptions {
+      private GetSelfBeneficiariesAccountOptions() {}
+
+      @ApiModelProperty(example = "2")
+      public Integer id;
+
+      @ApiModelProperty(example = "accountType.savings")
+      public String code;
+
+      @ApiModelProperty(example = "Savings Account")
+      public String value;
     }
 
-    @ApiModel(value = "GetSelfBeneficiariesTPTTemplateResponse")
-    public final static class GetSelfBeneficiariesTPTTemplateResponse {
-        private GetSelfBeneficiariesTPTTemplateResponse() {
-        }
+    public Set<GetSelfBeneficiariesAccountOptions> accountTypeOptions;
+  }
 
-        final class GetSelfBeneficiariesAccountOptions {
-            private GetSelfBeneficiariesAccountOptions() {
-            }
+  @ApiModel(value = "PostSelfBeneficiariesTPTRequest")
+  public static final class PostSelfBeneficiariesTPTRequest {
+    private PostSelfBeneficiariesTPTRequest() {}
 
-            @ApiModelProperty(example = "2")
-            public Integer id;
-            @ApiModelProperty(example = "accountType.savings")
-            public String code;
-            @ApiModelProperty(example = "Savings Account")
-            public String value;
-        }
+    @ApiModelProperty(example = "en_GB")
+    public String locale;
 
-        public Set<GetSelfBeneficiariesAccountOptions> accountTypeOptions;
+    @ApiModelProperty(example = "beneficiary nick name")
+    public String name;
+
+    @ApiModelProperty(example = "HEAD OFFICE")
+    public String officeName;
+
+    @ApiModelProperty(example = "0000001")
+    public Long accountNumber;
+
+    @ApiModelProperty(example = "1")
+    public Integer accountType;
+
+    @ApiModelProperty(example = "1000")
+    public Integer transferLimit;
+  }
+
+  @ApiModel(value = "PostSelfBeneficiariesTPTResponse")
+  public static final class PostSelfBeneficiariesTPTResponse {
+    private PostSelfBeneficiariesTPTResponse() {}
+
+    @ApiModelProperty(example = "5")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdRequest")
+  public static final class PutSelfBeneficiariesTPTBeneficiaryIdRequest {
+    private PutSelfBeneficiariesTPTBeneficiaryIdRequest() {}
+
+    @ApiModelProperty(example = "beneficiary nick name")
+    public String name;
+
+    @ApiModelProperty(example = "1000")
+    public Integer transferLimit;
+  }
+
+  @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdResponse")
+  public static final class PutSelfBeneficiariesTPTBeneficiaryIdResponse {
+    private PutSelfBeneficiariesTPTBeneficiaryIdResponse() {}
+
+    final class PutSelfBeneficiariesChanges {
+      private PutSelfBeneficiariesChanges() {}
+
+      @ApiModelProperty(example = "1000")
+      public Integer transferLimit;
+
+      @ApiModelProperty(example = "Client22")
+      public String name;
     }
 
-    @ApiModel(value = "PostSelfBeneficiariesTPTRequest")
-    public final static class PostSelfBeneficiariesTPTRequest {
-        private PostSelfBeneficiariesTPTRequest() {
-        }
+    @ApiModelProperty(example = "5")
+    public Integer resourceId;
 
-        @ApiModelProperty(example = "en_GB")
-        public String locale;
-        @ApiModelProperty(example = "beneficiary nick name")
-        public String name;
-        @ApiModelProperty(example = "HEAD OFFICE")
-        public String officeName;
-        @ApiModelProperty(example = "0000001")
-        public Long accountNumber;
-        @ApiModelProperty(example = "1")
-        public Integer accountType;
-        @ApiModelProperty(example = "1000")
-        public Integer transferLimit;
-    }
+    public PutSelfBeneficiariesChanges changes;
+  }
 
-    @ApiModel(value = "PostSelfBeneficiariesTPTResponse")
-    public final static class PostSelfBeneficiariesTPTResponse {
-        private PostSelfBeneficiariesTPTResponse() {
-        }
+  @ApiModel(value = "DeleteSelfBeneficiariesTPTBeneficiaryIdResponse")
+  public static final class DeleteSelfBeneficiariesTPTBeneficiaryIdResponse {
+    private DeleteSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
-        @ApiModelProperty(example = "5")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "5")
+    public Integer resourceId;
+  }
 
-    @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdRequest")
-    public final static class PutSelfBeneficiariesTPTBeneficiaryIdRequest {
-        private PutSelfBeneficiariesTPTBeneficiaryIdRequest() {
-        }
+  @ApiModel(value = "GetSelfBeneficiariesTPTResponse")
+  public static final class GetSelfBeneficiariesTPTResponse {
+    private GetSelfBeneficiariesTPTResponse() {}
 
-        @ApiModelProperty(example = "beneficiary nick name")
-        public String name;
-        @ApiModelProperty(example = "1000")
-        public Integer transferLimit;
-    }
+    @ApiModelProperty(example = "1")
+    public Integer id;
 
-    @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdResponse")
-    public final static class PutSelfBeneficiariesTPTBeneficiaryIdResponse {
-        private PutSelfBeneficiariesTPTBeneficiaryIdResponse() {
-        }
+    @ApiModelProperty(example = "Client2Savings")
+    public String name;
 
-        final class PutSelfBeneficiariesChanges {
-            private PutSelfBeneficiariesChanges() {
-            }
+    @ApiModelProperty(example = "Test Office")
+    public String officeName;
 
-            @ApiModelProperty(example = "1000")
-            public Integer transferLimit;
-            @ApiModelProperty(example = "Client22")
-            public String name;
-        }
+    @ApiModelProperty(example = "FN2 LN2")
+    public String clientName;
 
-        @ApiModelProperty(example = "5")
-        public Integer resourceId;
-        public PutSelfBeneficiariesChanges changes;
-    }
+    public GetSelfBeneficiariesTPTTemplateResponse.GetSelfBeneficiariesAccountOptions accountType;
 
-    @ApiModel(value = "DeleteSelfBeneficiariesTPTBeneficiaryIdResponse")
-    public final static class DeleteSelfBeneficiariesTPTBeneficiaryIdResponse {
-        private DeleteSelfBeneficiariesTPTBeneficiaryIdResponse() {
-        }
+    @ApiModelProperty(example = "000000002")
+    public Long accountNumber;
 
-        @ApiModelProperty(example = "5")
-        public Integer resourceId;
-    }
-
-    @ApiModel(value = "GetSelfBeneficiariesTPTResponse")
-    public final static class GetSelfBeneficiariesTPTResponse {
-        private GetSelfBeneficiariesTPTResponse() {
-        }
-
-
-        @ApiModelProperty(example = "1")
-        public Integer id;
-        @ApiModelProperty(example = "Client2Savings")
-        public String name;
-        @ApiModelProperty(example = "Test Office")
-        public String officeName;
-        @ApiModelProperty(example = "FN2 LN2")
-        public String clientName;
-        public GetSelfBeneficiariesTPTTemplateResponse.GetSelfBeneficiariesAccountOptions accountType;
-        @ApiModelProperty(example = "000000002")
-        public Long accountNumber;
-        @ApiModelProperty(example = "0")
-        public Integer transferLimit;
-    }
+    @ApiModelProperty(example = "0")
+    public Integer transferLimit;
+  }
 }

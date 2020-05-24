@@ -24,18 +24,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificationGeneratorWritePlatformServiceImpl implements NotificationGeneratorWritePlatformService {
+public class NotificationGeneratorWritePlatformServiceImpl
+    implements NotificationGeneratorWritePlatformService {
 
-    private final NotificationRepository notificationRepository;
+  private final NotificationRepository notificationRepository;
 
-    @Autowired
-    public NotificationGeneratorWritePlatformServiceImpl(NotificationRepository notificationRepository) {
-        this.notificationRepository = notificationRepository;
-    }
+  @Autowired
+  public NotificationGeneratorWritePlatformServiceImpl(
+      NotificationRepository notificationRepository) {
+    this.notificationRepository = notificationRepository;
+  }
 
-    @Override
-    public Long create(Notification notification) {
-        this.notificationRepository.save(notification);
-        return notification.getId();
-    }
+  @Override
+  public Long create(Notification notification) {
+    this.notificationRepository.save(notification);
+    return notification.getId();
+  }
 }

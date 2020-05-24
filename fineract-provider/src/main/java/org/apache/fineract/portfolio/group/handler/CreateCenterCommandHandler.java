@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CENTER", action = "CREATE")
 public class CreateCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+  private final GroupingTypesWritePlatformService groupWritePlatformService;
 
-    @Autowired
-    public CreateCenterCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public CreateCenterCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.groupWritePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.createCenter(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.groupWritePlatformService.createCenter(command);
+  }
 }

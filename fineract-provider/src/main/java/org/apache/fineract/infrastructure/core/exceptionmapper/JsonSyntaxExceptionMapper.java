@@ -37,14 +37,19 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class JsonSyntaxExceptionMapper implements ExceptionMapper<JsonSyntaxException> {
 
-    @Override
-    public Response toResponse(final JsonSyntaxException exception) {
+  @Override
+  public Response toResponse(final JsonSyntaxException exception) {
 
-        final String globalisationMessageCode = "error.msg.invalid.request.body";
-        final String defaultUserMessage = "The JSON syntax provided in the body of the request is invalid: " + exception.getMessage();
+    final String globalisationMessageCode = "error.msg.invalid.request.body";
+    final String defaultUserMessage =
+        "The JSON syntax provided in the body of the request is invalid: " + exception.getMessage();
 
-        final ApiParameterError error = ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
+    final ApiParameterError error =
+        ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage);
 
-        return Response.status(Status.BAD_REQUEST).entity(error).type(MediaType.APPLICATION_JSON).build();
-    }
+    return Response.status(Status.BAD_REQUEST)
+        .entity(error)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

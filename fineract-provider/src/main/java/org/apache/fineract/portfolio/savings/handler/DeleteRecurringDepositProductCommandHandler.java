@@ -30,15 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "RECURRINGDEPOSITPRODUCT", action = "DELETE")
 public class DeleteRecurringDepositProductCommandHandler implements NewCommandSourceHandler {
 
-    private final RecurringDepositProductWritePlatformService writePlatformService;
+  private final RecurringDepositProductWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteRecurringDepositProductCommandHandler(final RecurringDepositProductWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteRecurringDepositProductCommandHandler(
+      final RecurringDepositProductWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.delete(command.entityId());
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.delete(command.entityId());
+  }
 }

@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GUARANTOR", action = "CREATE")
 public class CreateGuarantorCommandHandler implements NewCommandSourceHandler {
 
-    private final GuarantorWritePlatformService writePlatformService;
+  private final GuarantorWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateGuarantorCommandHandler(final GuarantorWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateGuarantorCommandHandler(final GuarantorWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createGuarantor(command.getLoanId(), command);
-    }
+    return this.writePlatformService.createGuarantor(command.getLoanId(), command);
+  }
 }

@@ -40,24 +40,24 @@ import org.springframework.data.domain.Persistable;
 @MappedSuperclass
 public abstract class AbstractPersistableCustom implements Persistable<Long>, Serializable {
 
-    private static final long serialVersionUID = 9181640245194392646L;
+  private static final long serialVersionUID = 9181640245194392646L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Override
-    public Long getId() {
-        return id;
-    }
+  @Override
+  public Long getId() {
+    return id;
+  }
 
-    protected void setId(final Long id) {
-        this.id = id;
-    }
+  protected void setId(final Long id) {
+    this.id = id;
+  }
 
-    @Override
-    @Transient // DATAJPA-622
-    public boolean isNew() {
-        return null == this.id;
-    }
+  @Override
+  @Transient // DATAJPA-622
+  public boolean isNew() {
+    return null == this.id;
+  }
 }

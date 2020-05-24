@@ -23,7 +23,7 @@ import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixData;
 
 public interface ProductMixReadPlatformService {
 
-    ProductMixData retrieveLoanProductMixDetails(Long productId);
+  ProductMixData retrieveLoanProductMixDetails(Long productId);
 
-    Collection<ProductMixData> retrieveAllProductMixes();
+  Collection<ProductMixData> retrieveAllProductMixes();
 }

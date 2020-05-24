@@ -31,16 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "COLLATERAL", action = "DELETE")
 public class DeleteCollateralCommandHandler implements NewCommandSourceHandler {
 
-    private final CollateralWritePlatformService collateralWritePlatformService;
+  private final CollateralWritePlatformService collateralWritePlatformService;
 
-    @Autowired
-    public DeleteCollateralCommandHandler(final CollateralWritePlatformService guarantorWritePlatformService) {
-        this.collateralWritePlatformService = guarantorWritePlatformService;
-    }
+  @Autowired
+  public DeleteCollateralCommandHandler(
+      final CollateralWritePlatformService guarantorWritePlatformService) {
+    this.collateralWritePlatformService = guarantorWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.collateralWritePlatformService.deleteCollateral(command.getLoanId(), command.entityId(), command.commandId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.collateralWritePlatformService.deleteCollateral(
+        command.getLoanId(), command.entityId(), command.commandId());
+  }
 }

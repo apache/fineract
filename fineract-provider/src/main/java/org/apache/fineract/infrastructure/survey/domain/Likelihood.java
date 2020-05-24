@@ -32,50 +32,51 @@ import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
 @Table(name = "ppi_likelihoods_ppi")
 public final class Likelihood extends AbstractPersistableCustom {
 
-    @Column(name = "ppi_name", nullable = false)
-    private String ppiName;
+  @Column(name = "ppi_name", nullable = false)
+  private String ppiName;
 
-    @Column(name = "likelihood_id", nullable = false)
-    private Long likelihoodId;
+  @Column(name = "likelihood_id", nullable = false)
+  private Long likelihoodId;
 
-    @Column(name = "enabled", nullable = false)
-    private Long enabled;
+  @Column(name = "enabled", nullable = false)
+  private Long enabled;
 
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+  public Map<String, Object> update(final JsonCommand command) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
-        final boolean enabled = command.booleanPrimitiveValueOfParameterNamed(LikelihoodApiConstants.ACTIVE);
+    final boolean enabled =
+        command.booleanPrimitiveValueOfParameterNamed(LikelihoodApiConstants.ACTIVE);
 
-        Long changeToValue = null;
+    Long changeToValue = null;
 
-        if (enabled) {
-            changeToValue = LikelihoodStatus.ENABLED;
-        } else {
-            changeToValue = LikelihoodStatus.DISABLED;
-        }
-
-        if (!changeToValue.equals(this.enabled)) {
-            actualChanges.put(LikelihoodApiConstants.ACTIVE, enabled);
-            this.enabled = changeToValue;
-        }
-
-        return actualChanges;
+    if (enabled) {
+      changeToValue = LikelihoodStatus.ENABLED;
+    } else {
+      changeToValue = LikelihoodStatus.DISABLED;
     }
 
-    public boolean isActivateCommand(final JsonCommand command) {
-        return command.booleanPrimitiveValueOfParameterNamed(LikelihoodApiConstants.ACTIVE);
+    if (!changeToValue.equals(this.enabled)) {
+      actualChanges.put(LikelihoodApiConstants.ACTIVE, enabled);
+      this.enabled = changeToValue;
     }
 
-    public String getPpiName() {
-        return ppiName;
-    }
+    return actualChanges;
+  }
 
-    @Override
-    public Long getId() {
-        return super.getId();
-    }
+  public boolean isActivateCommand(final JsonCommand command) {
+    return command.booleanPrimitiveValueOfParameterNamed(LikelihoodApiConstants.ACTIVE);
+  }
 
-    public void disable() {
-        this.enabled = LikelihoodStatus.DISABLED;
-    }
+  public String getPpiName() {
+    return ppiName;
+  }
+
+  @Override
+  public Long getId() {
+    return super.getId();
+  }
+
+  public void disable() {
+    this.enabled = LikelihoodStatus.DISABLED;
+  }
 }

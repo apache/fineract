@@ -32,16 +32,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "RECURRINGDEPOSITACCOUNT", action = "WITHDRAWAL")
 public class WithdrawalRecurringDepositAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public WithdrawalRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public WithdrawalRecurringDepositAccountCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.withdrawal(command.entityId(), command, DepositAccountType.RECURRING_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.withdrawal(
+        command.entityId(), command, DepositAccountType.RECURRING_DEPOSIT);
+  }
 }

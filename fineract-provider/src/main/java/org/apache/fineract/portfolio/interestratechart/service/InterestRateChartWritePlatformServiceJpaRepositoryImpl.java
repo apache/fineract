@@ -34,71 +34,79 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class InterestRateChartWritePlatformServiceJpaRepositoryImpl implements InterestRateChartWritePlatformService {
+public class InterestRateChartWritePlatformServiceJpaRepositoryImpl
+    implements InterestRateChartWritePlatformService {
 
-    @SuppressWarnings("unused")
-    private final static Logger logger = LoggerFactory.getLogger(InterestRateChartWritePlatformServiceJpaRepositoryImpl.class);
-    @SuppressWarnings("unused")
-    private final PlatformSecurityContext context;
-    private final InterestRateChartDataValidator interestRateChartDataValidator;
-    private final InterestRateChartAssembler interestRateChartAssembler;
-    private final InterestRateChartRepositoryWrapper interestRateChartRepository;
+  @SuppressWarnings("unused")
+  private static final Logger logger =
+      LoggerFactory.getLogger(InterestRateChartWritePlatformServiceJpaRepositoryImpl.class);
 
-    @Autowired
-    public InterestRateChartWritePlatformServiceJpaRepositoryImpl(PlatformSecurityContext context,
-            final InterestRateChartDataValidator interestRateChartDataValidator,
-            final InterestRateChartAssembler interestRateChartAssembler,
-            final InterestRateChartRepositoryWrapper interestRateChartRepository) {
-        this.context = context;
-        this.interestRateChartDataValidator = interestRateChartDataValidator;
-        this.interestRateChartAssembler = interestRateChartAssembler;
-        this.interestRateChartRepository = interestRateChartRepository;
-    }
+  @SuppressWarnings("unused")
+  private final PlatformSecurityContext context;
 
-    @Override
-    @Transactional
-    public CommandProcessingResult create(JsonCommand command) {
-        this.interestRateChartDataValidator.validateForCreate(command.json());
+  private final InterestRateChartDataValidator interestRateChartDataValidator;
+  private final InterestRateChartAssembler interestRateChartAssembler;
+  private final InterestRateChartRepositoryWrapper interestRateChartRepository;
 
-        final InterestRateChart interestRateChart = this.interestRateChartAssembler.assembleFrom(command);
+  @Autowired
+  public InterestRateChartWritePlatformServiceJpaRepositoryImpl(
+      PlatformSecurityContext context,
+      final InterestRateChartDataValidator interestRateChartDataValidator,
+      final InterestRateChartAssembler interestRateChartAssembler,
+      final InterestRateChartRepositoryWrapper interestRateChartRepository) {
+    this.context = context;
+    this.interestRateChartDataValidator = interestRateChartDataValidator;
+    this.interestRateChartAssembler = interestRateChartAssembler;
+    this.interestRateChartRepository = interestRateChartRepository;
+  }
 
-        this.interestRateChartRepository.saveAndFlush(interestRateChart);
+  @Override
+  @Transactional
+  public CommandProcessingResult create(JsonCommand command) {
+    this.interestRateChartDataValidator.validateForCreate(command.json());
 
-        final Long interestRateChartId = interestRateChart.getId();
+    final InterestRateChart interestRateChart =
+        this.interestRateChartAssembler.assembleFrom(command);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(interestRateChartId) //
-                .build();
-    }
+    this.interestRateChartRepository.saveAndFlush(interestRateChart);
 
-    @Override
-    @Transactional
-    public CommandProcessingResult update(Long interestRateChartId, JsonCommand command) {
-        this.interestRateChartDataValidator.validateUpdate(command.json());
-        final Map<String, Object> changes = new LinkedHashMap<>(20);
-        final InterestRateChart interestRateChart = this.interestRateChartAssembler.assembleFrom(interestRateChartId);
+    final Long interestRateChartId = interestRateChart.getId();
 
-        interestRateChart.update(command, changes);
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(interestRateChartId) //
+        .build();
+  }
 
-        this.interestRateChartRepository.saveAndFlush(interestRateChart);
+  @Override
+  @Transactional
+  public CommandProcessingResult update(Long interestRateChartId, JsonCommand command) {
+    this.interestRateChartDataValidator.validateUpdate(command.json());
+    final Map<String, Object> changes = new LinkedHashMap<>(20);
+    final InterestRateChart interestRateChart =
+        this.interestRateChartAssembler.assembleFrom(interestRateChartId);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(interestRateChartId) //
-                .with(changes).build();
-    }
+    interestRateChart.update(command, changes);
 
-    @Override
-    @Transactional
-    public CommandProcessingResult deleteChart(Long chartId) {
-        final InterestRateChart chart = this.interestRateChartRepository.findOneWithNotFoundDetection(chartId);
-        // validate if chart is associated with any accounts
+    this.interestRateChartRepository.saveAndFlush(interestRateChart);
 
-        this.interestRateChartRepository.delete(chart);
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(chartId) //
-                .build();
-    }
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(interestRateChartId) //
+        .with(changes)
+        .build();
+  }
 
+  @Override
+  @Transactional
+  public CommandProcessingResult deleteChart(Long chartId) {
+    final InterestRateChart chart =
+        this.interestRateChartRepository.findOneWithNotFoundDetection(chartId);
+    // validate if chart is associated with any accounts
+
+    this.interestRateChartRepository.delete(chart);
+    return new CommandProcessingResultBuilder() //
+        .withEntityId(chartId) //
+        .build();
+  }
 }

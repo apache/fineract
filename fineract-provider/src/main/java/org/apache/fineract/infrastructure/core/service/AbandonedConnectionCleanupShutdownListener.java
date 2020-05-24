@@ -29,44 +29,46 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextClosedEvent> {
+public class AbandonedConnectionCleanupShutdownListener
+    implements ApplicationListener<ContextClosedEvent> {
 
-    private final static Logger logger = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
 
-    /**
-     * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc
-     *      re. why we use ContextClosedEvent instead of ContextStoppedEvent
-     */
-    @Override
-    public void onApplicationEvent(@SuppressWarnings("unused") ContextClosedEvent event) {
-        shutDowncleanUpThreadAndDeregisterJDBCDriver();
+  /**
+   * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc
+   *      re. why we use ContextClosedEvent instead of ContextStoppedEvent
+   */
+  @Override
+  public void onApplicationEvent(@SuppressWarnings("unused") ContextClosedEvent event) {
+    shutDowncleanUpThreadAndDeregisterJDBCDriver();
+  }
+
+  private void shutDowncleanUpThreadAndDeregisterJDBCDriver() {
+    /*try {
+
+        AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with mysql connector. With Drizzle not required
+        logger.info("Shut-down of AbandonedConnectionCleanupThread successful");
+    } catch (Throwable t) {
+        logger.error("Exception occurred while shut-down of AbandonedConnectionCleanupThread", t);
+    }*/
+
+    // This manually deregisters JDBC driver, which prevents Tomcat 7 from
+    // complaining about memory leaks
+    Enumeration<Driver> drivers = DriverManager.getDrivers();
+    while (drivers.hasMoreElements()) {
+      Driver driver = drivers.nextElement();
+      try {
+        java.sql.DriverManager.deregisterDriver(driver);
+        logger.info("JDBC driver de-registered successfully");
+      } catch (Throwable t) {
+        logger.error("Exception occured while deristering jdbc driver", t);
+      }
     }
-
-    private void shutDowncleanUpThreadAndDeregisterJDBCDriver() {
-        /*try {
-
-            AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with mysql connector. With Drizzle not required
-            logger.info("Shut-down of AbandonedConnectionCleanupThread successful");
-        } catch (Throwable t) {
-            logger.error("Exception occurred while shut-down of AbandonedConnectionCleanupThread", t);
-        }*/
-
-        // This manually deregisters JDBC driver, which prevents Tomcat 7 from
-        // complaining about memory leaks
-        Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
-            Driver driver = drivers.nextElement();
-            try {
-                java.sql.DriverManager.deregisterDriver(driver);
-                logger.info("JDBC driver de-registered successfully");
-            } catch (Throwable t) {
-                logger.error("Exception occured while deristering jdbc driver", t);
-            }
-        }
-        try {
-            Thread.sleep(2000L);
-        } catch (Exception e) {
-            logger.error("Exception Occcured while trying to sleep.", e);
-        }
+    try {
+      Thread.sleep(2000L);
+    } catch (Exception e) {
+      logger.error("Exception Occcured while trying to sleep.", e);
     }
+  }
 }

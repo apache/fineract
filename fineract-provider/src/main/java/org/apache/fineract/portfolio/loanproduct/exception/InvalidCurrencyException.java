@@ -26,8 +26,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class InvalidCurrencyException extends AbstractPlatformDomainRuleException {
 
-    public InvalidCurrencyException(final String entity, final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg." + entity + "." + postFix + ".invalid.currency", defaultUserMessage, defaultUserMessageArgs);
-    }
+  public InvalidCurrencyException(
+      final String entity,
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg." + entity + "." + postFix + ".invalid.currency",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

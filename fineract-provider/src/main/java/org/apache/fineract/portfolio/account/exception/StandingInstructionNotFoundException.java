@@ -23,10 +23,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 /**
  * A {@link RuntimeException} thrown when loan resources are not found.
  */
-public class StandingInstructionNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class StandingInstructionNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public StandingInstructionNotFoundException(final Long id) {
-        super("error.msg.standinginstruction.id.invalid", "AccountTransferStandingInstruction with identifier " + id + " does not exist",
-                id);
-    }
+  public StandingInstructionNotFoundException(final Long id) {
+    super(
+        "error.msg.standinginstruction.id.invalid",
+        "AccountTransferStandingInstruction with identifier " + id + " does not exist",
+        id);
+  }
 }

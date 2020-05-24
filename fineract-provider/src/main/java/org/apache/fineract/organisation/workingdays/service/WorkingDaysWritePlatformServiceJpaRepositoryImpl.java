@@ -35,42 +35,52 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class WorkingDaysWritePlatformServiceJpaRepositoryImpl implements WorkingDaysWritePlatformService {
+public class WorkingDaysWritePlatformServiceJpaRepositoryImpl
+    implements WorkingDaysWritePlatformService {
 
-    private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
-    private final WorkingDayValidator fromApiJsonDeserializer;
+  private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
+  private final WorkingDayValidator fromApiJsonDeserializer;
 
-    @Autowired
-    public WorkingDaysWritePlatformServiceJpaRepositoryImpl(final WorkingDaysRepositoryWrapper daysRepositoryWrapper,
-            final WorkingDayValidator fromApiJsonDeserializer) {
-        this.daysRepositoryWrapper = daysRepositoryWrapper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+  @Autowired
+  public WorkingDaysWritePlatformServiceJpaRepositoryImpl(
+      final WorkingDaysRepositoryWrapper daysRepositoryWrapper,
+      final WorkingDayValidator fromApiJsonDeserializer) {
+    this.daysRepositoryWrapper = daysRepositoryWrapper;
+    this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult updateWorkingDays(JsonCommand command) {
+    String recurrence = "";
+    RRule rrule = null;
+    try {
+      this.fromApiJsonDeserializer.validateForUpdate(command.json());
+      final WorkingDays workingDays = this.daysRepositoryWrapper.findOne();
+
+      recurrence = command.stringValueOfParameterNamed(WorkingDaysApiConstants.recurrence);
+      rrule = new RRule(recurrence);
+      rrule.validate();
+
+      Map<String, Object> changes = workingDays.update(command);
+      this.daysRepositoryWrapper.saveAndFlush(workingDays);
+      return new CommandProcessingResultBuilder()
+          .withCommandId(command.commandId())
+          .withEntityId(workingDays.getId())
+          .with(changes)
+          .build();
+    } catch (final ValidationException e) {
+      throw new PlatformDataIntegrityException(
+          "error.msg.invalid.recurring.rule",
+          "The Recurring Rule value: " + recurrence + " is not valid.",
+          "recurrence",
+          recurrence);
+    } catch (final IllegalArgumentException | ParseException e) {
+      throw new PlatformDataIntegrityException(
+          "error.msg.recurring.rule.parsing.error",
+          "Error in passing the Recurring Rule value: " + recurrence,
+          "recurrence",
+          e.getMessage());
     }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult updateWorkingDays(JsonCommand command) {
-        String recurrence = "";
-        RRule rrule = null;
-        try {
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
-            final WorkingDays workingDays = this.daysRepositoryWrapper.findOne();
-
-            recurrence = command.stringValueOfParameterNamed(WorkingDaysApiConstants.recurrence);
-            rrule = new RRule(recurrence);
-            rrule.validate();
-
-            Map<String, Object> changes = workingDays.update(command);
-            this.daysRepositoryWrapper.saveAndFlush(workingDays);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(workingDays.getId()).with(changes)
-                    .build();
-        } catch (final ValidationException e) {
-            throw new PlatformDataIntegrityException("error.msg.invalid.recurring.rule",
-                    "The Recurring Rule value: " + recurrence + " is not valid.", "recurrence", recurrence);
-        } catch (final IllegalArgumentException | ParseException e) {
-            throw new PlatformDataIntegrityException("error.msg.recurring.rule.parsing.error",
-                    "Error in passing the Recurring Rule value: " + recurrence, "recurrence", e.getMessage());
-        }
-    }
-
+  }
 }

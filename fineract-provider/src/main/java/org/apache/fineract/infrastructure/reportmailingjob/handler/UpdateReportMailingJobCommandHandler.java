@@ -31,16 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME, action = "UPDATE")
 public class UpdateReportMailingJobCommandHandler implements NewCommandSourceHandler {
-    private final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService;
+  private final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService;
 
-    @Autowired
-    public UpdateReportMailingJobCommandHandler(final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService) {
-        this.reportMailingJobWritePlatformService = reportMailingJobWritePlatformService;
-    }
+  @Autowired
+  public UpdateReportMailingJobCommandHandler(
+      final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService) {
+    this.reportMailingJobWritePlatformService = reportMailingJobWritePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.reportMailingJobWritePlatformService.updateReportMailingJob(jsonCommand.entityId(), jsonCommand);
-    }
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.reportMailingJobWritePlatformService.updateReportMailingJob(
+        jsonCommand.entityId(), jsonCommand);
+  }
 }

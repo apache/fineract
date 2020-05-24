@@ -47,110 +47,146 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GuarantorImportHandler implements ImportHandler {
-    private final static Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
-    private Workbook workbook;
-    private List<GuarantorData> guarantors;
-    private Long loanAccountId ;
+  private static final Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
+  private Workbook workbook;
+  private List<GuarantorData> guarantors;
+  private Long loanAccountId;
 
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-@Autowired
-    public GuarantorImportHandler(final PortfolioCommandSourceWritePlatformService
-        commandsSourceWritePlatformService) {
+  @Autowired
+  public GuarantorImportHandler(
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
     this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
+
+  @Override
+  public Count process(Workbook workbook, String locale, String dateFormat) {
+    this.workbook = workbook;
+    this.guarantors = new ArrayList<>();
+    readExcelFile(locale, dateFormat);
+    return importEntity(dateFormat);
+  }
+
+  public void readExcelFile(final String locale, final String dateFormat) {
+    Sheet addGuarantorSheet =
+        workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
+    Integer noOfEntries =
+        ImportHandlerUtils.getNumberOfRows(
+            addGuarantorSheet, GuarantorConstants.LOAN_ACCOUNT_NO_COL);
+    for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
+      Row row;
+      row = addGuarantorSheet.getRow(rowIndex);
+      if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL))
+        guarantors.add(ReadGuarantor(row, locale, dateFormat));
     }
+  }
 
-    @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook=workbook;
-        this.guarantors=new ArrayList<>();
-        readExcelFile(locale,dateFormat);
-        return importEntity(dateFormat);
+  private GuarantorData ReadGuarantor(Row row, String locale, String dateFormat) {
+    String loanaccountInfo =
+        ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
+    if (loanaccountInfo != null) {
+      String loanAccountAr[] = loanaccountInfo.split("-");
+      loanAccountId = Long.parseLong(loanAccountAr[0]);
     }
+    String guarantorType =
+        ImportHandlerUtils.readAsString(GuarantorConstants.GUARANTO_TYPE_COL, row);
 
-    public void readExcelFile(final String locale, final String dateFormat) {
-        Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
-        Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addGuarantorSheet, GuarantorConstants.LOAN_ACCOUNT_NO_COL);
-        for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
-            Row row;
-                row = addGuarantorSheet.getRow(rowIndex);
-                if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL))
-                    guarantors.add(ReadGuarantor(row,locale,dateFormat));
-
-        }
+    Integer guarantorTypeId = null;
+    if (guarantorType != null) {
+      if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_INTERNAL))
+        guarantorTypeId = 1;
+      else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL))
+        guarantorTypeId = 3;
     }
-
-    private GuarantorData ReadGuarantor(Row row,String locale,String dateFormat) {
-        String loanaccountInfo=ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
-        if (loanaccountInfo!=null){
-            String loanAccountAr[]=loanaccountInfo.split("-");
-            loanAccountId=Long.parseLong(loanAccountAr[0]);
-        }
-        String guarantorType = ImportHandlerUtils.readAsString(GuarantorConstants.GUARANTO_TYPE_COL, row);
-
-        Integer guarantorTypeId = null;
-        if (guarantorType!=null) {
-            if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_INTERNAL))
-                guarantorTypeId = 1;
-            else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL))
-                guarantorTypeId = 3;
-        }
-        String clientName = ImportHandlerUtils.readAsString(GuarantorConstants.ENTITY_ID_COL, row);
-        Long entityId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
-        String clientRelationshipTypeInfo=ImportHandlerUtils.readAsString(GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, row);
-        Integer clientRelationshipTypeId=null;
-        if (clientRelationshipTypeInfo!=null){
-            String clientRelationshipTypeAr[]=clientRelationshipTypeInfo.split("-");
-            clientRelationshipTypeId=Integer.parseInt(clientRelationshipTypeAr[1]);
-        }
-        String firstname = ImportHandlerUtils.readAsString(GuarantorConstants.FIRST_NAME_COL, row);
-        String lastname = ImportHandlerUtils.readAsString(GuarantorConstants.LAST_NAME_COL, row);
-        String addressLine1 = ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_1_COL, row);
-        String addressLine2 = ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_2_COL, row);
-        String city = ImportHandlerUtils.readAsString(GuarantorConstants.CITY_COL, row);
-        LocalDate dob = ImportHandlerUtils.readAsDate(GuarantorConstants.DOB_COL, row);
-        String zip = ImportHandlerUtils.readAsString(GuarantorConstants.ZIP_COL, row);
-        Integer savingsId = ImportHandlerUtils.readAsInt(GuarantorConstants.SAVINGS_ID_COL, row);
-        BigDecimal amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(GuarantorConstants.AMOUNT, row));
-
-        return GuarantorData.importInstance(guarantorTypeId,clientRelationshipTypeId,entityId,firstname,
-                lastname,addressLine1, addressLine2,city,dob,zip,savingsId,amount, row.getRowNum(), loanAccountId,locale,dateFormat);
+    String clientName = ImportHandlerUtils.readAsString(GuarantorConstants.ENTITY_ID_COL, row);
+    Long entityId =
+        ImportHandlerUtils.getIdByName(
+            workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
+    String clientRelationshipTypeInfo =
+        ImportHandlerUtils.readAsString(GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, row);
+    Integer clientRelationshipTypeId = null;
+    if (clientRelationshipTypeInfo != null) {
+      String clientRelationshipTypeAr[] = clientRelationshipTypeInfo.split("-");
+      clientRelationshipTypeId = Integer.parseInt(clientRelationshipTypeAr[1]);
     }
+    String firstname = ImportHandlerUtils.readAsString(GuarantorConstants.FIRST_NAME_COL, row);
+    String lastname = ImportHandlerUtils.readAsString(GuarantorConstants.LAST_NAME_COL, row);
+    String addressLine1 =
+        ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_1_COL, row);
+    String addressLine2 =
+        ImportHandlerUtils.readAsString(GuarantorConstants.ADDRESS_LINE_2_COL, row);
+    String city = ImportHandlerUtils.readAsString(GuarantorConstants.CITY_COL, row);
+    LocalDate dob = ImportHandlerUtils.readAsDate(GuarantorConstants.DOB_COL, row);
+    String zip = ImportHandlerUtils.readAsString(GuarantorConstants.ZIP_COL, row);
+    Integer savingsId = ImportHandlerUtils.readAsInt(GuarantorConstants.SAVINGS_ID_COL, row);
+    BigDecimal amount =
+        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(GuarantorConstants.AMOUNT, row));
 
-    public Count importEntity(String dateFormat) {
-        Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
-        int successCount=0;
-        int errorCount=0;
-        String errorMessage="";
-        GsonBuilder gsonBuilder=new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-        for (GuarantorData guarantor : guarantors) {
-            try {
-                JsonObject guarantorJsonob=gsonBuilder.create().toJsonTree(guarantor).getAsJsonObject();
-                guarantorJsonob.remove("status");
-                String payload = guarantorJsonob.toString();
-                final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                        .createGuarantor(guarantor.getAccountId()) //
-                        .withJson(payload) //
-                        .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-                successCount++;
-                Cell statusCell = addGuarantorSheet.getRow(guarantor.getRowIndex()).createCell(GuarantorConstants.STATUS_COL);
-                statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
-                statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
-                errorCount++;
-                LOG.error("Problem occurred in importEntity function",ex);
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                ImportHandlerUtils.writeErrorMessage(addGuarantorSheet,guarantor.getRowIndex(),errorMessage,GuarantorConstants.STATUS_COL);
-            }
+    return GuarantorData.importInstance(
+        guarantorTypeId,
+        clientRelationshipTypeId,
+        entityId,
+        firstname,
+        lastname,
+        addressLine1,
+        addressLine2,
+        city,
+        dob,
+        zip,
+        savingsId,
+        amount,
+        row.getRowNum(),
+        loanAccountId,
+        locale,
+        dateFormat);
+  }
 
-        }
-                addGuarantorSheet.setColumnWidth(GuarantorConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-                ImportHandlerUtils.writeString(GuarantorConstants.STATUS_COL, addGuarantorSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX),
-                TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
-                return  Count.instance(successCount,errorCount);
+  public Count importEntity(String dateFormat) {
+    Sheet addGuarantorSheet =
+        workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
+    int successCount = 0;
+    int errorCount = 0;
+    String errorMessage = "";
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
+    for (GuarantorData guarantor : guarantors) {
+      try {
+        JsonObject guarantorJsonob = gsonBuilder.create().toJsonTree(guarantor).getAsJsonObject();
+        guarantorJsonob.remove("status");
+        String payload = guarantorJsonob.toString();
+        final CommandWrapper commandRequest =
+            new CommandWrapperBuilder() //
+                .createGuarantor(guarantor.getAccountId()) //
+                .withJson(payload) //
+                .build(); //
+        final CommandProcessingResult result =
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        successCount++;
+        Cell statusCell =
+            addGuarantorSheet
+                .getRow(guarantor.getRowIndex())
+                .createCell(GuarantorConstants.STATUS_COL);
+        statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
+        statusCell.setCellStyle(
+            ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
+      } catch (RuntimeException ex) {
+        errorCount++;
+        LOG.error("Problem occurred in importEntity function", ex);
+        errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+        ImportHandlerUtils.writeErrorMessage(
+            addGuarantorSheet,
+            guarantor.getRowIndex(),
+            errorMessage,
+            GuarantorConstants.STATUS_COL);
+      }
     }
-
-
+    addGuarantorSheet.setColumnWidth(
+        GuarantorConstants.STATUS_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+    ImportHandlerUtils.writeString(
+        GuarantorConstants.STATUS_COL,
+        addGuarantorSheet.getRow(TemplatePopulateImportConstants.ROWHEADER_INDEX),
+        TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
+    return Count.instance(successCount, errorCount);
+  }
 }

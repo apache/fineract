@@ -30,16 +30,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "EMAIL_CAMPAIGN", action = "ACTIVATE")
 public class ActivateEmailCampaignCommandHandler implements NewCommandSourceHandler {
-    private EmailCampaignWritePlatformService emailCampaignWritePlatformService;
+  private EmailCampaignWritePlatformService emailCampaignWritePlatformService;
 
-    @Autowired
-    public ActivateEmailCampaignCommandHandler(final EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
-        this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
-    }
+  @Autowired
+  public ActivateEmailCampaignCommandHandler(
+      final EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
+    this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.emailCampaignWritePlatformService.activateEmailCampaign(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.emailCampaignWritePlatformService.activateEmailCampaign(
+        command.entityId(), command);
+  }
 }

@@ -30,100 +30,98 @@ import org.apache.fineract.organisation.office.data.OfficeData;
  * Created by sanyam on 26/7/17.
  */
 final class AccountingRuleApiResourceSwagger {
-    private AccountingRuleApiResourceSwagger() {
-        // For Swagger Documentation
+  private AccountingRuleApiResourceSwagger() {
+    // For Swagger Documentation
+  }
+
+  @ApiModel(value = "GetAccountRulesResponse")
+  public static final class GetAccountRulesResponse {
+    private GetAccountRulesResponse() {}
+
+    public Long id;
+    public Long officeId;
+    public String officeName;
+    public String name;
+    public String description;
+    public boolean systemDefined;
+    public boolean allowMultipleDebitEntries;
+    public boolean allowMultipleCreditEntries;
+    public List<AccountingTagRuleData> creditTags;
+    public List<AccountingTagRuleData> debitTags;
+  }
+
+  @ApiModel(value = "GetAccountRulesTemplateResponse")
+  public static final class GetAccountRulesTemplateResponse {
+    private GetAccountRulesTemplateResponse() {}
+
+    @ApiModelProperty(example = "false")
+    public boolean systemDefined;
+
+    public List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+    public List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
+  }
+
+  @ApiModel(value = "PostAccountingRulesRequest")
+  public static final class PostAccountingRulesRequest {
+    private PostAccountingRulesRequest() {}
+
+    @ApiModelProperty(example = "test")
+    public String name;
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "21")
+    public Long accountToDebit;
+
+    @ApiModelProperty(example = "9")
+    public Long accountToCredit;
+
+    @ApiModelProperty(example = "Employee salary")
+    public String description;
+  }
+
+  @ApiModel(value = "PostAccountingRulesResponse")
+  public static final class PostAccountingRulesResponse {
+    private PostAccountingRulesResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "PutAccountingRulesRequest")
+  public static final class PutAccountingRulesRequest {
+    private PutAccountingRulesRequest() {}
+
+    @ApiModelProperty(example = "Employee Salary posting rule")
+    public String name;
+  }
+
+  @ApiModel(value = "PutAccountingRulesResponse")
+  public static final class PutAccountingRulesResponse {
+    private PutAccountingRulesResponse() {}
+
+    public class PutAccountingRulesResponsechangesSwagger {
+      public PutAccountingRulesResponsechangesSwagger() {}
+
+      @ApiModelProperty(example = "Employee Salary posting rule")
+      public String name;
     }
 
-    @ApiModel(value = "GetAccountRulesResponse")
-    public static final class GetAccountRulesResponse {
-        private GetAccountRulesResponse() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
 
-        }
+    public PutAccountingRulesResponsechangesSwagger changes;
+  }
 
-        public Long id;
-        public Long officeId;
-        public String officeName;
-        public String name;
-        public String description;
-        public boolean systemDefined;
-        public boolean allowMultipleDebitEntries;
-        public boolean allowMultipleCreditEntries;
-        public List<AccountingTagRuleData> creditTags;
-        public List<AccountingTagRuleData> debitTags;
-    }
+  @ApiModel(value = "DeleteAccountingRulesResponse")
+  public static final class DeleteAccountingRulesResponse {
+    private DeleteAccountingRulesResponse() {}
 
-    @ApiModel(value = "GetAccountRulesTemplateResponse")
-    public static final class GetAccountRulesTemplateResponse {
-        private GetAccountRulesTemplateResponse() {
-
-        }
-
-        @ApiModelProperty(example = "false")
-        public boolean systemDefined;
-        public List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
-        public List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
-    }
-
-    @ApiModel(value = "PostAccountingRulesRequest")
-    public static final class PostAccountingRulesRequest {
-        private PostAccountingRulesRequest() {
-
-        }
-
-        @ApiModelProperty(example = "test")
-        public String name;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "21")
-        public Long accountToDebit;
-        @ApiModelProperty(example = "9")
-        public Long accountToCredit;
-        @ApiModelProperty(example = "Employee salary")
-        public String description;
-    }
-
-    @ApiModel(value = "PostAccountingRulesResponse")
-    public static final class PostAccountingRulesResponse {
-        private PostAccountingRulesResponse() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
-
-    @ApiModel(value = "PutAccountingRulesRequest")
-    public static final class PutAccountingRulesRequest {
-        private PutAccountingRulesRequest() {
-
-        }
-        @ApiModelProperty(example = "Employee Salary posting rule")
-        public String name;
-    }
-
-    @ApiModel(value = "PutAccountingRulesResponse")
-    public static final class PutAccountingRulesResponse {
-        private PutAccountingRulesResponse () {
-
-        }
-
-        public class PutAccountingRulesResponsechangesSwagger {
-            public PutAccountingRulesResponsechangesSwagger(){}
-            @ApiModelProperty(example = "Employee Salary posting rule")
-            public String name;
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        public PutAccountingRulesResponsechangesSwagger changes;
-    }
-
-    @ApiModel(value = "DeleteAccountingRulesResponse")
-    public static final class DeleteAccountingRulesResponse {
-        private DeleteAccountingRulesResponse() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 }

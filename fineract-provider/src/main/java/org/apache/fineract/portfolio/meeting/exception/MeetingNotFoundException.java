@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class MeetingNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public MeetingNotFoundException(final Long id) {
-        super("error.msg.meeting.id.invalid", "Meeting with identifier " + id + " does not exist", id);
-    }
+  public MeetingNotFoundException(final Long id) {
+    super("error.msg.meeting.id.invalid", "Meeting with identifier " + id + " does not exist", id);
+  }
 }

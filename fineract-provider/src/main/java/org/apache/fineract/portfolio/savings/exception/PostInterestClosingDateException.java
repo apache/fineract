@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class PostInterestClosingDateException extends AbstractPlatformDomainRuleException {
 
-    public PostInterestClosingDateException() {
-        super("error.msg.postInterest.notDone", "Please do a post interest on the closing date");
-    }
+  public PostInterestClosingDateException() {
+    super("error.msg.postInterest.notDone", "Please do a post interest on the closing date");
+  }
 }

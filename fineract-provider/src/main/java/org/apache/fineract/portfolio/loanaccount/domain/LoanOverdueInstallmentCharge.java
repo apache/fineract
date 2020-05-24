@@ -29,34 +29,34 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_loan_overdue_installment_charge")
 public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
-    private LoanCharge loancharge;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
+  private LoanCharge loancharge;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_schedule_id", referencedColumnName = "id", nullable = false)
-    private LoanRepaymentScheduleInstallment installment;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "loan_schedule_id", referencedColumnName = "id", nullable = false)
+  private LoanRepaymentScheduleInstallment installment;
 
-    @Column(name = "frequency_number")
-    private Integer frequencyNumber;
+  @Column(name = "frequency_number")
+  private Integer frequencyNumber;
 
-    public LoanOverdueInstallmentCharge() {
+  public LoanOverdueInstallmentCharge() {}
 
-    }
+  public LoanOverdueInstallmentCharge(
+      final LoanCharge loanCharge,
+      final LoanRepaymentScheduleInstallment installment,
+      final Integer frequencyNumber) {
+    this.loancharge = loanCharge;
+    this.installment = installment;
+    this.frequencyNumber = frequencyNumber;
+  }
 
-    public LoanOverdueInstallmentCharge(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment,
-            final Integer frequencyNumber) {
-        this.loancharge = loanCharge;
-        this.installment = installment;
-        this.frequencyNumber = frequencyNumber;
-    }
+  public void updateLoanRepaymentScheduleInstallment(
+      LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+    this.installment = loanRepaymentScheduleInstallment;
+  }
 
-    public void updateLoanRepaymentScheduleInstallment(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
-        this.installment = loanRepaymentScheduleInstallment;
-    }
-
-    public LoanRepaymentScheduleInstallment getInstallment() {
-        return this.installment;
-    }
-
+  public LoanRepaymentScheduleInstallment getInstallment() {
+    return this.installment;
+  }
 }

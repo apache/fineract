@@ -30,74 +30,90 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class InteropResponseData extends CommandProcessingResult {
 
-    public static final String ISO_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
-//    public static final SimpleDateFormat ISO_DATE_TIME_FORMATTER = new SimpleDateFormat(ISO_DATE_TIME_PATTERN); // TODO: not synchronized
-    public static final DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormat.forPattern(ISO_DATE_TIME_PATTERN);
+  public static final String ISO_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
+  //    public static final SimpleDateFormat ISO_DATE_TIME_FORMATTER = new
+  // SimpleDateFormat(ISO_DATE_TIME_PATTERN); // TODO: not synchronized
+  public static final DateTimeFormatter ISO_DATE_TIME_FORMATTER =
+      DateTimeFormat.forPattern(ISO_DATE_TIME_PATTERN);
 
-    @NotNull
-    private final String transactionCode;
+  @NotNull private final String transactionCode;
 
-    @NotNull
-    private final InteropActionState state;
+  @NotNull private final InteropActionState state;
 
-    private final String expiration;
+  private final String expiration;
 
-    private final List<ExtensionData> extensionList;
+  private final List<ExtensionData> extensionList;
 
+  protected InteropResponseData(
+      Long resourceId,
+      Long officeId,
+      Long commandId,
+      Map<String, Object> changesOnly,
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      LocalDateTime expiration,
+      List<ExtensionData> extensionList) {
+    super(resourceId, officeId, commandId, changesOnly);
+    this.transactionCode = transactionCode;
+    this.state = state;
+    this.expiration = format(expiration);
+    this.extensionList = extensionList;
+  }
 
-    protected InteropResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, @NotNull String transactionCode,
-                                  @NotNull InteropActionState state, LocalDateTime expiration, List<ExtensionData> extensionList) {
-        super(resourceId, officeId, commandId, changesOnly);
-        this.transactionCode = transactionCode;
-        this.state = state;
-        this.expiration = format(expiration);
-        this.extensionList = extensionList;
-    }
+  protected static InteropResponseData build(
+      Long commandId,
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      LocalDateTime expiration,
+      List<ExtensionData> extensionList) {
+    return new InteropResponseData(
+        null, null, commandId, null, transactionCode, state, expiration, extensionList);
+  }
 
-    protected static InteropResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                               LocalDateTime expiration, List<ExtensionData> extensionList) {
-        return new InteropResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList);
-    }
+  public static InteropResponseData build(
+      @NotNull String transactionCode,
+      @NotNull InteropActionState state,
+      LocalDateTime expiration,
+      List<ExtensionData> extensionList) {
+    return build(null, transactionCode, state, expiration, extensionList);
+  }
 
-    public static InteropResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
-                                            LocalDateTime expiration, List<ExtensionData> extensionList) {
-        return build(null, transactionCode, state, expiration, extensionList);
-    }
+  public static InteropResponseData build(
+      Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state) {
+    return build(commandId, transactionCode, state, null, null);
+  }
 
-    public static InteropResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state) {
-        return build(commandId, transactionCode, state, null, null);
-    }
+  public static InteropResponseData build(
+      @NotNull String transactionCode, @NotNull InteropActionState state) {
+    return build(null, transactionCode, state);
+  }
 
-    public static InteropResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state) {
-        return build(null, transactionCode, state);
-    }
+  public String getTransactionCode() {
+    return transactionCode;
+  }
 
-    public String getTransactionCode() {
-        return transactionCode;
-    }
+  public InteropActionState getState() {
+    return state;
+  }
 
-    public InteropActionState getState() {
-        return state;
-    }
+  public String getExpiration() {
+    return expiration;
+  }
 
-    public String getExpiration() {
-        return expiration;
-    }
+  @Transient
+  public LocalDateTime getExpirationDate() {
+    return parse(expiration);
+  }
 
-    @Transient
-    public LocalDateTime getExpirationDate() {
-        return parse(expiration);
-    }
+  public List<ExtensionData> getExtensionList() {
+    return extensionList;
+  }
 
-    public List<ExtensionData> getExtensionList() {
-        return extensionList;
-    }
+  protected static LocalDateTime parse(String date) {
+    return date == null ? null : LocalDateTime.parse(date, ISO_DATE_TIME_FORMATTER);
+  }
 
-    protected static LocalDateTime parse(String date) {
-        return date == null ? null : LocalDateTime.parse(date, ISO_DATE_TIME_FORMATTER);
-    }
-
-    protected static String format(LocalDateTime date) {
-        return date == null ? null : date.toString(ISO_DATE_TIME_FORMATTER);
-    }
+  protected static String format(LocalDateTime date) {
+    return date == null ? null : date.toString(ISO_DATE_TIME_FORMATTER);
+  }
 }

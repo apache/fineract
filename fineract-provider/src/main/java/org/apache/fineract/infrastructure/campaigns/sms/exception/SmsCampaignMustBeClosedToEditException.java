@@ -22,8 +22,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class SmsCampaignMustBeClosedToEditException extends AbstractPlatformDomainRuleException {
 
-    public SmsCampaignMustBeClosedToEditException(final Long resourceId) {
-        super("error.msg.sms.campaign.cannot.be.updated",
-                "Campaign with identifier " + resourceId + " cannot be updated as it is not in `Closed` state.", resourceId);
-    }
+  public SmsCampaignMustBeClosedToEditException(final Long resourceId) {
+    super(
+        "error.msg.sms.campaign.cannot.be.updated",
+        "Campaign with identifier "
+            + resourceId
+            + " cannot be updated as it is not in `Closed` state.",
+        resourceId);
+  }
 }

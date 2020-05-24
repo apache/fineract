@@ -27,23 +27,25 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface JournalEntryWritePlatformService {
 
-    CommandProcessingResult createJournalEntry(JsonCommand command);
+  CommandProcessingResult createJournalEntry(JsonCommand command);
 
-    CommandProcessingResult revertJournalEntry(JsonCommand command);
+  CommandProcessingResult revertJournalEntry(JsonCommand command);
 
-    void createJournalEntriesForLoan(Map<String, Object> accountingBridgeData);
+  void createJournalEntriesForLoan(Map<String, Object> accountingBridgeData);
 
-    void createJournalEntriesForSavings(Map<String, Object> accountingBridgeData);
+  void createJournalEntriesForSavings(Map<String, Object> accountingBridgeData);
 
-    void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData);
+  void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData);
 
-    CommandProcessingResult defineOpeningBalance(JsonCommand command);
+  CommandProcessingResult defineOpeningBalance(JsonCommand command);
 
-    public String revertProvisioningJournalEntries(final Date reversalTransactionDate, final Long entityId, final Integer entityType) ;
+  public String revertProvisioningJournalEntries(
+      final Date reversalTransactionDate, final Long entityId, final Integer entityType);
 
-    public String createProvisioningJournalEntries(ProvisioningEntry entry) ;
+  public String createProvisioningJournalEntries(ProvisioningEntry entry);
 
-    void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
+  void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
 
-    void revertShareAccountJournalEntries(final ArrayList<Long> transactionId, final Date transactionDate);
+  void revertShareAccountJournalEntries(
+      final ArrayList<Long> transactionId, final Date transactionDate);
 }

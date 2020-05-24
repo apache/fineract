@@ -23,8 +23,7 @@ import org.apache.fineract.portfolio.client.data.ClientIdentifierData;
 
 public interface ClientIdentifierReadPlatformService {
 
-    Collection<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
+  Collection<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
 
-    ClientIdentifierData retrieveClientIdentifier(Long clientId, Long clientIdentifierId);
-
+  ClientIdentifierData retrieveClientIdentifier(Long clientId, Long clientIdentifierId);
 }

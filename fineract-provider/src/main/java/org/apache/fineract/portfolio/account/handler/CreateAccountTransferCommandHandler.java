@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ACCOUNTTRANSFER", action = "CREATE")
 public class CreateAccountTransferCommandHandler implements NewCommandSourceHandler {
 
-    private final AccountTransfersWritePlatformService writePlatformService;
+  private final AccountTransfersWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateAccountTransferCommandHandler(final AccountTransfersWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateAccountTransferCommandHandler(
+      final AccountTransfersWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.create(command);
-    }
+    return this.writePlatformService.create(command);
+  }
 }

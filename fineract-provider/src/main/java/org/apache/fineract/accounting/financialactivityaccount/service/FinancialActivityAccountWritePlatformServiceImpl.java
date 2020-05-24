@@ -42,143 +42,179 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FinancialActivityAccountWritePlatformServiceImpl implements FinancialActivityAccountWritePlatformService {
+public class FinancialActivityAccountWritePlatformServiceImpl
+    implements FinancialActivityAccountWritePlatformService {
 
-    private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
-    private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
-    private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
-    private final static Logger logger = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
+  private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
+  private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
+  private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
+  private static final Logger logger =
+      LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
 
-    @Autowired
-    public FinancialActivityAccountWritePlatformServiceImpl(
-            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
-            final FinancialActivityAccountDataValidator fromApiJsonDeserializer, final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
-        this.financialActivityAccountRepository = financialActivityAccountRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
+  @Autowired
+  public FinancialActivityAccountWritePlatformServiceImpl(
+      final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
+      final FinancialActivityAccountDataValidator fromApiJsonDeserializer,
+      final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
+    this.financialActivityAccountRepository = financialActivityAccountRepository;
+    this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+    this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
+  }
+
+  @Override
+  public CommandProcessingResult createFinancialActivityAccountMapping(JsonCommand command) {
+    try {
+
+      this.fromApiJsonDeserializer.validateForCreate(command.json());
+
+      final Integer financialActivityId =
+          command.integerValueSansLocaleOfParameterNamed(
+              FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
+      final Long accountId =
+          command.longValueOfParameterNamed(
+              FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue());
+      final GLAccount glAccount =
+          glAccountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
+      FinancialActivityAccount financialActivityAccount =
+          FinancialActivityAccount.createNew(glAccount, financialActivityId);
+
+      validateFinancialActivityAndAccountMapping(financialActivityAccount);
+      this.financialActivityAccountRepository.save(financialActivityAccount);
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .withEntityId(financialActivityAccount.getId()) //
+          .build();
+    } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+      handleFinancialActivityAccountDataIntegrityIssues(
+          command,
+          dataIntegrityViolationException.getMostSpecificCause(),
+          dataIntegrityViolationException);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException ee) {
+      Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
+      handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  /**
+   * Validate that the GL Account is appropriate for the particular Financial
+   * Activity Type
+   **/
+  private void validateFinancialActivityAndAccountMapping(
+      FinancialActivityAccount financialActivityAccount) {
+    FinancialActivity financialActivity =
+        FinancialActivity.fromInt(financialActivityAccount.getFinancialActivityType());
+    GLAccount glAccount = financialActivityAccount.getGlAccount();
+    if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) {
+      throw new FinancialActivityAccountInvalidException(financialActivity, glAccount);
+    }
+  }
+
+  @Override
+  public CommandProcessingResult updateGLAccountActivityMapping(
+      Long financialActivityAccountId, JsonCommand command) {
+    try {
+      this.fromApiJsonDeserializer.validateForUpdate(command.json());
+      final FinancialActivityAccount financialActivityAccount =
+          this.financialActivityAccountRepository.findOneWithNotFoundDetection(
+              financialActivityAccountId);
+      Map<String, Object> changes = findChanges(command, financialActivityAccount);
+
+      if (changes.containsKey(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue())) {
+        final Long accountId =
+            command.longValueOfParameterNamed(
+                FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue());
+        final GLAccount glAccount =
+            glAccountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
+        financialActivityAccount.updateGlAccount(glAccount);
+      }
+
+      if (changes.containsKey(
+          FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue())) {
+        final Integer financialActivityId =
+            command.integerValueSansLocaleOfParameterNamed(
+                FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
+        financialActivityAccount.updateFinancialActivityType(financialActivityId);
+      }
+
+      if (!changes.isEmpty()) {
+        validateFinancialActivityAndAccountMapping(financialActivityAccount);
+        this.financialActivityAccountRepository.save(financialActivityAccount);
+      }
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .withEntityId(financialActivityAccountId) //
+          .with(changes) //
+          .build();
+    } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+      handleFinancialActivityAccountDataIntegrityIssues(
+          command,
+          dataIntegrityViolationException.getMostSpecificCause(),
+          dataIntegrityViolationException);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException ee) {
+      Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
+      handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  @Override
+  public CommandProcessingResult deleteGLAccountActivityMapping(
+      Long financialActivityAccountId, JsonCommand command) {
+    final FinancialActivityAccount financialActivityAccount =
+        this.financialActivityAccountRepository.findOneWithNotFoundDetection(
+            financialActivityAccountId);
+    this.financialActivityAccountRepository.delete(financialActivityAccount);
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(financialActivityAccountId) //
+        .build();
+  }
+
+  private void handleFinancialActivityAccountDataIntegrityIssues(
+      final JsonCommand command, final Throwable realCause, final Exception dve) {
+    if (realCause.getMessage().contains("financial_activity_type")) {
+      final Integer financialActivityId =
+          command.integerValueSansLocaleOfParameterNamed(
+              FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
+      throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
     }
 
-    @Override
-    public CommandProcessingResult createFinancialActivityAccountMapping(JsonCommand command) {
-        try {
+    logger.error("Error occured.", dve);
+    throw new PlatformDataIntegrityException(
+        "error.msg.glAccount.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
+  }
 
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
+  public Map<String, Object> findChanges(
+      JsonCommand command, FinancialActivityAccount financialActivityAccount) {
 
-            final Integer financialActivityId = command
-                    .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
-            final Long accountId = command.longValueOfParameterNamed(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue());
-            final GLAccount glAccount = glAccountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
-            FinancialActivityAccount financialActivityAccount = FinancialActivityAccount.createNew(glAccount, financialActivityId);
+    Map<String, Object> changes = new HashMap<>();
 
-            validateFinancialActivityAndAccountMapping(financialActivityAccount);
-            this.financialActivityAccountRepository.save(financialActivityAccount);
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(financialActivityAccount.getId()) //
-                    .build();
-        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
-            return CommandProcessingResult.empty();
-        }catch(final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-            handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
-            return CommandProcessingResult.empty();
-        }
+    Long existingGLAccountId = financialActivityAccount.getGlAccount().getId();
+    Integer financialActivityType = financialActivityAccount.getFinancialActivityType();
+
+    // is the account Id changed?
+    if (command.isChangeInLongParameterNamed(
+        FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue(), existingGLAccountId)) {
+      final Long newValue =
+          command.longValueOfParameterNamed(
+              FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue());
+      changes.put(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue(), newValue);
     }
 
-    /**
-     * Validate that the GL Account is appropriate for the particular Financial
-     * Activity Type
-     **/
-    private void validateFinancialActivityAndAccountMapping(FinancialActivityAccount financialActivityAccount) {
-        FinancialActivity financialActivity = FinancialActivity.fromInt(financialActivityAccount.getFinancialActivityType());
-        GLAccount glAccount = financialActivityAccount.getGlAccount();
-        if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) { throw new FinancialActivityAccountInvalidException(
-                financialActivity, glAccount); }
+    // is the financial Activity changed
+    if (command.isChangeInIntegerSansLocaleParameterNamed(
+        FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue(),
+        financialActivityType)) {
+      final Integer newValue =
+          command.integerValueSansLocaleOfParameterNamed(
+              FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
+      changes.put(
+          FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue(), newValue);
     }
-
-    @Override
-    public CommandProcessingResult updateGLAccountActivityMapping(Long financialActivityAccountId, JsonCommand command) {
-        try {
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
-            final FinancialActivityAccount financialActivityAccount = this.financialActivityAccountRepository
-                    .findOneWithNotFoundDetection(financialActivityAccountId);
-            Map<String, Object> changes = findChanges(command, financialActivityAccount);
-
-            if (changes.containsKey(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue())) {
-                final Long accountId = command.longValueOfParameterNamed(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue());
-                final GLAccount glAccount = glAccountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
-                financialActivityAccount.updateGlAccount(glAccount);
-            }
-
-            if (changes.containsKey(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue())) {
-                final Integer financialActivityId = command
-                        .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
-                financialActivityAccount.updateFinancialActivityType(financialActivityId);
-            }
-
-            if (!changes.isEmpty()) {
-                validateFinancialActivityAndAccountMapping(financialActivityAccount);
-                this.financialActivityAccountRepository.save(financialActivityAccount);
-            }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(financialActivityAccountId) //
-                    .with(changes) //
-                    .build();
-        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
-            return CommandProcessingResult.empty();
-        }catch(final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-            handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
-            return CommandProcessingResult.empty();
-        }
-    }
-
-    @Override
-    public CommandProcessingResult deleteGLAccountActivityMapping(Long financialActivityAccountId, JsonCommand command) {
-        final FinancialActivityAccount financialActivityAccount = this.financialActivityAccountRepository
-                .findOneWithNotFoundDetection(financialActivityAccountId);
-        this.financialActivityAccountRepository.delete(financialActivityAccount);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(financialActivityAccountId) //
-                .build();
-    }
-
-    private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-        if (realCause.getMessage().contains("financial_activity_type")) {
-            final Integer financialActivityId = command
-                    .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
-            throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
-        }
-
-        logger.error("Error occured.", dve);
-        throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
-    }
-
-    public Map<String, Object> findChanges(JsonCommand command, FinancialActivityAccount financialActivityAccount) {
-
-        Map<String, Object> changes = new HashMap<>();
-
-        Long existingGLAccountId = financialActivityAccount.getGlAccount().getId();
-        Integer financialActivityType = financialActivityAccount.getFinancialActivityType();
-
-        // is the account Id changed?
-        if (command.isChangeInLongParameterNamed(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue(), existingGLAccountId)) {
-            final Long newValue = command.longValueOfParameterNamed(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue());
-            changes.put(FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue(), newValue);
-        }
-
-        // is the financial Activity changed
-        if (command.isChangeInIntegerSansLocaleParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue(),
-                financialActivityType)) {
-            final Integer newValue = command
-                    .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());
-            changes.put(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue(), newValue);
-        }
-        return changes;
-    }
+    return changes;
+  }
 }

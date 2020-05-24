@@ -26,8 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 @SuppressWarnings("serial")
 public class ReportMailingJobNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ReportMailingJobNotFoundException(final Long reportMailingJobId) {
-        super("error.msg.report.mailing.job.id.invalid", "Report mailing job with identifier " + reportMailingJobId +
-                " does not exist", reportMailingJobId);
-    }
+  public ReportMailingJobNotFoundException(final Long reportMailingJobId) {
+    super(
+        "error.msg.report.mailing.job.id.invalid",
+        "Report mailing job with identifier " + reportMailingJobId + " does not exist",
+        reportMailingJobId);
+  }
 }

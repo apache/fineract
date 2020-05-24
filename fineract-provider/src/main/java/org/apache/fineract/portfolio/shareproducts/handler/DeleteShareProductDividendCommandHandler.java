@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SHAREPRODUCT", action = "DELETE_DIVIDEND")
 public class DeleteShareProductDividendCommandHandler implements NewCommandSourceHandler {
 
-    private final ShareProductWritePlatformService shareProductWritePlatformService;
+  private final ShareProductWritePlatformService shareProductWritePlatformService;
 
-    @Autowired
-    public DeleteShareProductDividendCommandHandler(final ShareProductWritePlatformService shareProductWritePlatformService) {
-        this.shareProductWritePlatformService = shareProductWritePlatformService;
-    }
+  @Autowired
+  public DeleteShareProductDividendCommandHandler(
+      final ShareProductWritePlatformService shareProductWritePlatformService) {
+    this.shareProductWritePlatformService = shareProductWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.shareProductWritePlatformService.deleteShareProductDividend(jsonCommand.entityId());
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.shareProductWritePlatformService.deleteShareProductDividend(jsonCommand.entityId());
+  }
 }

@@ -24,8 +24,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AppUserRepository extends JpaRepository<AppUser, Long>, JpaSpecificationExecutor<AppUser>, PlatformUserRepository {
+public interface AppUserRepository
+    extends JpaRepository<AppUser, Long>,
+        JpaSpecificationExecutor<AppUser>,
+        PlatformUserRepository {
 
-    @Query("Select appUser from AppUser appUser where appUser.username = :username")
-    AppUser findAppUserByName(@Param("username") String username);
+  @Query("Select appUser from AppUser appUser where appUser.username = :username")
+  AppUser findAppUserByName(@Param("username") String username);
 }

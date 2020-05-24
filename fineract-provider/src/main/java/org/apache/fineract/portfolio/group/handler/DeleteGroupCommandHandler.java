@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "DELETE")
 public class DeleteGroupCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+  private final GroupingTypesWritePlatformService groupWritePlatformService;
 
-    @Autowired
-    public DeleteGroupCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public DeleteGroupCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.groupWritePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.deleteGroup(command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.groupWritePlatformService.deleteGroup(command.entityId());
+  }
 }

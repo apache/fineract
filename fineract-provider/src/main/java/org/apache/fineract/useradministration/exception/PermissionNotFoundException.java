@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class PermissionNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public PermissionNotFoundException(final String code) {
-        super("error.msg.permission.code.invalid", "Permission with Code " + code + " does not exist", code);
-    }
+  public PermissionNotFoundException(final String code) {
+    super(
+        "error.msg.permission.code.invalid",
+        "Permission with Code " + code + " does not exist",
+        code);
+  }
 }

@@ -29,51 +29,56 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "acc_rule_tags", uniqueConstraints = { @UniqueConstraint(columnNames = { "acc_rule_id", "tag_id", "acc_type_enum" }, name = "UNIQUE_ACCOUNT_RULE_TAGS") })
+@Table(
+    name = "acc_rule_tags",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"acc_rule_id", "tag_id", "acc_type_enum"},
+          name = "UNIQUE_ACCOUNT_RULE_TAGS")
+    })
 public class AccountingTagRule extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "acc_rule_id", nullable = false)
-    private AccountingRule accountingRule;
+  @ManyToOne
+  @JoinColumn(name = "acc_rule_id", nullable = false)
+  private AccountingRule accountingRule;
 
-    @ManyToOne
-    @JoinColumn(name = "tag_id", nullable = false)
-    private CodeValue tagId;
+  @ManyToOne
+  @JoinColumn(name = "tag_id", nullable = false)
+  private CodeValue tagId;
 
-    @Column(name = "acc_type_enum", nullable = false)
-    private Integer accountType;
+  @Column(name = "acc_type_enum", nullable = false)
+  private Integer accountType;
 
-    public static AccountingTagRule create(final CodeValue tagId, final Integer accountType) {
-        return new AccountingTagRule(tagId, accountType);
-    }
+  public static AccountingTagRule create(final CodeValue tagId, final Integer accountType) {
+    return new AccountingTagRule(tagId, accountType);
+  }
 
-    public AccountingTagRule(final CodeValue tagId, final Integer accountType) {
-        this.tagId = tagId;
-        this.accountType = accountType;
-    }
+  public AccountingTagRule(final CodeValue tagId, final Integer accountType) {
+    this.tagId = tagId;
+    this.accountType = accountType;
+  }
 
-    public void updateAccountingTagRule(final AccountingRule accountingRule) {
-        this.accountingRule = accountingRule;
-    }
+  public void updateAccountingTagRule(final AccountingRule accountingRule) {
+    this.accountingRule = accountingRule;
+  }
 
-    public AccountingTagRule() {
-        // TODO Auto-generated constructor stub
-    }
+  public AccountingTagRule() {
+    // TODO Auto-generated constructor stub
+  }
 
-    public Integer getAccountType() {
-        return this.accountType;
-    }
+  public Integer getAccountType() {
+    return this.accountType;
+  }
 
-    public boolean isDebitAccount() {
-        return JournalEntryType.fromInt(this.accountType).isDebitType();
-    }
+  public boolean isDebitAccount() {
+    return JournalEntryType.fromInt(this.accountType).isDebitType();
+  }
 
-    public boolean isCreditAccount() {
-        return JournalEntryType.fromInt(this.accountType).isCreditType();
-    }
+  public boolean isCreditAccount() {
+    return JournalEntryType.fromInt(this.accountType).isCreditType();
+  }
 
-    public Long getTagId() {
-        return this.tagId.getId();
-    }
-
+  public Long getTagId() {
+    return this.tagId.getId();
+  }
 }

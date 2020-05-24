@@ -27,24 +27,24 @@ import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 
 public interface SchedularWritePlatformService {
 
-    public List<ScheduledJobDetail> retrieveAllJobs();
+  public List<ScheduledJobDetail> retrieveAllJobs();
 
-    public ScheduledJobDetail findByJobKey(String triggerKey);
+  public ScheduledJobDetail findByJobKey(String triggerKey);
 
-    public void saveOrUpdate(ScheduledJobDetail scheduledJobDetails);
+  public void saveOrUpdate(ScheduledJobDetail scheduledJobDetails);
 
-    public void saveOrUpdate(ScheduledJobDetail scheduledJobDetails, ScheduledJobRunHistory scheduledJobRunHistory);
+  public void saveOrUpdate(
+      ScheduledJobDetail scheduledJobDetails, ScheduledJobRunHistory scheduledJobRunHistory);
 
-    public Long fetchMaxVersionBy(String triggerKey);
+  public Long fetchMaxVersionBy(String triggerKey);
 
-    public ScheduledJobDetail findByJobId(Long jobId);
+  public ScheduledJobDetail findByJobId(Long jobId);
 
-    public CommandProcessingResult updateJobDetail(Long jobId, JsonCommand command);
+  public CommandProcessingResult updateJobDetail(Long jobId, JsonCommand command);
 
-    public SchedulerDetail retriveSchedulerDetail();
+  public SchedulerDetail retriveSchedulerDetail();
 
-    public void updateSchedulerDetail(final SchedulerDetail schedulerDetail);
+  public void updateSchedulerDetail(final SchedulerDetail schedulerDetail);
 
-    public boolean processJobDetailForExecution(String jobKey, String triggerType);
-
+  public boolean processJobDetailForExecution(String jobKey, String triggerType);
 }

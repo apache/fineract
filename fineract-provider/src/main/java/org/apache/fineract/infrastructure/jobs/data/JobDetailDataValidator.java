@@ -40,59 +40,87 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobDetailDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-            SchedulerJobApiConstants.cronExpressionParamName));
+  private final FromJsonHelper fromApiJsonHelper;
+  private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              SchedulerJobApiConstants.displayNameParamName,
+              SchedulerJobApiConstants.jobActiveStatusParamName,
+              SchedulerJobApiConstants.cronExpressionParamName));
 
-    @Autowired
-    public JobDetailDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public JobDetailDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateForUpdate(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    boolean atLeastOneParameterPassedForUpdate = false;
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, JOB_UPDATE_REQUEST_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        boolean atLeastOneParameterPassedForUpdate = false;
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, JOB_UPDATE_REQUEST_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SchedulerJobApiConstants.JOB_RESOURCE_NAME);
-        if (this.fromApiJsonHelper.parameterExists(SchedulerJobApiConstants.displayNameParamName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final String displayName = this.fromApiJsonHelper.extractStringNamed(SchedulerJobApiConstants.displayNameParamName, element);
-            baseDataValidator.reset().parameter(SchedulerJobApiConstants.displayNameParamName).value(displayName).notBlank();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(SchedulerJobApiConstants.cronExpressionParamName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final String cronExpression = this.fromApiJsonHelper.extractStringNamed(SchedulerJobApiConstants.cronExpressionParamName,
-                    element);
-            baseDataValidator.reset().parameter(SchedulerJobApiConstants.cronExpressionParamName).value(cronExpression).notBlank()
-                    .validateCronExpression();
-        }
-        if (this.fromApiJsonHelper.parameterExists(SchedulerJobApiConstants.jobActiveStatusParamName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final String status = this.fromApiJsonHelper.extractStringNamed(SchedulerJobApiConstants.jobActiveStatusParamName, element);
-            baseDataValidator.reset().parameter(SchedulerJobApiConstants.jobActiveStatusParamName).value(status).notBlank()
-                    .validateForBooleanValue();
-        }
-
-        if (!atLeastOneParameterPassedForUpdate) {
-            final Object forceError = null;
-            baseDataValidator.reset().anyOfNotNull(forceError);
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(SchedulerJobApiConstants.JOB_RESOURCE_NAME);
+    if (this.fromApiJsonHelper.parameterExists(
+        SchedulerJobApiConstants.displayNameParamName, element)) {
+      atLeastOneParameterPassedForUpdate = true;
+      final String displayName =
+          this.fromApiJsonHelper.extractStringNamed(
+              SchedulerJobApiConstants.displayNameParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(SchedulerJobApiConstants.displayNameParamName)
+          .value(displayName)
+          .notBlank();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (this.fromApiJsonHelper.parameterExists(
+        SchedulerJobApiConstants.cronExpressionParamName, element)) {
+      atLeastOneParameterPassedForUpdate = true;
+      final String cronExpression =
+          this.fromApiJsonHelper.extractStringNamed(
+              SchedulerJobApiConstants.cronExpressionParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(SchedulerJobApiConstants.cronExpressionParamName)
+          .value(cronExpression)
+          .notBlank()
+          .validateCronExpression();
+    }
+    if (this.fromApiJsonHelper.parameterExists(
+        SchedulerJobApiConstants.jobActiveStatusParamName, element)) {
+      atLeastOneParameterPassedForUpdate = true;
+      final String status =
+          this.fromApiJsonHelper.extractStringNamed(
+              SchedulerJobApiConstants.jobActiveStatusParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(SchedulerJobApiConstants.jobActiveStatusParamName)
+          .value(status)
+          .notBlank()
+          .validateForBooleanValue();
     }
 
+    if (!atLeastOneParameterPassedForUpdate) {
+      final Object forceError = null;
+      baseDataValidator.reset().anyOfNotNull(forceError);
+    }
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
 }

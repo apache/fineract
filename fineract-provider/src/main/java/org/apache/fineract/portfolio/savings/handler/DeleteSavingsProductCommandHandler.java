@@ -30,15 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "SAVINGSPRODUCT", action = "DELETE")
 public class DeleteSavingsProductCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsProductWritePlatformService savingProductWritePlatformService;
+  private final SavingsProductWritePlatformService savingProductWritePlatformService;
 
-    @Autowired
-    public DeleteSavingsProductCommandHandler(final SavingsProductWritePlatformService savingProductWritePlatformService) {
-        this.savingProductWritePlatformService = savingProductWritePlatformService;
-    }
+  @Autowired
+  public DeleteSavingsProductCommandHandler(
+      final SavingsProductWritePlatformService savingProductWritePlatformService) {
+    this.savingProductWritePlatformService = savingProductWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingProductWritePlatformService.delete(command.entityId());
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.savingProductWritePlatformService.delete(command.entityId());
+  }
 }

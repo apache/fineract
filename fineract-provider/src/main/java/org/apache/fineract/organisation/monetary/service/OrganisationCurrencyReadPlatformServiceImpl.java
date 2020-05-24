@@ -25,24 +25,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OrganisationCurrencyReadPlatformServiceImpl implements OrganisationCurrencyReadPlatformService {
+public class OrganisationCurrencyReadPlatformServiceImpl
+    implements OrganisationCurrencyReadPlatformService {
 
-    private final CurrencyReadPlatformService currencyReadPlatformService;
+  private final CurrencyReadPlatformService currencyReadPlatformService;
 
-    @Autowired
-    public OrganisationCurrencyReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService) {
-        this.currencyReadPlatformService = currencyReadPlatformService;
-    }
+  @Autowired
+  public OrganisationCurrencyReadPlatformServiceImpl(
+      final CurrencyReadPlatformService currencyReadPlatformService) {
+    this.currencyReadPlatformService = currencyReadPlatformService;
+  }
 
-    @Override
-    public ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration() {
+  @Override
+  public ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration() {
 
-        final Collection<CurrencyData> selectedCurrencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
+    final Collection<CurrencyData> selectedCurrencyOptions =
+        this.currencyReadPlatformService.retrieveAllowedCurrencies();
+    final Collection<CurrencyData> currencyOptions =
+        this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
 
-        // remove selected currency options
-        currencyOptions.removeAll(selectedCurrencyOptions);
+    // remove selected currency options
+    currencyOptions.removeAll(selectedCurrencyOptions);
 
-        return new ApplicationCurrencyConfigurationData(currencyOptions, selectedCurrencyOptions);
-    }
+    return new ApplicationCurrencyConfigurationData(currencyOptions, selectedCurrencyOptions);
+  }
 }

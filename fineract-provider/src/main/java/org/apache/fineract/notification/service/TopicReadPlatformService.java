@@ -23,10 +23,9 @@ import org.apache.fineract.notification.data.TopicData;
 
 public interface TopicReadPlatformService {
 
-    Collection<TopicData> getAllTopics();
+  Collection<TopicData> getAllTopics();
 
-    Collection<TopicData> getAllEnabledTopics();
+  Collection<TopicData> getAllEnabledTopics();
 
-    TopicData findById(Long id);
-
+  TopicData findById(Long id);
 }

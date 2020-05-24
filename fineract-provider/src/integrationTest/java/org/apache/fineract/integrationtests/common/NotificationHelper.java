@@ -24,21 +24,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NotificationHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(NotificationHelper.class);
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification responseSpec;
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationHelper.class);
+  private final RequestSpecification requestSpec;
+  private final ResponseSpecification responseSpec;
 
-    private static final String NOTIFICATION_API_URL = "/fineract-provider/api/v1/notifications?" + Utils.TENANT_IDENTIFIER;
+  private static final String NOTIFICATION_API_URL =
+      "/fineract-provider/api/v1/notifications?" + Utils.TENANT_IDENTIFIER;
 
-    public NotificationHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
-        this.requestSpec = requestSpec;
-        this.responseSpec = responseSpec;
-    }
+  public NotificationHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+    this.requestSpec = requestSpec;
+    this.responseSpec = responseSpec;
+  }
 
-    public static Object getNotifications(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-                                          final String jsonReturn) {
-        final String GET_NOTIFICATIONS_URL = NOTIFICATION_API_URL;
-        LOG.info("-----------------------------GET NOTIFICATIONS-----------------------------------");
-        return Utils.performServerGet(requestSpec, responseSpec, GET_NOTIFICATIONS_URL, "");
-    }
+  public static Object getNotifications(
+      final RequestSpecification requestSpec,
+      final ResponseSpecification responseSpec,
+      final String jsonReturn) {
+    final String GET_NOTIFICATIONS_URL = NOTIFICATION_API_URL;
+    LOG.info("-----------------------------GET NOTIFICATIONS-----------------------------------");
+    return Utils.performServerGet(requestSpec, responseSpec, GET_NOTIFICATIONS_URL, "");
+  }
 }

@@ -30,34 +30,35 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 @Table(name = "m_loan_tranche_charges")
 public class LoanTrancheCharge extends AbstractPersistableCustom {
 
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "loan_id", nullable = false)
-    private Loan loan;
+  @ManyToOne(cascade = CascadeType.ALL, optional = false)
+  @JoinColumn(name = "loan_id", nullable = false)
+  private Loan loan;
 
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "charge_id", nullable = false)
-    private Charge charge;
+  @ManyToOne(cascade = CascadeType.ALL, optional = false)
+  @JoinColumn(name = "charge_id", nullable = false)
+  private Charge charge;
 
-    LoanTrancheCharge() {
+  LoanTrancheCharge() {}
 
-    }
+  LoanTrancheCharge(Charge chargeDefinition) {
+    this.charge = chargeDefinition;
+  }
 
-    LoanTrancheCharge(Charge chargeDefinition) {
-        this.charge = chargeDefinition ;
-    }
-    public LoanTrancheCharge(Charge charge, Loan loan) {
-        this.charge = charge;
-        this.loan = loan ;
-    }
+  public LoanTrancheCharge(Charge charge, Loan loan) {
+    this.charge = charge;
+    this.loan = loan;
+  }
 
-    public static LoanTrancheCharge createLoanTrancheCharge(Charge chargeDefinition) {
-        return new LoanTrancheCharge(chargeDefinition) ;
-    }
-    public static LoanTrancheCharge createLoanTrancheChargeWithLoan(Charge chargeDefinition, Loan loan) {
-        return new LoanTrancheCharge(chargeDefinition, loan) ;
-    }
+  public static LoanTrancheCharge createLoanTrancheCharge(Charge chargeDefinition) {
+    return new LoanTrancheCharge(chargeDefinition);
+  }
 
-    public Charge getCharge() {
-        return charge ;
-    }
+  public static LoanTrancheCharge createLoanTrancheChargeWithLoan(
+      Charge chargeDefinition, Loan loan) {
+    return new LoanTrancheCharge(chargeDefinition, loan);
+  }
+
+  public Charge getCharge() {
+    return charge;
+  }
 }

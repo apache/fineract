@@ -47,77 +47,112 @@ import org.springframework.stereotype.Component;
 @Component
 public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
 
-    /**
-     * The parameters supported for this command.
-     */
-    final Set<String> supportedParameters = new HashSet<>(
-            Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
+  /**
+   * The parameters supported for this command.
+   */
+  final Set<String> supportedParameters =
+      new HashSet<>(
+          Arrays.asList(
+              transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
 
-    private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(Arrays.asList(
-            transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
+  private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS =
+      new HashSet<>(
+          Arrays.asList(
+              transactionDateParamName,
+              localeParamName,
+              dateFormatParamName,
+              officeIdParamName,
+              staffIdParamName));
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public CollectionSheetGenerateCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public CollectionSheetGenerateCommandFromApiJsonDeserializer(
+      final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateForGenerateCollectionSheet(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForGenerateCollectionSheet(final String json) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final String transactionDateStr =
+        this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(transactionDateParamName)
+        .value(transactionDateStr)
+        .notBlank();
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
-
-        final String transactionDateStr = this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
-        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDateStr).notBlank();
-
-        if (!StringUtils.isBlank(transactionDateStr)) {
-            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
-            baseDataValidator.reset().parameter(transactionDateParamName).value(dueDate).notNull();
-        }
-
-        final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParamName, element);
-        baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+    if (!StringUtils.isBlank(transactionDateStr)) {
+      final LocalDate dueDate =
+          this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+      baseDataValidator.reset().parameter(transactionDateParamName).value(dueDate).notNull();
     }
 
-    public void validateForGenerateCollectionSheetOfIndividuals(final String json) {
+    final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParamName, element);
+    baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
+    }
+  }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+  public void validateForGenerateCollectionSheetOfIndividuals(final String json) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
-
-        final String transactionDateStr = this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
-        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDateStr).notBlank();
-
-        if (!StringUtils.isBlank(transactionDateStr)) {
-            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
-            baseDataValidator.reset().parameter(transactionDateParamName).value(dueDate).notNull();
-        }
-
-        final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParamName, element);
-        baseDataValidator.reset().parameter(officeIdParamName).value(officeId).longGreaterThanZero();
-
-        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParamName, element);
-        baseDataValidator.reset().parameter(staffIdParamName).value(staffId).longGreaterThanZero();
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
+
+    final String transactionDateStr =
+        this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(transactionDateParamName)
+        .value(transactionDateStr)
+        .notBlank();
+
+    if (!StringUtils.isBlank(transactionDateStr)) {
+      final LocalDate dueDate =
+          this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+      baseDataValidator.reset().parameter(transactionDateParamName).value(dueDate).notNull();
+    }
+
+    final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParamName, element);
+    baseDataValidator.reset().parameter(officeIdParamName).value(officeId).longGreaterThanZero();
+
+    final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParamName, element);
+    baseDataValidator.reset().parameter(staffIdParamName).value(staffId).longGreaterThanZero();
+
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
+    }
+  }
 }

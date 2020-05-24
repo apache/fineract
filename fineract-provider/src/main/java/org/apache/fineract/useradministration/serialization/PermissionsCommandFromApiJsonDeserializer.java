@@ -38,27 +38,31 @@ import org.springframework.stereotype.Component;
  * {@link PermissionsCommand}'s.
  */
 @Component
-public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<PermissionsCommand> {
+public final class PermissionsCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<PermissionsCommand> {
 
-    /**
-     * The parameters supported for this command.
-     */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("permissions"));
-    private final FromJsonHelper fromApiJsonHelper;
+  /**
+   * The parameters supported for this command.
+   */
+  private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("permissions"));
 
-    @Autowired
-    public PermissionsCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
+
+  @Autowired
+  public PermissionsCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  @Override
+  public PermissionsCommand commandFromApiJson(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public PermissionsCommand commandFromApiJson(final String json) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-
-        return this.fromApiJsonHelper.fromJson(json, PermissionsCommand.class);
-    }
+    return this.fromApiJsonHelper.fromJson(json, PermissionsCommand.class);
+  }
 }

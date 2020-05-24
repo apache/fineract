@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
 public interface CacheWritePlatformService {
 
-    Map<String, Object> switchToCache(CacheType cacheType);
+  Map<String, Object> switchToCache(CacheType cacheType);
 }

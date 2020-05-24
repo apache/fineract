@@ -24,8 +24,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface JobParameterRepository extends JpaRepository<JobParameter, Long>, JpaSpecificationExecutor<JobParameter> {
+public interface JobParameterRepository
+    extends JpaRepository<JobParameter, Long>, JpaSpecificationExecutor<JobParameter> {
 
-    @Query("select jobParameter from JobParameter jobParameter where jobParameter.jobId=:jobId")
-    List<JobParameter> findJobParametersByJobId(@Param("jobId") Long jobId);
+  @Query("select jobParameter from JobParameter jobParameter where jobParameter.jobId=:jobId")
+  List<JobParameter> findJobParametersByJobId(@Param("jobId") Long jobId);
 }

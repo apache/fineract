@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface FundWritePlatformService {
 
-    CommandProcessingResult createFund(JsonCommand command);
+  CommandProcessingResult createFund(JsonCommand command);
 
-    CommandProcessingResult updateFund(Long fundId, JsonCommand command);
+  CommandProcessingResult updateFund(Long fundId, JsonCommand command);
 }

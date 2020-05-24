@@ -40,250 +40,256 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.joda.time.LocalDate;
 
 @Entity
-@Table(name = "m_tellers", uniqueConstraints = {
-        @UniqueConstraint(name = "ux_tellers_name", columnNames = {"name"})
-})
+@Table(
+    name = "m_tellers",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "ux_tellers_name",
+          columnNames = {"name"})
+    })
 public class Teller extends AbstractPersistableCustom {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "office_id", nullable = false)
-    private Office office;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id", nullable = false)
+  private Office office;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "debit_account_id", nullable = true)
-    private GLAccount debitAccount;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "debit_account_id", nullable = true)
+  private GLAccount debitAccount;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "credit_account_id", nullable = true)
-    private GLAccount creditAccount;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "credit_account_id", nullable = true)
+  private GLAccount creditAccount;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+  @Column(name = "name", nullable = false, length = 100)
+  private String name;
 
-    @Column(name = "description", nullable = true, length = 500)
-    private String description;
+  @Column(name = "description", nullable = true, length = 500)
+  private String description;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "valid_from", nullable = true)
-    private Date startDate;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "valid_from", nullable = true)
+  private Date startDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "valid_to", nullable = true)
-    private Date endDate;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "valid_to", nullable = true)
+  private Date endDate;
 
-    @Column(name = "state", nullable = false)
-    private Integer status;
+  @Column(name = "state", nullable = false)
+  private Integer status;
 
-    @OneToMany(mappedBy = "teller", fetch = FetchType.LAZY)
-    private Set<Cashier> cashiers;
+  @OneToMany(mappedBy = "teller", fetch = FetchType.LAZY)
+  private Set<Cashier> cashiers;
 
-    public Teller() {
-        super();
+  public Teller() {
+    super();
+  }
+
+  private Teller(
+      final Office staffOffice,
+      final String name,
+      final String description,
+      final LocalDate startDate,
+      final LocalDate endDate,
+      final TellerStatus status) {
+
+    this.name = StringUtils.defaultIfEmpty(name, null);
+    this.description = StringUtils.defaultIfEmpty(description, null);
+    if (startDate != null) {
+      this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
+    }
+    if (endDate != null) {
+      this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
+    }
+    if (status != null) {
+      this.status = status.getValue();
+    }
+    this.office = staffOffice;
+
+    /*
+    if (StringUtils.isNotBlank(name)) {
+        this.name = name.trim();
+    } else {
+        this.name = null;
     }
 
-    private Teller (final Office staffOffice, final String name, final String description, final LocalDate startDate,
-            final LocalDate endDate, final TellerStatus status) {
+    if (StringUtils.isNotBlank(description)) {
+        this.description = description.trim();
+    } else {
+        this.description = null;
+    } */
 
-        this.name = StringUtils.defaultIfEmpty(name, null);
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        if (startDate != null) {
-            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
-        }
-        if (endDate != null) {
-            this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
-        }
-        if (status != null) {
-            this.status = status.getValue();
-        }
-        this.office = staffOffice;
+  }
 
-        /*
-        if (StringUtils.isNotBlank(name)) {
-            this.name = name.trim();
-        } else {
-            this.name = null;
-        }
+  public static Teller fromJson(final Office tellerOffice, final JsonCommand command) {
+    final String name = command.stringValueOfParameterNamed("name");
+    final String description = command.stringValueOfParameterNamed("description");
+    final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
+    final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
+    final Integer tellerStatusInt = command.integerValueOfParameterNamed("status");
+    final TellerStatus status = TellerStatus.fromInt(tellerStatusInt);
 
-        if (StringUtils.isNotBlank(description)) {
-            this.description = description.trim();
-        } else {
-            this.description = null;
-        } */
+    return new Teller(tellerOffice, name, description, startDate, endDate, status);
+  }
 
+  public Map<String, Object> update(Office tellerOffice, final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+    final String dateFormatAsInput = command.dateFormat();
+    final String localeAsInput = command.locale();
+
+    final String officeIdParamName = "officeId";
+    if (command.isChangeInLongParameterNamed(officeIdParamName, this.officeId())) {
+      final long newValue = command.longValueOfParameterNamed(officeIdParamName);
+      actualChanges.put(officeIdParamName, newValue);
+      this.office = tellerOffice;
     }
 
-
-    public static Teller fromJson(final Office tellerOffice, final JsonCommand command) {
-        final String name = command.stringValueOfParameterNamed("name");
-        final String description = command.stringValueOfParameterNamed("description");
-        final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
-        final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
-        final Integer tellerStatusInt = command.integerValueOfParameterNamed("status");
-        final TellerStatus status = TellerStatus.fromInt(tellerStatusInt);
-
-        return new Teller (tellerOffice, name, description, startDate, endDate, status);
+    final String nameParamName = "name";
+    if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+      final String newValue = command.stringValueOfParameterNamed(nameParamName);
+      actualChanges.put(nameParamName, newValue);
+      this.name = newValue;
     }
 
-    public Map<String, Object> update(Office tellerOffice, final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        final String officeIdParamName = "officeId";
-        if (command.isChangeInLongParameterNamed(officeIdParamName, this.officeId())) {
-            final long newValue = command.longValueOfParameterNamed(officeIdParamName);
-            actualChanges.put(officeIdParamName, newValue);
-            this.office = tellerOffice;
-        }
-
-        final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
-        }
-
-        final String descriptionParamName = "description";
-        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, newValue);
-            this.description = newValue;
-        }
-
-        final String startDateParamName = "startDate";
-        if (command.isChangeInLocalDateParameterNamed(startDateParamName, getStartLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
-            actualChanges.put(startDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-
-            final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            this.startDate = newValue.toDate();
-        }
-
-        final String endDateParamName = "endDate";
-        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(endDateParamName);
-            actualChanges.put(endDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-
-            final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            this.endDate = newValue.toDate();
-        }
-
-        final String statusParamName = "status";
-        if (command.isChangeInIntegerParameterNamed(statusParamName, getStatus())) {
-            final Integer valueAsInput = command.integerValueOfParameterNamed(statusParamName);
-            actualChanges.put(statusParamName, valueAsInput);
-            final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
-            final TellerStatus status = TellerStatus.fromInt(newValue);
-            if (status != TellerStatus.INVALID) {
-                this.status = status.getValue();
-            }
-        }
-
-        return actualChanges;
+    final String descriptionParamName = "description";
+    if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+      final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+      actualChanges.put(descriptionParamName, newValue);
+      this.description = newValue;
     }
 
+    final String startDateParamName = "startDate";
+    if (command.isChangeInLocalDateParameterNamed(startDateParamName, getStartLocalDate())) {
+      final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
+      actualChanges.put(startDateParamName, valueAsInput);
+      actualChanges.put("dateFormat", dateFormatAsInput);
+      actualChanges.put("locale", localeAsInput);
 
-
-    public Office getOffice() {
-        return office;
+      final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
+      this.startDate = newValue.toDate();
     }
 
-    public void setOffice(Office office) {
-        this.office = office;
+    final String endDateParamName = "endDate";
+    if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndLocalDate())) {
+      final String valueAsInput = command.stringValueOfParameterNamed(endDateParamName);
+      actualChanges.put(endDateParamName, valueAsInput);
+      actualChanges.put("dateFormat", dateFormatAsInput);
+      actualChanges.put("locale", localeAsInput);
+
+      final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
+      this.endDate = newValue.toDate();
     }
 
-    public GLAccount getDebitAccount() {
-        return debitAccount;
+    final String statusParamName = "status";
+    if (command.isChangeInIntegerParameterNamed(statusParamName, getStatus())) {
+      final Integer valueAsInput = command.integerValueOfParameterNamed(statusParamName);
+      actualChanges.put(statusParamName, valueAsInput);
+      final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
+      final TellerStatus status = TellerStatus.fromInt(newValue);
+      if (status != TellerStatus.INVALID) {
+        this.status = status.getValue();
+      }
     }
 
-    public void setDebitAccount(GLAccount debitAccount) {
-        this.debitAccount = debitAccount;
-    }
+    return actualChanges;
+  }
 
-    public GLAccount getCreditAccount() {
-        return creditAccount;
-    }
+  public Office getOffice() {
+    return office;
+  }
 
-    public void setCreditAccount(GLAccount creditAccount) {
-        this.creditAccount = creditAccount;
-    }
+  public void setOffice(Office office) {
+    this.office = office;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public GLAccount getDebitAccount() {
+    return debitAccount;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setDebitAccount(GLAccount debitAccount) {
+    this.debitAccount = debitAccount;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public GLAccount getCreditAccount() {
+    return creditAccount;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setCreditAccount(GLAccount creditAccount) {
+    this.creditAccount = creditAccount;
+  }
 
-    public Date getStartDate() {
-        return startDate;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public LocalDate getStartLocalDate() {
-        LocalDate startLocalDate = null;
-        if (this.startDate != null) {
-            startLocalDate = LocalDate.fromDateFields(this.startDate);
-        }
-        return startLocalDate;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public Date getEndDate() {
-        return endDate;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public LocalDate getEndLocalDate() {
-        LocalDate endLocalDate = null;
-        if (this.endDate != null) {
-            endLocalDate = LocalDate.fromDateFields(this.endDate);
-        }
-        return endLocalDate;
-    }
+  public Date getStartDate() {
+    return startDate;
+  }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+  public LocalDate getStartLocalDate() {
+    LocalDate startLocalDate = null;
+    if (this.startDate != null) {
+      startLocalDate = LocalDate.fromDateFields(this.startDate);
     }
+    return startLocalDate;
+  }
 
-    public Integer getStatus() {
-        return status;
-    }
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
+  }
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
+  public Date getEndDate() {
+    return endDate;
+  }
 
-    public Long officeId() {
-        return this.office.getId();
+  public LocalDate getEndLocalDate() {
+    LocalDate endLocalDate = null;
+    if (this.endDate != null) {
+      endLocalDate = LocalDate.fromDateFields(this.endDate);
     }
+    return endLocalDate;
+  }
 
-    public Set<Cashier> getCashiers() {
-        return cashiers;
-    }
+  public void setEndDate(Date endDate) {
+    this.endDate = endDate;
+  }
 
-    public void setCashiers(Set<Cashier> cashiers) {
-        this.cashiers = cashiers;
-    }
+  public Integer getStatus() {
+    return status;
+  }
 
-    public void initializeLazyCollections() {
-        this.office.getId();
-        this.cashiers.size();
-    }
+  public void setStatus(Integer status) {
+    this.status = status;
+  }
+
+  public Long officeId() {
+    return this.office.getId();
+  }
+
+  public Set<Cashier> getCashiers() {
+    return cashiers;
+  }
+
+  public void setCashiers(Set<Cashier> cashiers) {
+    this.cashiers = cashiers;
+  }
+
+  public void initializeLazyCollections() {
+    this.office.getId();
+    this.cashiers.size();
+  }
 }

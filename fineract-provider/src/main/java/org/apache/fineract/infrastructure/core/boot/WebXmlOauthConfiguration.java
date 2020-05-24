@@ -35,28 +35,31 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Profile("oauth")
 public class WebXmlOauthConfiguration {
 
-    @Bean
-    public ServletRegistrationBean jersey() {
-        ServletRegistrationBean<SpringServlet> jerseyServletRegistration = new ServletRegistrationBean<SpringServlet>();
-        jerseyServletRegistration.setServlet(new SpringServlet());
-        jerseyServletRegistration.addUrlMappings("/api/v1/*");
-        jerseyServletRegistration.setName("jersey-servlet");
-        jerseyServletRegistration.setLoadOnStartup(1);
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.api.json.POJOMappingFeature", "true");
-//        jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
-//                ResponseCorsFilter.class.getName());
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
-        // debugging for development:
-        // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
-        // LoggingFilter.class.getName());
-        return jerseyServletRegistration;
-    }
+  @Bean
+  public ServletRegistrationBean jersey() {
+    ServletRegistrationBean<SpringServlet> jerseyServletRegistration =
+        new ServletRegistrationBean<SpringServlet>();
+    jerseyServletRegistration.setServlet(new SpringServlet());
+    jerseyServletRegistration.addUrlMappings("/api/v1/*");
+    jerseyServletRegistration.setName("jersey-servlet");
+    jerseyServletRegistration.setLoadOnStartup(1);
+    jerseyServletRegistration.addInitParameter(
+        "com.sun.jersey.api.json.POJOMappingFeature", "true");
+    //
+    // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
+    //                ResponseCorsFilter.class.getName());
+    jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
+    // debugging for development:
+    // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
+    // LoggingFilter.class.getName());
+    return jerseyServletRegistration;
+  }
 
-    @Bean
-    public ServletRegistrationBean dispatcherRegistration(DispatcherServlet dispatcherServlet) {
-        ServletRegistrationBean<DispatcherServlet> registrationBean = new ServletRegistrationBean<DispatcherServlet>(dispatcherServlet);
-        registrationBean.addUrlMappings("/api/oauth/token");
-        return registrationBean;
-    }
-
+  @Bean
+  public ServletRegistrationBean dispatcherRegistration(DispatcherServlet dispatcherServlet) {
+    ServletRegistrationBean<DispatcherServlet> registrationBean =
+        new ServletRegistrationBean<DispatcherServlet>(dispatcherServlet);
+    registrationBean.addUrlMappings("/api/oauth/token");
+    return registrationBean;
+  }
 }

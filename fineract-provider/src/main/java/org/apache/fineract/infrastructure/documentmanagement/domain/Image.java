@@ -27,35 +27,32 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_image")
 public final class Image extends AbstractPersistableCustom {
 
-    @Column(name = "location", length = 500)
-    private String location;
+  @Column(name = "location", length = 500)
+  private String location;
 
-    @Column(name = "storage_type_enum")
-    private Integer storageType;
+  @Column(name = "storage_type_enum")
+  private Integer storageType;
 
-    public Image(final String location, final StorageType storageType) {
-        this.location = location;
-        this.storageType = storageType.getValue();
-    }
+  public Image(final String location, final StorageType storageType) {
+    this.location = location;
+    this.storageType = storageType.getValue();
+  }
 
-    protected Image() {
+  protected Image() {}
 
-    }
+  public String getLocation() {
+    return this.location;
+  }
 
-    public String getLocation() {
-        return this.location;
-    }
+  public Integer getStorageType() {
+    return this.storageType;
+  }
 
-    public Integer getStorageType() {
-        return this.storageType;
-    }
+  public void setLocation(final String location) {
+    this.location = location;
+  }
 
-    public void setLocation(final String location) {
-        this.location = location;
-    }
-
-    public void setStorageType(final Integer storageType) {
-        this.storageType = storageType;
-    }
-
+  public void setStorageType(final Integer storageType) {
+    this.storageType = storageType;
+  }
 }

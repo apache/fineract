@@ -28,27 +28,67 @@ import org.joda.time.format.DateTimeFormatter;
 
 public interface DepositAccountDomainService {
 
-    SavingsAccountTransaction handleWithdrawal(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean applyWithdrawFee, boolean isRegularTransaction);
+  SavingsAccountTransaction handleWithdrawal(
+      SavingsAccount account,
+      DateTimeFormatter fmt,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      boolean applyWithdrawFee,
+      boolean isRegularTransaction);
 
-    SavingsAccountTransaction handleFDDeposit(FixedDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail);
+  SavingsAccountTransaction handleFDDeposit(
+      FixedDepositAccount account,
+      DateTimeFormatter fmt,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail);
 
-    SavingsAccountTransaction handleRDDeposit(RecurringDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isRegularTransaction);
+  SavingsAccountTransaction handleRDDeposit(
+      RecurringDepositAccount account,
+      DateTimeFormatter fmt,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      boolean isRegularTransaction);
 
-    SavingsAccountTransaction handleSavingDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isRegularTransaction);
+  SavingsAccountTransaction handleSavingDeposit(
+      SavingsAccount account,
+      DateTimeFormatter fmt,
+      LocalDate transactionDate,
+      BigDecimal transactionAmount,
+      PaymentDetail paymentDetail,
+      boolean isRegularTransaction);
 
-    Long handleFDAccountClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
-            LocalDate tenantsTodayDate, Map<String, Object> changes);
+  Long handleFDAccountClosure(
+      FixedDepositAccount account,
+      PaymentDetail paymentDetail,
+      AppUser user,
+      JsonCommand command,
+      LocalDate tenantsTodayDate,
+      Map<String, Object> changes);
 
-    Long handleRDAccountClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
-            LocalDate tenantsTodayDate, Map<String, Object> changes);
+  Long handleRDAccountClosure(
+      RecurringDepositAccount account,
+      PaymentDetail paymentDetail,
+      AppUser user,
+      JsonCommand command,
+      LocalDate tenantsTodayDate,
+      Map<String, Object> changes);
 
-    Long handleFDAccountPreMatureClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
-            LocalDate tenantsTodayDate, Map<String, Object> changes);
+  Long handleFDAccountPreMatureClosure(
+      FixedDepositAccount account,
+      PaymentDetail paymentDetail,
+      AppUser user,
+      JsonCommand command,
+      LocalDate tenantsTodayDate,
+      Map<String, Object> changes);
 
-    Long handleRDAccountPreMatureClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
-            LocalDate tenantsTodayDate, Map<String, Object> changes);
+  Long handleRDAccountPreMatureClosure(
+      RecurringDepositAccount account,
+      PaymentDetail paymentDetail,
+      AppUser user,
+      JsonCommand command,
+      LocalDate tenantsTodayDate,
+      Map<String, Object> changes);
 }

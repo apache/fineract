@@ -30,16 +30,15 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "ROLE", action = "DISABLE")
 public class DisableRoleCommandHandler implements NewCommandSourceHandler {
 
-    private final RoleWritePlatformService writePlatformService;
+  private final RoleWritePlatformService writePlatformService;
 
-    @Autowired
-    public DisableRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DisableRoleCommandHandler(final RoleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.disableRole(command.entityId());
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.writePlatformService.disableRole(command.entityId());
+  }
 }

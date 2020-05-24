@@ -34,17 +34,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class UnknownCommandStrategy implements CommandStrategy {
 
-    @Override
-    public BatchResponse execute(BatchRequest batchRequest, @SuppressWarnings("unused") UriInfo uriInfo) {
+  @Override
+  public BatchResponse execute(
+      BatchRequest batchRequest, @SuppressWarnings("unused") UriInfo uriInfo) {
 
-        final BatchResponse batchResponse = new BatchResponse();
+    final BatchResponse batchResponse = new BatchResponse();
 
-        batchResponse.setRequestId(batchRequest.getRequestId());
-        batchResponse.setStatusCode(501);
-        batchResponse.setBody("Resource with method " + batchRequest.getMethod() + " and relativeUrl " + batchRequest.getRelativeUrl()
-                + " doesn't exist");
+    batchResponse.setRequestId(batchRequest.getRequestId());
+    batchResponse.setStatusCode(501);
+    batchResponse.setBody(
+        "Resource with method "
+            + batchRequest.getMethod()
+            + " and relativeUrl "
+            + batchRequest.getRelativeUrl()
+            + " doesn't exist");
 
-        return batchResponse;
-    }
-
+    return batchResponse;
+  }
 }

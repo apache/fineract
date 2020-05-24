@@ -26,12 +26,12 @@ import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
 
 public interface SchedulerJobRunnerReadService {
 
-    public List<JobDetailData> findAllJobDeatils();
+  public List<JobDetailData> findAllJobDeatils();
 
-    public JobDetailData retrieveOne(Long jobId);
+  public JobDetailData retrieveOne(Long jobId);
 
-    public Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters);
+  public Page<JobDetailHistoryData> retrieveJobHistory(
+      Long jobId, SearchParameters searchParameters);
 
-    public boolean isUpdatesAllowed();
-
+  public boolean isUpdatesAllowed();
 }

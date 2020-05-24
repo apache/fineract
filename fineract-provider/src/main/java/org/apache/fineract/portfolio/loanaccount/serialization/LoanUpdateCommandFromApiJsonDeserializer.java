@@ -35,31 +35,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class LoanUpdateCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<LoanUpdateCommand> {
+public final class LoanUpdateCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<LoanUpdateCommand> {
 
-    /**
-     * The parameters supported for this command.
-     */
-    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
+  /**
+   * The parameters supported for this command.
+   */
+  final Set<String> supportedParameters =
+      new HashSet<>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public LoanUpdateCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public LoanUpdateCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  @Override
+  public LoanUpdateCommand commandFromApiJson(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public LoanUpdateCommand commandFromApiJson(final String json) {
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final LocalDate unassignedDate =
+        this.fromApiJsonHelper.extractLocalDateNamed("unassignedDate", element);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate unassignedDate = this.fromApiJsonHelper.extractLocalDateNamed("unassignedDate", element);
-
-        return new LoanUpdateCommand(unassignedDate);
-    }
+    return new LoanUpdateCommand(unassignedDate);
+  }
 }

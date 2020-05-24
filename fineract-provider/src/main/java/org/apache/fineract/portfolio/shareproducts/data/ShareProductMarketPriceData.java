@@ -23,27 +23,28 @@ import java.util.Date;
 
 public class ShareProductMarketPriceData {
 
-    private final Long id ;
+  private final Long id;
 
-    private final Date fromDate;
+  private final Date fromDate;
 
-    private final BigDecimal shareValue;
+  private final BigDecimal shareValue;
 
-    public ShareProductMarketPriceData(final Long id, final Date fromDate, final BigDecimal shareValue) {
-        this.id = id ;
-        this.fromDate = fromDate ;
-        this.shareValue = shareValue ;
-    }
+  public ShareProductMarketPriceData(
+      final Long id, final Date fromDate, final BigDecimal shareValue) {
+    this.id = id;
+    this.fromDate = fromDate;
+    this.shareValue = shareValue;
+  }
 
-    public Long getId() {
-        return this.id ;
-    }
+  public Long getId() {
+    return this.id;
+  }
 
-    public Date getStartDate() {
-        return this.fromDate;
-    }
+  public Date getStartDate() {
+    return this.fromDate;
+  }
 
-    public BigDecimal getShareValue() {
-        return this.shareValue;
-    }
+  public BigDecimal getShareValue() {
+    return this.shareValue;
+  }
 }

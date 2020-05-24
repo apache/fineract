@@ -29,19 +29,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = ClientApiConstants.CLIENT_RESOURCE_NAME, action = ClientApiConstants.CLIENT_TRANSACTION_ACTION_UNDO)
+@CommandType(
+    entity = ClientApiConstants.CLIENT_RESOURCE_NAME,
+    action = ClientApiConstants.CLIENT_TRANSACTION_ACTION_UNDO)
 public class UndoClientTransactionCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientTransactionWritePlatformService writePlatformService;
+  private final ClientTransactionWritePlatformService writePlatformService;
 
-    @Autowired
-    public UndoClientTransactionCommandHandler(final ClientTransactionWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UndoClientTransactionCommandHandler(
+      final ClientTransactionWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.undo(command.getClientId(), command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.undo(command.getClientId(), command.entityId());
+  }
 }

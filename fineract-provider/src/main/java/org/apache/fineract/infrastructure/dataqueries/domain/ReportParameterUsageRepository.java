@@ -22,9 +22,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
+public interface ReportParameterUsageRepository
+    extends JpaRepository<ReportParameterUsage, Long>,
         JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
+  // no added behaviour
 
-    List<ReportParameterUsage> findByReport(Report report);
+  List<ReportParameterUsage> findByReport(Report report);
 }

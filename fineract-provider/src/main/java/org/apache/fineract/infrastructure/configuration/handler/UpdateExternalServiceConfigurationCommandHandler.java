@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "EXTERNALSERVICES", action = "UPDATE")
 public class UpdateExternalServiceConfigurationCommandHandler implements NewCommandSourceHandler {
 
-    private final ExternalServiceWritePlatformService writePlatformService;
+  private final ExternalServiceWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateExternalServiceConfigurationCommandHandler(final ExternalServiceWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateExternalServiceConfigurationCommandHandler(
+      final ExternalServiceWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateExternalServicesProperties(command.getTransactionId(), command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.updateExternalServicesProperties(
+        command.getTransactionId(), command);
+  }
 }

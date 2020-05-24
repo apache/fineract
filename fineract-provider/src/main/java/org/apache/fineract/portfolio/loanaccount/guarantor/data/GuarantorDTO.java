@@ -23,9 +23,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 public class GuarantorDTO {
 
-    @SuppressWarnings("unused")
-    private BigDecimal paidAmount;
-    @SuppressWarnings("unused")
-    private Loan loan;
+  @SuppressWarnings("unused")
+  private BigDecimal paidAmount;
 
+  @SuppressWarnings("unused")
+  private Loan loan;
 }

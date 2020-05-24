@@ -27,8 +27,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class TaxMappingNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public TaxMappingNotFoundException(final Long id) {
-        super("error.msg.tax.group.id.invalid", "Tax group mapping with identifier " + id + " does not exist", id);
-    }
-
+  public TaxMappingNotFoundException(final Long id) {
+    super(
+        "error.msg.tax.group.id.invalid",
+        "Tax group mapping with identifier " + id + " does not exist",
+        id);
+  }
 }

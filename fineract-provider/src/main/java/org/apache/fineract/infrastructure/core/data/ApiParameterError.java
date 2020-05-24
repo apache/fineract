@@ -25,129 +25,142 @@ import java.util.List;
 
 public class ApiParameterError {
 
-    /**
-     * A developer friendly plain English description of why the HTTP error
-     * response was returned from the API.
-     */
-    private String developerMessage;
+  /**
+   * A developer friendly plain English description of why the HTTP error
+   * response was returned from the API.
+   */
+  private String developerMessage;
 
-    /**
-     * A user friendly plain English description of why the HTTP error response
-     * was returned from the API that can be presented to end users.
-     */
-    private String defaultUserMessage;
+  /**
+   * A user friendly plain English description of why the HTTP error response
+   * was returned from the API that can be presented to end users.
+   */
+  private String defaultUserMessage;
 
-    /**
-     * A code that can be used for globalisation support by client applications
-     * of the API.
-     */
-    private String userMessageGlobalisationCode;
+  /**
+   * A code that can be used for globalisation support by client applications
+   * of the API.
+   */
+  private String userMessageGlobalisationCode;
 
-    /**
-     * The name of the field or parameter passed to the API that this error
-     * relates to.
-     */
-    private String parameterName;
+  /**
+   * The name of the field or parameter passed to the API that this error
+   * relates to.
+   */
+  private String parameterName;
 
-    /**
-     * The actual value of the parameter (if any) as passed to API.
-     */
-    private Object value;
+  /**
+   * The actual value of the parameter (if any) as passed to API.
+   */
+  private Object value;
 
-    /**
-     * Arguments related to the user error message.
-     */
-    private List<ApiErrorMessageArg> args = new ArrayList<>();
+  /**
+   * Arguments related to the user error message.
+   */
+  private List<ApiErrorMessageArg> args = new ArrayList<>();
 
-    private final transient SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+  private final transient SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static ApiParameterError generalError(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-    }
+  public static ApiParameterError generalError(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    return new ApiParameterError(
+        globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+  }
 
-    public static ApiParameterError resourceIdentifierNotFound(final String globalisationMessageCode, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-    }
+  public static ApiParameterError resourceIdentifierNotFound(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    return new ApiParameterError(
+        globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+  }
 
-    public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
-            final String parameterName, final Object... defaultUserMessageArgs) {
-        final ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
-        error.setParameterName(parameterName);
-        return error;
-    }
+  public static ApiParameterError parameterError(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final String parameterName,
+      final Object... defaultUserMessageArgs) {
+    final ApiParameterError error =
+        new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+    error.setParameterName(parameterName);
+    return error;
+  }
 
-    protected ApiParameterError() {
-        //
-    }
+  protected ApiParameterError() {
+    //
+  }
 
-    private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs) {
-        this.userMessageGlobalisationCode = globalisationMessageCode;
-        this.developerMessage = defaultUserMessage;
-        this.defaultUserMessage = defaultUserMessage;
+  private ApiParameterError(
+      final String globalisationMessageCode,
+      final String defaultUserMessage,
+      final Object[] defaultUserMessageArgs) {
+    this.userMessageGlobalisationCode = globalisationMessageCode;
+    this.developerMessage = defaultUserMessage;
+    this.defaultUserMessage = defaultUserMessage;
 
-        final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
-        if (defaultUserMessageArgs != null) {
-            for (final Object object : defaultUserMessageArgs) {
-                if(object instanceof Date){
-                    final String formattedDate = dateFormatter.format(object);
-                    messageArgs.add(ApiErrorMessageArg.from(formattedDate));
-                } else {
-                    messageArgs.add(ApiErrorMessageArg.from(object));
-                }
-            }
+    final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
+    if (defaultUserMessageArgs != null) {
+      for (final Object object : defaultUserMessageArgs) {
+        if (object instanceof Date) {
+          final String formattedDate = dateFormatter.format(object);
+          messageArgs.add(ApiErrorMessageArg.from(formattedDate));
+        } else {
+          messageArgs.add(ApiErrorMessageArg.from(object));
         }
-        this.args = messageArgs;
-
-        this.parameterName = "id";
+      }
     }
+    this.args = messageArgs;
 
-    public String getDeveloperMessage() {
-        return this.developerMessage;
-    }
+    this.parameterName = "id";
+  }
 
-    public void setDeveloperMessage(final String developerMessage) {
-        this.developerMessage = developerMessage;
-    }
+  public String getDeveloperMessage() {
+    return this.developerMessage;
+  }
 
-    public String getDefaultUserMessage() {
-        return this.defaultUserMessage;
-    }
+  public void setDeveloperMessage(final String developerMessage) {
+    this.developerMessage = developerMessage;
+  }
 
-    public void setDefaultUserMessage(final String defaultUserMessage) {
-        this.defaultUserMessage = defaultUserMessage;
-    }
+  public String getDefaultUserMessage() {
+    return this.defaultUserMessage;
+  }
 
-    public String getUserMessageGlobalisationCode() {
-        return this.userMessageGlobalisationCode;
-    }
+  public void setDefaultUserMessage(final String defaultUserMessage) {
+    this.defaultUserMessage = defaultUserMessage;
+  }
 
-    public void setUserMessageGlobalisationCode(final String userMessageGlobalisationCode) {
-        this.userMessageGlobalisationCode = userMessageGlobalisationCode;
-    }
+  public String getUserMessageGlobalisationCode() {
+    return this.userMessageGlobalisationCode;
+  }
 
-    public String getParameterName() {
-        return this.parameterName;
-    }
+  public void setUserMessageGlobalisationCode(final String userMessageGlobalisationCode) {
+    this.userMessageGlobalisationCode = userMessageGlobalisationCode;
+  }
 
-    public void setParameterName(final String parameterName) {
-        this.parameterName = parameterName;
-    }
+  public String getParameterName() {
+    return this.parameterName;
+  }
 
-    public Object getValue() {
-        return this.value;
-    }
+  public void setParameterName(final String parameterName) {
+    this.parameterName = parameterName;
+  }
 
-    public void setValue(final Object value) {
-        this.value = value;
-    }
+  public Object getValue() {
+    return this.value;
+  }
 
-    public List<ApiErrorMessageArg> getArgs() {
-        return this.args;
-    }
+  public void setValue(final Object value) {
+    this.value = value;
+  }
 
-    public void setArgs(final List<ApiErrorMessageArg> args) {
-        this.args = args;
-    }
+  public List<ApiErrorMessageArg> getArgs() {
+    return this.args;
+  }
+
+  public void setArgs(final List<ApiErrorMessageArg> args) {
+    this.args = args;
+  }
 }

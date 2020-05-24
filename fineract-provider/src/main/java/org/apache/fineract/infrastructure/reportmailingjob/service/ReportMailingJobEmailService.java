@@ -21,10 +21,10 @@ package org.apache.fineract.infrastructure.reportmailingjob.service;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailData;
 
 public interface ReportMailingJobEmailService {
-    /**
-     * Handles request to send an email with attachment
-     *
-     * @param reportMailingJobEmailData {@link ReportMailingJobEmailData} object
-     */
-    void sendEmailWithAttachment(final ReportMailingJobEmailData reportMailingJobEmailData);
+  /**
+   * Handles request to send an email with attachment
+   *
+   * @param reportMailingJobEmailData {@link ReportMailingJobEmailData} object
+   */
+  void sendEmailWithAttachment(final ReportMailingJobEmailData reportMailingJobEmailData);
 }

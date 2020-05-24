@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "WITHDRAW")
 public class LoanApplicationWithdrawnByApplicantCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanApplicationWritePlatformService writePlatformService;
+  private final LoanApplicationWritePlatformService writePlatformService;
 
-    @Autowired
-    public LoanApplicationWithdrawnByApplicantCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public LoanApplicationWithdrawnByApplicantCommandHandler(
+      final LoanApplicationWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.applicantWithdrawsFromApplication(command.entityId(), command);
-    }
+    return this.writePlatformService.applicantWithdrawsFromApplication(command.entityId(), command);
+  }
 }

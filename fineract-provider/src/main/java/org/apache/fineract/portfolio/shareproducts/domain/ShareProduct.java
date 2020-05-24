@@ -53,391 +53,418 @@ import org.joda.time.DateTime;
 @Table(name = "m_share_product")
 public class ShareProduct extends AbstractAuditableCustom {
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+  @Column(name = "name", nullable = false, unique = true)
+  private String name;
 
-    @Column(name = "short_name", nullable = false, unique = true)
-    private String shortName;
+  @Column(name = "short_name", nullable = false, unique = true)
+  private String shortName;
 
-    @Column(name = "description")
-    private String description;
+  @Column(name = "description")
+  private String description;
 
-    @Column(name = "start_date")
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+  @Column(name = "start_date")
+  @Temporal(TemporalType.DATE)
+  private Date startDate;
 
-    @Column(name = "end_date")
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+  @Column(name = "end_date")
+  @Temporal(TemporalType.DATE)
+  private Date endDate;
 
-    @Column(name = "external_id", length = 100, nullable = true, unique = true)
-    private String externalId;
+  @Column(name = "external_id", length = 100, nullable = true, unique = true)
+  private String externalId;
 
-    @Embedded
-    private MonetaryCurrency currency;
+  @Embedded private MonetaryCurrency currency;
 
-    @Column(name = "total_shares", nullable = false)
-    private Long totalShares;
+  @Column(name = "total_shares", nullable = false)
+  private Long totalShares;
 
-    @Column(name = "issued_shares", nullable = false)
-    private Long totalSharesIssued;
+  @Column(name = "issued_shares", nullable = false)
+  private Long totalSharesIssued;
 
-    @Column(name = "totalsubscribed_shares", nullable = true)
-    private Long totalSubscribedShares;
+  @Column(name = "totalsubscribed_shares", nullable = true)
+  private Long totalSubscribedShares;
 
-    @Column(name = "unit_price", nullable = false)
-    private BigDecimal unitPrice;
+  @Column(name = "unit_price", nullable = false)
+  private BigDecimal unitPrice;
 
-    @Column(name = "capital_amount", nullable = false)
-    private BigDecimal shareCapital;
+  @Column(name = "capital_amount", nullable = false)
+  private BigDecimal shareCapital;
 
-    @Column(name = "minimum_client_shares")
-    private Long minimumShares;
+  @Column(name = "minimum_client_shares")
+  private Long minimumShares;
 
-    @Column(name = "nominal_client_shares", nullable = false)
-    private Long nominalShares;
+  @Column(name = "nominal_client_shares", nullable = false)
+  private Long nominalShares;
 
-    @Column(name = "maximum_client_shares")
-    private Long maximumShares;
+  @Column(name = "maximum_client_shares")
+  private Long maximumShares;
 
-    @OrderBy(value = "fromDate,id")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true, fetch=FetchType.EAGER)
-    Set<ShareProductMarketPrice> marketPrice;
+  @OrderBy(value = "fromDate,id")
+  @OneToMany(
+      cascade = CascadeType.ALL,
+      mappedBy = "product",
+      orphanRemoval = true,
+      fetch = FetchType.EAGER)
+  Set<ShareProductMarketPrice> marketPrice;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "m_share_product_charge", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
-    private Set<Charge> charges;
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "m_share_product_charge",
+      joinColumns = @JoinColumn(name = "product_id"),
+      inverseJoinColumns = @JoinColumn(name = "charge_id"))
+  private Set<Charge> charges;
 
-    @Column(name = "allow_dividends_inactive_clients")
-    private Boolean allowDividendCalculationForInactiveClients;
+  @Column(name = "allow_dividends_inactive_clients")
+  private Boolean allowDividendCalculationForInactiveClients;
 
-    @Column(name = "lockin_period_frequency")
-    private Integer lockinPeriod;
+  @Column(name = "lockin_period_frequency")
+  private Integer lockinPeriod;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "lockin_period_frequency_enum", nullable = true)
-    private PeriodFrequencyType lockPeriodType;
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "lockin_period_frequency_enum", nullable = true)
+  private PeriodFrequencyType lockPeriodType;
 
-    @Column(name = "minimum_active_period_frequency")
-    private Integer minimumActivePeriod;
+  @Column(name = "minimum_active_period_frequency")
+  private Integer minimumActivePeriod;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "minimum_active_period_frequency_enum", nullable = true)
-    private PeriodFrequencyType minimumActivePeriodType;
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "minimum_active_period_frequency_enum", nullable = true)
+  private PeriodFrequencyType minimumActivePeriodType;
 
-    @Column(name = "accounting_type", nullable = false)
-    protected Integer accountingRule;
+  @Column(name = "accounting_type", nullable = false)
+  protected Integer accountingRule;
 
-    protected ShareProduct() {
+  protected ShareProduct() {}
 
+  public ShareProduct(
+      final String name,
+      final String shortName,
+      final String description,
+      final String externalId,
+      final MonetaryCurrency currency,
+      final Long totalShares,
+      final Long totalSharesIssued,
+      final BigDecimal unitPrice,
+      final BigDecimal shareCapital,
+      final Long minimumShares,
+      final Long nominalShares,
+      final Long maximumShares,
+      Set<ShareProductMarketPrice> marketPrice,
+      Set<Charge> charges,
+      final Boolean allowDividendCalculationForInactiveClients,
+      final Integer lockinPeriod,
+      final PeriodFrequencyType lockPeriodType,
+      final Integer minimumActivePeriod,
+      final PeriodFrequencyType minimumActivePeriodForDividendsType,
+      AppUser createdBy,
+      DateTime createdDate,
+      AppUser lastModifiedBy,
+      DateTime lastModifiedDate,
+      final AccountingRuleType accountingRuleType) {
+
+    this.name = name;
+    this.shortName = shortName;
+    this.description = description;
+    this.externalId = externalId;
+    this.currency = currency;
+    this.totalShares = totalShares;
+    this.totalSharesIssued = totalSharesIssued;
+    this.unitPrice = unitPrice;
+    this.shareCapital = shareCapital;
+    this.minimumShares = minimumShares;
+    this.nominalShares = nominalShares;
+    this.maximumShares = maximumShares;
+    this.marketPrice = marketPrice;
+    this.charges = charges;
+    this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
+    this.lockinPeriod = lockinPeriod;
+    this.lockPeriodType = lockPeriodType;
+    this.minimumActivePeriod = minimumActivePeriod;
+    this.minimumActivePeriodType = minimumActivePeriodForDividendsType;
+    setCreatedBy(createdBy);
+    setCreatedDate(Instant.ofEpochMilli(createdDate.getMillis()));
+    setLastModifiedBy(lastModifiedBy);
+    setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.getMillis()));
+    startDate = DateUtils.getDateOfTenant();
+    endDate = DateUtils.getDateOfTenant();
+    if (accountingRuleType != null) {
+      this.accountingRule = accountingRuleType.getValue();
     }
+  }
 
-    public ShareProduct(final String name, final String shortName, final String description, final String externalId,
-            final MonetaryCurrency currency, final Long totalShares, final Long totalSharesIssued, final BigDecimal unitPrice,
-            final BigDecimal shareCapital, final Long minimumShares, final Long nominalShares, final Long maximumShares,
-            Set<ShareProductMarketPrice> marketPrice, Set<Charge> charges, final Boolean allowDividendCalculationForInactiveClients,
-            final Integer lockinPeriod, final PeriodFrequencyType lockPeriodType, final Integer minimumActivePeriod,
-            final PeriodFrequencyType minimumActivePeriodForDividendsType, AppUser createdBy, DateTime createdDate, AppUser lastModifiedBy,
-            DateTime lastModifiedDate, final AccountingRuleType accountingRuleType) {
-
-        this.name = name;
-        this.shortName = shortName;
-        this.description = description;
-        this.externalId = externalId;
-        this.currency = currency;
-        this.totalShares = totalShares;
-        this.totalSharesIssued = totalSharesIssued;
-        this.unitPrice = unitPrice;
-        this.shareCapital = shareCapital;
-        this.minimumShares = minimumShares;
-        this.nominalShares = nominalShares;
-        this.maximumShares = maximumShares;
-        this.marketPrice = marketPrice;
-        this.charges = charges;
-        this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
-        this.lockinPeriod = lockinPeriod;
-        this.lockPeriodType = lockPeriodType;
-        this.minimumActivePeriod = minimumActivePeriod;
-        this.minimumActivePeriodType = minimumActivePeriodForDividendsType;
-        setCreatedBy(createdBy);
-        setCreatedDate(Instant.ofEpochMilli(createdDate.getMillis()));
-        setLastModifiedBy(lastModifiedBy);
-        setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.getMillis()));
-        startDate = DateUtils.getDateOfTenant();
-        endDate = DateUtils.getDateOfTenant();
-        if (accountingRuleType != null) {
-            this.accountingRule = accountingRuleType.getValue();
-        }
+  public boolean setProductName(String productName) {
+    boolean returnValue = false;
+    if (!this.name.equals(productName)) {
+      this.name = productName;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setProductName(String productName) {
-        boolean returnValue = false;
-        if (!this.name.equals(productName)) {
-            this.name = productName;
-            returnValue = true;
-        }
-        return returnValue;
+  public String getProductName() {
+    return this.name;
+  }
+
+  public boolean setShortName(String shortName) {
+    boolean returnValue = false;
+    if (!this.shortName.equals(shortName)) {
+      this.shortName = shortName;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public String getProductName() {
-        return this.name;
+  public boolean setDescription(String description) {
+    boolean returnValue = false;
+    if (this.description == null || !this.description.equals(description)) {
+      this.description = description;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setShortName(String shortName) {
-        boolean returnValue = false;
-        if (!this.shortName.equals(shortName)) {
-            this.shortName = shortName;
-            returnValue = true;
-        }
-        return returnValue;
+  public boolean setExternalId(String externalId) {
+    boolean returnValue = false;
+    if (this.externalId == null || !this.externalId.equals(externalId)) {
+      this.externalId = externalId;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setDescription(String description) {
-        boolean returnValue = false;
-        if (this.description == null || !this.description.equals(description)) {
-            this.description = description;
-            returnValue = true;
-        }
-        return returnValue;
+  public boolean setTotalShares(Long totalShares) {
+    boolean returnValue = false;
+    if (!this.totalShares.equals(totalShares)) {
+      this.totalShares = totalShares;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setExternalId(String externalId) {
-        boolean returnValue = false;
-        if (this.externalId == null || !this.externalId.equals(externalId)) {
-            this.externalId = externalId;
-            returnValue = true;
-        }
-        return returnValue;
+  public Long getTotalShares() {
+    return this.totalShares;
+  }
+
+  public boolean setTotalIssuedShares(Long totalSharesIssued) {
+    boolean returnValue = false;
+    if (this.totalSharesIssued == null || !this.totalSharesIssued.equals(totalSharesIssued)) {
+      this.totalSharesIssued = totalSharesIssued;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setTotalShares(Long totalShares) {
-        boolean returnValue = false;
-        if (!this.totalShares.equals(totalShares)) {
-            this.totalShares = totalShares;
-            returnValue = true;
-        }
-        return returnValue;
-
+  public boolean setMonetaryCurrency(MonetaryCurrency currency) {
+    boolean returnValue = false;
+    if (!this.currency.equals(currency)) {
+      this.currency = currency;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public Long getTotalShares() {
-        return this.totalShares;
+  public MonetaryCurrency getCurrency() {
+    return this.currency;
+  }
+
+  public boolean setUnitPrice(BigDecimal unitPrice) {
+    boolean returnValue = false;
+    if (!this.unitPrice.equals(unitPrice)) {
+      this.unitPrice = unitPrice;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setTotalIssuedShares(Long totalSharesIssued) {
-        boolean returnValue = false;
-        if (this.totalSharesIssued == null || !this.totalSharesIssued.equals(totalSharesIssued)) {
-            this.totalSharesIssued = totalSharesIssued;
-            returnValue = true;
-        }
-        return returnValue;
+  public boolean setMinimumShares(final Long minimumShares) {
+    boolean returnValue = false;
+    if (this.minimumShares == null || !this.minimumShares.equals(minimumShares)) {
+      this.minimumShares = minimumShares;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setMonetaryCurrency(MonetaryCurrency currency) {
-        boolean returnValue = false;
-        if (!this.currency.equals(currency)) {
-            this.currency = currency;
-            returnValue = true;
-        }
-        return returnValue;
+  public boolean setNominalShares(final Long nominalShares) {
+    boolean returnValue = false;
+    if (!this.nominalShares.equals(nominalShares)) {
+      this.nominalShares = nominalShares;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public MonetaryCurrency getCurrency() {
-        return this.currency;
+  public boolean setMaximumShares(final Long maximumShares) {
+    boolean returnValue = false;
+    if (this.maximumShares == null || !this.maximumShares.equals(maximumShares)) {
+      this.maximumShares = maximumShares;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setUnitPrice(BigDecimal unitPrice) {
-        boolean returnValue = false;
-        if (!this.unitPrice.equals(unitPrice)) {
-            this.unitPrice = unitPrice;
-            returnValue = true;
-        }
-        return returnValue;
-    }
-
-    public boolean setMinimumShares(final Long minimumShares) {
-        boolean returnValue = false;
-        if (this.minimumShares == null || !this.minimumShares.equals(minimumShares)) {
-            this.minimumShares = minimumShares;
-            returnValue = true;
-        }
-        return returnValue;
-    }
-
-    public boolean setNominalShares(final Long nominalShares) {
-        boolean returnValue = false;
-        if (!this.nominalShares.equals(nominalShares)) {
-            this.nominalShares = nominalShares;
-            returnValue = true;
-        }
-        return returnValue;
-    }
-
-    public boolean setMaximumShares(final Long maximumShares) {
-        boolean returnValue = false;
-        if (this.maximumShares == null || !this.maximumShares.equals(maximumShares)) {
-            this.maximumShares = maximumShares;
-            returnValue = true;
-        }
-        return returnValue;
-    }
-
-    public boolean setMarketPrice(Set<ShareProductMarketPriceData> marketPrice) {
-        boolean update = true;
-        Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
-        if (marketPrice != null && marketPrice.size() > 0) {
-             for (ShareProductMarketPriceData data : marketPrice) {
-                 if (data.getId() == null) {
-                     ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
-                     entity.setShareProduct(this);
-                     marketPriceTemp.add(entity);
-                } else {
-                    for (ShareProductMarketPrice priceData : this.marketPrice) {
-                        if (priceData.getId().equals(data.getId())) {
-                            priceData.setStartDate(data.getStartDate());
-                            priceData.setShareValue(data.getShareValue());
-                            marketPriceTemp.add(priceData);
-                        }
-                    }
-                }
+  public boolean setMarketPrice(Set<ShareProductMarketPriceData> marketPrice) {
+    boolean update = true;
+    Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
+    if (marketPrice != null && marketPrice.size() > 0) {
+      for (ShareProductMarketPriceData data : marketPrice) {
+        if (data.getId() == null) {
+          ShareProductMarketPrice entity =
+              new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
+          entity.setShareProduct(this);
+          marketPriceTemp.add(entity);
+        } else {
+          for (ShareProductMarketPrice priceData : this.marketPrice) {
+            if (priceData.getId().equals(data.getId())) {
+              priceData.setStartDate(data.getStartDate());
+              priceData.setShareValue(data.getShareValue());
+              marketPriceTemp.add(priceData);
             }
+          }
         }
-        this.marketPrice = marketPriceTemp;
-        return update;
+      }
     }
+    this.marketPrice = marketPriceTemp;
+    return update;
+  }
 
-    public boolean setCharges(Set<Charge> charges) {
-        this.charges.clear();
-        this.charges.addAll(charges);
-        return true;
+  public boolean setCharges(Set<Charge> charges) {
+    this.charges.clear();
+    this.charges.addAll(charges);
+    return true;
+  }
+
+  public boolean setAllowDividendCalculationForInactiveClients(
+      Boolean allowDividendCalculationForInactiveClients) {
+    boolean returnValue = false;
+    if (this.allowDividendCalculationForInactiveClients == null
+        || !this.allowDividendCalculationForInactiveClients.equals(
+            allowDividendCalculationForInactiveClients)) {
+      this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
+      returnValue = true;
     }
+    return returnValue;
+  }
 
-    public boolean setAllowDividendCalculationForInactiveClients(Boolean allowDividendCalculationForInactiveClients) {
-        boolean returnValue = false;
-        if (this.allowDividendCalculationForInactiveClients == null || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
-            this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
-            returnValue = true;
+  public boolean setLockinPeriod(final Integer lockinPeriod) {
+    boolean returnValue = false;
+    if (this.lockinPeriod == null || !this.lockinPeriod.equals(lockinPeriod)) {
+      this.lockinPeriod = lockinPeriod;
+      returnValue = true;
+    }
+    return returnValue;
+  }
+
+  public boolean setLockPeriodFrequencyType(final PeriodFrequencyType lockPeriod) {
+    boolean returnValue = false;
+    if (this.lockPeriodType == null || !this.lockPeriodType.equals(lockPeriod)) {
+      this.lockPeriodType = lockPeriod;
+      returnValue = true;
+    }
+    return returnValue;
+  }
+
+  public boolean setminimumActivePeriod(final Integer minimumActivePeriod) {
+    boolean returnValue = false;
+    if (this.minimumActivePeriod == null || !this.minimumActivePeriod.equals(minimumActivePeriod)) {
+      this.minimumActivePeriod = minimumActivePeriod;
+      returnValue = true;
+    }
+    return returnValue;
+  }
+
+  public boolean setminimumActivePeriodFrequencyType(
+      final PeriodFrequencyType minimumActivePeriodForDividends) {
+    boolean returnValue = false;
+    if (this.minimumActivePeriodType == null
+        || !this.minimumActivePeriodType.equals(minimumActivePeriodForDividends)) {
+      this.minimumActivePeriodType = minimumActivePeriodForDividends;
+      returnValue = true;
+    }
+    return returnValue;
+  }
+
+  public String getShortName() {
+    return this.shortName;
+  }
+
+  public boolean setshareCapitalValue(BigDecimal shareCapitalValue) {
+    boolean updated = false;
+    if (this.shareCapital == null || !this.shareCapital.equals(shareCapitalValue)) {
+      this.shareCapital = shareCapitalValue;
+      updated = true;
+    }
+    return updated;
+  }
+
+  public boolean setAccountingRule(final Integer accountingRule) {
+    boolean returnValue = false;
+    if (!this.accountingRule.equals(accountingRule)) {
+      this.accountingRule = accountingRule;
+      returnValue = true;
+    }
+    return returnValue;
+  }
+
+  public Long getSharesIssued() {
+    return this.totalSharesIssued;
+  }
+
+  public BigDecimal getUnitPrice() {
+    return this.unitPrice;
+  }
+
+  public Integer getAccountingType() {
+    return this.accountingRule;
+  }
+
+  public boolean isSharesAllowed(Long requestedShares) {
+    boolean allowed = true;
+    if (minimumShares != null && maximumShares != null) {
+      if (requestedShares < minimumShares || requestedShares > maximumShares) {
+        allowed = false;
+      }
+    }
+    return allowed;
+  }
+
+  public BigDecimal deriveMarketPrice(final Date currentDate) {
+    BigDecimal marketValue = this.unitPrice;
+    if (this.marketPrice != null && !this.marketPrice.isEmpty()) {
+      for (ShareProductMarketPrice data : this.marketPrice) {
+        Date futureDate = data.getStartDate();
+        if (currentDate.equals(futureDate) || currentDate.after(futureDate)) {
+          marketValue = data.getPrice();
         }
-        return returnValue;
+      }
     }
+    return marketValue;
+  }
 
-    public boolean setLockinPeriod(final Integer lockinPeriod) {
-        boolean returnValue = false;
-        if (this.lockinPeriod == null || !this.lockinPeriod.equals(lockinPeriod)) {
-            this.lockinPeriod = lockinPeriod;
-            returnValue = true;
-        }
-        return returnValue;
+  public void addSubscribedShares(final Long subscribedShares) {
+    if (this.totalSubscribedShares == null) {
+      this.totalSubscribedShares = Long.valueOf(0);
     }
+    this.totalSubscribedShares += subscribedShares;
+  }
 
-    public boolean setLockPeriodFrequencyType(final PeriodFrequencyType lockPeriod) {
-        boolean returnValue = false;
-        if (this.lockPeriodType == null || !this.lockPeriodType.equals(lockPeriod)) {
-            this.lockPeriodType = lockPeriod;
-            returnValue = true;
-        }
-        return returnValue;
-    }
+  public void removeSubscribedShares(final Long subscribedShares) {
+    this.totalSubscribedShares -= subscribedShares;
+  }
 
-    public boolean setminimumActivePeriod(final Integer minimumActivePeriod) {
-        boolean returnValue = false;
-        if (this.minimumActivePeriod == null || !this.minimumActivePeriod.equals(minimumActivePeriod)) {
-            this.minimumActivePeriod = minimumActivePeriod;
-            returnValue = true;
-        }
-        return returnValue;
-    }
+  public Long getSubscribedShares() {
+    return this.totalSubscribedShares;
+  }
 
-    public boolean setminimumActivePeriodFrequencyType(final PeriodFrequencyType minimumActivePeriodForDividends) {
-        boolean returnValue = false;
-        if (this.minimumActivePeriodType == null || !this.minimumActivePeriodType.equals(minimumActivePeriodForDividends)) {
-            this.minimumActivePeriodType = minimumActivePeriodForDividends;
-            returnValue = true;
-        }
-        return returnValue;
-    }
+  public Long getMinimumClientShares() {
+    return this.minimumShares;
+  }
 
-    public String getShortName() {
-        return this.shortName;
-    }
+  public Long getMaximumClientShares() {
+    return this.maximumShares;
+  }
 
-    public boolean setshareCapitalValue(BigDecimal shareCapitalValue) {
-        boolean updated = false;
-        if (this.shareCapital == null || !this.shareCapital.equals(shareCapitalValue)) {
-            this.shareCapital = shareCapitalValue;
-            updated = true;
-        }
-        return updated;
-    }
-
-    public boolean setAccountingRule(final Integer accountingRule) {
-        boolean returnValue = false;
-        if (!this.accountingRule.equals(accountingRule)) {
-            this.accountingRule = accountingRule;
-            returnValue = true;
-        }
-        return returnValue;
-    }
-
-    public Long getSharesIssued() {
-        return this.totalSharesIssued;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return this.unitPrice;
-    }
-
-    public Integer getAccountingType() {
-        return this.accountingRule;
-    }
-
-    public boolean isSharesAllowed(Long requestedShares) {
-        boolean allowed = true;
-        if (minimumShares != null && maximumShares != null) {
-            if (requestedShares < minimumShares || requestedShares > maximumShares) {
-                allowed = false;
-            }
-        }
-        return allowed;
-    }
-
-    public BigDecimal deriveMarketPrice(final Date currentDate) {
-        BigDecimal marketValue = this.unitPrice;
-        if (this.marketPrice != null && !this.marketPrice.isEmpty()) {
-            for (ShareProductMarketPrice data : this.marketPrice) {
-                Date futureDate = data.getStartDate();
-                if (currentDate.equals(futureDate) || currentDate.after(futureDate)) {
-                    marketValue = data.getPrice();
-                }
-            }
-        }
-        return marketValue;
-    }
-
-    public void addSubscribedShares(final Long subscribedShares) {
-        if(this.totalSubscribedShares == null) {
-            this.totalSubscribedShares = Long.valueOf(0) ;
-        }
-        this.totalSubscribedShares += subscribedShares ;
-    }
-
-    public void removeSubscribedShares(final Long subscribedShares) {
-        this.totalSubscribedShares -= subscribedShares ;
-    }
-
-    public Long getSubscribedShares() {
-        return this.totalSubscribedShares ;
-    }
-
-    public Long getMinimumClientShares() {
-        return this.minimumShares ;
-    }
-
-    public Long getMaximumClientShares() {
-        return this.maximumShares ;
-    }
-
-    public Long getDefaultClientShares() {
-        return this.nominalShares ;
-    }
+  public Long getDefaultClientShares() {
+    return this.nominalShares;
+  }
 }

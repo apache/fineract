@@ -20,19 +20,18 @@ package org.apache.fineract.portfolio.tax.api;
 
 public interface TaxApiConstants {
 
-    public static final String nameParamName = "name";
-    public static final String percentageParamName = "percentage";
-    public static final String debitAccountTypeParamName = "debitAccountType";
-    public static final String debitAcountIdParamName = "debitAcountId";
-    public static final String creditAccountTypeParamName = "creditAccountType";
-    public static final String creditAcountIdParamName = "creditAcountId";
+  public static final String nameParamName = "name";
+  public static final String percentageParamName = "percentage";
+  public static final String debitAccountTypeParamName = "debitAccountType";
+  public static final String debitAcountIdParamName = "debitAcountId";
+  public static final String creditAccountTypeParamName = "creditAccountType";
+  public static final String creditAcountIdParamName = "creditAcountId";
 
-    public static final String startDateParamName = "startDate";
-    public static final String endDateParamName = "endDate";
+  public static final String startDateParamName = "startDate";
+  public static final String endDateParamName = "endDate";
 
-    public static final String chargeIncludesTaxParamName = "chargeIncludesTax";
-    public static final String taxComponentsParamName = "taxComponents";
-    public static final String idParamName = "id";
-    public static final String taxComponentIdParamName = "taxComponentId";
-
+  public static final String chargeIncludesTaxParamName = "chargeIncludesTax";
+  public static final String taxComponentsParamName = "taxComponents";
+  public static final String idParamName = "id";
+  public static final String taxComponentIdParamName = "taxComponentId";
 }

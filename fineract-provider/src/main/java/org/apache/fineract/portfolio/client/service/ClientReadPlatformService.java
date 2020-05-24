@@ -26,27 +26,27 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 
 public interface ClientReadPlatformService {
 
-    ClientData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
+  ClientData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
 
-    Page<ClientData> retrieveAll(SearchParameters searchParameters);
+  Page<ClientData> retrieveAll(SearchParameters searchParameters);
 
-    ClientData retrieveOne(Long clientId);
+  ClientData retrieveOne(Long clientId);
 
-    Collection<ClientData> retrieveAllForLookup(String extraCriteria);
+  Collection<ClientData> retrieveAllForLookup(String extraCriteria);
 
-    Collection<ClientData> retrieveAllForLookupByOfficeId(Long officeId);
+  Collection<ClientData> retrieveAllForLookupByOfficeId(Long officeId);
 
-    ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
+  ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
 
-    Collection<ClientData> retrieveClientMembersOfGroup(Long groupId);
+  Collection<ClientData> retrieveClientMembersOfGroup(Long groupId);
 
-    Collection<ClientData> retrieveActiveClientMembersOfGroup(Long groupId);
+  Collection<ClientData> retrieveActiveClientMembersOfGroup(Long groupId);
 
-    Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId);
+  Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId);
 
-    ClientData retrieveAllNarrations(String clientNarrations);
+  ClientData retrieveAllNarrations(String clientNarrations);
 
-    Date retrieveClientTransferProposalDate(Long clientId);
+  Date retrieveClientTransferProposalDate(Long clientId);
 
-    void validateClient(Long clientId);
+  void validateClient(Long clientId);
 }

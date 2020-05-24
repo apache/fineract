@@ -42,55 +42,63 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-
 @Path("/email/configuration")
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Component
 @Scope("singleton")
 public class EmailConfigurationApiResource {
 
-    private final String resourceNameForPermissions = "EMAIL_CONFIGURATION";
-    private final PlatformSecurityContext context;
-    private final EmailReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService;
+  private final String resourceNameForPermissions = "EMAIL_CONFIGURATION";
+  private final PlatformSecurityContext context;
+  private final EmailReadPlatformService readPlatformService;
+  private final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService;
 
-    @Autowired
-    public EmailConfigurationApiResource(final PlatformSecurityContext context, final EmailReadPlatformService readPlatformService,
-                            final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer,
-                            final ApiRequestParameterHelper apiRequestParameterHelper,
-                            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-                            final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.emailConfigurationReadPlatformService = emailConfigurationReadPlatformService;
-    }
+  @Autowired
+  public EmailConfigurationApiResource(
+      final PlatformSecurityContext context,
+      final EmailReadPlatformService readPlatformService,
+      final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+      final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
+    this.context = context;
+    this.readPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.emailConfigurationReadPlatformService = emailConfigurationReadPlatformService;
+  }
 
-    @GET
-    public String retrieveAll(@Context final UriInfo uriInfo){
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+  @GET
+  public String retrieveAll(@Context final UriInfo uriInfo) {
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<EmailConfigurationData> configuration = this.emailConfigurationReadPlatformService.retrieveAll();
+    final Collection<EmailConfigurationData> configuration =
+        this.emailConfigurationReadPlatformService.retrieveAll();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return this.toApiJsonSerializer.serialize(settings, configuration);
-    }
+    return this.toApiJsonSerializer.serialize(settings, configuration);
+  }
 
+  @PUT
+  public String updateConfiguration(
+      @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
-    @PUT
-    public String updateConfiguration(@Context final UriInfo uriInfo, final String apiRequestBodyAsJson){
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder()
+            .updateEmailConfiguration()
+            .withJson(apiRequestBodyAsJson)
+            .build();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateEmailConfiguration().withJson(apiRequestBodyAsJson).build();
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

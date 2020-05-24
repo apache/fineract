@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SHAREACCOUNT", action = "UPDATE")
 public class UpdateShareAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
+  private final ShareAccountWritePlatformService shareAccountWritePlatformService;
 
-    @Autowired
-    public UpdateShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
-        this.shareAccountWritePlatformService = shareAccountWritePlatformService ;
-    }
+  @Autowired
+  public UpdateShareAccountCommandHandler(
+      final ShareAccountWritePlatformService shareAccountWritePlatformService) {
+    this.shareAccountWritePlatformService = shareAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.shareAccountWritePlatformService.updateShareAccount(jsonCommand.entityId(), jsonCommand);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.shareAccountWritePlatformService.updateShareAccount(
+        jsonCommand.entityId(), jsonCommand);
+  }
 }

@@ -31,18 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "CREATE")
 public class CreateGroupCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+  private final GroupingTypesWritePlatformService groupWritePlatformService;
 
-    @Autowired
-    public CreateGroupCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
-    }
+  @Autowired
+  public CreateGroupCommandHandler(
+      final GroupingTypesWritePlatformService groupWritePlatformService) {
+    this.groupWritePlatformService = groupWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final Long centerId = command.longValueOfParameterNamed("centerId");
-        return this.groupWritePlatformService.createGroup(centerId, command);
-    }
+    final Long centerId = command.longValueOfParameterNamed("centerId");
+    return this.groupWritePlatformService.createGroup(centerId, command);
+  }
 }

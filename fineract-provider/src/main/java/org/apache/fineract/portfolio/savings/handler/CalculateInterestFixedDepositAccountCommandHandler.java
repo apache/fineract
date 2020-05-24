@@ -32,16 +32,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "FIXEDDEPOSITACCOUNT", action = "CALCULATEINTEREST")
 public class CalculateInterestFixedDepositAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+  private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public CalculateInterestFixedDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public CalculateInterestFixedDepositAccountCommandHandler(
+      final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.calculateInterest(command.entityId(), DepositAccountType.FIXED_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.calculateInterest(
+        command.entityId(), DepositAccountType.FIXED_DEPOSIT);
+  }
 }

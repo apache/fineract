@@ -23,30 +23,37 @@ import java.util.List;
 
 public class EmailMessageWithAttachmentData {
 
-    private final String to;
-    private final String text;
-    private final String subject;
-    private final List<File> attachments;
+  private final String to;
+  private final String text;
+  private final String subject;
+  private final List<File> attachments;
 
-    private EmailMessageWithAttachmentData(final String to, final String text, final String subject, final List<File> attachments) {
-        this.to = to;
-        this.text = text;
-        this.subject = subject;
-        this.attachments = attachments;
-    }
+  private EmailMessageWithAttachmentData(
+      final String to, final String text, final String subject, final List<File> attachments) {
+    this.to = to;
+    this.text = text;
+    this.subject = subject;
+    this.attachments = attachments;
+  }
 
+  public static EmailMessageWithAttachmentData createNew(
+      final String to, final String text, final String subject, final List<File> attachments) {
+    return new EmailMessageWithAttachmentData(to, text, subject, attachments);
+  }
 
-    public static EmailMessageWithAttachmentData createNew (final String to, final String text, final String subject, final List<File> attachments){
-        return new EmailMessageWithAttachmentData(to,text,subject,attachments);
-    }
+  public String getTo() {
+    return this.to;
+  }
 
-    public String getTo() {return this.to;}
+  public String getText() {
+    return this.text;
+  }
 
-    public String getText() {return this.text;}
+  public String getSubject() {
+    return this.subject;
+  }
 
-    public String getSubject() {return this.subject;}
-
-    public List<File> getAttachments() {
-        return this.attachments;
-    }
+  public List<File> getAttachments() {
+    return this.attachments;
+  }
 }

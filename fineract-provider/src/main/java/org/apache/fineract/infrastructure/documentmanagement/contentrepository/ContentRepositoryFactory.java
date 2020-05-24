@@ -29,31 +29,40 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContentRepositoryFactory {
 
-    private final ApplicationContext applicationContext;
-    private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
+  private final ApplicationContext applicationContext;
+  private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
 
-    @Autowired
-    public ContentRepositoryFactory(final ApplicationContext applicationContext,
-            final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
-        this.applicationContext = applicationContext;
-        this.externalServicesReadPlatformService = externalServicesReadPlatformService;
-    }
+  @Autowired
+  public ContentRepositoryFactory(
+      final ApplicationContext applicationContext,
+      final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
+    this.applicationContext = applicationContext;
+    this.externalServicesReadPlatformService = externalServicesReadPlatformService;
+  }
 
-    public ContentRepository getRepository() {
-        final ConfigurationDomainService configurationDomainServiceJpa = this.applicationContext.getBean("configurationDomainServiceJpa",
-                ConfigurationDomainService.class);
-        if (configurationDomainServiceJpa.isAmazonS3Enabled()) { return createS3DocumentStore(); }
-        return new FileSystemContentRepository();
+  public ContentRepository getRepository() {
+    final ConfigurationDomainService configurationDomainServiceJpa =
+        this.applicationContext.getBean(
+            "configurationDomainServiceJpa", ConfigurationDomainService.class);
+    if (configurationDomainServiceJpa.isAmazonS3Enabled()) {
+      return createS3DocumentStore();
     }
+    return new FileSystemContentRepository();
+  }
 
-    public ContentRepository getRepository(final StorageType documentStoreType) {
-        if (documentStoreType == StorageType.FILE_SYSTEM) { return new FileSystemContentRepository(); }
-        return createS3DocumentStore();
+  public ContentRepository getRepository(final StorageType documentStoreType) {
+    if (documentStoreType == StorageType.FILE_SYSTEM) {
+      return new FileSystemContentRepository();
     }
+    return createS3DocumentStore();
+  }
 
-    private ContentRepository createS3DocumentStore() {
-        final S3CredentialsData s3CredentialsData = this.externalServicesReadPlatformService.getS3Credentials();
-        return new S3ContentRepository(s3CredentialsData.getBucketName(), s3CredentialsData.getSecretKey(),
-                s3CredentialsData.getAccessKey());
-    }
+  private ContentRepository createS3DocumentStore() {
+    final S3CredentialsData s3CredentialsData =
+        this.externalServicesReadPlatformService.getS3Credentials();
+    return new S3ContentRepository(
+        s3CredentialsData.getBucketName(),
+        s3CredentialsData.getSecretKey(),
+        s3CredentialsData.getAccessKey());
+  }
 }

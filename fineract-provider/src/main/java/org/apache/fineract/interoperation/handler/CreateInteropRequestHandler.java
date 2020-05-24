@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = ENTITY_NAME_REQUEST, action = "CREATE")
 public class CreateInteropRequestHandler implements NewCommandSourceHandler {
 
-    private final InteropService interopService;
+  private final InteropService interopService;
 
-    @Autowired
-    public CreateInteropRequestHandler(InteropService interopService) {
-        this.interopService = interopService;
-    }
+  @Autowired
+  public CreateInteropRequestHandler(InteropService interopService) {
+    this.interopService = interopService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.interopService.createTransactionRequest(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.interopService.createTransactionRequest(command);
+  }
 }

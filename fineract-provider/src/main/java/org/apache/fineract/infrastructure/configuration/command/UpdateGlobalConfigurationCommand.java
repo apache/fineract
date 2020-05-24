@@ -25,13 +25,13 @@ import java.util.Map;
  */
 public class UpdateGlobalConfigurationCommand {
 
-    private final Map<String, Boolean> globalConfiguration;
+  private final Map<String, Boolean> globalConfiguration;
 
-    public UpdateGlobalConfigurationCommand(final Map<String, Boolean> globalConfigurationMap) {
-        this.globalConfiguration = globalConfigurationMap;
-    }
+  public UpdateGlobalConfigurationCommand(final Map<String, Boolean> globalConfigurationMap) {
+    this.globalConfiguration = globalConfigurationMap;
+  }
 
-    public Map<String, Boolean> getGlobalConfiguration() {
-        return this.globalConfiguration;
-    }
+  public Map<String, Boolean> getGlobalConfiguration() {
+    return this.globalConfiguration;
+  }
 }

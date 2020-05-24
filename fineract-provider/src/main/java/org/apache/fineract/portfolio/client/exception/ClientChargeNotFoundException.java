@@ -22,13 +22,18 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class ClientChargeNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ClientChargeNotFoundException(final Long id) {
-        super("error.msg.client.charge.id.invalid", "Client charge with identifier " + id + " does not exist", id);
-    }
+  public ClientChargeNotFoundException(final Long id) {
+    super(
+        "error.msg.client.charge.id.invalid",
+        "Client charge with identifier " + id + " does not exist",
+        id);
+  }
 
-    public ClientChargeNotFoundException(final Long id, final Long clientId) {
-        super("error.msg.client.charge.id.invalid.for.given.client",
-                "Client charge with identifier " + id + " does not exist for client with id " + clientId, id, clientId);
-    }
-
+  public ClientChargeNotFoundException(final Long id, final Long clientId) {
+    super(
+        "error.msg.client.charge.id.invalid.for.given.client",
+        "Client charge with identifier " + id + " does not exist for client with id " + clientId,
+        id,
+        clientId);
+  }
 }

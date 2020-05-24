@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface CodeValueWritePlatformService {
 
-    CommandProcessingResult createCodeValue(JsonCommand command);
+  CommandProcessingResult createCodeValue(JsonCommand command);
 
-    CommandProcessingResult updateCodeValue(Long codeValueId, JsonCommand command);
+  CommandProcessingResult updateCodeValue(Long codeValueId, JsonCommand command);
 
-    CommandProcessingResult deleteCodeValue(Long codeId, Long codeValueId);
+  CommandProcessingResult deleteCodeValue(Long codeId, Long codeValueId);
 }

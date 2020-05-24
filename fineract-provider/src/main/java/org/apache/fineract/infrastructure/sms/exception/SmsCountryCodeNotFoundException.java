@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class SmsCountryCodeNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public SmsCountryCodeNotFoundException() {
-        super("error.msg.sms.country.code.not.found", "SMS country code does not exist");
-    }
+  public SmsCountryCodeNotFoundException() {
+    super("error.msg.sms.country.code.not.found", "SMS country code does not exist");
+  }
 }

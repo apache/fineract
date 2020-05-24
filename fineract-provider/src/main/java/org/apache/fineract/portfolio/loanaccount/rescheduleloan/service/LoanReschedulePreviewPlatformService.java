@@ -22,5 +22,5 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 
 public interface LoanReschedulePreviewPlatformService {
 
-    public LoanScheduleModel previewLoanReschedule(Long requestId);
+  public LoanScheduleModel previewLoanReschedule(Long requestId);
 }

@@ -29,41 +29,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TaxGroupHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
-    private static final String CREATE_TAX_COMPONENT_URL = "/fineract-provider/api/v1/taxes/group?" + Utils.TENANT_IDENTIFIER;
+  private static final Logger LOG = LoggerFactory.getLogger(TaxGroupHelper.class);
+  private static final String CREATE_TAX_COMPONENT_URL =
+      "/fineract-provider/api/v1/taxes/group?" + Utils.TENANT_IDENTIFIER;
 
-    public static Integer createTaxGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Collection<Integer> taxComponentIds) {
-        LOG.info("---------------------------------CREATING A TAX GROUP---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_TAX_COMPONENT_URL, getTaxGroupAsJSON(taxComponentIds), "resourceId");
+  public static Integer createTaxGroup(
+      final RequestSpecification requestSpec,
+      final ResponseSpecification responseSpec,
+      final Collection<Integer> taxComponentIds) {
+    LOG.info(
+        "---------------------------------CREATING A TAX"
+            + " GROUP---------------------------------------------");
+    return Utils.performServerPost(
+        requestSpec,
+        responseSpec,
+        CREATE_TAX_COMPONENT_URL,
+        getTaxGroupAsJSON(taxComponentIds),
+        "resourceId");
+  }
+
+  public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {
+    final HashMap<String, Object> map = new HashMap<>();
+    map.put("name", randomNameGenerator("Tax_component_Name_", 5));
+    map.put("dateFormat", "dd MMMM yyyy");
+    map.put("locale", "en");
+    map.put("taxComponents", getTaxGroupComponents(taxComponentIds));
+    return new Gson().toJson(map);
+  }
+
+  public static List<HashMap<String, String>> getTaxGroupComponents(
+      final Collection<Integer> taxComponentIds) {
+    List<HashMap<String, String>> taxGroupComponents = new ArrayList<>();
+    for (Integer taxComponentId : taxComponentIds) {
+      taxGroupComponents.add(getTaxComponentMap(taxComponentId));
     }
+    return taxGroupComponents;
+  }
 
-    public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("name", randomNameGenerator("Tax_component_Name_", 5));
-        map.put("dateFormat", "dd MMMM yyyy");
-        map.put("locale", "en");
-        map.put("taxComponents", getTaxGroupComponents(taxComponentIds));
-        return new Gson().toJson(map);
-    }
+  public static HashMap<String, String> getTaxComponentMap(final Integer taxComponentId) {
+    final HashMap<String, String> map = new HashMap<>();
+    map.put("taxComponentId", String.valueOf(taxComponentId));
+    map.put("startDate", "01 January 2013");
+    return map;
+  }
 
-    public static List<HashMap<String, String>> getTaxGroupComponents(final Collection<Integer> taxComponentIds) {
-        List<HashMap<String, String>> taxGroupComponents = new ArrayList<>();
-        for (Integer taxComponentId : taxComponentIds) {
-            taxGroupComponents.add(getTaxComponentMap(taxComponentId));
-        }
-        return taxGroupComponents;
-    }
-
-    public static HashMap<String, String> getTaxComponentMap(final Integer taxComponentId) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("taxComponentId", String.valueOf(taxComponentId));
-        map.put("startDate", "01 January 2013");
-        return map;
-    }
-
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
-    }
-
+  public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
+    return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
+  }
 }

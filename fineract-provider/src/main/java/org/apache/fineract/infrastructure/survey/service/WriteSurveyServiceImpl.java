@@ -31,49 +31,77 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class WriteSurveyServiceImpl implements WriteSurveyService {
 
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+  private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
-    @Autowired(required = true)
-    WriteSurveyServiceImpl(final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
-        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+  @Autowired(required = true)
+  WriteSurveyServiceImpl(final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
+    this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+  }
 
-    }
+  @Override
+  @Transactional
+  public CommandProcessingResult registerSurvey(JsonCommand command) {
 
-    @Override
-    @Transactional
-    public CommandProcessingResult registerSurvey(JsonCommand command) {
+    final String dataTableName =
+        this.readWriteNonCoreDataService.getDataTableName(command.getUrl());
+    final String permissionSql = this._getPermissionSql(dataTableName);
+    this.readWriteNonCoreDataService.registerDatatable(command, permissionSql);
 
-        final String dataTableName = this.readWriteNonCoreDataService.getDataTableName(command.getUrl());
-        final String permissionSql = this._getPermissionSql(dataTableName);
-        this.readWriteNonCoreDataService.registerDatatable(command, permissionSql);
+    return CommandProcessingResult.commandOnlyResult(command.commandId());
+  }
 
-        return CommandProcessingResult.commandOnlyResult(command.commandId());
+  private String _getPermissionSql(final String dataTableName) {
+    final String createPermission = "'CREATE_" + dataTableName + "'";
+    final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
+    final String readPermission = "'READ_" + dataTableName + "'";
+    final String updatePermission = "'UPDATE_" + dataTableName + "'";
+    final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
+    final String deletePermission = "'DELETE_" + dataTableName + "'";
+    final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
 
-    }
+    return "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker)"
+        + " values ('datatable', "
+        + createPermission
+        + ", 'CREATE', '"
+        + dataTableName
+        + "', false),"
+        + "('datatable', "
+        + createPermissionChecker
+        + ", 'CREATE', '"
+        + dataTableName
+        + "', false),"
+        + "('datatable', "
+        + readPermission
+        + ", 'READ', '"
+        + dataTableName
+        + "', false),"
+        + "('datatable', "
+        + updatePermission
+        + ", 'UPDATE', '"
+        + dataTableName
+        + "', false),"
+        + "('datatable', "
+        + updatePermissionChecker
+        + ", 'UPDATE', '"
+        + dataTableName
+        + "', false),"
+        + "('datatable', "
+        + deletePermission
+        + ", 'DELETE', '"
+        + dataTableName
+        + "', false),"
+        + "('datatable', "
+        + deletePermissionChecker
+        + ", 'DELETE', '"
+        + dataTableName
+        + "', false)";
+  }
 
-    private String _getPermissionSql(final String dataTableName) {
-        final String createPermission = "'CREATE_" + dataTableName + "'";
-        final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
-        final String readPermission = "'READ_" + dataTableName + "'";
-        final String updatePermission = "'UPDATE_" + dataTableName + "'";
-        final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
-        final String deletePermission = "'DELETE_" + dataTableName + "'";
-        final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
+  @Transactional
+  @Override
+  public CommandProcessingResult fullFillSurvey(
+      final String dataTableName, final Long appTableId, final JsonCommand command) {
 
-        return "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values " + "('datatable', "
-                + createPermission + ", 'CREATE', '" + dataTableName + "', false)," + "('datatable', " + createPermissionChecker
-                + ", 'CREATE', '" + dataTableName + "', false)," + "('datatable', " + readPermission + ", 'READ', '" + dataTableName
-                + "', false)," + "('datatable', " + updatePermission + ", 'UPDATE', '" + dataTableName + "', false)," + "('datatable', "
-                + updatePermissionChecker + ", 'UPDATE', '" + dataTableName + "', false)," + "('datatable', " + deletePermission
-                + ", 'DELETE', '" + dataTableName + "', false)," + "('datatable', " + deletePermissionChecker + ", 'DELETE', '"
-                + dataTableName + "', false)";
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult fullFillSurvey(final String dataTableName, final Long appTableId, final JsonCommand command) {
-
-        return readWriteNonCoreDataService.createPPIEntry(dataTableName, appTableId, command);
-    }
-
+    return readWriteNonCoreDataService.createPPIEntry(dataTableName, appTableId, command);
+  }
 }

@@ -22,5 +22,5 @@ import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
 
 public interface AccountingProcessorForClientTransactions {
 
-    void createJournalEntriesForClientTransaction(ClientTransactionDTO clientTransactionDTO);
+  void createJournalEntriesForClientTransaction(ClientTransactionDTO clientTransactionDTO);
 }

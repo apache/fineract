@@ -26,10 +26,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class InvalidClientStateTransitionException extends AbstractPlatformDomainRuleException {
 
-    public InvalidClientStateTransitionException(final String action, final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg.client." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
-        // TODO Auto-generated constructor stub
-    }
-
+  public InvalidClientStateTransitionException(
+      final String action,
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super("error.msg.client." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
+    // TODO Auto-generated constructor stub
+  }
 }

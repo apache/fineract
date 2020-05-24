@@ -29,37 +29,37 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
  */
 public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 
-    MonetaryCurrency getCurrency();
+  MonetaryCurrency getCurrency();
 
-    Money getPrincipal();
+  Money getPrincipal();
 
-    Integer graceOnInterestCharged();
+  Integer graceOnInterestCharged();
 
-    Integer graceOnInterestPayment();
+  Integer graceOnInterestPayment();
 
-    Integer graceOnPrincipalPayment();
+  Integer graceOnPrincipalPayment();
 
-    Integer recurringMoratoriumOnPrincipalPeriods();
+  Integer recurringMoratoriumOnPrincipalPeriods();
 
-    Money getInArrearsTolerance();
+  Money getInArrearsTolerance();
 
-    BigDecimal getNominalInterestRatePerPeriod();
+  BigDecimal getNominalInterestRatePerPeriod();
 
-    PeriodFrequencyType getInterestPeriodFrequencyType();
+  PeriodFrequencyType getInterestPeriodFrequencyType();
 
-    BigDecimal getAnnualNominalInterestRate();
+  BigDecimal getAnnualNominalInterestRate();
 
-    InterestMethod getInterestMethod();
+  InterestMethod getInterestMethod();
 
-    InterestCalculationPeriodMethod getInterestCalculationPeriodMethod();
+  InterestCalculationPeriodMethod getInterestCalculationPeriodMethod();
 
-    Integer getRepayEvery();
+  Integer getRepayEvery();
 
-    PeriodFrequencyType getRepaymentPeriodFrequencyType();
+  PeriodFrequencyType getRepaymentPeriodFrequencyType();
 
-    Integer getNumberOfRepayments();
+  Integer getNumberOfRepayments();
 
-    AmortizationMethod getAmortizationMethod();
+  AmortizationMethod getAmortizationMethod();
 
-    Integer getGraceOnDueDate();
+  Integer getGraceOnDueDate();
 }

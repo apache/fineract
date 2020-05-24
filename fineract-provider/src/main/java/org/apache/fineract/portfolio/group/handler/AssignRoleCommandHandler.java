@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "ASSIGNROLE")
 public class AssignRoleCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupRolesWritePlatformService groupRolesWritePlatformService;
+  private final GroupRolesWritePlatformService groupRolesWritePlatformService;
 
-    @Autowired
-    public AssignRoleCommandHandler(final GroupRolesWritePlatformService groupRolesWritePlatformService) {
-        this.groupRolesWritePlatformService = groupRolesWritePlatformService;
-    }
+  @Autowired
+  public AssignRoleCommandHandler(
+      final GroupRolesWritePlatformService groupRolesWritePlatformService) {
+    this.groupRolesWritePlatformService = groupRolesWritePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupRolesWritePlatformService.createRole(command);
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.groupRolesWritePlatformService.createRole(command);
+  }
 }

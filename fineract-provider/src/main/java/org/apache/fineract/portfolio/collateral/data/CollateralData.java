@@ -28,45 +28,66 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
  */
 public class CollateralData {
 
-    private final Long id;
-    private final CodeValueData type;
-    private final BigDecimal value;
-    private final String description;
-    @SuppressWarnings("unused")
-    private final Collection<CodeValueData> allowedCollateralTypes;
-    private final CurrencyData currency;
+  private final Long id;
+  private final CodeValueData type;
+  private final BigDecimal value;
+  private final String description;
 
-    public static CollateralData instance(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData) {
-        return new CollateralData(id, type, value, description, currencyData);
-    }
+  @SuppressWarnings("unused")
+  private final Collection<CodeValueData> allowedCollateralTypes;
 
-    public static CollateralData template(final Collection<CodeValueData> codeValues) {
-        return new CollateralData(null, null, null, null, null, codeValues);
-    }
+  private final CurrencyData currency;
 
-    private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData) {
-        this.id = id;
-        this.type = type;
-        this.value = value;
-        this.description = description;
-        this.currency = currencyData;
-        this.allowedCollateralTypes = null;
-    }
+  public static CollateralData instance(
+      final Long id,
+      final CodeValueData type,
+      final BigDecimal value,
+      final String description,
+      final CurrencyData currencyData) {
+    return new CollateralData(id, type, value, description, currencyData);
+  }
 
-    private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData, final Collection<CodeValueData> allowedCollateralTypes) {
-        this.id = id;
-        this.type = type;
-        this.value = value;
-        this.description = description;
-        this.currency = currencyData;
-        this.allowedCollateralTypes = allowedCollateralTypes;
-    }
+  public static CollateralData template(final Collection<CodeValueData> codeValues) {
+    return new CollateralData(null, null, null, null, null, codeValues);
+  }
 
-    public CollateralData template(final CollateralData collateralData, final Collection<CodeValueData> codeValues) {
-        return new CollateralData(collateralData.id, collateralData.type, collateralData.value, collateralData.description,
-                collateralData.currency, codeValues);
-    }
+  private CollateralData(
+      final Long id,
+      final CodeValueData type,
+      final BigDecimal value,
+      final String description,
+      final CurrencyData currencyData) {
+    this.id = id;
+    this.type = type;
+    this.value = value;
+    this.description = description;
+    this.currency = currencyData;
+    this.allowedCollateralTypes = null;
+  }
+
+  private CollateralData(
+      final Long id,
+      final CodeValueData type,
+      final BigDecimal value,
+      final String description,
+      final CurrencyData currencyData,
+      final Collection<CodeValueData> allowedCollateralTypes) {
+    this.id = id;
+    this.type = type;
+    this.value = value;
+    this.description = description;
+    this.currency = currencyData;
+    this.allowedCollateralTypes = allowedCollateralTypes;
+  }
+
+  public CollateralData template(
+      final CollateralData collateralData, final Collection<CodeValueData> codeValues) {
+    return new CollateralData(
+        collateralData.id,
+        collateralData.type,
+        collateralData.value,
+        collateralData.description,
+        collateralData.currency,
+        codeValues);
+  }
 }

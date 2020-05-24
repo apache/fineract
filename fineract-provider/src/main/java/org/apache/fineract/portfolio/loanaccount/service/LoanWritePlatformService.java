@@ -36,82 +36,95 @@ import org.joda.time.LocalDate;
 
 public interface LoanWritePlatformService {
 
-    CommandProcessingResult disburseLoan(Long loanId, JsonCommand command, Boolean isAccountTransfer);
+  CommandProcessingResult disburseLoan(Long loanId, JsonCommand command, Boolean isAccountTransfer);
 
-    Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
-            Boolean isAccountTransfer);
+  Map<String, Object> bulkLoanDisbursal(
+      JsonCommand command,
+      CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
+      Boolean isAccountTransfer);
 
-    CommandProcessingResult undoLoanDisbursal(Long loanId, JsonCommand command);
+  CommandProcessingResult undoLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult makeLoanRepayment(Long loanId, JsonCommand command, boolean isRecoveryRepayment);
+  CommandProcessingResult makeLoanRepayment(
+      Long loanId, JsonCommand command, boolean isRecoveryRepayment);
 
-    Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
+  Map<String, Object> makeLoanBulkRepayment(
+      CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
 
-    CommandProcessingResult adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
+  CommandProcessingResult adjustLoanTransaction(
+      Long loanId, Long transactionId, JsonCommand command);
 
-    CommandProcessingResult waiveInterestOnLoan(Long loanId, JsonCommand command);
+  CommandProcessingResult waiveInterestOnLoan(Long loanId, JsonCommand command);
 
-    CommandProcessingResult writeOff(Long loanId, JsonCommand command);
+  CommandProcessingResult writeOff(Long loanId, JsonCommand command);
 
-    CommandProcessingResult closeLoan(Long loanId, JsonCommand command);
+  CommandProcessingResult closeLoan(Long loanId, JsonCommand command);
 
-    CommandProcessingResult closeAsRescheduled(Long loanId, JsonCommand command);
+  CommandProcessingResult closeAsRescheduled(Long loanId, JsonCommand command);
 
-    CommandProcessingResult addLoanCharge(Long loanId, JsonCommand command);
+  CommandProcessingResult addLoanCharge(Long loanId, JsonCommand command);
 
-    CommandProcessingResult updateLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
+  CommandProcessingResult updateLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
-    CommandProcessingResult deleteLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
+  CommandProcessingResult deleteLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
-    CommandProcessingResult waiveLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
+  CommandProcessingResult waiveLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
 
-    CommandProcessingResult loanReassignment(Long loanId, JsonCommand command);
+  CommandProcessingResult loanReassignment(Long loanId, JsonCommand command);
 
-    CommandProcessingResult bulkLoanReassignment(JsonCommand command);
+  CommandProcessingResult bulkLoanReassignment(JsonCommand command);
 
-    CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
+  CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
 
-    void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances,
-            Boolean reschedulebasedOnMeetingDates, LocalDate presentMeetingDate, LocalDate newMeetingDate);
+  void applyMeetingDateChanges(
+      Calendar calendar,
+      Collection<CalendarInstance> loanCalendarInstances,
+      Boolean reschedulebasedOnMeetingDates,
+      LocalDate presentMeetingDate,
+      LocalDate newMeetingDate);
 
-    void applyHolidaysToLoans();
+  void applyHolidaysToLoans();
 
-    LoanTransaction initiateLoanTransfer(Loan loan, LocalDate transferDate);
+  LoanTransaction initiateLoanTransfer(Loan loan, LocalDate transferDate);
 
-    LoanTransaction withdrawLoanTransfer(final Loan loan, LocalDate transferDate);
+  LoanTransaction withdrawLoanTransfer(final Loan loan, LocalDate transferDate);
 
-    void rejectLoanTransfer(final Loan loan);
+  void rejectLoanTransfer(final Loan loan);
 
-    LoanTransaction acceptLoanTransfer(Loan loan, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
+  LoanTransaction acceptLoanTransfer(
+      Loan loan, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
 
-    CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
+  CommandProcessingResult payLoanCharge(
+      Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
 
-    void transferFeeCharges() throws JobExecutionException;
+  void transferFeeCharges() throws JobExecutionException;
 
-    CommandProcessingResult undoWriteOff(Long loanId);
+  CommandProcessingResult undoWriteOff(Long loanId);
 
-    CommandProcessingResult updateDisbursementDateAndAmountForTranche(Long loanId, Long disbursementId, JsonCommand command);
+  CommandProcessingResult updateDisbursementDateAndAmountForTranche(
+      Long loanId, Long disbursementId, JsonCommand command);
 
-    CommandProcessingResult recoverFromGuarantor(Long loanId);
+  CommandProcessingResult recoverFromGuarantor(Long loanId);
 
-    void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
+  void applyMeetingDateChanges(
+      Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
 
-    CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
+  CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
 
-    CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
+  CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
 
-    void applyOverdueChargesForLoan(Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas);
+  void applyOverdueChargesForLoan(
+      Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas);
 
-    void recalculateInterest(long loanId);
+  void recalculateInterest(long loanId);
 
-    CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
+  CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult forecloseLoan(final Long loanId, JsonCommand command);
+  CommandProcessingResult forecloseLoan(final Long loanId, JsonCommand command);
 
-    CommandProcessingResult disburseGLIMLoan(Long loanId, JsonCommand command);
+  CommandProcessingResult disburseGLIMLoan(Long loanId, JsonCommand command);
 
-    CommandProcessingResult undoGLIMLoanDisbursal(Long loanId, JsonCommand command);
+  CommandProcessingResult undoGLIMLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
-
+  CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
 }

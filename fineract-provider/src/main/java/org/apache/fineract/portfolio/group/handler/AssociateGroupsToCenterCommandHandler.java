@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CENTER", action = "ASSOCIATEGROUPS")
 public class AssociateGroupsToCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService writePlatformService;
+  private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Autowired
-    public AssociateGroupsToCenterCommandHandler(final GroupingTypesWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public AssociateGroupsToCenterCommandHandler(
+      final GroupingTypesWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.associateGroupsToCenter(command.entityId(), command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.writePlatformService.associateGroupsToCenter(command.entityId(), command);
+  }
 }

@@ -25,159 +25,195 @@ import org.joda.time.LocalDate;
 
 public final class LoanRescheduleModelRepaymentPeriod implements LoanRescheduleModalPeriod {
 
-    private int periodNumber;
-    private int oldPeriodNumber;
-    private LocalDate fromDate;
-    private LocalDate dueDate;
-    private Money principalDue;
-    private Money outstandingLoanBalance;
-    private Money interestDue;
-    private Money feeChargesDue;
-    private Money penaltyChargesDue;
-    private Money totalDue;
-    private boolean isNew;
+  private int periodNumber;
+  private int oldPeriodNumber;
+  private LocalDate fromDate;
+  private LocalDate dueDate;
+  private Money principalDue;
+  private Money outstandingLoanBalance;
+  private Money interestDue;
+  private Money feeChargesDue;
+  private Money penaltyChargesDue;
+  private Money totalDue;
+  private boolean isNew;
 
-    public LoanRescheduleModelRepaymentPeriod(final int periodNumber, final int oldPeriodNumber, LocalDate fromDate,
-            final LocalDate dueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, final boolean isNew) {
-        this.periodNumber = periodNumber;
-        this.oldPeriodNumber = oldPeriodNumber;
-        this.fromDate = fromDate;
-        this.dueDate = dueDate;
-        this.principalDue = principalDue;
-        this.outstandingLoanBalance = outstandingLoanBalance;
-        this.interestDue = interestDue;
-        this.feeChargesDue = feeChargesDue;
-        this.penaltyChargesDue = penaltyChargesDue;
-        this.totalDue = totalDue;
-        this.isNew = isNew;
+  public LoanRescheduleModelRepaymentPeriod(
+      final int periodNumber,
+      final int oldPeriodNumber,
+      LocalDate fromDate,
+      final LocalDate dueDate,
+      final Money principalDue,
+      final Money outstandingLoanBalance,
+      final Money interestDue,
+      final Money feeChargesDue,
+      final Money penaltyChargesDue,
+      final Money totalDue,
+      final boolean isNew) {
+    this.periodNumber = periodNumber;
+    this.oldPeriodNumber = oldPeriodNumber;
+    this.fromDate = fromDate;
+    this.dueDate = dueDate;
+    this.principalDue = principalDue;
+    this.outstandingLoanBalance = outstandingLoanBalance;
+    this.interestDue = interestDue;
+    this.feeChargesDue = feeChargesDue;
+    this.penaltyChargesDue = penaltyChargesDue;
+    this.totalDue = totalDue;
+    this.isNew = isNew;
+  }
+
+  public static LoanRescheduleModelRepaymentPeriod instance(
+      final int periodNumber,
+      final int oldPeriodNumber,
+      LocalDate fromDate,
+      final LocalDate dueDate,
+      final Money principalDue,
+      final Money outstandingLoanBalance,
+      final Money interestDue,
+      final Money feeChargesDue,
+      final Money penaltyChargesDue,
+      final Money totalDue,
+      final boolean isNew) {
+
+    return new LoanRescheduleModelRepaymentPeriod(
+        periodNumber,
+        oldPeriodNumber,
+        fromDate,
+        dueDate,
+        principalDue,
+        outstandingLoanBalance,
+        interestDue,
+        feeChargesDue,
+        penaltyChargesDue,
+        totalDue,
+        isNew);
+  }
+
+  @Override
+  public LoanSchedulePeriodData toData() {
+    return LoanSchedulePeriodData.repaymentOnlyPeriod(
+        this.periodNumber,
+        this.fromDate,
+        this.dueDate,
+        this.principalDue.getAmount(),
+        this.outstandingLoanBalance.getAmount(),
+        this.interestDue.getAmount(),
+        this.feeChargesDue.getAmount(),
+        this.penaltyChargesDue.getAmount(),
+        this.totalDue.getAmount(),
+        this.principalDue.plus(this.interestDue).getAmount());
+  }
+
+  @Override
+  public Integer periodNumber() {
+    return this.periodNumber;
+  }
+
+  @Override
+  public Integer oldPeriodNumber() {
+    return this.oldPeriodNumber;
+  }
+
+  @Override
+  public LocalDate periodFromDate() {
+    return this.fromDate;
+  }
+
+  @Override
+  public LocalDate periodDueDate() {
+    return this.dueDate;
+  }
+
+  @Override
+  public BigDecimal principalDue() {
+    BigDecimal value = null;
+
+    if (this.principalDue != null) {
+      value = this.principalDue.getAmount();
     }
 
-    public static LoanRescheduleModelRepaymentPeriod instance(final int periodNumber, final int oldPeriodNumber, LocalDate fromDate,
-            final LocalDate dueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
-            final Money feeChargesDue, final Money penaltyChargesDue, final Money totalDue, final boolean isNew) {
+    return value;
+  }
 
-        return new LoanRescheduleModelRepaymentPeriod(periodNumber, oldPeriodNumber, fromDate, dueDate, principalDue,
-                outstandingLoanBalance, interestDue, feeChargesDue, penaltyChargesDue, totalDue, isNew);
+  @Override
+  public BigDecimal interestDue() {
+    BigDecimal value = null;
+
+    if (this.interestDue != null) {
+      value = this.interestDue.getAmount();
     }
 
-    @Override
-    public LoanSchedulePeriodData toData() {
-        return LoanSchedulePeriodData.repaymentOnlyPeriod(this.periodNumber, this.fromDate, this.dueDate, this.principalDue.getAmount(),
-                this.outstandingLoanBalance.getAmount(), this.interestDue.getAmount(), this.feeChargesDue.getAmount(),
-                this.penaltyChargesDue.getAmount(), this.totalDue.getAmount(), this.principalDue.plus(this.interestDue).getAmount());
+    return value;
+  }
+
+  @Override
+  public BigDecimal feeChargesDue() {
+    BigDecimal value = null;
+
+    if (this.feeChargesDue != null) {
+      value = this.feeChargesDue.getAmount();
     }
 
-    @Override
-    public Integer periodNumber() {
-        return this.periodNumber;
+    return value;
+  }
+
+  @Override
+  public BigDecimal penaltyChargesDue() {
+    BigDecimal value = null;
+
+    if (this.penaltyChargesDue != null) {
+      value = this.penaltyChargesDue.getAmount();
     }
 
-    @Override
-    public Integer oldPeriodNumber() {
-        return this.oldPeriodNumber;
-    }
+    return value;
+  }
 
-    @Override
-    public LocalDate periodFromDate() {
-        return this.fromDate;
-    }
+  @Override
+  public boolean isNew() {
+    return isNew;
+  }
 
-    @Override
-    public LocalDate periodDueDate() {
-        return this.dueDate;
-    }
+  public void updatePeriodNumber(Integer periodNumber) {
+    this.periodNumber = periodNumber;
+  }
 
-    @Override
-    public BigDecimal principalDue() {
-        BigDecimal value = null;
+  public void updateOldPeriodNumber(Integer oldPeriodNumber) {
+    this.oldPeriodNumber = oldPeriodNumber;
+  }
 
-        if (this.principalDue != null) {
-            value = this.principalDue.getAmount();
-        }
+  public void updatePeriodFromDate(LocalDate periodFromDate) {
+    this.fromDate = periodFromDate;
+  }
 
-        return value;
-    }
+  public void updatePeriodDueDate(LocalDate periodDueDate) {
+    this.dueDate = periodDueDate;
+  }
 
-    @Override
-    public BigDecimal interestDue() {
-        BigDecimal value = null;
+  public void updatePrincipalDue(Money principalDue) {
+    this.principalDue = principalDue;
+  }
 
-        if (this.interestDue != null) {
-            value = this.interestDue.getAmount();
-        }
+  public void updateInterestDue(Money interestDue) {
+    this.interestDue = interestDue;
+  }
 
-        return value;
-    }
+  public void updateFeeChargesDue(Money feeChargesDue) {
+    this.feeChargesDue = feeChargesDue;
+  }
 
-    @Override
-    public BigDecimal feeChargesDue() {
-        BigDecimal value = null;
+  public void updatePenaltyChargesDue(Money penaltyChargesDue) {
+    this.penaltyChargesDue = penaltyChargesDue;
+  }
 
-        if (this.feeChargesDue != null) {
-            value = this.feeChargesDue.getAmount();
-        }
+  public void updateOutstandingLoanBalance(Money outstandingLoanBalance) {
+    this.outstandingLoanBalance = outstandingLoanBalance;
+  }
 
-        return value;
-    }
+  public void updateTotalDue(Money totalDue) {
+    this.totalDue = totalDue;
+  }
 
-    @Override
-    public BigDecimal penaltyChargesDue() {
-        BigDecimal value = null;
-
-        if (this.penaltyChargesDue != null) {
-            value = this.penaltyChargesDue.getAmount();
-        }
-
-        return value;
-    }
-
-    @Override
-    public boolean isNew() {
-        return isNew;
-    }
-
-    public void updatePeriodNumber(Integer periodNumber) {
-        this.periodNumber = periodNumber;
-    }
-
-    public void updateOldPeriodNumber(Integer oldPeriodNumber) {
-        this.oldPeriodNumber = oldPeriodNumber;
-    }
-
-    public void updatePeriodFromDate(LocalDate periodFromDate) {
-        this.fromDate = periodFromDate;
-    }
-
-    public void updatePeriodDueDate(LocalDate periodDueDate) {
-        this.dueDate = periodDueDate;
-    }
-
-    public void updatePrincipalDue(Money principalDue) {
-        this.principalDue = principalDue;
-    }
-
-    public void updateInterestDue(Money interestDue) {
-        this.interestDue = interestDue;
-    }
-
-    public void updateFeeChargesDue(Money feeChargesDue) {
-        this.feeChargesDue = feeChargesDue;
-    }
-
-    public void updatePenaltyChargesDue(Money penaltyChargesDue) {
-        this.penaltyChargesDue = penaltyChargesDue;
-    }
-
-    public void updateOutstandingLoanBalance(Money outstandingLoanBalance) {
-        this.outstandingLoanBalance = outstandingLoanBalance;
-    }
-
-    public void updateTotalDue(Money totalDue) {
-        this.totalDue = totalDue;
-    }
-
-    public void updateIsNew(boolean isNew) {
-        this.isNew = isNew;
-    }
+  public void updateIsNew(boolean isNew) {
+    this.isNew = isNew;
+  }
 }

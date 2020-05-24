@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface CollateralWritePlatformService {
 
-    CommandProcessingResult addCollateral(Long loanId, JsonCommand command);
+  CommandProcessingResult addCollateral(Long loanId, JsonCommand command);
 
-    CommandProcessingResult updateCollateral(Long loanId, Long collateralId, JsonCommand command);
+  CommandProcessingResult updateCollateral(Long loanId, Long collateralId, JsonCommand command);
 
-    CommandProcessingResult deleteCollateral(Long loanId, Long collateralId, Long commandId);
+  CommandProcessingResult deleteCollateral(Long loanId, Long collateralId, Long commandId);
 }

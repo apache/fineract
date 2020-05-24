@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.apache.fineract.infrastructure.configuration.domain;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -25,29 +26,34 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "c_external_service", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_UNIQUE") })
+@Table(
+    name = "c_external_service",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"name"},
+          name = "name_UNIQUE")
+    })
 public class ExternalService extends AbstractPersistableCustom {
 
-    @Column(name = "name", length = 50)
-    private String name;
+  @Column(name = "name", length = 50)
+  private String name;
 
-    // @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy =
-    // "externalServicePropertiesPK.externalService", orphanRemoval = true)
-    // private Set<ExternalServicesProperties> values;
+  // @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy =
+  // "externalServicePropertiesPK.externalService", orphanRemoval = true)
+  // private Set<ExternalServicesProperties> values;
 
-    public static ExternalService fromJson(final JsonCommand command) {
-        final String name = command.stringValueOfParameterNamed("name");
-        return new ExternalService(name);
-    }
+  public static ExternalService fromJson(final JsonCommand command) {
+    final String name = command.stringValueOfParameterNamed("name");
+    return new ExternalService(name);
+  }
 
-    private ExternalService(final String name) {
-        this.name = name;
-    }
+  private ExternalService(final String name) {
+    this.name = name;
+  }
 
-    protected ExternalService() {}
+  protected ExternalService() {}
 
-    public String name() {
-        return this.name;
-    }
-
+  public String name() {
+    return this.name;
+  }
 }

@@ -29,21 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "UPDATE")
-public class GSIMApplicationModificationCommandHandler implements NewCommandSourceHandler
-{
+public class GSIMApplicationModificationCommandHandler implements NewCommandSourceHandler {
 
-     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
+  private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
-        @Autowired
-        public GSIMApplicationModificationCommandHandler(
-                final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
-            this.savingAccountWritePlatformService = savingAccountWritePlatformService;
-        }
+  @Autowired
+  public GSIMApplicationModificationCommandHandler(
+      final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    this.savingAccountWritePlatformService = savingAccountWritePlatformService;
+  }
 
-        @Transactional
-        @Override
-        public CommandProcessingResult processCommand(final JsonCommand command) {
-            return this.savingAccountWritePlatformService.modifyGSIMApplication(command.entityId(), command);
-        }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.savingAccountWritePlatformService.modifyGSIMApplication(
+        command.entityId(), command);
+  }
 }

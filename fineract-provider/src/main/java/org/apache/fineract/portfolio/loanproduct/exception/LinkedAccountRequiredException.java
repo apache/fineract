@@ -22,8 +22,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class LinkedAccountRequiredException extends AbstractPlatformDomainRuleException {
 
-    public LinkedAccountRequiredException(final String entity, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg." + entity + ".requires.linked.account", defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public LinkedAccountRequiredException(
+      final String entity,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg." + entity + ".requires.linked.account",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

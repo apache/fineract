@@ -23,5 +23,5 @@ package org.apache.fineract.infrastructure.core.exception;
  * sent in the body of the request to the platform api.
  */
 public class InvalidJsonException extends RuntimeException {
-    //
+  //
 }

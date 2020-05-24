@@ -24,9 +24,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * {@link AbstractPlatformDomainRuleException} thrown when attempting to crate
  * charge of type penalty due at disbursement .
  */
-public class ChargeDueAtDisbursementCannotBePenaltyException extends AbstractPlatformDomainRuleException {
+public class ChargeDueAtDisbursementCannotBePenaltyException
+    extends AbstractPlatformDomainRuleException {
 
-    public ChargeDueAtDisbursementCannotBePenaltyException(final String name) {
-        super("error.msg.charge.due.at.disbursement.cannot.be.penalty", "Charge '" + name + "' is invalid.", name, name);
-    }
+  public ChargeDueAtDisbursementCannotBePenaltyException(final String name) {
+    super(
+        "error.msg.charge.due.at.disbursement.cannot.be.penalty",
+        "Charge '" + name + "' is invalid.",
+        name,
+        name);
+  }
 }

@@ -28,224 +28,240 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
  * Created by sanyam on 31/7/17.
  */
 final class DatatablesApiResourceSwagger {
-    private DatatablesApiResourceSwagger() {
+  private DatatablesApiResourceSwagger() {}
 
+  @ApiModel(value = "GetDataTablesResponse")
+  public static final class GetDataTablesResponse {
+    private GetDataTablesResponse() {}
+
+    @ApiModelProperty(example = "m_client")
+    public String appTableName;
+
+    @ApiModelProperty(example = "extra_client_details")
+    public String datatableName;
+
+    public List<ResultsetColumnHeaderData> column;
+  }
+
+  @ApiModel(value = "PostDataTablesRequest")
+  public static final class PostDataTablesRequest {
+    private PostDataTablesRequest() {}
+
+    @ApiModelProperty(example = "m_client")
+    public String applicationTableName;
+
+    @ApiModelProperty(example = "extra_client_details")
+    public String registeredTableName;
+
+    @ApiModelProperty(example = "true")
+    public boolean multiRow;
+
+    public List<ResultsetColumnHeaderData> columnHeaderData;
+  }
+
+  @ApiModel(value = "PostDataTablesResponse")
+  public static final class PostDataTablesResponse {
+    private PostDataTablesResponse() {}
+
+    @ApiModelProperty(example = "extra_client_details")
+    public String resourceIdentifier;
+  }
+
+  @ApiModel(value = "PutDataTablesRequest")
+  public static final class PutDataTablesRequest {
+    private PutDataTablesRequest() {}
+
+    final class PutDataTablesRequestDropColumns {
+      private PutDataTablesRequestDropColumns() {}
+
+      @ApiModelProperty(example = "Gender_cd_Question")
+      public String name;
     }
 
-    @ApiModel(value = "GetDataTablesResponse")
-    public static final class GetDataTablesResponse {
-        private GetDataTablesResponse() {
+    final class PutDataTablesRequestAddColumns {
+      private PutDataTablesRequestAddColumns() {}
 
-        }
-        @ApiModelProperty(example = "m_client")
-        public String appTableName;
-        @ApiModelProperty(example = "extra_client_details")
-        public String datatableName;
-        public List<ResultsetColumnHeaderData> column;
+      @ApiModelProperty(example = "Question")
+      public String name;
+
+      @ApiModelProperty(example = "Dropdown")
+      public String type;
+
+      @ApiModelProperty(example = "Gender")
+      public String code;
+
+      @ApiModelProperty(example = "true")
+      public boolean mandatory;
     }
 
-    @ApiModel(value = "PostDataTablesRequest")
-    public static final class PostDataTablesRequest{
-        private PostDataTablesRequest() {
+    final class PutDataTablesRequestChangeColumns {
+      private PutDataTablesRequestChangeColumns() {}
 
-        }
-        @ApiModelProperty(example = "m_client")
-        public String applicationTableName;
-        @ApiModelProperty(example = "extra_client_details")
-        public String registeredTableName;
-        @ApiModelProperty(example = "true")
-        public boolean multiRow;
-        public List<ResultsetColumnHeaderData> columnHeaderData;
+      @ApiModelProperty(example = "Question")
+      public String name;
+
+      @ApiModelProperty(example = "Question 2")
+      public String newName;
+
+      @ApiModelProperty(example = "Gender")
+      public String code;
+
+      @ApiModelProperty(example = "Gender2")
+      public String newCode;
+
+      @ApiModelProperty(example = "true")
+      public boolean mandatory;
     }
 
-    @ApiModel(value = "PostDataTablesResponse")
-    public static final class PostDataTablesResponse{
-        private PostDataTablesResponse() {
+    @ApiModelProperty(example = "m_client")
+    public String appTableName;
 
-        }
-        @ApiModelProperty(example = "extra_client_details")
-        public String resourceIdentifier;
+    public List<PutDataTablesRequestDropColumns> dropColumns;
+    public List<PutDataTablesRequestAddColumns> addColumns;
+    public List<PutDataTablesRequestChangeColumns> ChangeColumns;
+  }
+
+  @ApiModel(value = "PutDataTablesResponse")
+  public static final class PutDataTablesResponse {
+    private PutDataTablesResponse() {}
+
+    @ApiModelProperty(example = "extra_client_details")
+    public String resourceIdentifier;
+  }
+
+  @ApiModel(value = "DeleteDataTablesResponse")
+  public static final class DeleteDataTablesResponse {
+    private DeleteDataTablesResponse() {}
+
+    @ApiModelProperty(example = "extra_client_details")
+    public String resourceIdentifier;
+  }
+
+  @ApiModel(value = "PostDataTablesRegisterDatatableAppTable")
+  public static final class PostDataTablesRegisterDatatableAppTable {
+    private PostDataTablesRegisterDatatableAppTable() {}
+  }
+
+  @ApiModel(value = "PostDataTablesAppTableIdRequest")
+  public static final class PostDataTablesAppTableIdRequest {
+    private PostDataTablesAppTableIdRequest() {}
+
+    @ApiModelProperty(example = "Livestock sales")
+    public String BusinessDescription;
+
+    @ApiModelProperty(example = "First comment made")
+    public String Comment;
+
+    @ApiModelProperty(example = "Primary")
+    public String Education_cv;
+
+    @ApiModelProperty(example = "6")
+    public Long Gender_cd;
+
+    @ApiModelProperty(example = "8.5")
+    public Double HighestRatePaid;
+
+    @ApiModelProperty(example = "01 October 2012")
+    public String NextVisit;
+
+    @ApiModelProperty(example = "5")
+    public Long YearsinBusiness;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+  }
+
+  @ApiModel(value = "PostDataTablesAppTableIdResponse ")
+  public static final class PostDataTablesAppTableIdResponse {
+    private PostDataTablesAppTableIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "GetDataTablesAppTableIdResponse")
+  public static final class GetDataTablesAppTableIdResponse {
+    private GetDataTablesAppTableIdResponse() {}
+
+    public List<ResultsetColumnHeaderData> columnHeaders;
+    public List<ResultsetRowData> data;
+  }
+
+  @ApiModel(value = "PutDataTablesAppTableIdRequest")
+  public static final class PutDataTablesAppTableIdRequest {
+    private PutDataTablesAppTableIdRequest() {}
+
+    @ApiModelProperty(example = "Livestock sales updated")
+    public String BusinessDescription;
+  }
+
+  @ApiModel(value = "PutDataTablesAppTableIdResponse")
+  public static final class PutDataTablesAppTableIdResponse {
+    private PutDataTablesAppTableIdResponse() {}
+
+    final class PutDataTablesAppTableIdResponseChanges {
+      private PutDataTablesAppTableIdResponseChanges() {}
+
+      @ApiModelProperty(example = "Livestock sales updated")
+      public String BusinessDescription;
     }
 
-    @ApiModel(value = "PutDataTablesRequest")
-    public static final class PutDataTablesRequest{
-        private PutDataTablesRequest() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
 
-        }
-        final class PutDataTablesRequestDropColumns {
-            private PutDataTablesRequestDropColumns() {}
-            @ApiModelProperty(example = "Gender_cd_Question")
-            public String name;
-        }
-        final class PutDataTablesRequestAddColumns {
-            private PutDataTablesRequestAddColumns() {
-            }
-            @ApiModelProperty(example = "Question")
-            public String name;
-            @ApiModelProperty(example = "Dropdown")
-            public String type;
-            @ApiModelProperty(example = "Gender")
-            public String code;
-            @ApiModelProperty(example = "true")
-            public boolean mandatory;
-        }
-        final class PutDataTablesRequestChangeColumns {
-            private PutDataTablesRequestChangeColumns() {
-            }
-            @ApiModelProperty(example = "Question")
-            public String name;
-            @ApiModelProperty(example = "Question 2")
-            public String newName;
-            @ApiModelProperty(example = "Gender")
-            public String code;
-            @ApiModelProperty(example = "Gender2")
-            public String newCode;
-            @ApiModelProperty(example = "true")
-            public boolean mandatory;
-        }
-        @ApiModelProperty(example = "m_client")
-        public String appTableName;
-        public List<PutDataTablesRequestDropColumns> dropColumns;
-        public List<PutDataTablesRequestAddColumns> addColumns;
-        public List<PutDataTablesRequestChangeColumns> ChangeColumns;
-    }
+    public PutDataTablesAppTableIdResponseChanges changes;
+  }
 
-    @ApiModel(value = "PutDataTablesResponse")
-    public static final class PutDataTablesResponse{
-        private PutDataTablesResponse() {
+  @ApiModel(value = "PutDataTablesAppTableIdDatatableIdRequest")
+  public static final class PutDataTablesAppTableIdDatatableIdRequest {
+    private PutDataTablesAppTableIdDatatableIdRequest() {}
 
-        }
-        @ApiModelProperty(example = "extra_client_details")
-        public String resourceIdentifier;
-    }
+    @ApiModelProperty(example = "01 June 1982")
+    public String DateOfBirth;
 
-    @ApiModel(value = "DeleteDataTablesResponse")
-    public static final class DeleteDataTablesResponse{
-        private DeleteDataTablesResponse() {
+    @ApiModelProperty(example = "5")
+    public Long Education_cdHighest;
 
-        }
-        @ApiModelProperty(example = "extra_client_details")
-        public String resourceIdentifier;
-    }
+    @ApiModelProperty(example = "June")
+    public String Name;
 
-    @ApiModel(value = "PostDataTablesRegisterDatatableAppTable")
-    public static final class PostDataTablesRegisterDatatableAppTable {
-        private PostDataTablesRegisterDatatableAppTable () {}
-    }
+    @ApiModelProperty(example = "More notes")
+    public String OtherNotes;
 
-    @ApiModel(value = "PostDataTablesAppTableIdRequest")
-    public static final class PostDataTablesAppTableIdRequest{
-        private PostDataTablesAppTableIdRequest() {
+    @ApiModelProperty(example = "20")
+    public Long PointsScore;
 
-        }
-        @ApiModelProperty(example = "Livestock sales")
-        public String BusinessDescription;
-        @ApiModelProperty(example = "First comment made")
-        public String Comment;
-        @ApiModelProperty(example = "Primary")
-        public String Education_cv;
-        @ApiModelProperty(example = "6")
-        public Long Gender_cd;
-        @ApiModelProperty(example = "8.5")
-        public Double HighestRatePaid;
-        @ApiModelProperty(example = "01 October 2012")
-        public String NextVisit;
-        @ApiModelProperty(example = "5")
-        public Long YearsinBusiness;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "en")
-        public String locale;
-    }
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
 
-    @ApiModel(value = "PostDataTablesAppTableIdResponse ")
-    public static final class PostDataTablesAppTableIdResponse {
-        private PostDataTablesAppTableIdResponse () {
+    @ApiModelProperty(example = "en")
+    public String locale;
+  }
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
+  @ApiModel(value = "PutDataTablesAppTableIdDatatableIdResponse ")
+  public static final class PutDataTablesAppTableIdDatatableIdResponse {
+    private PutDataTablesAppTableIdDatatableIdResponse() {}
 
-    @ApiModel(value = "GetDataTablesAppTableIdResponse")
-    public static final class GetDataTablesAppTableIdResponse {
-        private GetDataTablesAppTableIdResponse() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 
-        }
-        public List<ResultsetColumnHeaderData> columnHeaders;
-        public List<ResultsetRowData> data;
-    }
+  @ApiModel(value = "DeleteDataTablesDatatableAppTableIdResponse ")
+  public static final class DeleteDataTablesDatatableAppTableIdResponse {
+    private DeleteDataTablesDatatableAppTableIdResponse() {}
 
-    @ApiModel(value = "PutDataTablesAppTableIdRequest")
-    public static final class PutDataTablesAppTableIdRequest{
-        private PutDataTablesAppTableIdRequest() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 
-        }
-        @ApiModelProperty(example = "Livestock sales updated")
-        public String BusinessDescription;
-    }
+  @ApiModel(value = "DeleteDataTablesDatatableAppTableIdDatatableIdResponse ")
+  public static final class DeleteDataTablesDatatableAppTableIdDatatableIdResponse {
+    private DeleteDataTablesDatatableAppTableIdDatatableIdResponse() {}
 
-    @ApiModel(value = "PutDataTablesAppTableIdResponse")
-    public static final class PutDataTablesAppTableIdResponse {
-        private PutDataTablesAppTableIdResponse() {
-
-        }
-        final class PutDataTablesAppTableIdResponseChanges{
-            private PutDataTablesAppTableIdResponseChanges () {}
-            @ApiModelProperty(example = "Livestock sales updated")
-            public String BusinessDescription;
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        public PutDataTablesAppTableIdResponseChanges changes;
-    }
-
-    @ApiModel(value = "PutDataTablesAppTableIdDatatableIdRequest")
-    public static final class PutDataTablesAppTableIdDatatableIdRequest{
-        private PutDataTablesAppTableIdDatatableIdRequest() {
-
-        }
-        @ApiModelProperty(example = "01 June 1982")
-        public String DateOfBirth;
-        @ApiModelProperty(example = "5")
-        public Long Education_cdHighest;
-        @ApiModelProperty(example = "June")
-        public String Name;
-        @ApiModelProperty(example = "More notes")
-        public String OtherNotes;
-        @ApiModelProperty(example = "20")
-        public Long PointsScore;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "en")
-        public String locale;
-    }
-
-    @ApiModel(value = "PutDataTablesAppTableIdDatatableIdResponse ")
-    public static final class PutDataTablesAppTableIdDatatableIdResponse {
-        private PutDataTablesAppTableIdDatatableIdResponse () {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
-
-    @ApiModel(value = "DeleteDataTablesDatatableAppTableIdResponse ")
-    public static final class DeleteDataTablesDatatableAppTableIdResponse {
-        private DeleteDataTablesDatatableAppTableIdResponse () {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
-
-    @ApiModel(value = "DeleteDataTablesDatatableAppTableIdDatatableIdResponse ")
-    public static final class DeleteDataTablesDatatableAppTableIdDatatableIdResponse {
-        private DeleteDataTablesDatatableAppTableIdDatatableIdResponse () {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
-
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 }

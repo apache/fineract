@@ -40,83 +40,102 @@ import org.joda.time.LocalDate;
 @Table(name = "m_deposit_account_on_hold_transaction")
 public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "savings_account_id", nullable = true)
-    private SavingsAccount savingsAccount;
+  @ManyToOne
+  @JoinColumn(name = "savings_account_id", nullable = true)
+  private SavingsAccount savingsAccount;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+  private BigDecimal amount;
 
-    @Column(name = "transaction_type_enum", nullable = false)
-    private Integer transactionType;
+  @Column(name = "transaction_type_enum", nullable = false)
+  private Integer transactionType;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "transaction_date", nullable = false)
-    private Date transactionDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "transaction_date", nullable = false)
+  private Date transactionDate;
 
-    @Column(name = "is_reversed", nullable = false)
-    private boolean reversed;
+  @Column(name = "is_reversed", nullable = false)
+  private boolean reversed;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date", nullable = false)
-    private Date createdDate;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "created_date", nullable = false)
+  private Date createdDate;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "depositAccountOnHoldTransaction", optional = true, orphanRemoval = true)
-    private GuarantorFundingTransaction guarantorFundingTransaction;
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      mappedBy = "depositAccountOnHoldTransaction",
+      optional = true,
+      orphanRemoval = true)
+  private GuarantorFundingTransaction guarantorFundingTransaction;
 
-    protected DepositAccountOnHoldTransaction() {}
+  protected DepositAccountOnHoldTransaction() {}
 
-    private DepositAccountOnHoldTransaction(final SavingsAccount savingsAccount, final BigDecimal amount,
-            final DepositAccountOnHoldTransactionType transactionType, final LocalDate transactionDate, final boolean reversed) {
-        this.savingsAccount = savingsAccount;
-        this.amount = amount;
-        this.transactionType = transactionType.getValue();
-        this.transactionDate = transactionDate.toDate();
-        this.createdDate = new Date();
-        this.reversed = reversed;
+  private DepositAccountOnHoldTransaction(
+      final SavingsAccount savingsAccount,
+      final BigDecimal amount,
+      final DepositAccountOnHoldTransactionType transactionType,
+      final LocalDate transactionDate,
+      final boolean reversed) {
+    this.savingsAccount = savingsAccount;
+    this.amount = amount;
+    this.transactionType = transactionType.getValue();
+    this.transactionDate = transactionDate.toDate();
+    this.createdDate = new Date();
+    this.reversed = reversed;
+  }
+
+  public static DepositAccountOnHoldTransaction hold(
+      final SavingsAccount savingsAccount,
+      final BigDecimal amount,
+      final LocalDate transactionDate) {
+    boolean reversed = false;
+    return new DepositAccountOnHoldTransaction(
+        savingsAccount,
+        amount,
+        DepositAccountOnHoldTransactionType.HOLD,
+        transactionDate,
+        reversed);
+  }
+
+  public static DepositAccountOnHoldTransaction release(
+      final SavingsAccount savingsAccount,
+      final BigDecimal amount,
+      final LocalDate transactionDate) {
+    boolean reversed = false;
+    return new DepositAccountOnHoldTransaction(
+        savingsAccount,
+        amount,
+        DepositAccountOnHoldTransactionType.RELEASE,
+        transactionDate,
+        reversed);
+  }
+
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
+
+  public Money getAmountMoney(final MonetaryCurrency currency) {
+    return Money.of(currency, this.amount);
+  }
+
+  public void reverseTransaction() {
+    this.reversed = true;
+    if (this.getTransactionType().isHold()) {
+      this.savingsAccount.releaseFunds(this.amount);
+    } else {
+      this.savingsAccount.holdFunds(this.amount);
     }
+  }
 
-    public static DepositAccountOnHoldTransaction hold(final SavingsAccount savingsAccount, final BigDecimal amount,
-            final LocalDate transactionDate) {
-        boolean reversed = false;
-        return new DepositAccountOnHoldTransaction(savingsAccount, amount, DepositAccountOnHoldTransactionType.HOLD, transactionDate,
-                reversed);
+  public DepositAccountOnHoldTransactionType getTransactionType() {
+    return DepositAccountOnHoldTransactionType.fromInt(this.transactionType);
+  }
+
+  public LocalDate getTransactionDate() {
+    LocalDate transactionDate = null;
+    if (this.transactionDate != null) {
+      transactionDate = LocalDate.fromDateFields(this.transactionDate);
     }
-
-    public static DepositAccountOnHoldTransaction release(final SavingsAccount savingsAccount, final BigDecimal amount,
-            final LocalDate transactionDate) {
-        boolean reversed = false;
-        return new DepositAccountOnHoldTransaction(savingsAccount, amount, DepositAccountOnHoldTransactionType.RELEASE, transactionDate,
-                reversed);
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public Money getAmountMoney(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amount);
-    }
-
-    public void reverseTransaction() {
-        this.reversed = true;
-        if (this.getTransactionType().isHold()) {
-            this.savingsAccount.releaseFunds(this.amount);
-        } else {
-            this.savingsAccount.holdFunds(this.amount);
-        }
-    }
-
-    public DepositAccountOnHoldTransactionType getTransactionType() {
-        return DepositAccountOnHoldTransactionType.fromInt(this.transactionType);
-    }
-
-    public LocalDate getTransactionDate() {
-        LocalDate transactionDate = null;
-        if(this.transactionDate !=null){
-            transactionDate = LocalDate.fromDateFields(this.transactionDate);
-        }
-        return transactionDate;
-    }
-
+    return transactionDate;
+  }
 }

@@ -24,11 +24,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * {@link AbstractPlatformDomainRuleException} thrown when trying to modify a
  * loan in an invalid state.
  */
-public class LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified extends AbstractPlatformDomainRuleException {
+public class LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified
+    extends AbstractPlatformDomainRuleException {
 
-    public LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(final Long id) {
-        super("error.msg.loan.cannot.modify.loan.in.its.present.state", "Loan application with identifier " + id
-                + " cannot be modified in its current state.", id);
-    }
-
+  public LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(final Long id) {
+    super(
+        "error.msg.loan.cannot.modify.loan.in.its.present.state",
+        "Loan application with identifier " + id + " cannot be modified in its current state.",
+        id);
+  }
 }

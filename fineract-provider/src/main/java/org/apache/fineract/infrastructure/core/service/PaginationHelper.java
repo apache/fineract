@@ -25,23 +25,28 @@ import org.springframework.jdbc.core.RowMapper;
 
 public class PaginationHelper<E> {
 
-    public Page<E> fetchPage(final JdbcTemplate jt, final String sqlCountRows, final String sqlFetchRows, final Object args[],
-            final RowMapper<E> rowMapper) {
+  public Page<E> fetchPage(
+      final JdbcTemplate jt,
+      final String sqlCountRows,
+      final String sqlFetchRows,
+      final Object args[],
+      final RowMapper<E> rowMapper) {
 
-        final List<E> items = jt.query(sqlFetchRows, args, rowMapper);
+    final List<E> items = jt.query(sqlFetchRows, args, rowMapper);
 
-        // determine how many rows are available
-        final int totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class);
+    // determine how many rows are available
+    final int totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class);
 
-        return new Page<>(items, totalFilteredRecords);
-    }
+    return new Page<>(items, totalFilteredRecords);
+  }
 
-    public Page<Long> fetchPage(JdbcTemplate jdbcTemplate, String sql, String sqlCountRows, Class<Long> type) {
-        final List<Long> items = jdbcTemplate.queryForList(sql, type);
+  public Page<Long> fetchPage(
+      JdbcTemplate jdbcTemplate, String sql, String sqlCountRows, Class<Long> type) {
+    final List<Long> items = jdbcTemplate.queryForList(sql, type);
 
-        // determine how many rows are available
-        Integer totalFilteredRecords = jdbcTemplate.queryForObject(sqlCountRows, Integer.class);
+    // determine how many rows are available
+    Integer totalFilteredRecords = jdbcTemplate.queryForObject(sqlCountRows, Integer.class);
 
-        return new Page<>(items, ObjectUtils.defaultIfNull(totalFilteredRecords, 0));
-    }
+    return new Page<>(items, ObjectUtils.defaultIfNull(totalFilteredRecords, 0));
+  }
 }

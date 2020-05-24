@@ -20,11 +20,9 @@ package org.apache.fineract.portfolio.savings.service;
 
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
-
 public interface SavingsSchedularService {
 
-    void postInterestForAccounts() throws JobExecutionException;
+  void postInterestForAccounts() throws JobExecutionException;
 
-    void updateSavingsDormancyStatus() throws JobExecutionException;
-
+  void updateSavingsDormancyStatus() throws JobExecutionException;
 }

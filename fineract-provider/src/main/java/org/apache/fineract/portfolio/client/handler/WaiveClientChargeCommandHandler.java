@@ -29,20 +29,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME, action = ClientApiConstants.CLIENT_CHARGE_ACTION_WAIVE)
+@CommandType(
+    entity = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME,
+    action = ClientApiConstants.CLIENT_CHARGE_ACTION_WAIVE)
 public class WaiveClientChargeCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientChargeWritePlatformService writePlatformService;
+  private final ClientChargeWritePlatformService writePlatformService;
 
-    @Autowired
-    public WaiveClientChargeCommandHandler(final ClientChargeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public WaiveClientChargeCommandHandler(
+      final ClientChargeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.waiveCharge(command.getClientId(), command.entityId());
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.waiveCharge(command.getClientId(), command.entityId());
+  }
 }

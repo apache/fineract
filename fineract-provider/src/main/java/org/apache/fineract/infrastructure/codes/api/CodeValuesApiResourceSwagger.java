@@ -25,85 +25,89 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 30/7/17.
  */
 final class CodeValuesApiResourceSwagger {
-    private CodeValuesApiResourceSwagger() {
+  private CodeValuesApiResourceSwagger() {}
 
+  @ApiModel(value = "GetCodeValuesDataResponse")
+  public static final class GetCodeValuesDataResponse {
+    private GetCodeValuesDataResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long id;
+
+    @ApiModelProperty(example = "Passport")
+    public String name;
+
+    @ApiModelProperty(example = "Passport information")
+    public String description;
+
+    @ApiModelProperty(example = "0")
+    public Integer position;
+  }
+
+  @ApiModel(value = "PostCodeValuesDataRequest")
+  public static final class PostCodeValuesDataRequest {
+    private PostCodeValuesDataRequest() {}
+
+    @ApiModelProperty(example = "Passport")
+    public String name;
+
+    @ApiModelProperty(example = "Passport information")
+    public String description;
+
+    @ApiModelProperty(example = "0")
+    public Integer position;
+  }
+
+  @ApiModel(value = "PostCodeValueDataResponse")
+  public static final class PostCodeValueDataResponse {
+    private PostCodeValueDataResponse() {}
+
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "PutCodeValuesDataRequest")
+  public static final class PutCodeValuesDataRequest {
+    private PutCodeValuesDataRequest() {}
+
+    @ApiModelProperty(example = "Passport")
+    public String name;
+
+    @ApiModelProperty(example = "Passport information")
+    public String description;
+
+    @ApiModelProperty(example = "0")
+    public Integer position;
+  }
+
+  @ApiModel(value = "PutCodeValueDataResponse")
+  public static final class PutCodeValueDataResponse {
+    private PutCodeValueDataResponse() {}
+
+    private final class PutCodeValuechangesSwagger {
+      private PutCodeValuechangesSwagger() {}
+
+      @ApiModelProperty(example = "Passport")
+      public String name;
+
+      @ApiModelProperty(example = "Passport information")
+      public String description;
+
+      @ApiModelProperty(example = "0")
+      public Integer position;
     }
 
-    @ApiModel(value = "GetCodeValuesDataResponse")
-    public static final class GetCodeValuesDataResponse {
-        private GetCodeValuesDataResponse() {
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long id;
-        @ApiModelProperty(example = "Passport")
-        public String name;
-        @ApiModelProperty(example = "Passport information")
-        public String description;
-        @ApiModelProperty(example = "0")
-        public Integer position;
-    }
+    public PutCodeValuechangesSwagger changes;
+  }
 
-    @ApiModel(value = "PostCodeValuesDataRequest")
-    public static final class PostCodeValuesDataRequest {
-        private PostCodeValuesDataRequest() {
+  @ApiModel(value = "DeleteCodeValueDataResponse")
+  public static final class DeleteCodeValueDataResponse {
+    private DeleteCodeValueDataResponse() {}
 
-        }
-        @ApiModelProperty(example = "Passport")
-        public String name;
-        @ApiModelProperty(example = "Passport information")
-        public String description;
-        @ApiModelProperty(example = "0")
-        public Integer position;
-    }
-
-    @ApiModel(value = "PostCodeValueDataResponse")
-    public static final class PostCodeValueDataResponse {
-        private PostCodeValueDataResponse() {
-
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-    }
-
-    @ApiModel(value = "PutCodeValuesDataRequest")
-    public static final class PutCodeValuesDataRequest {
-        private PutCodeValuesDataRequest() {
-
-        }
-        @ApiModelProperty(example = "Passport")
-        public String name;
-        @ApiModelProperty(example = "Passport information")
-        public String description;
-        @ApiModelProperty(example = "0")
-        public Integer position;
-    }
-
-    @ApiModel(value = "PutCodeValueDataResponse")
-    public static final class PutCodeValueDataResponse {
-        private PutCodeValueDataResponse() {
-
-        }
-        private final class PutCodeValuechangesSwagger{
-            private PutCodeValuechangesSwagger() {}
-            @ApiModelProperty(example = "Passport")
-            public String name;
-            @ApiModelProperty(example = "Passport information")
-            public String description;
-            @ApiModelProperty(example = "0")
-            public Integer position;
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-        public PutCodeValuechangesSwagger changes;
-    }
-
-    @ApiModel(value = "DeleteCodeValueDataResponse")
-    public static final class DeleteCodeValueDataResponse {
-        private DeleteCodeValueDataResponse() {
-
-        }
-        @ApiModelProperty(example = "4")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "4")
+    public Long resourceId;
+  }
 }

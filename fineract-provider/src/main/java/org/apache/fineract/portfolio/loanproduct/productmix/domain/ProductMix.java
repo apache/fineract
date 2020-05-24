@@ -29,33 +29,33 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Table(name = "m_product_mix")
 public class ProductMix extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private LoanProduct product;
+  @ManyToOne
+  @JoinColumn(name = "product_id", nullable = false)
+  private LoanProduct product;
 
-    @ManyToOne
-    @JoinColumn(name = "restricted_product_id", nullable = false)
-    private LoanProduct restrictedProduct;
+  @ManyToOne
+  @JoinColumn(name = "restricted_product_id", nullable = false)
+  private LoanProduct restrictedProduct;
 
-    public ProductMix() {
-        //
-    }
+  public ProductMix() {
+    //
+  }
 
-    private ProductMix(final LoanProduct product, final LoanProduct restrictedProduct) {
-        this.product = product;
-        this.restrictedProduct = restrictedProduct;
-    }
+  private ProductMix(final LoanProduct product, final LoanProduct restrictedProduct) {
+    this.product = product;
+    this.restrictedProduct = restrictedProduct;
+  }
 
-    public static ProductMix createNew(final LoanProduct product, final LoanProduct restrictedProduct) {
-        return new ProductMix(product, restrictedProduct);
-    }
+  public static ProductMix createNew(
+      final LoanProduct product, final LoanProduct restrictedProduct) {
+    return new ProductMix(product, restrictedProduct);
+  }
 
-    public Long getRestrictedProductId() {
-        return this.restrictedProduct.getId();
-    }
+  public Long getRestrictedProductId() {
+    return this.restrictedProduct.getId();
+  }
 
-    public Long getProductId() {
-        return this.product.getId();
-    }
-
+  public Long getProductId() {
+    return this.product.getId();
+  }
 }

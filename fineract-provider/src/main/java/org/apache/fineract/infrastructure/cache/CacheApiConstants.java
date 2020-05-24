@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.cache;
 
 public class CacheApiConstants {
 
-    public static final String RESOURCE_NAME = "CACHE";
-    public static final String cacheTypeParameter = "cacheType";
-
+  public static final String RESOURCE_NAME = "CACHE";
+  public static final String cacheTypeParameter = "cacheType";
 }

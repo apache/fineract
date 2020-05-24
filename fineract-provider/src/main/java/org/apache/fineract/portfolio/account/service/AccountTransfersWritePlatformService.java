@@ -28,19 +28,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface AccountTransfersWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+  CommandProcessingResult create(JsonCommand command);
 
-    void reverseTransfersWithFromAccountType(Long accountNumber, PortfolioAccountType accountTypeId);
+  void reverseTransfersWithFromAccountType(Long accountNumber, PortfolioAccountType accountTypeId);
 
-    Long transferFunds(AccountTransferDTO accountTransferDTO);
+  Long transferFunds(AccountTransferDTO accountTransferDTO);
 
-    void reverseAllTransactions(Long accountId, PortfolioAccountType accountTypeId);
+  void reverseAllTransactions(Long accountId, PortfolioAccountType accountTypeId);
 
-    void updateLoanTransaction(Long loanTransactionId, LoanTransaction newLoanTransaction);
+  void updateLoanTransaction(Long loanTransactionId, LoanTransaction newLoanTransaction);
 
-    CommandProcessingResult refundByTransfer(JsonCommand command);
+  CommandProcessingResult refundByTransfer(JsonCommand command);
 
-    void reverseTransfersWithFromAccountTransactions(Collection<Long> fromTransactionIds, PortfolioAccountType accountTypeId);
+  void reverseTransfersWithFromAccountTransactions(
+      Collection<Long> fromTransactionIds, PortfolioAccountType accountTypeId);
 
-    AccountTransferDetails repayLoanWithTopup(AccountTransferDTO accountTransferDTO);
+  AccountTransferDetails repayLoanWithTopup(AccountTransferDTO accountTransferDTO);
 }

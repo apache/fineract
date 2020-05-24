@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class HolidayDateException extends AbstractPlatformDomainRuleException {
 
-    public HolidayDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.holiday." + postFix, defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public HolidayDateException(
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super("error.msg.holiday." + postFix, defaultUserMessage, defaultUserMessageArgs);
+  }
 }

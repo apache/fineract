@@ -37,21 +37,20 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "TELLER", action = "CREATE")
 public class CreateTellerCommandHandler implements NewCommandSourceHandler {
 
-    private final TellerWritePlatformService writePlatformService;
+  private final TellerWritePlatformService writePlatformService;
 
-    /**
-     * Creates a new instance
-     *
-     * @param writePlatformService the {@code TellerWritePlatformService} used to access the backend
-     */
-    @Autowired
-    public CreateTellerCommandHandler(final TellerWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  /**
+   * Creates a new instance
+   *
+   * @param writePlatformService the {@code TellerWritePlatformService} used to access the backend
+   */
+  @Autowired
+  public CreateTellerCommandHandler(final TellerWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.createTeller(command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.createTeller(command);
+  }
 }
-

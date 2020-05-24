@@ -27,96 +27,117 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/01/17.
  */
 final class StandingInstructionHistoryApiResourceSwagger {
-    private StandingInstructionHistoryApiResourceSwagger() {
-    }
+  private StandingInstructionHistoryApiResourceSwagger() {}
 
-    @ApiModel(value = "GetStandingInstructionRunHistoryResponse")
-    public final static class GetStandingInstructionRunHistoryResponse {
-        private GetStandingInstructionRunHistoryResponse() {
-        }
+  @ApiModel(value = "GetStandingInstructionRunHistoryResponse")
+  public static final class GetStandingInstructionRunHistoryResponse {
+    private GetStandingInstructionRunHistoryResponse() {}
 
-        final class GetStandingInstructionHistoryPageItemsResponse {
+    final class GetStandingInstructionHistoryPageItemsResponse {
 
-            final class GetStandingInstructionHistoryPageItemsFromClient {
-                private GetStandingInstructionHistoryPageItemsFromClient() {
-                }
+      final class GetStandingInstructionHistoryPageItemsFromClient {
+        private GetStandingInstructionHistoryPageItemsFromClient() {}
 
-                @ApiModelProperty(example = "1")
-                public Long id;
-                @ApiModelProperty(example = "Test client")
-                public String displayName;
-                @ApiModelProperty(example = "1")
-                public Long officeId;
-                @ApiModelProperty(example = "Head Office")
-                public String officeName;
-            }
+        @ApiModelProperty(example = "1")
+        public Long id;
 
-            final class GetStandingInstructionHistoryFromAccount {
-                private GetStandingInstructionHistoryFromAccount() {
-                }
+        @ApiModelProperty(example = "Test client")
+        public String displayName;
 
-                @ApiModelProperty(example = "2")
-                public Long id;
-                @ApiModelProperty(example = "000000002")
-                public Long accountNo;
-                @ApiModelProperty(example = "1")
-                public Long productId;
-                @ApiModelProperty(example = "General Savings")
-                public String productName;
-            }
+        @ApiModelProperty(example = "1")
+        public Long officeId;
 
-            final class GetStandingInstructionHistoryToAccount {
-                private GetStandingInstructionHistoryToAccount() {
-                }
+        @ApiModelProperty(example = "Head Office")
+        public String officeName;
+      }
 
-                @ApiModelProperty(example = "1")
-                public Long id;
-                @ApiModelProperty(example = "000000001")
-                public Long accountNo;
-                @ApiModelProperty(example = "1")
-                public Long productId;
-                @ApiModelProperty(example = "General Savings")
-                public String productName;
-            }
-
-            final class GetStandingInstructionHistoryToClient {
-                private GetStandingInstructionHistoryToClient() {
-                }
-
-                @ApiModelProperty(example = "1")
-                public Long id;
-                @ApiModelProperty(example = "Test client")
-                public String displayName;
-                @ApiModelProperty(example = "1")
-                public Long officeId;
-                @ApiModelProperty(example = "Head Office")
-                public String officeName;
-            }
-
-            @ApiModelProperty(example = "1")
-            public Long standingInstructionId;
-            @ApiModelProperty(example = "ACC Transfer")
-            public String name;
-            public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetFromOfficeStandingInstructionSwagger fromOffice;
-            public GetStandingInstructionHistoryPageItemsFromClient fromClient;
-            public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetFromAccountTypeStandingInstructionSwagger fromAccountType;
-            public GetStandingInstructionHistoryFromAccount fromAccount;
-            public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetToAccountTypeStandingInstructionSwagger toAccountType;
-            public GetStandingInstructionHistoryToAccount toAccount;
-            public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.GetPageItemsStandingInstructionSwagger.GetToOfficeStandingInstructionSwagger toOffice;
-            public GetStandingInstructionHistoryToClient toClient;
-            @ApiModelProperty(example = "10")
-            public Float amount;
-            @ApiModelProperty(example = "success")
-            public String status;
-            @ApiModelProperty(example = "[2014, 6, 30]")
-            public LocalDate executionTime;
-            @ApiModelProperty(example = " ")
-            public String errorLog;
-        }
+      final class GetStandingInstructionHistoryFromAccount {
+        private GetStandingInstructionHistoryFromAccount() {}
 
         @ApiModelProperty(example = "2")
-        public Integer totalFilteredRecords;
-        public Set<GetStandingInstructionHistoryPageItemsResponse> pageItems;
+        public Long id;
+
+        @ApiModelProperty(example = "000000002")
+        public Long accountNo;
+
+        @ApiModelProperty(example = "1")
+        public Long productId;
+
+        @ApiModelProperty(example = "General Savings")
+        public String productName;
+      }
+
+      final class GetStandingInstructionHistoryToAccount {
+        private GetStandingInstructionHistoryToAccount() {}
+
+        @ApiModelProperty(example = "1")
+        public Long id;
+
+        @ApiModelProperty(example = "000000001")
+        public Long accountNo;
+
+        @ApiModelProperty(example = "1")
+        public Long productId;
+
+        @ApiModelProperty(example = "General Savings")
+        public String productName;
+      }
+
+      final class GetStandingInstructionHistoryToClient {
+        private GetStandingInstructionHistoryToClient() {}
+
+        @ApiModelProperty(example = "1")
+        public Long id;
+
+        @ApiModelProperty(example = "Test client")
+        public String displayName;
+
+        @ApiModelProperty(example = "1")
+        public Long officeId;
+
+        @ApiModelProperty(example = "Head Office")
+        public String officeName;
+      }
+
+      @ApiModelProperty(example = "1")
+      public Long standingInstructionId;
+
+      @ApiModelProperty(example = "ACC Transfer")
+      public String name;
+
+      public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse
+              .GetPageItemsStandingInstructionSwagger.GetFromOfficeStandingInstructionSwagger
+          fromOffice;
+      public GetStandingInstructionHistoryPageItemsFromClient fromClient;
+      public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse
+              .GetPageItemsStandingInstructionSwagger.GetFromAccountTypeStandingInstructionSwagger
+          fromAccountType;
+      public GetStandingInstructionHistoryFromAccount fromAccount;
+      public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse
+              .GetPageItemsStandingInstructionSwagger.GetToAccountTypeStandingInstructionSwagger
+          toAccountType;
+      public GetStandingInstructionHistoryToAccount toAccount;
+      public StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse
+              .GetPageItemsStandingInstructionSwagger.GetToOfficeStandingInstructionSwagger
+          toOffice;
+      public GetStandingInstructionHistoryToClient toClient;
+
+      @ApiModelProperty(example = "10")
+      public Float amount;
+
+      @ApiModelProperty(example = "success")
+      public String status;
+
+      @ApiModelProperty(example = "[2014, 6, 30]")
+      public LocalDate executionTime;
+
+      @ApiModelProperty(example = " ")
+      public String errorLog;
     }
+
+    @ApiModelProperty(example = "2")
+    public Integer totalFilteredRecords;
+
+    public Set<GetStandingInstructionHistoryPageItemsResponse> pageItems;
+  }
 }

@@ -60,277 +60,349 @@ import org.joda.time.LocalDate;
 @Table(name = "m_interest_rate_chart")
 public class InterestRateChart extends AbstractPersistableCustom {
 
-    @Embedded
-    private InterestRateChartFields chartFields;
+  @Embedded private InterestRateChartFields chartFields;
 
-    @OneToMany(mappedBy = "interestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<InterestRateChartSlab> chartSlabs = new HashSet<>();
+  @OneToMany(
+      mappedBy = "interestRateChart",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.EAGER)
+  private Set<InterestRateChartSlab> chartSlabs = new HashSet<>();
 
-    protected InterestRateChart() {
-        //
-    }
+  protected InterestRateChart() {
+    //
+  }
 
-    public static InterestRateChart createNew(InterestRateChartFields chartFields, Collection<InterestRateChartSlab> interestRateChartSlabs) {
+  public static InterestRateChart createNew(
+      InterestRateChartFields chartFields,
+      Collection<InterestRateChartSlab> interestRateChartSlabs) {
 
-        return new InterestRateChart(chartFields, new HashSet<>(interestRateChartSlabs));
-    }
+    return new InterestRateChart(chartFields, new HashSet<>(interestRateChartSlabs));
+  }
 
-    private InterestRateChart(InterestRateChartFields chartFields, Set<InterestRateChartSlab> interestRateChartSlabs) {
+  private InterestRateChart(
+      InterestRateChartFields chartFields, Set<InterestRateChartSlab> interestRateChartSlabs) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(INTERESTRATE_CHART_RESOURCE_NAME);
-        this.chartFields = chartFields;
-        // validate before setting the other fields
-        this.validateChartSlabs(baseDataValidator);
-        this.throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(INTERESTRATE_CHART_RESOURCE_NAME);
+    this.chartFields = chartFields;
+    // validate before setting the other fields
+    this.validateChartSlabs(baseDataValidator);
+    this.throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
-        this.addChartSlabs(interestRateChartSlabs);
+    this.addChartSlabs(interestRateChartSlabs);
+  }
 
-    }
+  public void validateChartSlabs(DataValidatorBuilder baseDataValidator) {
+    Collection<InterestRateChartSlab> chartSlabs = this.setOfChartSlabs();
 
-    public void validateChartSlabs(DataValidatorBuilder baseDataValidator) {
-        Collection<InterestRateChartSlab> chartSlabs = this.setOfChartSlabs();
+    Integer tmpPeriodType = null;
+    List<InterestRateChartSlab> chartSlabsList = new ArrayList<>(chartSlabs);
+    boolean isPrimaryGroupingByAmount = this.chartFields.isPrimaryGroupingByAmount();
+    chartSlabsList.sort(
+        new InterestRateChartSlabComparator<InterestRateChartSlab>(isPrimaryGroupingByAmount));
+    boolean isPeriodChart = !isPrimaryGroupingByAmount;
+    boolean isAmountChart = isPrimaryGroupingByAmount;
 
-        Integer tmpPeriodType = null;
-        List<InterestRateChartSlab> chartSlabsList = new ArrayList<>(chartSlabs);
-        boolean isPrimaryGroupingByAmount = this.chartFields.isPrimaryGroupingByAmount();
-        chartSlabsList.sort(new InterestRateChartSlabComparator<InterestRateChartSlab>(isPrimaryGroupingByAmount));
-        boolean isPeriodChart = !isPrimaryGroupingByAmount;
-        boolean isAmountChart = isPrimaryGroupingByAmount;
+    for (int i = 0; i < chartSlabsList.size(); i++) {
+      InterestRateChartSlab iSlabs = chartSlabsList.get(i);
+      if (!iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
+        if (isPrimaryGroupingByAmount) {
+          baseDataValidator
+              .parameter(InterestRateChartSlabApiConstants.amountRangeFromParamName)
+              .failWithCode("cannot.be.blank");
+        } else {
+          baseDataValidator
+              .parameter(InterestRateChartSlabApiConstants.fromPeriodParamName)
+              .failWithCode("cannot.be.blank");
+        }
 
-        for (int i = 0; i < chartSlabsList.size(); i++) {
-            InterestRateChartSlab iSlabs = chartSlabsList.get(i);
-            if (!iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
-                if (isPrimaryGroupingByAmount) {
-                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.amountRangeFromParamName).failWithCode("cannot.be.blank");
-                } else {
-                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.fromPeriodParamName).failWithCode("cannot.be.blank");
-                }
+      } else if (i > 0) {
+        if (isPeriodChart ^ iSlabs.slabFields().fromPeriod() != null) {
+          baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+              "chart.slabs.period.range.incomplete");
+          isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
+        }
+        if (isAmountChart ^ iSlabs.slabFields().getAmountRangeFrom() != null) {
+          baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+              "chart.slabs.amount.range.incomplete");
+          isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
+        }
+      }
 
-            } else if (i > 0) {
-                if (isPeriodChart ^ iSlabs.slabFields().fromPeriod() != null) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.incomplete");
-                    isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
-                }
-                if (isAmountChart ^ iSlabs.slabFields().getAmountRangeFrom() != null) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.incomplete");
-                    isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
-                }
+      if (i == 0) {
+        tmpPeriodType = iSlabs.slabFields().periodType();
+        if (iSlabs.slabFields().isNotProperChartStart()) {
+          baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+              "chart.slabs.range.start.incorrect",
+              iSlabs.slabFields().fromPeriod(),
+              iSlabs.slabFields().getAmountRangeFrom());
+        }
+        isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
+        isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
+      } else if (iSlabs.slabFields().periodType() != null
+          && !iSlabs.slabFields().periodType().equals(tmpPeriodType)) {
+        baseDataValidator
+            .parameter(periodTypeParamName)
+            .value(iSlabs.slabFields().periodType())
+            .failWithCode("period.type.is.not.same", tmpPeriodType);
+      }
+      if (i + 1 < chartSlabsList.size()) {
+        InterestRateChartSlab nextSlabs = chartSlabsList.get(i + 1);
+        if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
+            && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
+          if (iSlabs
+              .slabFields()
+              .isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                "chart.slabs.range.overlapping",
+                iSlabs.slabFields().fromPeriod(),
+                iSlabs.slabFields().toPeriod(),
+                nextSlabs.slabFields().fromPeriod(),
+                nextSlabs.slabFields().toPeriod(),
+                iSlabs.slabFields().getAmountRangeFrom(),
+                iSlabs.slabFields().getAmountRangeTo(),
+                nextSlabs.slabFields().getAmountRangeFrom(),
+                nextSlabs.slabFields().getAmountRangeTo());
+          } else if (iSlabs
+              .slabFields()
+              .isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                "chart.slabs.range.has.gap",
+                iSlabs.slabFields().fromPeriod(),
+                iSlabs.slabFields().toPeriod(),
+                nextSlabs.slabFields().fromPeriod(),
+                nextSlabs.slabFields().toPeriod(),
+                iSlabs.slabFields().getAmountRangeFrom(),
+                iSlabs.slabFields().getAmountRangeTo(),
+                nextSlabs.slabFields().getAmountRangeFrom(),
+                nextSlabs.slabFields().getAmountRangeTo());
+          }
+          if (isPrimaryGroupingByAmount) {
+            if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {
+              if (InterestRateChartSlabFields.isNotProperPeriodStart(nextSlabs.slabFields())) {
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                    "chart.slabs.period.range.start.incorrect", nextSlabs.slabFields().toPeriod());
+              }
+              if (iSlabs.slabFields().toPeriod() != null) {
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                    "chart.slabs.period.range.end.incorrect", iSlabs.slabFields().toPeriod());
+              }
             }
-
-            if (i == 0) {
-                tmpPeriodType = iSlabs.slabFields().periodType();
-                if (iSlabs.slabFields().isNotProperChartStart()) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.start.incorrect", iSlabs.slabFields()
-                            .fromPeriod(), iSlabs.slabFields().getAmountRangeFrom());
-                }
-                isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
-                isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
-            } else if (iSlabs.slabFields().periodType() != null && !iSlabs.slabFields().periodType().equals(tmpPeriodType)) {
-                baseDataValidator.parameter(periodTypeParamName).value(iSlabs.slabFields().periodType())
-                        .failWithCode("period.type.is.not.same", tmpPeriodType);
+          } else if (!iSlabs.slabFields().isPeriodsSame(nextSlabs.slabFields())) {
+            if (InterestRateChartSlabFields.isNotProperAmountStart(nextSlabs.slabFields())) {
+              baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                  "chart.slabs.amount.range.start.incorrect",
+                  nextSlabs.slabFields().getAmountRangeFrom());
             }
-            if (i + 1 < chartSlabsList.size()) {
-                InterestRateChartSlab nextSlabs = chartSlabsList.get(i + 1);
-                if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
-                        && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
-                    if (iSlabs.slabFields().isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping", iSlabs.slabFields()
-                                .fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields()
-                                .toPeriod(), iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(), nextSlabs
-                                .slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
-                    } else if (iSlabs.slabFields().isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap", iSlabs.slabFields()
-                                .fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields()
-                                .toPeriod(), iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(), nextSlabs
-                                .slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
-                    }
-                    if (isPrimaryGroupingByAmount) {
-                        if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {
-                            if (InterestRateChartSlabFields.isNotProperPeriodStart(nextSlabs.slabFields())) {
-                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.start.incorrect",
-                                        nextSlabs.slabFields().toPeriod());
-                            }
-                            if (iSlabs.slabFields().toPeriod() != null) {
-                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.end.incorrect", iSlabs
-                                        .slabFields().toPeriod());
-                            }
-
-                        }
-                    } else if (!iSlabs.slabFields().isPeriodsSame(nextSlabs.slabFields())) {
-                        if (InterestRateChartSlabFields.isNotProperAmountStart(nextSlabs.slabFields())) {
-                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.start.incorrect", nextSlabs
-                                    .slabFields().getAmountRangeFrom());
-                        }
-                        if (iSlabs.slabFields().getAmountRangeTo() != null) {
-                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.end.incorrect", iSlabs
-                                    .slabFields().getAmountRangeTo());
-                        }
-
-                    }
-                }
-            } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
-                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect",
-                        iSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeTo());
+            if (iSlabs.slabFields().getAmountRangeTo() != null) {
+              baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+                  "chart.slabs.amount.range.end.incorrect", iSlabs.slabFields().getAmountRangeTo());
             }
+          }
         }
+      } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
+        baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+            "chart.slabs.range.end.incorrect",
+            iSlabs.slabFields().toPeriod(),
+            iSlabs.slabFields().getAmountRangeTo());
+      }
+    }
+  }
+
+  public void addChartSlabs(Collection<InterestRateChartSlab> interestRateChartSlabsSet) {
+    Set<InterestRateChartSlab> existingChartSlabs = setOfChartSlabs();
+    for (InterestRateChartSlab newChartSlabs : interestRateChartSlabsSet) {
+      newChartSlabs.setInterestRateChart(this);
+      existingChartSlabs.add(newChartSlabs);
+    }
+  }
+
+  public void addChartSlab(InterestRateChartSlab newChartSlab) {
+    newChartSlab.setInterestRateChart(this);
+    setOfChartSlabs().add(newChartSlab);
+  }
+
+  public Set<InterestRateChartSlab> setOfChartSlabs() {
+    if (this.chartSlabs == null) {
+      this.chartSlabs = new HashSet<>();
+    }
+    return this.chartSlabs;
+  }
+
+  public void update(JsonCommand command, final Map<String, Object> actualChanges) {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(INTERESTRATE_CHART_RESOURCE_NAME);
+
+    this.update(command, actualChanges, baseDataValidator, null, null);
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  public void update(
+      JsonCommand command,
+      final Map<String, Object> actualChanges,
+      final DataValidatorBuilder baseDataValidator,
+      final Set<InterestRateChart> existingCharts,
+      String currencyCode) {
+
+    this.chartFields.update(command, actualChanges, baseDataValidator);
+
+    // interestRateChartSlabs
+    if (command.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
+      updateChartSlabs(command, actualChanges, baseDataValidator, currencyCode);
     }
 
-    public void addChartSlabs(Collection<InterestRateChartSlab> interestRateChartSlabsSet) {
-        Set<InterestRateChartSlab> existingChartSlabs = setOfChartSlabs();
-        for (InterestRateChartSlab newChartSlabs : interestRateChartSlabsSet) {
-            newChartSlabs.setInterestRateChart(this);
-            existingChartSlabs.add(newChartSlabs);
+    this.validateCharts(baseDataValidator, existingCharts);
+  }
+
+  private void validateCharts(
+      final DataValidatorBuilder baseDataValidator, final Set<InterestRateChart> existingCharts) {
+
+    for (InterestRateChart existingChart : existingCharts) {
+      if (!existingChart.equals(this)) {
+        if (this.chartFields.isOverlapping(existingChart.chartFields)) {
+          baseDataValidator.failWithCodeNoParameterAddedToErrorCode(
+              "chart.overlapping.from.and.end.dates",
+              existingChart.getFromDateAsLocalDate(),
+              existingChart.getEndDateAsLocalDate(),
+              this.getFromDateAsLocalDate(),
+              this.getEndDateAsLocalDate());
         }
+      }
     }
+  }
 
-    public void addChartSlab(InterestRateChartSlab newChartSlab) {
-        newChartSlab.setInterestRateChart(this);
-        setOfChartSlabs().add(newChartSlab);
-    }
+  public void updateChartSlabs(
+      JsonCommand command,
+      final Map<String, Object> actualChanges,
+      final DataValidatorBuilder baseDataValidator,
+      String currencyCode) {
 
-    public Set<InterestRateChartSlab> setOfChartSlabs() {
-        if (this.chartSlabs == null) {
-            this.chartSlabs = new HashSet<>();
-        }
-        return this.chartSlabs;
-    }
-
-    public void update(JsonCommand command, final Map<String, Object> actualChanges) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(INTERESTRATE_CHART_RESOURCE_NAME);
-
-        this.update(command, actualChanges, baseDataValidator, null, null);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
-    }
-
-    public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final Set<InterestRateChart> existingCharts, String currencyCode) {
-
-        this.chartFields.update(command, actualChanges, baseDataValidator);
-
-        // interestRateChartSlabs
-        if (command.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
-            updateChartSlabs(command, actualChanges, baseDataValidator, currencyCode);
-        }
-
-        this.validateCharts(baseDataValidator, existingCharts);
-    }
-
-    private void validateCharts(final DataValidatorBuilder baseDataValidator, final Set<InterestRateChart> existingCharts) {
-
-        for (InterestRateChart existingChart : existingCharts) {
-            if (!existingChart.equals(this)) {
-                if (this.chartFields.isOverlapping(existingChart.chartFields)) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.overlapping.from.and.end.dates",
-                            existingChart.getFromDateAsLocalDate(), existingChart.getEndDateAsLocalDate(), this.getFromDateAsLocalDate(),
-                            this.getEndDateAsLocalDate());
-                }
+    final Map<String, Object> deleteChartSlabs = new HashMap<>();
+    final Map<String, Object> chartSlabsChanges = new HashMap<>();
+    final Locale locale = command.extractLocale();
+    if (command.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
+      final JsonArray array =
+          command.arrayOfParameterNamed(InterestRateChartApiConstants.chartSlabs);
+      if (array != null) {
+        for (int i = 0; i < array.size(); i++) {
+          final JsonObject chartSlabsElement = array.get(i).getAsJsonObject();
+          JsonCommand chartSlabsCommand =
+              JsonCommand.fromExistingCommand(command, chartSlabsElement);
+          if (chartSlabsCommand.parameterExists(idParamName)) {
+            final Long chartSlabId = chartSlabsCommand.longValueOfParameterNamed(idParamName);
+            final InterestRateChartSlab chartSlab = this.findChartSlab(chartSlabId);
+            if (chartSlab == null) {
+              baseDataValidator
+                  .parameter(idParamName)
+                  .value(chartSlabId)
+                  .failWithCode("no.chart.slab.associated.with.id");
+            } else if (chartSlabsCommand.parameterExists(deleteParamName)) {
+              if (this.removeChartSlab(chartSlab)) {
+                deleteChartSlabs.put(idParamName, chartSlabId);
+              }
+            } else {
+              chartSlab.update(chartSlabsCommand, chartSlabsChanges, baseDataValidator, locale);
             }
+          } else {
+
+            /**
+             * TODO: AA: Move this code to
+             * InterestRateChartSlabAssembler
+             */
+            final String description =
+                chartSlabsCommand.stringValueOfParameterNamed(descriptionParamName);
+            final Integer periodTypeId =
+                chartSlabsCommand.integerValueOfParameterNamed(periodTypeParamName, locale);
+            final SavingsPeriodFrequencyType periodFrequencyType =
+                SavingsPeriodFrequencyType.fromInt(periodTypeId);
+            final Integer fromPeriod =
+                chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName, locale);
+            final Integer toPeriod =
+                chartSlabsCommand.integerValueOfParameterNamed(toPeriodParamName, locale);
+            final BigDecimal amountRangeFrom =
+                chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName, locale);
+            final BigDecimal amountRangeTo =
+                chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeToParamName, locale);
+            final BigDecimal annualInterestRate =
+                chartSlabsCommand.bigDecimalValueOfParameterNamed(
+                    annualInterestRateParamName, locale);
+
+            final InterestRateChartSlabFields slabFields =
+                InterestRateChartSlabFields.createNew(
+                    description,
+                    periodFrequencyType,
+                    fromPeriod,
+                    toPeriod,
+                    amountRangeFrom,
+                    amountRangeTo,
+                    annualInterestRate,
+                    currencyCode);
+            final InterestRateChartSlab chartSlab =
+                InterestRateChartSlab.createNew(slabFields, this);
+            chartSlab
+                .slabFields()
+                .validateChartSlabPlatformRules(chartSlabsCommand, baseDataValidator, locale);
+            chartSlab.updateIncentives(
+                chartSlabsCommand, actualChanges, baseDataValidator, chartSlab, locale);
+            this.addChartSlab(chartSlab);
+          }
         }
+      }
     }
 
-    public void updateChartSlabs(JsonCommand command, final Map<String, Object> actualChanges,
-            final DataValidatorBuilder baseDataValidator, String currencyCode) {
-
-        final Map<String, Object> deleteChartSlabs = new HashMap<>();
-        final Map<String, Object> chartSlabsChanges = new HashMap<>();
-        final Locale locale = command.extractLocale();
-        if (command.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
-            final JsonArray array = command.arrayOfParameterNamed(InterestRateChartApiConstants.chartSlabs);
-            if (array != null) {
-                for (int i = 0; i < array.size(); i++) {
-                    final JsonObject chartSlabsElement = array.get(i).getAsJsonObject();
-                    JsonCommand chartSlabsCommand = JsonCommand.fromExistingCommand(command, chartSlabsElement);
-                    if (chartSlabsCommand.parameterExists(idParamName)) {
-                        final Long chartSlabId = chartSlabsCommand.longValueOfParameterNamed(idParamName);
-                        final InterestRateChartSlab chartSlab = this.findChartSlab(chartSlabId);
-                        if (chartSlab == null) {
-                            baseDataValidator.parameter(idParamName).value(chartSlabId).failWithCode("no.chart.slab.associated.with.id");
-                        } else if (chartSlabsCommand.parameterExists(deleteParamName)) {
-                            if (this.removeChartSlab(chartSlab)) {
-                                deleteChartSlabs.put(idParamName, chartSlabId);
-                            }
-                        } else {
-                            chartSlab.update(chartSlabsCommand, chartSlabsChanges, baseDataValidator, locale);
-                        }
-                    } else {
-
-                        /**
-                         * TODO: AA: Move this code to
-                         * InterestRateChartSlabAssembler
-                         */
-                        final String description = chartSlabsCommand.stringValueOfParameterNamed(descriptionParamName);
-                        final Integer periodTypeId = chartSlabsCommand.integerValueOfParameterNamed(periodTypeParamName, locale);
-                        final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(periodTypeId);
-                        final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName, locale);
-                        final Integer toPeriod = chartSlabsCommand.integerValueOfParameterNamed(toPeriodParamName, locale);
-                        final BigDecimal amountRangeFrom = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName,
-                                locale);
-                        final BigDecimal amountRangeTo = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeToParamName, locale);
-                        final BigDecimal annualInterestRate = chartSlabsCommand.bigDecimalValueOfParameterNamed(
-                                annualInterestRateParamName, locale);
-
-                        final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields
-                                .createNew(description, periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
-                                        annualInterestRate, currencyCode);
-                        final InterestRateChartSlab chartSlab = InterestRateChartSlab.createNew(slabFields, this);
-                        chartSlab.slabFields().validateChartSlabPlatformRules(chartSlabsCommand, baseDataValidator, locale);
-                        chartSlab.updateIncentives(chartSlabsCommand, actualChanges, baseDataValidator, chartSlab, locale);
-                        this.addChartSlab(chartSlab);
-                    }
-                }
-            }
-        }
-
-        // add chart slab changes to actual changes list.
-        if (!chartSlabsChanges.isEmpty()) {
-            actualChanges.put(InterestRateChartApiConstants.chartSlabs, chartSlabsChanges);
-        }
-
-        // add deleted chart Slabs to actual changes
-        if (!deleteChartSlabs.isEmpty()) {
-            actualChanges.put("deletedChartSlabs", deleteChartSlabs);
-        }
-
-        this.validateChartSlabs(baseDataValidator);
+    // add chart slab changes to actual changes list.
+    if (!chartSlabsChanges.isEmpty()) {
+      actualChanges.put(InterestRateChartApiConstants.chartSlabs, chartSlabsChanges);
     }
 
-    public InterestRateChartSlab findChartSlab(Long chartSlabId) {
-        final Set<InterestRateChartSlab> chartSlabs = setOfChartSlabs();
-
-        for (InterestRateChartSlab interestRateChartSlab : chartSlabs) {
-            if (interestRateChartSlab.getId().equals(chartSlabId)) { return interestRateChartSlab; }
-        }
-        return null;
+    // add deleted chart Slabs to actual changes
+    if (!deleteChartSlabs.isEmpty()) {
+      actualChanges.put("deletedChartSlabs", deleteChartSlabs);
     }
 
-    private boolean removeChartSlab(InterestRateChartSlab chartSlab) {
-        final Set<InterestRateChartSlab> chartSlabs = setOfChartSlabs();
-        return chartSlabs.remove(chartSlab);
-    }
+    this.validateChartSlabs(baseDataValidator);
+  }
 
-    public LocalDate getFromDateAsLocalDate() {
-        return this.chartFields.getFromDateAsLocalDate();
-    }
+  public InterestRateChartSlab findChartSlab(Long chartSlabId) {
+    final Set<InterestRateChartSlab> chartSlabs = setOfChartSlabs();
 
-    public LocalDate getEndDateAsLocalDate() {
-        return this.chartFields.getEndDateAsLocalDate();
+    for (InterestRateChartSlab interestRateChartSlab : chartSlabs) {
+      if (interestRateChartSlab.getId().equals(chartSlabId)) {
+        return interestRateChartSlab;
+      }
     }
+    return null;
+  }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
+  private boolean removeChartSlab(InterestRateChartSlab chartSlab) {
+    final Set<InterestRateChartSlab> chartSlabs = setOfChartSlabs();
+    return chartSlabs.remove(chartSlab);
+  }
 
-    public InterestRateChartFields chartFields() {
-        return this.chartFields;
-    }
+  public LocalDate getFromDateAsLocalDate() {
+    return this.chartFields.getFromDateAsLocalDate();
+  }
 
-    public boolean isApplicableChartFor(final LocalDate target) {
-        return this.chartFields.isApplicableChartFor(target);
+  public LocalDate getEndDateAsLocalDate() {
+    return this.chartFields.getEndDateAsLocalDate();
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
+  }
+
+  public InterestRateChartFields chartFields() {
+    return this.chartFields;
+  }
+
+  public boolean isApplicableChartFor(final LocalDate target) {
+    return this.chartFields.isApplicableChartFor(target);
+  }
 }

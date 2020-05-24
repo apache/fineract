@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.accounting.glaccount.domain;
-
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -34,81 +32,88 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_trial_balance")
 public class TrialBalance extends AbstractPersistableCustom {
 
-    @Column(name = "office_id", nullable = false)
-    private Long officeId;
+  @Column(name = "office_id", nullable = false)
+  private Long officeId;
 
-    @Column(name = "account_id", nullable = false)
-    private Long glAccountId;
+  @Column(name = "account_id", nullable = false)
+  private Long glAccountId;
 
-    @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+  @Column(name = "amount", nullable = false)
+  private BigDecimal amount;
 
-    @Column(name = "entry_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date entryDate;
+  @Column(name = "entry_date", nullable = false)
+  @Temporal(TemporalType.DATE)
+  private Date entryDate;
 
-    @Column(name = "created_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date transactionDate;
+  @Column(name = "created_date", nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date transactionDate;
 
-    @Column(name = "closing_balance", nullable = false)
-    private BigDecimal closingBalance;
+  @Column(name = "closing_balance", nullable = false)
+  private BigDecimal closingBalance;
 
-    public static TrialBalance getInstance(final Long officeId, final Long glAccountId,
-                                           final BigDecimal amount, final Date entryDate, final Date transactionDate) {
-        return new TrialBalance(officeId, glAccountId, amount, entryDate, transactionDate);
-    }
+  public static TrialBalance getInstance(
+      final Long officeId,
+      final Long glAccountId,
+      final BigDecimal amount,
+      final Date entryDate,
+      final Date transactionDate) {
+    return new TrialBalance(officeId, glAccountId, amount, entryDate, transactionDate);
+  }
 
-    private TrialBalance(final Long officeId, final Long glAccountId,
-                         final BigDecimal amount, final Date entryDate, final Date transactionDate) {
-        this.officeId = officeId;
-        this.glAccountId = glAccountId;
-        this.amount = amount;
-        this.entryDate = entryDate;
-        this.transactionDate = transactionDate;
-    }
+  private TrialBalance(
+      final Long officeId,
+      final Long glAccountId,
+      final BigDecimal amount,
+      final Date entryDate,
+      final Date transactionDate) {
+    this.officeId = officeId;
+    this.glAccountId = glAccountId;
+    this.amount = amount;
+    this.entryDate = entryDate;
+    this.transactionDate = transactionDate;
+  }
 
-    protected TrialBalance() {
-    }
+  protected TrialBalance() {}
 
-    public Long getOfficeId() {
-        return officeId;
-    }
+  public Long getOfficeId() {
+    return officeId;
+  }
 
-    public Date getTransactionDate() {
-        return transactionDate;
-    }
+  public Date getTransactionDate() {
+    return transactionDate;
+  }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+  public BigDecimal getAmount() {
+    return amount;
+  }
 
-    public void setClosingBalance(final BigDecimal closingBalance) {
-        this.closingBalance = closingBalance;
-    }
+  public void setClosingBalance(final BigDecimal closingBalance) {
+    this.closingBalance = closingBalance;
+  }
 
-    public Date getEntryDate() {
-        return entryDate;
-    }
+  public Date getEntryDate() {
+    return entryDate;
+  }
 
-    public Long getGlAccountId() {
-        return glAccountId;
-    }
+  public Long getGlAccountId() {
+    return glAccountId;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
-        TrialBalance other = (TrialBalance) obj;
-        return Objects.equals(other.officeId, officeId)
-            && Objects.equals(other.glAccountId, glAccountId)
-            && Objects.equals(other.amount, amount)
-            && Objects.equals(other.entryDate, entryDate)
-            && Objects.equals(other.transactionDate, transactionDate)
-            && Objects.equals(other.closingBalance, closingBalance);
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (!obj.getClass().equals(getClass())) return false;
+    TrialBalance other = (TrialBalance) obj;
+    return Objects.equals(other.officeId, officeId)
+        && Objects.equals(other.glAccountId, glAccountId)
+        && Objects.equals(other.amount, amount)
+        && Objects.equals(other.entryDate, entryDate)
+        && Objects.equals(other.transactionDate, transactionDate)
+        && Objects.equals(other.closingBalance, closingBalance);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(officeId, glAccountId, amount, entryDate, transactionDate, closingBalance);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(officeId, glAccountId, amount, entryDate, transactionDate, closingBalance);
+  }
 }

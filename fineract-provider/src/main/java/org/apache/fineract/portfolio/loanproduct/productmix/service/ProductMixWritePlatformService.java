@@ -23,10 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface ProductMixWritePlatformService {
 
-    CommandProcessingResult createProductMix(Long productId, JsonCommand command);
+  CommandProcessingResult createProductMix(Long productId, JsonCommand command);
 
-    CommandProcessingResult updateProductMix(Long productId, JsonCommand command);
+  CommandProcessingResult updateProductMix(Long productId, JsonCommand command);
 
-    CommandProcessingResult deleteProductMix(Long productId);
-
+  CommandProcessingResult deleteProductMix(Long productId);
 }

@@ -30,57 +30,51 @@ import org.joda.time.DateTime;
  * Created by sanyam on 27/7/17.
  */
 final class MakercheckersApiResourceSwagger {
-    private MakercheckersApiResourceSwagger() {
-        // only to initialize swagger documentation
-    }
+  private MakercheckersApiResourceSwagger() {
+    // only to initialize swagger documentation
+  }
 
-    @ApiModel(value = "GetMakerCheckerResponse")
-    public static final class GetMakerCheckerResponse{
-        private GetMakerCheckerResponse() {
+  @ApiModel(value = "GetMakerCheckerResponse")
+  public static final class GetMakerCheckerResponse {
+    private GetMakerCheckerResponse() {}
 
-        }
-        public Long id;
-        public String actionName;
-        public String entityName;
-        public Long resourceId;
-        public Long subresourceId;
-        public String maker;
-        public DateTime madeOnDate;
-        public String checker;
-        public DateTime checkedOnDate;
-        public String processingResult;
-        public String commandAsJson;
-        public String officeName;
-        public String groupLevelName;
-        public String groupName;
-        public String clientName;
-        public String loanAccountNo;
-        public String savingsAccountNo;
-        public Long clientId;
-        public Long loanId;
-        public String url;
+    public Long id;
+    public String actionName;
+    public String entityName;
+    public Long resourceId;
+    public Long subresourceId;
+    public String maker;
+    public DateTime madeOnDate;
+    public String checker;
+    public DateTime checkedOnDate;
+    public String processingResult;
+    public String commandAsJson;
+    public String officeName;
+    public String groupLevelName;
+    public String groupName;
+    public String clientName;
+    public String loanAccountNo;
+    public String savingsAccountNo;
+    public Long clientId;
+    public Long loanId;
+    public String url;
+  }
 
+  @ApiModel(value = "GetMakerCheckersSearchTemplateResponse")
+  public static final class GetMakerCheckersSearchTemplateResponse {
+    private GetMakerCheckersSearchTemplateResponse() {}
 
-    }
+    public Collection<AppUserData> appUsers;
+    public List<String> actionNames;
+    public List<String> entityNames;
+    public Collection<ProcessingResultLookup> processingResults;
+  }
 
-    @ApiModel(value = "GetMakerCheckersSearchTemplateResponse")
-    public static final class GetMakerCheckersSearchTemplateResponse{
-        private GetMakerCheckersSearchTemplateResponse() {
+  @ApiModel(value = "PostMakerCheckersResponse")
+  public static final class PostMakerCheckersResponse {
+    private PostMakerCheckersResponse() {}
 
-        }
-        public Collection<AppUserData> appUsers;
-        public List<String> actionNames;
-        public List<String> entityNames;
-        public Collection<ProcessingResultLookup> processingResults;
-    }
-
-    @ApiModel(value = "PostMakerCheckersResponse")
-    public static final class PostMakerCheckersResponse{
-        private PostMakerCheckersResponse() {
-
-        }
-        @ApiModelProperty(example = "1")
-        public Long auditId;
-
-    }
+    @ApiModelProperty(example = "1")
+    public Long auditId;
+  }
 }

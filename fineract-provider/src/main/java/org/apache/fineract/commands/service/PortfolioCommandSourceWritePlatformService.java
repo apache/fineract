@@ -23,11 +23,11 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface PortfolioCommandSourceWritePlatformService {
 
-    CommandProcessingResult logCommandSource(CommandWrapper commandRequest);
+  CommandProcessingResult logCommandSource(CommandWrapper commandRequest);
 
-    CommandProcessingResult approveEntry(Long id);
+  CommandProcessingResult approveEntry(Long id);
 
-    Long rejectEntry(Long id);
+  Long rejectEntry(Long id);
 
-    Long deleteEntry(Long makerCheckerId);
+  Long deleteEntry(Long makerCheckerId);
 }

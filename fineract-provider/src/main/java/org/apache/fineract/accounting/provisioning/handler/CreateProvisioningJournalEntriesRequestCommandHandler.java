@@ -29,19 +29,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "PROVISIONJOURNALENTRIES", action = "CREATE")
-public class CreateProvisioningJournalEntriesRequestCommandHandler implements NewCommandSourceHandler {
+public class CreateProvisioningJournalEntriesRequestCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService ;
-    @Autowired
-    public CreateProvisioningJournalEntriesRequestCommandHandler(
-            final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService) {
-        this.provisioningEntriesWritePlatformService = provisioningEntriesWritePlatformService;
-    }
+  private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningEntriesWritePlatformService.createProvisioningJournalEntries(jsonCommand.entityId(), jsonCommand) ;
-    }
+  @Autowired
+  public CreateProvisioningJournalEntriesRequestCommandHandler(
+      final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService) {
+    this.provisioningEntriesWritePlatformService = provisioningEntriesWritePlatformService;
+  }
 
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.provisioningEntriesWritePlatformService.createProvisioningJournalEntries(
+        jsonCommand.entityId(), jsonCommand);
+  }
 }

@@ -23,6 +23,5 @@ import org.apache.fineract.portfolio.address.data.ClientAddressData;
 
 public interface ClientAddressReadPlatformService {
 
-    public Collection<ClientAddressData> retrieveClientAddrConfiguration(String entity);
-
+  public Collection<ClientAddressData> retrieveClientAddrConfiguration(String entity);
 }

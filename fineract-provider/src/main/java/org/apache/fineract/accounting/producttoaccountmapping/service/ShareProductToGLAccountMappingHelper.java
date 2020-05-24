@@ -39,164 +39,298 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMappingHelper {
 
-    @Autowired
-    public ShareProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
-            final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper, final GLAccountRepositoryWrapper accountRepositoryWrapper,
-            final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, chargeRepositoryWrapper, accountRepositoryWrapper,
-                paymentTypeRepositoryWrapper);
+  @Autowired
+  public ShareProductToGLAccountMappingHelper(
+      final GLAccountRepository glAccountRepository,
+      final ProductToGLAccountMappingRepository glAccountMappingRepository,
+      final FromJsonHelper fromApiJsonHelper,
+      final ChargeRepositoryWrapper chargeRepositoryWrapper,
+      final GLAccountRepositoryWrapper accountRepositoryWrapper,
+      final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
+    super(
+        glAccountRepository,
+        glAccountMappingRepository,
+        fromApiJsonHelper,
+        chargeRepositoryWrapper,
+        accountRepositoryWrapper,
+        paymentTypeRepositoryWrapper);
+  }
+
+  /*** Set of abstractions for saving Share Products to GL Account Mappings ***/
+
+  public void saveSharesToAssetAccountMapping(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int placeHolderTypeId) {
+    saveProductToAccountMapping(
+        element,
+        paramName,
+        productId,
+        placeHolderTypeId,
+        GLAccountType.ASSET,
+        PortfolioProductType.SHARES);
+  }
+
+  public void saveSharesToIncomeAccountMapping(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int placeHolderTypeId) {
+    saveProductToAccountMapping(
+        element,
+        paramName,
+        productId,
+        placeHolderTypeId,
+        GLAccountType.INCOME,
+        PortfolioProductType.SHARES);
+  }
+
+  public void saveSharesToEquityAccountMapping(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int placeHolderTypeId) {
+    saveProductToAccountMapping(
+        element,
+        paramName,
+        productId,
+        placeHolderTypeId,
+        GLAccountType.EQUITY,
+        PortfolioProductType.SHARES);
+  }
+
+  public void saveSharesToLiabilityAccountMapping(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int placeHolderTypeId) {
+    saveProductToAccountMapping(
+        element,
+        paramName,
+        productId,
+        placeHolderTypeId,
+        GLAccountType.LIABILITY,
+        PortfolioProductType.SHARES);
+  }
+
+  /*** Set of abstractions for merging Shares Products to GL Account Mappings ***/
+
+  public void mergeSharesToAssetAccountMappingChanges(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int accountTypeId,
+      final String accountTypeName,
+      final Map<String, Object> changes) {
+    mergeProductToAccountMappingChanges(
+        element,
+        paramName,
+        productId,
+        accountTypeId,
+        accountTypeName,
+        changes,
+        GLAccountType.ASSET,
+        PortfolioProductType.SHARES);
+  }
+
+  public void mergeSharesToIncomeAccountMappingChanges(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int accountTypeId,
+      final String accountTypeName,
+      final Map<String, Object> changes) {
+    mergeProductToAccountMappingChanges(
+        element,
+        paramName,
+        productId,
+        accountTypeId,
+        accountTypeName,
+        changes,
+        GLAccountType.INCOME,
+        PortfolioProductType.SHARES);
+  }
+
+  public void mergeSharesToEquityAccountMappingChanges(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int accountTypeId,
+      final String accountTypeName,
+      final Map<String, Object> changes) {
+    mergeProductToAccountMappingChanges(
+        element,
+        paramName,
+        productId,
+        accountTypeId,
+        accountTypeName,
+        changes,
+        GLAccountType.EQUITY,
+        PortfolioProductType.SHARES);
+  }
+
+  public void mergeSharesToLiabilityAccountMappingChanges(
+      final JsonElement element,
+      final String paramName,
+      final Long productId,
+      final int accountTypeId,
+      final String accountTypeName,
+      final Map<String, Object> changes) {
+    mergeProductToAccountMappingChanges(
+        element,
+        paramName,
+        productId,
+        accountTypeId,
+        accountTypeName,
+        changes,
+        GLAccountType.LIABILITY,
+        PortfolioProductType.SHARES);
+  }
+
+  /*** Abstractions for payments channel related to Shares products ***/
+
+  public void savePaymentChannelToFundSourceMappings(
+      final JsonCommand command,
+      final JsonElement element,
+      final Long productId,
+      final Map<String, Object> changes) {
+    savePaymentChannelToFundSourceMappings(
+        command, element, productId, changes, PortfolioProductType.SHARES);
+  }
+
+  public void updatePaymentChannelToFundSourceMappings(
+      final JsonCommand command,
+      final JsonElement element,
+      final Long productId,
+      final Map<String, Object> changes) {
+    updatePaymentChannelToFundSourceMappings(
+        command, element, productId, changes, PortfolioProductType.SHARES);
+  }
+
+  public void saveChargesToIncomeAccountMappings(
+      final JsonCommand command,
+      final JsonElement element,
+      final Long productId,
+      final Map<String, Object> changes) {
+    saveChargesToIncomeOrLiabilityAccountMappings(
+        command, element, productId, changes, PortfolioProductType.SHARES, true);
+    saveChargesToIncomeOrLiabilityAccountMappings(
+        command, element, productId, changes, PortfolioProductType.SHARES, false);
+  }
+
+  public void updateChargesToIncomeAccountMappings(
+      final JsonCommand command,
+      final JsonElement element,
+      final Long productId,
+      final Map<String, Object> changes) {
+    updateChargeToIncomeAccountMappings(
+        command, element, productId, changes, PortfolioProductType.SHARES, true);
+    updateChargeToIncomeAccountMappings(
+        command, element, productId, changes, PortfolioProductType.SHARES, false);
+  }
+
+  public Map<String, Object> populateChangesForNewSharesProductToGLAccountMappingCreation(
+      final JsonElement element, final AccountingRuleType accountingRuleType) {
+    final Map<String, Object> changes = new HashMap<>();
+
+    final Long shareReferenceId =
+        this.fromApiJsonHelper.extractLongNamed(
+            SharesProductAccountingParams.SHARES_REFERENCE.getValue(), element);
+    final Long incomeFromFeeAccountId =
+        this.fromApiJsonHelper.extractLongNamed(
+            SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), element);
+    final Long shareSuspenseId =
+        this.fromApiJsonHelper.extractLongNamed(
+            SharesProductAccountingParams.SHARES_SUSPENSE.getValue(), element);
+    final Long shareEquityId =
+        this.fromApiJsonHelper.extractLongNamed(
+            SharesProductAccountingParams.SHARES_EQUITY.getValue(), element);
+
+    switch (accountingRuleType) {
+      case NONE:
+        break;
+      case CASH_BASED:
+        changes.put(SharesProductAccountingParams.SHARES_REFERENCE.getValue(), shareReferenceId);
+        changes.put(
+            SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), incomeFromFeeAccountId);
+        changes.put(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(), shareSuspenseId);
+        changes.put(SharesProductAccountingParams.SHARES_EQUITY.getValue(), shareEquityId);
+        break;
+      case ACCRUAL_PERIODIC:
+        break;
+      case ACCRUAL_UPFRONT:
+        break;
+      default:
+        break;
     }
+    return changes;
+  }
 
-    /*** Set of abstractions for saving Share Products to GL Account Mappings ***/
+  /**
+   * Examines and updates each account mapping for given loan product with
+   * changes passed in from the Json element
+   *
+   * @param sharesProductId
+   * @param changes
+   * @param element
+   * @param accountingRuleType
+   */
+  public void handleChangesToSharesProductToGLAccountMappings(
+      final Long sharesProductId,
+      final Map<String, Object> changes,
+      final JsonElement element,
+      final AccountingRuleType accountingRuleType) {
+    switch (accountingRuleType) {
+      case NONE:
+        break;
+      case CASH_BASED:
+        // asset
+        mergeSharesToAssetAccountMappingChanges(
+            element,
+            SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
+            sharesProductId,
+            CashAccountsForShares.SHARES_REFERENCE.getValue(),
+            CashAccountsForShares.SHARES_REFERENCE.toString(),
+            changes);
 
-    public void saveSharesToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
-            final int placeHolderTypeId) {
-        saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.ASSET, PortfolioProductType.SHARES);
+        // income
+        mergeSharesToIncomeAccountMappingChanges(
+            element,
+            SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
+            sharesProductId,
+            CashAccountsForShares.INCOME_FROM_FEES.getValue(),
+            CashAccountsForShares.INCOME_FROM_FEES.toString(),
+            changes);
+
+        // liability
+        mergeSharesToLiabilityAccountMappingChanges(
+            element,
+            SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
+            sharesProductId,
+            CashAccountsForShares.SHARES_SUSPENSE.getValue(),
+            CashAccountsForShares.SHARES_SUSPENSE.toString(),
+            changes);
+
+        // equity
+        mergeSharesToEquityAccountMappingChanges(
+            element,
+            SharesProductAccountingParams.SHARES_EQUITY.getValue(),
+            sharesProductId,
+            CashAccountsForShares.SHARES_EQUITY.getValue(),
+            CashAccountsForShares.SHARES_EQUITY.toString(),
+            changes);
+        break;
+      case ACCRUAL_PERIODIC:
+        break;
+      case ACCRUAL_UPFRONT:
+        break;
+      default:
+        break;
     }
+  }
 
-    public void saveSharesToIncomeAccountMapping(final JsonElement element, final String paramName, final Long productId,
-            final int placeHolderTypeId) {
-        saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.INCOME, PortfolioProductType.SHARES);
-    }
-
-    public void saveSharesToEquityAccountMapping(final JsonElement element, final String paramName, final Long productId,
-            final int placeHolderTypeId) {
-        saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.EQUITY, PortfolioProductType.SHARES);
-    }
-
-    public void saveSharesToLiabilityAccountMapping(final JsonElement element, final String paramName, final Long productId,
-            final int placeHolderTypeId) {
-        saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.LIABILITY, PortfolioProductType.SHARES);
-    }
-
-    /*** Set of abstractions for merging Shares Products to GL Account Mappings ***/
-
-    public void mergeSharesToAssetAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
-            final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.ASSET,
-                PortfolioProductType.SHARES);
-    }
-
-    public void mergeSharesToIncomeAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
-            final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.INCOME,
-                PortfolioProductType.SHARES);
-    }
-
-    public void mergeSharesToEquityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
-            final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.EQUITY,
-                PortfolioProductType.SHARES);
-    }
-
-    public void mergeSharesToLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
-            final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes,
-                GLAccountType.LIABILITY, PortfolioProductType.SHARES);
-    }
-
-    /*** Abstractions for payments channel related to Shares products ***/
-
-    public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            final Map<String, Object> changes) {
-        savePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.SHARES);
-    }
-
-    public void updatePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            final Map<String, Object> changes) {
-        updatePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.SHARES);
-    }
-
-    public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            final Map<String, Object> changes) {
-        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, true);
-        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, false);
-    }
-
-    public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            final Map<String, Object> changes) {
-        updateChargeToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, true);
-        updateChargeToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SHARES, false);
-    }
-
-    public Map<String, Object> populateChangesForNewSharesProductToGLAccountMappingCreation(final JsonElement element,
-            final AccountingRuleType accountingRuleType) {
-        final Map<String, Object> changes = new HashMap<>();
-
-        final Long shareReferenceId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
-                element);
-        final Long incomeFromFeeAccountId = this.fromApiJsonHelper.extractLongNamed(
-                SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), element);
-        final Long shareSuspenseId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
-                element);
-        final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_EQUITY.getValue(),
-                element);
-
-        switch (accountingRuleType) {
-            case NONE:
-            break;
-            case CASH_BASED:
-                changes.put(SharesProductAccountingParams.SHARES_REFERENCE.getValue(), shareReferenceId);
-                changes.put(SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), incomeFromFeeAccountId);
-                changes.put(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(), shareSuspenseId);
-                changes.put(SharesProductAccountingParams.SHARES_EQUITY.getValue(), shareEquityId);
-            break;
-            case ACCRUAL_PERIODIC:
-            break;
-            case ACCRUAL_UPFRONT:
-            break;
-            default:
-            break;
-        }
-        return changes;
-    }
-
-    /**
-     * Examines and updates each account mapping for given loan product with
-     * changes passed in from the Json element
-     *
-     * @param sharesProductId
-     * @param changes
-     * @param element
-     * @param accountingRuleType
-     */
-    public void handleChangesToSharesProductToGLAccountMappings(final Long sharesProductId, final Map<String, Object> changes,
-            final JsonElement element, final AccountingRuleType accountingRuleType) {
-        switch (accountingRuleType) {
-            case NONE:
-            break;
-            case CASH_BASED:
-                // asset
-                mergeSharesToAssetAccountMappingChanges(element, SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
-                        sharesProductId, CashAccountsForShares.SHARES_REFERENCE.getValue(),
-                        CashAccountsForShares.SHARES_REFERENCE.toString(), changes);
-
-                // income
-                mergeSharesToIncomeAccountMappingChanges(element, SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
-                        sharesProductId, CashAccountsForShares.INCOME_FROM_FEES.getValue(),
-                        CashAccountsForShares.INCOME_FROM_FEES.toString(), changes);
-
-                // liability
-                mergeSharesToLiabilityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
-                        sharesProductId, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
-                        CashAccountsForShares.SHARES_SUSPENSE.toString(), changes);
-
-                // equity
-                mergeSharesToEquityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_EQUITY.getValue(),
-                        sharesProductId, CashAccountsForShares.SHARES_EQUITY.getValue(),
-                        CashAccountsForShares.SHARES_EQUITY.toString(), changes);
-            break;
-            case ACCRUAL_PERIODIC:
-            break;
-            case ACCRUAL_UPFRONT:
-            break;
-            default:
-            break;
-        }
-    }
-
-    public void deleteSharesProductToGLAccountMapping(final Long sharesProductId) {
-        deleteProductToGLAccountMapping(sharesProductId, PortfolioProductType.SHARES);
-    }
+  public void deleteSharesProductToGLAccountMapping(final Long sharesProductId) {
+    deleteProductToGLAccountMapping(sharesProductId, PortfolioProductType.SHARES);
+  }
 }

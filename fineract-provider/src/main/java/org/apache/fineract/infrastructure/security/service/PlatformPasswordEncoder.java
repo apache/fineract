@@ -22,5 +22,5 @@ import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 
 public interface PlatformPasswordEncoder {
 
-    String encode(PlatformUser appUser);
+  String encode(PlatformUser appUser);
 }

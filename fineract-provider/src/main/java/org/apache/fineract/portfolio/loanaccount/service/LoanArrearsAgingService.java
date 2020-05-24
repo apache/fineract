@@ -22,10 +22,9 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 public interface LoanArrearsAgingService {
 
-    void updateLoanArrearsAgeingDetails();
+  void updateLoanArrearsAgeingDetails();
 
-    void updateLoanArrearsAgeingDetailsWithOriginalSchedule(Loan loan);
+  void updateLoanArrearsAgeingDetailsWithOriginalSchedule(Loan loan);
 
-    void updateLoanArrearsAgeingDetails(Loan loan);
-
+  void updateLoanArrearsAgeingDetails(Loan loan);
 }

@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "JOURNALENTRY", action = "CREATE")
 public class CreateJournalEntryCommandHandler implements NewCommandSourceHandler {
 
-    private final JournalEntryWritePlatformService writePlatformService;
+  private final JournalEntryWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateJournalEntryCommandHandler(final JournalEntryWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateJournalEntryCommandHandler(
+      final JournalEntryWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createJournalEntry(command);
-    }
+    return this.writePlatformService.createJournalEntry(command);
+  }
 }

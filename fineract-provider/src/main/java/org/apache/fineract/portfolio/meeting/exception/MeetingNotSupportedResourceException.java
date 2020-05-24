@@ -26,7 +26,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class MeetingNotSupportedResourceException extends AbstractPlatformDomainRuleException {
 
-    public MeetingNotSupportedResourceException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.meeting.not.supported.resource", defaultUserMessage, defaultUserMessageArgs);
-    }
+  public MeetingNotSupportedResourceException(
+      final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+    super("error.msg.meeting.not.supported.resource", defaultUserMessage, defaultUserMessageArgs);
+  }
 }

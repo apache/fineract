@@ -24,11 +24,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * {@link AbstractPlatformDomainRuleException} thrown an action to transition a
  * loan from one state to another violates a domain rule.
  */
-public class SavingsActivityPriorToClientTransferException extends AbstractPlatformDomainRuleException {
+public class SavingsActivityPriorToClientTransferException
+    extends AbstractPlatformDomainRuleException {
 
-    public SavingsActivityPriorToClientTransferException(final String action, final Object... defaultUserMessageArgs) {
-        super("error.msg.savings." + action + "." + "not.permitted.before.client.transfer.date",
-                "Transactions on savings account prior to the customer joining date are not permitted", defaultUserMessageArgs);
-    }
-
+  public SavingsActivityPriorToClientTransferException(
+      final String action, final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg.savings." + action + "." + "not.permitted.before.client.transfer.date",
+        "Transactions on savings account prior to the customer joining date are not permitted",
+        defaultUserMessageArgs);
+  }
 }

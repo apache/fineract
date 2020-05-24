@@ -31,91 +31,102 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_product_loan_variations_borrower_cycle")
 public class LoanProductBorrowerCycleVariations extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "loan_product_id", nullable = false)
-    private LoanProduct loanProduct;
+  @ManyToOne
+  @JoinColumn(name = "loan_product_id", nullable = false)
+  private LoanProduct loanProduct;
 
-    @Column(name = "borrower_cycle_number", nullable = false)
-    private Integer borrowerCycleNumber;
+  @Column(name = "borrower_cycle_number", nullable = false)
+  private Integer borrowerCycleNumber;
 
-    @Column(name = "param_type", nullable = false)
-    private Integer paramType;
+  @Column(name = "param_type", nullable = false)
+  private Integer paramType;
 
-    @Column(name = "value_condition", nullable = false)
-    private Integer valueConditionType;
+  @Column(name = "value_condition", nullable = false)
+  private Integer valueConditionType;
 
-    @Column(name = "min_value", scale = 6, precision = 19, nullable = true)
-    private BigDecimal minValue;
+  @Column(name = "min_value", scale = 6, precision = 19, nullable = true)
+  private BigDecimal minValue;
 
-    @Column(name = "max_value", scale = 6, precision = 19, nullable = true)
-    private BigDecimal maxValue;
+  @Column(name = "max_value", scale = 6, precision = 19, nullable = true)
+  private BigDecimal maxValue;
 
-    @Column(name = "default_value", scale = 6, precision = 19, nullable = false)
-    private BigDecimal defaultValue;
+  @Column(name = "default_value", scale = 6, precision = 19, nullable = false)
+  private BigDecimal defaultValue;
 
-    protected LoanProductBorrowerCycleVariations() {
-    }
+  protected LoanProductBorrowerCycleVariations() {}
 
-    public LoanProductBorrowerCycleVariations(final Integer borrowerCycleNumber, final Integer paramType, final Integer valueConditionType,
-            final BigDecimal minValue, final BigDecimal maxValue, final BigDecimal defaultValue) {
-        this.borrowerCycleNumber = borrowerCycleNumber;
-        this.paramType = paramType;
-        this.valueConditionType = valueConditionType;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.defaultValue = defaultValue;
-    }
+  public LoanProductBorrowerCycleVariations(
+      final Integer borrowerCycleNumber,
+      final Integer paramType,
+      final Integer valueConditionType,
+      final BigDecimal minValue,
+      final BigDecimal maxValue,
+      final BigDecimal defaultValue) {
+    this.borrowerCycleNumber = borrowerCycleNumber;
+    this.paramType = paramType;
+    this.valueConditionType = valueConditionType;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
+    this.defaultValue = defaultValue;
+  }
 
-    public void updateLoanProduct(final LoanProduct loanProduct) {
-        this.loanProduct = loanProduct;
-    }
+  public void updateLoanProduct(final LoanProduct loanProduct) {
+    this.loanProduct = loanProduct;
+  }
 
-    public LoanProductParamType getParamType() {
-        return LoanProductParamType.fromInt(this.paramType);
-    }
+  public LoanProductParamType getParamType() {
+    return LoanProductParamType.fromInt(this.paramType);
+  }
 
-    public LoanProductValueConditionType getValueConditionType() {
-        return LoanProductValueConditionType.fromInt(this.valueConditionType);
-    }
+  public LoanProductValueConditionType getValueConditionType() {
+    return LoanProductValueConditionType.fromInt(this.valueConditionType);
+  }
 
-    @Override
-    public boolean equals(final Object obj) {
-        final LoanProductBorrowerCycleVariations other = (LoanProductBorrowerCycleVariations) obj;
-        return Objects.equals(loanProduct, other.loanProduct)
-            && Objects.equals(borrowerCycleNumber, other.borrowerCycleNumber)
-            && Objects.equals(paramType, other.paramType)
-            && Objects.equals(valueConditionType, other.valueConditionType)
-            && Objects.equals(minValue, other.minValue)
-            && Objects.equals(maxValue, other.maxValue)
-            && Objects.equals(defaultValue, other.defaultValue);
-    }
+  @Override
+  public boolean equals(final Object obj) {
+    final LoanProductBorrowerCycleVariations other = (LoanProductBorrowerCycleVariations) obj;
+    return Objects.equals(loanProduct, other.loanProduct)
+        && Objects.equals(borrowerCycleNumber, other.borrowerCycleNumber)
+        && Objects.equals(paramType, other.paramType)
+        && Objects.equals(valueConditionType, other.valueConditionType)
+        && Objects.equals(minValue, other.minValue)
+        && Objects.equals(maxValue, other.maxValue)
+        && Objects.equals(defaultValue, other.defaultValue);
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(loanProduct, borrowerCycleNumber, paramType, valueConditionType, minValue, maxValue, defaultValue);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        loanProduct,
+        borrowerCycleNumber,
+        paramType,
+        valueConditionType,
+        minValue,
+        maxValue,
+        defaultValue);
+  }
 
-    public void copy(final LoanProductBorrowerCycleVariations borrowerCycleVariations) {
-        this.defaultValue = borrowerCycleVariations.defaultValue;
-        this.minValue = borrowerCycleVariations.minValue;
-        this.maxValue = borrowerCycleVariations.maxValue;
-        this.valueConditionType = borrowerCycleVariations.valueConditionType;
-        this.borrowerCycleNumber = borrowerCycleVariations.borrowerCycleNumber;
-    }
+  public void copy(final LoanProductBorrowerCycleVariations borrowerCycleVariations) {
+    this.defaultValue = borrowerCycleVariations.defaultValue;
+    this.minValue = borrowerCycleVariations.minValue;
+    this.maxValue = borrowerCycleVariations.maxValue;
+    this.valueConditionType = borrowerCycleVariations.valueConditionType;
+    this.borrowerCycleNumber = borrowerCycleVariations.borrowerCycleNumber;
+  }
 
-    public Integer getBorrowerCycleNumber() {
-        return this.borrowerCycleNumber;
-    }
+  public Integer getBorrowerCycleNumber() {
+    return this.borrowerCycleNumber;
+  }
 
-    public BigDecimal getMinValue() {
-        return this.minValue;
-    }
+  public BigDecimal getMinValue() {
+    return this.minValue;
+  }
 
-    public BigDecimal getMaxValue() {
-        return this.maxValue;
-    }
+  public BigDecimal getMaxValue() {
+    return this.maxValue;
+  }
 
-    public BigDecimal getDefaultValue() {
-        return this.defaultValue;
-    }
+  public BigDecimal getDefaultValue() {
+    return this.defaultValue;
+  }
 }

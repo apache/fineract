@@ -22,6 +22,5 @@ import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
 
 public interface ImageReadPlatformService {
 
-    ImageData retrieveImage(String entityType, Long entityId);
-
+  ImageData retrieveImage(String entityType, Long entityId);
 }

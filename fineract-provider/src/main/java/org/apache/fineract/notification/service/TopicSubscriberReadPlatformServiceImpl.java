@@ -31,48 +31,49 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberReadPlatformService{
+public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public TopicSubscriberReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+  @Autowired
+  public TopicSubscriberReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
+
+  private static final class TopicSubscriberMapper implements RowMapper<TopicSubscriberData> {
+
+    private final String schema;
+
+    public TopicSubscriberMapper() {
+      final StringBuilder sqlBuilder = new StringBuilder(200);
+      sqlBuilder.append("ts.id as id, ts.topic_id as topicId, ts.user_id as userId, ");
+      sqlBuilder.append("ts.subscription_date as subscriptionDate from topic_subscriber ts ");
+      sqlBuilder.append("WHERE ts.topic_id = ( SELECT id from topic WHERE entity_id = ? ");
+      sqlBuilder.append("AND entity_type = ? AND member_type = ? )");
+      this.schema = sqlBuilder.toString();
     }
 
-    private static final class TopicSubscriberMapper implements RowMapper<TopicSubscriberData> {
-
-        private final String schema;
-
-        public TopicSubscriberMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder(200);
-            sqlBuilder.append("ts.id as id, ts.topic_id as topicId, ts.user_id as userId, ");
-            sqlBuilder.append("ts.subscription_date as subscriptionDate from topic_subscriber ts ");
-            sqlBuilder.append("WHERE ts.topic_id = ( SELECT id from topic WHERE entity_id = ? ");
-            sqlBuilder.append("AND entity_type = ? AND member_type = ? )");
-            this.schema = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schema;
-        }
-
-        @Override
-        public TopicSubscriberData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = rs.getLong("id");
-            final Long topicId = rs.getLong("topicId");
-            final Long userId = rs.getLong("userId");
-            final LocalDate subscriptionDate = JdbcSupport.getLocalDate(rs, "subscriptionDate");
-
-            return new TopicSubscriberData(id, topicId, userId, subscriptionDate);
-        }
-
+    public String schema() {
+      return this.schema;
     }
 
     @Override
-    public Collection<TopicSubscriberData> getSubscribers(Long entityId, String entityType, String memberType) {
-        final TopicSubscriberMapper tsm = new TopicSubscriberMapper();
-        String sql = "SELECT " + tsm.schema();
-        return this.jdbcTemplate.query(sql, tsm, new Object[] { entityId, entityType, memberType });
+    public TopicSubscriberData mapRow(
+        final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+      final Long id = rs.getLong("id");
+      final Long topicId = rs.getLong("topicId");
+      final Long userId = rs.getLong("userId");
+      final LocalDate subscriptionDate = JdbcSupport.getLocalDate(rs, "subscriptionDate");
+
+      return new TopicSubscriberData(id, topicId, userId, subscriptionDate);
     }
+  }
+
+  @Override
+  public Collection<TopicSubscriberData> getSubscribers(
+      Long entityId, String entityType, String memberType) {
+    final TopicSubscriberMapper tsm = new TopicSubscriberMapper();
+    String sql = "SELECT " + tsm.schema();
+    return this.jdbcTemplate.query(sql, tsm, new Object[] {entityId, entityType, memberType});
+  }
 }

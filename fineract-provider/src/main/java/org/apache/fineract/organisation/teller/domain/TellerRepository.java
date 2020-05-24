@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @see org.apache.fineract.organisation.teller.domain.Teller
  * @since 2.0.0
  */
-public interface TellerRepository extends JpaRepository<Teller, Long>, JpaSpecificationExecutor<Teller> {
-    Collection<Teller> findTellerByOfficeId(Long officeId);
+public interface TellerRepository
+    extends JpaRepository<Teller, Long>, JpaSpecificationExecutor<Teller> {
+  Collection<Teller> findTellerByOfficeId(Long officeId);
 }

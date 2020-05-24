@@ -25,28 +25,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificationMapperReadRepositoryWrapperImpl implements NotificationMapperReadRepositoryWrapper {
+public class NotificationMapperReadRepositoryWrapperImpl
+    implements NotificationMapperReadRepositoryWrapper {
 
-    private final NotificationMapperRepository notificationMapperRepository;
+  private final NotificationMapperRepository notificationMapperRepository;
 
-    @Autowired
-    public NotificationMapperReadRepositoryWrapperImpl(NotificationMapperRepository notificationMapperRepository) {
-        this.notificationMapperRepository = notificationMapperRepository;
-    }
+  @Autowired
+  public NotificationMapperReadRepositoryWrapperImpl(
+      NotificationMapperRepository notificationMapperRepository) {
+    this.notificationMapperRepository = notificationMapperRepository;
+  }
 
-    @Override
-    public NotificationMapper findById(Long id) {
-        return this.notificationMapperRepository.findById(id).orElse(null);
-    }
+  @Override
+  public NotificationMapper findById(Long id) {
+    return this.notificationMapperRepository.findById(id).orElse(null);
+  }
 
-    @Override
-    public List<NotificationMapper> fetchAllNotifications() {
-        return this.notificationMapperRepository.findAll();
-    }
+  @Override
+  public List<NotificationMapper> fetchAllNotifications() {
+    return this.notificationMapperRepository.findAll();
+  }
 
-    @Override
-    public void delete(Long id) {
-        this.notificationMapperRepository.deleteById(id);
-    }
-
+  @Override
+  public void delete(Long id) {
+    this.notificationMapperRepository.deleteById(id);
+  }
 }

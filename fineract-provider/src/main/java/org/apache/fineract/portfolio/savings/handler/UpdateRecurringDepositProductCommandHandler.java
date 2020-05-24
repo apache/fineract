@@ -30,15 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "RECURRINGDEPOSITPRODUCT", action = "UPDATE")
 public class UpdateRecurringDepositProductCommandHandler implements NewCommandSourceHandler {
 
-    private final RecurringDepositProductWritePlatformService writePlatformService;
+  private final RecurringDepositProductWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateRecurringDepositProductCommandHandler(final RecurringDepositProductWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateRecurringDepositProductCommandHandler(
+      final RecurringDepositProductWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.update(command.entityId(), command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.update(command.entityId(), command);
+  }
 }

@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface SmsWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+  CommandProcessingResult create(JsonCommand command);
 
-    CommandProcessingResult update(Long resourceId, JsonCommand command);
+  CommandProcessingResult update(Long resourceId, JsonCommand command);
 
-    CommandProcessingResult delete(Long resourceId);
+  CommandProcessingResult delete(Long resourceId);
 }

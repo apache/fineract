@@ -35,101 +35,118 @@ import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiReso
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
 
 @Entity
-@Table(name = "m_entity_to_entity_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "rel_id", "from_id", "to_id" }) })
+@Table(
+    name = "m_entity_to_entity_mapping",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"rel_id", "from_id", "to_id"})})
 public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "rel_id")
-    private FineractEntityRelation relationId;
+  @ManyToOne
+  @JoinColumn(name = "rel_id")
+  private FineractEntityRelation relationId;
 
-    @Column(name = "from_id")
-    private Long fromId;
+  @Column(name = "from_id")
+  private Long fromId;
 
-    @Column(name = "to_id")
-    private Long toId;
+  @Column(name = "to_id")
+  private Long toId;
 
-    @Column(name = "start_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+  @Column(name = "start_date", nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date startDate;
 
-    @Column(name = "end_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+  @Column(name = "end_date", nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date endDate;
 
-    private FineractEntityToEntityMapping(final FineractEntityRelation relationId, final Long fromId, final Long toId, final Date startDate,
-            final Date endDate) {
-        this.relationId = relationId;
-        this.fromId = fromId;
-        this.toId = toId;
-        this.startDate = startDate;
-        this.endDate = endDate;
+  private FineractEntityToEntityMapping(
+      final FineractEntityRelation relationId,
+      final Long fromId,
+      final Long toId,
+      final Date startDate,
+      final Date endDate) {
+    this.relationId = relationId;
+    this.fromId = fromId;
+    this.toId = toId;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 
+  public FineractEntityToEntityMapping() {
+    //
+  }
+
+  public static FineractEntityToEntityMapping newMap(
+      FineractEntityRelation relationId, Long fromId, Long toId, Date startDate, Date endDate) {
+
+    return new FineractEntityToEntityMapping(relationId, fromId, toId, startDate, endDate);
+  }
+
+  public Map<String, Object> updateMap(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+
+    if (command.isChangeInLongParameterNamed(
+        FineractEntityApiResourceConstants.fromEnityType, this.fromId)) {
+      final Long newValue =
+          command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
+      actualChanges.put(FineractEntityApiResourceConstants.fromEnityType, newValue);
+      this.fromId = newValue;
     }
 
-    public FineractEntityToEntityMapping() {
-        //
+    if (command.isChangeInLongParameterNamed(
+        FineractEntityApiResourceConstants.toEntityType, this.toId)) {
+      final Long newValue =
+          command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
+      actualChanges.put(FineractEntityApiResourceConstants.toEntityType, newValue);
+      this.toId = newValue;
     }
 
-    public static FineractEntityToEntityMapping newMap(FineractEntityRelation relationId, Long fromId, Long toId, Date startDate, Date endDate) {
-
-        return new FineractEntityToEntityMapping(relationId, fromId, toId, startDate, endDate);
-
+    if (command.isChangeInDateParameterNamed(
+        FineractEntityApiResourceConstants.startDate, this.startDate)) {
+      final String valueAsInput =
+          command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+      actualChanges.put(FineractEntityApiResourceConstants.startDate, valueAsInput);
+      final Date startDate =
+          command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+      this.startDate = startDate;
     }
 
-    public Map<String, Object> updateMap(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
-
-        if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.fromEnityType, this.fromId)) {
-            final Long newValue = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
-            actualChanges.put(FineractEntityApiResourceConstants.fromEnityType, newValue);
-            this.fromId = newValue;
-        }
-
-        if (command.isChangeInLongParameterNamed(FineractEntityApiResourceConstants.toEntityType, this.toId)) {
-            final Long newValue = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
-            actualChanges.put(FineractEntityApiResourceConstants.toEntityType, newValue);
-            this.toId = newValue;
-        }
-
-        if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.startDate, this.startDate)) {
-            final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-            actualChanges.put(FineractEntityApiResourceConstants.startDate, valueAsInput);
-            final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-            this.startDate = startDate;
-        }
-
-        if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.endDate, this.endDate)) {
-            final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
-            actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
-            final Date endDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
-            this.endDate = endDate;
-        }
-        if (startDate != null && endDate != null) {
-            if (endDate.before(startDate)) { throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
-        }
-
-        return actualChanges;
-
+    if (command.isChangeInDateParameterNamed(
+        FineractEntityApiResourceConstants.endDate, this.endDate)) {
+      final String valueAsInput =
+          command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+      actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
+      final Date endDate =
+          command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+      this.endDate = endDate;
+    }
+    if (startDate != null && endDate != null) {
+      if (endDate.before(startDate)) {
+        throw new FineractEntityToEntityMappingDateException(
+            startDate.toString(), endDate.toString());
+      }
     }
 
-    public FineractEntityRelation getRelationId() {
-        return this.relationId;
-    }
+    return actualChanges;
+  }
 
-    public void setRelationId(FineractEntityRelation relationId) {
-        this.relationId = relationId;
-    }
+  public FineractEntityRelation getRelationId() {
+    return this.relationId;
+  }
 
-    /*
-     * public Date getStartDate() { Date startDate = null; if (this.startDate !=
-     * null) { startDate = Date.fromDateFields(this.startDate); } return
-     * startDate; }
-     */
+  public void setRelationId(FineractEntityRelation relationId) {
+    this.relationId = relationId;
+  }
 
-    /*
-     * public Date getStartDate() { return (Date) ObjectUtils.defaultIfNull(new
-     * Date(this.startDate), null); }
-     */
+  /*
+   * public Date getStartDate() { Date startDate = null; if (this.startDate !=
+   * null) { startDate = Date.fromDateFields(this.startDate); } return
+   * startDate; }
+   */
+
+  /*
+   * public Date getStartDate() { return (Date) ObjectUtils.defaultIfNull(new
+   * Date(this.startDate), null); }
+   */
 
 }

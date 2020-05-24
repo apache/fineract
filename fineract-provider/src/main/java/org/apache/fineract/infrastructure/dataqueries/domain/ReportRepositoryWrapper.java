@@ -28,22 +28,21 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class ReportRepositoryWrapper {
-    private final ReportRepository reportRepository;
+  private final ReportRepository reportRepository;
 
-    @Autowired
-    public ReportRepositoryWrapper(final ReportRepository reportRepository) {
-        this.reportRepository = reportRepository;
-    }
+  @Autowired
+  public ReportRepositoryWrapper(final ReportRepository reportRepository) {
+    this.reportRepository = reportRepository;
+  }
 
-    /**
-     * Retrieves an entity by its id
-     *
-     * @param id must not be null
-     * @throws ReportNotFoundException if entity not found
-     * @return {@link Report} object
-     */
-    public Report findOneThrowExceptionIfNotFound(final Long id) {
-        return this.reportRepository.findById(id)
-                .orElseThrow(() -> new ReportNotFoundException(id));
-    }
+  /**
+   * Retrieves an entity by its id
+   *
+   * @param id must not be null
+   * @throws ReportNotFoundException if entity not found
+   * @return {@link Report} object
+   */
+  public Report findOneThrowExceptionIfNotFound(final Long id) {
+    return this.reportRepository.findById(id).orElseThrow(() -> new ReportNotFoundException(id));
+  }
 }

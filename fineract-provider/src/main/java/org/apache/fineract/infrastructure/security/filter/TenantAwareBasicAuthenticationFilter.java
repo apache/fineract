@@ -66,117 +66,129 @@ import org.springframework.stereotype.Service;
 @Profile("basicauth")
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
-    private static boolean firstRequestProcessed = false;
-    private final static Logger logger = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
+  private static boolean firstRequestProcessed = false;
+  private static final Logger logger =
+      LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
 
-    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
-    private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
-    private final ConfigurationDomainService configurationDomainService;
-    private final CacheWritePlatformService cacheWritePlatformService;
-    private final NotificationReadPlatformService notificationReadPlatformService;
-    private final String tenantRequestHeader = "Fineract-Platform-TenantId";
-    private final boolean exceptionIfHeaderMissing = true;
+  private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+  private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
+  private final ConfigurationDomainService configurationDomainService;
+  private final CacheWritePlatformService cacheWritePlatformService;
+  private final NotificationReadPlatformService notificationReadPlatformService;
+  private final String tenantRequestHeader = "Fineract-Platform-TenantId";
+  private final boolean exceptionIfHeaderMissing = true;
 
-    @Autowired
-    public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-            final AuthenticationEntryPoint authenticationEntryPoint, final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-            final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
-            final CacheWritePlatformService cacheWritePlatformService,
-            final NotificationReadPlatformService notificationReadPlatformService) {
-        super(authenticationManager, authenticationEntryPoint);
-        this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.configurationDomainService = configurationDomainService;
-        this.cacheWritePlatformService = cacheWritePlatformService;
-        this.notificationReadPlatformService = notificationReadPlatformService;
-    }
+  @Autowired
+  public TenantAwareBasicAuthenticationFilter(
+      final AuthenticationManager authenticationManager,
+      final AuthenticationEntryPoint authenticationEntryPoint,
+      final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+      final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
+      final ConfigurationDomainService configurationDomainService,
+      final CacheWritePlatformService cacheWritePlatformService,
+      final NotificationReadPlatformService notificationReadPlatformService) {
+    super(authenticationManager, authenticationEntryPoint);
+    this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.configurationDomainService = configurationDomainService;
+    this.cacheWritePlatformService = cacheWritePlatformService;
+    this.notificationReadPlatformService = notificationReadPlatformService;
+  }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
 
-        final StopWatch task = new StopWatch();
-        task.start();
+    final StopWatch task = new StopWatch();
+    task.start();
 
-        try {
+    try {
 
-            if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-                // ignore to allow 'preflight' requests from AJAX applications
-                // in different origin (domain name)
-            } else {
+      if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        // ignore to allow 'preflight' requests from AJAX applications
+        // in different origin (domain name)
+      } else {
 
-                String tenantIdentifier = request.getHeader(this.tenantRequestHeader);
+        String tenantIdentifier = request.getHeader(this.tenantRequestHeader);
 
-                if (org.apache.commons.lang3.StringUtils.isBlank(tenantIdentifier)) {
-                    tenantIdentifier = request.getParameter("tenantIdentifier");
-                }
-
-                if (tenantIdentifier == null && this.exceptionIfHeaderMissing) { throw new InvalidTenantIdentiferException(
-                        "No tenant identifier found: Add request header of '" + this.tenantRequestHeader
-                                + "' or add the parameter 'tenantIdentifier' to query string of request URL."); }
-
-                String pathInfo = request.getRequestURI();
-                boolean isReportRequest = false;
-                if (pathInfo != null && pathInfo.contains("report")) {
-                    isReportRequest = true;
-                }
-                final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
-
-                ThreadLocalContextUtil.setTenant(tenant);
-                String authToken = request.getHeader("Authorization");
-
-                if (authToken != null && authToken.startsWith("Basic ")) {
-                    ThreadLocalContextUtil.setAuthToken(authToken.replaceFirst("Basic ", ""));
-                }
-
-                if (!firstRequestProcessed) {
-                    final String baseUrl = request.getRequestURL().toString().replace(request.getPathInfo(), "/");
-                    System.setProperty("baseUrl", baseUrl);
-
-                    final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
-                    if (ehcacheEnabled) {
-                        this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
-                    } else {
-                        this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
-                    }
-                    TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
-                }
-            }
-
-            super.doFilterInternal(request, response, filterChain);
-        } catch (final InvalidTenantIdentiferException e) {
-            // deal with exception at low level
-            SecurityContextHolder.getContext().setAuthentication(null);
-
-            response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Fineract Platform API" + "\"");
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        } finally {
-            task.stop();
-            final PlatformRequestLog log = PlatformRequestLog.from(task, request);
-            logger.debug("{}", this.toApiJsonSerializer.serialize(log));
-        }
-    }
-
-    @Override
-    protected void onSuccessfulAuthentication(HttpServletRequest request,
-            HttpServletResponse response, Authentication authResult)
-            throws IOException {
-        super.onSuccessfulAuthentication(request, response, authResult);
-        AppUser user = (AppUser) authResult.getPrincipal();
-
-        if (notificationReadPlatformService.hasUnreadNotifications(user.getId())) {
-            response.addHeader("X-Notification-Refresh", "true");
-        } else {
-            response.addHeader("X-Notification-Refresh", "false");
+        if (org.apache.commons.lang3.StringUtils.isBlank(tenantIdentifier)) {
+          tenantIdentifier = request.getParameter("tenantIdentifier");
         }
 
-        String pathURL = request.getRequestURI();
-        boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
-
-        boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
-                ||(!isSelfServiceRequest && user.isSelfServiceUser()));
-
-        if(notAllowed){
-            throw new BadCredentialsException("User not authorised to use the requested resource.");
+        if (tenantIdentifier == null && this.exceptionIfHeaderMissing) {
+          throw new InvalidTenantIdentiferException(
+              "No tenant identifier found: Add request header of '"
+                  + this.tenantRequestHeader
+                  + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
         }
+
+        String pathInfo = request.getRequestURI();
+        boolean isReportRequest = false;
+        if (pathInfo != null && pathInfo.contains("report")) {
+          isReportRequest = true;
+        }
+        final FineractPlatformTenant tenant =
+            this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
+
+        ThreadLocalContextUtil.setTenant(tenant);
+        String authToken = request.getHeader("Authorization");
+
+        if (authToken != null && authToken.startsWith("Basic ")) {
+          ThreadLocalContextUtil.setAuthToken(authToken.replaceFirst("Basic ", ""));
+        }
+
+        if (!firstRequestProcessed) {
+          final String baseUrl =
+              request.getRequestURL().toString().replace(request.getPathInfo(), "/");
+          System.setProperty("baseUrl", baseUrl);
+
+          final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
+          if (ehcacheEnabled) {
+            this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
+          } else {
+            this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
+          }
+          TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
+        }
+      }
+
+      super.doFilterInternal(request, response, filterChain);
+    } catch (final InvalidTenantIdentiferException e) {
+      // deal with exception at low level
+      SecurityContextHolder.getContext().setAuthentication(null);
+
+      response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Fineract Platform API" + "\"");
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    } finally {
+      task.stop();
+      final PlatformRequestLog log = PlatformRequestLog.from(task, request);
+      logger.debug("{}", this.toApiJsonSerializer.serialize(log));
     }
+  }
+
+  @Override
+  protected void onSuccessfulAuthentication(
+      HttpServletRequest request, HttpServletResponse response, Authentication authResult)
+      throws IOException {
+    super.onSuccessfulAuthentication(request, response, authResult);
+    AppUser user = (AppUser) authResult.getPrincipal();
+
+    if (notificationReadPlatformService.hasUnreadNotifications(user.getId())) {
+      response.addHeader("X-Notification-Refresh", "true");
+    } else {
+      response.addHeader("X-Notification-Refresh", "false");
+    }
+
+    String pathURL = request.getRequestURI();
+    boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
+
+    boolean notAllowed =
+        ((isSelfServiceRequest && !user.isSelfServiceUser())
+            || (!isSelfServiceRequest && user.isSelfServiceUser()));
+
+    if (notAllowed) {
+      throw new BadCredentialsException("User not authorised to use the requested resource.");
+    }
+  }
 }

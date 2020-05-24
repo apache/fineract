@@ -45,126 +45,146 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements CollectionSheetWritePlatformService {
+public class CollectionSheetWritePlatformServiceJpaRepositoryImpl
+    implements CollectionSheetWritePlatformService {
 
-    private final LoanWritePlatformService loanWritePlatformService;
-    private final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer;
-    private final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer;
-    private final CollectionSheetTransactionDataValidator transactionDataValidator;
-    private final MeetingWritePlatformService meetingWritePlatformService;
-    private final DepositAccountAssembler accountAssembler;
-    private final DepositAccountWritePlatformService accountWritePlatformService;
-    private final PaymentDetailAssembler paymentDetailAssembler;
-    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+  private final LoanWritePlatformService loanWritePlatformService;
+  private final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
+      bulkRepaymentCommandFromApiJsonDeserializer;
+  private final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer
+      bulkDisbursalCommandFromApiJsonDeserializer;
+  private final CollectionSheetTransactionDataValidator transactionDataValidator;
+  private final MeetingWritePlatformService meetingWritePlatformService;
+  private final DepositAccountAssembler accountAssembler;
+  private final DepositAccountWritePlatformService accountWritePlatformService;
+  private final PaymentDetailAssembler paymentDetailAssembler;
+  private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
-    @Autowired
-    public CollectionSheetWritePlatformServiceJpaRepositoryImpl(final LoanWritePlatformService loanWritePlatformService,
-            final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer,
-            final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
-            final CollectionSheetTransactionDataValidator transactionDataValidator,
-            final MeetingWritePlatformService meetingWritePlatformService, final DepositAccountAssembler accountAssembler,
-            final DepositAccountWritePlatformService accountWritePlatformService, final PaymentDetailAssembler paymentDetailAssembler, final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
-        this.loanWritePlatformService = loanWritePlatformService;
-        this.bulkRepaymentCommandFromApiJsonDeserializer = bulkRepaymentCommandFromApiJsonDeserializer;
-        this.bulkDisbursalCommandFromApiJsonDeserializer = bulkDisbursalCommandFromApiJsonDeserializer;
-        this.transactionDataValidator = transactionDataValidator;
-        this.meetingWritePlatformService = meetingWritePlatformService;
-        this.accountAssembler = accountAssembler;
-        this.accountWritePlatformService = accountWritePlatformService;
-        this.paymentDetailAssembler = paymentDetailAssembler;
-        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
+  @Autowired
+  public CollectionSheetWritePlatformServiceJpaRepositoryImpl(
+      final LoanWritePlatformService loanWritePlatformService,
+      final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
+          bulkRepaymentCommandFromApiJsonDeserializer,
+      final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer
+          bulkDisbursalCommandFromApiJsonDeserializer,
+      final CollectionSheetTransactionDataValidator transactionDataValidator,
+      final MeetingWritePlatformService meetingWritePlatformService,
+      final DepositAccountAssembler accountAssembler,
+      final DepositAccountWritePlatformService accountWritePlatformService,
+      final PaymentDetailAssembler paymentDetailAssembler,
+      final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+    this.loanWritePlatformService = loanWritePlatformService;
+    this.bulkRepaymentCommandFromApiJsonDeserializer = bulkRepaymentCommandFromApiJsonDeserializer;
+    this.bulkDisbursalCommandFromApiJsonDeserializer = bulkDisbursalCommandFromApiJsonDeserializer;
+    this.transactionDataValidator = transactionDataValidator;
+    this.meetingWritePlatformService = meetingWritePlatformService;
+    this.accountAssembler = accountAssembler;
+    this.accountWritePlatformService = accountWritePlatformService;
+    this.paymentDetailAssembler = paymentDetailAssembler;
+    this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
+  }
+
+  @Override
+  public CommandProcessingResult updateCollectionSheet(final JsonCommand command) {
+
+    this.transactionDataValidator.validateTransaction(command);
+
+    final Map<String, Object> changes = new HashMap<>();
+    changes.put("locale", command.locale());
+    changes.put("dateFormat", command.dateFormat());
+
+    final String noteText = command.stringValueOfParameterNamed("note");
+    if (StringUtils.isNotBlank(noteText)) {
+      changes.put("note", noteText);
     }
 
-    @Override
-    public CommandProcessingResult updateCollectionSheet(final JsonCommand command) {
+    final PaymentDetail paymentDetail =
+        this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+    changes.putAll(updateBulkReapayments(command, paymentDetail));
 
-        this.transactionDataValidator.validateTransaction(command);
+    changes.putAll(updateBulkDisbursals(command));
 
-        final Map<String, Object> changes = new HashMap<>();
-        changes.put("locale", command.locale());
-        changes.put("dateFormat", command.dateFormat());
+    changes.putAll(updateBulkMandatorySavingsDuePayments(command, paymentDetail));
 
-        final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-        }
+    this.meetingWritePlatformService.updateCollectionSheetAttendance(command);
 
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-        changes.putAll(updateBulkReapayments(command, paymentDetail));
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(command.entityId()) //
+        .withGroupId(command.entityId()) //
+        .with(changes)
+        .with(changes)
+        .build();
+  }
 
-        changes.putAll(updateBulkDisbursals(command));
+  @Override
+  public CommandProcessingResult saveIndividualCollectionSheet(final JsonCommand command) {
 
-        changes.putAll(updateBulkMandatorySavingsDuePayments(command, paymentDetail));
+    this.transactionDataValidator.validateIndividualCollectionSheet(command);
 
-        this.meetingWritePlatformService.updateCollectionSheetAttendance(command);
+    final Map<String, Object> changes = new HashMap<>();
+    changes.put("locale", command.locale());
+    changes.put("dateFormat", command.dateFormat());
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
-                .withGroupId(command.entityId()) //
-                .with(changes).with(changes).build();
+    final String noteText = command.stringValueOfParameterNamed("note");
+    if (StringUtils.isNotBlank(noteText)) {
+      changes.put("note", noteText);
     }
 
-    @Override
-    public CommandProcessingResult saveIndividualCollectionSheet(final JsonCommand command) {
+    final PaymentDetail paymentDetail = null;
 
-        this.transactionDataValidator.validateIndividualCollectionSheet(command);
+    changes.putAll(updateBulkReapayments(command, paymentDetail));
 
-        final Map<String, Object> changes = new HashMap<>();
-        changes.put("locale", command.locale());
-        changes.put("dateFormat", command.dateFormat());
+    changes.putAll(updateBulkDisbursals(command));
 
-        final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-        }
+    changes.putAll(updateBulkMandatorySavingsDuePayments(command, paymentDetail));
 
-        final PaymentDetail paymentDetail = null;
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(command.entityId()) //
+        .withGroupId(command.entityId()) //
+        .with(changes)
+        .with(changes)
+        .build();
+  }
 
-        changes.putAll(updateBulkReapayments(command, paymentDetail));
+  private Map<String, Object> updateBulkReapayments(
+      final JsonCommand command, final PaymentDetail paymentDetail) {
+    final Map<String, Object> changes = new HashMap<>();
+    final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand =
+        this.bulkRepaymentCommandFromApiJsonDeserializer.commandFromApiJson(
+            command.json(), paymentDetail);
+    changes.putAll(this.loanWritePlatformService.makeLoanBulkRepayment(bulkRepaymentCommand));
+    return changes;
+  }
 
-        changes.putAll(updateBulkDisbursals(command));
+  private Map<String, Object> updateBulkDisbursals(final JsonCommand command) {
+    final Map<String, Object> changes = new HashMap<>();
+    final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand =
+        this.bulkDisbursalCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+    changes.putAll(
+        this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand, false));
+    return changes;
+  }
 
-        changes.putAll(updateBulkMandatorySavingsDuePayments(command, paymentDetail));
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
-                .withGroupId(command.entityId()) //
-                .with(changes).with(changes).build();
+  private Map<String, Object> updateBulkMandatorySavingsDuePayments(
+      final JsonCommand command, final PaymentDetail paymentDetail) {
+    final Map<String, Object> changes = new HashMap<>();
+    final Collection<SavingsAccountTransactionDTO> savingsTransactions =
+        this.accountAssembler.assembleBulkMandatorySavingsAccountTransactionDTOs(
+            command, paymentDetail);
+    List<Long> depositTransactionIds = new ArrayList<>();
+    for (SavingsAccountTransactionDTO savingsAccountTransactionDTO : savingsTransactions) {
+      try {
+        SavingsAccountTransaction savingsAccountTransaction =
+            this.accountWritePlatformService.mandatorySavingsAccountDeposit(
+                savingsAccountTransactionDTO);
+        depositTransactionIds.add(savingsAccountTransaction.getId());
+      } catch (Exception e) {
+        // TODO: handle exception
+      }
     }
-
-    private Map<String, Object> updateBulkReapayments(final JsonCommand command, final PaymentDetail paymentDetail) {
-        final Map<String, Object> changes = new HashMap<>();
-        final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json(), paymentDetail);
-        changes.putAll(this.loanWritePlatformService.makeLoanBulkRepayment(bulkRepaymentCommand));
-        return changes;
-    }
-
-    private Map<String, Object> updateBulkDisbursals(final JsonCommand command) {
-        final Map<String, Object> changes = new HashMap<>();
-        final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        changes.putAll(this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand, false));
-        return changes;
-    }
-
-    private Map<String, Object> updateBulkMandatorySavingsDuePayments(final JsonCommand command, final PaymentDetail paymentDetail) {
-        final Map<String, Object> changes = new HashMap<>();
-        final Collection<SavingsAccountTransactionDTO> savingsTransactions = this.accountAssembler
-                .assembleBulkMandatorySavingsAccountTransactionDTOs(command, paymentDetail);
-        List<Long> depositTransactionIds = new ArrayList<>();
-        for (SavingsAccountTransactionDTO savingsAccountTransactionDTO : savingsTransactions) {
-            try {
-                SavingsAccountTransaction savingsAccountTransaction =  this.accountWritePlatformService.mandatorySavingsAccountDeposit(savingsAccountTransactionDTO);
-                depositTransactionIds.add(savingsAccountTransaction.getId());
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-        }
-        changes.put("SavingsTransactions", depositTransactionIds);
-        return changes;
-    }
-
+    changes.put("SavingsTransactions", depositTransactionIds);
+    return changes;
+  }
 }

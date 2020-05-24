@@ -32,41 +32,52 @@ import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 
 public interface InteropService {
 
-    @NotNull
-    InteropIdentifiersResponseData getAccountIdentifiers(@NotNull String accountId);
+  @NotNull
+  InteropIdentifiersResponseData getAccountIdentifiers(@NotNull String accountId);
 
-    @NotNull
-    InteropAccountData getAccountDetails(@NotNull String accountId);
+  @NotNull
+  InteropAccountData getAccountDetails(@NotNull String accountId);
 
-    @NotNull
-    InteropTransactionsData getAccountTransactions(@NotNull String accountId, boolean debit, boolean credit, LocalDateTime transactionsFrom, LocalDateTime transactionsTo);
+  @NotNull
+  InteropTransactionsData getAccountTransactions(
+      @NotNull String accountId,
+      boolean debit,
+      boolean credit,
+      LocalDateTime transactionsFrom,
+      LocalDateTime transactionsTo);
 
-    @NotNull
-    InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType);
+  @NotNull
+  InteropIdentifierAccountResponseData getAccountByIdentifier(
+      @NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType);
 
-    @NotNull
-    InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                                   String subIdOrType, @NotNull JsonCommand command);
+  @NotNull
+  InteropIdentifierAccountResponseData registerAccountIdentifier(
+      @NotNull InteropIdentifierType idType,
+      @NotNull String idValue,
+      String subIdOrType,
+      @NotNull JsonCommand command);
 
-    @NotNull
-    InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                                 String subIdOrType);
+  @NotNull
+  InteropIdentifierAccountResponseData deleteAccountIdentifier(
+      @NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType);
 
-    InteropTransactionRequestResponseData getTransactionRequest(@NotNull String transactionCode, @NotNull String requestCode);
+  InteropTransactionRequestResponseData getTransactionRequest(
+      @NotNull String transactionCode, @NotNull String requestCode);
 
-    @NotNull
-    InteropTransactionRequestResponseData createTransactionRequest(@NotNull JsonCommand command);
+  @NotNull
+  InteropTransactionRequestResponseData createTransactionRequest(@NotNull JsonCommand command);
 
-    InteropQuoteResponseData getQuote(@NotNull String transactionCode, @NotNull String quoteCode);
+  InteropQuoteResponseData getQuote(@NotNull String transactionCode, @NotNull String quoteCode);
 
-    @NotNull
-    InteropQuoteResponseData createQuote(@NotNull JsonCommand command);
+  @NotNull
+  InteropQuoteResponseData createQuote(@NotNull JsonCommand command);
 
-    InteropTransferResponseData getTransfer(@NotNull String transactionCode, @NotNull String transferCode);
+  InteropTransferResponseData getTransfer(
+      @NotNull String transactionCode, @NotNull String transferCode);
 
-    @NotNull
-    InteropTransferResponseData prepareTransfer(@NotNull JsonCommand command);
+  @NotNull
+  InteropTransferResponseData prepareTransfer(@NotNull JsonCommand command);
 
-    @NotNull
-    InteropTransferResponseData commitTransfer(@NotNull JsonCommand command);
+  @NotNull
+  InteropTransferResponseData commitTransfer(@NotNull JsonCommand command);
 }

@@ -30,16 +30,15 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "LOAN", action = "FORECLOSURE")
 public class ForeClosureCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public ForeClosureCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public ForeClosureCommandHandler(final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return writePlatformService.forecloseLoan(command.getLoanId(), command);
-    }
-
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return writePlatformService.forecloseLoan(command.getLoanId(), command);
+  }
 }

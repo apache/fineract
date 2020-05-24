@@ -53,107 +53,139 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Self Dividend"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Self Dividend", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Self Dividend", description = "")})
 public class ShareDividendApiResource {
 
-    private final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<ShareAccountDividendData> toApiAccountDetailJsonSerializer;
-    private final PlatformSecurityContext platformSecurityContext;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
-    private final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService;
-    private final String resourceNameForPermissions = "DIVIDEND_SHAREPRODUCT";
+  private final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer;
+  private final DefaultToApiJsonSerializer<ShareAccountDividendData>
+      toApiAccountDetailJsonSerializer;
+  private final PlatformSecurityContext platformSecurityContext;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
+  private final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService;
+  private final String resourceNameForPermissions = "DIVIDEND_SHAREPRODUCT";
 
-    @Autowired
-    public ShareDividendApiResource(final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer,
-            final PlatformSecurityContext platformSecurityContext,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final DefaultToApiJsonSerializer<ShareAccountDividendData> toApiDividendsJsonSerializer,
-            final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService) {
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.platformSecurityContext = platformSecurityContext;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.toApiAccountDetailJsonSerializer = toApiDividendsJsonSerializer;
-        this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
-        this.shareProductDividendReadPlatformService = shareProductDividendReadPlatformService;
+  @Autowired
+  public ShareDividendApiResource(
+      final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer,
+      final PlatformSecurityContext platformSecurityContext,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+      final DefaultToApiJsonSerializer<ShareAccountDividendData> toApiDividendsJsonSerializer,
+      final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
+      final ShareProductDividendReadPlatformService shareProductDividendReadPlatformService) {
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.platformSecurityContext = platformSecurityContext;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.toApiAccountDetailJsonSerializer = toApiDividendsJsonSerializer;
+    this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
+    this.shareProductDividendReadPlatformService = shareProductDividendReadPlatformService;
+  }
+
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(
+      @PathParam("productId") final Long productId,
+      @QueryParam("offset") final Integer offset,
+      @QueryParam("limit") final Integer limit,
+      @QueryParam("orderBy") final String orderBy,
+      @QueryParam("sortOrder") final String sortOrder,
+      @QueryParam("status") final Integer status) {
+
+    this.platformSecurityContext
+        .authenticatedUser()
+        .validateHasReadPermission(this.resourceNameForPermissions);
+    final SearchParameters searchParameters =
+        SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+    Page<ShareProductDividendPayOutData> dividendPayoutDetails =
+        this.shareProductDividendReadPlatformService.retriveAll(
+            productId, status, searchParameters);
+    return this.toApiJsonSerializer.serialize(dividendPayoutDetails);
+  }
+
+  @GET
+  @Path("{dividendId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveDividendDetails(
+      @PathParam("dividendId") final Long dividendId,
+      @QueryParam("offset") final Integer offset,
+      @QueryParam("limit") final Integer limit,
+      @QueryParam("orderBy") final String orderBy,
+      @QueryParam("sortOrder") final String sortOrder,
+      @QueryParam("accountNo") final String accountNo) {
+
+    this.platformSecurityContext
+        .authenticatedUser()
+        .validateHasReadPermission(this.resourceNameForPermissions);
+    final SearchParameters searchParameters =
+        SearchParameters.forPaginationAndAccountNumberSearch(
+            offset, limit, orderBy, sortOrder, accountNo);
+    Page<ShareAccountDividendData> dividendDetails =
+        this.shareAccountDividendReadPlatformService.retriveAll(dividendId, searchParameters);
+    return this.toApiAccountDetailJsonSerializer.serialize(dividendDetails);
+  }
+
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String createDividendDetail(
+      @PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+    this.platformSecurityContext.authenticatedUser();
+    CommandWrapper commandWrapper =
+        new CommandWrapperBuilder()
+            .createShareProductDividendPayoutCommand(productId)
+            .withJson(apiRequestBodyAsJson)
+            .build();
+    final CommandProcessingResult commandProcessingResult =
+        this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+    return this.toApiJsonSerializer.serialize(commandProcessingResult);
+  }
+
+  @PUT
+  @Path("{dividendId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String updateDividendDetail(
+      @PathParam("productId") final Long productId,
+      @PathParam("dividendId") final Long dividendId,
+      @QueryParam("command") final String commandParam,
+      final String apiRequestBodyAsJson) {
+    CommandWrapper commandWrapper = null;
+    this.platformSecurityContext.authenticatedUser();
+    if (is(commandParam, "approve")) {
+      commandWrapper =
+          new CommandWrapperBuilder()
+              .approveShareProductDividendPayoutCommand(productId, dividendId)
+              .withJson(apiRequestBodyAsJson)
+              .build();
+    } else {
+      throw new UnrecognizedQueryParamException("command", commandParam);
     }
+    final CommandProcessingResult commandProcessingResult =
+        this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+    return this.toApiJsonSerializer.serialize(commandProcessingResult);
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@PathParam("productId") final Long productId, @QueryParam("offset") final Integer offset,
-            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder, @QueryParam("status") final Integer status) {
+  @DELETE
+  @Path("{dividendId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String deleteDividendDetail(
+      @PathParam("productId") final Long productId,
+      @PathParam("dividendId") final Long dividendId) {
+    this.platformSecurityContext.authenticatedUser();
+    final CommandWrapper commandWrapper =
+        new CommandWrapperBuilder()
+            .deleteShareProductDividendPayoutCommand(productId, dividendId)
+            .build();
+    final CommandProcessingResult commandProcessingResult =
+        this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+    return this.toApiJsonSerializer.serialize(commandProcessingResult);
+  }
 
-        this.platformSecurityContext.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
-        Page<ShareProductDividendPayOutData> dividendPayoutDetails = this.shareProductDividendReadPlatformService.retriveAll(productId,
-                status, searchParameters);
-        return this.toApiJsonSerializer.serialize(dividendPayoutDetails);
-    }
-
-    @GET
-    @Path("{dividendId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveDividendDetails(@PathParam("dividendId") final Long dividendId, @QueryParam("offset") final Integer offset,
-            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder, @QueryParam("accountNo") final String accountNo) {
-
-        this.platformSecurityContext.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-        final SearchParameters searchParameters = SearchParameters.forPaginationAndAccountNumberSearch(offset, limit, orderBy, sortOrder,
-                accountNo);
-        Page<ShareAccountDividendData> dividendDetails = this.shareAccountDividendReadPlatformService.retriveAll(dividendId,
-                searchParameters);
-        return this.toApiAccountDetailJsonSerializer.serialize(dividendDetails);
-    }
-
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createDividendDetail(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
-        this.platformSecurityContext.authenticatedUser();
-        CommandWrapper commandWrapper = new CommandWrapperBuilder().createShareProductDividendPayoutCommand(productId)
-                .withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.toApiJsonSerializer.serialize(commandProcessingResult);
-    }
-
-    @PUT
-    @Path("{dividendId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDividendDetail(@PathParam("productId") final Long productId, @PathParam("dividendId") final Long dividendId,
-            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
-        CommandWrapper commandWrapper = null;
-        this.platformSecurityContext.authenticatedUser();
-        if (is(commandParam, "approve")) {
-            commandWrapper = new CommandWrapperBuilder().approveShareProductDividendPayoutCommand(productId, dividendId)
-                    .withJson(apiRequestBodyAsJson).build();
-        } else {
-            throw new UnrecognizedQueryParamException("command", commandParam);
-        }
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.toApiJsonSerializer.serialize(commandProcessingResult);
-    }
-
-    @DELETE
-    @Path("{dividendId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDividendDetail(@PathParam("productId") final Long productId, @PathParam("dividendId") final Long dividendId) {
-        this.platformSecurityContext.authenticatedUser();
-        final CommandWrapper commandWrapper = new CommandWrapperBuilder().deleteShareProductDividendPayoutCommand(productId, dividendId)
-                .build();
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.toApiJsonSerializer.serialize(commandProcessingResult);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
-
+  private boolean is(final String commandParam, final String commandValue) {
+    return StringUtils.isNotBlank(commandParam)
+        && commandParam.trim().equalsIgnoreCase(commandValue);
+  }
 }

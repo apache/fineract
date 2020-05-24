@@ -31,27 +31,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class FineractEntityAccessRepositoryWrapper {
 
-    private final FineractEntityAccessRepository repository;
+  private final FineractEntityAccessRepository repository;
 
-    @Autowired
-    public FineractEntityAccessRepositoryWrapper(final FineractEntityAccessRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public FineractEntityAccessRepositoryWrapper(final FineractEntityAccessRepository repository) {
+    this.repository = repository;
+  }
 
-    public FineractEntityAccess findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
-    }
+  public FineractEntityAccess findOneWithNotFoundDetection(final Long id) {
+    return this.repository
+        .findById(id)
+        .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
+  }
 
-    public void save(final FineractEntityAccess fineractEntityAccess) {
-        this.repository.save(fineractEntityAccess);
-    }
+  public void save(final FineractEntityAccess fineractEntityAccess) {
+    this.repository.save(fineractEntityAccess);
+  }
 
-    public void saveAndFlush(final FineractEntityAccess fineractEntityAccess) {
-        this.repository.saveAndFlush(fineractEntityAccess);
-    }
+  public void saveAndFlush(final FineractEntityAccess fineractEntityAccess) {
+    this.repository.saveAndFlush(fineractEntityAccess);
+  }
 
-    public void delete(final FineractEntityAccess fineractEntityAccess) {
-        this.repository.delete(fineractEntityAccess);
-    }
+  public void delete(final FineractEntityAccess fineractEntityAccess) {
+    this.repository.delete(fineractEntityAccess);
+  }
 }

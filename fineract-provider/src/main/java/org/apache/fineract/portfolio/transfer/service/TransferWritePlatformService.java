@@ -23,16 +23,18 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface TransferWritePlatformService {
 
-    CommandProcessingResult transferClientsBetweenGroups(final Long sourceGroupId, final JsonCommand jsonCommand);
+  CommandProcessingResult transferClientsBetweenGroups(
+      final Long sourceGroupId, final JsonCommand jsonCommand);
 
-    CommandProcessingResult proposeClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+  CommandProcessingResult proposeClientTransfer(final Long clientId, final JsonCommand jsonCommand);
 
-    CommandProcessingResult withdrawClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+  CommandProcessingResult withdrawClientTransfer(
+      final Long clientId, final JsonCommand jsonCommand);
 
-    CommandProcessingResult acceptClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+  CommandProcessingResult acceptClientTransfer(final Long clientId, final JsonCommand jsonCommand);
 
-    CommandProcessingResult rejectClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+  CommandProcessingResult rejectClientTransfer(final Long clientId, final JsonCommand jsonCommand);
 
-    CommandProcessingResult proposeAndAcceptClientTransfer(final Long clientId, final JsonCommand jsonCommand);
-
+  CommandProcessingResult proposeAndAcceptClientTransfer(
+      final Long clientId, final JsonCommand jsonCommand);
 }

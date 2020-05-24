@@ -42,157 +42,212 @@ import org.joda.time.LocalDate;
 @Table(name = "sms_messages_outbound")
 public class SmsMessage extends AbstractPersistableCustom {
 
-    @Column(name = "external_id", nullable = true)
-    private String externalId;
+  @Column(name = "external_id", nullable = true)
+  private String externalId;
 
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = true)
-    private Group group;
+  @ManyToOne
+  @JoinColumn(name = "group_id", nullable = true)
+  private Group group;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id", nullable = true)
-    private Client client;
+  @ManyToOne
+  @JoinColumn(name = "client_id", nullable = true)
+  private Client client;
 
-    @ManyToOne
-    @JoinColumn(name = "staff_id", nullable = true)
-    private Staff staff;
+  @ManyToOne
+  @JoinColumn(name = "staff_id", nullable = true)
+  private Staff staff;
 
-    @ManyToOne
-    @JoinColumn(name = "campaign_id", nullable = true)
-    private SmsCampaign smsCampaign;
+  @ManyToOne
+  @JoinColumn(name = "campaign_id", nullable = true)
+  private SmsCampaign smsCampaign;
 
-    @Column(name = "status_enum", nullable = false)
-    private Integer statusType;
+  @Column(name = "status_enum", nullable = false)
+  private Integer statusType;
 
-    @Column(name = "mobile_no", nullable = true, length = 50)
-    private String mobileNo;
+  @Column(name = "mobile_no", nullable = true, length = 50)
+  private String mobileNo;
 
-    @Column(name = "message", nullable = false)
-    private String message;
+  @Column(name = "message", nullable = false)
+  private String message;
 
-//    @Column(name = "provider_id", nullable = true)
-//    private Long providerId;
-//
-//    @Column(name = "campaign_name", nullable = true)
-//    private String campaignName;
+  //    @Column(name = "provider_id", nullable = true)
+  //    private Long providerId;
+  //
+  //    @Column(name = "campaign_name", nullable = true)
+  //    private String campaignName;
 
-    @Column(name = "submittedon_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date submittedOnDate;
+  @Column(name = "submittedon_date", nullable = true)
+  @Temporal(TemporalType.DATE)
+  private Date submittedOnDate;
 
-    @Column(name = "delivered_on_date", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date deliveredOnDate;
+  @Column(name = "delivered_on_date", nullable = true)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date deliveredOnDate;
 
-    @Column(name = "is_notification", nullable = true)
-    private boolean isNotification;
+  @Column(name = "is_notification", nullable = true)
+  private boolean isNotification;
 
-    public static SmsMessage pendingSms(final String externalId, final Group group, final Client client, final Staff staff,
-            final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
-        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.PENDING, message, mobileNo, smsCampaign, isNotification);
+  public static SmsMessage pendingSms(
+      final String externalId,
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final String message,
+      final String mobileNo,
+      final SmsCampaign smsCampaign,
+      final boolean isNotification) {
+    return new SmsMessage(
+        externalId,
+        group,
+        client,
+        staff,
+        SmsMessageStatusType.PENDING,
+        message,
+        mobileNo,
+        smsCampaign,
+        isNotification);
+  }
+
+  public static SmsMessage sentSms(
+      final String externalId,
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final String message,
+      final String mobileNo,
+      final SmsCampaign smsCampaign,
+      final boolean isNotification) {
+    return new SmsMessage(
+        externalId,
+        group,
+        client,
+        staff,
+        SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT,
+        message,
+        mobileNo,
+        smsCampaign,
+        isNotification);
+  }
+
+  public static SmsMessage instance(
+      String externalId,
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final SmsMessageStatusType statusType,
+      final String message,
+      final String mobileNo,
+      final SmsCampaign smsCampaign,
+      final boolean isNotification) {
+
+    return new SmsMessage(
+        externalId,
+        group,
+        client,
+        staff,
+        statusType,
+        message,
+        mobileNo,
+        smsCampaign,
+        isNotification);
+  }
+
+  protected SmsMessage() {
+    //
+  }
+
+  private SmsMessage(
+      String externalId,
+      final Group group,
+      final Client client,
+      final Staff staff,
+      final SmsMessageStatusType statusType,
+      final String message,
+      final String mobileNo,
+      final SmsCampaign smsCampaign,
+      final boolean isNotification) {
+    this.externalId = externalId;
+    this.group = group;
+    this.client = client;
+    this.staff = staff;
+    this.statusType = statusType.getValue();
+    this.mobileNo = mobileNo;
+    this.message = message;
+    this.smsCampaign = smsCampaign;
+    this.submittedOnDate = LocalDate.now().toDate();
+    this.isNotification = isNotification;
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+
+    if (command.isChangeInStringParameterNamed(SmsApiConstants.messageParamName, this.message)) {
+      final String newValue = command.stringValueOfParameterNamed(SmsApiConstants.messageParamName);
+      actualChanges.put(SmsApiConstants.messageParamName, newValue);
+      this.message = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    public static SmsMessage sentSms(final String externalId, final Group group, final Client client, final Staff staff,
-            final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
-        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT, message, mobileNo, smsCampaign, isNotification);
-    }
+    return actualChanges;
+  }
 
-    public static SmsMessage instance(String externalId, final Group group, final Client client, final Staff staff,
-            final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
+  public String getExternalId() {
+    return this.externalId;
+  }
 
-        return new SmsMessage(externalId, group, client, staff, statusType, message, mobileNo, smsCampaign, isNotification);
-    }
+  public SmsCampaign getSmsCampaign() {
+    return this.smsCampaign;
+  }
 
-    protected SmsMessage() {
-        //
-    }
+  public Group getGroup() {
+    return group;
+  }
 
-    private SmsMessage(String externalId, final Group group, final Client client, final Staff staff, final SmsMessageStatusType statusType,
-            final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
-        this.externalId = externalId;
-        this.group = group;
-        this.client = client;
-        this.staff = staff;
-        this.statusType = statusType.getValue();
-        this.mobileNo = mobileNo;
-        this.message = message;
-        this.smsCampaign = smsCampaign;
-        this.submittedOnDate = LocalDate.now().toDate();
-        this.isNotification = isNotification;
-    }
+  public Client getClient() {
+    return client;
+  }
 
-    public Map<String, Object> update(final JsonCommand command) {
+  public Staff getStaff() {
+    return staff;
+  }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+  public Integer getStatusType() {
+    return statusType;
+  }
 
-        if (command.isChangeInStringParameterNamed(SmsApiConstants.messageParamName, this.message)) {
-            final String newValue = command.stringValueOfParameterNamed(SmsApiConstants.messageParamName);
-            actualChanges.put(SmsApiConstants.messageParamName, newValue);
-            this.message = StringUtils.defaultIfEmpty(newValue, null);
-        }
+  public String getMobileNo() {
+    return mobileNo;
+  }
 
-        return actualChanges;
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    public String getExternalId() {
-        return this.externalId;
-    }
+  public void setExternalId(final String externalId) {
+    this.externalId = externalId;
+  }
 
-    public SmsCampaign getSmsCampaign() {
-        return this.smsCampaign;
-    }
+  public void setStatusType(final Integer statusType) {
+    this.statusType = statusType;
+  }
 
-    public Group getGroup() {
-        return group;
-    }
+  public Date getSubmittedOnDate() {
+    return this.submittedOnDate;
+  }
 
-    public Client getClient() {
-        return client;
-    }
+  public Date getDeliveredOnDate() {
+    return this.deliveredOnDate;
+  }
 
-    public Staff getStaff() {
-        return staff;
-    }
+  public void setDeliveredOnDate(final Date deliveredOnDate) {
+    this.deliveredOnDate = deliveredOnDate;
+  }
 
-    public Integer getStatusType() {
-        return statusType;
-    }
+  public boolean isNotification() {
+    return this.isNotification;
+  }
 
-    public String getMobileNo() {
-        return mobileNo;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setExternalId(final String externalId) {
-        this.externalId = externalId;
-    }
-
-    public void setStatusType(final Integer statusType) {
-        this.statusType = statusType;
-    }
-
-    public Date getSubmittedOnDate() {
-        return this.submittedOnDate;
-    }
-
-    public Date getDeliveredOnDate() {
-        return this.deliveredOnDate;
-    }
-
-    public void setDeliveredOnDate(final Date deliveredOnDate) {
-        this.deliveredOnDate = deliveredOnDate;
-    }
-
-    public boolean isNotification() {
-        return this.isNotification;
-    }
-
-    public void setNotification(boolean isNotification) {
-        this.isNotification = isNotification;
-    }
-
-
+  public void setNotification(boolean isNotification) {
+    this.isNotification = isNotification;
+  }
 }

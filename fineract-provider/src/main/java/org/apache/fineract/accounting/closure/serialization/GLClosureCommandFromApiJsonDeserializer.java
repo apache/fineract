@@ -40,31 +40,41 @@ import org.springframework.stereotype.Component;
  * {@link GuarantorCommand}'s.
  */
 @Component
-public final class GLClosureCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<GLClosureCommand> {
+public final class GLClosureCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<GLClosureCommand> {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public GLClosureCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonfromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonfromApiJsonHelper;
+  @Autowired
+  public GLClosureCommandFromApiJsonDeserializer(
+      final FromJsonHelper fromApiJsonfromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonfromApiJsonHelper;
+  }
+
+  @Override
+  public GLClosureCommand commandFromApiJson(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public GLClosureCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    final Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final Long id =
+        this.fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.ID.getValue(), element);
+    final Long officeId =
+        this.fromApiJsonHelper.extractLongNamed(
+            GLClosureJsonInputParams.OFFICE_ID.getValue(), element);
+    final String comments =
+        this.fromApiJsonHelper.extractStringNamed(
+            GLClosureJsonInputParams.COMMENTS.getValue(), element);
+    final LocalDate closingDate =
+        this.fromApiJsonHelper.extractLocalDateNamed(
+            GLClosureJsonInputParams.CLOSING_DATE.getValue(), element);
 
-        final Long id = this.fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.ID.getValue(), element);
-        final Long officeId = this.fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.OFFICE_ID.getValue(), element);
-        final String comments = this.fromApiJsonHelper.extractStringNamed(GLClosureJsonInputParams.COMMENTS.getValue(), element);
-        final LocalDate closingDate = this.fromApiJsonHelper.extractLocalDateNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue(),
-                element);
-
-        return new GLClosureCommand(id, officeId, closingDate, comments);
-    }
+    return new GLClosureCommand(id, officeId, closingDate, comments);
+  }
 }

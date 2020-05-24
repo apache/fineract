@@ -24,15 +24,22 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  * A {@link RuntimeException} thrown when product to GL account mapping are not
  * found.
  */
-public class FinancialActivityAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class FinancialActivityAccountNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public FinancialActivityAccountNotFoundException(final Long id) {
-        super("error.msg.financialActivityAccount.not.found", "Financial Activity account with Id " + id + " does not exist", id);
-    }
+  public FinancialActivityAccountNotFoundException(final Long id) {
+    super(
+        "error.msg.financialActivityAccount.not.found",
+        "Financial Activity account with Id " + id + " does not exist",
+        id);
+  }
 
-    public FinancialActivityAccountNotFoundException(final Integer financialActivityType) {
-        super("error.msg.financialActivityAccount.not.found", "Financial Activity account with for the financial Activity with Id "
-                + financialActivityType + " does not exist", financialActivityType);
-    }
-
+  public FinancialActivityAccountNotFoundException(final Integer financialActivityType) {
+    super(
+        "error.msg.financialActivityAccount.not.found",
+        "Financial Activity account with for the financial Activity with Id "
+            + financialActivityType
+            + " does not exist",
+        financialActivityType);
+  }
 }

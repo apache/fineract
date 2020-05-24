@@ -26,22 +26,28 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class GLAccountInvalidUpdateException extends AbstractPlatformDomainRuleException {
 
-    /*** Enum of reasons for invalid delete **/
-    public static enum GlAccountInvalidUpdateReason {
-        TRANSANCTIONS_LOGGED;
+  /*** Enum of reasons for invalid delete **/
+  public static enum GlAccountInvalidUpdateReason {
+    TRANSANCTIONS_LOGGED;
 
-        public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) { return "This Usage of this (detail) GL Account as it already has transactions logged against it"; }
-            return name().toString();
-        }
-
-        public String errorCode() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) { return "error.msg.glaccount.glcode.invalid.update.transactions.logged"; }
-            return name().toString();
-        }
+    public String errorMessage() {
+      if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
+        return "This Usage of this (detail) GL Account as it already has transactions logged"
+            + " against it";
+      }
+      return name().toString();
     }
 
-    public GLAccountInvalidUpdateException(final GlAccountInvalidUpdateReason reason, final Long glAccountId) {
-        super(reason.errorCode(), reason.errorMessage(), glAccountId);
+    public String errorCode() {
+      if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
+        return "error.msg.glaccount.glcode.invalid.update.transactions.logged";
+      }
+      return name().toString();
     }
+  }
+
+  public GLAccountInvalidUpdateException(
+      final GlAccountInvalidUpdateReason reason, final Long glAccountId) {
+    super(reason.errorCode(), reason.errorMessage(), glAccountId);
+  }
 }

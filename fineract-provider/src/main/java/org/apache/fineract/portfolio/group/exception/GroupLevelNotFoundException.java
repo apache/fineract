@@ -25,8 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class GroupLevelNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public GroupLevelNotFoundException(final Long id) {
-        super("error.msg.group.level.id.invalid", "Group level with identifier " + id + " does not exist", id);
-    }
-
+  public GroupLevelNotFoundException(final Long id) {
+    super(
+        "error.msg.group.level.id.invalid",
+        "Group level with identifier " + id + " does not exist",
+        id);
+  }
 }

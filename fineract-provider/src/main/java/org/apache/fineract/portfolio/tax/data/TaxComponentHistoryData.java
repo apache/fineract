@@ -24,16 +24,19 @@ import org.joda.time.LocalDate;
 
 public class TaxComponentHistoryData implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final BigDecimal percentage;
-    @SuppressWarnings("unused")
-    private final LocalDate startDate;
-    @SuppressWarnings("unused")
-    private final LocalDate endDate;
+  @SuppressWarnings("unused")
+  private final BigDecimal percentage;
 
-    public TaxComponentHistoryData(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
-        this.percentage = percentage;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
+  @SuppressWarnings("unused")
+  private final LocalDate startDate;
+
+  @SuppressWarnings("unused")
+  private final LocalDate endDate;
+
+  public TaxComponentHistoryData(
+      final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
+    this.percentage = percentage;
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
 }

@@ -38,14 +38,21 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformApiDataValidationExceptionMapper implements ExceptionMapper<PlatformApiDataValidationException> {
+public class PlatformApiDataValidationExceptionMapper
+    implements ExceptionMapper<PlatformApiDataValidationException> {
 
-    @Override
-    public Response toResponse(final PlatformApiDataValidationException exception) {
+  @Override
+  public Response toResponse(final PlatformApiDataValidationException exception) {
 
-        final ApiGlobalErrorResponse dataValidationErrorResponse = ApiGlobalErrorResponse.badClientRequest(
-                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getErrors());
+    final ApiGlobalErrorResponse dataValidationErrorResponse =
+        ApiGlobalErrorResponse.badClientRequest(
+            exception.getGlobalisationMessageCode(),
+            exception.getDefaultUserMessage(),
+            exception.getErrors());
 
-        return Response.status(Status.BAD_REQUEST).entity(dataValidationErrorResponse).type(MediaType.APPLICATION_JSON).build();
-    }
+    return Response.status(Status.BAD_REQUEST)
+        .entity(dataValidationErrorResponse)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

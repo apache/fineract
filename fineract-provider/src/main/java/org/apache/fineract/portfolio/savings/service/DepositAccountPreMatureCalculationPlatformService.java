@@ -24,5 +24,6 @@ import org.apache.fineract.portfolio.savings.data.DepositAccountData;
 
 public interface DepositAccountPreMatureCalculationPlatformService {
 
-    DepositAccountData calculatePreMatureAmount(Long accountId, JsonQuery query, DepositAccountType depositAccountType);
+  DepositAccountData calculatePreMatureAmount(
+      Long accountId, JsonQuery query, DepositAccountType depositAccountType);
 }

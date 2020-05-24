@@ -33,24 +33,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NotificationApiTest {
-    private final static Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
 
-    @Before
-    public void setUp() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+  @Before
+  public void setUp() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testNotificationRetrieval() {
-        HashMap<String, Object> response = (HashMap<String, Object>) NotificationHelper.getNotifications(this.requestSpec,
-                this.responseSpec, "");
-        LOG.info("Response : {}" , response.toString());
-        Assert.assertNotNull(response);
-    }
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testNotificationRetrieval() {
+    HashMap<String, Object> response =
+        (HashMap<String, Object>)
+            NotificationHelper.getNotifications(this.requestSpec, this.responseSpec, "");
+    LOG.info("Response : {}", response.toString());
+    Assert.assertNotNull(response);
+  }
 }

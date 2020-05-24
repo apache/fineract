@@ -28,20 +28,21 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
  */
 public class ResetPasswordException extends PlatformApiDataValidationException {
 
-    public ResetPasswordException(final Long userId) {
+  public ResetPasswordException(final Long userId) {
 
-        super("error.msg.password.outdated", "The password of the user with id " + userId + " has expired, please reset it",
-                new ArrayList<ApiParameterError>() {
+    super(
+        "error.msg.password.outdated",
+        "The password of the user with id " + userId + " has expired, please reset it",
+        new ArrayList<ApiParameterError>() {
 
-                    {
-                        add(ApiParameterError.parameterError("error.msg.password.outdated", "The password of the user with id " + userId
-                                + " has expired, please reset it", "userId", userId));
-
-                    }
-                }
-
-        );
-
-    }
-
+          {
+            add(
+                ApiParameterError.parameterError(
+                    "error.msg.password.outdated",
+                    "The password of the user with id " + userId + " has expired, please reset it",
+                    "userId",
+                    userId));
+          }
+        });
+  }
 }

@@ -47,276 +47,413 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoanRescheduleRequestDataValidator {
 
-    private final FromJsonHelper fromJsonHelper;
-    private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-            RescheduleLoansApiConstants.graceOnPrincipalParamName,
-            RescheduleLoansApiConstants.recurringMoratoriumOnPrincipalPeriodsParamName,
-            RescheduleLoansApiConstants.graceOnInterestParamName, RescheduleLoansApiConstants.extraTermsParamName,
-            RescheduleLoansApiConstants.rescheduleFromDateParamName,
-            RescheduleLoansApiConstants.newInterestRateParamName,
-            RescheduleLoansApiConstants.rescheduleReasonIdParamName,
-            RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
-            RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
-            RescheduleLoansApiConstants.adjustedDueDateParamName,
-            RescheduleLoansApiConstants.recalculateInterestParamName));
+  private final FromJsonHelper fromJsonHelper;
+  private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              RescheduleLoansApiConstants.localeParamName,
+              RescheduleLoansApiConstants.dateFormatParamName,
+              RescheduleLoansApiConstants.graceOnPrincipalParamName,
+              RescheduleLoansApiConstants.recurringMoratoriumOnPrincipalPeriodsParamName,
+              RescheduleLoansApiConstants.graceOnInterestParamName,
+              RescheduleLoansApiConstants.extraTermsParamName,
+              RescheduleLoansApiConstants.rescheduleFromDateParamName,
+              RescheduleLoansApiConstants.newInterestRateParamName,
+              RescheduleLoansApiConstants.rescheduleReasonIdParamName,
+              RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
+              RescheduleLoansApiConstants.submittedOnDateParamName,
+              RescheduleLoansApiConstants.loanIdParamName,
+              RescheduleLoansApiConstants.adjustedDueDateParamName,
+              RescheduleLoansApiConstants.recalculateInterestParamName));
 
-    private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-                    RescheduleLoansApiConstants.rejectedOnDateParam));
+  private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              RescheduleLoansApiConstants.localeParamName,
+              RescheduleLoansApiConstants.dateFormatParamName,
+              RescheduleLoansApiConstants.rejectedOnDateParam));
 
-    private static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-                    RescheduleLoansApiConstants.approvedOnDateParam));
+  private static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              RescheduleLoansApiConstants.localeParamName,
+              RescheduleLoansApiConstants.dateFormatParamName,
+              RescheduleLoansApiConstants.approvedOnDateParam));
 
-    @Autowired
-    public LoanRescheduleRequestDataValidator(FromJsonHelper fromJsonHelper) {
-        this.fromJsonHelper = fromJsonHelper;
+  @Autowired
+  public LoanRescheduleRequestDataValidator(FromJsonHelper fromJsonHelper) {
+    this.fromJsonHelper = fromJsonHelper;
+  }
+
+  /**
+   * Validates the request to create a new loan reschedule entry
+   *
+   * @param jsonCommand
+   *            the JSON command object (instance of the JsonCommand class)
+   *
+   **/
+  public void validateForCreateAction(final JsonCommand jsonCommand, final Loan loan) {
+
+    final String jsonString = jsonCommand.json();
+
+    if (StringUtils.isBlank(jsonString)) {
+      throw new InvalidJsonException();
     }
 
-    /**
-     * Validates the request to create a new loan reschedule entry
-     *
-     * @param jsonCommand
-     *            the JSON command object (instance of the JsonCommand class)
-     *
-     **/
-    public void validateForCreateAction(final JsonCommand jsonCommand, final Loan loan) {
+    final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromJsonHelper.checkForUnsupportedParameters(
+        typeToken, jsonString, CREATE_REQUEST_DATA_PARAMETERS);
 
-        final String jsonString = jsonCommand.json();
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder dataValidatorBuilder =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(StringUtils.lowerCase(RescheduleLoansApiConstants.ENTITY_NAME));
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+    final JsonElement jsonElement = jsonCommand.parsedJson();
 
-        final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromJsonHelper
-                .checkForUnsupportedParameters(typeToken, jsonString, CREATE_REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(StringUtils
-                .lowerCase(RescheduleLoansApiConstants.ENTITY_NAME));
-
-        final JsonElement jsonElement = jsonCommand.parsedJson();
-
-        if (!loan.status().isActive()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
-        }
-
-        final Long loanId = this.fromJsonHelper.extractLongNamed(RescheduleLoansApiConstants.loanIdParamName, jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.loanIdParamName).value(loanId).notNull()
-                .integerGreaterThanZero();
-
-        final LocalDate submittedOnDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.submittedOnDateParamName,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
-
-        if (submittedOnDate != null && loan.getDisbursementDate().isAfter(submittedOnDate)) {
-            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.submittedOnDateParamName)
-                    .failWithCode("before.loan.disbursement.date", "Submission date cannot be before the loan disbursement date");
-        }
-
-        final LocalDate rescheduleFromDate = this.fromJsonHelper.extractLocalDateNamed(
-                RescheduleLoansApiConstants.rescheduleFromDateParamName, jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).value(rescheduleFromDate).notNull();
-
-        final Integer graceOnPrincipal = this.fromJsonHelper.extractIntegerWithLocaleNamed(
-                RescheduleLoansApiConstants.graceOnPrincipalParamName, jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName).value(graceOnPrincipal)
-                .ignoreIfNull().integerGreaterThanZero();
-
-        final Integer graceOnInterest = this.fromJsonHelper.extractIntegerWithLocaleNamed(
-                RescheduleLoansApiConstants.graceOnInterestParamName, jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnInterestParamName).value(graceOnInterest).ignoreIfNull()
-                .integerGreaterThanZero();
-
-        final Integer extraTerms = this.fromJsonHelper.extractIntegerWithLocaleNamed(RescheduleLoansApiConstants.extraTermsParamName,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.extraTermsParamName).value(extraTerms).ignoreIfNull()
-                .integerGreaterThanZero();
-
-        final Long rescheduleReasonId = this.fromJsonHelper.extractLongNamed(RescheduleLoansApiConstants.rescheduleReasonIdParamName,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleReasonIdParamName).value(rescheduleReasonId).notNull()
-                .integerGreaterThanZero();
-
-        final String rescheduleReasonComment = this.fromJsonHelper.extractStringNamed(
-                RescheduleLoansApiConstants.rescheduleReasonCommentParamName, jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleReasonCommentParamName).value(rescheduleReasonComment)
-                .ignoreIfNull().notExceedingLengthOf(500);
-
-        final LocalDate adjustedDueDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.adjustedDueDateParamName,
-                jsonElement);
-
-        if (adjustedDueDate != null && rescheduleFromDate != null && adjustedDueDate.isBefore(rescheduleFromDate)) {
-            dataValidatorBuilder
-                    .reset()
-                    .parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                    .failWithCode("adjustedDueDate.before.rescheduleFromDate",
-                            "Adjusted due date cannot be before the reschedule from date");
-        }
-
-        // at least one of the following must be provided => graceOnPrincipal,
-        // graceOnInterest, extraTerms, newInterestRate
-        if (!this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.graceOnPrincipalParamName, jsonElement)
-                && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.graceOnInterestParamName, jsonElement)
-                && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.extraTermsParamName, jsonElement)
-                && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.newInterestRateParamName, jsonElement)
-                && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.adjustedDueDateParamName, jsonElement)) {
-            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName).notNull();
-        }
-        LoanRepaymentScheduleInstallment installment = null;
-        if (rescheduleFromDate != null) {
-            installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
-
-            if (installment == null) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                        .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
-            }
-
-            if (installment != null && installment.isObligationsMet()) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                        .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation met");
-            }
-
-        }
-
-        if(loan.isMultiDisburmentLoan()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
-                    "Loan rescheduling is not supported for multidisbursement loans");
-        }
-
-        if(loan.isInterestRecalculationEnabledForProduct()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleWithInterestRecalculationNotSupportedErrorCode,
-                    "Loan rescheduling is not supported for the loan product with interest recalculation enabled");
-        }
-        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (!loan.status().isActive()) {
+      dataValidatorBuilder
+          .reset()
+          .failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
     }
 
+    final Long loanId =
+        this.fromJsonHelper.extractLongNamed(
+            RescheduleLoansApiConstants.loanIdParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.loanIdParamName)
+        .value(loanId)
+        .notNull()
+        .integerGreaterThanZero();
 
-    private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
-            final LoanRepaymentScheduleInstallment installment) {
-        if (installment != null) {
-            LocalDate rescheduleFromDate = installment.getFromDate();
-            Collection<LoanCharge> charges = loan.getLoanCharges();
-            for (LoanCharge loanCharge : charges) {
-                if (loanCharge.isOverdueInstallmentCharge() && loanCharge.getDueLocalDate().isAfter(rescheduleFromDate)) {
-                    dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode("not.allowed.due.to.overdue.charges");
-                    break;
-                }
-            }
-        }
+    final LocalDate submittedOnDate =
+        this.fromJsonHelper.extractLocalDateNamed(
+            RescheduleLoansApiConstants.submittedOnDateParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.submittedOnDateParamName)
+        .value(submittedOnDate)
+        .notNull();
+
+    if (submittedOnDate != null && loan.getDisbursementDate().isAfter(submittedOnDate)) {
+      dataValidatorBuilder
+          .reset()
+          .parameter(RescheduleLoansApiConstants.submittedOnDateParamName)
+          .failWithCode(
+              "before.loan.disbursement.date",
+              "Submission date cannot be before the loan disbursement date");
     }
 
-    /**
-     * Validates a user request to approve a loan reschedule request
-     *
-     * @param jsonCommand
-     *            the JSON command object (instance of the JsonCommand class)
-     *
-     **/
-    public void validateForApproveAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
-        final String jsonString = jsonCommand.json();
+    final LocalDate rescheduleFromDate =
+        this.fromJsonHelper.extractLocalDateNamed(
+            RescheduleLoansApiConstants.rescheduleFromDateParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+        .value(rescheduleFromDate)
+        .notNull();
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+    final Integer graceOnPrincipal =
+        this.fromJsonHelper.extractIntegerWithLocaleNamed(
+            RescheduleLoansApiConstants.graceOnPrincipalParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName)
+        .value(graceOnPrincipal)
+        .ignoreIfNull()
+        .integerGreaterThanZero();
 
-        final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, APPROVE_REQUEST_DATA_PARAMETERS);
+    final Integer graceOnInterest =
+        this.fromJsonHelper.extractIntegerWithLocaleNamed(
+            RescheduleLoansApiConstants.graceOnInterestParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.graceOnInterestParamName)
+        .value(graceOnInterest)
+        .ignoreIfNull()
+        .integerGreaterThanZero();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(StringUtils
-                .lowerCase(RescheduleLoansApiConstants.ENTITY_NAME));
+    final Integer extraTerms =
+        this.fromJsonHelper.extractIntegerWithLocaleNamed(
+            RescheduleLoansApiConstants.extraTermsParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.extraTermsParamName)
+        .value(extraTerms)
+        .ignoreIfNull()
+        .integerGreaterThanZero();
 
-        final JsonElement jsonElement = jsonCommand.parsedJson();
+    final Long rescheduleReasonId =
+        this.fromJsonHelper.extractLongNamed(
+            RescheduleLoansApiConstants.rescheduleReasonIdParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.rescheduleReasonIdParamName)
+        .value(rescheduleReasonId)
+        .notNull()
+        .integerGreaterThanZero();
 
-        final LocalDate approvedOnDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.approvedOnDateParam,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.approvedOnDateParam).value(approvedOnDate).notNull();
+    final String rescheduleReasonComment =
+        this.fromJsonHelper.extractStringNamed(
+            RescheduleLoansApiConstants.rescheduleReasonCommentParamName, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.rescheduleReasonCommentParamName)
+        .value(rescheduleReasonComment)
+        .ignoreIfNull()
+        .notExceedingLengthOf(500);
 
-        if (approvedOnDate != null && loanRescheduleRequest.getSubmittedOnDate().isAfter(approvedOnDate)) {
-            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.approvedOnDateParam)
-                    .failWithCode("before.submission.date", "Approval date cannot be before the request submission date.");
-        }
+    final LocalDate adjustedDueDate =
+        this.fromJsonHelper.extractLocalDateNamed(
+            RescheduleLoansApiConstants.adjustedDueDateParamName, jsonElement);
 
-        LoanRescheduleRequestStatusEnumData loanRescheduleRequestStatusEnumData = LoanRescheduleRequestEnumerations
-                .status(loanRescheduleRequest.getStatusEnum());
-
-        if (!loanRescheduleRequestStatusEnumData.isPendingApproval()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                    "request.is.not.in.submitted.and.pending.state",
-                    "Loan reschedule request approval is not allowed. "
-                            + "Loan reschedule request is not in submitted and pending approval state.");
-        }
-
-        LocalDate rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
-        final Loan loan = loanRescheduleRequest.getLoan();
-        LoanRepaymentScheduleInstallment installment = null;
-        if (loan != null) {
-
-            if (!loan.status().isActive()) {
-                dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
-            }
-
-            if (rescheduleFromDate != null) {
-                 installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
-
-                if (installment == null) {
-                    dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                            "loan.repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
-                }
-
-                if (installment != null && installment.isObligationsMet()) {
-                    dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                            "loan.repayment.schedule.installment." + "obligation.met", "Repayment schedule installment obligation met");
-                }
-            }
-        }
-
-        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (adjustedDueDate != null
+        && rescheduleFromDate != null
+        && adjustedDueDate.isBefore(rescheduleFromDate)) {
+      dataValidatorBuilder
+          .reset()
+          .parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+          .failWithCode(
+              "adjustedDueDate.before.rescheduleFromDate",
+              "Adjusted due date cannot be before the reschedule from date");
     }
 
-    /**
-     * Validates a user request to reject a loan reschedule request
-     *
-     * @param jsonCommand
-     *            the JSON command object (instance of the JsonCommand class)
-     *
-     **/
-    public void validateForRejectAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
-        final String jsonString = jsonCommand.json();
-
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
-
-        final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromJsonHelper
-                .checkForUnsupportedParameters(typeToken, jsonString, REJECT_REQUEST_DATA_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(StringUtils
-                .lowerCase(RescheduleLoansApiConstants.ENTITY_NAME));
-
-        final JsonElement jsonElement = jsonCommand.parsedJson();
-
-        final LocalDate rejectedOnDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.rejectedOnDateParam,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rejectedOnDateParam).value(rejectedOnDate).notNull();
-
-        if (rejectedOnDate != null && loanRescheduleRequest.getSubmittedOnDate().isAfter(rejectedOnDate)) {
-            dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rejectedOnDateParam)
-                    .failWithCode("before.submission.date", "Rejection date cannot be before the request submission date.");
-        }
-
-        LoanRescheduleRequestStatusEnumData loanRescheduleRequestStatusEnumData = LoanRescheduleRequestEnumerations
-                .status(loanRescheduleRequest.getStatusEnum());
-
-        if (!loanRescheduleRequestStatusEnumData.isPendingApproval()) {
-            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                    "request.is.not.in.submitted.and.pending.state",
-                    "Loan reschedule request rejection is not allowed. "
-                            + "Loan reschedule request is not in submitted and pending approval state.");
-        }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    // at least one of the following must be provided => graceOnPrincipal,
+    // graceOnInterest, extraTerms, newInterestRate
+    if (!this.fromJsonHelper.parameterExists(
+            RescheduleLoansApiConstants.graceOnPrincipalParamName, jsonElement)
+        && !this.fromJsonHelper.parameterExists(
+            RescheduleLoansApiConstants.graceOnInterestParamName, jsonElement)
+        && !this.fromJsonHelper.parameterExists(
+            RescheduleLoansApiConstants.extraTermsParamName, jsonElement)
+        && !this.fromJsonHelper.parameterExists(
+            RescheduleLoansApiConstants.newInterestRateParamName, jsonElement)
+        && !this.fromJsonHelper.parameterExists(
+            RescheduleLoansApiConstants.adjustedDueDateParamName, jsonElement)) {
+      dataValidatorBuilder
+          .reset()
+          .parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName)
+          .notNull();
     }
+    LoanRepaymentScheduleInstallment installment = null;
+    if (rescheduleFromDate != null) {
+      installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+
+      if (installment == null) {
+        dataValidatorBuilder
+            .reset()
+            .parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+            .failWithCode(
+                "repayment.schedule.installment.does.not.exist",
+                "Repayment schedule installment does not exist");
+      }
+
+      if (installment != null && installment.isObligationsMet()) {
+        dataValidatorBuilder
+            .reset()
+            .parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+            .failWithCode(
+                "repayment.schedule.installment.obligation.met",
+                "Repayment schedule installment obligation met");
+      }
+    }
+
+    if (loan.isMultiDisburmentLoan()) {
+      dataValidatorBuilder
+          .reset()
+          .failWithCodeNoParameterAddedToErrorCode(
+              RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
+              "Loan rescheduling is not supported for multidisbursement loans");
+    }
+
+    if (loan.isInterestRecalculationEnabledForProduct()) {
+      dataValidatorBuilder
+          .reset()
+          .failWithCodeNoParameterAddedToErrorCode(
+              RescheduleLoansApiConstants.resheduleWithInterestRecalculationNotSupportedErrorCode,
+              "Loan rescheduling is not supported for the loan product with interest recalculation"
+                  + " enabled");
+    }
+    validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  private void validateForOverdueCharges(
+      DataValidatorBuilder dataValidatorBuilder,
+      final Loan loan,
+      final LoanRepaymentScheduleInstallment installment) {
+    if (installment != null) {
+      LocalDate rescheduleFromDate = installment.getFromDate();
+      Collection<LoanCharge> charges = loan.getLoanCharges();
+      for (LoanCharge loanCharge : charges) {
+        if (loanCharge.isOverdueInstallmentCharge()
+            && loanCharge.getDueLocalDate().isAfter(rescheduleFromDate)) {
+          dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode(
+              "not.allowed.due.to.overdue.charges");
+          break;
+        }
+      }
+    }
+  }
+
+  /**
+   * Validates a user request to approve a loan reschedule request
+   *
+   * @param jsonCommand
+   *            the JSON command object (instance of the JsonCommand class)
+   *
+   **/
+  public void validateForApproveAction(
+      final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
+    final String jsonString = jsonCommand.json();
+
+    if (StringUtils.isBlank(jsonString)) {
+      throw new InvalidJsonException();
+    }
+
+    final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromJsonHelper.checkForUnsupportedParameters(
+        typeToken, jsonString, APPROVE_REQUEST_DATA_PARAMETERS);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder dataValidatorBuilder =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(StringUtils.lowerCase(RescheduleLoansApiConstants.ENTITY_NAME));
+
+    final JsonElement jsonElement = jsonCommand.parsedJson();
+
+    final LocalDate approvedOnDate =
+        this.fromJsonHelper.extractLocalDateNamed(
+            RescheduleLoansApiConstants.approvedOnDateParam, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.approvedOnDateParam)
+        .value(approvedOnDate)
+        .notNull();
+
+    if (approvedOnDate != null
+        && loanRescheduleRequest.getSubmittedOnDate().isAfter(approvedOnDate)) {
+      dataValidatorBuilder
+          .reset()
+          .parameter(RescheduleLoansApiConstants.approvedOnDateParam)
+          .failWithCode(
+              "before.submission.date",
+              "Approval date cannot be before the request submission date.");
+    }
+
+    LoanRescheduleRequestStatusEnumData loanRescheduleRequestStatusEnumData =
+        LoanRescheduleRequestEnumerations.status(loanRescheduleRequest.getStatusEnum());
+
+    if (!loanRescheduleRequestStatusEnumData.isPendingApproval()) {
+      dataValidatorBuilder
+          .reset()
+          .failWithCodeNoParameterAddedToErrorCode(
+              "request.is.not.in.submitted.and.pending.state",
+              "Loan reschedule request approval is not allowed. "
+                  + "Loan reschedule request is not in submitted and pending approval state.");
+    }
+
+    LocalDate rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
+    final Loan loan = loanRescheduleRequest.getLoan();
+    LoanRepaymentScheduleInstallment installment = null;
+    if (loan != null) {
+
+      if (!loan.status().isActive()) {
+        dataValidatorBuilder
+            .reset()
+            .failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
+      }
+
+      if (rescheduleFromDate != null) {
+        installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+
+        if (installment == null) {
+          dataValidatorBuilder
+              .reset()
+              .failWithCodeNoParameterAddedToErrorCode(
+                  "loan.repayment.schedule.installment.does.not.exist",
+                  "Repayment schedule installment does not exist");
+        }
+
+        if (installment != null && installment.isObligationsMet()) {
+          dataValidatorBuilder
+              .reset()
+              .failWithCodeNoParameterAddedToErrorCode(
+                  "loan.repayment.schedule.installment." + "obligation.met",
+                  "Repayment schedule installment obligation met");
+        }
+      }
+    }
+
+    validateForOverdueCharges(dataValidatorBuilder, loan, installment);
+
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  /**
+   * Validates a user request to reject a loan reschedule request
+   *
+   * @param jsonCommand
+   *            the JSON command object (instance of the JsonCommand class)
+   *
+   **/
+  public void validateForRejectAction(
+      final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
+    final String jsonString = jsonCommand.json();
+
+    if (StringUtils.isBlank(jsonString)) {
+      throw new InvalidJsonException();
+    }
+
+    final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromJsonHelper.checkForUnsupportedParameters(
+        typeToken, jsonString, REJECT_REQUEST_DATA_PARAMETERS);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder dataValidatorBuilder =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(StringUtils.lowerCase(RescheduleLoansApiConstants.ENTITY_NAME));
+
+    final JsonElement jsonElement = jsonCommand.parsedJson();
+
+    final LocalDate rejectedOnDate =
+        this.fromJsonHelper.extractLocalDateNamed(
+            RescheduleLoansApiConstants.rejectedOnDateParam, jsonElement);
+    dataValidatorBuilder
+        .reset()
+        .parameter(RescheduleLoansApiConstants.rejectedOnDateParam)
+        .value(rejectedOnDate)
+        .notNull();
+
+    if (rejectedOnDate != null
+        && loanRescheduleRequest.getSubmittedOnDate().isAfter(rejectedOnDate)) {
+      dataValidatorBuilder
+          .reset()
+          .parameter(RescheduleLoansApiConstants.rejectedOnDateParam)
+          .failWithCode(
+              "before.submission.date",
+              "Rejection date cannot be before the request submission date.");
+    }
+
+    LoanRescheduleRequestStatusEnumData loanRescheduleRequestStatusEnumData =
+        LoanRescheduleRequestEnumerations.status(loanRescheduleRequest.getStatusEnum());
+
+    if (!loanRescheduleRequestStatusEnumData.isPendingApproval()) {
+      dataValidatorBuilder
+          .reset()
+          .failWithCodeNoParameterAddedToErrorCode(
+              "request.is.not.in.submitted.and.pending.state",
+              "Loan reschedule request rejection is not allowed. "
+                  + "Loan reschedule request is not in submitted and pending approval state.");
+    }
+
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
 }

@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CONFIGURATION", action = "UPDATE")
 public class UpdateGlobalConfigurationCommandHandler implements NewCommandSourceHandler {
 
-    private final GlobalConfigurationWritePlatformService writePlatformService;
+  private final GlobalConfigurationWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateGlobalConfigurationCommandHandler(final GlobalConfigurationWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateGlobalConfigurationCommandHandler(
+      final GlobalConfigurationWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.update(command.entityId(), command);
-    }
+    return this.writePlatformService.update(command.entityId(), command);
+  }
 }

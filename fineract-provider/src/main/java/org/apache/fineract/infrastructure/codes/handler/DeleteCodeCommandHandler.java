@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CODE", action = "DELETE")
 public class DeleteCodeCommandHandler implements NewCommandSourceHandler {
 
-    private final CodeWritePlatformService writePlatformService;
+  private final CodeWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteCodeCommandHandler(final CodeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteCodeCommandHandler(final CodeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteCode(command.entityId());
-    }
+    return this.writePlatformService.deleteCode(command.entityId());
+  }
 }

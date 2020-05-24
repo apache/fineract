@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CALENDAR", action = "DELETE")
 public class DeleteCalendarCommandHandler implements NewCommandSourceHandler {
 
-    private final CalendarWritePlatformService writePlatformService;
+  private final CalendarWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteCalendarCommandHandler(final CalendarWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteCalendarCommandHandler(final CalendarWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteCalendar(command.entityId());
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteCalendar(command.entityId());
+  }
 }

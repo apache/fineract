@@ -25,23 +25,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class FineractEntityRelationRepositoryWrapper {
 
-    private final FineractEntityRelationRepository fineractEntityRelationRepository;
+  private final FineractEntityRelationRepository fineractEntityRelationRepository;
 
-    @Autowired
-    private FineractEntityRelationRepositoryWrapper(final FineractEntityRelationRepository fineractEntityRelationRepository) {
-        this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+  @Autowired
+  private FineractEntityRelationRepositoryWrapper(
+      final FineractEntityRelationRepository fineractEntityRelationRepository) {
+    this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+  }
 
+  public FineractEntityRelation findOneWithNotFoundDetection(final Long id) {
+    return this.fineractEntityRelationRepository
+        .findById(id)
+        .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
+  }
+
+  public FineractEntityRelation findOneByCodeName(final String codeName) {
+    final FineractEntityRelation fineractEntityRelation =
+        this.fineractEntityRelationRepository.findOneByCodeName(codeName);
+    if (fineractEntityRelation == null) {
+      throw new FineractEntityAccessNotFoundException(codeName);
     }
-
-    public FineractEntityRelation findOneWithNotFoundDetection(final Long id) {
-        return this.fineractEntityRelationRepository.findById(id)
-                .orElseThrow(() -> new FineractEntityAccessNotFoundException(id));
-    }
-
-    public FineractEntityRelation findOneByCodeName(final String codeName) {
-                 final FineractEntityRelation fineractEntityRelation = this.fineractEntityRelationRepository.findOneByCodeName(codeName) ;
-                 if (fineractEntityRelation == null) { throw new FineractEntityAccessNotFoundException(codeName); }
-                 return fineractEntityRelation;
-            }
-
+    return fineractEntityRelation;
+  }
 }

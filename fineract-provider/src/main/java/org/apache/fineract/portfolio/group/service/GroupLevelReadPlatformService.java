@@ -23,6 +23,5 @@ import org.apache.fineract.portfolio.group.data.GroupLevelData;
 
 public interface GroupLevelReadPlatformService {
 
-    Collection<GroupLevelData> retrieveAllLevels();
-
+  Collection<GroupLevelData> retrieveAllLevels();
 }

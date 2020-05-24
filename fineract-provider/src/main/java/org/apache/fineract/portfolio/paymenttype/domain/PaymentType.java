@@ -33,68 +33,80 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 @Table(name = "m_payment_type")
 public class PaymentType extends AbstractPersistableCustom {
 
-    @Column(name = "value")
-    private String name;
+  @Column(name = "value")
+  private String name;
 
-    @Column(name = "description")
-    private String description;
+  @Column(name = "description")
+  private String description;
 
-    @Column(name = "is_cash_payment")
-    private Boolean isCashPayment;
+  @Column(name = "is_cash_payment")
+  private Boolean isCashPayment;
 
-    @Column(name = "order_position")
-    private Long position;
+  @Column(name = "order_position")
+  private Long position;
 
-    protected PaymentType() {}
+  protected PaymentType() {}
 
-    public PaymentType(final String name, final String description, final Boolean isCashPayment, final Long position) {
-        this.name = name;
-        this.description = description;
-        this.isCashPayment = isCashPayment;
-        this.position = position;
+  public PaymentType(
+      final String name,
+      final String description,
+      final Boolean isCashPayment,
+      final Long position) {
+    this.name = name;
+    this.description = description;
+    this.isCashPayment = isCashPayment;
+    this.position = position;
+  }
+
+  public static PaymentType create(
+      String name, String description, Boolean isCashPayment, Long position) {
+    return new PaymentType(name, description, isCashPayment, position);
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
+
+    if (command.isChangeInStringParameterNamed(PaymentTypeApiResourceConstants.NAME, this.name)) {
+      final String newValue =
+          command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.NAME);
+      actualChanges.put(PaymentTypeApiResourceConstants.NAME, newValue);
+      this.name = StringUtils.defaultIfEmpty(newValue, null);
     }
 
-    public static PaymentType create(String name, String description, Boolean isCashPayment, Long position) {
-        return new PaymentType(name, description, isCashPayment, position);
+    if (command.isChangeInStringParameterNamed(
+        PaymentTypeApiResourceConstants.DESCRIPTION, this.description)) {
+      final String newDescription =
+          command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION);
+      actualChanges.put(PaymentTypeApiResourceConstants.DESCRIPTION, newDescription);
+      this.description = StringUtils.defaultIfEmpty(newDescription, null);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
-
-        if (command.isChangeInStringParameterNamed(PaymentTypeApiResourceConstants.NAME, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.NAME);
-            actualChanges.put(PaymentTypeApiResourceConstants.NAME, newValue);
-            this.name = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION, this.description)) {
-            final String newDescription = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION);
-            actualChanges.put(PaymentTypeApiResourceConstants.DESCRIPTION, newDescription);
-            this.description = StringUtils.defaultIfEmpty(newDescription, null);
-        }
-
-        if (command.isChangeInBooleanParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT, this.isCashPayment)) {
-            final Boolean newCashPaymentType = command.booleanObjectValueOfParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT);
-            actualChanges.put(PaymentTypeApiResourceConstants.ISCASHPAYMENT, newCashPaymentType);
-            this.isCashPayment = newCashPaymentType.booleanValue();
-        }
-
-        if (command.isChangeInLongParameterNamed(PaymentTypeApiResourceConstants.POSITION, this.position)) {
-            final Long newPosition = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.POSITION);
-            actualChanges.put(PaymentTypeApiResourceConstants.POSITION, newPosition);
-            this.position = newPosition;
-        }
-
-        return actualChanges;
+    if (command.isChangeInBooleanParameterNamed(
+        PaymentTypeApiResourceConstants.ISCASHPAYMENT, this.isCashPayment)) {
+      final Boolean newCashPaymentType =
+          command.booleanObjectValueOfParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT);
+      actualChanges.put(PaymentTypeApiResourceConstants.ISCASHPAYMENT, newCashPaymentType);
+      this.isCashPayment = newCashPaymentType.booleanValue();
     }
 
-    public PaymentTypeData toData() {
-        return PaymentTypeData.instance(getId(), this.name, this.description, this.isCashPayment, this.position);
+    if (command.isChangeInLongParameterNamed(
+        PaymentTypeApiResourceConstants.POSITION, this.position)) {
+      final Long newPosition =
+          command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.POSITION);
+      actualChanges.put(PaymentTypeApiResourceConstants.POSITION, newPosition);
+      this.position = newPosition;
     }
 
-    public Boolean isCashPayment() {
-        return isCashPayment;
-    }
+    return actualChanges;
+  }
 
+  public PaymentTypeData toData() {
+    return PaymentTypeData.instance(
+        getId(), this.name, this.description, this.isCashPayment, this.position);
+  }
+
+  public Boolean isCashPayment() {
+    return isCashPayment;
+  }
 }

@@ -40,115 +40,145 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class LoanApplicationUndoLastTrancheTest {
-    private final static Logger LOG = LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private LoanApplicationApprovalTest loanApplicationApprovalTest;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(LoanApplicationUndoLastTrancheTest.class);
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
+  private LoanTransactionHelper loanTransactionHelper;
+  private LoanApplicationApprovalTest loanApplicationApprovalTest;
 
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
-    }
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+    this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
+  }
 
-    @Test
-    public void LoanApplicationUndoLastTranche() {
+  @Test
+  public void LoanApplicationUndoLastTranche() {
 
-        final String proposedAmount = "5000";
-        final String approvalAmount = "2000";
-        final String approveDate = "1 March 2014";
-        final String expectedDisbursementDate = "1 March 2014";
-        final String disbursalDate = "1 March 2014";
+    final String proposedAmount = "5000";
+    final String approvalAmount = "2000";
+    final String approveDate = "1 March 2014";
+    final String expectedDisbursementDate = "1 March 2014";
+    final String disbursalDate = "1 March 2014";
 
-        // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}"
-                , clientID);
+    // CREATE CLIENT
+    final Integer clientID =
+        ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+    LOG.info(
+        "---------------------------------CLIENT CREATED WITH"
+            + " ID--------------------------------------------------- {}",
+        clientID);
 
-        // CREATE LOAN MULTIDISBURSAL PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+    // CREATE LOAN MULTIDISBURSAL PRODUCT
+    final Integer loanProductID =
+        this.loanTransactionHelper.getLoanProductId(
+            new LoanProductTestBuilder()
+                .withInterestTypeAsDecliningBalance()
+                .withTranches(true)
+                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .build(null));
-        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}"
-                , loanProductID);
+    LOG.info(
+        "----------------------------------LOAN PRODUCT CREATED WITH"
+            + " ID------------------------------------------- {}",
+        loanProductID);
 
-        // CREATE TRANCHES
-        List<HashMap> createTranches = new ArrayList<>();
-        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("1 March 2014", "1000"));
-        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "4000"));
+    // CREATE TRANCHES
+    List<HashMap> createTranches = new ArrayList<>();
+    createTranches.add(
+        this.loanApplicationApprovalTest.createTrancheDetail("1 March 2014", "1000"));
+    createTranches.add(
+        this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "4000"));
 
-        // APPROVE TRANCHES
-        List<HashMap> approveTranches = new ArrayList<>();
-        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("1 March 2014", "1000"));
-        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "1000"));
+    // APPROVE TRANCHES
+    List<HashMap> approveTranches = new ArrayList<>();
+    approveTranches.add(
+        this.loanApplicationApprovalTest.createTrancheDetail("1 March 2014", "1000"));
+    approveTranches.add(
+        this.loanApplicationApprovalTest.createTrancheDetail("23 June 2014", "1000"));
 
-        // APPLY FOR LOAN WITH TRANCHES
-        final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
-        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}"
-                , loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+    // APPLY FOR LOAN WITH TRANCHES
+    final Integer loanID =
+        applyForLoanApplicationWithTranches(
+            clientID, loanProductID, proposedAmount, createTranches);
+    LOG.info(
+        "-----------------------------------LOAN CREATED WITH"
+            + " LOANID------------------------------------------------- {}",
+        loanID);
+    HashMap loanStatusHashMap =
+        LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
-        // VALIDATE THE LOAN STATUS
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+    // VALIDATE THE LOAN STATUS
+    LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
-                loanID, approveTranches);
+    LOG.info(
+        "-----------------------------------APPROVE"
+            + " LOAN-----------------------------------------------------------");
+    loanStatusHashMap =
+        this.loanTransactionHelper.approveLoanWithApproveAmount(
+            approveDate, expectedDisbursementDate, approvalAmount, loanID, approveTranches);
 
-        // VALIDATE THE LOAN IS APPROVED
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+    // VALIDATE THE LOAN IS APPROVED
+    LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+    LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        // DISBURSE A LOAN
-        this.loanTransactionHelper.disburseLoan(disbursalDate, loanID);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+    // DISBURSE A LOAN
+    this.loanTransactionHelper.disburseLoan(disbursalDate, loanID);
+    loanStatusHashMap =
+        LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
-        // VALIDATE THE LOAN IS ACTIVE STATUS
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+    // VALIDATE THE LOAN IS ACTIVE STATUS
+    LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("01 April 2014", Float.valueOf("420"), loanID);
-        LOG.info("-------------Make repayment 2-----------");
-        this.loanTransactionHelper.makeRepayment("01 May 2014", Float.valueOf("412"), loanID);
-        LOG.info("-------------Make repayment 3-----------");
-        this.loanTransactionHelper.makeRepayment("01 June 2014", Float.valueOf("204"), loanID);
-        // DISBURSE A SECOND TRANCHE
-        this.loanTransactionHelper.disburseLoan("23 June 2014", loanID);
-        // UNDO LAST TRANCHE
-        Float disbursedAmount = this.loanTransactionHelper.undoLastDisbursal(loanID);
-        validateDisbursedAmount(disbursedAmount);
-    }
+    LOG.info("-------------Make repayment 1-----------");
+    this.loanTransactionHelper.makeRepayment("01 April 2014", Float.valueOf("420"), loanID);
+    LOG.info("-------------Make repayment 2-----------");
+    this.loanTransactionHelper.makeRepayment("01 May 2014", Float.valueOf("412"), loanID);
+    LOG.info("-------------Make repayment 3-----------");
+    this.loanTransactionHelper.makeRepayment("01 June 2014", Float.valueOf("204"), loanID);
+    // DISBURSE A SECOND TRANCHE
+    this.loanTransactionHelper.disburseLoan("23 June 2014", loanID);
+    // UNDO LAST TRANCHE
+    Float disbursedAmount = this.loanTransactionHelper.undoLastDisbursal(loanID);
+    validateDisbursedAmount(disbursedAmount);
+  }
 
-    private void validateDisbursedAmount(Float disbursedAmount) {
-        Assert.assertEquals(Float.valueOf("1000.0"), disbursedAmount);
+  private void validateDisbursedAmount(Float disbursedAmount) {
+    Assert.assertEquals(Float.valueOf("1000.0"), disbursedAmount);
+  }
 
-    }
+  public Integer applyForLoanApplicationWithTranches(
+      final Integer clientID,
+      final Integer loanProductID,
+      String principal,
+      List<HashMap> tranches) {
+    LOG.info(
+        "--------------------------------APPLYING FOR LOAN"
+            + " APPLICATION--------------------------------");
+    final String loanApplicationJSON =
+        new LoanApplicationTestBuilder()
+            //
+            .withPrincipal(principal)
+            //
+            .withLoanTermFrequency("5")
+            //
+            .withLoanTermFrequencyAsMonths()
+            //
+            .withNumberOfRepayments("5")
+            .withRepaymentEveryAfter("1")
+            .withRepaymentFrequencyTypeAsMonths() //
+            .withInterestRatePerPeriod("2") //
+            .withExpectedDisbursementDate("1 March 2014") //
+            .withTranches(tranches) //
+            .withInterestTypeAsDecliningBalance() //
+            .withSubmittedOnDate("1 March 2014") //
+            .build(clientID.toString(), loanProductID.toString(), null);
 
-    public Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, String principal,
-            List<HashMap> tranches) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder()
-        //
-                .withPrincipal(principal)
-                //
-                .withLoanTermFrequency("5")
-                //
-                .withLoanTermFrequencyAsMonths()
-                //
-                .withNumberOfRepayments("5").withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withExpectedDisbursementDate("1 March 2014") //
-                .withTranches(tranches) //
-                .withInterestTypeAsDecliningBalance() //
-                .withSubmittedOnDate("1 March 2014") //
-                .build(clientID.toString(), loanProductID.toString(), null);
-
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
+    return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+  }
 }

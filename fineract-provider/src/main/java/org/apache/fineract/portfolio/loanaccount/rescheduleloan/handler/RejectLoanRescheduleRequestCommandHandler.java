@@ -30,17 +30,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "RESCHEDULELOAN", action = "REJECT")
 public class RejectLoanRescheduleRequestCommandHandler implements NewCommandSourceHandler {
-    private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
+  private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
 
-    @Autowired
-    public RejectLoanRescheduleRequestCommandHandler(
-            LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
-        this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
-    }
+  @Autowired
+  public RejectLoanRescheduleRequestCommandHandler(
+      LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
+    this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.loanRescheduleRequestWritePlatformService.reject(jsonCommand);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.loanRescheduleRequestWritePlatformService.reject(jsonCommand);
+  }
 }

@@ -25,17 +25,18 @@ import org.apache.fineract.organisation.office.data.OfficeTransactionData;
 
 public interface OfficeReadPlatformService {
 
-    Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices, SearchParameters searchParameters);
+  Collection<OfficeData> retrieveAllOffices(
+      boolean includeAllOffices, SearchParameters searchParameters);
 
-    Collection<OfficeData> retrieveAllOfficesForDropdown();
+  Collection<OfficeData> retrieveAllOfficesForDropdown();
 
-    OfficeData retrieveOffice(Long officeId);
+  OfficeData retrieveOffice(Long officeId);
 
-    OfficeData retrieveNewOfficeTemplate();
+  OfficeData retrieveNewOfficeTemplate();
 
-    Collection<OfficeData> retrieveAllowedParents(Long officeId);
+  Collection<OfficeData> retrieveAllowedParents(Long officeId);
 
-    Collection<OfficeTransactionData> retrieveAllOfficeTransactions();
+  Collection<OfficeTransactionData> retrieveAllOfficeTransactions();
 
-    OfficeTransactionData retrieveNewOfficeTransactionDetails();
+  OfficeTransactionData retrieveNewOfficeTransactionDetails();
 }

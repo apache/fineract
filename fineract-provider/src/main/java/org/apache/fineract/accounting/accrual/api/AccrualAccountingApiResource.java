@@ -46,35 +46,57 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Periodic Accrual Accounting"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Periodic Accrual Accounting",
+          description =
+              "Periodic Accrual is to accrue the loan income till the specific date or till batch"
+                  + " job scheduled time.\n")
+    })
 public class AccrualAccountingApiResource {
 
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final DefaultToApiJsonSerializer<String> apiJsonSerializerService;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final DefaultToApiJsonSerializer<String> apiJsonSerializerService;
 
-    @Autowired
-    public AccrualAccountingApiResource(final DefaultToApiJsonSerializer<String> apiJsonSerializerService,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
+  @Autowired
+  public AccrualAccountingApiResource(
+      final DefaultToApiJsonSerializer<String> apiJsonSerializerService,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.apiJsonSerializerService = apiJsonSerializerService;
+  }
 
-    }
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Executes Periodic Accrual Accounting",
+      httpMethod = "POST",
+      notes = "Mandatory Fields\n" + "\n" + "tillDate\n")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        paramType = "body",
+        required = true,
+        type = "body",
+        dataTypeClass = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class,
+        value =
+            "Request Body\n"
+                + "\n"
+                + "Field Descriptions: \n"
+                + "tillDate: \n"
+                + "which specifies periodic accruals should happen till the given Date")
+  })
+  @ApiResponses({@ApiResponse(code = 200, message = "OK")})
+  public String executePeriodicAccrualAccounting(
+      @ApiParam(hidden = true) final String jsonRequestBody) {
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Executes Periodic Accrual Accounting", httpMethod = "POST", notes = "Mandatory Fields\n" + "\n" + "tillDate\n")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", required = true, type = "body", dataTypeClass = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class, value = "Request Body\n" + "\n" + "Field Descriptions: \n" + "tillDate: \n" + "which specifies periodic accruals should happen till the given Date" )})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
-    public String executePeriodicAccrualAccounting( @ApiParam(hidden = true) final String jsonRequestBody) {
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().excuteAccrualAccounting().withJson(jsonRequestBody).build();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().excuteAccrualAccounting().withJson(jsonRequestBody).build();
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
-    }
-
+    return this.apiJsonSerializerService.serialize(result);
+  }
 }

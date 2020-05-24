@@ -40,101 +40,124 @@ import org.springframework.stereotype.Component;
 @Component
 public final class SavingsAccountApplicationTransitionApiJsonValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public SavingsAccountApplicationTransitionApiJsonValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public SavingsAccountApplicationTransitionApiJsonValidator(
+      final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  public void validateApproval(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    final Set<String> disbursementParameters =
+        new HashSet<>(Arrays.asList("approvedOnDate", "note", "locale", "dateFormat"));
+
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
+
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final LocalDate approvedOnDate =
+        this.fromApiJsonHelper.extractLocalDateNamed("approvedOnDate", element);
+    baseDataValidator.reset().parameter("approvedOnDate").value(approvedOnDate).notNull();
+
+    final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+    baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  public void validateRejection(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateApproval(final String json) {
+    final Set<String> disbursementParameters =
+        new HashSet<>(Arrays.asList("rejectedOnDate", "note", "locale", "dateFormat"));
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("approvedOnDate", "note", "locale", "dateFormat"));
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final LocalDate rejectedOnDate =
+        this.fromApiJsonHelper.extractLocalDateNamed("rejectedOnDate", element);
+    baseDataValidator.reset().parameter("rejectedOnDate").value(rejectedOnDate).notNull();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
+    final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+    baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate approvedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("approvedOnDate", element);
-        baseDataValidator.reset().parameter("approvedOnDate").value(approvedOnDate).notNull();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+  public void validateApplicantWithdrawal(final String json) {
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateRejection(final String json) {
+    final Set<String> disbursementParameters =
+        new HashSet<>(Arrays.asList("withdrawnOnDate", "note", "locale", "dateFormat"));
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("rejectedOnDate", "note", "locale", "dateFormat"));
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final LocalDate withdrawnOnDate =
+        this.fromApiJsonHelper.extractLocalDateNamed("withdrawnOnDate", element);
+    baseDataValidator.reset().parameter("withdrawnOnDate").value(withdrawnOnDate).notNull();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
+    final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+    baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate rejectedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("rejectedOnDate", element);
-        baseDataValidator.reset().parameter("rejectedOnDate").value(rejectedOnDate).notNull();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validateForUndo(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateApplicantWithdrawal(final String json) {
+    final Set<String> undoSupportedParameters = new HashSet<>(Arrays.asList("note"));
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, undoSupportedParameters);
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication.undo");
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("withdrawnOnDate", "note", "locale", "dateFormat"));
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate withdrawnOnDate = this.fromApiJsonHelper.extractLocalDateNamed("withdrawnOnDate", element);
-        baseDataValidator.reset().parameter("withdrawnOnDate").value(withdrawnOnDate).notNull();
-
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    final String note = "note";
+    if (this.fromApiJsonHelper.parameterExists(note, element)) {
+      final String noteText = this.fromApiJsonHelper.extractStringNamed(note, element);
+      baseDataValidator.reset().parameter(note).value(noteText).notExceedingLengthOf(1000);
     }
 
-    public void validateForUndo(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Set<String> undoSupportedParameters = new HashSet<>(Arrays.asList("note"));
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, undoSupportedParameters);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("savingsaccountapplication.undo");
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final String note = "note";
-        if (this.fromApiJsonHelper.parameterExists(note, element)) {
-            final String noteText = this.fromApiJsonHelper.extractStringNamed(note, element);
-            baseDataValidator.reset().parameter(note).value(noteText).notExceedingLengthOf(1000);
-        }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
+  }
 }

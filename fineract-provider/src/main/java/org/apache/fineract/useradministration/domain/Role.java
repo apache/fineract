@@ -37,114 +37,123 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.data.RoleData;
 
 @Entity
-@Table(name = "m_role", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
+@Table(
+    name = "m_role",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          columnNames = {"name"},
+          name = "unq_name")
+    })
 public class Role extends AbstractPersistableCustom implements Serializable {
 
-    @Column(name = "name", unique = true, nullable = false, length = 100)
-    private String name;
+  @Column(name = "name", unique = true, nullable = false, length = 100)
+  private String name;
 
-    @Column(name = "description", nullable = false, length = 500)
-    private String description;
+  @Column(name = "description", nullable = false, length = 500)
+  private String description;
 
-    @Column(name = "is_disabled", nullable = false)
-    private Boolean disabled;
+  @Column(name = "is_disabled", nullable = false)
+  private Boolean disabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "m_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private Set<Permission> permissions = new HashSet<>();
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "m_role_permission",
+      joinColumns = @JoinColumn(name = "role_id"),
+      inverseJoinColumns = @JoinColumn(name = "permission_id"))
+  private Set<Permission> permissions = new HashSet<>();
 
-    public static Role fromJson(final JsonCommand command) {
-        final String name = command.stringValueOfParameterNamed("name");
-        final String description = command.stringValueOfParameterNamed("description");
-        return new Role(name, description);
+  public static Role fromJson(final JsonCommand command) {
+    final String name = command.stringValueOfParameterNamed("name");
+    final String description = command.stringValueOfParameterNamed("description");
+    return new Role(name, description);
+  }
+
+  protected Role() {
+    //
+  }
+
+  public Role(final String name, final String description) {
+    this.name = name.trim();
+    this.description = description.trim();
+    this.disabled = false;
+  }
+
+  public Map<String, Object> update(final JsonCommand command) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+    final String nameParamName = "name";
+    if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+      final String newValue = command.stringValueOfParameterNamed(nameParamName);
+      actualChanges.put(nameParamName, newValue);
+      this.name = newValue;
     }
 
-    protected Role() {
-        //
+    final String descriptionParamName = "description";
+    if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+      final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+      actualChanges.put(descriptionParamName, newValue);
+      this.description = newValue;
     }
 
-    public Role(final String name, final String description) {
-        this.name = name.trim();
-        this.description = description.trim();
-        this.disabled = false;
+    return actualChanges;
+  }
+
+  public boolean updatePermission(final Permission permission, final boolean isSelected) {
+    boolean changed = false;
+    if (isSelected) {
+      changed = addPermission(permission);
+    } else {
+      changed = removePermission(permission);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    return changed;
+  }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+  private boolean addPermission(final Permission permission) {
+    return this.permissions.add(permission);
+  }
 
-        final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
-        }
+  private boolean removePermission(final Permission permission) {
+    return this.permissions.remove(permission);
+  }
 
-        final String descriptionParamName = "description";
-        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, newValue);
-            this.description = newValue;
-        }
+  public Collection<Permission> getPermissions() {
+    return this.permissions;
+  }
 
-        return actualChanges;
+  public boolean hasPermissionTo(final String permissionCode) {
+    boolean match = false;
+    for (final Permission permission : this.permissions) {
+      if (permission.hasCode(permissionCode)) {
+        match = true;
+        break;
+      }
     }
+    return match;
+  }
 
-    public boolean updatePermission(final Permission permission, final boolean isSelected) {
-        boolean changed = false;
-        if (isSelected) {
-            changed = addPermission(permission);
-        } else {
-            changed = removePermission(permission);
-        }
+  public RoleData toData() {
+    return new RoleData(getId(), this.name, this.description, this.disabled);
+  }
 
-        return changed;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    private boolean addPermission(final Permission permission) {
-        return this.permissions.add(permission);
-    }
+  public void disableRole() {
+    this.disabled = true;
+  }
 
-    private boolean removePermission(final Permission permission) {
-        return this.permissions.remove(permission);
-    }
+  public Boolean isDisabled() {
+    return this.disabled;
+  }
 
-    public Collection<Permission> getPermissions() {
-        return this.permissions;
-    }
+  public void enableRole() {
+    this.disabled = false;
+  }
 
-    public boolean hasPermissionTo(final String permissionCode) {
-        boolean match = false;
-        for (final Permission permission : this.permissions) {
-            if (permission.hasCode(permissionCode)) {
-                match = true;
-                break;
-            }
-        }
-        return match;
-    }
-
-    public RoleData toData() {
-        return new RoleData(getId(), this.name, this.description, this.disabled);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void disableRole() {
-        this.disabled = true;
-    }
-
-    public Boolean isDisabled() {
-        return this.disabled;
-    }
-
-    public void enableRole() {
-        this.disabled = false;
-    }
-
-    public Boolean isEnabled() {
-        return this.disabled;
-    }
+  public Boolean isEnabled() {
+    return this.disabled;
+  }
 }

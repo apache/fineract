@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLCLOSURE", action = "CREATE")
 public class CreateGLClosureCommandHandler implements NewCommandSourceHandler {
 
-    private final GLClosureWritePlatformService writePlatformService;
+  private final GLClosureWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateGLClosureCommandHandler(final GLClosureWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateGLClosureCommandHandler(final GLClosureWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createGLClosure(command);
-    }
+    return this.writePlatformService.createGLClosure(command);
+  }
 }

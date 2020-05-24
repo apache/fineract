@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.self.pockets.service;
 
 import com.google.gson.JsonArray;
@@ -43,94 +42,106 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PocketWritePlatformServiceImpl implements PocketWritePlatformService {
 
-    private final PlatformSecurityContext context;
-    private final PocketDataValidator pocketDataValidator;
-    private final AccountEntityServiceFactory accountEntityServiceFactory;
-    private final PocketRepositoryWrapper pocketRepositoryWrapper;
-    private final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper;
-    private final PocketAccountMappingReadPlatformService pocketAccountMappingReadPlatformService;
+  private final PlatformSecurityContext context;
+  private final PocketDataValidator pocketDataValidator;
+  private final AccountEntityServiceFactory accountEntityServiceFactory;
+  private final PocketRepositoryWrapper pocketRepositoryWrapper;
+  private final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper;
+  private final PocketAccountMappingReadPlatformService pocketAccountMappingReadPlatformService;
 
-    @Autowired
-    public PocketWritePlatformServiceImpl(final PlatformSecurityContext context,
-            PocketDataValidator pocketDataValidator, final AccountEntityServiceFactory accountEntityServiceFactory,
-            final PocketRepositoryWrapper pocketRepositoryWrapper,
-            final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper,
-            final PocketAccountMappingReadPlatformService pocketAccountMappingReadPlatformService) {
-        this.context = context;
-        this.pocketDataValidator = pocketDataValidator;
-        this.accountEntityServiceFactory = accountEntityServiceFactory;
-        this.pocketRepositoryWrapper = pocketRepositoryWrapper;
-        this.pocketAccountMappingRepositoryWrapper = pocketAccountMappingRepositoryWrapper;
-        this.pocketAccountMappingReadPlatformService = pocketAccountMappingReadPlatformService;
+  @Autowired
+  public PocketWritePlatformServiceImpl(
+      final PlatformSecurityContext context,
+      PocketDataValidator pocketDataValidator,
+      final AccountEntityServiceFactory accountEntityServiceFactory,
+      final PocketRepositoryWrapper pocketRepositoryWrapper,
+      final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper,
+      final PocketAccountMappingReadPlatformService pocketAccountMappingReadPlatformService) {
+    this.context = context;
+    this.pocketDataValidator = pocketDataValidator;
+    this.accountEntityServiceFactory = accountEntityServiceFactory;
+    this.pocketRepositoryWrapper = pocketRepositoryWrapper;
+    this.pocketAccountMappingRepositoryWrapper = pocketAccountMappingRepositoryWrapper;
+    this.pocketAccountMappingReadPlatformService = pocketAccountMappingReadPlatformService;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult linkAccounts(JsonCommand command) {
+
+    this.pocketDataValidator.validateForLinkingAccounts(command.json());
+    JsonArray accountsDetail = command.arrayOfParameterNamed(PocketApiConstants.accountsDetail);
+
+    Long pocketId =
+        this.pocketRepositoryWrapper.findByAppUserId(this.context.authenticatedUser().getId());
+
+    if (pocketId == null) {
+      final Pocket pocket = Pocket.instance(this.context.authenticatedUser().getId());
+      this.pocketRepositoryWrapper.saveAndFlush(pocket);
+      pocketId = pocket.getId();
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult linkAccounts(JsonCommand command) {
+    final List<PocketAccountMapping> pocketAccounts = new ArrayList<>();
 
-        this.pocketDataValidator.validateForLinkingAccounts(command.json());
-        JsonArray accountsDetail = command.arrayOfParameterNamed(PocketApiConstants.accountsDetail);
+    for (int i = 0; i < accountsDetail.size(); i++) {
+      final JsonObject element = accountsDetail.get(i).getAsJsonObject();
+      final Long accountId = element.get(PocketApiConstants.accountIdParamName).getAsLong();
+      final String accountType = element.get(PocketApiConstants.accountTypeParamName).getAsString();
 
-        Long pocketId = this.pocketRepositoryWrapper.findByAppUserId(this.context.authenticatedUser().getId());
+      final AccountEntityService accountEntityService =
+          this.accountEntityServiceFactory.getAccountEntityService(accountType);
+      accountEntityService.validateSelfUserAccountMapping(accountId);
+      Integer accountTypeValue = EntityAccountType.valueOf(accountType).getValue();
+      if (this.pocketAccountMappingReadPlatformService.validatePocketAndAccountMapping(
+          pocketId, accountId, accountTypeValue)) {
+        throw new PlatformDataIntegrityException(
+            PocketApiConstants.duplicateMappingException,
+            PocketApiConstants.duplicateMappingExceptionMessage,
+            accountId,
+            accountType);
+      }
 
-        if (pocketId == null) {
-            final Pocket pocket = Pocket.instance(this.context.authenticatedUser().getId());
-            this.pocketRepositoryWrapper.saveAndFlush(pocket);
-            pocketId = pocket.getId();
-        }
+      final String accountNumber = accountEntityService.retrieveAccountNumberByAccountId(accountId);
 
-        final List<PocketAccountMapping> pocketAccounts = new ArrayList<>();
+      pocketAccounts.add(
+          PocketAccountMapping.instance(pocketId, accountId, accountTypeValue, accountNumber));
+    }
+    this.pocketAccountMappingRepositoryWrapper.save(pocketAccounts);
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .withEntityId(pocketId)
+        .build();
+  }
 
-        for (int i = 0; i < accountsDetail.size(); i++) {
-            final JsonObject element = accountsDetail.get(i).getAsJsonObject();
-            final Long accountId = element.get(PocketApiConstants.accountIdParamName).getAsLong();
-            final String accountType = element.get(PocketApiConstants.accountTypeParamName).getAsString();
+  @Override
+  public CommandProcessingResult delinkAccounts(JsonCommand command) {
+    this.pocketDataValidator.validateForDeLinkingAccounts(command.json());
+    JsonArray pocketAccountMappingList =
+        command.arrayOfParameterNamed(PocketApiConstants.pocketAccountMappingList);
 
-            final AccountEntityService accountEntityService = this.accountEntityServiceFactory
-                    .getAccountEntityService(accountType);
-            accountEntityService.validateSelfUserAccountMapping(accountId);
-            Integer accountTypeValue = EntityAccountType.valueOf(accountType).getValue();
-            if (this.pocketAccountMappingReadPlatformService.validatePocketAndAccountMapping(pocketId, accountId,
-                    accountTypeValue)) {
-                throw new PlatformDataIntegrityException(PocketApiConstants.duplicateMappingException,
-                        PocketApiConstants.duplicateMappingExceptionMessage, accountId, accountType);
-            }
+    Long pocketId =
+        this.pocketRepositoryWrapper.findByAppUserIdWithNotFoundDetection(
+            this.context.authenticatedUser().getId());
 
-            final String accountNumber = accountEntityService.retrieveAccountNumberByAccountId(accountId);
+    final List<PocketAccountMapping> pocketAccounts = new ArrayList<>();
 
-            pocketAccounts.add(PocketAccountMapping.instance(pocketId, accountId, accountTypeValue, accountNumber));
+    for (JsonElement mapping : pocketAccountMappingList) {
 
-        }
-        this.pocketAccountMappingRepositoryWrapper.save(pocketAccounts);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(pocketId).build();
+      final Long mappingId = mapping.getAsLong();
 
+      PocketAccountMapping pocketAccountMapping =
+          this.pocketAccountMappingRepositoryWrapper.findByIdAndPocketIdWithNotFoundException(
+              mappingId, pocketId);
+
+      if (pocketAccountMapping != null) {
+        pocketAccounts.add(pocketAccountMapping);
+      }
     }
 
-    @Override
-    public CommandProcessingResult delinkAccounts(JsonCommand command) {
-        this.pocketDataValidator.validateForDeLinkingAccounts(command.json());
-        JsonArray pocketAccountMappingList = command.arrayOfParameterNamed(PocketApiConstants.pocketAccountMappingList);
-
-        Long pocketId = this.pocketRepositoryWrapper
-                .findByAppUserIdWithNotFoundDetection(this.context.authenticatedUser().getId());
-
-        final List<PocketAccountMapping> pocketAccounts = new ArrayList<>();
-
-        for (JsonElement mapping : pocketAccountMappingList) {
-
-            final Long mappingId = mapping.getAsLong();
-
-            PocketAccountMapping pocketAccountMapping = this.pocketAccountMappingRepositoryWrapper
-                    .findByIdAndPocketIdWithNotFoundException(mappingId, pocketId);
-
-            if (pocketAccountMapping != null) {
-                pocketAccounts.add(pocketAccountMapping);
-            }
-        }
-
-        this.pocketAccountMappingRepositoryWrapper.delete(pocketAccounts);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(pocketId).build();
-
-    }
-
+    this.pocketAccountMappingRepositoryWrapper.delete(pocketAccounts);
+    return new CommandProcessingResultBuilder()
+        .withCommandId(command.commandId())
+        .withEntityId(pocketId)
+        .build();
+  }
 }

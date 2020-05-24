@@ -39,82 +39,123 @@ import org.springframework.stereotype.Component;
 @Component
 public final class FinancialActivityAccountDataValidator {
 
-    /**
-     * The parameters supported for this command.
-     */
-    private final Set<String> supportedParameters = FinancialActivityAccountsJsonInputParams.getAllValues();
+  /**
+   * The parameters supported for this command.
+   */
+  private final Set<String> supportedParameters =
+      FinancialActivityAccountsJsonInputParams.getAllValues();
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    private final String paramNameForFinancialActivity = FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue();
-    private final String paramNameForGLAccount = FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue();
+  private final String paramNameForFinancialActivity =
+      FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue();
+  private final String paramNameForGLAccount =
+      FinancialActivityAccountsJsonInputParams.GL_ACCOUNT_ID.getValue();
 
-    @Autowired
-    public FinancialActivityAccountDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public FinancialActivityAccountDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public void validateForCreate(final String json) {
+    validateJSONAndCheckForUnsupportedParams(json);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
+
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    final Integer financialActivityId =
+        this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+            paramNameForFinancialActivity, element);
+    baseDataValidator
+        .reset()
+        .parameter(paramNameForFinancialActivity)
+        .value(financialActivityId)
+        .notNull()
+        .isOneOfTheseValues(
+            FinancialActivity.ASSET_TRANSFER.getValue(),
+            FinancialActivity.LIABILITY_TRANSFER.getValue(),
+            FinancialActivity.CASH_AT_MAINVAULT.getValue(),
+            FinancialActivity.CASH_AT_TELLER.getValue(),
+            FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(),
+            FinancialActivity.ASSET_FUND_SOURCE.getValue(),
+            FinancialActivity.PAYABLE_DIVIDENDS.getValue());
+
+    final Long glAccountId =
+        this.fromApiJsonHelper.extractLongNamed(paramNameForGLAccount, element);
+    baseDataValidator
+        .reset()
+        .parameter(paramNameForGLAccount)
+        .value(glAccountId)
+        .notNull()
+        .integerGreaterThanZero();
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private DataValidatorBuilder getDataValidator(
+      final List<ApiParameterError> dataValidationErrors) {
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("financialactivityaccount");
+    return baseDataValidator;
+  }
+
+  public void validateForUpdate(final String json) {
+    validateJSONAndCheckForUnsupportedParams(json);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
+
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    if (this.fromApiJsonHelper.parameterExists(paramNameForFinancialActivity, element)) {
+      final Integer financialActivityId =
+          this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+              paramNameForFinancialActivity, element);
+      baseDataValidator
+          .reset()
+          .parameter(paramNameForFinancialActivity)
+          .value(financialActivityId)
+          .ignoreIfNull()
+          .isOneOfTheseValues(
+              FinancialActivity.ASSET_TRANSFER.getValue(),
+              FinancialActivity.LIABILITY_TRANSFER.getValue(),
+              FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(),
+              FinancialActivity.ASSET_FUND_SOURCE.getValue(),
+              FinancialActivity.PAYABLE_DIVIDENDS.getValue());
     }
 
-    public void validateForCreate(final String json) {
-        validateJSONAndCheckForUnsupportedParams(json);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final Integer financialActivityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(paramNameForFinancialActivity, element);
-        baseDataValidator.reset().parameter(paramNameForFinancialActivity).value(financialActivityId).notNull().isOneOfTheseValues(
-                FinancialActivity.ASSET_TRANSFER.getValue(), FinancialActivity.LIABILITY_TRANSFER.getValue(),
-                FinancialActivity.CASH_AT_MAINVAULT.getValue(), FinancialActivity.CASH_AT_TELLER.getValue(),
-                FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FinancialActivity.ASSET_FUND_SOURCE.getValue(),
-                FinancialActivity.PAYABLE_DIVIDENDS.getValue());
-
-        final Long glAccountId = this.fromApiJsonHelper.extractLongNamed(paramNameForGLAccount, element);
-        baseDataValidator.reset().parameter(paramNameForGLAccount).value(glAccountId).notNull().integerGreaterThanZero();
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(paramNameForGLAccount, element)) {
+      final Long glAccountId =
+          this.fromApiJsonHelper.extractLongNamed(paramNameForGLAccount, element);
+      baseDataValidator
+          .reset()
+          .parameter(paramNameForGLAccount)
+          .value(glAccountId)
+          .ignoreIfNull()
+          .integerGreaterThanZero();
     }
 
-    private DataValidatorBuilder getDataValidator(final List<ApiParameterError> dataValidationErrors) {
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("financialactivityaccount");
-        return baseDataValidator;
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private void validateJSONAndCheckForUnsupportedParams(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForUpdate(final String json) {
-        validateJSONAndCheckForUnsupportedParams(json);
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+  }
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        if (this.fromApiJsonHelper.parameterExists(paramNameForFinancialActivity, element)) {
-            final Integer financialActivityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(paramNameForFinancialActivity,
-                    element);
-            baseDataValidator.reset().parameter(paramNameForFinancialActivity).value(financialActivityId).ignoreIfNull().isOneOfTheseValues(
-                    FinancialActivity.ASSET_TRANSFER.getValue(), FinancialActivity.LIABILITY_TRANSFER.getValue(),
-                    FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FinancialActivity.ASSET_FUND_SOURCE.getValue(),
-                    FinancialActivity.PAYABLE_DIVIDENDS.getValue());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(paramNameForGLAccount, element)) {
-            final Long glAccountId = this.fromApiJsonHelper.extractLongNamed(paramNameForGLAccount, element);
-            baseDataValidator.reset().parameter(paramNameForGLAccount).value(glAccountId).ignoreIfNull().integerGreaterThanZero();
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
-
-    private void validateJSONAndCheckForUnsupportedParams(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-    }
-
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-    }
-
+  }
 }

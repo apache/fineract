@@ -27,10 +27,10 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecks
 
 public interface EntityDatatableChecksReadService {
 
-    EntityDataTableChecksTemplateData retrieveTemplate();
+  EntityDataTableChecksTemplateData retrieveTemplate();
 
-    List<DatatableData> retrieveTemplates(Long status, String entity, Long productId);
+  List<DatatableData> retrieveTemplates(Long status, String entity, Long productId);
 
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Long status, String entity, Long productLoanId);
-
+  Page<EntityDataTableChecksData> retrieveAll(
+      SearchParameters searchParameters, Long status, String entity, Long productLoanId);
 }

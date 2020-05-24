@@ -55,60 +55,97 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/caches")
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON })
+@Consumes({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON})
 @Component
 @Scope("singleton")
 @Api(tags = {"Cache"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Cache", description = "The following settings are possible for cache:\n" + "\n" + "No Caching: caching turned off\n" + "Single node: caching on for single instance deployments of platorm (works for multiple tenants but only one tomcat)\n" + "By default caching is set to No Caching. Switching between caches results in the cache been clear e.g. from Single node to No cache and back again would clear down the single node cache.")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Cache",
+          description =
+              "The following settings are possible for cache:\n"
+                  + "\n"
+                  + "No Caching: caching turned off\n"
+                  + "Single node: caching on for single instance deployments of platorm (works for"
+                  + " multiple tenants but only one tomcat)\n"
+                  + "By default caching is set to No Caching. Switching between caches results in"
+                  + " the cache been clear e.g. from Single node to No cache and back again would"
+                  + " clear down the single node cache.")
+    })
 public class CacheApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));
-    private final String resourceNameForPermissions = "CACHE";
+  private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));
+  private final String resourceNameForPermissions = "CACHE";
 
-    private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final RuntimeDelegatingCacheManager cacheService;
+  private final PlatformSecurityContext context;
+  private final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final RuntimeDelegatingCacheManager cacheService;
 
-    @Autowired
-    public CacheApiResource(final PlatformSecurityContext context,
-            @Qualifier("runtimeDelegatingCacheManager") final RuntimeDelegatingCacheManager cacheService,
-            final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.cacheService = cacheService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+  @Autowired
+  public CacheApiResource(
+      final PlatformSecurityContext context,
+      @Qualifier("runtimeDelegatingCacheManager") final RuntimeDelegatingCacheManager cacheService,
+      final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.cacheService = cacheService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
 
-    @GET
-    @ApiOperation(value = "Retrieve Cache Types", notes = "Returns the list of caches.\n" + "\n" + "Example Requests:\n" + "\n" + "caches")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CacheApiResourceSwagger.GetCachesResponse.class, responseContainer = "list")})
-    public String retrieveAll(@Context final UriInfo uriInfo) {
+  @GET
+  @ApiOperation(
+      value = "Retrieve Cache Types",
+      notes = "Returns the list of caches.\n" + "\n" + "Example Requests:\n" + "\n" + "caches")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CacheApiResourceSwagger.GetCachesResponse.class,
+        responseContainer = "list")
+  })
+  public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<CacheData> codes = this.cacheService.retrieveAll();
+    final Collection<CacheData> codes = this.cacheService.retrieveAll();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, codes, this.RESPONSE_DATA_PARAMETERS);
-    }
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, codes, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-    @PUT
-    @ApiOperation(value = "Switch Cache", notes = "Switches the cache to chosen one.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CacheApiResourceSwagger.PutCachesRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CacheApiResourceSwagger.PutCachesResponse.class)})
-    public String switchCache(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+  @PUT
+  @ApiOperation(value = "Switch Cache", notes = "Switches the cache to chosen one.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = CacheApiResourceSwagger.PutCachesRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = CacheApiResourceSwagger.PutCachesResponse.class)
+  })
+  public String switchCache(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCache().withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().updateCache().withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

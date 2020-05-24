@@ -22,8 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class MultiDisbursementEmiAmountException extends AbstractPlatformDomainRuleException {
 
-    public MultiDisbursementEmiAmountException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.loanschedule.emi.amount.must.be.greter.than.interest", defaultUserMessage, defaultUserMessageArgs);
-    }
-
+  public MultiDisbursementEmiAmountException(
+      final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg.loanschedule.emi.amount.must.be.greter.than.interest",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

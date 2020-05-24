@@ -25,97 +25,103 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 01/01/18.
  */
 final class PaymentTypeApiResourceSwagger {
-    private PaymentTypeApiResourceSwagger() {
-    }
+  private PaymentTypeApiResourceSwagger() {}
 
-    @ApiModel(value = "GetPaymentTypesResponse")
-    public final static class GetPaymentTypesResponse {
-        private GetPaymentTypesResponse() {
-        }
+  @ApiModel(value = "GetPaymentTypesResponse")
+  public static final class GetPaymentTypesResponse {
+    private GetPaymentTypesResponse() {}
 
-        @ApiModelProperty(example = "24")
-        public Integer id;
-        @ApiModelProperty(example = "PTC")
-        public String name;
-        @ApiModelProperty(example = "Cash")
-        public String description;
-        @ApiModelProperty(example = "true")
-        public Boolean isCashPayment;
-        @ApiModelProperty(example = "0")
-        public Integer position;
-    }
+    @ApiModelProperty(example = "24")
+    public Integer id;
 
-    @ApiModel(value = "GetPaymentTypesPaymentTypeIdResponse")
-    public final static class GetPaymentTypesPaymentTypeIdResponse {
-        private GetPaymentTypesPaymentTypeIdResponse() {
-        }
+    @ApiModelProperty(example = "PTC")
+    public String name;
 
-        @ApiModelProperty(example = "13")
-        public Integer id;
-        @ApiModelProperty(example = "cash")
-        public String name;
-        @ApiModelProperty(example = "cash Payment")
-        public String description;
-        @ApiModelProperty(example = "true")
-        public Boolean isCashPayment;
-        @ApiModelProperty(example = "1")
-        public Integer position;
-    }
+    @ApiModelProperty(example = "Cash")
+    public String description;
 
-    @ApiModel(value = "PostPaymentTypesRequest")
-    public final static class PostPaymentTypesRequest {
-        private PostPaymentTypesRequest() {
-        }
+    @ApiModelProperty(example = "true")
+    public Boolean isCashPayment;
 
-        @ApiModelProperty(example = "cash")
-        public String name;
-        @ApiModelProperty(example = "cash payment type")
-        public String description;
-        @ApiModelProperty(example = "true")
-        public Boolean isCashPayment;
-        @ApiModelProperty(example = "1")
-        public Integer position;
-    }
+    @ApiModelProperty(example = "0")
+    public Integer position;
+  }
 
-    @ApiModel(value = "PostPaymentTypesResponse")
-    public final static class PostPaymentTypesResponse {
-        private PostPaymentTypesResponse() {
-        }
+  @ApiModel(value = "GetPaymentTypesPaymentTypeIdResponse")
+  public static final class GetPaymentTypesPaymentTypeIdResponse {
+    private GetPaymentTypesPaymentTypeIdResponse() {}
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "13")
+    public Integer id;
 
-    @ApiModel(value = "PutPaymentTypesPaymentTypeIdRequest")
-    public final static class PutPaymentTypesPaymentTypeIdRequest {
-        private PutPaymentTypesPaymentTypeIdRequest() {
-        }
+    @ApiModelProperty(example = "cash")
+    public String name;
 
-        @ApiModelProperty(example = "mPay")
-        public String name;
-        @ApiModelProperty(example = "not a cash payment type")
-        public String description;
-        @ApiModelProperty(example = "false")
-        public Boolean isCashPayment;
-        @ApiModelProperty(example = "3")
-        public Integer position;
-    }
+    @ApiModelProperty(example = "cash Payment")
+    public String description;
 
-    @ApiModel(value = "PutPaymentTypesPaymentTypeIdResponse")
-    public final static class PutPaymentTypesPaymentTypeIdResponse {
-        private PutPaymentTypesPaymentTypeIdResponse() {
-        }
+    @ApiModelProperty(example = "true")
+    public Boolean isCashPayment;
 
-        @ApiModelProperty(example = "13")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "1")
+    public Integer position;
+  }
 
-    @ApiModel(value = "DeletePaymentTypesPaymentTypeIdResponse")
-    public final static class DeletePaymentTypesPaymentTypeIdResponse {
-        private DeletePaymentTypesPaymentTypeIdResponse() {
-        }
+  @ApiModel(value = "PostPaymentTypesRequest")
+  public static final class PostPaymentTypesRequest {
+    private PostPaymentTypesRequest() {}
 
-        @ApiModelProperty(example = "13")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "cash")
+    public String name;
+
+    @ApiModelProperty(example = "cash payment type")
+    public String description;
+
+    @ApiModelProperty(example = "true")
+    public Boolean isCashPayment;
+
+    @ApiModelProperty(example = "1")
+    public Integer position;
+  }
+
+  @ApiModel(value = "PostPaymentTypesResponse")
+  public static final class PostPaymentTypesResponse {
+    private PostPaymentTypesResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "PutPaymentTypesPaymentTypeIdRequest")
+  public static final class PutPaymentTypesPaymentTypeIdRequest {
+    private PutPaymentTypesPaymentTypeIdRequest() {}
+
+    @ApiModelProperty(example = "mPay")
+    public String name;
+
+    @ApiModelProperty(example = "not a cash payment type")
+    public String description;
+
+    @ApiModelProperty(example = "false")
+    public Boolean isCashPayment;
+
+    @ApiModelProperty(example = "3")
+    public Integer position;
+  }
+
+  @ApiModel(value = "PutPaymentTypesPaymentTypeIdResponse")
+  public static final class PutPaymentTypesPaymentTypeIdResponse {
+    private PutPaymentTypesPaymentTypeIdResponse() {}
+
+    @ApiModelProperty(example = "13")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "DeletePaymentTypesPaymentTypeIdResponse")
+  public static final class DeletePaymentTypesPaymentTypeIdResponse {
+    private DeletePaymentTypesPaymentTypeIdResponse() {}
+
+    @ApiModelProperty(example = "13")
+    public Integer resourceId;
+  }
 }

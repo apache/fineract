@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "LOAN", action = "REPAYMENT")
 public class LoanRepaymentCommandHandler implements NewCommandSourceHandler {
 
-    private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public LoanRepaymentCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public LoanRepaymentCommandHandler(final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        boolean isRecoveryRepayment = false;
-        return this.writePlatformService.makeLoanRepayment(command.getLoanId(), command, isRecoveryRepayment);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    boolean isRecoveryRepayment = false;
+    return this.writePlatformService.makeLoanRepayment(
+        command.getLoanId(), command, isRecoveryRepayment);
+  }
 }

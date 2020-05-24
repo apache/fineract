@@ -41,12 +41,14 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDeniedException> {
 
-    @Override
-    public Response toResponse(final AccessDeniedException exception) {
-        // Status code 403 really reads as:
-        // "Authenticated - but not authorized":
-        final String defaultUserMessage = exception.getMessage();
-        return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized(defaultUserMessage))
-                .type(MediaType.APPLICATION_JSON).build();
-    }
+  @Override
+  public Response toResponse(final AccessDeniedException exception) {
+    // Status code 403 really reads as:
+    // "Authenticated - but not authorized":
+    final String defaultUserMessage = exception.getMessage();
+    return Response.status(Status.FORBIDDEN)
+        .entity(ApiGlobalErrorResponse.unAuthorized(defaultUserMessage))
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

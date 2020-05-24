@@ -22,17 +22,17 @@ import java.util.List;
 
 public class ResultsetRowData {
 
-    private final List<String> row;
+  private final List<String> row;
 
-    public static ResultsetRowData create(final List<String> rowValues) {
-        return new ResultsetRowData(rowValues);
-    }
+  public static ResultsetRowData create(final List<String> rowValues) {
+    return new ResultsetRowData(rowValues);
+  }
 
-    private ResultsetRowData(final List<String> rowValues) {
-        this.row = rowValues;
-    }
+  private ResultsetRowData(final List<String> rowValues) {
+    this.row = rowValues;
+  }
 
-    public List<String> getRow() {
-        return this.row;
-    }
+  public List<String> getRow() {
+    return this.row;
+  }
 }

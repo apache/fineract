@@ -37,68 +37,80 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 @Table(name = "m_savings_account_interest_rate_slab")
 public class DepositAccountInterestRateChartSlabs extends AbstractPersistableCustom {
 
-    @Embedded
-    private InterestRateChartSlabFields slabFields;
+  @Embedded private InterestRateChartSlabFields slabFields;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "savings_account_interest_rate_chart_id", referencedColumnName = "id", nullable = false)
-    private DepositAccountInterestRateChart depositAccountInterestRateChart;
+  @ManyToOne(optional = false)
+  @JoinColumn(
+      name = "savings_account_interest_rate_chart_id",
+      referencedColumnName = "id",
+      nullable = false)
+  private DepositAccountInterestRateChart depositAccountInterestRateChart;
 
-    @OneToMany(mappedBy = "depositAccountInterestRateChartSlabs", cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
-    private Set<DepositAccountInterestIncentives> interestIncentives = new HashSet<>();
+  @OneToMany(
+      mappedBy = "depositAccountInterestRateChartSlabs",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.EAGER)
+  private Set<DepositAccountInterestIncentives> interestIncentives = new HashSet<>();
 
-    protected DepositAccountInterestRateChartSlabs() {
-        //
+  protected DepositAccountInterestRateChartSlabs() {
+    //
+  }
+
+  private DepositAccountInterestRateChartSlabs(
+      InterestRateChartSlabFields slabFields,
+      DepositAccountInterestRateChart depositAccountInterestRateChart,
+      final Set<DepositAccountInterestIncentives> interestIncentives) {
+    this.slabFields = slabFields;
+    this.depositAccountInterestRateChart = depositAccountInterestRateChart;
+    this.interestIncentives = interestIncentives;
+  }
+
+  public void setDepositAccountInterestRateChart(
+      DepositAccountInterestRateChart depositAccountInterestRateChart) {
+    this.depositAccountInterestRateChart = depositAccountInterestRateChart;
+  }
+
+  public Long savingsProductId() {
+    return this.depositAccountInterestRateChart.savingsAccountId();
+  }
+
+  public InterestRateChartSlabFields slabFields() {
+    return this.slabFields;
+  }
+
+  public static DepositAccountInterestRateChartSlabs from(
+      InterestRateChartSlab interestRateChartSlab,
+      DepositAccountInterestRateChart depositAccountInterestRateChart) {
+    InterestRateChartSlabFields slabFields = interestRateChartSlab.slabFields();
+    Set<DepositAccountInterestIncentives> depositInterestIncentives = new HashSet<>();
+    Set<InterestIncentives> incentives = interestRateChartSlab.setOfInterestIncentives();
+    for (InterestIncentives incentive : incentives) {
+      depositInterestIncentives.add(
+          DepositAccountInterestIncentives.from(null, incentive.interestIncentivesFields()));
     }
+    DepositAccountInterestRateChartSlabs chartSlabs =
+        new DepositAccountInterestRateChartSlabs(
+            slabFields, depositAccountInterestRateChart, depositInterestIncentives);
+    chartSlabs.updateIncentiveReference();
+    return chartSlabs;
+  }
 
-    private DepositAccountInterestRateChartSlabs(InterestRateChartSlabFields slabFields,
-            DepositAccountInterestRateChart depositAccountInterestRateChart, final Set<DepositAccountInterestIncentives> interestIncentives) {
-        this.slabFields = slabFields;
-        this.depositAccountInterestRateChart = depositAccountInterestRateChart;
-        this.interestIncentives = interestIncentives;
+  private void updateIncentiveReference() {
+    final Set<DepositAccountInterestIncentives> incentives = setOfIncentives();
+    for (DepositAccountInterestIncentives depositInterestIncentives : incentives) {
+      depositInterestIncentives.updateDepositAccountInterestRateChartSlabs(this);
     }
+  }
 
-    public void setDepositAccountInterestRateChart(DepositAccountInterestRateChart depositAccountInterestRateChart) {
-        this.depositAccountInterestRateChart = depositAccountInterestRateChart;
+  public Set<DepositAccountInterestIncentives> setOfIncentives() {
+    if (this.interestIncentives == null) {
+      this.interestIncentives = new HashSet<>();
     }
+    return this.interestIncentives;
+  }
 
-    public Long savingsProductId() {
-        return this.depositAccountInterestRateChart.savingsAccountId();
-    }
-
-    public InterestRateChartSlabFields slabFields() {
-        return this.slabFields;
-    }
-
-    public static DepositAccountInterestRateChartSlabs from(InterestRateChartSlab interestRateChartSlab,
-            DepositAccountInterestRateChart depositAccountInterestRateChart) {
-        InterestRateChartSlabFields slabFields = interestRateChartSlab.slabFields();
-        Set<DepositAccountInterestIncentives> depositInterestIncentives = new HashSet<>();
-        Set<InterestIncentives> incentives = interestRateChartSlab.setOfInterestIncentives();
-        for (InterestIncentives incentive : incentives) {
-            depositInterestIncentives.add(DepositAccountInterestIncentives.from(null, incentive.interestIncentivesFields()));
-        }
-        DepositAccountInterestRateChartSlabs chartSlabs = new DepositAccountInterestRateChartSlabs(slabFields,
-                depositAccountInterestRateChart, depositInterestIncentives);
-        chartSlabs.updateIncentiveReference();
-        return chartSlabs;
-    }
-
-    private void updateIncentiveReference() {
-        final Set<DepositAccountInterestIncentives> incentives = setOfIncentives();
-        for (DepositAccountInterestIncentives depositInterestIncentives : incentives) {
-            depositInterestIncentives.updateDepositAccountInterestRateChartSlabs(this);
-        }
-    }
-
-    public Set<DepositAccountInterestIncentives> setOfIncentives() {
-        if (this.interestIncentives == null) {
-            this.interestIncentives = new HashSet<>();
-        }
-        return this.interestIncentives;
-    }
-
-    public void updateChartReference(final DepositAccountInterestRateChart chart) {
-        this.depositAccountInterestRateChart = chart;
-    }
+  public void updateChartReference(final DepositAccountInterestRateChart chart) {
+    this.depositAccountInterestRateChart = chart;
+  }
 }

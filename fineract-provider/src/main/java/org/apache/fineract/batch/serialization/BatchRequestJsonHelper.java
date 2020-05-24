@@ -39,16 +39,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchRequestJsonHelper extends FromJsonHelper {
 
-    /**
-     * Returns a list of batchRequests after de-serializing it from the input
-     * JSON string.
-     *
-     * @param json
-     * @return List&lt;BatchRequest&gt;
-     */
-    public List<BatchRequest> extractList(final String json) {
-        final Type listType = new TypeToken<List<BatchRequest>>() {}.getType();
-        final List<BatchRequest> requests = super.getGsonConverter().fromJson(json, listType);
-        return requests;
-    }
+  /**
+   * Returns a list of batchRequests after de-serializing it from the input
+   * JSON string.
+   *
+   * @param json
+   * @return List&lt;BatchRequest&gt;
+   */
+  public List<BatchRequest> extractList(final String json) {
+    final Type listType = new TypeToken<List<BatchRequest>>() {}.getType();
+    final List<BatchRequest> requests = super.getGsonConverter().fromJson(json, listType);
+    return requests;
+  }
 }

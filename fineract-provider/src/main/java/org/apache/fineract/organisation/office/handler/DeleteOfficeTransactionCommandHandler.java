@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "OFFICETRANSACTION", action = "DELETE")
 public class DeleteOfficeTransactionCommandHandler implements NewCommandSourceHandler {
 
-    private final OfficeWritePlatformService writePlatformService;
+  private final OfficeWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteOfficeTransactionCommandHandler(final OfficeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteOfficeTransactionCommandHandler(
+      final OfficeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteOfficeTransaction(command.entityId(), command);
-    }
+    return this.writePlatformService.deleteOfficeTransaction(command.entityId(), command);
+  }
 }

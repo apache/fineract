@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SHAREPRODUCT", action = "APPROVE_DIVIDEND")
 public class ApproveShareProductDividendCommandHandler implements NewCommandSourceHandler {
 
-    private final ShareProductWritePlatformService shareProductWritePlatformService;
+  private final ShareProductWritePlatformService shareProductWritePlatformService;
 
-    @Autowired
-    public ApproveShareProductDividendCommandHandler(final ShareProductWritePlatformService shareProductWritePlatformService) {
-        this.shareProductWritePlatformService = shareProductWritePlatformService;
-    }
+  @Autowired
+  public ApproveShareProductDividendCommandHandler(
+      final ShareProductWritePlatformService shareProductWritePlatformService) {
+    this.shareProductWritePlatformService = shareProductWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.shareProductWritePlatformService.approveShareProductDividend(jsonCommand.entityId());
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.shareProductWritePlatformService.approveShareProductDividend(
+        jsonCommand.entityId());
+  }
 }

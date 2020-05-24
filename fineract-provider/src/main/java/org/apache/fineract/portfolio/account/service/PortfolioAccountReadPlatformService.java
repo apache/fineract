@@ -24,11 +24,12 @@ import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 
 public interface PortfolioAccountReadPlatformService {
 
-    PortfolioAccountData retrieveOne(Long accountId, Integer accountTypeId);
+  PortfolioAccountData retrieveOne(Long accountId, Integer accountTypeId);
 
-    PortfolioAccountData retrieveOne(Long accountId, Integer accountTypeId, String currencyCode);
+  PortfolioAccountData retrieveOne(Long accountId, Integer accountTypeId, String currencyCode);
 
-    Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO);
+  Collection<PortfolioAccountData> retrieveAllForLookup(
+      final PortfolioAccountDTO portfolioAccountDTO);
 
-    PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId);
+  PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId);
 }

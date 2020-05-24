@@ -23,15 +23,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface SavingsDropdownReadPlatformService {
 
-    Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions();
+  Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions();
 
-    Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions();
+  Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions();
 
-    Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions();
+  Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions();
 
-    Collection<EnumOptionData> retrieveInterestCalculationTypeOptions();
+  Collection<EnumOptionData> retrieveInterestCalculationTypeOptions();
 
-    Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions();
+  Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions();
 
-    Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions();
+  Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions();
 }

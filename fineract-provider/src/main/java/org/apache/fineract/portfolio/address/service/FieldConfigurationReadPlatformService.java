@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 
 public interface FieldConfigurationReadPlatformService {
-    public Collection<FieldConfigurationData> retrieveFieldConfiguration(String entity);
+  public Collection<FieldConfigurationData> retrieveFieldConfiguration(String entity);
 
-    List<FieldConfigurationData> retrieveFieldConfigurationList(String entity);
+  List<FieldConfigurationData> retrieveFieldConfigurationList(String entity);
 }

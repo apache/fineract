@@ -29,21 +29,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GLIMLOAN", action = "UNDODISBURSAL")
-public class UndoGLIMLoanDisbursalCommandHandler implements NewCommandSourceHandler
-{
+public class UndoGLIMLoanDisbursalCommandHandler implements NewCommandSourceHandler {
 
-private final LoanWritePlatformService writePlatformService;
+  private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public UndoGLIMLoanDisbursalCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UndoGLIMLoanDisbursalCommandHandler(final LoanWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.undoGLIMLoanDisbursal(command.entityId(), command);
-    }
-
+    return this.writePlatformService.undoGLIMLoanDisbursal(command.entityId(), command);
+  }
 }

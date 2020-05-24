@@ -30,19 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "FIXEDDEPOSITACCOUNT", action = "DELETE")
-public class FixedDepositAccountApplicationDeletionCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositAccountApplicationDeletionCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+  private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public FixedDepositAccountApplicationDeletionCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public FixedDepositAccountApplicationDeletionCommandHandler(
+      final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.deleteApplication(command.entityId(), DepositAccountType.FIXED_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.deleteApplication(
+        command.entityId(), DepositAccountType.FIXED_DEPOSIT);
+  }
 }

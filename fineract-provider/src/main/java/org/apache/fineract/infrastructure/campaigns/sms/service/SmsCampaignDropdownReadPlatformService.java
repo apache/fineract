@@ -24,16 +24,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface SmsCampaignDropdownReadPlatformService {
 
-    Collection<EnumOptionData> retrieveCampaignTriggerTypes();
+  Collection<EnumOptionData> retrieveCampaignTriggerTypes();
 
-    Collection<SmsProviderData> retrieveSmsProviders();
+  Collection<SmsProviderData> retrieveSmsProviders();
 
-    Collection<EnumOptionData> retrieveCampaignTypes();
+  Collection<EnumOptionData> retrieveCampaignTypes();
 
-    Collection<EnumOptionData> retrieveWeeks();
+  Collection<EnumOptionData> retrieveWeeks();
 
-    Collection<EnumOptionData> retrieveMonths();
+  Collection<EnumOptionData> retrieveMonths();
 
-    Collection<EnumOptionData> retrivePeriodFrequencyTypes();
-
+  Collection<EnumOptionData> retrivePeriodFrequencyTypes();
 }

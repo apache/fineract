@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CODE", action = "CREATE")
 public class CreateCodeCommandHandler implements NewCommandSourceHandler {
 
-    private final CodeWritePlatformService writePlatformService;
+  private final CodeWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateCodeCommandHandler(final CodeWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateCodeCommandHandler(final CodeWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createCode(command);
-    }
+    return this.writePlatformService.createCode(command);
+  }
 }

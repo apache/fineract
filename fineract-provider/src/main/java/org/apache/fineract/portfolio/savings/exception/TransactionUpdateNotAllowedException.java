@@ -23,11 +23,17 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformService
 /**
  * A {@link RuntimeException} thrown when update not allowed.
  */
-public class TransactionUpdateNotAllowedException extends AbstractPlatformServiceUnavailableException {
+public class TransactionUpdateNotAllowedException
+    extends AbstractPlatformServiceUnavailableException {
 
-    public TransactionUpdateNotAllowedException(final Long savingsId, final Long transactionId) {
-        super("error.msg.saving.account.trasaction.update.notallowed",
-                "Savings Account transaction update not allowed with savings identifier " + savingsId + " and trasaction identifier "
-                        + transactionId, savingsId, transactionId);
-    }
+  public TransactionUpdateNotAllowedException(final Long savingsId, final Long transactionId) {
+    super(
+        "error.msg.saving.account.trasaction.update.notallowed",
+        "Savings Account transaction update not allowed with savings identifier "
+            + savingsId
+            + " and trasaction identifier "
+            + transactionId,
+        savingsId,
+        transactionId);
+  }
 }

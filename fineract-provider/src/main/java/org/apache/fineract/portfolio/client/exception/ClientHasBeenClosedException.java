@@ -22,8 +22,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class ClientHasBeenClosedException extends AbstractPlatformDomainRuleException {
 
-    public ClientHasBeenClosedException(final Long clientId) {
-        super("error.msg.client.closed", "Client with identifier " + clientId + " has already been closed");
-    }
-
+  public ClientHasBeenClosedException(final Long clientId) {
+    super(
+        "error.msg.client.closed",
+        "Client with identifier " + clientId + " has already been closed");
+  }
 }

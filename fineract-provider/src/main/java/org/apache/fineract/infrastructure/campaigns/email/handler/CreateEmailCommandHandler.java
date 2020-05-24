@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "EMAIL", action = "CREATE")
 public class CreateEmailCommandHandler implements NewCommandSourceHandler {
 
-    private final EmailWritePlatformService writePlatformService;
+  private final EmailWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateEmailCommandHandler(final EmailWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateEmailCommandHandler(final EmailWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.create(command);
-    }
+    return this.writePlatformService.create(command);
+  }
 }

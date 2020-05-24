@@ -33,48 +33,49 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_interest_incentives")
 public class InterestIncentives extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "interest_rate_slab_id", nullable = false)
-    private InterestRateChartSlab interestRateChartSlab;
+  @ManyToOne
+  @JoinColumn(name = "interest_rate_slab_id", nullable = false)
+  private InterestRateChartSlab interestRateChartSlab;
 
-    @Embedded
-    private InterestIncentivesFields interestIncentivesFields;
+  @Embedded private InterestIncentivesFields interestIncentivesFields;
 
-    protected InterestIncentives() {
+  protected InterestIncentives() {}
 
+  /*
+   * public InterestIncentives(final InterestRateChartSlab
+   * interestRateChartSlab, final InterestIncentivesFields
+   * interestIncentivesFields) { this.interestRateChartSlab =
+   * interestRateChartSlab; this.interestIncentivesFields =
+   * interestIncentivesFields; }
+   */
+
+  public InterestRateChartSlab interestRateChartSlab() {
+    return this.interestRateChartSlab;
+  }
+
+  public void updateInterestRateChartSlab(InterestRateChartSlab interestRateChartSlab) {
+    this.interestRateChartSlab = interestRateChartSlab;
+  }
+
+  public InterestIncentives(
+      final InterestRateChartSlab interestRateChartSlab,
+      final InterestIncentivesFields interestIncentivesFields) {
+    this.interestRateChartSlab = interestRateChartSlab;
+    this.interestIncentivesFields = interestIncentivesFields;
+    if (this.interestRateChartSlab != null) {
+      interestRateChartSlab.addInterestIncentive(this);
     }
+  }
 
-    /*
-     * public InterestIncentives(final InterestRateChartSlab
-     * interestRateChartSlab, final InterestIncentivesFields
-     * interestIncentivesFields) { this.interestRateChartSlab =
-     * interestRateChartSlab; this.interestIncentivesFields =
-     * interestIncentivesFields; }
-     */
+  public void update(
+      final JsonCommand command,
+      final Map<String, Object> actualChanges,
+      final DataValidatorBuilder baseDataValidator,
+      final Locale locale) {
+    this.interestIncentivesFields.update(command, actualChanges, baseDataValidator, locale);
+  }
 
-    public InterestRateChartSlab interestRateChartSlab() {
-        return this.interestRateChartSlab;
-    }
-
-    public void updateInterestRateChartSlab(InterestRateChartSlab interestRateChartSlab) {
-        this.interestRateChartSlab = interestRateChartSlab;
-    }
-
-    public InterestIncentives(final InterestRateChartSlab interestRateChartSlab, final InterestIncentivesFields interestIncentivesFields) {
-        this.interestRateChartSlab = interestRateChartSlab;
-        this.interestIncentivesFields = interestIncentivesFields;
-        if (this.interestRateChartSlab != null) {
-            interestRateChartSlab.addInterestIncentive(this);
-        }
-    }
-
-    public void update(final JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
-            final Locale locale) {
-        this.interestIncentivesFields.update(command, actualChanges, baseDataValidator, locale);
-    }
-
-    public InterestIncentivesFields interestIncentivesFields() {
-        return this.interestIncentivesFields;
-    }
-
+  public InterestIncentivesFields interestIncentivesFields() {
+    return this.interestIncentivesFields;
+  }
 }

@@ -42,92 +42,101 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ShareProductDividendReadPlatformServiceImpl implements ShareProductDividendReadPlatformService {
+public class ShareProductDividendReadPlatformServiceImpl
+    implements ShareProductDividendReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final ColumnValidator columnValidator;
-    private final PaginationHelper<ShareProductDividendPayOutData> paginationHelper = new PaginationHelper<>();
+  private final JdbcTemplate jdbcTemplate;
+  private final ColumnValidator columnValidator;
+  private final PaginationHelper<ShareProductDividendPayOutData> paginationHelper =
+      new PaginationHelper<>();
 
-    @Autowired
-    public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.columnValidator = columnValidator;
+  @Autowired
+  public ShareProductDividendReadPlatformServiceImpl(
+      final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.columnValidator = columnValidator;
+  }
+
+  @Override
+  public Page<ShareProductDividendPayOutData> retriveAll(
+      final Long productId, final Integer status, final SearchParameters searchParameters) {
+    ShareProductDividendMapper shareProductDividendMapper = new ShareProductDividendMapper();
+    final StringBuilder sqlBuilder = new StringBuilder(200);
+    sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+    sqlBuilder.append(shareProductDividendMapper.schema());
+    sqlBuilder.append(" where sp.id = ? ");
+    List<Object> params = new ArrayList<>(2);
+    params.add(productId);
+    if (status != null) {
+      sqlBuilder.append(" and pod.status = ?");
+      params.add(status);
+    }
+    if (searchParameters.isOrderByRequested()) {
+      sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+      this.columnValidator.validateSqlInjection(
+          sqlBuilder.toString(), searchParameters.getOrderBy());
+
+      if (searchParameters.isSortOrderProvided()) {
+        sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+        this.columnValidator.validateSqlInjection(
+            sqlBuilder.toString(), searchParameters.getSortOrder());
+      }
+    }
+
+    if (searchParameters.isLimited()) {
+      sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+      if (searchParameters.isOffset()) {
+        sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+      }
+    }
+
+    final String sqlCountRows = "SELECT FOUND_ROWS()";
+    Object[] paramsObj = params.toArray();
+    return this.paginationHelper.fetchPage(
+        this.jdbcTemplate,
+        sqlCountRows,
+        sqlBuilder.toString(),
+        paramsObj,
+        shareProductDividendMapper);
+  }
+
+  private static final class ShareProductDividendMapper
+      implements RowMapper<ShareProductDividendPayOutData> {
+
+    private final String sql;
+
+    public ShareProductDividendMapper() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(" pod.id as id, pod.amount as amount,");
+      sb.append(" pod.status as status, pod.dividend_period_start_date as startDate,");
+      sb.append(" pod.dividend_period_end_date as endDate,");
+      sb.append(" sp.id as productId,sp.name as productName ");
+      sb.append(" from m_share_product_dividend_pay_out pod");
+      sb.append(" inner join m_share_product sp on sp.id = pod.product_id ");
+      sql = sb.toString();
+    }
+
+    public String schema() {
+      return this.sql;
     }
 
     @Override
-    public Page<ShareProductDividendPayOutData> retriveAll(final Long productId, final Integer status,
-            final SearchParameters searchParameters) {
-        ShareProductDividendMapper shareProductDividendMapper = new ShareProductDividendMapper();
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(shareProductDividendMapper.schema());
-        sqlBuilder.append(" where sp.id = ? ");
-        List<Object> params = new ArrayList<>(2);
-        params.add(productId);
-        if (status != null) {
-            sqlBuilder.append(" and pod.status = ?");
-            params.add(status);
-        }
-        if (searchParameters.isOrderByRequested()) {
-            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+    public ShareProductDividendPayOutData mapRow(
+        ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+      final Long id = rs.getLong("id");
+      final BigDecimal amount = rs.getBigDecimal("amount");
+      final Integer status = JdbcSupport.getInteger(rs, "status");
+      final EnumOptionData statusEnum = SharesEnumerations.ShareProductDividendStatusEnum(status);
+      final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
+      final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
 
-            if (searchParameters.isSortOrderProvided()) {
-                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
-                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
-            }
-        }
+      final Long productId = rs.getLong("productId");
+      final String productName = rs.getString("productName");
 
-        if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
-            if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
-            }
-        }
-
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        Object[] paramsObj = params.toArray();
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramsObj,
-                shareProductDividendMapper);
+      final ShareProductData productData = ShareProductData.lookup(productId, productName);
+      final Collection<ShareAccountDividendData> accountDividendsData = null;
+      return new ShareProductDividendPayOutData(
+          id, productData, amount, startDate, endDate, accountDividendsData, statusEnum);
     }
-
-    private static final class ShareProductDividendMapper implements RowMapper<ShareProductDividendPayOutData> {
-
-        private final String sql;
-
-        public ShareProductDividendMapper() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(" pod.id as id, pod.amount as amount,");
-            sb.append(" pod.status as status, pod.dividend_period_start_date as startDate,");
-            sb.append(" pod.dividend_period_end_date as endDate,");
-            sb.append(" sp.id as productId,sp.name as productName ");
-            sb.append(" from m_share_product_dividend_pay_out pod");
-            sb.append(" inner join m_share_product sp on sp.id = pod.product_id ");
-            sql = sb.toString();
-        }
-
-        public String schema() {
-            return this.sql;
-        }
-
-        @Override
-        public ShareProductDividendPayOutData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-            final Long id = rs.getLong("id");
-            final BigDecimal amount = rs.getBigDecimal("amount");
-            final Integer status = JdbcSupport.getInteger(rs, "status");
-            final EnumOptionData statusEnum = SharesEnumerations.ShareProductDividendStatusEnum(status);
-            final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
-            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
-
-            final Long productId = rs.getLong("productId");
-            final String productName = rs.getString("productName");
-
-            final ShareProductData productData = ShareProductData.lookup(productId, productName);
-            final Collection<ShareAccountDividendData> accountDividendsData = null;
-            return new ShareProductDividendPayOutData(id, productData, amount, startDate, endDate, accountDividendsData, statusEnum);
-        }
-
-    }
-
+  }
 }

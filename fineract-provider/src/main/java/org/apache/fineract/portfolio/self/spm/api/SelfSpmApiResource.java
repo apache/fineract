@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.self.spm.api;
 
 import io.swagger.annotations.Api;
@@ -40,28 +39,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Scope("singleton")
 @Api(tags = {"Self Spm"})
-@SwaggerDefinition(tags = {
-  @Tag(name = "Self Spm", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Self Spm", description = "")})
 public class SelfSpmApiResource {
 
-    private final PlatformSecurityContext securityContext;
-    private final SpmApiResource spmApiResource;
+  private final PlatformSecurityContext securityContext;
+  private final SpmApiResource spmApiResource;
 
-    @Autowired
-    public SelfSpmApiResource(final PlatformSecurityContext securityContext, final SpmApiResource spmApiResource) {
-        this.securityContext = securityContext;
-        this.spmApiResource = spmApiResource;
-    }
+  @Autowired
+  public SelfSpmApiResource(
+      final PlatformSecurityContext securityContext, final SpmApiResource spmApiResource) {
+    this.securityContext = securityContext;
+    this.spmApiResource = spmApiResource;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @Transactional
-    public List<SurveyData> fetchAllSurveys() {
-        securityContext.authenticatedUser();
-        final Boolean isActive = true;
-        return this.spmApiResource.fetchAllSurveys(isActive);
-    }
-
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @Transactional
+  public List<SurveyData> fetchAllSurveys() {
+    securityContext.authenticatedUser();
+    final Boolean isActive = true;
+    return this.spmApiResource.fetchAllSurveys(isActive);
+  }
 }

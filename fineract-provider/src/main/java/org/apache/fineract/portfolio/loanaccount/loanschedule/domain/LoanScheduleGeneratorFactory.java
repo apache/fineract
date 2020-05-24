@@ -22,5 +22,5 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
 public interface LoanScheduleGeneratorFactory {
 
-    LoanScheduleGenerator create(InterestMethod interestMethod);
+  LoanScheduleGenerator create(InterestMethod interestMethod);
 }

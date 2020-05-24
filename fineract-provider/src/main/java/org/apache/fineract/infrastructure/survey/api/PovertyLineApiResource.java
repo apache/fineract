@@ -40,49 +40,55 @@ import org.springframework.stereotype.Component;
 @Api(value = "Poverty Line")
 public class PovertyLineApiResource {
 
-    private final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer;
-    // private final DefaultToApiJsonSerializer<PpiPovertyLineData>
-    // toApiJsonSerializer;
-    private final PlatformSecurityContext context;
-    private final PovertyLineService readService;
+  private final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer;
+  private final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer;
+  // private final DefaultToApiJsonSerializer<PpiPovertyLineData>
+  // toApiJsonSerializer;
+  private final PlatformSecurityContext context;
+  private final PovertyLineService readService;
 
-    @Autowired
-    PovertyLineApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer,
-            final PovertyLineService readService, final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer) {
+  @Autowired
+  PovertyLineApiResource(
+      final PlatformSecurityContext context,
+      final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer,
+      final PovertyLineService readService,
+      final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer) {
 
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.readService = readService;
-        this.likelihoodToApiJsonSerializer = likelihoodToApiJsonSerializer;
+    this.context = context;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.readService = readService;
+    this.likelihoodToApiJsonSerializer = likelihoodToApiJsonSerializer;
+  }
 
-    }
+  @GET
+  @Path("{ppiName}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(@PathParam("ppiName") final String ppiName) {
 
-    @GET
-    @Path("{ppiName}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@PathParam("ppiName") final String ppiName) {
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
 
-        this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
+    PpiPovertyLineData povertyLine = this.readService.retrieveAll(ppiName);
+    return this.toApiJsonSerializer.serialize(povertyLine);
+  }
 
-        PpiPovertyLineData povertyLine = this.readService.retrieveAll(ppiName);
-        return this.toApiJsonSerializer.serialize(povertyLine);
+  @GET
+  @Path("{ppiName}/{likelihoodId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(
+      @PathParam("ppiName") final String ppiName,
+      @PathParam("likelihoodId") final Long likelihoodId) {
 
-    }
+    this.context
+        .authenticatedUser()
+        .validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
 
-    @GET
-    @Path("{ppiName}/{likelihoodId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@PathParam("ppiName") final String ppiName, @PathParam("likelihoodId") final Long likelihoodId) {
+    LikeliHoodPovertyLineData likeliHoodPovertyLineData =
+        this.readService.retrieveForLikelihood(ppiName, likelihoodId);
 
-        this.context.authenticatedUser().validateHasReadPermission(PovertyLineApiConstants.POVERTY_LINE_RESOURCE_NAME);
-
-        LikeliHoodPovertyLineData likeliHoodPovertyLineData = this.readService.retrieveForLikelihood(ppiName, likelihoodId);
-
-        return this.likelihoodToApiJsonSerializer.serialize(likeliHoodPovertyLineData);
-
-    }
-
+    return this.likelihoodToApiJsonSerializer.serialize(likeliHoodPovertyLineData);
+  }
 }

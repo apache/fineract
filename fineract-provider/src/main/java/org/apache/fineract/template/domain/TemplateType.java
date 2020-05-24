@@ -23,35 +23,36 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 @JsonSerialize(using = TemplateTypeSerializer.class)
 public enum TemplateType {
+  @SerializedName("Document")
+  DOCUMENT(0, "Document"),
+  @SerializedName("SMS")
+  SMS(2, "SMS");
 
-    @SerializedName("Document")
-    DOCUMENT(0, "Document"), @SerializedName("SMS")
-    SMS(2, "SMS");
+  /**
+   * @SerializedName("E-Mail") EMAIL(1, "E-Mail")
+   */
+  private int id;
 
-    /**
-     * @SerializedName("E-Mail") EMAIL(1, "E-Mail")
-     */
-    private int id;
-    private String name;
+  private String name;
 
-    private TemplateType(final int id, final String name) {
-        this.id = id;
-        this.name = name;
-    }
+  private TemplateType(final int id, final String name) {
+    this.id = id;
+    this.name = name;
+  }
 
-    public int getId() {
-        return this.id;
-    }
+  public int getId() {
+    return this.id;
+  }
 
-    public void setId(final int id) {
-        this.id = id;
-    }
+  public void setId(final int id) {
+    this.id = id;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 }

@@ -24,12 +24,11 @@ import org.joda.time.LocalDate;
 
 public interface GuarantorDomainService {
 
-    void releaseGuarantor(GuarantorFundingDetails guarantorFundingDetails, LocalDate transactionDate);
+  void releaseGuarantor(GuarantorFundingDetails guarantorFundingDetails, LocalDate transactionDate);
 
-    void validateGuarantorBusinessRules(Loan loan);
+  void validateGuarantorBusinessRules(Loan loan);
 
-    void assignGuarantor(GuarantorFundingDetails guarantorFundingDetails, LocalDate transactionDate);
+  void assignGuarantor(GuarantorFundingDetails guarantorFundingDetails, LocalDate transactionDate);
 
-    void transaferFundsFromGuarantor(Loan loan);
-
+  void transaferFundsFromGuarantor(Loan loan);
 }

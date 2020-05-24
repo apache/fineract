@@ -35,57 +35,56 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpringEventListener implements ApplicationListener<SpringEvent> {
 
-    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+  private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
 
-    private final NotificationWritePlatformService notificationWritePlatformService;
+  private final NotificationWritePlatformService notificationWritePlatformService;
 
-    private final AppUserRepository appUserRepository;
+  private final AppUserRepository appUserRepository;
 
-    @Autowired
-    public SpringEventListener(BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-                                     NotificationWritePlatformService notificationWritePlatformService,
-                                     AppUserRepository appUserRepository) {
-        this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
-        this.notificationWritePlatformService = notificationWritePlatformService;
-        this.appUserRepository = appUserRepository;
+  @Autowired
+  public SpringEventListener(
+      BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+      NotificationWritePlatformService notificationWritePlatformService,
+      AppUserRepository appUserRepository) {
+    this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
+    this.notificationWritePlatformService = notificationWritePlatformService;
+    this.appUserRepository = appUserRepository;
+  }
+
+  @Override
+  public void onApplicationEvent(SpringEvent event) {
+    NotificationData notificationData = event.getNotificationData();
+
+    final FineractPlatformTenant tenant =
+        this.basicAuthTenantDetailsService.loadTenantById(
+            notificationData.getTenantIdentifier(), false);
+    ThreadLocalContextUtil.setTenant(tenant);
+
+    Long appUserId = notificationData.getActor();
+
+    List<Long> userIds = notificationData.getUserIds();
+
+    if (notificationData.getOfficeId() != null) {
+      List<Long> tempUserIds = new ArrayList<>(userIds);
+      for (Long userId : tempUserIds) {
+        AppUser appUser = appUserRepository.findById(userId).get();
+        if (!Objects.equals(appUser.getOffice().getId(), notificationData.getOfficeId())) {
+          userIds.remove(userId);
+        }
+      }
     }
 
-    @Override
-    public void onApplicationEvent(SpringEvent event) {
-        NotificationData notificationData = event.getNotificationData();
-
-        final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService
-                .loadTenantById(notificationData.getTenantIdentifier(), false);
-        ThreadLocalContextUtil.setTenant(tenant);
-
-        Long appUserId = notificationData.getActor();
-
-        List<Long> userIds = notificationData.getUserIds();
-
-        if (notificationData.getOfficeId() != null) {
-            List<Long> tempUserIds = new ArrayList<>(userIds);
-            for (Long userId : tempUserIds) {
-                AppUser appUser = appUserRepository.findById(userId).get();
-                if (!Objects.equals(appUser.getOffice().getId(), notificationData.getOfficeId())) {
-                    userIds.remove(userId);
-                }
-            }
-        }
-
-        if (userIds.contains(appUserId)) {
-            userIds.remove(appUserId);
-        }
-
-        notificationWritePlatformService.notify(
-                userIds,
-                notificationData.getObjectType(),
-                notificationData.getObjectIdentfier(),
-                notificationData.getAction(),
-                notificationData.getActor(),
-                notificationData.getContent(),
-                notificationData.isSystemGenerated()
-        );
-
+    if (userIds.contains(appUserId)) {
+      userIds.remove(appUserId);
     }
 
+    notificationWritePlatformService.notify(
+        userIds,
+        notificationData.getObjectType(),
+        notificationData.getObjectIdentfier(),
+        notificationData.getAction(),
+        notificationData.getActor(),
+        notificationData.getContent(),
+        notificationData.isSystemGenerated());
+  }
 }

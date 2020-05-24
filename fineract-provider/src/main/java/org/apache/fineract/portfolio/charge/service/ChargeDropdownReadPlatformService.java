@@ -23,26 +23,27 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface ChargeDropdownReadPlatformService {
 
-    List<EnumOptionData> retrieveCalculationTypes();
+  List<EnumOptionData> retrieveCalculationTypes();
 
-    List<EnumOptionData> retrieveApplicableToTypes();
+  List<EnumOptionData> retrieveApplicableToTypes();
 
-    List<EnumOptionData> retrieveCollectionTimeTypes();
+  List<EnumOptionData> retrieveCollectionTimeTypes();
 
-    List<EnumOptionData> retrivePaymentModes();
+  List<EnumOptionData> retrivePaymentModes();
 
-    List<EnumOptionData> retrieveLoanCalculationTypes();
+  List<EnumOptionData> retrieveLoanCalculationTypes();
 
-    List<EnumOptionData> retrieveLoanCollectionTimeTypes();
+  List<EnumOptionData> retrieveLoanCollectionTimeTypes();
 
-    List<EnumOptionData> retrieveSavingsCalculationTypes();
+  List<EnumOptionData> retrieveSavingsCalculationTypes();
 
-    List<EnumOptionData> retrieveSavingsCollectionTimeTypes();
-    List<EnumOptionData> retrieveClientCalculationTypes();
+  List<EnumOptionData> retrieveSavingsCollectionTimeTypes();
 
-    List<EnumOptionData> retrieveClientCollectionTimeTypes();
+  List<EnumOptionData> retrieveClientCalculationTypes();
 
-    List<EnumOptionData> retrieveSharesCalculationTypes() ;
-    List<EnumOptionData> retrieveSharesCollectionTimeTypes() ;
+  List<EnumOptionData> retrieveClientCollectionTimeTypes();
 
+  List<EnumOptionData> retrieveSharesCalculationTypes();
+
+  List<EnumOptionData> retrieveSharesCollectionTimeTypes();
 }

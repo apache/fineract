@@ -28,129 +28,135 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/14/17.
  */
 final class TaxGroupApiResourceSwagger {
-    private TaxGroupApiResourceSwagger() {
-    }
+  private TaxGroupApiResourceSwagger() {}
 
-    @ApiModel(value = "GetTaxesGroupResponse")
-    public final static class GetTaxesGroupResponse {
-        private GetTaxesGroupResponse() {
-        }
+  @ApiModel(value = "GetTaxesGroupResponse")
+  public static final class GetTaxesGroupResponse {
+    private GetTaxesGroupResponse() {}
 
-        final class GetTaxesGroupTaxAssociations {
-            private GetTaxesGroupTaxAssociations() {
-            }
+    final class GetTaxesGroupTaxAssociations {
+      private GetTaxesGroupTaxAssociations() {}
 
-            final class GetTaxesGroupTaxComponent {
-                private GetTaxesGroupTaxComponent() {
-                }
-
-                @ApiModelProperty(example = "7")
-                public Integer id;
-                @ApiModelProperty(example = "tax component 2")
-                public String name;
-            }
-
-            @ApiModelProperty(example = "7")
-            public Integer id;
-            public GetTaxesGroupTaxComponent taxComponent;
-            @ApiModelProperty(example = "[2016, 4, 11]")
-            public LocalDate startDate;
-        }
+      final class GetTaxesGroupTaxComponent {
+        private GetTaxesGroupTaxComponent() {}
 
         @ApiModelProperty(example = "7")
         public Integer id;
-        @ApiModelProperty(example = "tax group 1")
+
+        @ApiModelProperty(example = "tax component 2")
         public String name;
-        public Set<GetTaxesGroupTaxAssociations> taxAssociations;
+      }
+
+      @ApiModelProperty(example = "7")
+      public Integer id;
+
+      public GetTaxesGroupTaxComponent taxComponent;
+
+      @ApiModelProperty(example = "[2016, 4, 11]")
+      public LocalDate startDate;
     }
 
-    @ApiModel(value = "PostTaxesGroupRequest")
-    public final static class PostTaxesGroupRequest {
-        private PostTaxesGroupRequest() {
-        }
+    @ApiModelProperty(example = "7")
+    public Integer id;
 
-        final class PostTaxesGroupTaxComponents {
-            private PostTaxesGroupTaxComponents() {
-            }
+    @ApiModelProperty(example = "tax group 1")
+    public String name;
 
-            @ApiModelProperty(example = "7")
-            public Integer taxComponentId;
-            @ApiModelProperty(example = "11 April 2016")
-            public String startDate;
-        }
+    public Set<GetTaxesGroupTaxAssociations> taxAssociations;
+  }
 
-        @ApiModelProperty(example = "tax group 1")
-        public String name;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        public Set<PostTaxesGroupTaxComponents> taxComponents;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
+  @ApiModel(value = "PostTaxesGroupRequest")
+  public static final class PostTaxesGroupRequest {
+    private PostTaxesGroupRequest() {}
+
+    final class PostTaxesGroupTaxComponents {
+      private PostTaxesGroupTaxComponents() {}
+
+      @ApiModelProperty(example = "7")
+      public Integer taxComponentId;
+
+      @ApiModelProperty(example = "11 April 2016")
+      public String startDate;
     }
 
-    @ApiModel(value = "PostTaxesGroupResponse")
-    public static final class PostTaxesGroupResponse {
-        private PostTaxesGroupResponse() {
-        }
+    @ApiModelProperty(example = "tax group 1")
+    public String name;
 
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    public Set<PostTaxesGroupTaxComponents> taxComponents;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+  }
+
+  @ApiModel(value = "PostTaxesGroupResponse")
+  public static final class PostTaxesGroupResponse {
+    private PostTaxesGroupResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "PutTaxesGroupTaxGroupIdRequest")
+  public static final class PutTaxesGroupTaxGroupIdRequest {
+    private PutTaxesGroupTaxGroupIdRequest() {}
+
+    final class PutTaxesGroupTaxComponents {
+      private PutTaxesGroupTaxComponents() {}
+
+      @ApiModelProperty(example = "7")
+      public Integer id;
+
+      @ApiModelProperty(example = "7")
+      public Integer taxComponentId;
+
+      @ApiModelProperty(example = "22 April 2016")
+      public String endDate;
     }
 
-    @ApiModel(value = "PutTaxesGroupTaxGroupIdRequest")
-    public final static class PutTaxesGroupTaxGroupIdRequest {
-        private PutTaxesGroupTaxGroupIdRequest() {
-        }
+    @ApiModelProperty(example = "tax group 2")
+    public String name;
 
-        final class PutTaxesGroupTaxComponents {
-            private PutTaxesGroupTaxComponents() {
-            }
+    @ApiModelProperty(example = "en")
+    public String locale;
 
-            @ApiModelProperty(example = "7")
-            public Integer id;
-            @ApiModelProperty(example = "7")
-            public Integer taxComponentId;
-            @ApiModelProperty(example = "22 April 2016")
-            public String endDate;
-        }
+    public Set<PutTaxesGroupTaxComponents> taxComponents;
 
-        @ApiModelProperty(example = "tax group 2")
-        public String name;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        public Set<PutTaxesGroupTaxComponents> taxComponents;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-    }
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+  }
 
-    @ApiModel(value = "PutTaxesGroupTaxGroupIdResponse")
-    public final static class PutTaxesGroupTaxGroupIdResponse {
-        private PutTaxesGroupTaxGroupIdResponse() {
-        }
+  @ApiModel(value = "PutTaxesGroupTaxGroupIdResponse")
+  public static final class PutTaxesGroupTaxGroupIdResponse {
+    private PutTaxesGroupTaxGroupIdResponse() {}
 
-        final class PutTaxesGroupChanges {
-            private PutTaxesGroupChanges() {
-            }
+    final class PutTaxesGroupChanges {
+      private PutTaxesGroupChanges() {}
 
-            final class PutTaxesGroupModifiedComponents {
-                private PutTaxesGroupModifiedComponents() {
-                }
+      final class PutTaxesGroupModifiedComponents {
+        private PutTaxesGroupModifiedComponents() {}
 
-                @ApiModelProperty(example = "Apr 22, 2016 12:00:00 AM")
-                public String endDate;
-                @ApiModelProperty(example = "7")
-                public Integer taxComponentId;
-            }
-
-            @ApiModelProperty(example = "[6]")
-            public List<Integer> addComponents;
-            public Set<PutTaxesGroupModifiedComponents> modifiedComponents;
-            @ApiModelProperty(example = "tax group 2")
-            public String name;
-        }
+        @ApiModelProperty(example = "Apr 22, 2016 12:00:00 AM")
+        public String endDate;
 
         @ApiModelProperty(example = "7")
-        public Integer resourceId;
-        public PutTaxesGroupChanges changes;
+        public Integer taxComponentId;
+      }
+
+      @ApiModelProperty(example = "[6]")
+      public List<Integer> addComponents;
+
+      public Set<PutTaxesGroupModifiedComponents> modifiedComponents;
+
+      @ApiModelProperty(example = "tax group 2")
+      public String name;
     }
+
+    @ApiModelProperty(example = "7")
+    public Integer resourceId;
+
+    public PutTaxesGroupChanges changes;
+  }
 }

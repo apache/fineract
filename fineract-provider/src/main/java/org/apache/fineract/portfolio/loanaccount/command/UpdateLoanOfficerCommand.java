@@ -31,55 +31,84 @@ import org.joda.time.LocalDate;
  */
 public class UpdateLoanOfficerCommand {
 
-    private final Long fromLoanOfficerId;
-    private final Long toLoanOfficerId;
-    private final LocalDate assignmentDate;
+  private final Long fromLoanOfficerId;
+  private final Long toLoanOfficerId;
+  private final LocalDate assignmentDate;
 
-    private final String[] loans;
+  private final String[] loans;
 
-    public UpdateLoanOfficerCommand(final Long fromLoanOfficerId, final Long toLoanOfficerId, final LocalDate assignmentDate) {
-        this.fromLoanOfficerId = fromLoanOfficerId;
-        this.toLoanOfficerId = toLoanOfficerId;
-        this.assignmentDate = assignmentDate;
-        this.loans = null;
+  public UpdateLoanOfficerCommand(
+      final Long fromLoanOfficerId, final Long toLoanOfficerId, final LocalDate assignmentDate) {
+    this.fromLoanOfficerId = fromLoanOfficerId;
+    this.toLoanOfficerId = toLoanOfficerId;
+    this.assignmentDate = assignmentDate;
+    this.loans = null;
+  }
+
+  public UpdateLoanOfficerCommand(
+      final Long fromLoanOfficerId,
+      final Long toLoanOfficerId,
+      final LocalDate assignmentDate,
+      final String[] loans) {
+    this.fromLoanOfficerId = fromLoanOfficerId;
+    this.toLoanOfficerId = toLoanOfficerId;
+    this.assignmentDate = assignmentDate;
+    this.loans = loans;
+  }
+
+  public void validateForBulkLoanReassignment() {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
+
+    baseDataValidator
+        .reset()
+        .parameter("fromLoanOfficerId")
+        .value(this.fromLoanOfficerId)
+        .notNull()
+        .integerGreaterThanZero();
+    baseDataValidator
+        .reset()
+        .parameter("toLoanOfficerId")
+        .value(this.toLoanOfficerId)
+        .notNull()
+        .integerGreaterThanZero()
+        .notSameAsParameter("fromLoanOfficerId", this.fromLoanOfficerId);
+
+    baseDataValidator.reset().parameter("assignmentDate").value(this.assignmentDate).notNull();
+
+    baseDataValidator.reset().parameter("loans").value(this.loans).arrayNotEmpty();
+
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
+  }
 
-    public UpdateLoanOfficerCommand(final Long fromLoanOfficerId, final Long toLoanOfficerId, final LocalDate assignmentDate,
-            final String[] loans) {
-        this.fromLoanOfficerId = fromLoanOfficerId;
-        this.toLoanOfficerId = toLoanOfficerId;
-        this.assignmentDate = assignmentDate;
-        this.loans = loans;
+  public void validateForLoanReassignment() {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
+
+    baseDataValidator
+        .reset()
+        .parameter("toLoanOfficerId")
+        .value(this.toLoanOfficerId)
+        .notNull()
+        .integerGreaterThanZero()
+        .notSameAsParameter("fromLoanOfficerId", this.fromLoanOfficerId);
+
+    baseDataValidator.reset().parameter("assignmentDate").value(this.assignmentDate).notNull();
+
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(
+          "validation.msg.validation.errors.exist",
+          "Validation errors exist.",
+          dataValidationErrors);
     }
-
-    public void validateForBulkLoanReassignment() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
-
-        baseDataValidator.reset().parameter("fromLoanOfficerId").value(this.fromLoanOfficerId).notNull().integerGreaterThanZero();
-        baseDataValidator.reset().parameter("toLoanOfficerId").value(this.toLoanOfficerId).notNull().integerGreaterThanZero()
-                .notSameAsParameter("fromLoanOfficerId", this.fromLoanOfficerId);
-
-        baseDataValidator.reset().parameter("assignmentDate").value(this.assignmentDate).notNull();
-
-        baseDataValidator.reset().parameter("loans").value(this.loans).arrayNotEmpty();
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-    }
-
-    public void validateForLoanReassignment() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
-
-        baseDataValidator.reset().parameter("toLoanOfficerId").value(this.toLoanOfficerId).notNull().integerGreaterThanZero()
-                .notSameAsParameter("fromLoanOfficerId", this.fromLoanOfficerId);
-
-        baseDataValidator.reset().parameter("assignmentDate").value(this.assignmentDate).notNull();
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-    }
+  }
 }

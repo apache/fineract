@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class StaffNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public StaffNotFoundException(final Long id) {
-        super("error.msg.staff.id.invalid", "Staff with identifier " + id + " does not exist", id);
-    }
+  public StaffNotFoundException(final Long id) {
+    super("error.msg.staff.id.invalid", "Staff with identifier " + id + " does not exist", id);
+  }
 }

@@ -22,5 +22,5 @@ import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 
 public interface MixTaxonomyMappingReadPlatformService {
 
-    MixTaxonomyMappingData retrieveTaxonomyMapping();
+  MixTaxonomyMappingData retrieveTaxonomyMapping();
 }

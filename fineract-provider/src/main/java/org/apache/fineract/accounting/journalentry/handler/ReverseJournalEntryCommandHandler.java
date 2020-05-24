@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "JOURNALENTRY", action = "REVERSE")
 public class ReverseJournalEntryCommandHandler implements NewCommandSourceHandler {
 
-    private final JournalEntryWritePlatformService writePlatformService;
+  private final JournalEntryWritePlatformService writePlatformService;
 
-    @Autowired
-    public ReverseJournalEntryCommandHandler(final JournalEntryWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public ReverseJournalEntryCommandHandler(
+      final JournalEntryWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.revertJournalEntry(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.revertJournalEntry(command);
+  }
 }

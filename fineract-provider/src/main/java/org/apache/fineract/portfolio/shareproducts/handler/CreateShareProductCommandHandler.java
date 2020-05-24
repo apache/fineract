@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SHAREPRODUCT", action = "CREATE")
 public class CreateShareProductCommandHandler implements NewCommandSourceHandler {
 
-    private final ShareProductWritePlatformService shareProductWritePlatformService ;
+  private final ShareProductWritePlatformService shareProductWritePlatformService;
 
-    @Autowired
-    public CreateShareProductCommandHandler(final ShareProductWritePlatformService shareProductWritePlatformService) {
-        this.shareProductWritePlatformService = shareProductWritePlatformService ;
-    }
+  @Autowired
+  public CreateShareProductCommandHandler(
+      final ShareProductWritePlatformService shareProductWritePlatformService) {
+    this.shareProductWritePlatformService = shareProductWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.shareProductWritePlatformService.createShareProduct(jsonCommand);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.shareProductWritePlatformService.createShareProduct(jsonCommand);
+  }
 }

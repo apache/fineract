@@ -38,85 +38,101 @@ import org.springframework.stereotype.Service;
 @Service
 public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
-    private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
+  private final JdbcTemplate jdbcTemplate;
+  private final PlatformSecurityContext context;
+  private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
 
-    @Autowired
-    public BulkLoansReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
-        this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
+  @Autowired
+  public BulkLoansReadPlatformServiceImpl(
+      final PlatformSecurityContext context,
+      final RoutingDataSource dataSource,
+      final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
+    this.context = context;
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
+  }
+
+  @Override
+  public StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(
+      final Long loanOfficerId) {
+
+    this.context.authenticatedUser();
+
+    final StaffClientMapper staffClientMapper = new StaffClientMapper();
+    final String clientSql =
+        "select distinct " + staffClientMapper.schema() + " and c.status_enum=?";
+
+    final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
+    final String groupSql = "select distinct " + staffGroupMapper.schema() + " and g.status_enum=?";
+
+    final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList =
+        this.jdbcTemplate.query(
+            clientSql,
+            staffClientMapper,
+            new Object[] {loanOfficerId, ClientStatus.ACTIVE.getValue()});
+
+    for (final StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary :
+        clientSummaryList) {
+
+      final Collection<LoanAccountSummaryData> clientLoanAccounts =
+          this.accountDetailsReadPlatformService.retrieveClientLoanAccountsByLoanOfficerId(
+              clientSummary.getId(), loanOfficerId);
+
+      clientSummary.setLoans(clientLoanAccounts);
+    }
+
+    final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList =
+        this.jdbcTemplate.query(
+            groupSql,
+            staffGroupMapper,
+            new Object[] {loanOfficerId, GroupingTypeStatus.ACTIVE.getValue()});
+
+    for (final StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary :
+        groupSummaryList) {
+
+      final Collection<LoanAccountSummaryData> groupLoanAccounts =
+          this.accountDetailsReadPlatformService.retrieveGroupLoanAccountsByLoanOfficerId(
+              groupSummary.getId(), loanOfficerId);
+
+      groupSummary.setLoans(groupLoanAccounts);
+    }
+
+    return new StaffAccountSummaryCollectionData(clientSummaryList, groupSummaryList);
+  }
+
+  private static final class StaffClientMapper
+      implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
+
+    public String schema() {
+      return " c.id as id, c.display_name as displayName from m_client c "
+          + " join m_loan l on c.id = l.client_id where l.loan_officer_id = ? ";
     }
 
     @Override
-    public StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(final Long loanOfficerId) {
+    public StaffAccountSummaryCollectionData.LoanAccountSummary mapRow(
+        final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final String displayName = rs.getString("displayName");
 
-        this.context.authenticatedUser();
+      return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, displayName);
+    }
+  }
 
-        final StaffClientMapper staffClientMapper = new StaffClientMapper();
-        final String clientSql = "select distinct " + staffClientMapper.schema() + " and c.status_enum=?";
+  private static final class StaffGroupMapper
+      implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
 
-        final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
-        final String groupSql = "select distinct " + staffGroupMapper.schema() + " and g.status_enum=?";
-
-        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
-                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue() });
-
-        for (final StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
-
-            final Collection<LoanAccountSummaryData> clientLoanAccounts = this.accountDetailsReadPlatformService
-                    .retrieveClientLoanAccountsByLoanOfficerId(clientSummary.getId(), loanOfficerId);
-
-            clientSummary.setLoans(clientLoanAccounts);
-        }
-
-        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql,
-                staffGroupMapper, new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue() });
-
-        for (final StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
-
-            final Collection<LoanAccountSummaryData> groupLoanAccounts = this.accountDetailsReadPlatformService
-                    .retrieveGroupLoanAccountsByLoanOfficerId(groupSummary.getId(), loanOfficerId);
-
-            groupSummary.setLoans(groupLoanAccounts);
-        }
-
-        return new StaffAccountSummaryCollectionData(clientSummaryList, groupSummaryList);
+    public String schema() {
+      return " g.id as id, g.display_name as name from m_group g"
+          + " join m_loan l on g.id = l.group_id where l.loan_officer_id = ? ";
     }
 
-    private static final class StaffClientMapper implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
+    @Override
+    public StaffAccountSummaryCollectionData.LoanAccountSummary mapRow(
+        final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+      final Long id = JdbcSupport.getLong(rs, "id");
+      final String name = rs.getString("name");
 
-        public String schema() {
-            return " c.id as id, c.display_name as displayName from m_client c "
-                    + " join m_loan l on c.id = l.client_id where l.loan_officer_id = ? ";
-        }
-
-        @Override
-        public StaffAccountSummaryCollectionData.LoanAccountSummary mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String displayName = rs.getString("displayName");
-
-            return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, displayName);
-        }
+      return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, name);
     }
-
-    private static final class StaffGroupMapper implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
-
-        public String schema() {
-            return " g.id as id, g.display_name as name from m_group g"
-                    + " join m_loan l on g.id = l.group_id where l.loan_officer_id = ? ";
-        }
-
-        @Override
-        public StaffAccountSummaryCollectionData.LoanAccountSummary mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
-                throws SQLException {
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String name = rs.getString("name");
-
-            return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, name);
-        }
-    }
+  }
 }

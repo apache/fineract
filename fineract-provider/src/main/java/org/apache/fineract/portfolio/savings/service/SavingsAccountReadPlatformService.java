@@ -29,36 +29,46 @@ import org.joda.time.LocalDate;
 
 public interface SavingsAccountReadPlatformService {
 
-    Page<SavingsAccountData> retrieveAll(SearchParameters searchParameters);
+  Page<SavingsAccountData> retrieveAll(SearchParameters searchParameters);
 
-    Collection<SavingsAccountData> retrieveAllForLookup(Long clientId);
+  Collection<SavingsAccountData> retrieveAllForLookup(Long clientId);
 
-    Collection<SavingsAccountData> retrieveActiveForLookup(Long clientId, DepositAccountType depositAccountType);
+  Collection<SavingsAccountData> retrieveActiveForLookup(
+      Long clientId, DepositAccountType depositAccountType);
 
-    public Collection<SavingsAccountData> retrieveActiveForLookup(final Long clientId, DepositAccountType depositAccountType, String currencyCode) ;
+  public Collection<SavingsAccountData> retrieveActiveForLookup(
+      final Long clientId, DepositAccountType depositAccountType, String currencyCode);
 
-    SavingsAccountData retrieveOne(Long savingsId);
+  SavingsAccountData retrieveOne(Long savingsId);
 
-    SavingsAccountData retrieveTemplate(Long clientId, Long groupId, Long productId, boolean staffInSelectedOfficeOnly);
+  SavingsAccountData retrieveTemplate(
+      Long clientId, Long groupId, Long productId, boolean staffInSelectedOfficeOnly);
 
-    SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId, DepositAccountType depositAccountType);
+  SavingsAccountTransactionData retrieveDepositTransactionTemplate(
+      Long savingsId, DepositAccountType depositAccountType);
 
-    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType);
+  Collection<SavingsAccountTransactionData> retrieveAllTransactions(
+      Long savingsId, DepositAccountType depositAccountType);
 
-    // Collection<SavingsAccountAnnualFeeData>
-    // retrieveAccountsWithAnnualFeeDue();
+  // Collection<SavingsAccountAnnualFeeData>
+  // retrieveAccountsWithAnnualFeeDue();
 
-    SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId, DepositAccountType depositAccountType);
+  SavingsAccountTransactionData retrieveSavingsTransaction(
+      Long savingsId, Long transactionId, DepositAccountType depositAccountType);
 
-    Collection<SavingsAccountData> retrieveForLookup(Long clientId, Boolean overdraft);
+  Collection<SavingsAccountData> retrieveForLookup(Long clientId, Boolean overdraft);
 
-    List<Long> retrieveSavingsIdsPendingInactive(LocalDate tenantLocalDate);
+  List<Long> retrieveSavingsIdsPendingInactive(LocalDate tenantLocalDate);
 
-    List<Long> retrieveSavingsIdsPendingDormant(LocalDate tenantLocalDate);
+  List<Long> retrieveSavingsIdsPendingDormant(LocalDate tenantLocalDate);
 
-    List<Long> retrieveSavingsIdsPendingEscheat(LocalDate tenantLocalDate);
-    boolean isAccountBelongsToClient(final Long clientId, final Long accountId, final DepositAccountType depositAccountType, final String currencyCode) ;
+  List<Long> retrieveSavingsIdsPendingEscheat(LocalDate tenantLocalDate);
 
-    String retrieveAccountNumberByAccountId(Long accountId);
+  boolean isAccountBelongsToClient(
+      final Long clientId,
+      final Long accountId,
+      final DepositAccountType depositAccountType,
+      final String currencyCode);
 
+  String retrieveAccountNumberByAccountId(Long accountId);
 }

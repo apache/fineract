@@ -40,128 +40,144 @@ import org.springframework.stereotype.Service;
  * Wrapper around spring security's {@link SecurityContext} for extracted the
  * current authenticated {@link AppUser}.
  */
-
 @Service
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
-    // private final static Logger logger =
-    // LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
+  // private final static Logger logger =
+  // LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
 
-    private final ConfigurationDomainService configurationDomainService;
+  private final ConfigurationDomainService configurationDomainService;
 
-    protected static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>() {
+  protected static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK =
+      new ArrayList<CommandWrapper>() {
 
         {
-            add(new CommandWrapperBuilder().updateUser(null).build());
+          add(new CommandWrapperBuilder().updateUser(null).build());
         }
-    };
+      };
 
-    @Autowired
-    SpringSecurityPlatformSecurityContext(final ConfigurationDomainService configurationDomainService) {
-        this.configurationDomainService = configurationDomainService;
+  @Autowired
+  SpringSecurityPlatformSecurityContext(
+      final ConfigurationDomainService configurationDomainService) {
+    this.configurationDomainService = configurationDomainService;
+  }
+
+  @Override
+  public AppUser authenticatedUser() {
+
+    AppUser currentUser = null;
+    final SecurityContext context = SecurityContextHolder.getContext();
+    if (context != null) {
+      final Authentication auth = context.getAuthentication();
+      if (auth != null) {
+        currentUser = (AppUser) auth.getPrincipal();
+      }
     }
 
-    @Override
-    public AppUser authenticatedUser() {
-
-        AppUser currentUser = null;
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context != null) {
-            final Authentication auth = context.getAuthentication();
-            if (auth != null) {
-                currentUser = (AppUser) auth.getPrincipal();
-            }
-        }
-
-        if (currentUser == null) { throw new UnAuthenticatedUserException(); }
-
-        if (this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId()); }
-
-        return currentUser;
+    if (currentUser == null) {
+      throw new UnAuthenticatedUserException();
     }
 
-    @Override
-    public AppUser getAuthenticatedUserIfPresent() {
-
-        AppUser currentUser = null;
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context != null) {
-            final Authentication auth = context.getAuthentication();
-            if (auth != null) {
-                currentUser = (AppUser) auth.getPrincipal();
-            }
-        }
-
-        if (currentUser == null) { return null; }
-
-        if (this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId()); }
-
-        return currentUser;
+    if (this.doesPasswordHasToBeRenewed(currentUser)) {
+      throw new ResetPasswordException(currentUser.getId());
     }
 
-    @Override
-    public AppUser authenticatedUser(CommandWrapper commandWrapper) {
+    return currentUser;
+  }
 
-        AppUser currentUser = null;
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context != null) {
-            final Authentication auth = context.getAuthentication();
-            if (auth != null) {
-                currentUser = (AppUser) auth.getPrincipal();
-            }
-        }
+  @Override
+  public AppUser getAuthenticatedUserIfPresent() {
 
-        if (currentUser == null) { throw new UnAuthenticatedUserException(); }
-
-        if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(
-                currentUser.getId()); }
-
-        return currentUser;
-
+    AppUser currentUser = null;
+    final SecurityContext context = SecurityContextHolder.getContext();
+    if (context != null) {
+      final Authentication auth = context.getAuthentication();
+      if (auth != null) {
+        currentUser = (AppUser) auth.getPrincipal();
+      }
     }
 
-    @Override
-    public void validateAccessRights(final String resourceOfficeHierarchy) {
-
-        final AppUser user = authenticatedUser();
-        final String userOfficeHierarchy = user.getOffice().getHierarchy();
-
-        if (!resourceOfficeHierarchy.startsWith(userOfficeHierarchy)) { throw new NoAuthorizationException(
-                "The user doesn't have enough permissions to access the resource."); }
-
+    if (currentUser == null) {
+      return null;
     }
 
-    @Override
-    public String officeHierarchy() {
-        return authenticatedUser().getOffice().getHierarchy();
+    if (this.doesPasswordHasToBeRenewed(currentUser)) {
+      throw new ResetPasswordException(currentUser.getId());
     }
 
-    @Override
-    public boolean doesPasswordHasToBeRenewed(AppUser currentUser) {
+    return currentUser;
+  }
 
-        if (this.configurationDomainService.isPasswordForcedResetEnable() && !currentUser.getPasswordNeverExpires()) {
+  @Override
+  public AppUser authenticatedUser(CommandWrapper commandWrapper) {
 
-            Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
-            final Date passWordLastUpdateDate = currentUser.getLastTimePasswordUpdated();
-
-            Calendar c = Calendar.getInstance();
-            c.setTime(passWordLastUpdateDate);
-            c.add(Calendar.DATE, passwordDurationDays.intValue());
-
-            final Date passwordExpirationDate = c.getTime();
-
-            if (DateUtils.getDateOfTenant().after(passwordExpirationDate)) { return true; }
-        }
-        return false;
-
+    AppUser currentUser = null;
+    final SecurityContext context = SecurityContextHolder.getContext();
+    if (context != null) {
+      final Authentication auth = context.getAuthentication();
+      if (auth != null) {
+        currentUser = (AppUser) auth.getPrincipal();
+      }
     }
 
-    private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
-        for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
-            if (commandItem.actionName().equals(commandWrapper.actionName())
-                    && commandItem.getEntityName().equals(commandWrapper.getEntityName())) { return false; }
-        }
+    if (currentUser == null) {
+      throw new UnAuthenticatedUserException();
+    }
+
+    if (this.shouldCheckForPasswordForceReset(commandWrapper)
+        && this.doesPasswordHasToBeRenewed(currentUser)) {
+      throw new ResetPasswordException(currentUser.getId());
+    }
+
+    return currentUser;
+  }
+
+  @Override
+  public void validateAccessRights(final String resourceOfficeHierarchy) {
+
+    final AppUser user = authenticatedUser();
+    final String userOfficeHierarchy = user.getOffice().getHierarchy();
+
+    if (!resourceOfficeHierarchy.startsWith(userOfficeHierarchy)) {
+      throw new NoAuthorizationException(
+          "The user doesn't have enough permissions to access the resource.");
+    }
+  }
+
+  @Override
+  public String officeHierarchy() {
+    return authenticatedUser().getOffice().getHierarchy();
+  }
+
+  @Override
+  public boolean doesPasswordHasToBeRenewed(AppUser currentUser) {
+
+    if (this.configurationDomainService.isPasswordForcedResetEnable()
+        && !currentUser.getPasswordNeverExpires()) {
+
+      Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
+      final Date passWordLastUpdateDate = currentUser.getLastTimePasswordUpdated();
+
+      Calendar c = Calendar.getInstance();
+      c.setTime(passWordLastUpdateDate);
+      c.add(Calendar.DATE, passwordDurationDays.intValue());
+
+      final Date passwordExpirationDate = c.getTime();
+
+      if (DateUtils.getDateOfTenant().after(passwordExpirationDate)) {
         return true;
+      }
     }
+    return false;
+  }
 
+  private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
+    for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
+      if (commandItem.actionName().equals(commandWrapper.actionName())
+          && commandItem.getEntityName().equals(commandWrapper.getEntityName())) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

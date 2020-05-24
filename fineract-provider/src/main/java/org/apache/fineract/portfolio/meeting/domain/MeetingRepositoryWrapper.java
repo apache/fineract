@@ -37,27 +37,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class MeetingRepositoryWrapper {
 
-    private final MeetingRepository repository;
+  private final MeetingRepository repository;
 
-    @Autowired
-    public MeetingRepositoryWrapper(final MeetingRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public MeetingRepositoryWrapper(final MeetingRepository repository) {
+    this.repository = repository;
+  }
 
-    public Meeting findOneWithNotFoundDetection(final Long meetingId) {
-        return this.repository.findById(meetingId)
-                .orElseThrow(() -> new MeetingNotFoundException(meetingId));
-    }
+  public Meeting findOneWithNotFoundDetection(final Long meetingId) {
+    return this.repository
+        .findById(meetingId)
+        .orElseThrow(() -> new MeetingNotFoundException(meetingId));
+  }
 
-    public void save(final Meeting meeting) {
-        this.repository.save(meeting);
-    }
+  public void save(final Meeting meeting) {
+    this.repository.save(meeting);
+  }
 
-    public void delete(final Meeting meeting) {
-        this.repository.delete(meeting);
-    }
+  public void delete(final Meeting meeting) {
+    this.repository.delete(meeting);
+  }
 
-    public void saveAndFlush(final Meeting meeting) {
-        this.repository.saveAndFlush(meeting);
-    }
+  public void saveAndFlush(final Meeting meeting) {
+    this.repository.saveAndFlush(meeting);
+  }
 }

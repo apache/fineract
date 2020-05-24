@@ -25,17 +25,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExternalServicesPropertiesRepositoryWrapper {
 
-    private final ExternalServicesPropertiesRepository repository;
+  private final ExternalServicesPropertiesRepository repository;
 
-    @Autowired
-    public ExternalServicesPropertiesRepositoryWrapper(final ExternalServicesPropertiesRepository repository) {
-        this.repository = repository;
-    }
+  @Autowired
+  public ExternalServicesPropertiesRepositoryWrapper(
+      final ExternalServicesPropertiesRepository repository) {
+    this.repository = repository;
+  }
 
-    public ExternalServicesProperties findOneByIdAndName(Long id, String name, String externalServiceName) {
-        final ExternalServicesProperties externalServicesProperties = this.repository
-                .findOneByExternalServicePropertiesPK(name,id);
-        if (externalServicesProperties == null) throw new ExternalServiceConfigurationNotFoundException(externalServiceName, name);
-        return externalServicesProperties;
-    }
+  public ExternalServicesProperties findOneByIdAndName(
+      Long id, String name, String externalServiceName) {
+    final ExternalServicesProperties externalServicesProperties =
+        this.repository.findOneByExternalServicePropertiesPK(name, id);
+    if (externalServicesProperties == null)
+      throw new ExternalServiceConfigurationNotFoundException(externalServiceName, name);
+    return externalServicesProperties;
+  }
 }

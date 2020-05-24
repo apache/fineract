@@ -33,22 +33,21 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ModifyCashierCommandHandler implements NewCommandSourceHandler {
 
-    private final CashierWritePlatformService writePlatformService;
+  private final CashierWritePlatformService writePlatformService;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param writePlatformService the {@code CashierWritePlatformService} used to access the backend
-     */
-    @Autowired
-    public ModifyCashierCommandHandler(final CashierWritePlatformService writePlatformService) {
-        super();
-        this.writePlatformService = writePlatformService;
-    }
+  /**
+   * Creates a new instance.
+   *
+   * @param writePlatformService the {@code CashierWritePlatformService} used to access the backend
+   */
+  @Autowired
+  public ModifyCashierCommandHandler(final CashierWritePlatformService writePlatformService) {
+    super();
+    this.writePlatformService = writePlatformService;
+  }
 
-
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.modifyCashier(command.entityId(), command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.modifyCashier(command.entityId(), command);
+  }
 }

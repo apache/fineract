@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface InterestRateChartDropdownReadPlatformService {
 
-    Collection<EnumOptionData> retrievePeriodTypeOptions();
+  Collection<EnumOptionData> retrievePeriodTypeOptions();
 }

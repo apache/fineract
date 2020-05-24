@@ -24,18 +24,17 @@ package org.apache.fineract.accounting.journalentry.data;
 @SuppressWarnings("unused")
 public class TransactionTypeEnumData {
 
-    private final Long id;
-    private final String code;
-    private final String value;
+  private final Long id;
+  private final String code;
+  private final String value;
 
-    public TransactionTypeEnumData(final Long id, final String code, final String value) {
-        this.id = id;
-        this.code = code;
-        this.value = value;
-    }
+  public TransactionTypeEnumData(final Long id, final String code, final String value) {
+    this.id = id;
+    this.code = code;
+    this.value = value;
+  }
 
-    public Long id() {
-        return this.id;
-    }
-
+  public Long id() {
+    return this.id;
+  }
 }

@@ -26,8 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class GLAccountDuplicateException extends AbstractPlatformDomainRuleException {
 
-    public GLAccountDuplicateException(final String glCode) {
-        super("error.msg.glaccount.glcode.duplicate", "General Ledger Account with GL code " + glCode + " is already present", glCode);
-    }
-
+  public GLAccountDuplicateException(final String glCode) {
+    super(
+        "error.msg.glaccount.glcode.duplicate",
+        "General Ledger Account with GL code " + glCode + " is already present",
+        glCode);
+  }
 }

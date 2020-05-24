@@ -23,5 +23,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface InteropIdentifierRepository extends JpaRepository<InteropIdentifier, Long>, JpaSpecificationExecutor<InteropIdentifier> {
-}
+public interface InteropIdentifierRepository
+    extends JpaRepository<InteropIdentifier, Long>, JpaSpecificationExecutor<InteropIdentifier> {}

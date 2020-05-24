@@ -26,42 +26,51 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditio
 
 public class LoanProductBorrowerCycleVariationData implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    private final Integer borrowerCycleNumber;
-    private final EnumOptionData paramType;
-    private final EnumOptionData valueConditionType;
-    @SuppressWarnings("unused")
-    private final BigDecimal minValue;
-    @SuppressWarnings("unused")
-    private final BigDecimal maxValue;
-    private final BigDecimal defaultValue;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public LoanProductBorrowerCycleVariationData(final Long id, final Integer borrowerCycleNumber, final EnumOptionData paramType,
-            final EnumOptionData valueConditionType, final BigDecimal defaultValue, final BigDecimal minValue, final BigDecimal maxValue) {
-        this.id = id;
-        this.borrowerCycleNumber = borrowerCycleNumber;
-        this.paramType = paramType;
-        this.valueConditionType = valueConditionType;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.defaultValue = defaultValue;
-    }
+  private final Integer borrowerCycleNumber;
+  private final EnumOptionData paramType;
+  private final EnumOptionData valueConditionType;
 
-    public LoanProductParamType getParamType() {
-        return LoanProductParamType.fromInt(this.paramType.getId().intValue());
-    }
+  @SuppressWarnings("unused")
+  private final BigDecimal minValue;
 
-    public Integer getBorrowerCycleNumber() {
-        return this.borrowerCycleNumber;
-    }
+  @SuppressWarnings("unused")
+  private final BigDecimal maxValue;
 
-    public LoanProductValueConditionType getValueConditionType() {
-        return LoanProductValueConditionType.fromInt(this.valueConditionType.getId().intValue());
-    }
+  private final BigDecimal defaultValue;
 
-    public BigDecimal getDefaultValue() {
-        return this.defaultValue;
-    }
+  public LoanProductBorrowerCycleVariationData(
+      final Long id,
+      final Integer borrowerCycleNumber,
+      final EnumOptionData paramType,
+      final EnumOptionData valueConditionType,
+      final BigDecimal defaultValue,
+      final BigDecimal minValue,
+      final BigDecimal maxValue) {
+    this.id = id;
+    this.borrowerCycleNumber = borrowerCycleNumber;
+    this.paramType = paramType;
+    this.valueConditionType = valueConditionType;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
+    this.defaultValue = defaultValue;
+  }
 
+  public LoanProductParamType getParamType() {
+    return LoanProductParamType.fromInt(this.paramType.getId().intValue());
+  }
+
+  public Integer getBorrowerCycleNumber() {
+    return this.borrowerCycleNumber;
+  }
+
+  public LoanProductValueConditionType getValueConditionType() {
+    return LoanProductValueConditionType.fromInt(this.valueConditionType.getId().intValue());
+  }
+
+  public BigDecimal getDefaultValue() {
+    return this.defaultValue;
+  }
 }

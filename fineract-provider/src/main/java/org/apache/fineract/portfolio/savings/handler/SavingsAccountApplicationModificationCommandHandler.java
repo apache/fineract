@@ -29,19 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "SAVINGSACCOUNT", action = "UPDATE")
-public class SavingsAccountApplicationModificationCommandHandler implements NewCommandSourceHandler {
+public class SavingsAccountApplicationModificationCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
+  private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
-    @Autowired
-    public SavingsAccountApplicationModificationCommandHandler(
-            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
-        this.savingAccountWritePlatformService = savingAccountWritePlatformService;
-    }
+  @Autowired
+  public SavingsAccountApplicationModificationCommandHandler(
+      final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    this.savingAccountWritePlatformService = savingAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingAccountWritePlatformService.modifyApplication(command.entityId(), command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.savingAccountWritePlatformService.modifyApplication(command.entityId(), command);
+  }
 }

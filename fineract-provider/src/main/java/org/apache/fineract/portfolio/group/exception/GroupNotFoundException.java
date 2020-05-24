@@ -25,8 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class GroupNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public GroupNotFoundException(final Long id) {
-        super("error.msg.group.id.invalid", "Group with identifier " + id + " does not exist", id);
-    }
-
+  public GroupNotFoundException(final Long id) {
+    super("error.msg.group.id.invalid", "Group with identifier " + id + " does not exist", id);
+  }
 }

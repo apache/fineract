@@ -28,19 +28,23 @@ import org.slf4j.LoggerFactory;
 
 class MultiExceptionTest {
 
-    Logger logger = LoggerFactory.getLogger(MultiExceptionTest.class);
+  Logger logger = LoggerFactory.getLogger(MultiExceptionTest.class);
 
-    @Test()
-    void testEmpty() throws MultiException {
-        assertThrows(IllegalArgumentException.class, () -> { throw new MultiException(Collections.emptyList()); });
-    }
+  @Test()
+  void testEmpty() throws MultiException {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          throw new MultiException(Collections.emptyList());
+        });
+  }
 
-    @Test()
-    void test() throws MultiException {
-        List<Throwable> causes = List.of(new IllegalArgumentException(), new IllegalStateException());
-        MultiException e = new MultiException(causes);
-        logger.warn("Biep, bieb", e);
-        // Uncomment to see JUnit UI:
-        // throw e;
-    }
+  @Test()
+  void test() throws MultiException {
+    List<Throwable> causes = List.of(new IllegalArgumentException(), new IllegalStateException());
+    MultiException e = new MultiException(causes);
+    logger.warn("Biep, bieb", e);
+    // Uncomment to see JUnit UI:
+    // throw e;
+  }
 }

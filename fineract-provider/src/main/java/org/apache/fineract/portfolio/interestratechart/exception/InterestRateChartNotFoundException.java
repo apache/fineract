@@ -22,7 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class InterestRateChartNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public InterestRateChartNotFoundException(final Long id) {
-        super("error.msg.interest.rate.chart.id.invalid", "Interest rate chart with identifier " + id + " does not exist", id);
-    }
+  public InterestRateChartNotFoundException(final Long id) {
+    super(
+        "error.msg.interest.rate.chart.id.invalid",
+        "Interest rate chart with identifier " + id + " does not exist",
+        id);
+  }
 }

@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "EMAIL_CAMPAIGN", action = "CREATE")
 public class CreateEmailCampaignCommandHandler implements NewCommandSourceHandler {
 
-    private EmailCampaignWritePlatformService emailCampaignWritePlatformService;
+  private EmailCampaignWritePlatformService emailCampaignWritePlatformService;
 
-    @Autowired
-    public CreateEmailCampaignCommandHandler(final EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
-        this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
-    }
+  @Autowired
+  public CreateEmailCampaignCommandHandler(
+      final EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
+    this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.emailCampaignWritePlatformService.create(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.emailCampaignWritePlatformService.create(command);
+  }
 }

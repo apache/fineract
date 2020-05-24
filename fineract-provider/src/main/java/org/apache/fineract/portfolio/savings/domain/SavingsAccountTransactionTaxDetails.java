@@ -32,30 +32,30 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 @Table(name = "m_savings_account_transaction_tax_details")
 public class SavingsAccountTransactionTaxDetails extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "tax_component_id", nullable = false)
-    private TaxComponent taxComponent;
+  @ManyToOne
+  @JoinColumn(name = "tax_component_id", nullable = false)
+  private TaxComponent taxComponent;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+  private BigDecimal amount;
 
-    protected SavingsAccountTransactionTaxDetails() {}
+  protected SavingsAccountTransactionTaxDetails() {}
 
-    public SavingsAccountTransactionTaxDetails(final TaxComponent taxComponent, final BigDecimal amount) {
-        this.taxComponent = taxComponent;
-        this.amount = amount;
-    }
+  public SavingsAccountTransactionTaxDetails(
+      final TaxComponent taxComponent, final BigDecimal amount) {
+    this.taxComponent = taxComponent;
+    this.amount = amount;
+  }
 
-    public TaxComponent getTaxComponent() {
-        return this.taxComponent;
-    }
+  public TaxComponent getTaxComponent() {
+    return this.taxComponent;
+  }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
 
-    public void updateAmount(Money amount) {
-        this.amount = amount.getAmount();
-    }
-
+  public void updateAmount(Money amount) {
+    this.amount = amount.getAmount();
+  }
 }

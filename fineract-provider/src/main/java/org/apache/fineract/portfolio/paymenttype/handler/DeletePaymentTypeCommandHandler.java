@@ -31,16 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PAYMENTTYPE", action = "DELETE")
 public class DeletePaymentTypeCommandHandler implements NewCommandSourceHandler {
 
-    private final PaymentTypeWriteService paymentTypeWriteService;
+  private final PaymentTypeWriteService paymentTypeWriteService;
 
-    @Autowired
-    public DeletePaymentTypeCommandHandler(final PaymentTypeWriteService paymentTypeWriteService) {
-        this.paymentTypeWriteService = paymentTypeWriteService;
-    }
+  @Autowired
+  public DeletePaymentTypeCommandHandler(final PaymentTypeWriteService paymentTypeWriteService) {
+    this.paymentTypeWriteService = paymentTypeWriteService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.paymentTypeWriteService.deletePaymentType(command.entityId());
-    }
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return this.paymentTypeWriteService.deletePaymentType(command.entityId());
+  }
 }

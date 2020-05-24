@@ -33,78 +33,97 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownReadPlatformService {
 
-    @Override
-    public Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions() {
-        final List<EnumOptionData> allowedOptions = Arrays.asList( //
-                SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.FLAT), //
-                SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT) //
-                );
+  @Override
+  public Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions() {
+    final List<EnumOptionData> allowedOptions =
+        Arrays.asList( //
+            SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.FLAT), //
+            SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT) //
+            );
 
-        return allowedOptions;
-    }
+    return allowedOptions;
+  }
 
-    @Override
-    public List<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions() {
-        final List<EnumOptionData> allowedLockinPeriodFrequencyTypeOptions = Arrays.asList( //
-                SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.DAYS), //
-                SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.WEEKS), //
-                SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.MONTHS), //
-                SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.YEARS) //
-                );
+  @Override
+  public List<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions() {
+    final List<EnumOptionData> allowedLockinPeriodFrequencyTypeOptions =
+        Arrays.asList( //
+            SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.DAYS), //
+            SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.WEEKS), //
+            SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.MONTHS), //
+            SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.YEARS) //
+            );
 
-        return allowedLockinPeriodFrequencyTypeOptions;
-    }
+    return allowedLockinPeriodFrequencyTypeOptions;
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions() {
-        final List<EnumOptionData> allowedOptions = Arrays.asList(
-                //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY), //
-                // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY),
-                // //
-                // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY),
-                // //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.MONTHLY),
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY),
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL),
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL)
-        // //
-        // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST)
-        // //
-                );
+  @Override
+  public Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions() {
+    final List<EnumOptionData> allowedOptions =
+        Arrays.asList(
+            //
+            SavingsEnumerations.compoundingInterestPeriodType(
+                SavingsCompoundingInterestPeriodType.DAILY), //
+            // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY),
+            // //
+            // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY),
+            // //
+            SavingsEnumerations.compoundingInterestPeriodType(
+                SavingsCompoundingInterestPeriodType.MONTHLY),
+            SavingsEnumerations.compoundingInterestPeriodType(
+                SavingsCompoundingInterestPeriodType.QUATERLY),
+            SavingsEnumerations.compoundingInterestPeriodType(
+                SavingsCompoundingInterestPeriodType.BI_ANNUAL),
+            SavingsEnumerations.compoundingInterestPeriodType(
+                SavingsCompoundingInterestPeriodType.ANNUAL)
+            // //
+            // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST)
+            // //
+            );
 
-        return allowedOptions;
-    }
+    return allowedOptions;
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions() {
-        final List<EnumOptionData> allowedOptions = Arrays.asList( //
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY), //
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.QUATERLY), //
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.BIANNUAL), //
-                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.ANNUAL) //
-                );
+  @Override
+  public Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions() {
+    final List<EnumOptionData> allowedOptions =
+        Arrays.asList( //
+            SavingsEnumerations.interestPostingPeriodType(
+                SavingsPostingInterestPeriodType.MONTHLY), //
+            SavingsEnumerations.interestPostingPeriodType(
+                SavingsPostingInterestPeriodType.QUATERLY), //
+            SavingsEnumerations.interestPostingPeriodType(
+                SavingsPostingInterestPeriodType.BIANNUAL), //
+            SavingsEnumerations.interestPostingPeriodType(
+                SavingsPostingInterestPeriodType.ANNUAL) //
+            );
 
-        return allowedOptions;
-    }
+    return allowedOptions;
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveInterestCalculationTypeOptions() {
-        final List<EnumOptionData> allowedOptions = Arrays.asList( //
-                SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType.DAILY_BALANCE), //
-                SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE) //
-                );
+  @Override
+  public Collection<EnumOptionData> retrieveInterestCalculationTypeOptions() {
+    final List<EnumOptionData> allowedOptions =
+        Arrays.asList( //
+            SavingsEnumerations.interestCalculationType(
+                SavingsInterestCalculationType.DAILY_BALANCE), //
+            SavingsEnumerations.interestCalculationType(
+                SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE) //
+            );
 
-        return allowedOptions;
-    }
+    return allowedOptions;
+  }
 
-    @Override
-    public Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions() {
-        final List<EnumOptionData> allowedOptions = Arrays.asList( //
-                SavingsEnumerations.interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_360), //
-                SavingsEnumerations.interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_365) //
-                );
+  @Override
+  public Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions() {
+    final List<EnumOptionData> allowedOptions =
+        Arrays.asList( //
+            SavingsEnumerations.interestCalculationDaysInYearType(
+                SavingsInterestCalculationDaysInYearType.DAYS_360), //
+            SavingsEnumerations.interestCalculationDaysInYearType(
+                SavingsInterestCalculationDaysInYearType.DAYS_365) //
+            );
 
-        return allowedOptions;
-    }
+    return allowedOptions;
+  }
 }

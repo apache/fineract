@@ -38,59 +38,65 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements PasswordPreferencesWritePlatformService {
+public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl
+    implements PasswordPreferencesWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(PasswordPreferencesWritePlatformServiceJpaRepositoryImpl.class);
-    private final PasswordValidationPolicyRepository validationRepository;
-    private final PasswordPreferencesDataValidator dataValidator;
+  private static final Logger logger =
+      LoggerFactory.getLogger(PasswordPreferencesWritePlatformServiceJpaRepositoryImpl.class);
+  private final PasswordValidationPolicyRepository validationRepository;
+  private final PasswordPreferencesDataValidator dataValidator;
 
-    @Autowired
-    public PasswordPreferencesWritePlatformServiceJpaRepositoryImpl(final PasswordValidationPolicyRepository validationPolicyRepository,
-            final PasswordPreferencesDataValidator dataValidator) {
-        this.validationRepository = validationPolicyRepository;
-        this.dataValidator = dataValidator;
+  @Autowired
+  public PasswordPreferencesWritePlatformServiceJpaRepositoryImpl(
+      final PasswordValidationPolicyRepository validationPolicyRepository,
+      final PasswordPreferencesDataValidator dataValidator) {
+    this.validationRepository = validationPolicyRepository;
+    this.dataValidator = dataValidator;
+  }
 
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult updatePreferences(final JsonCommand command) {
 
-    @Transactional
-    @Override
-    public CommandProcessingResult updatePreferences(final JsonCommand command) {
+    this.dataValidator.validateForUpdate(command.json());
+    Long validationPolicyId =
+        command.longValueOfParameterNamed(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID);
+    try {
+      final List<PasswordValidationPolicy> validationPolicies = this.validationRepository.findAll();
 
-        this.dataValidator.validateForUpdate(command.json());
-        Long validationPolicyId = command.longValueOfParameterNamed(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID);
-        try {
-            final List<PasswordValidationPolicy> validationPolicies = this.validationRepository.findAll();
+      Map<String, Object> changes = new HashMap<>(1);
 
-            Map<String, Object> changes = new HashMap<>(1);
+      boolean found = false;
 
-            boolean found = false;
-
-            for (PasswordValidationPolicy policy : validationPolicies) {
-                if (policy.getId().equals(validationPolicyId)) {
-                    found = true;
-                    if (!policy.isActive()) {
-                        changes = policy.activate();
-                    }
-                } else if (policy.isActive() && !policy.getId().equals(validationPolicyId)) {
-                    policy.deActivate();
-                }
-            }
-
-            if (!found) { throw new PasswordValidationPolicyNotFoundException(validationPolicyId); }
-
-            if (!changes.isEmpty()) {
-                this.validationRepository.saveAll(validationPolicies);
-                this.validationRepository.flush();
-            }
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .with(changes) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            logger.error("Error occured.", dve);
-            throw new PlatformDataIntegrityException("error.msg.password.validation.policy.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+      for (PasswordValidationPolicy policy : validationPolicies) {
+        if (policy.getId().equals(validationPolicyId)) {
+          found = true;
+          if (!policy.isActive()) {
+            changes = policy.activate();
+          }
+        } else if (policy.isActive() && !policy.getId().equals(validationPolicyId)) {
+          policy.deActivate();
         }
+      }
+
+      if (!found) {
+        throw new PasswordValidationPolicyNotFoundException(validationPolicyId);
+      }
+
+      if (!changes.isEmpty()) {
+        this.validationRepository.saveAll(validationPolicies);
+        this.validationRepository.flush();
+      }
+
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .with(changes) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      logger.error("Error occured.", dve);
+      throw new PlatformDataIntegrityException(
+          "error.msg.password.validation.policy.unknown.data.integrity.issue",
+          "Unknown data integrity issue with resource.");
     }
+  }
 }

@@ -29,17 +29,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreateDatatableCommandHandler implements NewCommandSourceHandler {
 
-    private final ReadWriteNonCoreDataService writePlatformService;
+  private final ReadWriteNonCoreDataService writePlatformService;
 
-    @Autowired
-    public CreateDatatableCommandHandler(final ReadWriteNonCoreDataService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateDatatableCommandHandler(final ReadWriteNonCoreDataService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createDatatable(command);
-    }
+    return this.writePlatformService.createDatatable(command);
+  }
 }

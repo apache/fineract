@@ -29,16 +29,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DeleteNoteCommandHandler implements NewCommandSourceHandler {
 
-    private final NoteWritePlatformService writePlatformService;
+  private final NoteWritePlatformService writePlatformService;
 
-    @Autowired
-    public DeleteNoteCommandHandler(final NoteWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteNoteCommandHandler(final NoteWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteNote(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.deleteNote(command);
+  }
 }

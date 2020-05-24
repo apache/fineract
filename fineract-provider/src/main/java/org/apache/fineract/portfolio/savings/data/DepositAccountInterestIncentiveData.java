@@ -24,51 +24,82 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestIncentiveDat
 
 public class DepositAccountInterestIncentiveData {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final EnumOptionData entityType;
-    @SuppressWarnings("unused")
-    private final EnumOptionData attributeName;
-    @SuppressWarnings("unused")
-    private final EnumOptionData conditionType;
-    @SuppressWarnings("unused")
-    private final String attributeValue;
-    @SuppressWarnings("unused")
-    private final String attributeValueDesc;
-    @SuppressWarnings("unused")
-    private final EnumOptionData incentiveType;
-    @SuppressWarnings("unused")
-    private final BigDecimal amount;
+  @SuppressWarnings("unused")
+  private final Long id;
 
-    public static DepositAccountInterestIncentiveData instance(final Long id, final EnumOptionData entityType,
-            final EnumOptionData attributeName, final EnumOptionData conditionType, final String attributeValue,
-            final String attributeValueDesc, final EnumOptionData incentiveType, final BigDecimal amount) {
+  @SuppressWarnings("unused")
+  private final EnumOptionData entityType;
 
-        return new DepositAccountInterestIncentiveData(id, entityType, attributeName, conditionType, attributeValue, attributeValueDesc,
-                incentiveType, amount);
-    }
+  @SuppressWarnings("unused")
+  private final EnumOptionData attributeName;
 
-    public static DepositAccountInterestIncentiveData from(final InterestIncentiveData incentiveData) {
-        final Long id = null;
-        return new DepositAccountInterestIncentiveData(id, incentiveData.entityType(), incentiveData.attributeName(),
-                incentiveData.conditionType(), incentiveData.attributeValue(), incentiveData.attributeValueDesc(),
-                incentiveData.incentiveType(), incentiveData.amount());
-    }
+  @SuppressWarnings("unused")
+  private final EnumOptionData conditionType;
 
-    private DepositAccountInterestIncentiveData(final Long id, final EnumOptionData entityType, final EnumOptionData attributeName,
-            final EnumOptionData conditionType, final String attributeValue, final String attributeValueDesc,
-            final EnumOptionData incentiveType, final BigDecimal amount) {
+  @SuppressWarnings("unused")
+  private final String attributeValue;
 
-        this.id = id;
-        this.entityType = entityType;
-        this.attributeName = attributeName;
-        this.conditionType = conditionType;
-        this.attributeValue = attributeValue;
-        this.attributeValueDesc = attributeValueDesc;
-        this.incentiveType = incentiveType;
-        this.amount = amount;
+  @SuppressWarnings("unused")
+  private final String attributeValueDesc;
 
-    }
+  @SuppressWarnings("unused")
+  private final EnumOptionData incentiveType;
 
+  @SuppressWarnings("unused")
+  private final BigDecimal amount;
+
+  public static DepositAccountInterestIncentiveData instance(
+      final Long id,
+      final EnumOptionData entityType,
+      final EnumOptionData attributeName,
+      final EnumOptionData conditionType,
+      final String attributeValue,
+      final String attributeValueDesc,
+      final EnumOptionData incentiveType,
+      final BigDecimal amount) {
+
+    return new DepositAccountInterestIncentiveData(
+        id,
+        entityType,
+        attributeName,
+        conditionType,
+        attributeValue,
+        attributeValueDesc,
+        incentiveType,
+        amount);
+  }
+
+  public static DepositAccountInterestIncentiveData from(
+      final InterestIncentiveData incentiveData) {
+    final Long id = null;
+    return new DepositAccountInterestIncentiveData(
+        id,
+        incentiveData.entityType(),
+        incentiveData.attributeName(),
+        incentiveData.conditionType(),
+        incentiveData.attributeValue(),
+        incentiveData.attributeValueDesc(),
+        incentiveData.incentiveType(),
+        incentiveData.amount());
+  }
+
+  private DepositAccountInterestIncentiveData(
+      final Long id,
+      final EnumOptionData entityType,
+      final EnumOptionData attributeName,
+      final EnumOptionData conditionType,
+      final String attributeValue,
+      final String attributeValueDesc,
+      final EnumOptionData incentiveType,
+      final BigDecimal amount) {
+
+    this.id = id;
+    this.entityType = entityType;
+    this.attributeName = attributeName;
+    this.conditionType = conditionType;
+    this.attributeValue = attributeValue;
+    this.attributeValueDesc = attributeValueDesc;
+    this.incentiveType = incentiveType;
+    this.amount = amount;
+  }
 }

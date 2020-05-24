@@ -27,52 +27,65 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WorkingDaysHelper {
-    private final static Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
-    private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
+  private static final Logger LOG = LoggerFactory.getLogger(WorkingDaysHelper.class);
+  private static final String WORKINGDAYS_URL = "/fineract-provider/api/v1/workingdays";
 
-    public static Object updateWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("---------------------------------UPDATE WORKINGDAY---------------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
-    }
+  public static Object updateWorkingDays(
+      final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
+    LOG.info(
+        "---------------------------------UPDATE"
+            + " WORKINGDAY---------------------------------------------");
+    return Utils.performServerPut(
+        requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDaysAsJson(), "");
+  }
 
-    public static Object updateWorkingDaysWithWrongRecurrence(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, String jsonAttributeToGetback) {
-        final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("---------------------------------UPDATE WORKINGDAY WITH WRONG RECURRENCE-----------------------------------------");
-        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_WORKINGDAYS_URL, updateWorkingDayWithWrongRecur(),
-                jsonAttributeToGetback);
-    }
+  public static Object updateWorkingDaysWithWrongRecurrence(
+      final RequestSpecification requestSpec,
+      final ResponseSpecification responseSpec,
+      String jsonAttributeToGetback) {
+    final String UPDATE_WORKINGDAYS_URL = WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER;
+    LOG.info(
+        "---------------------------------UPDATE WORKINGDAY WITH WRONG"
+            + " RECURRENCE-----------------------------------------");
+    return Utils.performServerPut(
+        requestSpec,
+        responseSpec,
+        UPDATE_WORKINGDAYS_URL,
+        updateWorkingDayWithWrongRecur(),
+        jsonAttributeToGetback);
+  }
 
-    public static String updateWorkingDaysAsJson() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
-        map.put("locale", "en");
-        map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
-        map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}" , map);
-        return new Gson().toJson(map);
-    }
+  public static String updateWorkingDaysAsJson() {
+    final HashMap<String, Object> map = new HashMap<>();
+    map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
+    map.put("locale", "en");
+    map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
+    map.put("extendTermForDailyRepayments", false);
+    LOG.info("map :  {}", map);
+    return new Gson().toJson(map);
+  }
 
-    public static String updateWorkingDayWithWrongRecur() {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH");
-        map.put("locale", "en");
-        map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
-        map.put("extendTermForDailyRepayments", false);
-        LOG.info("map :  {}" , map);
-        return new Gson().toJson(map);
-    }
+  public static String updateWorkingDayWithWrongRecur() {
+    final HashMap<String, Object> map = new HashMap<>();
+    map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH");
+    map.put("locale", "en");
+    map.put("repaymentRescheduleType", new Random().nextInt(4) + 1);
+    map.put("extendTermForDailyRepayments", false);
+    LOG.info("map :  {}", map);
+    return new Gson().toJson(map);
+  }
 
-    public static int workingDaysId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        HashMap<String, Object> workingDays = getAllWorkingDays(requestSpec, responseSpec);
-        return (int) workingDays.get("id");
-    }
+  public static int workingDaysId(
+      final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    HashMap<String, Object> workingDays = getAllWorkingDays(requestSpec, responseSpec);
+    return (int) workingDays.get("id");
+  }
 
-    public static HashMap<String, Object> getAllWorkingDays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+  public static HashMap<String, Object> getAllWorkingDays(
+      final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
 
-        return Utils.performServerGet(requestSpec, responseSpec, WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER, "");
-
-    }
-
+    return Utils.performServerGet(
+        requestSpec, responseSpec, WORKINGDAYS_URL + "?" + Utils.TENANT_IDENTIFIER, "");
+  }
 }

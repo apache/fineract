@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface AppUserWritePlatformService {
 
-    CommandProcessingResult createUser(JsonCommand command);
+  CommandProcessingResult createUser(JsonCommand command);
 
-    CommandProcessingResult updateUser(Long userId, JsonCommand command);
+  CommandProcessingResult updateUser(Long userId, JsonCommand command);
 
-    CommandProcessingResult deleteUser(Long userId);
+  CommandProcessingResult deleteUser(Long userId);
 }

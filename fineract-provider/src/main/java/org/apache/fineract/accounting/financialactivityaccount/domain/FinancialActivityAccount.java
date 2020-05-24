@@ -31,39 +31,40 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "acc_gl_financial_activity_account")
 public class FinancialActivityAccount extends AbstractPersistableCustom {
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "gl_account_id")
-    private GLAccount glAccount;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "gl_account_id")
+  private GLAccount glAccount;
 
-    @Column(name = "financial_activity_type", nullable = false)
-    private Integer financialActivityType;
+  @Column(name = "financial_activity_type", nullable = false)
+  private Integer financialActivityType;
 
-    public static FinancialActivityAccount createNew(final GLAccount glAccount, final Integer financialAccountType) {
-        return new FinancialActivityAccount(glAccount, financialAccountType);
-    }
+  public static FinancialActivityAccount createNew(
+      final GLAccount glAccount, final Integer financialAccountType) {
+    return new FinancialActivityAccount(glAccount, financialAccountType);
+  }
 
-    protected FinancialActivityAccount() {
-        //
-    }
+  protected FinancialActivityAccount() {
+    //
+  }
 
-    private FinancialActivityAccount(final GLAccount glAccount, final int financialAccountType) {
-        this.glAccount = glAccount;
-        this.financialActivityType = financialAccountType;
-    }
+  private FinancialActivityAccount(final GLAccount glAccount, final int financialAccountType) {
+    this.glAccount = glAccount;
+    this.financialActivityType = financialAccountType;
+  }
 
-    public GLAccount getGlAccount() {
-        return this.glAccount;
-    }
+  public GLAccount getGlAccount() {
+    return this.glAccount;
+  }
 
-    public Integer getFinancialActivityType() {
-        return this.financialActivityType;
-    }
+  public Integer getFinancialActivityType() {
+    return this.financialActivityType;
+  }
 
-    public void updateGlAccount(final GLAccount glAccount) {
-        this.glAccount = glAccount;
-    }
+  public void updateGlAccount(final GLAccount glAccount) {
+    this.glAccount = glAccount;
+  }
 
-    public void updateFinancialActivityType(final Integer financialActivityType) {
-        this.financialActivityType = financialActivityType;
-    }
+  public void updateFinancialActivityType(final Integer financialActivityType) {
+    this.financialActivityType = financialActivityType;
+  }
 }

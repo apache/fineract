@@ -30,23 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by Cieyou on 3/12/14.
  */
-
 @Service
 @CommandType(entity = "LIKELIHOOD", action = "UPDATE")
 public class UpdateLikelihoodCommandHandler implements NewCommandSourceHandler {
 
+  private final WriteLikelihoodService writePlatformService;
 
-    private final WriteLikelihoodService writePlatformService;
+  @Autowired
+  public UpdateLikelihoodCommandHandler(final WriteLikelihoodService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Autowired
-    public UpdateLikelihoodCommandHandler(final WriteLikelihoodService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.update(command.entityId(), command);
-    }
+    return this.writePlatformService.update(command.entityId(), command);
+  }
 }

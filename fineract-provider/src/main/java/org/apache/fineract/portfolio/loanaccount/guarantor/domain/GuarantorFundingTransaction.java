@@ -33,40 +33,41 @@ import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransact
 @Table(name = "m_guarantor_transaction")
 public class GuarantorFundingTransaction extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "guarantor_fund_detail_id", nullable = false)
-    private GuarantorFundingDetails guarantorFundingDetails;
+  @ManyToOne
+  @JoinColumn(name = "guarantor_fund_detail_id", nullable = false)
+  private GuarantorFundingDetails guarantorFundingDetails;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_transaction_id", nullable = true)
-    private LoanTransaction loanTransaction;
+  @ManyToOne
+  @JoinColumn(name = "loan_transaction_id", nullable = true)
+  private LoanTransaction loanTransaction;
 
-    @OneToOne
-    @JoinColumn(name = "deposit_on_hold_transaction_id", nullable = false)
-    private DepositAccountOnHoldTransaction depositAccountOnHoldTransaction;
+  @OneToOne
+  @JoinColumn(name = "deposit_on_hold_transaction_id", nullable = false)
+  private DepositAccountOnHoldTransaction depositAccountOnHoldTransaction;
 
-    @Column(name = "is_reversed", nullable = false)
-    private boolean reversed;
+  @Column(name = "is_reversed", nullable = false)
+  private boolean reversed;
 
-    protected GuarantorFundingTransaction() {}
+  protected GuarantorFundingTransaction() {}
 
-    public GuarantorFundingTransaction(final GuarantorFundingDetails guarantorFundingDetails, final LoanTransaction loanTransaction,
-            final DepositAccountOnHoldTransaction depositAccountOnHoldTransaction) {
-        this.depositAccountOnHoldTransaction = depositAccountOnHoldTransaction;
-        this.guarantorFundingDetails = guarantorFundingDetails;
-        this.loanTransaction = loanTransaction;
-        this.reversed = false;
+  public GuarantorFundingTransaction(
+      final GuarantorFundingDetails guarantorFundingDetails,
+      final LoanTransaction loanTransaction,
+      final DepositAccountOnHoldTransaction depositAccountOnHoldTransaction) {
+    this.depositAccountOnHoldTransaction = depositAccountOnHoldTransaction;
+    this.guarantorFundingDetails = guarantorFundingDetails;
+    this.loanTransaction = loanTransaction;
+    this.reversed = false;
+  }
+
+  public void reverseTransaction() {
+    if (!this.reversed) {
+      this.reversed = true;
+      BigDecimal amountForReverse = this.depositAccountOnHoldTransaction.getAmount();
+      this.depositAccountOnHoldTransaction.reverseTransaction();
+      if (this.depositAccountOnHoldTransaction.getTransactionType().isRelease()) {
+        this.guarantorFundingDetails.undoReleaseFunds(amountForReverse);
+      }
     }
-
-    public void reverseTransaction() {
-        if (!this.reversed) {
-            this.reversed = true;
-            BigDecimal amountForReverse = this.depositAccountOnHoldTransaction.getAmount();
-            this.depositAccountOnHoldTransaction.reverseTransaction();
-            if (this.depositAccountOnHoldTransaction.getTransactionType().isRelease()) {
-                this.guarantorFundingDetails.undoReleaseFunds(amountForReverse);
-            }
-        }
-    }
-
+  }
 }

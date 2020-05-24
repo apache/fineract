@@ -23,6 +23,5 @@ import org.apache.fineract.mix.data.XBRLData;
 
 public interface XBRLResultService {
 
-    XBRLData getXBRLResult(Date startDate, Date endDate, String currency);
-
+  XBRLData getXBRLResult(Date startDate, Date endDate, String currency);
 }

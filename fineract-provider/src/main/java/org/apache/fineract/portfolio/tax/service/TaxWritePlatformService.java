@@ -23,12 +23,11 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface TaxWritePlatformService {
 
-    public CommandProcessingResult createTaxComponent(JsonCommand command);
+  public CommandProcessingResult createTaxComponent(JsonCommand command);
 
-    public CommandProcessingResult updateTaxComponent(final Long id, final JsonCommand command);
+  public CommandProcessingResult updateTaxComponent(final Long id, final JsonCommand command);
 
-    public CommandProcessingResult createTaxGroup(JsonCommand command);
+  public CommandProcessingResult createTaxGroup(JsonCommand command);
 
-    public CommandProcessingResult updateTaxGroup(final Long id, final JsonCommand command);
-
+  public CommandProcessingResult updateTaxGroup(final Long id, final JsonCommand command);
 }

@@ -42,34 +42,42 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Cashier Journals"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Cashier Journals", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Cashier Journals", description = "")})
 public class TellerJournalApiResource {
 
-    private final PlatformSecurityContext securityContext;
-    private final DefaultToApiJsonSerializer<TellerData> jsonSerializer;
-    private final TellerManagementReadPlatformService readPlatformService;
+  private final PlatformSecurityContext securityContext;
+  private final DefaultToApiJsonSerializer<TellerData> jsonSerializer;
+  private final TellerManagementReadPlatformService readPlatformService;
 
-    @Autowired
-    public TellerJournalApiResource(final PlatformSecurityContext securityContext,
-            final DefaultToApiJsonSerializer<TellerData> jsonSerializer, final TellerManagementReadPlatformService readPlatformService) {
-        super();
-        this.securityContext = securityContext;
-        this.jsonSerializer = jsonSerializer;
-        this.readPlatformService = readPlatformService;
-    }
+  @Autowired
+  public TellerJournalApiResource(
+      final PlatformSecurityContext securityContext,
+      final DefaultToApiJsonSerializer<TellerData> jsonSerializer,
+      final TellerManagementReadPlatformService readPlatformService) {
+    super();
+    this.securityContext = securityContext;
+    this.jsonSerializer = jsonSerializer;
+    this.readPlatformService = readPlatformService;
+  }
 
-    @GET
-    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getJournalData(@QueryParam("officeId") final Long officeId, @QueryParam("tellerId") final Long tellerId,
-            @QueryParam("cashierId") final Long cashierId, @QueryParam("dateRange") final String dateRange) {
-        final DateRange dateRangeHolder = DateRange.fromString(dateRange);
+  @GET
+  @Consumes({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
+  @Produces(MediaType.APPLICATION_JSON)
+  public String getJournalData(
+      @QueryParam("officeId") final Long officeId,
+      @QueryParam("tellerId") final Long tellerId,
+      @QueryParam("cashierId") final Long cashierId,
+      @QueryParam("dateRange") final String dateRange) {
+    final DateRange dateRangeHolder = DateRange.fromString(dateRange);
 
-        final Collection<TellerJournalData> journals = this.readPlatformService.getJournals(officeId, tellerId, cashierId,
-                dateRangeHolder.getStartDate(), dateRangeHolder.getEndDate());
+    final Collection<TellerJournalData> journals =
+        this.readPlatformService.getJournals(
+            officeId,
+            tellerId,
+            cashierId,
+            dateRangeHolder.getStartDate(),
+            dateRangeHolder.getEndDate());
 
-        return this.jsonSerializer.serialize(journals);
-    }
+    return this.jsonSerializer.serialize(journals);
+  }
 }

@@ -41,35 +41,42 @@ import org.springframework.stereotype.Component;
  * {@link CollateralCommand}'s.
  */
 @Component
-public final class CollateralCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<CollateralCommand> {
+public final class CollateralCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<CollateralCommand> {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public CollateralCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public CollateralCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  @Override
+  public CollateralCommand commandFromApiJson(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public CollateralCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    final Set<String> supportedParameters = CollateralJSONinputParams.getAllValues();
+    supportedParameters.add("locale");
+    supportedParameters.add("dateFormat");
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Set<String> supportedParameters = CollateralJSONinputParams.getAllValues();
-        supportedParameters.add("locale");
-        supportedParameters.add("dateFormat");
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final JsonObject topLevelJsonElement = element.getAsJsonObject();
+    final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final JsonObject topLevelJsonElement = element.getAsJsonObject();
-        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+    final Long collateralTypeId =
+        this.fromApiJsonHelper.extractLongNamed(
+            CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue(), element);
+    final String description =
+        this.fromApiJsonHelper.extractStringNamed(
+            CollateralJSONinputParams.DESCRIPTION.getValue(), element);
+    final BigDecimal value =
+        this.fromApiJsonHelper.extractBigDecimalNamed(
+            CollateralJSONinputParams.VALUE.getValue(), element, locale);
 
-        final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed(CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue(),
-                element);
-        final String description = this.fromApiJsonHelper.extractStringNamed(CollateralJSONinputParams.DESCRIPTION.getValue(), element);
-        final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed(CollateralJSONinputParams.VALUE.getValue(), element,
-                locale);
-
-        return new CollateralCommand(collateralTypeId, value, description);
-    }
+    return new CollateralCommand(collateralTypeId, value, description);
+  }
 }

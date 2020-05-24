@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class LoanTemplateTypeRequiredException extends AbstractPlatformDomainRuleException {
 
-    public LoanTemplateTypeRequiredException(final String defaultUserMessage) {
-        super("error.msg.loan.template.type.required", defaultUserMessage);
-    }
+  public LoanTemplateTypeRequiredException(final String defaultUserMessage) {
+    super("error.msg.loan.template.type.required", defaultUserMessage);
+  }
 }

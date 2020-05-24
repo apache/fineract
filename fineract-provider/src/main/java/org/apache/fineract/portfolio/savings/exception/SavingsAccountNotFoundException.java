@@ -22,11 +22,17 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class SavingsAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public SavingsAccountNotFoundException(final Long id) {
-        super("error.msg.saving.account.id.invalid", "Savings account with identifier " + id + " does not exist", id);
-    }
+  public SavingsAccountNotFoundException(final Long id) {
+    super(
+        "error.msg.saving.account.id.invalid",
+        "Savings account with identifier " + id + " does not exist",
+        id);
+  }
 
-    public SavingsAccountNotFoundException(final String externalId) {
-        super("error.msg.saving.account.id.invalid", "Savings account with external identifier " + externalId + " does not exist", externalId);
-    }
+  public SavingsAccountNotFoundException(final String externalId) {
+    super(
+        "error.msg.saving.account.id.invalid",
+        "Savings account with external identifier " + externalId + " does not exist",
+        externalId);
+  }
 }

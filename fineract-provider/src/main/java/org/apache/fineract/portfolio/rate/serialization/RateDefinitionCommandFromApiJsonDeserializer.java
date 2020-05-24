@@ -44,8 +44,10 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
   /**
    * The parameters supported for this command.
    */
-  private final Set<String> supportedParameters = new HashSet<>(
-      Arrays.asList("id", "name", "percentage", "productApply", "active", "approveUser", "locale"));
+  private final Set<String> supportedParameters =
+      new HashSet<>(
+          Arrays.asList(
+              "id", "name", "percentage", "productApply", "active", "approveUser", "locale"));
 
   private final FromJsonHelper fromApiJsonHelper;
 
@@ -59,27 +61,42 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
       throw new InvalidJsonException();
     }
 
-    final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-    }.getType();
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
     this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-        .resource(RateApiConstants.rateName);
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(RateApiConstants.rateName);
 
     final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-    final String name = this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateName, element);
-    baseDataValidator.reset().parameter(RateApiConstants.rateName).value(name).notBlank().notExceedingLengthOf(250);
+    final String name =
+        this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateName, element);
+    baseDataValidator
+        .reset()
+        .parameter(RateApiConstants.rateName)
+        .value(name)
+        .notBlank()
+        .notExceedingLengthOf(250);
 
-    final BigDecimal percentage = this.fromApiJsonHelper
-        .extractBigDecimalWithLocaleNamed(RateApiConstants.ratePercentage, element);
-    baseDataValidator.reset().parameter(RateApiConstants.ratePercentage).value(percentage).notBlank();
+    final BigDecimal percentage =
+        this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+            RateApiConstants.ratePercentage, element);
+    baseDataValidator
+        .reset()
+        .parameter(RateApiConstants.ratePercentage)
+        .value(percentage)
+        .notBlank();
 
-    final String productApply = this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateProductApply, element);
-    baseDataValidator.reset().parameter(RateApiConstants.rateProductApply).value(productApply).notBlank()
+    final String productApply =
+        this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateProductApply, element);
+    baseDataValidator
+        .reset()
+        .parameter(RateApiConstants.rateProductApply)
+        .value(productApply)
+        .notBlank()
         .notExceedingLengthOf(100);
 
     throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -90,30 +107,45 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
       throw new InvalidJsonException();
     }
 
-    final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-    }.getType();
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
     this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-        .resource(RateApiConstants.rate);
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource(RateApiConstants.rate);
 
     final JsonElement element = this.fromApiJsonHelper.parse(json);
 
     if (this.fromApiJsonHelper.parameterExists(RateApiConstants.rateName, element)) {
-      final String name = this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateName, element);
-      baseDataValidator.reset().parameter(RateApiConstants.rateName).value(name).notBlank().notExceedingLengthOf(250);
+      final String name =
+          this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateName, element);
+      baseDataValidator
+          .reset()
+          .parameter(RateApiConstants.rateName)
+          .value(name)
+          .notBlank()
+          .notExceedingLengthOf(250);
     }
 
     if (this.fromApiJsonHelper.parameterExists(RateApiConstants.ratePercentage, element)) {
-      final BigDecimal percentage = this.fromApiJsonHelper
-          .extractBigDecimalWithLocaleNamed(RateApiConstants.ratePercentage, element);
-      baseDataValidator.reset().parameter(RateApiConstants.ratePercentage).value(percentage).notBlank();
+      final BigDecimal percentage =
+          this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+              RateApiConstants.ratePercentage, element);
+      baseDataValidator
+          .reset()
+          .parameter(RateApiConstants.ratePercentage)
+          .value(percentage)
+          .notBlank();
     }
 
     if (this.fromApiJsonHelper.parameterExists(RateApiConstants.rateProductApply, element)) {
-      final String productApply = this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateProductApply, element);
-      baseDataValidator.reset().parameter(RateApiConstants.rateProductApply).value(productApply).notBlank();
+      final String productApply =
+          this.fromApiJsonHelper.extractStringNamed(RateApiConstants.rateProductApply, element);
+      baseDataValidator
+          .reset()
+          .parameter(RateApiConstants.rateProductApply)
+          .value(productApply)
+          .notBlank();
     }
 
     throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -125,5 +157,4 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
       throw new PlatformApiDataValidationException(dataValidationErrors);
     }
   }
-
 }

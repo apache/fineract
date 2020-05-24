@@ -26,7 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class AccountingRuleNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public AccountingRuleNotFoundException(final Long id) {
-        super("error.msg.accounting.rule.id.invalid", "Accounting Rule with identifier " + id + " does not exist", id);
-    }
+  public AccountingRuleNotFoundException(final Long id) {
+    super(
+        "error.msg.accounting.rule.id.invalid",
+        "Accounting Rule with identifier " + id + " does not exist",
+        id);
+  }
 }

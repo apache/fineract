@@ -19,5 +19,5 @@
 package org.apache.fineract.useradministration.exception;
 
 public class UsernameMustBeDifferentException extends RuntimeException {
-    // basic runtime exception
+  // basic runtime exception
 }

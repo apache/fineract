@@ -36,410 +36,486 @@ import org.joda.time.LocalDate;
  * Created by sanyam on 20/8/17.
  */
 final class TellerApiResourceSwagger {
-    private TellerApiResourceSwagger(){
+  private TellerApiResourceSwagger() {}
 
+  @ApiModel(value = "GetTellersResponse")
+  public static final class GetTellersResponse {
+    private GetTellersResponse() {}
+
+    @ApiModelProperty(example = "3")
+    public Long id;
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "0")
+    public Long debitAccountId;
+
+    @ApiModelProperty(example = "0")
+    public Long creditAccountId;
+
+    @ApiModelProperty(example = "Teller3")
+    public String name;
+
+    @ApiModelProperty(example = "[2015,2,1]")
+    public LocalDate startDate;
+
+    @ApiModelProperty(example = "ACTIVE")
+    public TellerStatus status;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+  }
+
+  @ApiModel(value = "PostTellersRequest")
+  public static final class PostTellersRequest {
+    private PostTellersRequest() {}
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "Teller3")
+    public String name;
+
+    @ApiModelProperty(example = "cash handling")
+    public String description;
+
+    @ApiModelProperty(example = "ACTIVE")
+    public TellerStatus status;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd-MM-yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "01 February 2015")
+    public LocalDate startDate;
+  }
+
+  @ApiModel(value = "PostTellersResponse")
+  public static final class PostTellersResponse {
+    private PostTellersResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "5")
+    public Long resourceId;
+  }
+
+  @ApiModel(value = "PutTellersRequest")
+  public static final class PutTellersRequest {
+    private PutTellersRequest() {}
+
+    @ApiModelProperty(example = "Teller3")
+    public String name;
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "teller cash handling")
+    public String description;
+
+    @ApiModelProperty(example = "ACTIVE")
+    public TellerStatus status;
+
+    @ApiModelProperty(example = "28 February 2015")
+    public LocalDate endDate;
+
+    @ApiModelProperty(example = "01 February 2015")
+    public LocalDate startDate;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd-MM-yyyy")
+    public String dateFormat;
+  }
+
+  @ApiModel(value = "PutTellersResponse")
+  public static final class PutTellersResponse {
+    private PutTellersResponse() {}
+
+    final class PutTellersResponseChanges {
+      private PutTellersResponseChanges() {}
+
+      @ApiModelProperty(example = "teller cash handling")
+      public String description;
+
+      @ApiModelProperty(example = "28 February 2015")
+      public LocalDate endDate;
+
+      @ApiModelProperty(example = "01 February 2015")
+      public LocalDate startDate;
+
+      @ApiModelProperty(example = "en")
+      public String locale;
+
+      @ApiModelProperty(example = "dd-MM-yyyy")
+      public String dateFormat;
     }
 
-    @ApiModel(value = "GetTellersResponse")
-    public static final class GetTellersResponse {
-        private GetTellersResponse() {
+    @ApiModelProperty(example = "1")
+    public Long officeId;
 
-        }
-        @ApiModelProperty(example = "3")
-        public Long id;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "0")
-        public Long debitAccountId;
-        @ApiModelProperty(example = "0")
-        public Long creditAccountId;
-        @ApiModelProperty(example = "Teller3")
-        public String name;
-        @ApiModelProperty(example = "[2015,2,1]")
-        public LocalDate startDate;
-        @ApiModelProperty(example = "ACTIVE")
-        public TellerStatus status;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
+    @ApiModelProperty(example = "5")
+    public Long resourceId;
+
+    public PutTellersResponseChanges changes;
+  }
+
+  @ApiModel(value = "GetTellersTellerIdCashiersResponse")
+  public static final class GetTellersTellerIdCashiersResponse {
+    private GetTellersTellerIdCashiersResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long tellerId;
+
+    @ApiModelProperty(example = "Teller1")
+    public String tellerName;
+
+    @ApiModelProperty(example = "1")
+    public Long officeId;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+
+    public Collection<CashierData> cashiers;
+  }
+
+  @ApiModel(value = "PostTellersTellerIdCashiersRequest")
+  public static final class PostTellersTellerIdCashiersRequest {
+    private PostTellersTellerIdCashiersRequest() {}
+
+    @ApiModelProperty(example = "28 February 2015")
+    public LocalDate endDate;
+
+    @ApiModelProperty(example = "teller cash handling")
+    public String description;
+
+    @ApiModelProperty(example = "true")
+    public Boolean isFullDay;
+
+    @ApiModelProperty(example = "3")
+    public Long staffId;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd-MM-yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "01 February 2015")
+    public LocalDate startDate;
+  }
+
+  @ApiModel(value = "PostTellersTellerIdCashiersResponse")
+  public static final class PostTellersTellerIdCashiersResponse {
+    private PostTellersTellerIdCashiersResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+
+    @ApiModelProperty(example = "2")
+    public Long subResourceId;
+  }
+
+  @ApiModel(value = "GetTellersTellerIdCashiersCashierIdResponse")
+  public static final class GetTellersTellerIdCashiersCashierIdResponse {
+    private GetTellersTellerIdCashiersCashierIdResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long id;
+
+    @ApiModelProperty(example = "1")
+    public Long tellerId;
+
+    @ApiModelProperty(example = "1")
+    public Long staffId;
+
+    @ApiModelProperty(example = "")
+    public String description;
+
+    @ApiModelProperty(example = "Feb 20, 2015 12:00:00 AM")
+    public LocalDate startDate;
+
+    @ApiModelProperty(example = "Feb 27, 2015 12:00:00 AM")
+    public LocalDate endDate;
+
+    @ApiModelProperty(example = "true")
+    public Boolean isFullDay;
+
+    @ApiModelProperty(example = "")
+    public String startTime;
+
+    @ApiModelProperty(example = "")
+    public String endTime;
+
+    @ApiModelProperty(example = "Teller1")
+    public String tellerName;
+
+    @ApiModelProperty(example = "Staff1, Test")
+    public String staffName;
+  }
+
+  @ApiModel(value = "PutTellersTellerIdCashiersCashierIdRequest")
+  public static final class PutTellersTellerIdCashiersCashierIdRequest {
+    private PutTellersTellerIdCashiersCashierIdRequest() {}
+
+    @ApiModelProperty(example = "25 February 2015")
+    public LocalDate endDate;
+
+    @ApiModelProperty(example = "Cashier updated.")
+    public String description;
+
+    @ApiModelProperty(example = "true")
+    public Boolean isFullDay;
+
+    @ApiModelProperty(example = "1")
+    public Long staffId;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd-MM-yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "01 February 2015")
+    public LocalDate startDate;
+  }
+
+  @ApiModel(value = "PutTellersTellerIdCashiersCashierIdResponse")
+  public static final class PutTellersTellerIdCashiersCashierIdResponse {
+    private PutTellersTellerIdCashiersCashierIdResponse() {}
+
+    final class PutTellersTellerIdCashiersCashierIdResponseChanges {
+      private PutTellersTellerIdCashiersCashierIdResponseChanges() {}
+
+      @ApiModelProperty(example = "25 February 2015")
+      public LocalDate endDate;
+
+      @ApiModelProperty(example = "Cashier updated.")
+      public String description;
+
+      @ApiModelProperty(example = "en")
+      public String locale;
+
+      @ApiModelProperty(example = "dd-MM-yyyy")
+      public String dateFormat;
     }
 
-    @ApiModel(value = "PostTellersRequest")
-    public static final class PostTellersRequest {
-        private PostTellersRequest() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "Teller3")
-        public String name;
-        @ApiModelProperty(example = "cash handling")
-        public String description;
-        @ApiModelProperty(example = "ACTIVE")
-        public TellerStatus status;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd-MM-yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "01 February 2015")
-        public LocalDate startDate;
+    @ApiModelProperty(example = "2")
+    public Long subResourceId;
 
-    }
+    public PutTellersTellerIdCashiersCashierIdResponseChanges changes;
+  }
 
-    @ApiModel(value = "PostTellersResponse")
-    public static final class PostTellersResponse {
-        private PostTellersResponse() {
+  @ApiModel(value = "DeleteTellersTellerIdCashiersCashierIdResponse")
+  public static final class DeleteTellersTellerIdCashiersCashierIdResponse {
+    private DeleteTellersTellerIdCashiersCashierIdResponse() {}
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "5")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
+  }
 
-    @ApiModel(value = "PutTellersRequest")
-    public static final class PutTellersRequest {
-        private PutTellersRequest() {
+  @ApiModel(value = "GetTellersTellerIdCashiersTemplateResponse")
+  public static final class GetTellersTellerIdCashiersTemplateResponse {
+    private GetTellersTellerIdCashiersTemplateResponse() {}
 
-        }
-        @ApiModelProperty(example = "Teller3")
-        public String name;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "teller cash handling")
-        public String description;
-        @ApiModelProperty(example = "ACTIVE")
-        public TellerStatus status;
-        @ApiModelProperty(example = "28 February 2015")
-        public LocalDate endDate;
-        @ApiModelProperty(example = "01 February 2015")
-        public LocalDate startDate;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd-MM-yyyy")
-        public String dateFormat;
+    @ApiModelProperty(example = "1")
+    public Long tellerId;
 
-    }
+    @ApiModelProperty(example = "Teller1")
+    public String tellerName;
 
-    @ApiModel(value = "PutTellersResponse")
-    public static final class PutTellersResponse {
-        private PutTellersResponse() {
+    @ApiModelProperty(example = "1")
+    public Long officeId;
 
-        }
-        final class PutTellersResponseChanges {
-            private PutTellersResponseChanges() {}
-            @ApiModelProperty(example = "teller cash handling")
-            public String description;
-            @ApiModelProperty(example = "28 February 2015")
-            public LocalDate endDate;
-            @ApiModelProperty(example = "01 February 2015")
-            public LocalDate startDate;
-            @ApiModelProperty(example = "en")
-            public String locale;
-            @ApiModelProperty(example = "dd-MM-yyyy")
-            public String dateFormat;
-        }
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "5")
-        public Long resourceId;
-        public PutTellersResponseChanges changes;
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
 
-    }
+    public Collection<StaffData> staffOptions;
+  }
 
-    @ApiModel(value = "GetTellersTellerIdCashiersResponse")
-    public static final class GetTellersTellerIdCashiersResponse {
-        private GetTellersTellerIdCashiersResponse() {
+  @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdTransactionsResponse")
+  public static final class GetTellersTellerIdCashiersCashiersIdTransactionsResponse {
+    private GetTellersTellerIdCashiersCashiersIdTransactionsResponse() {}
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long tellerId;
-        @ApiModelProperty(example = "Teller1")
-        public String tellerName;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        public Collection<CashierData> cashiers;
+    @ApiModelProperty(example = "8")
+    public Long id;
 
-    }
+    @ApiModelProperty(example = "15")
+    public Long cashierId;
 
-    @ApiModel(value = "PostTellersTellerIdCashiersRequest")
-    public static final class PostTellersTellerIdCashiersRequest {
-        private PostTellersTellerIdCashiersRequest() {
+    public CashierTxnType txnType;
 
-        }
-        @ApiModelProperty(example = "28 February 2015")
-        public LocalDate endDate;
-        @ApiModelProperty(example = "teller cash handling")
-        public String description;
-        @ApiModelProperty(example = "true")
-        public Boolean isFullDay;
-        @ApiModelProperty(example = "3")
-        public Long staffId;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd-MM-yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "01 February 2015")
-        public LocalDate startDate;
+    @ApiModelProperty(example = "1000")
+    public BigDecimal txnAmount;
 
-    }
+    @ApiModelProperty(example = "Feb 25, 2015 12:00:00 AM")
+    public Date txnDate;
 
-    @ApiModel(value = "PostTellersTellerIdCashiersResponse")
-    public static final class PostTellersTellerIdCashiersResponse {
-        private PostTellersTellerIdCashiersResponse() {
+    @ApiModelProperty(example = "2")
+    public Long entityId;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        @ApiModelProperty(example = "2")
-        public Long subResourceId;
+    @ApiModelProperty(example = "loans")
+    public String entityType;
 
-    }
+    @ApiModelProperty(example = "Disbursement, Loan:2-000000002,Client:1-Test 1")
+    public String txnNote;
 
-    @ApiModel(value = "GetTellersTellerIdCashiersCashierIdResponse")
-    public static final class GetTellersTellerIdCashiersCashierIdResponse {
-        private GetTellersTellerIdCashiersCashierIdResponse() {
+    @ApiModelProperty(example = "Feb 25, 2015 12:00:00 AM")
+    public Date createdDate;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long id;
-        @ApiModelProperty(example = "1")
-        public Long tellerId;
-        @ApiModelProperty(example = "1")
-        public Long staffId;
-        @ApiModelProperty(example = "")
-        public String description;
-        @ApiModelProperty(example = "Feb 20, 2015 12:00:00 AM")
-        public LocalDate startDate;
-        @ApiModelProperty(example = "Feb 27, 2015 12:00:00 AM")
-        public LocalDate endDate;
-        @ApiModelProperty(example = "true")
-        public Boolean isFullDay;
-        @ApiModelProperty(example = "")
-        public String startTime;
-        @ApiModelProperty(example = "")
-        public String endTime;
-        @ApiModelProperty(example = "Teller1")
-        public String tellerName;
-        @ApiModelProperty(example = "Staff1, Test")
-        public String staffName;
+    @ApiModelProperty(example = "1")
+    public Long officeId;
 
-    }
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
 
-    @ApiModel(value = "PutTellersTellerIdCashiersCashierIdRequest")
-    public static final class PutTellersTellerIdCashiersCashierIdRequest {
-        private PutTellersTellerIdCashiersCashierIdRequest() {
+    @ApiModelProperty(example = "0")
+    public Long tellerId;
 
-        }
-        @ApiModelProperty(example = "25 February 2015")
-        public LocalDate endDate;
-        @ApiModelProperty(example = "Cashier updated.")
-        public String description;
-        @ApiModelProperty(example = "true")
-        public Boolean isFullDay;
-        @ApiModelProperty(example = "1")
-        public Long staffId;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd-MM-yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "01 February 2015")
-        public LocalDate startDate;
+    @ApiModelProperty(example = "B, Ramesh")
+    public String cashierName;
+  }
 
-    }
+  @ApiModel(value = "PostTellersTellerIdCashiersCashierIdAllocateRequest")
+  public static final class PostTellersTellerIdCashiersCashierIdAllocateRequest {
+    private PostTellersTellerIdCashiersCashierIdAllocateRequest() {}
 
-    @ApiModel(value = "PutTellersTellerIdCashiersCashierIdResponse")
-    public static final class PutTellersTellerIdCashiersCashierIdResponse {
-        private PutTellersTellerIdCashiersCashierIdResponse() {
+    @ApiModelProperty(example = "USD")
+    public String currencyCode;
 
-        }
-        final class PutTellersTellerIdCashiersCashierIdResponseChanges {
-            private PutTellersTellerIdCashiersCashierIdResponseChanges() {}
-            @ApiModelProperty(example = "25 February 2015")
-            public LocalDate endDate;
-            @ApiModelProperty(example = "Cashier updated.")
-            public String description;
-            @ApiModelProperty(example = "en")
-            public String locale;
-            @ApiModelProperty(example = "dd-MM-yyyy")
-            public String dateFormat;
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        @ApiModelProperty(example = "2")
-        public Long subResourceId;
-        public PutTellersTellerIdCashiersCashierIdResponseChanges changes;
-    }
+    @ApiModelProperty(example = "5000")
+    public BigDecimal txnAmount;
 
-    @ApiModel(value = "DeleteTellersTellerIdCashiersCashierIdResponse")
-    public static final class DeleteTellersTellerIdCashiersCashierIdResponse {
-        private DeleteTellersTellerIdCashiersCashierIdResponse() {
+    @ApiModelProperty(example = "allocating cash")
+    public String txnNote;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-    }
+    @ApiModelProperty(example = "en")
+    public String locale;
 
-    @ApiModel(value = "GetTellersTellerIdCashiersTemplateResponse")
-    public static final class GetTellersTellerIdCashiersTemplateResponse {
-        private GetTellersTellerIdCashiersTemplateResponse() {
+    @ApiModelProperty(example = "dd-MM-yyyy")
+    public String dateFormat;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long tellerId;
-        @ApiModelProperty(example = "Teller1")
-        public String tellerName;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        public Collection<StaffData> staffOptions;
-    }
+    @ApiModelProperty(example = "01 February 2015")
+    public Date txnDate;
+  }
 
-    @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdTransactionsResponse")
-    public static final class GetTellersTellerIdCashiersCashiersIdTransactionsResponse {
-        private GetTellersTellerIdCashiersCashiersIdTransactionsResponse() {
+  @ApiModel(value = "PostTellersTellerIdCashiersCashierIdAllocateResponse")
+  public static final class PostTellersTellerIdCashiersCashierIdAllocateResponse {
+    private PostTellersTellerIdCashiersCashierIdAllocateResponse() {}
 
-        }
-        @ApiModelProperty(example = "8")
-        public Long id;
-        @ApiModelProperty(example = "15")
-        public Long cashierId;
-        public CashierTxnType txnType;
-        @ApiModelProperty(example = "1000")
-        public BigDecimal txnAmount;
-        @ApiModelProperty(example = "Feb 25, 2015 12:00:00 AM")
-        public Date txnDate;
-        @ApiModelProperty(example = "2")
-        public Long entityId;
-        @ApiModelProperty(example = "loans")
-        public String entityType;
-        @ApiModelProperty(example = "Disbursement, Loan:2-000000002,Client:1-Test 1")
-        public String txnNote;
-        @ApiModelProperty(example = "Feb 25, 2015 12:00:00 AM")
-        public Date createdDate;
-        @ApiModelProperty(example = "1")
-        public Long officeId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        @ApiModelProperty(example = "0")
-        public Long tellerId;
-        @ApiModelProperty(example = "B, Ramesh")
-        public String cashierName;
-    }
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
 
-    @ApiModel(value = "PostTellersTellerIdCashiersCashierIdAllocateRequest")
-    public static final class PostTellersTellerIdCashiersCashierIdAllocateRequest {
-        private PostTellersTellerIdCashiersCashierIdAllocateRequest() {
+    @ApiModelProperty(example = "4")
+    public Long subResourceId;
+  }
 
-        }
-        @ApiModelProperty(example = "USD")
-        public String currencyCode;
-        @ApiModelProperty(example = "5000")
-        public BigDecimal txnAmount;
-        @ApiModelProperty(example = "allocating cash")
-        public String txnNote;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd-MM-yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "01 February 2015")
-        public Date txnDate;
-    }
+  @ApiModel(value = "PostTellersTellerIdCashiersCashierIdSettleRequest")
+  public static final class PostTellersTellerIdCashiersCashierIdSettleRequest {
+    private PostTellersTellerIdCashiersCashierIdSettleRequest() {}
 
-    @ApiModel(value = "PostTellersTellerIdCashiersCashierIdAllocateResponse")
-    public static final class PostTellersTellerIdCashiersCashierIdAllocateResponse {
-        private PostTellersTellerIdCashiersCashierIdAllocateResponse() {
+    @ApiModelProperty(example = "USD")
+    public String currencyCode;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        @ApiModelProperty(example = "4")
-        public Long subResourceId;
-    }
+    @ApiModelProperty(example = "2000")
+    public BigDecimal txnAmount;
 
-    @ApiModel(value = "PostTellersTellerIdCashiersCashierIdSettleRequest")
-    public static final class PostTellersTellerIdCashiersCashierIdSettleRequest {
-        private PostTellersTellerIdCashiersCashierIdSettleRequest() {
+    @ApiModelProperty(example = "cash settlement")
+    public String txnNote;
 
-        }
-        @ApiModelProperty(example = "USD")
-        public String currencyCode;
-        @ApiModelProperty(example = "2000")
-        public BigDecimal txnAmount;
-        @ApiModelProperty(example = "cash settlement")
-        public String txnNote;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd-MM-yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "20 February 2015")
-        public Date txnDate;
+    @ApiModelProperty(example = "en")
+    public String locale;
 
-    }
+    @ApiModelProperty(example = "dd-MM-yyyy")
+    public String dateFormat;
 
-    @ApiModel(value = "PostTellersTellerIdCashiersCashierIdSettleResponse")
-    public static final class PostTellersTellerIdCashiersCashierIdSettleResponse {
-        private PostTellersTellerIdCashiersCashierIdSettleResponse() {
+    @ApiModelProperty(example = "20 February 2015")
+    public Date txnDate;
+  }
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long resourceId;
-        @ApiModelProperty(example = "5")
-        public Long subResourceId;
-    }
+  @ApiModel(value = "PostTellersTellerIdCashiersCashierIdSettleResponse")
+  public static final class PostTellersTellerIdCashiersCashierIdSettleResponse {
+    private PostTellersTellerIdCashiersCashierIdSettleResponse() {}
 
-    @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse")
-    public static final class GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse {
-        private GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse() {
+    @ApiModelProperty(example = "1")
+    public Long resourceId;
 
-        }
-        @ApiModelProperty(example = "7000.000000")
-        public BigDecimal sumCashAllocation;
-        @ApiModelProperty(example = "0")
-        public BigDecimal sumInwardCash;
-        @ApiModelProperty(example = "0")
-        public BigDecimal sumOutwardCash;
-        @ApiModelProperty(example = "50.000000")
-        public BigDecimal sumCashSettlement;
-        @ApiModelProperty(example = "6950.000000")
-        public BigDecimal netCash;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        @ApiModelProperty(example = "1")
-        public long tellerId;
-        @ApiModelProperty(example = "Teller1")
-        public String tellerName;
-        @ApiModelProperty(example = "1")
-        public long cashierId;
-        @ApiModelProperty(example = "Staff1, Test")
-        public String cashierName;
-        public Page<CashierTransactionData> cashierTransactions;
+    @ApiModelProperty(example = "5")
+    public Long subResourceId;
+  }
 
-    }
+  @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse")
+  public static final class GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse {
+    private GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse() {}
 
-    @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse")
-    public static final class GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse {
-        private GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse() {
+    @ApiModelProperty(example = "7000.000000")
+    public BigDecimal sumCashAllocation;
 
-        }
-        @ApiModelProperty(example = "1")
-        public Long cashierId;
-        @ApiModelProperty(example = "Head Office")
-        public String officeName;
-        @ApiModelProperty(example = "0")
-        public Long tellerId;
-        @ApiModelProperty(example = "Teller1")
-        public String tellerName;
-        @ApiModelProperty(example = "Staff1, Test")
-        public String cashierName;
-        public CashierData cashierData;
-        @ApiModelProperty(example = "Feb 20, 2015 12:00:00 AM")
-        public LocalDate startDate;
-        @ApiModelProperty(example = "Feb 27, 2015 12:00:00 AM")
-        public LocalDate endDate;
-        public Collection<CurrencyData> currencyOptions;
-    }
+    @ApiModelProperty(example = "0")
+    public BigDecimal sumInwardCash;
 
+    @ApiModelProperty(example = "0")
+    public BigDecimal sumOutwardCash;
+
+    @ApiModelProperty(example = "50.000000")
+    public BigDecimal sumCashSettlement;
+
+    @ApiModelProperty(example = "6950.000000")
+    public BigDecimal netCash;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+
+    @ApiModelProperty(example = "1")
+    public long tellerId;
+
+    @ApiModelProperty(example = "Teller1")
+    public String tellerName;
+
+    @ApiModelProperty(example = "1")
+    public long cashierId;
+
+    @ApiModelProperty(example = "Staff1, Test")
+    public String cashierName;
+
+    public Page<CashierTransactionData> cashierTransactions;
+  }
+
+  @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse")
+  public static final class GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse {
+    private GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Long cashierId;
+
+    @ApiModelProperty(example = "Head Office")
+    public String officeName;
+
+    @ApiModelProperty(example = "0")
+    public Long tellerId;
+
+    @ApiModelProperty(example = "Teller1")
+    public String tellerName;
+
+    @ApiModelProperty(example = "Staff1, Test")
+    public String cashierName;
+
+    public CashierData cashierData;
+
+    @ApiModelProperty(example = "Feb 20, 2015 12:00:00 AM")
+    public LocalDate startDate;
+
+    @ApiModelProperty(example = "Feb 27, 2015 12:00:00 AM")
+    public LocalDate endDate;
+
+    public Collection<CurrencyData> currencyOptions;
+  }
 }

@@ -23,13 +23,13 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface MeetingWritePlatformService {
 
-    CommandProcessingResult createMeeting(JsonCommand command);
+  CommandProcessingResult createMeeting(JsonCommand command);
 
-    void updateCollectionSheetAttendance(JsonCommand command);
+  void updateCollectionSheetAttendance(JsonCommand command);
 
-    CommandProcessingResult updateMeeting(JsonCommand command);
+  CommandProcessingResult updateMeeting(JsonCommand command);
 
-    CommandProcessingResult deleteMeeting(Long meetingId);
+  CommandProcessingResult deleteMeeting(Long meetingId);
 
-    CommandProcessingResult saveOrUpdateAttendance(JsonCommand command);
+  CommandProcessingResult saveOrUpdateAttendance(JsonCommand command);
 }

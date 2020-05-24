@@ -27,45 +27,44 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_templatemappers")
 public class TemplateMapper extends AbstractPersistableCustom {
 
-    @Column(name = "mapperorder")
-    private int mapperorder;
+  @Column(name = "mapperorder")
+  private int mapperorder;
 
-    @Column(name = "mapperkey")
-    private String mapperkey;
+  @Column(name = "mapperkey")
+  private String mapperkey;
 
-    @Column(name = "mappervalue")
-    private String mappervalue;
+  @Column(name = "mappervalue")
+  private String mappervalue;
 
-    protected TemplateMapper() {}
+  protected TemplateMapper() {}
 
-    public TemplateMapper(final int mapperorder, final String mapperkey, final String mappervalue) {
-        this.mapperorder = mapperorder;
-        this.mapperkey = mapperkey;
-        this.mappervalue = mappervalue;
-    }
+  public TemplateMapper(final int mapperorder, final String mapperkey, final String mappervalue) {
+    this.mapperorder = mapperorder;
+    this.mapperkey = mapperkey;
+    this.mappervalue = mappervalue;
+  }
 
-    public String getMapperkey() {
-        return this.mapperkey;
-    }
+  public String getMapperkey() {
+    return this.mapperkey;
+  }
 
-    public int getMapperorder() {
-        return this.mapperorder;
-    }
+  public int getMapperorder() {
+    return this.mapperorder;
+  }
 
-    public void setMapperorder(final int mapperorder) {
-        this.mapperorder = mapperorder;
-    }
+  public void setMapperorder(final int mapperorder) {
+    this.mapperorder = mapperorder;
+  }
 
-    public void setMapperkey(final String mapperkey) {
-        this.mapperkey = mapperkey;
-    }
+  public void setMapperkey(final String mapperkey) {
+    this.mapperkey = mapperkey;
+  }
 
-    public String getMappervalue() {
-        return this.mappervalue;
-    }
+  public String getMappervalue() {
+    return this.mappervalue;
+  }
 
-    public void setMappervalue(final String mappervalue) {
-        this.mappervalue = mappervalue;
-    }
-
+  public void setMappervalue(final String mappervalue) {
+    this.mappervalue = mappervalue;
+  }
 }

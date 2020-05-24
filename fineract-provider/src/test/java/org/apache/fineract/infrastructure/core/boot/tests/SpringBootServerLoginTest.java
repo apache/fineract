@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.ServerApplication;
 import org.apache.fineract.common.RestAssuredFixture;
 import org.junit.Ignore;
@@ -36,14 +35,13 @@ import org.junit.Test;
  */
 public class SpringBootServerLoginTest extends AbstractSpringBootWithMariaDB4jIntegrationTest {
 
-    protected RestAssuredFixture util;
+  protected RestAssuredFixture util;
 
-    @Test
-    @Ignore("Failing on Cloubees")
-    public void hasPlatformStarted() {
-        util = new RestAssuredFixture(8443);
-        List<Map<String, String>> response = util.httpGet("/users");
-        assertThat(response.get(0).get("username"), is("mifos"));
-    }
-
+  @Test
+  @Ignore("Failing on Cloubees")
+  public void hasPlatformStarted() {
+    util = new RestAssuredFixture(8443);
+    List<Map<String, String>> response = util.httpGet("/users");
+    assertThat(response.get(0).get("username"), is("mifos"));
+  }
 }

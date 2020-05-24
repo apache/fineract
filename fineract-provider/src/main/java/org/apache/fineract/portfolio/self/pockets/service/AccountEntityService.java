@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.self.pockets.service;
 
 public interface AccountEntityService {
 
-    String getKey();
+  String getKey();
 
-    void validateSelfUserAccountMapping(Long accountId);
+  void validateSelfUserAccountMapping(Long accountId);
 
-    String retrieveAccountNumberByAccountId(Long accountId);
+  String retrieveAccountNumberByAccountId(Long accountId);
 }

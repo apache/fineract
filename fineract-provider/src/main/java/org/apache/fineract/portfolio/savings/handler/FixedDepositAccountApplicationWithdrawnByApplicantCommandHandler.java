@@ -30,20 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "FIXEDDEPOSITACCOUNT", action = "WITHDRAW")
-public class FixedDepositAccountApplicationWithdrawnByApplicantCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositAccountApplicationWithdrawnByApplicantCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+  private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
-    @Autowired
-    public FixedDepositAccountApplicationWithdrawnByApplicantCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
-        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
-    }
+  @Autowired
+  public FixedDepositAccountApplicationWithdrawnByApplicantCommandHandler(
+      final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.applicantWithdrawsFromApplication(command.entityId(), command,
-                DepositAccountType.FIXED_DEPOSIT);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.depositAccountWritePlatformService.applicantWithdrawsFromApplication(
+        command.entityId(), command, DepositAccountType.FIXED_DEPOSIT);
+  }
 }

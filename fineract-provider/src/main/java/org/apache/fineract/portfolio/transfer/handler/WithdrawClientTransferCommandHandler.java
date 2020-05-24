@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "CLIENT", action = "WITHDRAWTRANSFER")
 public class WithdrawClientTransferCommandHandler implements NewCommandSourceHandler {
 
-    private final TransferWritePlatformService writePlatformService;
+  private final TransferWritePlatformService writePlatformService;
 
-    @Autowired
-    public WithdrawClientTransferCommandHandler(final TransferWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public WithdrawClientTransferCommandHandler(
+      final TransferWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.withdrawClientTransfer(command.entityId(), command);
-    }
+    return this.writePlatformService.withdrawClientTransfer(command.entityId(), command);
+  }
 }

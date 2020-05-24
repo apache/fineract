@@ -25,13 +25,15 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 
 public interface SavingsAccountChargeReadPlatformService {
 
-    ChargeData retrieveSavingsAccountChargeTemplate();
+  ChargeData retrieveSavingsAccountChargeTemplate();
 
-    Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(Long savingsAccountId, String status);
+  Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(
+      Long savingsAccountId, String status);
 
-    SavingsAccountChargeData retrieveSavingsAccountChargeDetails(Long savingsAccountChargeId, Long savingsAccountId);
+  SavingsAccountChargeData retrieveSavingsAccountChargeDetails(
+      Long savingsAccountChargeId, Long savingsAccountId);
 
-    Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue();
+  Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue();
 
-    Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue();
+  Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue();
 }

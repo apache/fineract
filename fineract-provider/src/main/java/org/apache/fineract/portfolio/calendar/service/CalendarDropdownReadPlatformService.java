@@ -23,15 +23,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface CalendarDropdownReadPlatformService {
 
-    List<EnumOptionData> retrieveCalendarEntityTypeOptions();
+  List<EnumOptionData> retrieveCalendarEntityTypeOptions();
 
-    List<EnumOptionData> retrieveCalendarTypeOptions();
+  List<EnumOptionData> retrieveCalendarTypeOptions();
 
-    List<EnumOptionData> retrieveCalendarRemindByOptions();
+  List<EnumOptionData> retrieveCalendarRemindByOptions();
 
-    List<EnumOptionData> retrieveCalendarFrequencyTypeOptions();
+  List<EnumOptionData> retrieveCalendarFrequencyTypeOptions();
 
-    List<EnumOptionData> retrieveCalendarWeekDaysTypeOptions();
-    List<EnumOptionData> retrieveCalendarFrequencyNthDayTypeOptions();
+  List<EnumOptionData> retrieveCalendarWeekDaysTypeOptions();
 
+  List<EnumOptionData> retrieveCalendarFrequencyNthDayTypeOptions();
 }

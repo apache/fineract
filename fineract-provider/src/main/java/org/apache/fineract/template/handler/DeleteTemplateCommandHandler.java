@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "TEMPLATE", action = "DELETE")
 public class DeleteTemplateCommandHandler implements NewCommandSourceHandler {
 
-    private final TemplateDomainService templateService;
+  private final TemplateDomainService templateService;
 
-    @Autowired
-    public DeleteTemplateCommandHandler(final TemplateDomainService templateService) {
+  @Autowired
+  public DeleteTemplateCommandHandler(final TemplateDomainService templateService) {
 
-        this.templateService = templateService;
-    }
+    this.templateService = templateService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.templateService.removeTemplate(command.entityId());
-    }
+    return this.templateService.removeTemplate(command.entityId());
+  }
 }

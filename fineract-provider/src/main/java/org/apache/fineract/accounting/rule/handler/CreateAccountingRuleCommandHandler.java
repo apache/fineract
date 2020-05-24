@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ACCOUNTINGRULE", action = "CREATE")
 public class CreateAccountingRuleCommandHandler implements NewCommandSourceHandler {
 
-    private final AccountingRuleWritePlatformService writePlatformService;
+  private final AccountingRuleWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateAccountingRuleCommandHandler(final AccountingRuleWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateAccountingRuleCommandHandler(
+      final AccountingRuleWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.createAccountingRule(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.createAccountingRule(command);
+  }
 }

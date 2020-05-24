@@ -23,8 +23,10 @@ import org.springframework.util.Assert;
 
 public class AccountingConstantsTest {
 
- @Test
- public void testGetAllFinancialActivities() {
-  Assert.notEmpty(AccountingConstants.FinancialActivity.getAllFinancialActivities(), "static initialization of collection of all enums is broken");
- }
+  @Test
+  public void testGetAllFinancialActivities() {
+    Assert.notEmpty(
+        AccountingConstants.FinancialActivity.getAllFinancialActivities(),
+        "static initialization of collection of all enums is broken");
+  }
 }

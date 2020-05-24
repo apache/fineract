@@ -22,8 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class LoanOfficerUnassignmentException extends AbstractPlatformDomainRuleException {
 
-    public LoanOfficerUnassignmentException(final Long loanId) {
-        super("error.msg.loan.not.assigned.to.loan.officer", "Loan with identifier " + loanId + " is not assigned to any loan officer.",
-                loanId);
-    }
+  public LoanOfficerUnassignmentException(final Long loanId) {
+    super(
+        "error.msg.loan.not.assigned.to.loan.officer",
+        "Loan with identifier " + loanId + " is not assigned to any loan officer.",
+        loanId);
+  }
 }

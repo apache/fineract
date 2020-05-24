@@ -23,6 +23,5 @@ import javax.ws.rs.core.Response;
 
 public interface ReportingProcessService {
 
-    Response processRequest(String reportName, MultivaluedMap<String, String> queryParams);
-
+  Response processRequest(String reportName, MultivaluedMap<String, String> queryParams);
 }

@@ -27,24 +27,27 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
  */
 public class LoanScheduleDTO {
 
-    private final List<LoanRepaymentScheduleInstallment> installments;
-    private final LoanScheduleModel loanScheduleModel;
+  private final List<LoanRepaymentScheduleInstallment> installments;
+  private final LoanScheduleModel loanScheduleModel;
 
-    private LoanScheduleDTO(final List<LoanRepaymentScheduleInstallment> installments, final LoanScheduleModel loanScheduleModel) {
-        this.installments = installments;
-        this.loanScheduleModel = loanScheduleModel;
-    }
+  private LoanScheduleDTO(
+      final List<LoanRepaymentScheduleInstallment> installments,
+      final LoanScheduleModel loanScheduleModel) {
+    this.installments = installments;
+    this.loanScheduleModel = loanScheduleModel;
+  }
 
-    public static LoanScheduleDTO from(final List<LoanRepaymentScheduleInstallment> installments, final LoanScheduleModel loanScheduleModel){
-        return new LoanScheduleDTO(installments, loanScheduleModel);
-    }
+  public static LoanScheduleDTO from(
+      final List<LoanRepaymentScheduleInstallment> installments,
+      final LoanScheduleModel loanScheduleModel) {
+    return new LoanScheduleDTO(installments, loanScheduleModel);
+  }
 
-    public List<LoanRepaymentScheduleInstallment> getInstallments() {
-        return this.installments;
-    }
+  public List<LoanRepaymentScheduleInstallment> getInstallments() {
+    return this.installments;
+  }
 
-    public LoanScheduleModel getLoanScheduleModel() {
-        return this.loanScheduleModel;
-    }
-
+  public LoanScheduleModel getLoanScheduleModel() {
+    return this.loanScheduleModel;
+  }
 }

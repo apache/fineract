@@ -30,33 +30,43 @@ import org.apache.commons.lang3.time.StopWatch;
  */
 public class PlatformRequestLog {
 
-    @SuppressWarnings("unused")
-    private final long startTime;
-    @SuppressWarnings("unused")
-    private final long totalTime;
-    @SuppressWarnings("unused")
-    private final String method;
-    @SuppressWarnings("unused")
-    private final String url;
-    @SuppressWarnings("unused")
-    private final Map<String, String[]> parameters;
+  @SuppressWarnings("unused")
+  private final long startTime;
 
-    public static PlatformRequestLog from(final StopWatch task, final HttpServletRequest request) throws IOException {
-        final String requestUrl = request.getRequestURL().toString();
+  @SuppressWarnings("unused")
+  private final long totalTime;
 
-        final Map<String, String[]> parameters = new HashMap<>(request.getParameterMap());
-        parameters.remove("password");
-        parameters.remove("_");
+  @SuppressWarnings("unused")
+  private final String method;
 
-        return new PlatformRequestLog(task.getStartTime(), task.getTime(), request.getMethod(), requestUrl, parameters);
-    }
+  @SuppressWarnings("unused")
+  private final String url;
 
-    private PlatformRequestLog(final long startTime, final long time, final String method, final String requestUrl,
-            final Map<String, String[]> parameters) {
-        this.startTime = startTime;
-        this.totalTime = time;
-        this.method = method;
-        this.url = requestUrl;
-        this.parameters = parameters;
-    }
+  @SuppressWarnings("unused")
+  private final Map<String, String[]> parameters;
+
+  public static PlatformRequestLog from(final StopWatch task, final HttpServletRequest request)
+      throws IOException {
+    final String requestUrl = request.getRequestURL().toString();
+
+    final Map<String, String[]> parameters = new HashMap<>(request.getParameterMap());
+    parameters.remove("password");
+    parameters.remove("_");
+
+    return new PlatformRequestLog(
+        task.getStartTime(), task.getTime(), request.getMethod(), requestUrl, parameters);
+  }
+
+  private PlatformRequestLog(
+      final long startTime,
+      final long time,
+      final String method,
+      final String requestUrl,
+      final Map<String, String[]> parameters) {
+    this.startTime = startTime;
+    this.totalTime = time;
+    this.method = method;
+    this.url = requestUrl;
+    this.parameters = parameters;
+  }
 }

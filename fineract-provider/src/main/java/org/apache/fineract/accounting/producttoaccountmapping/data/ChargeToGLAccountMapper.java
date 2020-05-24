@@ -24,14 +24,14 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 
 public class ChargeToGLAccountMapper implements Serializable {
 
-    @SuppressWarnings("unused")
-    private final ChargeData charge;
-    @SuppressWarnings("unused")
-    private final GLAccountData incomeAccount;
+  @SuppressWarnings("unused")
+  private final ChargeData charge;
 
-    public ChargeToGLAccountMapper(final ChargeData charge, final GLAccountData incomeAccount) {
-        this.charge = charge;
-        this.incomeAccount = incomeAccount;
-    }
+  @SuppressWarnings("unused")
+  private final GLAccountData incomeAccount;
 
+  public ChargeToGLAccountMapper(final ChargeData charge, final GLAccountData incomeAccount) {
+    this.charge = charge;
+    this.incomeAccount = incomeAccount;
+  }
 }

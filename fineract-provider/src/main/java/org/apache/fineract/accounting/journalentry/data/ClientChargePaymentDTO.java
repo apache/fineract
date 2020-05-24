@@ -22,39 +22,43 @@ import java.math.BigDecimal;
 
 public class ClientChargePaymentDTO {
 
-    private final Long chargeId;
-    private final BigDecimal amount;
-    private final Long clientChargeId;
-    private final boolean isPenalty;
-    private final Long incomeAccountId;
+  private final Long chargeId;
+  private final BigDecimal amount;
+  private final Long clientChargeId;
+  private final boolean isPenalty;
+  private final Long incomeAccountId;
 
-    public ClientChargePaymentDTO(Long chargeId, BigDecimal amount, Long clientChargeId, boolean isPenalty, Long incomeAccountId) {
-        super();
-        this.chargeId = chargeId;
-        this.amount = amount;
-        this.clientChargeId = clientChargeId;
-        this.isPenalty = isPenalty;
-        this.incomeAccountId = incomeAccountId;
-    }
+  public ClientChargePaymentDTO(
+      Long chargeId,
+      BigDecimal amount,
+      Long clientChargeId,
+      boolean isPenalty,
+      Long incomeAccountId) {
+    super();
+    this.chargeId = chargeId;
+    this.amount = amount;
+    this.clientChargeId = clientChargeId;
+    this.isPenalty = isPenalty;
+    this.incomeAccountId = incomeAccountId;
+  }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
 
-    public Long getClientChargeId() {
-        return this.clientChargeId;
-    }
+  public Long getClientChargeId() {
+    return this.clientChargeId;
+  }
 
-    public boolean isPenalty() {
-        return this.isPenalty;
-    }
+  public boolean isPenalty() {
+    return this.isPenalty;
+  }
 
-    public Long getChargeId() {
-        return chargeId;
-    }
+  public Long getChargeId() {
+    return chargeId;
+  }
 
-    public Long getIncomeAccountId() {
-        return this.incomeAccountId;
-    }
-
+  public Long getIncomeAccountId() {
+    return this.incomeAccountId;
+  }
 }

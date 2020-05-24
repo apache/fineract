@@ -22,25 +22,26 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 public class PrincipalInterest {
 
-    private final Money principal;
-    private final Money interest;
-    private final Money interestPaymentDueToGrace;
+  private final Money principal;
+  private final Money interest;
+  private final Money interestPaymentDueToGrace;
 
-    public PrincipalInterest(final Money principal, final Money interest, final Money interestPaymentDueToGrace) {
-        this.principal = principal;
-        this.interest = interest;
-        this.interestPaymentDueToGrace = interestPaymentDueToGrace;
-    }
+  public PrincipalInterest(
+      final Money principal, final Money interest, final Money interestPaymentDueToGrace) {
+    this.principal = principal;
+    this.interest = interest;
+    this.interestPaymentDueToGrace = interestPaymentDueToGrace;
+  }
 
-    public Money principal() {
-        return this.principal;
-    }
+  public Money principal() {
+    return this.principal;
+  }
 
-    public Money interest() {
-        return this.interest;
-    }
+  public Money interest() {
+    return this.interest;
+  }
 
-    public Money interestPaymentDueToGrace() {
-        return this.interestPaymentDueToGrace;
-    }
+  public Money interestPaymentDueToGrace() {
+    return this.interestPaymentDueToGrace;
+  }
 }

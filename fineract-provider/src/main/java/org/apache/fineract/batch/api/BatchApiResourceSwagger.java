@@ -27,51 +27,57 @@ import org.apache.fineract.batch.domain.Header;
  * Created by sanyam on 26/7/17.
  */
 final class BatchApiResourceSwagger {
-    private BatchApiResourceSwagger() {
+  private BatchApiResourceSwagger() {}
 
+  @ApiModel(value = "PostBatchesRequest")
+  public static final class PostBatchesRequest {
+    private PostBatchesRequest() {}
+
+    public static final class PostBodyRequestSwagger {
+      private PostBodyRequestSwagger() {}
+
+      @ApiModelProperty(example = "1")
+      public Long officeId;
+
+      @ApiModelProperty(example = "\"Petra\"")
+      public String firstname;
+
+      @ApiModelProperty(example = "\"Yton\"")
+      public String lastname;
+
+      @ApiModelProperty(example = "\"ex_externalId1\"")
+      public String externalId;
+
+      @ApiModelProperty(example = "\"dd MMMM yyyy\"")
+      public String dateFormat;
+
+      @ApiModelProperty(example = "\"en\"")
+      public String locale;
+
+      @ApiModelProperty(example = "true")
+      public boolean active;
+
+      @ApiModelProperty(example = "\"04 March 2009\"")
+      public String activationDate;
+
+      @ApiModelProperty(example = "\"04 March 2009\"")
+      public String submittedOnDate;
     }
 
-    @ApiModel(value = "PostBatchesRequest")
-    public static final class PostBatchesRequest{
-        private PostBatchesRequest() {
+    @ApiModelProperty(example = "1")
+    public Long requestId;
 
-        }
+    @ApiModelProperty(example = "clients")
+    public String relativeUrl;
 
-        public static final class PostBodyRequestSwagger{
-            private PostBodyRequestSwagger() {
+    @ApiModelProperty(example = "POST")
+    public String method;
 
-            }
+    public Set<Header> headers;
 
-            @ApiModelProperty(example = "1")
-            public Long officeId;
-            @ApiModelProperty(example = "\"Petra\"")
-            public String firstname;
-            @ApiModelProperty(example = "\"Yton\"")
-            public String lastname;
-            @ApiModelProperty(example = "\"ex_externalId1\"")
-            public String externalId;
-            @ApiModelProperty(example = "\"dd MMMM yyyy\"")
-            public String dateFormat;
-            @ApiModelProperty(example = "\"en\"")
-            public String locale;
-            @ApiModelProperty(example = "true")
-            public boolean active;
-            @ApiModelProperty(example = "\"04 March 2009\"")
-            public String activationDate;
-            @ApiModelProperty(example = "\"04 March 2009\"")
-            public String submittedOnDate;
+    @ApiModelProperty(example = "1")
+    public Long reference;
 
-        }
-
-        @ApiModelProperty(example = "1")
-        public Long requestId;
-        @ApiModelProperty(example = "clients")
-        public String relativeUrl;
-        @ApiModelProperty(example = "POST")
-        public String method;
-        public Set<Header> headers;
-        @ApiModelProperty(example = "1")
-        public Long reference;
-        public PostBodyRequestSwagger body;
-    }
+    public PostBodyRequestSwagger body;
+  }
 }

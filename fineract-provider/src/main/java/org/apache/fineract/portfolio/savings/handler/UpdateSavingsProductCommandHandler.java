@@ -30,15 +30,16 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "SAVINGSPRODUCT", action = "UPDATE")
 public class UpdateSavingsProductCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsProductWritePlatformService savingProductWritePlatformService;
+  private final SavingsProductWritePlatformService savingProductWritePlatformService;
 
-    @Autowired
-    public UpdateSavingsProductCommandHandler(final SavingsProductWritePlatformService savingProductWritePlatformService) {
-        this.savingProductWritePlatformService = savingProductWritePlatformService;
-    }
+  @Autowired
+  public UpdateSavingsProductCommandHandler(
+      final SavingsProductWritePlatformService savingProductWritePlatformService) {
+    this.savingProductWritePlatformService = savingProductWritePlatformService;
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingProductWritePlatformService.update(command.entityId(), command);
-    }
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.savingProductWritePlatformService.update(command.entityId(), command);
+  }
 }

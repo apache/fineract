@@ -22,42 +22,44 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Set;
 
-
 /**
  * Created by Kang Breder on 07/08/19.
  */
-
 final class SelfRunReportApiResourceSwagger {
-    private SelfRunReportApiResourceSwagger() {
-    }
-    @ApiModel(value = "GetRunReportResponse")
-    public final static class GetRunReportResponse {
-        private GetRunReportResponse() {
-    }
-        final class GetRunReportColumnHeaders {
-            private GetRunReportColumnHeaders() {
-            }
-            @ApiModelProperty(example = "Office/Branch")
-            public String columnName;
-            @ApiModelProperty(example = "VARCHAR")
-            public String columnType;
-            @ApiModelProperty(example = "false")
-            public Boolean isColumnNullable;
-            @ApiModelProperty(example = "false")
-            public Boolean isColumnPrimaryKey;
-            @ApiModelProperty(example = "[]")
-            public String columnValues;
+  private SelfRunReportApiResourceSwagger() {}
 
-        }
-        final class GetPocketData {
-            private GetPocketData() {
-            }
+  @ApiModel(value = "GetRunReportResponse")
+  public static final class GetRunReportResponse {
+    private GetRunReportResponse() {}
 
-                @ApiModelProperty(example = "[\"Head Office\", \"000000001\", \"John Doe\"  \"2017-03-04\", \"786YYH7\"")
-                public String row;
-            }
-        public Set<GetRunReportColumnHeaders> columnHeaders;
-        public Set<GetPocketData> data;
+    final class GetRunReportColumnHeaders {
+      private GetRunReportColumnHeaders() {}
 
-        }
+      @ApiModelProperty(example = "Office/Branch")
+      public String columnName;
+
+      @ApiModelProperty(example = "VARCHAR")
+      public String columnType;
+
+      @ApiModelProperty(example = "false")
+      public Boolean isColumnNullable;
+
+      @ApiModelProperty(example = "false")
+      public Boolean isColumnPrimaryKey;
+
+      @ApiModelProperty(example = "[]")
+      public String columnValues;
     }
+
+    final class GetPocketData {
+      private GetPocketData() {}
+
+      @ApiModelProperty(
+          example = "[\"Head Office\", \"000000001\", \"John Doe\"  \"2017-03-04\", \"786YYH7\"")
+      public String row;
+    }
+
+    public Set<GetRunReportColumnHeaders> columnHeaders;
+    public Set<GetPocketData> data;
+  }
+}

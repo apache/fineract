@@ -26,46 +26,55 @@ import org.joda.time.LocalDate;
 
 public class WorkingDaysUtil {
 
-    public static LocalDate getOffSetDateIfNonWorkingDay(final LocalDate date, final LocalDate nextMeetingDate,
-            final WorkingDays workingDays) {
+  public static LocalDate getOffSetDateIfNonWorkingDay(
+      final LocalDate date, final LocalDate nextMeetingDate, final WorkingDays workingDays) {
 
-        // If date is not a non working day then return date.
-        if (isWorkingDay(workingDays, date)) { return date; }
-
-        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
-
-        switch (rescheduleType) {
-            case INVALID:
-                return date;
-            case SAME_DAY:
-                return date;
-            case MOVE_TO_NEXT_WORKING_DAY:
-                return getOffSetDateIfNonWorkingDay(date.plusDays(1), nextMeetingDate, workingDays);
-            case MOVE_TO_NEXT_REPAYMENT_MEETING_DAY:
-                return nextMeetingDate;
-            case MOVE_TO_PREVIOUS_WORKING_DAY:
-                return getOffSetDateIfNonWorkingDay(date.minusDays(1), nextMeetingDate, workingDays);
-            default:
-                return date;
-        }
+    // If date is not a non working day then return date.
+    if (isWorkingDay(workingDays, date)) {
+      return date;
     }
 
-    public static boolean isWorkingDay(final WorkingDays workingDays, final LocalDate date) {
-        return CalendarUtils.isValidRedurringDate(workingDays.getRecurrence(), date, date);
-    }
+    final RepaymentRescheduleType rescheduleType =
+        RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
 
-    public static boolean isNonWorkingDay(final WorkingDays workingDays, final LocalDate date) {
-        return !isWorkingDay(workingDays, date);
+    switch (rescheduleType) {
+      case INVALID:
+        return date;
+      case SAME_DAY:
+        return date;
+      case MOVE_TO_NEXT_WORKING_DAY:
+        return getOffSetDateIfNonWorkingDay(date.plusDays(1), nextMeetingDate, workingDays);
+      case MOVE_TO_NEXT_REPAYMENT_MEETING_DAY:
+        return nextMeetingDate;
+      case MOVE_TO_PREVIOUS_WORKING_DAY:
+        return getOffSetDateIfNonWorkingDay(date.minusDays(1), nextMeetingDate, workingDays);
+      default:
+        return date;
     }
+  }
 
-    public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO, final WorkingDays workingDays) {
-        final LocalDate changedScheduleDate = getOffSetDateIfNonWorkingDay(adjustedDateDetailsDTO.getChangedScheduleDate(),
-                adjustedDateDetailsDTO.getNextRepaymentPeriodDueDate(), workingDays);
-        adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);
-    }
+  public static boolean isWorkingDay(final WorkingDays workingDays, final LocalDate date) {
+    return CalendarUtils.isValidRedurringDate(workingDays.getRecurrence(), date, date);
+  }
 
-    public static RepaymentRescheduleType getRepaymentRescheduleType(final WorkingDays workingDays, final LocalDate date) {
-        RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
-        return rescheduleType;
-    }
+  public static boolean isNonWorkingDay(final WorkingDays workingDays, final LocalDate date) {
+    return !isWorkingDay(workingDays, date);
+  }
+
+  public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(
+      final AdjustedDateDetailsDTO adjustedDateDetailsDTO, final WorkingDays workingDays) {
+    final LocalDate changedScheduleDate =
+        getOffSetDateIfNonWorkingDay(
+            adjustedDateDetailsDTO.getChangedScheduleDate(),
+            adjustedDateDetailsDTO.getNextRepaymentPeriodDueDate(),
+            workingDays);
+    adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);
+  }
+
+  public static RepaymentRescheduleType getRepaymentRescheduleType(
+      final WorkingDays workingDays, final LocalDate date) {
+    RepaymentRescheduleType rescheduleType =
+        RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
+    return rescheduleType;
+  }
 }

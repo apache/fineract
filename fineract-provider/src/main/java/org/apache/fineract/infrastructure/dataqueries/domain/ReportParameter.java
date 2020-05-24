@@ -26,11 +26,11 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "stretchy_parameter")
 public class ReportParameter extends AbstractPersistableCustom {
 
-    protected ReportParameter() {
-        //
-    }
+  protected ReportParameter() {
+    //
+  }
 
-    public boolean hasIdOf(final Long id) {
-        return getId().equals(id);
-    }
+  public boolean hasIdOf(final Long id) {
+    return getId().equals(id);
+  }
 }

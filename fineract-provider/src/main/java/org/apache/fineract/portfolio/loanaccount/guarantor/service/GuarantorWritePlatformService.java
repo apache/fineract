@@ -23,10 +23,11 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface GuarantorWritePlatformService {
 
-    CommandProcessingResult createGuarantor(final Long loanId, final JsonCommand command);
+  CommandProcessingResult createGuarantor(final Long loanId, final JsonCommand command);
 
-    CommandProcessingResult updateGuarantor(final Long loanId, final Long guarantorId, final JsonCommand command);
+  CommandProcessingResult updateGuarantor(
+      final Long loanId, final Long guarantorId, final JsonCommand command);
 
-    CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId, Long guarantorFundingId);
-
+  CommandProcessingResult removeGuarantor(
+      final Long loanId, final Long guarantorId, Long guarantorFundingId);
 }

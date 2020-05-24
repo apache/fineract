@@ -26,22 +26,21 @@ import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
 public interface EmailCampaignWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+  CommandProcessingResult create(JsonCommand command);
 
-    CommandProcessingResult update(Long resourceId, JsonCommand command);
+  CommandProcessingResult update(Long resourceId, JsonCommand command);
 
-    CommandProcessingResult delete(Long resourceId);
+  CommandProcessingResult delete(Long resourceId);
 
-    CommandProcessingResult activateEmailCampaign(Long campaignId, JsonCommand command);
+  CommandProcessingResult activateEmailCampaign(Long campaignId, JsonCommand command);
 
-    CommandProcessingResult closeEmailCampaign(Long campaignId, JsonCommand command);
+  CommandProcessingResult closeEmailCampaign(Long campaignId, JsonCommand command);
 
-    CommandProcessingResult reactivateEmailCampaign(Long campaignId, JsonCommand command);
+  CommandProcessingResult reactivateEmailCampaign(Long campaignId, JsonCommand command);
 
-    void storeTemplateMessageIntoEmailOutBoundTable() throws JobExecutionException;
+  void storeTemplateMessageIntoEmailOutBoundTable() throws JobExecutionException;
 
-    PreviewCampaignMessage previewMessage(JsonQuery query);
+  PreviewCampaignMessage previewMessage(JsonQuery query);
 
-    void sendEmailMessage() throws JobExecutionException;
-
+  void sendEmailMessage() throws JobExecutionException;
 }

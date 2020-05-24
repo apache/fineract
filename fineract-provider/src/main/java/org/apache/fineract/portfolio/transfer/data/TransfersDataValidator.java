@@ -42,199 +42,298 @@ import org.springframework.stereotype.Component;
 @Component
 public final class TransfersDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
-                    TransferApiConstants.destinationGroupIdParamName, TransferApiConstants.clients,
-                    TransferApiConstants.inheritDestinationGroupLoanOfficer, TransferApiConstants.newStaffIdParamName,
-                    TransferApiConstants.transferActiveLoans));
+  private final FromJsonHelper fromApiJsonHelper;
+  private static final Set<String> TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              TransferApiConstants.localeParamName,
+              TransferApiConstants.dateFormatParamName,
+              TransferApiConstants.destinationGroupIdParamName,
+              TransferApiConstants.clients,
+              TransferApiConstants.inheritDestinationGroupLoanOfficer,
+              TransferApiConstants.newStaffIdParamName,
+              TransferApiConstants.transferActiveLoans));
 
-    private static final Set<String> PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
-                    TransferApiConstants.destinationOfficeIdParamName, TransferApiConstants.transferActiveLoans,
-                    TransferApiConstants.note, TransferApiConstants.transferDate));
+  private static final Set<String> PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              TransferApiConstants.localeParamName,
+              TransferApiConstants.dateFormatParamName,
+              TransferApiConstants.destinationOfficeIdParamName,
+              TransferApiConstants.transferActiveLoans,
+              TransferApiConstants.note,
+              TransferApiConstants.transferDate));
 
-    private static final Set<String> ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.newStaffIdParamName, TransferApiConstants.destinationGroupIdParamName,
-                    TransferApiConstants.note));
+  private static final Set<String> ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              TransferApiConstants.newStaffIdParamName,
+              TransferApiConstants.destinationGroupIdParamName,
+              TransferApiConstants.note));
 
-    private static final Set<String> PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
-                    TransferApiConstants.destinationOfficeIdParamName, TransferApiConstants.transferActiveLoans,
-                    TransferApiConstants.newStaffIdParamName, TransferApiConstants.destinationGroupIdParamName,
-                    TransferApiConstants.note));
+  private static final Set<String> PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              TransferApiConstants.localeParamName,
+              TransferApiConstants.dateFormatParamName,
+              TransferApiConstants.destinationOfficeIdParamName,
+              TransferApiConstants.transferActiveLoans,
+              TransferApiConstants.newStaffIdParamName,
+              TransferApiConstants.destinationGroupIdParamName,
+              TransferApiConstants.note));
 
-    private static final Set<String> REJECT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.note));
+  private static final Set<String> REJECT_CLIENT_TRANSFER_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList(TransferApiConstants.note));
 
-    private static final Set<String> WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(TransferApiConstants.note));
+  private static final Set<String> WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS =
+      new HashSet<>(Arrays.asList(TransferApiConstants.note));
 
-    @Autowired
-    public TransfersDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public TransfersDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  private void throwExceptionIfValidationWarningsExist(
+      final List<ApiParameterError> dataValidationErrors) {
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
+    }
+  }
+
+  public void validateForClientsTransferBetweenGroups(final String json) {
+
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+
+    final Long destinationGroupId =
+        this.fromApiJsonHelper.extractLongNamed(
+            TransferApiConstants.destinationGroupIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(TransferApiConstants.destinationGroupIdParamName)
+        .value(destinationGroupId)
+        .notNull()
+        .integerGreaterThanZero();
+
+    if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
+      final Long newStaffId =
+          this.fromApiJsonHelper.extractLongNamed(
+              TransferApiConstants.newStaffIdParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(TransferApiConstants.newStaffIdParamName)
+          .value(newStaffId)
+          .notNull()
+          .integerGreaterThanZero();
     }
 
-    public void validateForClientsTransferBetweenGroups(final String json) {
-
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
-
-        final Long destinationGroupId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.destinationGroupIdParamName, element);
-        baseDataValidator.reset().parameter(TransferApiConstants.destinationGroupIdParamName).value(destinationGroupId).notNull()
-                .integerGreaterThanZero();
-
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
-            final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.inheritDestinationGroupLoanOfficer, element)) {
-            final Boolean inheritDestinationGroupLoanOfficer = this.fromApiJsonHelper.extractBooleanNamed(
-                    TransferApiConstants.inheritDestinationGroupLoanOfficer, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.inheritDestinationGroupLoanOfficer)
-                    .value(inheritDestinationGroupLoanOfficer).notNull();
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(
+        TransferApiConstants.inheritDestinationGroupLoanOfficer, element)) {
+      final Boolean inheritDestinationGroupLoanOfficer =
+          this.fromApiJsonHelper.extractBooleanNamed(
+              TransferApiConstants.inheritDestinationGroupLoanOfficer, element);
+      baseDataValidator
+          .reset()
+          .parameter(TransferApiConstants.inheritDestinationGroupLoanOfficer)
+          .value(inheritDestinationGroupLoanOfficer)
+          .notNull();
     }
 
-    public void validateForProposeClientTransfer(final String json) {
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+  public void validateForProposeClientTransfer(final String json) {
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-
-        final Long destinationOfficeId = this.fromApiJsonHelper
-                .extractLongNamed(TransferApiConstants.destinationOfficeIdParamName, element);
-        baseDataValidator.reset().parameter(TransferApiConstants.destinationOfficeIdParamName).value(destinationOfficeId).notNull()
-                .integerGreaterThanZero();
-
-        validateNote(baseDataValidator, element);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForAcceptClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
-            final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).notNull()
-                    .integerGreaterThanZero();
-        }
+    final Long destinationOfficeId =
+        this.fromApiJsonHelper.extractLongNamed(
+            TransferApiConstants.destinationOfficeIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(TransferApiConstants.destinationOfficeIdParamName)
+        .value(destinationOfficeId)
+        .notNull()
+        .integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.destinationGroupIdParamName, element)) {
-            final Long destinationGroupId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.destinationGroupIdParamName,
-                    element);
-            baseDataValidator.reset().parameter(TransferApiConstants.destinationGroupIdParamName).value(destinationGroupId).notNull()
-                    .integerGreaterThanZero();
-        }
+    validateNote(baseDataValidator, element);
 
-        validateNote(baseDataValidator, element);
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validateForAcceptClientTransfer(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    public void validateForProposeAndAcceptClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final Long destinationOfficeId = this.fromApiJsonHelper
-                .extractLongNamed(TransferApiConstants.destinationOfficeIdParamName, element);
-        baseDataValidator.reset().parameter(TransferApiConstants.destinationOfficeIdParamName).value(destinationOfficeId).notNull()
-                .integerGreaterThanZero();
-
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
-            final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.destinationGroupIdParamName, element)) {
-            final Long destinationGroupId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.destinationGroupIdParamName,
-                    element);
-            baseDataValidator.reset().parameter(TransferApiConstants.destinationGroupIdParamName).value(destinationGroupId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        validateNote(baseDataValidator, element);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
+      final Long newStaffId =
+          this.fromApiJsonHelper.extractLongNamed(
+              TransferApiConstants.newStaffIdParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(TransferApiConstants.newStaffIdParamName)
+          .value(newStaffId)
+          .notNull()
+          .integerGreaterThanZero();
     }
 
-    public void validateForRejectClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        validateNote(baseDataValidator, element);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    if (this.fromApiJsonHelper.parameterExists(
+        TransferApiConstants.destinationGroupIdParamName, element)) {
+      final Long destinationGroupId =
+          this.fromApiJsonHelper.extractLongNamed(
+              TransferApiConstants.destinationGroupIdParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(TransferApiConstants.destinationGroupIdParamName)
+          .value(destinationGroupId)
+          .notNull()
+          .integerGreaterThanZero();
     }
 
-    public void validateForWithdrawClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    validateNote(baseDataValidator, element);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        validateNote(baseDataValidator, element);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  public void validateForProposeAndAcceptClientTransfer(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    private void validateNote(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
-        final String note = this.fromApiJsonHelper.extractStringNamed(TransferApiConstants.note, element);
-        baseDataValidator.reset().parameter(TransferApiConstants.note).value(note).notExceedingLengthOf(1000);
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    final Long destinationOfficeId =
+        this.fromApiJsonHelper.extractLongNamed(
+            TransferApiConstants.destinationOfficeIdParamName, element);
+    baseDataValidator
+        .reset()
+        .parameter(TransferApiConstants.destinationOfficeIdParamName)
+        .value(destinationOfficeId)
+        .notNull()
+        .integerGreaterThanZero();
+
+    if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
+      final Long newStaffId =
+          this.fromApiJsonHelper.extractLongNamed(
+              TransferApiConstants.newStaffIdParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(TransferApiConstants.newStaffIdParamName)
+          .value(newStaffId)
+          .notNull()
+          .integerGreaterThanZero();
     }
 
+    if (this.fromApiJsonHelper.parameterExists(
+        TransferApiConstants.destinationGroupIdParamName, element)) {
+      final Long destinationGroupId =
+          this.fromApiJsonHelper.extractLongNamed(
+              TransferApiConstants.destinationGroupIdParamName, element);
+      baseDataValidator
+          .reset()
+          .parameter(TransferApiConstants.destinationGroupIdParamName)
+          .value(destinationGroupId)
+          .notNull()
+          .integerGreaterThanZero();
+    }
+
+    validateNote(baseDataValidator, element);
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  public void validateForRejectClientTransfer(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
+    }
+
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    validateNote(baseDataValidator, element);
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  public void validateForWithdrawClientTransfer(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
+    }
+
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(
+        typeOfMap, json, WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors)
+            .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+    validateNote(baseDataValidator, element);
+
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
+  }
+
+  private void validateNote(
+      final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+    final String note =
+        this.fromApiJsonHelper.extractStringNamed(TransferApiConstants.note, element);
+    baseDataValidator
+        .reset()
+        .parameter(TransferApiConstants.note)
+        .value(note)
+        .notExceedingLengthOf(1000);
+  }
 }

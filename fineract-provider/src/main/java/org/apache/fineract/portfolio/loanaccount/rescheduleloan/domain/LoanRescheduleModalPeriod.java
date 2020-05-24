@@ -24,23 +24,23 @@ import org.joda.time.LocalDate;
 
 public interface LoanRescheduleModalPeriod {
 
-    LoanSchedulePeriodData toData();
+  LoanSchedulePeriodData toData();
 
-    Integer periodNumber();
+  Integer periodNumber();
 
-    Integer oldPeriodNumber();
+  Integer oldPeriodNumber();
 
-    LocalDate periodFromDate();
+  LocalDate periodFromDate();
 
-    LocalDate periodDueDate();
+  LocalDate periodDueDate();
 
-    BigDecimal principalDue();
+  BigDecimal principalDue();
 
-    BigDecimal interestDue();
+  BigDecimal interestDue();
 
-    BigDecimal feeChargesDue();
+  BigDecimal feeChargesDue();
 
-    BigDecimal penaltyChargesDue();
+  BigDecimal penaltyChargesDue();
 
-    boolean isNew();
+  boolean isNew();
 }

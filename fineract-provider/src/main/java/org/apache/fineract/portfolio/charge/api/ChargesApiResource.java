@@ -60,131 +60,260 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Charges"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Charges", description = "Its typical for MFIs to add extra costs for their financial products. These are typically Fees or Penalties.\n" + "\n" + "A Charge on fineract platform is what we use to model both Fees and Penalties.\n" + "\n" + "At present we support defining charges for use with Client accounts and both loan and saving products.")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Charges",
+          description =
+              "Its typical for MFIs to add extra costs for their financial products. These are"
+                  + " typically Fees or Penalties.\n"
+                  + "\n"
+                  + "A Charge on fineract platform is what we use to model both Fees and"
+                  + " Penalties.\n"
+                  + "\n"
+                  + "At present we support defining charges for use with Client accounts and both"
+                  + " loan and saving products.")
+    })
 public class ChargesApiResource {
 
-    private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty", "active",
-            "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "chargeAppliesToOptions",
-            "chargeTimeTypeOptions", "currencyOptions", "loanChargeCalculationTypeOptions", "loanChargeTimeTypeOptions",
-            "savingsChargeCalculationTypeOptions", "savingsChargeTimeTypeOptions", "incomeAccount", "clientChargeCalculationTypeOptions",
-            "clientChargeTimeTypeOptions"));
+  private final Set<String> CHARGES_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              "id",
+              "name",
+              "amount",
+              "currency",
+              "penalty",
+              "active",
+              "chargeAppliesTo",
+              "chargeTimeType",
+              "chargeCalculationType",
+              "chargeCalculationTypeOptions",
+              "chargeAppliesToOptions",
+              "chargeTimeTypeOptions",
+              "currencyOptions",
+              "loanChargeCalculationTypeOptions",
+              "loanChargeTimeTypeOptions",
+              "savingsChargeCalculationTypeOptions",
+              "savingsChargeTimeTypeOptions",
+              "incomeAccount",
+              "clientChargeCalculationTypeOptions",
+              "clientChargeTimeTypeOptions"));
 
-    private final String resourceNameForPermissions = "CHARGE";
+  private final String resourceNameForPermissions = "CHARGE";
 
-    private final PlatformSecurityContext context;
-    private final ChargeReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext context;
+  private final ChargeReadPlatformService readPlatformService;
+  private final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public ChargesApiResource(final PlatformSecurityContext context, final ChargeReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  @Autowired
+  public ChargesApiResource(
+      final PlatformSecurityContext context,
+      final ChargeReadPlatformService readPlatformService,
+      final DefaultToApiJsonSerializer<ChargeData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.context = context;
+    this.readPlatformService = readPlatformService;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
+
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve Charges",
+      httpMethod = "GET",
+      notes =
+          "Returns the list of defined charges.\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "charges")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = ChargesApiResourceSwagger.GetChargesResponse.class,
+        responseContainer = "List")
+  })
+  public String retrieveAllCharges(@Context final UriInfo uriInfo) {
+
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+    final Collection<ChargeData> charges = this.readPlatformService.retrieveAllCharges();
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, charges, this.CHARGES_DATA_PARAMETERS);
+  }
+
+  @GET
+  @Path("{chargeId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve a Charge",
+      httpMethod = "GET",
+      notes =
+          "Returns the details of a defined Charge.\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "charges/1")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = ChargesApiResourceSwagger.GetChargesResponse.class)
+  })
+  public String retrieveCharge(
+      @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
+      @Context final UriInfo uriInfo) {
+
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+    ChargeData charge = this.readPlatformService.retrieveCharge(chargeId);
+    if (settings.isTemplate()) {
+      final ChargeData templateData = this.readPlatformService.retrieveNewChargeDetails();
+      charge = ChargeData.withTemplate(charge, templateData);
     }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Charges", httpMethod = "GET", notes = "Returns the list of defined charges.\n" + "\n" + "Example Requests:\n" + "\n" + "charges")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class, responseContainer = "List")})
-    public String retrieveAllCharges(@Context final UriInfo uriInfo) {
+    return this.toApiJsonSerializer.serialize(settings, charge, this.CHARGES_DATA_PARAMETERS);
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+  @GET
+  @Path("template")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve Charge Template",
+      httpMethod = "GET",
+      notes =
+          "This is a convenience resource. It can be useful when building maintenance user"
+              + " interface screens for client applications. The template data returned consists"
+              + " of any or all of:\n"
+              + "\n"
+              + "Field Defaults\n"
+              + "Allowed Value Lists\n"
+              + "Example Request:\n"
+              + "\n"
+              + "charges/template\n")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = ChargesApiResourceSwagger.GetChargesTemplateResponse.class)
+  })
+  public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
 
-        final Collection<ChargeData> charges = this.readPlatformService.retrieveAllCharges();
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, charges, this.CHARGES_DATA_PARAMETERS);
-    }
+    final ChargeData charge = this.readPlatformService.retrieveNewChargeDetails();
 
-    @GET
-    @Path("{chargeId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Charge", httpMethod = "GET", notes = "Returns the details of a defined Charge.\n" + "\n" + "Example Requests:\n" + "\n" + "charges/1")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class)})
-    public String retrieveCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, charge, this.CHARGES_DATA_PARAMETERS);
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Create/Define a Charge",
+      httpMethod = "POST",
+      notes =
+          "Define a new charge that can later be associated with loans and savings through their"
+              + " respective product definitions or directly on each account instance.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = ChargesApiResourceSwagger.PostChargesRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = ChargesApiResourceSwagger.PostChargesResponse.class)
+  })
+  public String createCharge(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().createCharge().withJson(apiRequestBodyAsJson).build();
 
-        ChargeData charge = this.readPlatformService.retrieveCharge(chargeId);
-        if (settings.isTemplate()) {
-            final ChargeData templateData = this.readPlatformService.retrieveNewChargeDetails();
-            charge = ChargeData.withTemplate(charge, templateData);
-        }
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(settings, charge, this.CHARGES_DATA_PARAMETERS);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @GET
-    @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Charge Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "charges/template\n")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesTemplateResponse.class)})
-    public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
+  @PUT
+  @Path("{chargeId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Update a Charge",
+      httpMethod = "PUT",
+      notes = "Updates the details of a Charge.")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        value = "body",
+        required = true,
+        paramType = "body",
+        dataType = "body",
+        format = "body",
+        dataTypeClass = ChargesApiResourceSwagger.PutChargesChargeIdRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = ChargesApiResourceSwagger.PutChargesChargeIdResponse.class)
+  })
+  public String updateCharge(
+      @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
+      @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().updateCharge(chargeId).withJson(apiRequestBodyAsJson).build();
 
-        final ChargeData charge = this.readPlatformService.retrieveNewChargeDetails();
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, charge, this.CHARGES_DATA_PARAMETERS);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create/Define a Charge", httpMethod = "POST", notes = "Define a new charge that can later be associated with loans and savings through their respective product definitions or directly on each account instance.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PostChargesRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PostChargesResponse.class)})
-    public String createCharge(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+  @DELETE
+  @Path("{chargeId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Delete a Charge", httpMethod = "DELETE", notes = "Deletes a Charge.")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "OK",
+        response = ChargesApiResourceSwagger.DeleteChargesChargeIdResponse.class)
+  })
+  public String deleteCharge(
+      @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCharge().withJson(apiRequestBodyAsJson).build();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().deleteCharge(chargeId).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
-    @PUT
-    @Path("{chargeId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update a Charge", httpMethod = "PUT", notes = "Updates the details of a Charge.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PutChargesChargeIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PutChargesChargeIdResponse.class)})
-    public String updateCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCharge(chargeId).withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
-    @DELETE
-    @Path("{chargeId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete a Charge", httpMethod = "DELETE", notes = "Deletes a Charge.")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.DeleteChargesChargeIdResponse.class)})
-    public String deleteCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCharge(chargeId).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

@@ -31,18 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGSACCOUNT", action = "ADJUSTTRANSACTION")
 public class SavingsTransactionAdjustmentCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService writePlatformService;
+  private final SavingsAccountWritePlatformService writePlatformService;
 
-    @Autowired
-    public SavingsTransactionAdjustmentCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public SavingsTransactionAdjustmentCommandHandler(
+      final SavingsAccountWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.adjustSavingsTransaction(command.getSavingsId(), transactionId, command);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    final Long transactionId = Long.valueOf(command.getTransactionId());
+    return this.writePlatformService.adjustSavingsTransaction(
+        command.getSavingsId(), transactionId, command);
+  }
 }

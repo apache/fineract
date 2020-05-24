@@ -34,33 +34,34 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class XBRLIntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(XBRLIntegrationTest.class);
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+  private static final Logger LOG = LoggerFactory.getLogger(XBRLIntegrationTest.class);
+  private RequestSpecification requestSpec;
+  private ResponseSpecification responseSpec;
 
-    private XBRLIntegrationTestHelper xbrlHelper;
+  private XBRLIntegrationTestHelper xbrlHelper;
 
-    @Before
-    public void setUp() throws Exception {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+  @Before
+  public void setUp() throws Exception {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 
-    @Test
-    public void shouldRetrieveTaxonomyList() {
-        this.xbrlHelper = new XBRLIntegrationTestHelper(this.requestSpec, this.responseSpec);
+  @Test
+  public void shouldRetrieveTaxonomyList() {
+    this.xbrlHelper = new XBRLIntegrationTestHelper(this.requestSpec, this.responseSpec);
 
-        final ArrayList<HashMap> taxonomyList = this.xbrlHelper.getTaxonomyList();
-        verifyTaxonomyList(taxonomyList);
-    }
+    final ArrayList<HashMap> taxonomyList = this.xbrlHelper.getTaxonomyList();
+    verifyTaxonomyList(taxonomyList);
+  }
 
-    private void verifyTaxonomyList(final ArrayList<HashMap> taxonomyList) {
-        LOG.info("--------------------VERIFYING TAXONOMY LIST--------------------------");
-        assertEquals("Checking for the 1st taxonomy", "AdministrativeExpense", taxonomyList.get(0).get("name"));
-    }
-
+  private void verifyTaxonomyList(final ArrayList<HashMap> taxonomyList) {
+    LOG.info("--------------------VERIFYING TAXONOMY LIST--------------------------");
+    assertEquals(
+        "Checking for the 1st taxonomy", "AdministrativeExpense", taxonomyList.get(0).get("name"));
+  }
 }

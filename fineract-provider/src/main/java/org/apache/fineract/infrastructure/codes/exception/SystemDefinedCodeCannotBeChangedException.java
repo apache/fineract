@@ -26,7 +26,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class SystemDefinedCodeCannotBeChangedException extends AbstractPlatformDomainRuleException {
 
-    public SystemDefinedCodeCannotBeChangedException() {
-        super("error.msg.code.systemdefined", "This code is system defined and cannot be modified or deleted.");
-    }
+  public SystemDefinedCodeCannotBeChangedException() {
+    super(
+        "error.msg.code.systemdefined",
+        "This code is system defined and cannot be modified or deleted.");
+  }
 }

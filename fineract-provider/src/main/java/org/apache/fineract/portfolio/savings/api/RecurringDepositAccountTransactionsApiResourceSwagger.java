@@ -28,251 +28,327 @@ import java.util.List;
  * Created by Chirag Gupta on 12/31/17.
  */
 final class RecurringDepositAccountTransactionsApiResourceSwagger {
-    private RecurringDepositAccountTransactionsApiResourceSwagger() {
+  private RecurringDepositAccountTransactionsApiResourceSwagger() {}
+
+  @ApiModel(
+      value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
+  public static final
+  class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
+    private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
+
+    final class GetRecurringTransactionType {
+      private GetRecurringTransactionType() {}
+
+      @ApiModelProperty(example = "1")
+      public Integer id;
+
+      @ApiModelProperty(example = "savingsAccountTransactionType.deposit")
+      public String code;
+
+      @ApiModelProperty(example = "Deposit")
+      public String value;
+
+      @ApiModelProperty(example = "true")
+      public Boolean deposit;
+
+      @ApiModelProperty(example = "false")
+      public Boolean withdrawal;
+
+      @ApiModelProperty(example = "false")
+      public Boolean interestPosting;
+
+      @ApiModelProperty(example = "false")
+      public Boolean feeDeduction;
+
+      @ApiModelProperty(example = "false")
+      public Boolean initiateTransfer;
+
+      @ApiModelProperty(example = "false")
+      public Boolean approveTransfer;
+
+      @ApiModelProperty(example = "false")
+      public Boolean withdrawTransfer;
+
+      @ApiModelProperty(example = "false")
+      public Boolean rejectTransfer;
+
+      @ApiModelProperty(example = "false")
+      public Boolean overdraftInterest;
+
+      @ApiModelProperty(example = "false")
+      public Boolean writtenoff;
+
+      @ApiModelProperty(example = "true")
+      public Boolean overdraftFee;
     }
 
-    @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
-        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {
-        }
+    final class GetRecurringCurrency {
+      private GetRecurringCurrency() {}
 
-        final class GetRecurringTransactionType {
-            private GetRecurringTransactionType() {
-            }
+      @ApiModelProperty(example = "USD")
+      public String code;
 
-            @ApiModelProperty(example = "1")
-            public Integer id;
-            @ApiModelProperty(example = "savingsAccountTransactionType.deposit")
-            public String code;
-            @ApiModelProperty(example = "Deposit")
-            public String value;
-            @ApiModelProperty(example = "true")
-            public Boolean deposit;
-            @ApiModelProperty(example = "false")
-            public Boolean withdrawal;
-            @ApiModelProperty(example = "false")
-            public Boolean interestPosting;
-            @ApiModelProperty(example = "false")
-            public Boolean feeDeduction;
-            @ApiModelProperty(example = "false")
-            public Boolean initiateTransfer;
-            @ApiModelProperty(example = "false")
-            public Boolean approveTransfer;
-            @ApiModelProperty(example = "false")
-            public Boolean withdrawTransfer;
-            @ApiModelProperty(example = "false")
-            public Boolean rejectTransfer;
-            @ApiModelProperty(example = "false")
-            public Boolean overdraftInterest;
-            @ApiModelProperty(example = "false")
-            public Boolean writtenoff;
-            @ApiModelProperty(example = "true")
-            public Boolean overdraftFee;
-        }
+      @ApiModelProperty(example = "US Dollar")
+      public String name;
 
-        final class GetRecurringCurrency {
-            private GetRecurringCurrency() {
-            }
+      @ApiModelProperty(example = "4")
+      public Integer decimalPlaces;
 
-            @ApiModelProperty(example = "USD")
-            public String code;
-            @ApiModelProperty(example = "US Dollar")
-            public String name;
-            @ApiModelProperty(example = "4")
-            public Integer decimalPlaces;
-            @ApiModelProperty(example = "100")
-            public Integer inMultiplesOf;
-            @ApiModelProperty(example = "$")
-            public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
-            public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
-            public String displayLabel;
-        }
+      @ApiModelProperty(example = "100")
+      public Integer inMultiplesOf;
 
-        @ApiModelProperty(example = "1")
+      @ApiModelProperty(example = "$")
+      public String displaySymbol;
+
+      @ApiModelProperty(example = "currency.USD")
+      public String nameCode;
+
+      @ApiModelProperty(example = "US Dollar ($)")
+      public String displayLabel;
+    }
+
+    @ApiModelProperty(example = "1")
+    public Integer id;
+
+    public GetRecurringTransactionType transactionType;
+
+    @ApiModelProperty(example = "1")
+    public Integer accountId;
+
+    @ApiModelProperty(example = "000000001")
+    public String accountNo;
+
+    @ApiModelProperty(example = "[2014, 6, 25]")
+    public LocalDate date;
+
+    public GetRecurringCurrency currency;
+
+    @ApiModelProperty(example = "100000.000000")
+    public BigDecimal amount;
+
+    @ApiModelProperty(example = "false")
+    public Boolean reversed;
+
+    @ApiModelProperty(example = "[]")
+    public List<Integer> paymentTypeOptions;
+  }
+
+  @ApiModel(
+      value =
+          "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
+  public static final
+  class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+    private
+    GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
+
+    final class GetRecurringTransactionsCurrency {
+      private GetRecurringTransactionsCurrency() {}
+
+      @ApiModelProperty(example = "USD")
+      public String code;
+
+      @ApiModelProperty(example = "US Dollar")
+      public String name;
+
+      @ApiModelProperty(example = "2")
+      public Integer decimalPlaces;
+
+      @ApiModelProperty(example = "0")
+      public Integer inMultiplesOf;
+
+      @ApiModelProperty(example = "$")
+      public String displaySymbol;
+
+      @ApiModelProperty(example = "currency.USD")
+      public String nameCode;
+
+      @ApiModelProperty(example = "US Dollar ($)")
+      public String displayLabel;
+    }
+
+    final class GetRecurringTransactionsTransactionType {
+      private GetRecurringTransactionsTransactionType() {}
+
+      @ApiModelProperty(example = "2")
+      public Integer id;
+
+      @ApiModelProperty(example = "savingsAccountTransactionType.withdrawal")
+      public String code;
+
+      @ApiModelProperty(example = "Withdrawal")
+      public String value;
+
+      @ApiModelProperty(example = "false")
+      public Boolean deposit;
+
+      @ApiModelProperty(example = "true")
+      public Boolean withdrawal;
+
+      @ApiModelProperty(example = "false")
+      public Boolean interestPosting;
+
+      @ApiModelProperty(example = "false")
+      public Boolean feeDeduction;
+    }
+
+    final class GetRecurringPaymentDetailData {
+      private GetRecurringPaymentDetailData() {}
+
+      final class GetRecurringPaymentType {
+        private GetRecurringPaymentType() {}
+
+        @ApiModelProperty(example = "11")
         public Integer id;
-        public GetRecurringTransactionType transactionType;
-        @ApiModelProperty(example = "1")
-        public Integer accountId;
-        @ApiModelProperty(example = "000000001")
-        public String accountNo;
-        @ApiModelProperty(example = "[2014, 6, 25]")
-        public LocalDate date;
-        public GetRecurringCurrency currency;
-        @ApiModelProperty(example = "100000.000000")
-        public BigDecimal amount;
-        @ApiModelProperty(example = "false")
-        public Boolean reversed;
-        @ApiModelProperty(example = "[]")
-        public List<Integer> paymentTypeOptions;
+
+        @ApiModelProperty(example = "cash")
+        public String name;
+      }
+
+      @ApiModelProperty(example = "62")
+      public Integer id;
+
+      public GetRecurringPaymentType paymentType;
+
+      @ApiModelProperty(example = "")
+      public Integer accountNumber;
+
+      @ApiModelProperty(example = "")
+      public Integer checkNumber;
+
+      @ApiModelProperty(example = "")
+      public Integer routingCode;
+
+      @ApiModelProperty(example = "")
+      public Integer receiptNumber;
+
+      @ApiModelProperty(example = "")
+      public Integer bankNumber;
     }
 
-    @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
-        private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer id;
 
-        final class GetRecurringTransactionsCurrency {
-            private GetRecurringTransactionsCurrency() {
-            }
+    public GetRecurringTransactionsTransactionType transactionType;
 
-            @ApiModelProperty(example = "USD")
-            public String code;
-            @ApiModelProperty(example = "US Dollar")
-            public String name;
-            @ApiModelProperty(example = "2")
-            public Integer decimalPlaces;
-            @ApiModelProperty(example = "0")
-            public Integer inMultiplesOf;
-            @ApiModelProperty(example = "$")
-            public String displaySymbol;
-            @ApiModelProperty(example = "currency.USD")
-            public String nameCode;
-            @ApiModelProperty(example = "US Dollar ($)")
-            public String displayLabel;
-        }
+    @ApiModelProperty(example = "1")
+    public Integer accountId;
 
-        final class GetRecurringTransactionsTransactionType {
-            private GetRecurringTransactionsTransactionType() {
-            }
+    @ApiModelProperty(example = "000000001")
+    public String accountNo;
 
-            @ApiModelProperty(example = "2")
-            public Integer id;
-            @ApiModelProperty(example = "savingsAccountTransactionType.withdrawal")
-            public String code;
-            @ApiModelProperty(example = "Withdrawal")
-            public String value;
-            @ApiModelProperty(example = "false")
-            public Boolean deposit;
-            @ApiModelProperty(example = "true")
-            public Boolean withdrawal;
-            @ApiModelProperty(example = "false")
-            public Boolean interestPosting;
-            @ApiModelProperty(example = "false")
-            public Boolean feeDeduction;
-        }
+    @ApiModelProperty(example = "[2013, 8, 7]")
+    public LocalDate date;
 
-        final class GetRecurringPaymentDetailData {
-            private GetRecurringPaymentDetailData() {
-            }
+    public GetRecurringTransactionsCurrency currency;
+    public GetRecurringPaymentDetailData paymentDetailData;
 
-            final class GetRecurringPaymentType {
-                private GetRecurringPaymentType() {
-                }
+    @ApiModelProperty(example = "5000")
+    public Float amount;
 
-                @ApiModelProperty(example = "11")
-                public Integer id;
-                @ApiModelProperty(example = "cash")
-                public String name;
-            }
+    @ApiModelProperty(example = "0")
+    public Integer runningBalance;
 
-            @ApiModelProperty(example = "62")
-            public Integer id;
-            public GetRecurringPaymentType paymentType;
-            @ApiModelProperty(example = "")
-            public Integer accountNumber;
-            @ApiModelProperty(example = "")
-            public Integer checkNumber;
-            @ApiModelProperty(example = "")
-            public Integer routingCode;
-            @ApiModelProperty(example = "")
-            public Integer receiptNumber;
-            @ApiModelProperty(example = "")
-            public Integer bankNumber;
-        }
+    @ApiModelProperty(example = "true")
+    public Boolean reversed;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer id;
-        public GetRecurringTransactionsTransactionType transactionType;
-        @ApiModelProperty(example = "1")
-        public Integer accountId;
-        @ApiModelProperty(example = "000000001")
-        public String accountNo;
-        @ApiModelProperty(example = "[2013, 8, 7]")
-        public LocalDate date;
-        public GetRecurringTransactionsCurrency currency;
-        public GetRecurringPaymentDetailData paymentDetailData;
-        @ApiModelProperty(example = "5000")
-        public Float amount;
-        @ApiModelProperty(example = "0")
-        public Integer runningBalance;
-        @ApiModelProperty(example = "true")
-        public Boolean reversed;
+  @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
+  public static final
+  class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
+    private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {}
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "27 May 2013")
+    public String transactionDate;
+
+    @ApiModelProperty(example = "500")
+    public Double transactionAmount;
+
+    @ApiModelProperty(example = "14")
+    public Integer paymentTypeId;
+
+    @ApiModelProperty(example = "acc123")
+    public String accountNumber;
+
+    @ApiModelProperty(example = "che123")
+    public String checkNumber;
+
+    @ApiModelProperty(example = "rou123")
+    public String routingCode;
+
+    @ApiModelProperty(example = "rec123")
+    public String receiptNumber;
+
+    @ApiModelProperty(example = "ban123")
+    public String bankNumber;
+  }
+
+  @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
+  public static final
+  class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
+    private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
+
+    final class PostRecurringChanges {
+      private PostRecurringChanges() {}
+
+      @ApiModelProperty(example = "acc123")
+      public String accountNumber;
+
+      @ApiModelProperty(example = "che123")
+      public String checkNumber;
+
+      @ApiModelProperty(example = "rou123")
+      public String routingCode;
+
+      @ApiModelProperty(example = "rec123")
+      public String receiptNumber;
+
+      @ApiModelProperty(example = "ban123")
+      public String bankNumber;
     }
 
-    @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
 
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "27 May 2013")
-        public String transactionDate;
-        @ApiModelProperty(example = "500")
-        public Double transactionAmount;
-        @ApiModelProperty(example = "14")
-        public Integer paymentTypeId;
-        @ApiModelProperty(example = "acc123")
-        public String accountNumber;
-        @ApiModelProperty(example = "che123")
-        public String checkNumber;
-        @ApiModelProperty(example = "rou123")
-        public String routingCode;
-        @ApiModelProperty(example = "rec123")
-        public String receiptNumber;
-        @ApiModelProperty(example = "ban123")
-        public String bankNumber;
-    }
+    @ApiModelProperty(example = "2")
+    public Integer clientId;
 
-    @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer savingsId;
 
-        final class PostRecurringChanges {
-            private PostRecurringChanges() {
-            }
+    @ApiModelProperty(example = "47")
+    public Integer resourceId;
 
-            @ApiModelProperty(example = "acc123")
-            public String accountNumber;
-            @ApiModelProperty(example = "che123")
-            public String checkNumber;
-            @ApiModelProperty(example = "rou123")
-            public String routingCode;
-            @ApiModelProperty(example = "rec123")
-            public String receiptNumber;
-            @ApiModelProperty(example = "ban123")
-            public String bankNumber;
-        }
+    public PostRecurringChanges changes;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "2")
-        public Integer clientId;
-        @ApiModelProperty(example = "1")
-        public Integer savingsId;
-        @ApiModelProperty(example = "47")
-        public Integer resourceId;
-        public PostRecurringChanges changes;
-    }
+  @ApiModel(
+      value =
+          "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
+  public static final
+  class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+    private
+    PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 
-    @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
-        private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "2")
-        public Integer clientId;
-        @ApiModelProperty(example = "1")
-        public Integer savingsId;
-        @ApiModelProperty(example = "48")
-        public Integer resourceId;
-        public PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse.PostRecurringChanges changes;
-    }
+    @ApiModelProperty(example = "2")
+    public Integer clientId;
+
+    @ApiModelProperty(example = "1")
+    public Integer savingsId;
+
+    @ApiModelProperty(example = "48")
+    public Integer resourceId;
+
+    public PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse
+            .PostRecurringChanges
+        changes;
+  }
 }

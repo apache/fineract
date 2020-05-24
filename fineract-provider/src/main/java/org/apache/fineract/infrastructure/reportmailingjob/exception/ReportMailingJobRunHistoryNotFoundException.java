@@ -24,9 +24,14 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  * A {@link RuntimeException} thrown when report mailing job run history resources are not found.
  **/
 @SuppressWarnings("serial")
-public class ReportMailingJobRunHistoryNotFoundException extends AbstractPlatformResourceNotFoundException {
-    public ReportMailingJobRunHistoryNotFoundException(final Long reportMailingJobId) {
-        super("error.msg.report.mailing.job.run.history.invalid", "Report mailing job run history with job identifier "
-                + reportMailingJobId + " does not exist", reportMailingJobId);
-    }
+public class ReportMailingJobRunHistoryNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
+  public ReportMailingJobRunHistoryNotFoundException(final Long reportMailingJobId) {
+    super(
+        "error.msg.report.mailing.job.run.history.invalid",
+        "Report mailing job run history with job identifier "
+            + reportMailingJobId
+            + " does not exist",
+        reportMailingJobId);
+  }
 }

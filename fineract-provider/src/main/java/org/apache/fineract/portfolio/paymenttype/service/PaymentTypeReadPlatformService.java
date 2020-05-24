@@ -23,7 +23,7 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 public interface PaymentTypeReadPlatformService {
 
-    Collection<PaymentTypeData> retrieveAllPaymentTypes();
-    PaymentTypeData retrieveOne(Long paymentTypeId);
+  Collection<PaymentTypeData> retrieveAllPaymentTypes();
 
+  PaymentTypeData retrieveOne(Long paymentTypeId);
 }

@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ADHOC", action = "CREATE")
 public class CreateAdHocCommandHandler implements NewCommandSourceHandler {
 
-    private final AdHocWritePlatformService writePlatformService;
+  private final AdHocWritePlatformService writePlatformService;
 
-    @Autowired
-    public CreateAdHocCommandHandler(final AdHocWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public CreateAdHocCommandHandler(final AdHocWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createAdHocQuery(command);
-    }
+    return this.writePlatformService.createAdHocQuery(command);
+  }
 }

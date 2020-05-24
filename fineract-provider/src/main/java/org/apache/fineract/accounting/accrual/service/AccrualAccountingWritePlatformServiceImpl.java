@@ -37,32 +37,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccountingWritePlatformService {
+public class AccrualAccountingWritePlatformServiceImpl
+    implements AccrualAccountingWritePlatformService {
 
-    private final LoanAccrualPlatformService loanAccrualPlatformService;
-    private final AccrualAccountingDataValidator accountingDataValidator;
+  private final LoanAccrualPlatformService loanAccrualPlatformService;
+  private final AccrualAccountingDataValidator accountingDataValidator;
 
-    @Autowired
-    public AccrualAccountingWritePlatformServiceImpl(final LoanAccrualPlatformService loanAccrualPlatformService,
-            final AccrualAccountingDataValidator accountingDataValidator) {
-        this.loanAccrualPlatformService = loanAccrualPlatformService;
-        this.accountingDataValidator = accountingDataValidator;
+  @Autowired
+  public AccrualAccountingWritePlatformServiceImpl(
+      final LoanAccrualPlatformService loanAccrualPlatformService,
+      final AccrualAccountingDataValidator accountingDataValidator) {
+    this.loanAccrualPlatformService = loanAccrualPlatformService;
+    this.accountingDataValidator = accountingDataValidator;
+  }
+
+  @Override
+  public CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command) {
+    this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
+    LocalDate tilldate = command.localDateValueOfParameterNamed(accrueTillParamName);
+    try {
+      this.loanAccrualPlatformService.addPeriodicAccruals(tilldate);
+    } catch (MultiException e) {
+      final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+      final DataValidatorBuilder baseDataValidator =
+          new DataValidatorBuilder(dataValidationErrors)
+              .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
+      baseDataValidator
+          .reset()
+          .failWithCodeNoParameterAddedToErrorCode(
+              PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE, e.getMessage());
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
-
-    @Override
-    public CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command) {
-        this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
-        LocalDate tilldate = command.localDateValueOfParameterNamed(accrueTillParamName);
-        try {
-            this.loanAccrualPlatformService.addPeriodicAccruals(tilldate);
-        } catch (MultiException e) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                    .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE, e.getMessage());
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        return CommandProcessingResult.empty();
-    }
-
+    return CommandProcessingResult.empty();
+  }
 }

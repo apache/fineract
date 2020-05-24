@@ -26,31 +26,32 @@ import org.joda.time.LocalDate;
 
 public interface CalendarReadPlatformService {
 
-    CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId);
+  CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId);
 
-    Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, List<Integer> calendarTypeOptions);
+  Collection<CalendarData> retrieveCalendarsByEntity(
+      final Long entityId, final Integer entityTypeId, List<Integer> calendarTypeOptions);
 
-    Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId,
-            List<Integer> calendarTypeOptions);
+  Collection<CalendarData> retrieveParentCalendarsByEntity(
+      final Long entityId, final Integer entityTypeId, List<Integer> calendarTypeOptions);
 
-    Collection<CalendarData> retrieveAllCalendars();
+  Collection<CalendarData> retrieveAllCalendars();
 
-    CalendarData retrieveNewCalendarDetails();
+  CalendarData retrieveNewCalendarDetails();
 
-    Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory, final LocalDate tillDate);
+  Collection<LocalDate> generateRecurringDates(
+      final CalendarData calendarData, final boolean withHistory, final LocalDate tillDate);
 
-    Collection<LocalDate> generateNextTenRecurringDates(final CalendarData calendarData);
+  Collection<LocalDate> generateNextTenRecurringDates(final CalendarData calendarData);
 
-    Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData);
+  Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData);
 
-    CalendarData retrieveLoanCalendar(final Long loanId);
+  CalendarData retrieveLoanCalendar(final Long loanId);
 
-    CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId);
+  CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId);
 
-    LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, MeetingData lastMeetingData);
+  LocalDate generateNextEligibleMeetingDateForCollection(
+      CalendarData calendarData, MeetingData lastMeetingData);
 
-    Boolean isCalendarAssociatedWithEntity(final Long entityId, final Long calendarId, Long entityTypeId);
-
-
-
+  Boolean isCalendarAssociatedWithEntity(
+      final Long entityId, final Long calendarId, Long entityTypeId);
 }

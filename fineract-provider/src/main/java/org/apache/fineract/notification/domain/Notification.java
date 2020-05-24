@@ -27,92 +27,112 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "notification_generator")
 public class Notification extends AbstractPersistableCustom {
 
-    @Column(name = "object_type")
-    private String objectType;
+  @Column(name = "object_type")
+  private String objectType;
 
-    @Column(name = "object_identifier")
-    private Long objectIdentifier;
+  @Column(name = "object_identifier")
+  private Long objectIdentifier;
 
-    @Column(name = "action")
-    private String action;
+  @Column(name = "action")
+  private String action;
 
-    @Column(name = "actor")
-    private Long actorId;
+  @Column(name = "actor")
+  private Long actorId;
 
-    @Column(name = "is_system_generated")
-    private boolean isSystemGenerated;
+  @Column(name = "is_system_generated")
+  private boolean isSystemGenerated;
 
-    @Column(name = "notification_content")
-    private String notificationContent;
+  @Column(name = "notification_content")
+  private String notificationContent;
 
-    @Column(name = "created_at")
-    private String createdAt;
+  @Column(name = "created_at")
+  private String createdAt;
 
-    public Notification() {}
+  public Notification() {}
 
-    public Notification(String objectType, Long objectIdentifier, String action, Long actorId, boolean isSystemGenerated,
-            String notificationContent, String createdAt) {
-        this.objectType = objectType;
-        this.objectIdentifier = objectIdentifier;
-        this.action = action;
-        this.actorId = actorId;
-        this.isSystemGenerated = isSystemGenerated;
-        this.notificationContent = notificationContent;
-        this.createdAt = createdAt;
-    }
+  public Notification(
+      String objectType,
+      Long objectIdentifier,
+      String action,
+      Long actorId,
+      boolean isSystemGenerated,
+      String notificationContent,
+      String createdAt) {
+    this.objectType = objectType;
+    this.objectIdentifier = objectIdentifier;
+    this.action = action;
+    this.actorId = actorId;
+    this.isSystemGenerated = isSystemGenerated;
+    this.notificationContent = notificationContent;
+    this.createdAt = createdAt;
+  }
 
-    public String getObjectType() {
-        return objectType;
-    }
+  public String getObjectType() {
+    return objectType;
+  }
 
-    public void setObjectType(String objectType) {
-        this.objectType = objectType;
-    }
+  public void setObjectType(String objectType) {
+    this.objectType = objectType;
+  }
 
-    public Long getObjectIdentifier() {
-        return objectIdentifier;
-    }
+  public Long getObjectIdentifier() {
+    return objectIdentifier;
+  }
 
-    public void setObjectIdentifier(Long objectIdentifier) {
-        this.objectIdentifier = objectIdentifier;
-    }
+  public void setObjectIdentifier(Long objectIdentifier) {
+    this.objectIdentifier = objectIdentifier;
+  }
 
-    public String getAction() {
-        return action;
-    }
+  public String getAction() {
+    return action;
+  }
 
-    public void setAction(String action) {
-        this.action = action;
-    }
+  public void setAction(String action) {
+    this.action = action;
+  }
 
-    public Long getActor() {
-        return actorId;
-    }
+  public Long getActor() {
+    return actorId;
+  }
 
-    public void setActor(Long actorId) {
-        this.actorId = actorId;
-    }
+  public void setActor(Long actorId) {
+    this.actorId = actorId;
+  }
 
-    public boolean isSystemGenerated() {
-        return isSystemGenerated;
-    }
+  public boolean isSystemGenerated() {
+    return isSystemGenerated;
+  }
 
-    public void setSystemGenerated(boolean systemGenerated) {
-        isSystemGenerated = systemGenerated;
-    }
+  public void setSystemGenerated(boolean systemGenerated) {
+    isSystemGenerated = systemGenerated;
+  }
 
-    public String getNotificationContent() {
-        return notificationContent;
-    }
+  public String getNotificationContent() {
+    return notificationContent;
+  }
 
-    public void setNotificationContent(String notificationContent) {
-        this.notificationContent = notificationContent;
-    }
+  public void setNotificationContent(String notificationContent) {
+    this.notificationContent = notificationContent;
+  }
 
-    @Override
-    public String toString() {
-        return "Notification [objectType=" + this.objectType + ", objectIdentifier=" + this.objectIdentifier + ", action=" + this.action
-                + ", actorId=" + this.actorId + ", isSystemGenerated=" + this.isSystemGenerated + ", notificationContent="
-                + this.notificationContent + ", createdAt=" + this.createdAt + ", getId()=" + this.getId() + "]";
-    }
+  @Override
+  public String toString() {
+    return "Notification [objectType="
+        + this.objectType
+        + ", objectIdentifier="
+        + this.objectIdentifier
+        + ", action="
+        + this.action
+        + ", actorId="
+        + this.actorId
+        + ", isSystemGenerated="
+        + this.isSystemGenerated
+        + ", notificationContent="
+        + this.notificationContent
+        + ", createdAt="
+        + this.createdAt
+        + ", getId()="
+        + this.getId()
+        + "]";
+  }
 }

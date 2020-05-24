@@ -23,13 +23,19 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 /**
  * A {@link RuntimeException} thrown when office resources are not found.
  */
-public class FineractEntityAccessNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class FineractEntityAccessNotFoundException
+    extends AbstractPlatformResourceNotFoundException {
 
-    public FineractEntityAccessNotFoundException(final Long id) {
-        super("error.msg.entityaccess.id.invalid", "FineractEntityAccess with identifier " + id + " does not exist", id);
-    }
+  public FineractEntityAccessNotFoundException(final Long id) {
+    super(
+        "error.msg.entityaccess.id.invalid",
+        "FineractEntityAccess with identifier " + id + " does not exist",
+        id);
+  }
 
-    public FineractEntityAccessNotFoundException(final String codeName) {
-               super("error.msg.entityaccess.id.invalid", "FineractEntityAccess with identifier " + codeName + " does not exist");
-            }
+  public FineractEntityAccessNotFoundException(final String codeName) {
+    super(
+        "error.msg.entityaccess.id.invalid",
+        "FineractEntityAccess with identifier " + codeName + " does not exist");
+  }
 }

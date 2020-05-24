@@ -76,205 +76,406 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"General Ledger Account"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "General Ledger Account", description = "Ledger accounts represent an Individual account within an Organizations Chart Of Accounts(COA) and are assigned a name and unique number by which they can be identified. \n" + "All transactions relating to a company's assets, liabilities, owners' equity, revenue and expenses are recorded against these accounts")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "General Ledger Account",
+          description =
+              "Ledger accounts represent an Individual account within an Organizations Chart Of"
+                  + " Accounts(COA) and are assigned a name and unique number by which they can be"
+                  + " identified. \n"
+                  + "All transactions relating to a company's assets, liabilities, owners' equity,"
+                  + " revenue and expenses are recorded against these accounts")
+    })
 public class GLAccountsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "parentId", "glCode",
-            "disabled", "manualEntriesAllowed", "type", "usage", "description", "assetHeaderAccountOptions",
-            "liabilityHeaderAccountOptions", "equityHeaderAccountOptions", "incomeHeaderAccountOptions", "expenseHeaderAccountOptions",
-            "nameDecorated", "tagId", "allowedAssetsTagOptions", "allowedLiabilitiesTagOptions", "allowedEquityTagOptions",
-            "allowedIncomeTagOptions", "allowedExpensesTagOptions", "creditAccounts", "debitAccounts"));
+  private static final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              "id",
+              "name",
+              "parentId",
+              "glCode",
+              "disabled",
+              "manualEntriesAllowed",
+              "type",
+              "usage",
+              "description",
+              "assetHeaderAccountOptions",
+              "liabilityHeaderAccountOptions",
+              "equityHeaderAccountOptions",
+              "incomeHeaderAccountOptions",
+              "expenseHeaderAccountOptions",
+              "nameDecorated",
+              "tagId",
+              "allowedAssetsTagOptions",
+              "allowedLiabilitiesTagOptions",
+              "allowedEquityTagOptions",
+              "allowedIncomeTagOptions",
+              "allowedExpensesTagOptions",
+              "creditAccounts",
+              "debitAccounts"));
 
-    private final String resourceNameForPermission = "GLACCOUNT";
+  private final String resourceNameForPermission = "GLACCOUNT";
 
-    private final GLAccountReadPlatformService glAccountReadPlatformService;
-    private final AccountingDropdownReadPlatformService dropdownReadPlatformService;
-    private final DefaultToApiJsonSerializer<GLAccountData> apiJsonSerializerService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PlatformSecurityContext context;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final BulkImportWorkbookService bulkImportWorkbookService;
-    private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+  private final GLAccountReadPlatformService glAccountReadPlatformService;
+  private final AccountingDropdownReadPlatformService dropdownReadPlatformService;
+  private final DefaultToApiJsonSerializer<GLAccountData> apiJsonSerializerService;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final PlatformSecurityContext context;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final CodeValueReadPlatformService codeValueReadPlatformService;
+  private final BulkImportWorkbookService bulkImportWorkbookService;
+  private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
 
+  @Autowired
+  public GLAccountsApiResource(
+      final PlatformSecurityContext context,
+      final GLAccountReadPlatformService glAccountReadPlatformService,
+      final DefaultToApiJsonSerializer<GLAccountData> toApiJsonSerializer,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+      final AccountingDropdownReadPlatformService dropdownReadPlatformService,
+      final CodeValueReadPlatformService codeValueReadPlatformService,
+      final BulkImportWorkbookService bulkImportWorkbookService,
+      final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
+    this.context = context;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    this.apiJsonSerializerService = toApiJsonSerializer;
+    this.glAccountReadPlatformService = glAccountReadPlatformService;
+    this.dropdownReadPlatformService = dropdownReadPlatformService;
+    this.codeValueReadPlatformService = codeValueReadPlatformService;
+    this.bulkImportWorkbookService = bulkImportWorkbookService;
+    this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
+  }
 
+  @GET
+  @Path("template")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve GL Accounts Template",
+      notes =
+          "This is a convenience resource. It can be useful when building maintenance user"
+              + " interface screens for client applications. The template data returned consists"
+              + " of any or all of:\n"
+              + "\n"
+              + "Field Defaults\n"
+              + "Allowed Value Lists\n"
+              + "Example Request:\n"
+              + "\n"
+              + "glaccounts/template\n"
+              + "glaccounts/template?type=1\n"
+              + "\n"
+              + "type is optional and integer value from 1 to 5.\n"
+              + "\n"
+              + "1.Assets \n"
+              + "2.Liabilities \n"
+              + "3.Equity \n"
+              + "4.Income \n"
+              + "5.Expenses")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = GLAccountsApiResourceSwagger.GetGLAccountsTemplateResponse.class)
+  })
+  public String retrieveNewAccountDetails(
+      @Context final UriInfo uriInfo,
+      @QueryParam("type") @ApiParam(value = "type") final Integer type) {
 
-    @Autowired
-    public GLAccountsApiResource(final PlatformSecurityContext context, final GLAccountReadPlatformService glAccountReadPlatformService,
-            final DefaultToApiJsonSerializer<GLAccountData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final AccountingDropdownReadPlatformService dropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.context = context;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiJsonSerializerService = toApiJsonSerializer;
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.bulkImportWorkbookService=bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+
+    GLAccountData glAccountData =
+        this.glAccountReadPlatformService.retrieveNewGLAccountDetails(type);
+    glAccountData = handleTemplate(glAccountData);
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.apiJsonSerializerService.serialize(
+        settings, glAccountData, RESPONSE_DATA_PARAMETERS);
+  }
+
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "List General Ledger Accounts",
+      notes =
+          "ARGUMENTS\n"
+              + "type Integer optional manualEntriesAllowed boolean optional usage Integer"
+              + " optional disabled boolean optional parentId Long optional tagId Long optional\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "glaccounts\n"
+              + "\n"
+              + "\n"
+              + "glaccounts?type=1&manualEntriesAllowed=true&usage=1&disabled=false\n"
+              + "\n"
+              + "glaccounts?fetchRunningBalance=true")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class,
+        responseContainer = "list")
+  })
+  public String retrieveAllAccounts(
+      @Context final UriInfo uriInfo,
+      @QueryParam("type") @ApiParam(value = "type") final Integer type,
+      @QueryParam("searchParam") @ApiParam(value = "searchParam") final String searchParam,
+      @QueryParam("usage") @ApiParam(value = "usage") final Integer usage,
+      @QueryParam("manualEntriesAllowed") @ApiParam(value = "manualEntriesAllowed")
+          final Boolean manualEntriesAllowed,
+      @QueryParam("disabled") @ApiParam(value = "disabled") final Boolean disabled,
+      @QueryParam("fetchRunningBalance") @ApiParam(value = "fetchRunningBalance")
+          final boolean runningBalance) {
+
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+    JournalEntryAssociationParametersData associationParametersData =
+        new JournalEntryAssociationParametersData(false, runningBalance);
+    final List<GLAccountData> glAccountDatas =
+        this.glAccountReadPlatformService.retrieveAllGLAccounts(
+            type, searchParam, usage, manualEntriesAllowed, disabled, associationParametersData);
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.apiJsonSerializerService.serialize(
+        settings, glAccountDatas, RESPONSE_DATA_PARAMETERS);
+  }
+
+  @GET
+  @Path("{glAccountId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve a General Ledger Account",
+      notes =
+          "Example Requests:\n"
+              + "\n"
+              + "glaccounts/1\n"
+              + "\n"
+              + "\n"
+              + "glaccounts/1?template=true\n"
+              + "\n"
+              + "\n"
+              + "glaccounts/1?fields=name,glCode\n"
+              + "\n"
+              + "\n"
+              + "glaccounts/1?fetchRunningBalance=true")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class)
+  })
+  public String retreiveAccount(
+      @PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId,
+      @Context final UriInfo uriInfo,
+      @QueryParam("fetchRunningBalance") @ApiParam(value = "fetchRunningBalance")
+          final boolean runningBalance) {
+
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    JournalEntryAssociationParametersData associationParametersData =
+        new JournalEntryAssociationParametersData(false, runningBalance);
+    GLAccountData glAccountData =
+        this.glAccountReadPlatformService.retrieveGLAccountById(
+            glAccountId, associationParametersData);
+    if (settings.isTemplate()) {
+      glAccountData = handleTemplate(glAccountData);
     }
 
-    @GET
-    @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve GL Accounts Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "glaccounts/template\n" + "glaccounts/template?type=1\n" + "\n" + "type is optional and integer value from 1 to 5.\n" + "\n" + "1.Assets \n" + "2.Liabilities \n" + "3.Equity \n" + "4.Income \n" + "5.Expenses")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.GetGLAccountsTemplateResponse.class)})
-    public String retrieveNewAccountDetails(@Context final UriInfo uriInfo, @QueryParam("type") @ApiParam(value = "type") final Integer type) {
+    return this.apiJsonSerializerService.serialize(
+        settings, glAccountData, RESPONSE_DATA_PARAMETERS);
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Create a General Ledger Account",
+      notes =
+          "Note: You may optionally create Hierarchical Chart of Accounts by using the"
+              + " \"parentId\" property of an Account\n"
+              + "Mandatory Fields: \n"
+              + "name, glCode, type, usage and manualEntriesAllowed")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        paramType = "body",
+        value = "body",
+        dataType = "body",
+        dataTypeClass = GLAccountsApiResourceSwagger.PostGLAccountsRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = GLAccountsApiResourceSwagger.PostGLAccountsResponse.class)
+  })
+  public String createGLAccount(@ApiParam(hidden = true) final String jsonRequestBody) {
 
-        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveNewGLAccountDetails(type);
-        glAccountData = handleTemplate(glAccountData);
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().createGLAccount().withJson(jsonRequestBody).build();
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, glAccountData, RESPONSE_DATA_PARAMETERS);
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+    return this.apiJsonSerializerService.serialize(result);
+  }
+
+  @PUT
+  @Path("{glAccountId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Update an Accounting closure",
+      notes =
+          "Once an accounting closure is created, only the comments associated with it may be"
+              + " edited\n"
+              + "\n")
+  @ApiImplicitParams({
+    @ApiImplicitParam(
+        paramType = "body",
+        value = "body",
+        dataType = "body",
+        dataTypeClass = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)
+  })
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class)
+  })
+  public String updateGLAccount(
+      @PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId,
+      @ApiParam(hidden = true) final String jsonRequestBody) {
+
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().updateGLAccount(glAccountId).withJson(jsonRequestBody).build();
+
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+    return this.apiJsonSerializerService.serialize(result);
+  }
+
+  @DELETE
+  @Path("{glAccountId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Delete an accounting closure",
+      notes = "Note: Only the latest accounting closure associated with a branch may be deleted.")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class)
+  })
+  public String deleteGLAccount(
+      @PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId) {
+
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().deleteGLAccount(glAccountId).build();
+
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+    return this.apiJsonSerializerService.serialize(result);
+  }
+
+  private GLAccountData handleTemplate(final GLAccountData glAccountData) {
+    final List<EnumOptionData> accountTypeOptions =
+        this.dropdownReadPlatformService.retrieveGLAccountTypeOptions();
+    final List<EnumOptionData> usageOptions =
+        this.dropdownReadPlatformService.retrieveGLAccountUsageOptions();
+    final List<GLAccountData> assetHeaderAccountOptions =
+        defaultIfEmpty(
+            this.glAccountReadPlatformService.retrieveAllEnabledHeaderGLAccounts(
+                GLAccountType.ASSET));
+    final List<GLAccountData> liabilityHeaderAccountOptions =
+        defaultIfEmpty(
+            this.glAccountReadPlatformService.retrieveAllEnabledHeaderGLAccounts(
+                GLAccountType.LIABILITY));
+    final List<GLAccountData> equityHeaderAccountOptions =
+        defaultIfEmpty(
+            this.glAccountReadPlatformService.retrieveAllEnabledHeaderGLAccounts(
+                GLAccountType.EQUITY));
+    final List<GLAccountData> incomeHeaderAccountOptions =
+        defaultIfEmpty(
+            this.glAccountReadPlatformService.retrieveAllEnabledHeaderGLAccounts(
+                GLAccountType.INCOME));
+    final List<GLAccountData> expenseHeaderAccountOptions =
+        defaultIfEmpty(
+            this.glAccountReadPlatformService.retrieveAllEnabledHeaderGLAccounts(
+                GLAccountType.EXPENSE));
+    final Collection<CodeValueData> allowedAssetsTagOptions =
+        this.codeValueReadPlatformService.retrieveCodeValuesByCode(
+            AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME);
+    final Collection<CodeValueData> allowedLiabilitiesTagOptions =
+        this.codeValueReadPlatformService.retrieveCodeValuesByCode(
+            AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME);
+    final Collection<CodeValueData> allowedEquityTagOptions =
+        this.codeValueReadPlatformService.retrieveCodeValuesByCode(
+            AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME);
+    final Collection<CodeValueData> allowedIncomeTagOptions =
+        this.codeValueReadPlatformService.retrieveCodeValuesByCode(
+            AccountingConstants.INCOME_TAG_OPTION_CODE_NAME);
+    final Collection<CodeValueData> allowedExpensesTagOptions =
+        this.codeValueReadPlatformService.retrieveCodeValuesByCode(
+            AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME);
+
+    return new GLAccountData(
+        glAccountData,
+        accountTypeOptions,
+        usageOptions,
+        assetHeaderAccountOptions,
+        liabilityHeaderAccountOptions,
+        equityHeaderAccountOptions,
+        incomeHeaderAccountOptions,
+        expenseHeaderAccountOptions,
+        allowedAssetsTagOptions,
+        allowedLiabilitiesTagOptions,
+        allowedEquityTagOptions,
+        allowedIncomeTagOptions,
+        allowedExpensesTagOptions);
+  }
+
+  private List<GLAccountData> defaultIfEmpty(final List<GLAccountData> list) {
+    List<GLAccountData> returnList = null;
+    if (list != null && !list.isEmpty()) {
+      returnList = list;
     }
+    return returnList;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List General Ledger Accounts", notes = "ARGUMENTS\n" + "type Integer optional manualEntriesAllowed boolean optional usage Integer optional disabled boolean optional parentId Long optional tagId Long optional\n" + "Example Requests:\n" + "\n" + "glaccounts\n" + "\n" + "\n" + "glaccounts?type=1&manualEntriesAllowed=true&usage=1&disabled=false\n" + "\n" + "glaccounts?fetchRunningBalance=true")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class, responseContainer = "list")})
-    public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("type") @ApiParam(value = "type") final Integer type,
-            @QueryParam("searchParam") @ApiParam(value = "searchParam") final String searchParam, @QueryParam("usage") @ApiParam(value = "usage") final Integer usage,
-            @QueryParam("manualEntriesAllowed") @ApiParam(value = "manualEntriesAllowed") final Boolean manualEntriesAllowed, @QueryParam("disabled") @ApiParam(value = "disabled") final Boolean disabled,
-            @QueryParam("fetchRunningBalance") @ApiParam(value = "fetchRunningBalance") final boolean runningBalance) {
+  @GET
+  @Path("downloadtemplate")
+  @Produces("application/vnd.ms-excel")
+  public Response getGlAccountsTemplate(@QueryParam("dateFormat") final String dateFormat) {
+    return bulkImportWorkbookPopulatorService.getTemplate(
+        GlobalEntityType.CHART_OF_ACCOUNTS.toString(), null, null, dateFormat);
+  }
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(false, runningBalance);
-        final List<GLAccountData> glAccountDatas = this.glAccountReadPlatformService.retrieveAllGLAccounts(type, searchParam, usage,
-                manualEntriesAllowed, disabled, associationParametersData);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, glAccountDatas, RESPONSE_DATA_PARAMETERS);
-    }
-
-    @GET
-    @Path("{glAccountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a General Ledger Account", notes = "Example Requests:\n" + "\n" + "glaccounts/1\n" + "\n" + "\n" + "glaccounts/1?template=true\n" + "\n" + "\n" + "glaccounts/1?fields=name,glCode\n" + "\n" + "\n" + "glaccounts/1?fetchRunningBalance=true")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class)})
-    public String retreiveAccount(@PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId, @Context final UriInfo uriInfo,
-            @QueryParam("fetchRunningBalance") @ApiParam(value = "fetchRunningBalance") final boolean runningBalance) {
-
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(false, runningBalance);
-        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveGLAccountById(glAccountId, associationParametersData);
-        if (settings.isTemplate()) {
-            glAccountData = handleTemplate(glAccountData);
-        }
-
-        return this.apiJsonSerializerService.serialize(settings, glAccountData, RESPONSE_DATA_PARAMETERS);
-    }
-
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create a General Ledger Account", notes = "Note: You may optionally create Hierarchical Chart of Accounts by using the \"parentId\" property of an Account\n" + "Mandatory Fields: \n" + "name, glCode, type, usage and manualEntriesAllowed")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = GLAccountsApiResourceSwagger.PostGLAccountsRequest.class )})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.PostGLAccountsResponse.class)})
-    public String createGLAccount(@ApiParam(hidden = true) final String jsonRequestBody) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGLAccount().withJson(jsonRequestBody).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
-    }
-
-    @PUT
-    @Path("{glAccountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Update an Accounting closure", notes = "Once an accounting closure is created, only the comments associated with it may be edited\n" + "\n")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class)})
-    public String updateGLAccount(@PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId, @ApiParam(hidden = true) final String jsonRequestBody) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGLAccount(glAccountId).withJson(jsonRequestBody).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
-    }
-
-    @DELETE
-    @Path("{glAccountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Delete an accounting closure", notes = "Note: Only the latest accounting closure associated with a branch may be deleted.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class)})
-    public String deleteGLAccount(@PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGLAccount(glAccountId).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.apiJsonSerializerService.serialize(result);
-    }
-
-    private GLAccountData handleTemplate(final GLAccountData glAccountData) {
-        final List<EnumOptionData> accountTypeOptions = this.dropdownReadPlatformService.retrieveGLAccountTypeOptions();
-        final List<EnumOptionData> usageOptions = this.dropdownReadPlatformService.retrieveGLAccountUsageOptions();
-        final List<GLAccountData> assetHeaderAccountOptions = defaultIfEmpty(this.glAccountReadPlatformService
-                .retrieveAllEnabledHeaderGLAccounts(GLAccountType.ASSET));
-        final List<GLAccountData> liabilityHeaderAccountOptions = defaultIfEmpty(this.glAccountReadPlatformService
-                .retrieveAllEnabledHeaderGLAccounts(GLAccountType.LIABILITY));
-        final List<GLAccountData> equityHeaderAccountOptions = defaultIfEmpty(this.glAccountReadPlatformService
-                .retrieveAllEnabledHeaderGLAccounts(GLAccountType.EQUITY));
-        final List<GLAccountData> incomeHeaderAccountOptions = defaultIfEmpty(this.glAccountReadPlatformService
-                .retrieveAllEnabledHeaderGLAccounts(GLAccountType.INCOME));
-        final List<GLAccountData> expenseHeaderAccountOptions = defaultIfEmpty(this.glAccountReadPlatformService
-                .retrieveAllEnabledHeaderGLAccounts(GLAccountType.EXPENSE));
-        final Collection<CodeValueData> allowedAssetsTagOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME);
-        final Collection<CodeValueData> allowedLiabilitiesTagOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME);
-        final Collection<CodeValueData> allowedEquityTagOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME);
-        final Collection<CodeValueData> allowedIncomeTagOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(AccountingConstants.INCOME_TAG_OPTION_CODE_NAME);
-        final Collection<CodeValueData> allowedExpensesTagOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME);
-
-        return new GLAccountData(glAccountData, accountTypeOptions, usageOptions, assetHeaderAccountOptions, liabilityHeaderAccountOptions,
-                equityHeaderAccountOptions, incomeHeaderAccountOptions, expenseHeaderAccountOptions, allowedAssetsTagOptions,
-                allowedLiabilitiesTagOptions, allowedEquityTagOptions, allowedIncomeTagOptions, allowedExpensesTagOptions);
-    }
-
-    private List<GLAccountData> defaultIfEmpty(final List<GLAccountData> list) {
-        List<GLAccountData> returnList = null;
-        if (list != null && !list.isEmpty()) {
-            returnList = list;
-        }
-        return returnList;
-    }
-
-    @GET
-    @Path("downloadtemplate")
-    @Produces("application/vnd.ms-excel")
-    public Response getGlAccountsTemplate(@QueryParam("dateFormat") final String dateFormat) {
-        return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.CHART_OF_ACCOUNTS.toString(),null,null,dateFormat);
-    }
-
-    @POST
-    @Path("uploadtemplate")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public String postGlAccountsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail,
-            @FormDataParam("locale") final String locale, @FormDataParam("dateFormat") final String dateFormat){
-        Long importDocumentId= bulkImportWorkbookService.importWorkbook(GlobalEntityType.CHART_OF_ACCOUNTS.toString(), uploadedInputStream,fileDetail,
-                locale,dateFormat);
-        return this.apiJsonSerializerService.serialize(importDocumentId);
-    }
+  @POST
+  @Path("uploadtemplate")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public String postGlAccountsTemplate(
+      @FormDataParam("file") InputStream uploadedInputStream,
+      @FormDataParam("file") FormDataContentDisposition fileDetail,
+      @FormDataParam("locale") final String locale,
+      @FormDataParam("dateFormat") final String dateFormat) {
+    Long importDocumentId =
+        bulkImportWorkbookService.importWorkbook(
+            GlobalEntityType.CHART_OF_ACCOUNTS.toString(),
+            uploadedInputStream,
+            fileDetail,
+            locale,
+            dateFormat);
+    return this.apiJsonSerializerService.serialize(importDocumentId);
+  }
 }

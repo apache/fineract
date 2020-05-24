@@ -25,118 +25,133 @@ import java.util.Set;
 /**
  * Created by Kang Breder on 29/07/19.
  */
-
 final class SelfAccountTransferApiResourceSwagger {
-    private SelfAccountTransferApiResourceSwagger() {
+  private SelfAccountTransferApiResourceSwagger() {}
+
+  @ApiModel(value = "GetAccountTransferTemplateResponse")
+  public static final class GetAccountTransferTemplateResponse {
+    private GetAccountTransferTemplateResponse() {}
+
+    final class GetAccountOptions {
+      private GetAccountOptions() {}
+
+      @ApiModelProperty(example = "2")
+      public Integer id;
+
+      @ApiModelProperty(example = "accountType.savings")
+      public String code;
+
+      @ApiModelProperty(example = "Savings Account")
+      public String value;
     }
 
+    public Set<GetAccountOptions> accountTypeOptions;
 
-    @ApiModel(value = "GetAccountTransferTemplateResponse")
-    public final static class GetAccountTransferTemplateResponse {
-        private GetAccountTransferTemplateResponse() {
-        }
+    final class GetFromAccountOptions {
+      private GetFromAccountOptions() {}
 
-        final class GetAccountOptions {
-            private GetAccountOptions() {
-            }
+      @ApiModelProperty(example = "2")
+      public Integer accountId;
 
-            @ApiModelProperty(example = "2")
-            public Integer id;
-            @ApiModelProperty(example = "accountType.savings")
-            public String code;
-            @ApiModelProperty(example = "Savings Account")
-            public String value;
-        }
+      @ApiModelProperty(example = "00000001")
+      public Integer accountNo;
 
-        public Set<GetAccountOptions> accountTypeOptions;
+      public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
 
-        final class GetFromAccountOptions {
-            private GetFromAccountOptions() {
-            }
+      @ApiModelProperty(example = "1")
+      public Integer clientId;
 
-            @ApiModelProperty(example = "2")
-            public Integer accountId;
-            @ApiModelProperty(example = "00000001")
-            public Integer accountNo;
-            public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
-            @ApiModelProperty(example = "1")
-            public Integer clientId;
-            @ApiModelProperty(example = "ABC")
-            public String clientName;
-            @ApiModelProperty(example = "1")
-            public Integer officeId;
-            @ApiModelProperty(example = "HEAD OFFICE")
-            public String officeName;
+      @ApiModelProperty(example = "ABC")
+      public String clientName;
 
-        }
+      @ApiModelProperty(example = "1")
+      public Integer officeId;
 
-        public Set<GetFromAccountOptions> fromAccountTypeOptions;
-
-        final class GetToAccountOptions {
-            private GetToAccountOptions() {
-            }
-
-            @ApiModelProperty(example = "2")
-            public Integer accountId;
-            @ApiModelProperty(example = "00000001")
-            public Integer accountNo;
-            public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
-            @ApiModelProperty(example = "1")
-            public Integer clientId;
-            @ApiModelProperty(example = "ABC")
-            public String clientName;
-            @ApiModelProperty(example = "1")
-            public Integer officeId;
-            @ApiModelProperty(example = "HEAD OFFICE")
-            public String officeName;
-
-        }
-
-        public Set<GetFromAccountOptions> toAccountTypeOptions;
+      @ApiModelProperty(example = "HEAD OFFICE")
+      public String officeName;
     }
 
-    @ApiModel(value = "PostNewTransferRequest")
-    public final static class PostNewTransferRequest {
-        private PostNewTransferRequest() {
-        }
+    public Set<GetFromAccountOptions> fromAccountTypeOptions;
 
-        @ApiModelProperty(example = "1")
-        public Integer fromOfficeId;
-        @ApiModelProperty(example = "1")
-        public Integer fromClientId;
-        @ApiModelProperty(example = "2")
-        public Integer fromAccountType;
-        @ApiModelProperty(example = "1")
-        public Integer fromAccountId;
-        @ApiModelProperty(example = "1")
-        public Integer toOfficeId;
-        @ApiModelProperty(example = "1")
-        public Integer toClientId;
-        @ApiModelProperty(example = "2")
-        public Integer toAccountType;
-        @ApiModelProperty(example = "2")
-        public Integer toAccountId;
-        @ApiModelProperty(example = "dd  MMMM YYYY")
-        public String dateFormat;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "01  August 2011")
-        public String transferDate;
-        @ApiModelProperty(example = "112.45")
-        public Float transferAmount;
-        @ApiModelProperty(example = "A description of the transfer")
-        public String transferDescription;
+    final class GetToAccountOptions {
+      private GetToAccountOptions() {}
 
+      @ApiModelProperty(example = "2")
+      public Integer accountId;
+
+      @ApiModelProperty(example = "00000001")
+      public Integer accountNo;
+
+      public GetAccountTransferTemplateResponse.GetAccountOptions accountType;
+
+      @ApiModelProperty(example = "1")
+      public Integer clientId;
+
+      @ApiModelProperty(example = "ABC")
+      public String clientName;
+
+      @ApiModelProperty(example = "1")
+      public Integer officeId;
+
+      @ApiModelProperty(example = "HEAD OFFICE")
+      public String officeName;
     }
 
-    @ApiModel(value = "PostNewTransferResponse")
-    public final static class PostNewTransferResponse {
-        private PostNewTransferResponse() {
-        }
+    public Set<GetFromAccountOptions> toAccountTypeOptions;
+  }
 
-        @ApiModelProperty(example = "1")
-        public Integer savingsId;
-        @ApiModelProperty(example = "1")
-        public Integer resourceId;
-    }
+  @ApiModel(value = "PostNewTransferRequest")
+  public static final class PostNewTransferRequest {
+    private PostNewTransferRequest() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer fromOfficeId;
+
+    @ApiModelProperty(example = "1")
+    public Integer fromClientId;
+
+    @ApiModelProperty(example = "2")
+    public Integer fromAccountType;
+
+    @ApiModelProperty(example = "1")
+    public Integer fromAccountId;
+
+    @ApiModelProperty(example = "1")
+    public Integer toOfficeId;
+
+    @ApiModelProperty(example = "1")
+    public Integer toClientId;
+
+    @ApiModelProperty(example = "2")
+    public Integer toAccountType;
+
+    @ApiModelProperty(example = "2")
+    public Integer toAccountId;
+
+    @ApiModelProperty(example = "dd  MMMM YYYY")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "01  August 2011")
+    public String transferDate;
+
+    @ApiModelProperty(example = "112.45")
+    public Float transferAmount;
+
+    @ApiModelProperty(example = "A description of the transfer")
+    public String transferDescription;
+  }
+
+  @ApiModel(value = "PostNewTransferResponse")
+  public static final class PostNewTransferResponse {
+    private PostNewTransferResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer savingsId;
+
+    @ApiModelProperty(example = "1")
+    public Integer resourceId;
+  }
 }

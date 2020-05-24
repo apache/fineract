@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ClientTransactionWritePlatformService {
 
-    @Transactional
-    CommandProcessingResult undo(Long clientId, Long transactionId);
-
+  @Transactional
+  CommandProcessingResult undo(Long clientId, Long transactionId);
 }

@@ -22,6 +22,5 @@ import org.apache.fineract.accounting.journalentry.data.SharesDTO;
 
 public interface AccountingProcessorForShares {
 
-    void createJournalEntriesForShares(SharesDTO sharesDTO);
-
+  void createJournalEntriesForShares(SharesDTO sharesDTO);
 }

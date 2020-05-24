@@ -51,72 +51,85 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Provisioning Category"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Provisioning Category", description = "")
-})
+@SwaggerDefinition(tags = {@Tag(name = "Provisioning Category", description = "")})
 public class ProvisioningCategoryApiResource {
 
-    private final PlatformSecurityContext platformSecurityContext;
-    private final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final DefaultToApiJsonSerializer<ProvisioningCategoryData> toApiJsonSerializer;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+  private final PlatformSecurityContext platformSecurityContext;
+  private final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final DefaultToApiJsonSerializer<ProvisioningCategoryData> toApiJsonSerializer;
+  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public ProvisioningCategoryApiResource(final PlatformSecurityContext platformSecurityContext,
-            final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<ProvisioningCategoryData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.platformSecurityContext = platformSecurityContext;
-        this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+  @Autowired
+  public ProvisioningCategoryApiResource(
+      final PlatformSecurityContext platformSecurityContext,
+      final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final DefaultToApiJsonSerializer<ProvisioningCategoryData> toApiJsonSerializer,
+      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    this.platformSecurityContext = platformSecurityContext;
+    this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+  }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo) {
-        this.platformSecurityContext.authenticatedUser();
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        Collection<ProvisioningCategoryData> provisionCategoriesSet = null;
-        provisionCategoriesSet = this.provisioningCategoryReadPlatformService.retrieveAllProvisionCategories();
-        return this.toApiJsonSerializer.serialize(settings, provisionCategoriesSet);
-    }
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String retrieveAll(@Context final UriInfo uriInfo) {
+    this.platformSecurityContext.authenticatedUser();
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    Collection<ProvisioningCategoryData> provisionCategoriesSet = null;
+    provisionCategoriesSet =
+        this.provisioningCategoryReadPlatformService.retrieveAllProvisionCategories();
+    return this.toApiJsonSerializer.serialize(settings, provisionCategoriesSet);
+  }
 
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createProvisioningCategory(final String apiRequestBodyAsJson) {
-        CommandWrapper commandWrapper = null;
-        this.platformSecurityContext.authenticatedUser();
-        commandWrapper = new CommandWrapperBuilder().createProvisioningCategory().withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-        return this.toApiJsonSerializer.serialize(commandProcessingResult);
-    }
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String createProvisioningCategory(final String apiRequestBodyAsJson) {
+    CommandWrapper commandWrapper = null;
+    this.platformSecurityContext.authenticatedUser();
+    commandWrapper =
+        new CommandWrapperBuilder()
+            .createProvisioningCategory()
+            .withJson(apiRequestBodyAsJson)
+            .build();
+    final CommandProcessingResult commandProcessingResult =
+        this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+    return this.toApiJsonSerializer.serialize(commandProcessingResult);
+  }
 
-    @PUT
-    @Path("{categoryId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateProvisioningCategory(@PathParam("categoryId") final Long categoryId, final String apiRequestBodyAsJson) {
-        this.platformSecurityContext.authenticatedUser();
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateProvisioningCategory(categoryId)
-                .withJson(apiRequestBodyAsJson).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
-    }
+  @PUT
+  @Path("{categoryId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String updateProvisioningCategory(
+      @PathParam("categoryId") final Long categoryId, final String apiRequestBodyAsJson) {
+    this.platformSecurityContext.authenticatedUser();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder()
+            .updateProvisioningCategory(categoryId)
+            .withJson(apiRequestBodyAsJson)
+            .build();
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    return this.toApiJsonSerializer.serialize(result);
+  }
 
-    @DELETE
-    @Path("{categoryId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteProvisioningCategory(@PathParam("categoryId") final Long categoryId) {
-        this.platformSecurityContext.authenticatedUser();
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteProvisioningCategory(categoryId).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
-    }
+  @DELETE
+  @Path("{categoryId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  public String deleteProvisioningCategory(@PathParam("categoryId") final Long categoryId) {
+    this.platformSecurityContext.authenticatedUser();
+    final CommandWrapper commandRequest =
+        new CommandWrapperBuilder().deleteProvisioningCategory(categoryId).build();
+    final CommandProcessingResult result =
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    return this.toApiJsonSerializer.serialize(result);
+  }
 }

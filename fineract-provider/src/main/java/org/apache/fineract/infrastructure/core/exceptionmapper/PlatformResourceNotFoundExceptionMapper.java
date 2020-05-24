@@ -39,13 +39,20 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<AbstractPlatformResourceNotFoundException> {
+public class PlatformResourceNotFoundExceptionMapper
+    implements ExceptionMapper<AbstractPlatformResourceNotFoundException> {
 
-    @Override
-    public Response toResponse(final AbstractPlatformResourceNotFoundException exception) {
+  @Override
+  public Response toResponse(final AbstractPlatformResourceNotFoundException exception) {
 
-        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
-                exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
-        return Response.status(Status.NOT_FOUND).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
-    }
+    final ApiGlobalErrorResponse notFoundErrorResponse =
+        ApiGlobalErrorResponse.notFound(
+            exception.getGlobalisationMessageCode(),
+            exception.getDefaultUserMessage(),
+            exception.getDefaultUserMessageArgs());
+    return Response.status(Status.NOT_FOUND)
+        .entity(notFoundErrorResponse)
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

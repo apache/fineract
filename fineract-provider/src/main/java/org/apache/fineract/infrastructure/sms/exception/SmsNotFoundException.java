@@ -25,7 +25,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class SmsNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public SmsNotFoundException(final Long resourceId) {
-        super("error.msg.sms.identifier.not.found", "SMS with identifier `" + resourceId + "` does not exist", resourceId);
-    }
+  public SmsNotFoundException(final Long resourceId) {
+    super(
+        "error.msg.sms.identifier.not.found",
+        "SMS with identifier `" + resourceId + "` does not exist",
+        resourceId);
+  }
 }

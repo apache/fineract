@@ -31,68 +31,68 @@ import org.apache.fineract.portfolio.address.domain.Address;
 @Table(name = "m_client_address")
 public class ClientAddress extends AbstractPersistableCustom {
 
-    @ManyToOne
-    private Client client;
+  @ManyToOne private Client client;
 
-    @ManyToOne
-    private Address address;
+  @ManyToOne private Address address;
 
-    @ManyToOne
-    @JoinColumn(name = "address_type_id")
-    private CodeValue addressType;
+  @ManyToOne
+  @JoinColumn(name = "address_type_id")
+  private CodeValue addressType;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+  @Column(name = "is_active")
+  private boolean isActive;
 
-    private ClientAddress(final Client client, final Address address, final CodeValue addressType,
-            final boolean isActive) {
-        this.client = client;
-        this.address = address;
-        this.addressType = addressType;
-        this.isActive = isActive;
+  private ClientAddress(
+      final Client client,
+      final Address address,
+      final CodeValue addressType,
+      final boolean isActive) {
+    this.client = client;
+    this.address = address;
+    this.addressType = addressType;
+    this.isActive = isActive;
+  }
 
-    }
+  public ClientAddress() {}
 
-    public ClientAddress() {
+  public static ClientAddress fromJson(
+      final boolean isActive,
+      final Client client,
+      final Address address,
+      final CodeValue address_type) {
 
-    }
+    return new ClientAddress(client, address, address_type, isActive);
+  }
 
-    public static ClientAddress fromJson(final boolean isActive, final Client client, final Address address,
-            final CodeValue address_type) {
+  public Client getClient() {
+    return this.client;
+  }
 
-        return new ClientAddress(client, address, address_type, isActive);
-    }
+  public Address getAddress() {
+    return this.address;
+  }
 
-    public Client getClient() {
-        return this.client;
-    }
+  public CodeValue getAddressType() {
+    return this.addressType;
+  }
 
-    public Address getAddress() {
-        return this.address;
-    }
+  public void setAddressType(final CodeValue addressType) {
+    this.addressType = addressType;
+  }
 
-    public CodeValue getAddressType() {
-        return this.addressType;
-    }
+  public boolean isIs_active() {
+    return this.isActive;
+  }
 
-    public void setAddressType(final CodeValue addressType) {
-        this.addressType = addressType;
-    }
+  public void setClient(final Client client) {
+    this.client = client;
+  }
 
-    public boolean isIs_active() {
-        return this.isActive;
-    }
+  public void setAddress(final Address address) {
+    this.address = address;
+  }
 
-    public void setClient(final Client client) {
-        this.client = client;
-    }
-
-    public void setAddress(final Address address) {
-        this.address = address;
-    }
-
-    public void setIs_active(final boolean isActive) {
-        this.isActive = isActive;
-    }
-
+  public void setIs_active(final boolean isActive) {
+    this.isActive = isActive;
+  }
 }

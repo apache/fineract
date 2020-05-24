@@ -23,86 +23,95 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
-
-
 /**
  * Created by Kang Breder on 13/06/19.
  */
 final class SearchApiResourceSwagger {
-    private SearchApiResourceSwagger() {
+  private SearchApiResourceSwagger() {}
 
-    }
+  @ApiModel(value = "GetSearchResponse")
+  public static final class GetSearchResponse {
+    private GetSearchResponse() {}
 
-    @ApiModel(value = "GetSearchResponse")
-    public static final class GetSearchResponse {
-        private GetSearchResponse() {
+    @ApiModelProperty(example = "1")
+    public Long entityId;
 
-        }
+    @ApiModelProperty(example = "000000001")
+    public Long entityAccountNo;
 
-        @ApiModelProperty(example = "1")
-        public Long entityId;
-        @ApiModelProperty(example = "000000001")
-        public Long entityAccountNo;
-        @ApiModelProperty(example = "ID_JKZGEXF")
-        public String entityExternalId;
-        @ApiModelProperty(example = "Group_Name_HVCU5")
-        public String entityName;
-        @ApiModelProperty(example = "GROUP")
-        public String entityType;
-        @ApiModelProperty(example = "1")
-        public Long parentId;
-        @ApiModelProperty(example = "Head Office")
-        public String parentName;
-        public EnumOptionData entityStatus;
-    }
+    @ApiModelProperty(example = "ID_JKZGEXF")
+    public String entityExternalId;
 
-    @ApiModel(value = "PostAdhocQuerySearchRequest")
-    public static final class PostAdhocQuerySearchRequest {
-        private PostAdhocQuerySearchRequest() {
+    @ApiModelProperty(example = "Group_Name_HVCU5")
+    public String entityName;
 
-        }
+    @ApiModelProperty(example = "GROUP")
+    public String entityType;
 
+    @ApiModelProperty(example = "1")
+    public Long parentId;
 
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "approvalDate")
-        public String loanDateOption;
-        @ApiModelProperty(example = "2013-01-01")
-        public LocalDate loanFromDate;
-        @ApiModelProperty(example = "2014-01-27")
-        public LocalDate loanToDate;
-        @ApiModelProperty(example = "true")
-        public boolean includeOutStandingAmountPercentage;
-        @ApiModelProperty(example = "<=")
-        public String outStandingAmountPercentageCondition;
-        @ApiModelProperty(example = "80")
-        public Long outStandingAmountPercentage;
-        @ApiModelProperty(example = "true")
-        public boolean includeOutstandingAmount;
-        @ApiModelProperty(example = "between")
-        public String outstandingAmountCondition;
-        @ApiModelProperty(example = "100")
-        public Long minOutstandingAmount;
-        @ApiModelProperty(example = "10000")
-        public Long maxOutstandingAmount;
-    }
+    @ApiModelProperty(example = "Head Office")
+    public String parentName;
 
-    @ApiModel(value = "PostAdhocQuerySearchResponse")
-    public static final class PostAdhocQuerySearchResponse {
-        private PostAdhocQuerySearchResponse() {
+    public EnumOptionData entityStatus;
+  }
 
-        }
+  @ApiModel(value = "PostAdhocQuerySearchRequest")
+  public static final class PostAdhocQuerySearchRequest {
+    private PostAdhocQuerySearchRequest() {}
 
-        @ApiModelProperty(example = "HFC")
-        public String officeName;
-        @ApiModelProperty(example = "01 BC3M")
-        public String loanProductName;
-        @ApiModelProperty(example = " 5692.41")
-        public Long loanOutStanding;
-        @ApiModelProperty(example = "76.4")
-        public Long percentage;
-    }
+    @ApiModelProperty(example = "en")
+    public String locale;
+
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
+
+    @ApiModelProperty(example = "approvalDate")
+    public String loanDateOption;
+
+    @ApiModelProperty(example = "2013-01-01")
+    public LocalDate loanFromDate;
+
+    @ApiModelProperty(example = "2014-01-27")
+    public LocalDate loanToDate;
+
+    @ApiModelProperty(example = "true")
+    public boolean includeOutStandingAmountPercentage;
+
+    @ApiModelProperty(example = "<=")
+    public String outStandingAmountPercentageCondition;
+
+    @ApiModelProperty(example = "80")
+    public Long outStandingAmountPercentage;
+
+    @ApiModelProperty(example = "true")
+    public boolean includeOutstandingAmount;
+
+    @ApiModelProperty(example = "between")
+    public String outstandingAmountCondition;
+
+    @ApiModelProperty(example = "100")
+    public Long minOutstandingAmount;
+
+    @ApiModelProperty(example = "10000")
+    public Long maxOutstandingAmount;
+  }
+
+  @ApiModel(value = "PostAdhocQuerySearchResponse")
+  public static final class PostAdhocQuerySearchResponse {
+    private PostAdhocQuerySearchResponse() {}
+
+    @ApiModelProperty(example = "HFC")
+    public String officeName;
+
+    @ApiModelProperty(example = "01 BC3M")
+    public String loanProductName;
+
+    @ApiModelProperty(example = " 5692.41")
+    public Long loanOutStanding;
+
+    @ApiModelProperty(example = "76.4")
+    public Long percentage;
+  }
 }
-

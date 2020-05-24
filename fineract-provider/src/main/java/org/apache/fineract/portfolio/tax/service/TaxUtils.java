@@ -30,65 +30,76 @@ import org.joda.time.LocalDate;
 
 public class TaxUtils {
 
-    public static Map<TaxComponent, BigDecimal> splitTax(final BigDecimal amount, final LocalDate date,
-            final Set<TaxGroupMappings> taxGroupMappings, final int scale) {
-        Map<TaxComponent, BigDecimal> map = new HashMap<>(3);
-        if (amount != null) {
-            final double amountVal = amount.doubleValue();
-            double cent_percentage = Double.valueOf("100.0");
-            for (TaxGroupMappings groupMappings : taxGroupMappings) {
-                if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
-                    TaxComponent component = groupMappings.getTaxComponent();
-                    BigDecimal percentage = component.getApplicablePercentage(date);
-                    if (percentage != null) {
-                        double percentageVal = percentage.doubleValue();
-                        double tax = amountVal * percentageVal / cent_percentage;
-                        map.put(component, BigDecimal.valueOf(tax).setScale(scale, MoneyHelper.getRoundingMode()));
-                    }
-                }
-            }
+  public static Map<TaxComponent, BigDecimal> splitTax(
+      final BigDecimal amount,
+      final LocalDate date,
+      final Set<TaxGroupMappings> taxGroupMappings,
+      final int scale) {
+    Map<TaxComponent, BigDecimal> map = new HashMap<>(3);
+    if (amount != null) {
+      final double amountVal = amount.doubleValue();
+      double cent_percentage = Double.valueOf("100.0");
+      for (TaxGroupMappings groupMappings : taxGroupMappings) {
+        if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
+          TaxComponent component = groupMappings.getTaxComponent();
+          BigDecimal percentage = component.getApplicablePercentage(date);
+          if (percentage != null) {
+            double percentageVal = percentage.doubleValue();
+            double tax = amountVal * percentageVal / cent_percentage;
+            map.put(
+                component, BigDecimal.valueOf(tax).setScale(scale, MoneyHelper.getRoundingMode()));
+          }
         }
-        return map;
+      }
     }
+    return map;
+  }
 
-    public static BigDecimal incomeAmount(final BigDecimal amount, final LocalDate date, final Set<TaxGroupMappings> taxGroupMappings,
-            final int scale) {
-        Map<TaxComponent, BigDecimal> map = splitTax(amount, date, taxGroupMappings, scale);
-        return incomeAmount(amount, map);
+  public static BigDecimal incomeAmount(
+      final BigDecimal amount,
+      final LocalDate date,
+      final Set<TaxGroupMappings> taxGroupMappings,
+      final int scale) {
+    Map<TaxComponent, BigDecimal> map = splitTax(amount, date, taxGroupMappings, scale);
+    return incomeAmount(amount, map);
+  }
+
+  public static BigDecimal incomeAmount(
+      final BigDecimal amount, final Map<TaxComponent, BigDecimal> map) {
+    BigDecimal totalTax = totalTaxAmount(map);
+    return amount.subtract(totalTax);
+  }
+
+  public static BigDecimal totalTaxAmount(final Map<TaxComponent, BigDecimal> map) {
+    BigDecimal totalTax = BigDecimal.ZERO;
+    for (BigDecimal tax : map.values()) {
+      totalTax = totalTax.add(tax);
     }
+    return totalTax;
+  }
 
-    public static BigDecimal incomeAmount(final BigDecimal amount, final Map<TaxComponent, BigDecimal> map) {
-        BigDecimal totalTax = totalTaxAmount(map);
-        return amount.subtract(totalTax);
-    }
-
-    public static BigDecimal totalTaxAmount(final Map<TaxComponent, BigDecimal> map) {
-        BigDecimal totalTax = BigDecimal.ZERO;
-        for (BigDecimal tax : map.values()) {
-            totalTax = totalTax.add(tax);
+  public static BigDecimal addTax(
+      final BigDecimal amount,
+      final LocalDate date,
+      final List<TaxGroupMappings> taxGroupMappings,
+      final int scale) {
+    BigDecimal totalAmount = null;
+    if (amount != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+      double percentageVal = 0;
+      double amountVal = amount.doubleValue();
+      double cent_percentage = Double.valueOf("100.0");
+      for (TaxGroupMappings groupMappings : taxGroupMappings) {
+        if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
+          TaxComponent component = groupMappings.getTaxComponent();
+          BigDecimal percentage = component.getApplicablePercentage(date);
+          if (percentage != null) {
+            percentageVal = percentageVal + percentage.doubleValue();
+          }
         }
-        return totalTax;
+      }
+      double total = amountVal * cent_percentage / (cent_percentage - percentageVal);
+      totalAmount = BigDecimal.valueOf(total).setScale(scale, MoneyHelper.getRoundingMode());
     }
-
-    public static BigDecimal addTax(final BigDecimal amount, final LocalDate date, final List<TaxGroupMappings> taxGroupMappings,
-            final int scale) {
-        BigDecimal totalAmount = null;
-        if (amount != null && amount.compareTo(BigDecimal.ZERO) == 1) {
-            double percentageVal = 0;
-            double amountVal = amount.doubleValue();
-            double cent_percentage = Double.valueOf("100.0");
-            for (TaxGroupMappings groupMappings : taxGroupMappings) {
-                if (groupMappings.occursOnDayFromAndUpToAndIncluding(date)) {
-                    TaxComponent component = groupMappings.getTaxComponent();
-                    BigDecimal percentage = component.getApplicablePercentage(date);
-                    if (percentage != null) {
-                        percentageVal = percentageVal + percentage.doubleValue();
-                    }
-                }
-            }
-            double total = amountVal * cent_percentage / (cent_percentage - percentageVal);
-            totalAmount = BigDecimal.valueOf(total).setScale(scale, MoneyHelper.getRoundingMode());
-        }
-        return totalAmount;
-    }
+    return totalAmount;
+  }
 }

@@ -43,65 +43,67 @@ import org.slf4j.LoggerFactory;
  * @author Michael Vorburger.ch <mike@vorburger.ch>
  */
 public class MultiException extends Exception {
-    private final static Logger LOG = LoggerFactory.getLogger(MultiException.class);
-    private final List<Throwable> throwables;
+  private static final Logger LOG = LoggerFactory.getLogger(MultiException.class);
+  private final List<Throwable> throwables;
 
-    public MultiException(List<Throwable> problems) {
-        super("MultiException with " + problems.size() + " contained causes (details available)");
-        if (problems.isEmpty()) { throw new IllegalArgumentException("List of Throwables must not be empty"); }
-        this.throwables = new ArrayList<>(problems);
+  public MultiException(List<Throwable> problems) {
+    super("MultiException with " + problems.size() + " contained causes (details available)");
+    if (problems.isEmpty()) {
+      throw new IllegalArgumentException("List of Throwables must not be empty");
     }
+    this.throwables = new ArrayList<>(problems);
+  }
 
-    public List<Throwable> getCauses() {
-        return Collections.unmodifiableList(throwables);
-    }
+  public List<Throwable> getCauses() {
+    return Collections.unmodifiableList(throwables);
+  }
 
-    @Override
-    @SuppressWarnings("RegexpSinglelineJava")
-    public String getMessage() {
-        int i = 0;
-        StringBuilder sb = new StringBuilder(super.getMessage());
-        for (Throwable e : throwables) {
-            sb.append("\n    ");
-            sb.append(++i);
-            sb.append(". ");
-            Writer w = CharStreams.asWriter(sb);
-            e.printStackTrace(new PrintWriter(w, true));
-        }
-        sb.append("\n  which was itself thrown..");
-        return sb.toString();
+  @Override
+  @SuppressWarnings("RegexpSinglelineJava")
+  public String getMessage() {
+    int i = 0;
+    StringBuilder sb = new StringBuilder(super.getMessage());
+    for (Throwable e : throwables) {
+      sb.append("\n    ");
+      sb.append(++i);
+      sb.append(". ");
+      Writer w = CharStreams.asWriter(sb);
+      e.printStackTrace(new PrintWriter(w, true));
     }
+    sb.append("\n  which was itself thrown..");
+    return sb.toString();
+  }
 
-    @Override
-    @SuppressWarnings("RegexpSinglelineJava")
-    public void printStackTrace() {
-        LOG.info("{}", super.getMessage());
-        int i = 0;
-        for (Throwable e : throwables) {
-            LOG.info("{}.",++i);
-            e.printStackTrace();
-        }
+  @Override
+  @SuppressWarnings("RegexpSinglelineJava")
+  public void printStackTrace() {
+    LOG.info("{}", super.getMessage());
+    int i = 0;
+    for (Throwable e : throwables) {
+      LOG.info("{}.", ++i);
+      e.printStackTrace();
     }
+  }
 
-    @Override
-    @SuppressWarnings("RegexpSinglelineJava")
-    public void printStackTrace(PrintStream s) {
-        s.println(super.getMessage());
-        int i = 0;
-        for (Throwable e : throwables) {
-            s.print(++i + ".");
-            e.printStackTrace(s);
-        }
+  @Override
+  @SuppressWarnings("RegexpSinglelineJava")
+  public void printStackTrace(PrintStream s) {
+    s.println(super.getMessage());
+    int i = 0;
+    for (Throwable e : throwables) {
+      s.print(++i + ".");
+      e.printStackTrace(s);
     }
+  }
 
-    @Override
-    @SuppressWarnings("RegexpSinglelineJava")
-    public void printStackTrace(PrintWriter s) {
-        s.println(super.getMessage());
-        int i = 0;
-        for (Throwable e : throwables) {
-            s.print(++i + ".");
-            e.printStackTrace(s);
-        }
+  @Override
+  @SuppressWarnings("RegexpSinglelineJava")
+  public void printStackTrace(PrintWriter s) {
+    s.println(super.getMessage());
+    int i = 0;
+    for (Throwable e : throwables) {
+      s.print(++i + ".");
+      e.printStackTrace(s);
     }
+  }
 }

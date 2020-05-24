@@ -28,12 +28,12 @@ import org.springframework.stereotype.Component;
 @CommandType(entity = "HUMAN", action = "UPDATE")
 public class ValidCommandHandler implements NewCommandSourceHandler {
 
-    public ValidCommandHandler() {
-        super();
-    }
+  public ValidCommandHandler() {
+    super();
+  }
 
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
-        return CommandProcessingResult.commandOnlyResult(command.commandId());
-    }
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand command) {
+    return CommandProcessingResult.commandOnlyResult(command.commandId());
+  }
 }

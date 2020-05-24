@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface AttendanceDropdownReadPlatformService {
 
-    List<EnumOptionData> retrieveAttendanceTypeOptions();
+  List<EnumOptionData> retrieveAttendanceTypeOptions();
 }

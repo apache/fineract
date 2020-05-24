@@ -25,81 +25,82 @@ import java.util.Set;
 /**
  * Created by Kang Breder on 07/08/19.
  */
-
 final class PocketApiResourceSwagger {
-    private PocketApiResourceSwagger() {
+  private PocketApiResourceSwagger() {}
+
+  @ApiModel(value = "PostLinkDelinkAccountsToFromPocketRequest")
+  public static final class PostLinkDelinkAccountsToFromPocketRequest {
+    private PostLinkDelinkAccountsToFromPocketRequest() {}
+
+    final class GetPocketAccountDetail {
+      private GetPocketAccountDetail() {}
+
+      @ApiModelProperty(example = "11")
+      public Integer accountId;
+
+      @ApiModelProperty(example = "LOAN")
+      public String accountType;
     }
 
-    @ApiModel(value = "PostLinkDelinkAccountsToFromPocketRequest")
-    public final static class PostLinkDelinkAccountsToFromPocketRequest {
-        private PostLinkDelinkAccountsToFromPocketRequest() {
+    public Set<GetPocketAccountDetail> accountDetail;
+  }
+
+  @ApiModel(value = "PostLinkDelinkAccountsToFromPocketResponse")
+  public static final class PostLinkDelinkAccountsToFromPocketResponse {
+    private PostLinkDelinkAccountsToFromPocketResponse() {}
+
+    @ApiModelProperty(example = "6")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "GetAccountsLinkedToPocketResponse")
+  public static final class GetAccountsLinkedToPocketResponse {
+    private GetAccountsLinkedToPocketResponse() {}
+
+    final class GetPocketLoanAccounts {
+      private GetPocketLoanAccounts() {}
+
+      @ApiModelProperty(example = "6")
+      public Integer pocketId;
+
+      @ApiModelProperty(example = "11")
+      public Integer accountId;
+
+      @ApiModelProperty(example = "2")
+      public Integer accountType;
+
+      @ApiModelProperty(example = "000000011")
+      public Integer accountNumber;
+
+      @ApiModelProperty(example = "10")
+      public Integer id;
     }
-        final class GetPocketAccountDetail {
-            private GetPocketAccountDetail() {
-            }
 
-            @ApiModelProperty(example = "11")
-            public Integer accountId;
-            @ApiModelProperty(example = "LOAN")
-            public String accountType;
-        }
-        public Set<GetPocketAccountDetail> accountDetail;
+    final class GetPocketSavingAccounts {
+      private GetPocketSavingAccounts() {}
+
+      @ApiModelProperty(example = "6")
+      public Integer pocketId;
+
+      @ApiModelProperty(example = "2")
+      public Integer accountId;
+
+      @ApiModelProperty(example = "3")
+      public Integer accountType;
+
+      @ApiModelProperty(example = "000000002")
+      public Integer accountNumber;
+
+      @ApiModelProperty(example = "11")
+      public Integer id;
     }
 
-    @ApiModel(value = "PostLinkDelinkAccountsToFromPocketResponse")
-    public final static class PostLinkDelinkAccountsToFromPocketResponse {
-        private PostLinkDelinkAccountsToFromPocketResponse() {
-    }
-        @ApiModelProperty(example = "6")
-        public Integer resourceId;
+    final class GetPocketShareAccounts {
+      private GetPocketShareAccounts() {}
     }
 
-    @ApiModel(value = "GetAccountsLinkedToPocketResponse")
-    public final static class GetAccountsLinkedToPocketResponse {
-        private GetAccountsLinkedToPocketResponse() {
-        }
-
-        final class GetPocketLoanAccounts {
-            private GetPocketLoanAccounts() {
-            }
-
-            @ApiModelProperty(example = "6")
-            public Integer pocketId;
-            @ApiModelProperty(example = "11")
-            public Integer accountId;
-            @ApiModelProperty(example = "2")
-            public Integer accountType;
-            @ApiModelProperty(example = "000000011")
-            public Integer accountNumber;
-            @ApiModelProperty(example = "10")
-            public Integer id;
-        }
-
-        final class GetPocketSavingAccounts {
-            private GetPocketSavingAccounts() {
-            }
-
-            @ApiModelProperty(example = "6")
-            public Integer pocketId;
-            @ApiModelProperty(example = "2")
-            public Integer accountId;
-            @ApiModelProperty(example = "3")
-            public Integer accountType;
-            @ApiModelProperty(example = "000000002")
-            public Integer accountNumber;
-            @ApiModelProperty(example = "11")
-            public Integer id;
-        }
-
-        final class GetPocketShareAccounts {
-            private GetPocketShareAccounts() {
-            }
-
-        }
-
-        public Set<GetPocketLoanAccounts> loanAccounts;
-        public Set<GetPocketSavingAccounts> savingAccounts;
-        public Set<GetPocketShareAccounts> shareAccounts;
-    }
+    public Set<GetPocketLoanAccounts> loanAccounts;
+    public Set<GetPocketSavingAccounts> savingAccounts;
+    public Set<GetPocketShareAccounts> shareAccounts;
+  }
 }
-

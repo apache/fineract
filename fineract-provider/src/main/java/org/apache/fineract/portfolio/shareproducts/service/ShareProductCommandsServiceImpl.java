@@ -30,29 +30,43 @@ import org.springframework.stereotype.Service;
 @Service(value = "SHAREPRODUCT_COMMANDSERVICE")
 public class ShareProductCommandsServiceImpl implements ProductCommandsService {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public ShareProductCommandsServiceImpl(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
+  @Autowired
+  public ShareProductCommandsServiceImpl(final FromJsonHelper fromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonHelper;
+  }
+
+  public CommandProcessingResult postDividends(Long productId, JsonCommand jsonCommand) {
+    return null;
+  }
+
+  @Override
+  public Object handleCommand(Long productId, String command, String jsonBody) {
+    final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonBody);
+    final JsonCommand jsonCommand =
+        JsonCommand.from(
+            jsonBody,
+            parsedCommand,
+            this.fromApiJsonHelper,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    if (ShareProductApiConstants.PREIEW_DIVIDENDS_COMMAND_STRING.equals(command)) {
+      return null;
+    } else if (ShareProductApiConstants.POST_DIVIDENdS_COMMAND_STRING.equals(command)) {
+      return postDividends(productId, jsonCommand);
     }
-
-
-    public CommandProcessingResult postDividends(Long productId, JsonCommand jsonCommand) {
-        return null ;
-    }
-
-    @Override
-    public Object handleCommand(Long productId, String command, String jsonBody) {
-        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonBody);
-        final JsonCommand jsonCommand = JsonCommand.from(jsonBody, parsedCommand, this.fromApiJsonHelper, null, null, null, null, null,
-                null, null, null, null, null,null,null);
-        if (ShareProductApiConstants.PREIEW_DIVIDENDS_COMMAND_STRING.equals(command)) {
-            return null ;
-        } else if (ShareProductApiConstants.POST_DIVIDENdS_COMMAND_STRING.equals(command)) { return postDividends(productId,
-                jsonCommand); }
-        // throw unknow commandexception
-        return CommandProcessingResult.empty();
-    }
-
+    // throw unknow commandexception
+    return CommandProcessingResult.empty();
+  }
 }

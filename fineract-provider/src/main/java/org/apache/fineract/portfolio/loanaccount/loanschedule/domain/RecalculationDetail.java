@@ -23,28 +23,28 @@ import org.joda.time.LocalDate;
 
 public class RecalculationDetail {
 
-    private LocalDate transactionDate;
-    private boolean isProcessed;
-    private LoanTransaction transaction;
+  private LocalDate transactionDate;
+  private boolean isProcessed;
+  private LoanTransaction transaction;
 
-    public RecalculationDetail(final LocalDate transactionDate, final LoanTransaction transaction) {
-        this.transactionDate = transactionDate;
-        this.transaction = transaction;
-    }
+  public RecalculationDetail(final LocalDate transactionDate, final LoanTransaction transaction) {
+    this.transactionDate = transactionDate;
+    this.transaction = transaction;
+  }
 
-    public LocalDate getTransactionDate() {
-        return this.transactionDate;
-    }
+  public LocalDate getTransactionDate() {
+    return this.transactionDate;
+  }
 
-    public LoanTransaction getTransaction() {
-        return this.transaction;
-    }
+  public LoanTransaction getTransaction() {
+    return this.transaction;
+  }
 
-    public boolean isProcessed() {
-        return this.isProcessed;
-    }
+  public boolean isProcessed() {
+    return this.isProcessed;
+  }
 
-    public void setProcessed(boolean isProcessed) {
-        this.isProcessed = isProcessed;
-    }
+  public void setProcessed(boolean isProcessed) {
+    this.isProcessed = isProcessed;
+  }
 }

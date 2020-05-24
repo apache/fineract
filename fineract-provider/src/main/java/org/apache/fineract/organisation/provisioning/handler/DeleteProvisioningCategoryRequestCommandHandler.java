@@ -31,18 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PROVISIONCATEGORY", action = "DELETE")
 public class DeleteProvisioningCategoryRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
+  private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
 
-    @Autowired
-    public DeleteProvisioningCategoryRequestCommandHandler(
-            ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
-        this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
-    }
+  @Autowired
+  public DeleteProvisioningCategoryRequestCommandHandler(
+      ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
+    this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningCategoryWritePlatformService.deleteProvisioningCateogry(jsonCommand);
-    }
-
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
+    return this.provisioningCategoryWritePlatformService.deleteProvisioningCateogry(jsonCommand);
+  }
 }

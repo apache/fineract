@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -26,22 +25,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class TwoFactorUtils {
 
-    private static final String TWO_FACTOR_PROFILE_NAME = "twofactor";
+  private static final String TWO_FACTOR_PROFILE_NAME = "twofactor";
 
-    private final Environment environment;
+  private final Environment environment;
 
-    @Autowired
-    public TwoFactorUtils(Environment environment) {
-        this.environment = environment;
+  @Autowired
+  public TwoFactorUtils(Environment environment) {
+    this.environment = environment;
+  }
+
+  public boolean isTwoFactorAuthEnabled() {
+    for (final String profile : this.environment.getActiveProfiles()) {
+      if (TWO_FACTOR_PROFILE_NAME.equals(profile)) {
+        return true;
+      }
     }
-
-
-    public boolean isTwoFactorAuthEnabled() {
-        for(final String profile : this.environment.getActiveProfiles()) {
-            if(TWO_FACTOR_PROFILE_NAME.equals(profile)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    return false;
+  }
 }

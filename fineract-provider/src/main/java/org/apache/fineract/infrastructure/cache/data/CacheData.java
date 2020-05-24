@@ -22,17 +22,18 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class CacheData {
 
-    @SuppressWarnings("unused")
-    private final EnumOptionData cacheType;
-    @SuppressWarnings("unused")
-    private final boolean enabled;
+  @SuppressWarnings("unused")
+  private final EnumOptionData cacheType;
 
-    public static CacheData instance(final EnumOptionData cacheType, final boolean enabled) {
-        return new CacheData(cacheType, enabled);
-    }
+  @SuppressWarnings("unused")
+  private final boolean enabled;
 
-    private CacheData(final EnumOptionData cacheType, final boolean enabled) {
-        this.cacheType = cacheType;
-        this.enabled = enabled;
-    }
+  public static CacheData instance(final EnumOptionData cacheType, final boolean enabled) {
+    return new CacheData(cacheType, enabled);
+  }
+
+  private CacheData(final EnumOptionData cacheType, final boolean enabled) {
+    this.cacheType = cacheType;
+    this.enabled = enabled;
+  }
 }

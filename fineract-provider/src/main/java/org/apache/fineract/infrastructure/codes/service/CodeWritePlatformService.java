@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface CodeWritePlatformService {
 
-    CommandProcessingResult createCode(JsonCommand command);
+  CommandProcessingResult createCode(JsonCommand command);
 
-    CommandProcessingResult updateCode(Long codeId, JsonCommand command);
+  CommandProcessingResult updateCode(Long codeId, JsonCommand command);
 
-    CommandProcessingResult deleteCode(Long codeId);
+  CommandProcessingResult deleteCode(Long codeId);
 }

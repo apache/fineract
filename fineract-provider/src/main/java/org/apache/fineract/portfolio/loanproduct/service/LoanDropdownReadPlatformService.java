@@ -25,34 +25,35 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 
 public interface LoanDropdownReadPlatformService {
 
-    List<EnumOptionData> retrieveLoanAmortizationTypeOptions();
+  List<EnumOptionData> retrieveLoanAmortizationTypeOptions();
 
-    List<EnumOptionData> retrieveLoanInterestTypeOptions();
+  List<EnumOptionData> retrieveLoanInterestTypeOptions();
 
-    List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
+  List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
 
-    List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions();
+  List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions();
 
-    List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
+  List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
 
-    List<EnumOptionData> retrieveRepaymentFrequencyOptionsForNthDayOfMonth();
+  List<EnumOptionData> retrieveRepaymentFrequencyOptionsForNthDayOfMonth();
 
-    List<EnumOptionData> retrieveRepaymentFrequencyOptionsForDaysOfWeek();
+  List<EnumOptionData> retrieveRepaymentFrequencyOptionsForDaysOfWeek();
 
-    List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
+  List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
 
-    Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
+  Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
 
-    List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions();
+  List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions();
 
-    List<EnumOptionData> retrieveInterestRecalculationCompoundingTypeOptions();
-    List<EnumOptionData> retrieveInterestRecalculationNthDayTypeOptions();
-    List<EnumOptionData> retrieveInterestRecalculationDayOfWeekTypeOptions();
+  List<EnumOptionData> retrieveInterestRecalculationCompoundingTypeOptions();
 
-    List<EnumOptionData> retrieveRescheduleStrategyTypeOptions();
+  List<EnumOptionData> retrieveInterestRecalculationNthDayTypeOptions();
 
-    List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions();
+  List<EnumOptionData> retrieveInterestRecalculationDayOfWeekTypeOptions();
 
-    List<EnumOptionData> retrivePreCloseInterestCalculationStrategyOptions();
+  List<EnumOptionData> retrieveRescheduleStrategyTypeOptions();
 
+  List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions();
+
+  List<EnumOptionData> retrivePreCloseInterestCalculationStrategyOptions();
 }

@@ -24,11 +24,11 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InterestRateChartDropdownReadPlatformServiceImpl implements InterestRateChartDropdownReadPlatformService {
+public class InterestRateChartDropdownReadPlatformServiceImpl
+    implements InterestRateChartDropdownReadPlatformService {
 
-    @Override
-    public Collection<EnumOptionData> retrievePeriodTypeOptions() {
-        return InterestRateChartEnumerations.periodType(PeriodFrequencyType.values());
-    }
-
+  @Override
+  public Collection<EnumOptionData> retrievePeriodTypeOptions() {
+    return InterestRateChartEnumerations.periodType(PeriodFrequencyType.values());
+  }
 }

@@ -32,58 +32,55 @@ import org.joda.time.LocalDate;
 @Table(name = "m_tax_component_history")
 public class TaxComponentHistory extends AbstractAuditableCustom {
 
-    @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
-    private BigDecimal percentage;
+  @Column(name = "percentage", scale = 6, precision = 19, nullable = false)
+  private BigDecimal percentage;
 
-    @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+  @Column(name = "start_date", nullable = false)
+  @Temporal(TemporalType.DATE)
+  private Date startDate;
 
-    @Column(name = "end_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+  @Column(name = "end_date", nullable = false)
+  @Temporal(TemporalType.DATE)
+  private Date endDate;
 
-    protected TaxComponentHistory() {
+  protected TaxComponentHistory() {}
 
+  private TaxComponentHistory(
+      final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
+    this.percentage = percentage;
+    this.startDate = startDate.toDate();
+    this.endDate = endDate.toDate();
+  }
+
+  public static TaxComponentHistory createTaxComponentHistory(
+      final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
+    return new TaxComponentHistory(percentage, startDate, endDate);
+  }
+
+  public LocalDate startDate() {
+    LocalDate startDate = null;
+    if (this.startDate != null) {
+      startDate = new LocalDate(this.startDate);
     }
+    return startDate;
+  }
 
-    private TaxComponentHistory(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
-        this.percentage = percentage;
-        this.startDate = startDate.toDate();
-        this.endDate = endDate.toDate();
+  public LocalDate endDate() {
+    LocalDate endDate = null;
+    if (this.endDate != null) {
+      endDate = new LocalDate(this.endDate);
     }
+    return endDate;
+  }
 
-    public static TaxComponentHistory createTaxComponentHistory(final BigDecimal percentage, final LocalDate startDate,
-            final LocalDate endDate) {
-        return new TaxComponentHistory(percentage, startDate, endDate);
+  public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
+    if (this.endDate == null) {
+      return target != null && target.isAfter(startDate());
     }
+    return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
+  }
 
-    public LocalDate startDate(){
-        LocalDate startDate = null;
-        if(this.startDate != null){
-            startDate = new LocalDate(this.startDate);
-        }
-        return startDate;
-    }
-
-    public LocalDate endDate(){
-        LocalDate endDate = null;
-        if(this.endDate != null){
-            endDate = new LocalDate(this.endDate);
-        }
-        return endDate;
-    }
-
-    public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        if(this.endDate == null){
-            return target != null && target.isAfter(startDate());
-        }
-        return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
-    }
-
-
-    public BigDecimal getPercentage() {
-        return this.percentage;
-    }
-
+  public BigDecimal getPercentage() {
+    return this.percentage;
+  }
 }

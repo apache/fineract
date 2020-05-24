@@ -33,7 +33,6 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Util for RestAssured tests. This class here in src/test is copy/pasted :(
  * from and identical to the one in src/integrationTest; please keep it in sync.
@@ -43,38 +42,52 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("unchecked")
 public class Utils {
-    private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
-    public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
+  private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+  public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
 
-    private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
+  private static final String LOGIN_URL =
+      "/fineract-provider/api/v1/authentication?username=mifos&password=password&"
+          + TENANT_IDENTIFIER;
 
-    public static void initializeRESTAssured() {
-        RestAssured.baseURI = "https://localhost";
-        RestAssured.port = 8443;
-        RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
-        RestAssured.useRelaxedHTTPSValidation();
+  public static void initializeRESTAssured() {
+    RestAssured.baseURI = "https://localhost";
+    RestAssured.port = 8443;
+    RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
+    RestAssured.useRelaxedHTTPSValidation();
+  }
+
+  public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+    try {
+      LOG.info("-----------------------------------LOGIN-----------------------------------------");
+      final String json = RestAssured.post(LOGIN_URL).asString();
+      assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
+      return JsonPath.with(json).get("base64EncodedAuthenticationKey");
+    } catch (final Exception e) {
+      if (e instanceof HttpHostConnectException) {
+        final HttpHostConnectException hh = (HttpHostConnectException) e;
+        fail("Failed to connect to fineract platform:" + hh.getMessage());
+      }
+
+      throw new RuntimeException(e);
     }
+  }
 
-    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
-        try {
-            LOG.info("-----------------------------------LOGIN-----------------------------------------");
-            final String json = RestAssured.post(LOGIN_URL).asString();
-            assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
-            return JsonPath.with(json).get("base64EncodedAuthenticationKey");
-        } catch (final Exception e) {
-            if (e instanceof HttpHostConnectException) {
-                final HttpHostConnectException hh = (HttpHostConnectException) e;
-                fail("Failed to connect to fineract platform:" + hh.getMessage());
-            }
-
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String getURL, final String jsonAttributeToGetBack) {
-        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        return (T) from(json).get(jsonAttributeToGetBack);
-    }
-
+  public static <T> T performServerGet(
+      final RequestSpecification requestSpec,
+      final ResponseSpecification responseSpec,
+      final String getURL,
+      final String jsonAttributeToGetBack) {
+    final String json =
+        given()
+            .spec(requestSpec)
+            .expect()
+            .spec(responseSpec)
+            .log()
+            .ifError()
+            .when()
+            .get(getURL)
+            .andReturn()
+            .asString();
+    return (T) from(json).get(jsonAttributeToGetBack);
+  }
 }

@@ -29,19 +29,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "SAVINGSACCOUNT", action = "APPROVALUNDO")
-public class SavingsAccountApplicationApprovalUndoCommandHandler implements NewCommandSourceHandler {
+public class SavingsAccountApplicationApprovalUndoCommandHandler
+    implements NewCommandSourceHandler {
 
-    private final SavingsApplicationProcessWritePlatformService writePlatformService;
+  private final SavingsApplicationProcessWritePlatformService writePlatformService;
 
-    @Autowired
-    public SavingsAccountApplicationApprovalUndoCommandHandler(final SavingsApplicationProcessWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public SavingsAccountApplicationApprovalUndoCommandHandler(
+      final SavingsApplicationProcessWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.undoApplicationApproval(command.entityId(), command);
-    }
+    return this.writePlatformService.undoApplicationApproval(command.entityId(), command);
+  }
 }

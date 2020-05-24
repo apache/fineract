@@ -30,21 +30,20 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives
 @Table(name = "m_deposit_account_interest_incentives")
 public class DepositAccountInterestIncentive extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)
-    private DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs;
+  @ManyToOne
+  @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)
+  private DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs;
 
-    @Embedded
-    private InterestIncentivesFields interestIncentivesFields;
+  @Embedded private InterestIncentivesFields interestIncentivesFields;
 
-    protected DepositAccountInterestIncentive() {
-        // TODO Auto-generated constructor stub
-    }
+  protected DepositAccountInterestIncentive() {
+    // TODO Auto-generated constructor stub
+  }
 
-    public DepositAccountInterestIncentive(final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
-            final InterestIncentivesFields interestIncentivesFields) {
-        this.depositAccountInterestRateChartSlabs = depositAccountInterestRateChartSlabs;
-        this.interestIncentivesFields = interestIncentivesFields;
-    }
-
+  public DepositAccountInterestIncentive(
+      final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
+      final InterestIncentivesFields interestIncentivesFields) {
+    this.depositAccountInterestRateChartSlabs = depositAccountInterestRateChartSlabs;
+    this.interestIncentivesFields = interestIncentivesFields;
+  }
 }

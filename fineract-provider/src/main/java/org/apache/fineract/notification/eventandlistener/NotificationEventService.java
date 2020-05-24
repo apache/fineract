@@ -31,19 +31,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationEventService {
 
-    private final JmsTemplate jmsTemplate;
+  private final JmsTemplate jmsTemplate;
 
-    @Autowired
-    public NotificationEventService(JmsTemplate jmsTemplate) {
-        this.jmsTemplate = jmsTemplate;
-    }
+  @Autowired
+  public NotificationEventService(JmsTemplate jmsTemplate) {
+    this.jmsTemplate = jmsTemplate;
+  }
 
-    public void broadcastNotification(final Destination destination, final NotificationData notificationData) {
-        this.jmsTemplate.send(destination, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                return session.createObjectMessage(notificationData);
-            }
+  public void broadcastNotification(
+      final Destination destination, final NotificationData notificationData) {
+    this.jmsTemplate.send(
+        destination,
+        new MessageCreator() {
+          @Override
+          public Message createMessage(Session session) throws JMSException {
+            return session.createObjectMessage(notificationData);
+          }
         });
-    }
+  }
 }

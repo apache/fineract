@@ -22,7 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class DividendNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public DividendNotFoundException(final Long id, String type) {
-        super("error.msg.dividend.id.invalid", type + " dividend with identifier " + id + " does not exist", id);
-    }
+  public DividendNotFoundException(final Long id, String type) {
+    super(
+        "error.msg.dividend.id.invalid",
+        type + " dividend with identifier " + id + " does not exist",
+        id);
+  }
 }

@@ -30,28 +30,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DeleteOneToManyDatatableEntryCommandHandler implements NewCommandSourceHandler {
 
-    private final ReadWriteNonCoreDataService writePlatformService;
+  private final ReadWriteNonCoreDataService writePlatformService;
 
-    @Autowired
-    public DeleteOneToManyDatatableEntryCommandHandler(final ReadWriteNonCoreDataService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public DeleteOneToManyDatatableEntryCommandHandler(
+      final ReadWriteNonCoreDataService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final CommandProcessingResult commandProcessingResult = this.writePlatformService.deleteDatatableEntry(command.entityName(),
-                command.entityId(), command.subentityId());
+    final CommandProcessingResult commandProcessingResult =
+        this.writePlatformService.deleteDatatableEntry(
+            command.entityName(), command.entityId(), command.subentityId());
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(command.entityId()) //
-                .withOfficeId(commandProcessingResult.getOfficeId()) //
-                .withGroupId(commandProcessingResult.getGroupId()) //
-                .withClientId(commandProcessingResult.getClientId()) //
-                .withSavingsId(commandProcessingResult.getSavingsId()) //
-                .withLoanId(commandProcessingResult.getLoanId()) //
-                .build();
-    }
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(command.entityId()) //
+        .withOfficeId(commandProcessingResult.getOfficeId()) //
+        .withGroupId(commandProcessingResult.getGroupId()) //
+        .withClientId(commandProcessingResult.getClientId()) //
+        .withSavingsId(commandProcessingResult.getSavingsId()) //
+        .withLoanId(commandProcessingResult.getLoanId()) //
+        .build();
+  }
 }

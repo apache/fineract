@@ -29,16 +29,16 @@ import org.junit.Before;
 
 public class CurrencyIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private SavingsAccountHelper savingsAccountHelper;
+  private ResponseSpecification responseSpec;
+  private RequestSpecification requestSpec;
+  private SavingsAccountHelper savingsAccountHelper;
 
-
-    @Before
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-    }
+  @Before
+  public void setup() {
+    Utils.initializeRESTAssured();
+    this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+    this.requestSpec.header(
+        "Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+    this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+  }
 }

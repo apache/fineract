@@ -23,7 +23,7 @@ import org.apache.fineract.mix.data.MixTaxonomyData;
 
 public interface MixTaxonomyReadPlatformService {
 
-    List<MixTaxonomyData> retrieveAll();
+  List<MixTaxonomyData> retrieveAll();
 
-    MixTaxonomyData retrieveOne(Long id);
+  MixTaxonomyData retrieveOne(Long id);
 }

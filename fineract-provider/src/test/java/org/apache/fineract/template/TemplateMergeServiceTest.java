@@ -50,82 +50,85 @@ import org.junit.Test;
 
 public class TemplateMergeServiceTest {
 
-    private TemplateMergeService tms = new TemplateMergeService();
+  private TemplateMergeService tms = new TemplateMergeService();
 
-    @Before
-    public void setUpForEachTestCase() throws Exception {
+  @Before
+  public void setUpForEachTestCase() throws Exception {
 
-        Field field = MoneyHelper.class.getDeclaredField("roundingMode");
-        field.setAccessible(true);
-        field.set(null, RoundingMode.HALF_EVEN);
-    }
+    Field field = MoneyHelper.class.getDeclaredField("roundingMode");
+    field.setAccessible(true);
+    field.set(null, RoundingMode.HALF_EVEN);
+  }
 
+  @Test
+  public void compileHelloTemplate() throws Exception {
+    String templateText = "Hello Test for Template {{file.name}}!";
 
+    File file = new File("hello");
+    Map<String, Object> scopes = new HashMap<>();
+    scopes.put("file", file);
 
-    @Test
-    public void compileHelloTemplate() throws Exception {
-        String templateText = "Hello Test for Template {{file.name}}!";
+    String output = compileTemplateText(templateText, scopes);
+    assertEquals("Hello Test for Template hello!", output);
+  }
 
-        File file = new File("hello");
-        Map<String, Object> scopes = new HashMap<>();
-        scopes.put("file", file);
+  @Test
+  public void compileLoanSummary() throws IOException {
+    LocalDate july2nd = new LocalDate(2012, 7, 2);
+    MonetaryCurrency usDollars =
+        new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
+    List<LoanRepaymentScheduleInstallment> installments =
+        LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
 
-        String output = compileTemplateText(templateText, scopes);
-        assertEquals("Hello Test for Template hello!", output);
-    }
+    Map<String, Object> scopes = new HashMap<>();
+    scopes.put("installments", installments);
 
-    @Test
-    public void compileLoanSummary() throws IOException {
-        LocalDate july2nd = new LocalDate(2012, 7, 2);
-        MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        List<LoanRepaymentScheduleInstallment> installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
+    String templateText =
+        Resources.toString(Resources.getResource("template.mustache"), StandardCharsets.UTF_8);
+    String expectedOutput =
+        Resources.toString(Resources.getResource("template-expected.html"), StandardCharsets.UTF_8);
 
-        Map<String, Object> scopes = new HashMap<>();
-        scopes.put("installments", installments);
+    String output = compileTemplateText(templateText, scopes);
+    assertEquals(expectedOutput, output);
+  }
 
-        String templateText = Resources.toString(Resources.getResource("template.mustache"), StandardCharsets.UTF_8);
-        String expectedOutput = Resources.toString(Resources.getResource("template-expected.html"), StandardCharsets.UTF_8);
+  @Test
+  public void arrayUsingLoop() throws Exception {
+    String templateText = "Hello Test for Template{{#data.name}} {{.}}{{/data.name}}!";
+    String jsonData = "{\"name\": [ \"Michael\", \"Terence\" ] }";
+    String expectedOutput = "Hello Test for Template Michael Terence!";
 
-        String output = compileTemplateText(templateText, scopes);
-        assertEquals(expectedOutput, output);
-    }
+    Map<String, Object> scopes = new HashMap<>();
+    scopes.put("data", createMapFromJSON(jsonData));
 
-    @Test
-    public void arrayUsingLoop() throws Exception {
-        String templateText = "Hello Test for Template{{#data.name}} {{.}}{{/data.name}}!";
-        String jsonData = "{\"name\": [ \"Michael\", \"Terence\" ] }";
-        String expectedOutput = "Hello Test for Template Michael Terence!";
+    String output = compileTemplateText(templateText, scopes);
+    assertEquals(expectedOutput, output);
+  }
 
-        Map<String, Object> scopes = new HashMap<>();
-        scopes.put("data", createMapFromJSON(jsonData));
+  @Test
+  public void arrayUsingIndex() throws Exception {
+    String templateText = "Hello Test for Template {{data.name#1}} & {{data.name#0}}!";
+    String jsonData = "{\"name\": [ \"Michael\", \"Terence\" ] }";
+    String expectedOutput = "Hello Test for Template Terence & Michael!";
 
-        String output = compileTemplateText(templateText, scopes);
-        assertEquals(expectedOutput, output);
-    }
+    Map<String, Object> scopes = new HashMap<>();
+    scopes.put("data", createMapFromJSON(jsonData));
 
-    @Test
-    public void arrayUsingIndex() throws Exception {
-        String templateText = "Hello Test for Template {{data.name#1}} & {{data.name#0}}!";
-        String jsonData = "{\"name\": [ \"Michael\", \"Terence\" ] }";
-        String expectedOutput = "Hello Test for Template Terence & Michael!";
+    String output = compileTemplateText(templateText, scopes);
+    assertEquals(expectedOutput, output);
+  }
 
-        Map<String, Object> scopes = new HashMap<>();
-        scopes.put("data", createMapFromJSON(jsonData));
+  protected String compileTemplateText(String templateText, Map<String, Object> scope)
+      throws MalformedURLException, IOException {
+    List<TemplateMapper> mappers = new ArrayList<>();
+    Template template = new Template("TemplateName", templateText, null, null, mappers);
+    return tms.compile(template, scope);
+  }
 
-        String output = compileTemplateText(templateText, scopes);
-        assertEquals(expectedOutput, output);
-    }
-
-    protected String compileTemplateText(String templateText, Map<String, Object> scope) throws MalformedURLException, IOException {
-        List<TemplateMapper> mappers = new ArrayList<>();
-        Template template = new Template("TemplateName", templateText, null, null, mappers);
-        return tms.compile(template, scope);
-    }
-
-    protected Map<String, Object> createMapFromJSON(String jsonText) {
-        Gson gson = new Gson();
-        Type ssMap = new TypeToken<Map<String, Object>>(){}.getType();
-        JsonElement json = JsonParser.parseString(jsonText);
-        return gson.fromJson(json, ssMap);
-    }
+  protected Map<String, Object> createMapFromJSON(String jsonText) {
+    Gson gson = new Gson();
+    Type ssMap = new TypeToken<Map<String, Object>>() {}.getType();
+    JsonElement json = JsonParser.parseString(jsonText);
+    return gson.fromJson(json, ssMap);
+  }
 }

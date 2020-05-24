@@ -45,161 +45,189 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements ClientIdentifierWritePlatformService {
+public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl
+    implements ClientIdentifierWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ClientIdentifierWritePlatformServiceJpaRepositoryImpl.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(ClientIdentifierWritePlatformServiceJpaRepositoryImpl.class);
 
-    private final PlatformSecurityContext context;
-    private final ClientRepositoryWrapper clientRepository;
-    private final ClientIdentifierRepository clientIdentifierRepository;
-    private final CodeValueRepositoryWrapper codeValueRepository;
-    private final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer;
+  private final PlatformSecurityContext context;
+  private final ClientRepositoryWrapper clientRepository;
+  private final ClientIdentifierRepository clientIdentifierRepository;
+  private final CodeValueRepositoryWrapper codeValueRepository;
+  private final ClientIdentifierCommandFromApiJsonDeserializer
+      clientIdentifierCommandFromApiJsonDeserializer;
 
-    @Autowired
-    public ClientIdentifierWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepositoryWrapper clientRepository, final ClientIdentifierRepository clientIdentifierRepository,
-            final CodeValueRepositoryWrapper codeValueRepository,
-            final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer) {
-        this.context = context;
-        this.clientRepository = clientRepository;
-        this.clientIdentifierRepository = clientIdentifierRepository;
-        this.codeValueRepository = codeValueRepository;
-        this.clientIdentifierCommandFromApiJsonDeserializer = clientIdentifierCommandFromApiJsonDeserializer;
+  @Autowired
+  public ClientIdentifierWritePlatformServiceJpaRepositoryImpl(
+      final PlatformSecurityContext context,
+      final ClientRepositoryWrapper clientRepository,
+      final ClientIdentifierRepository clientIdentifierRepository,
+      final CodeValueRepositoryWrapper codeValueRepository,
+      final ClientIdentifierCommandFromApiJsonDeserializer
+          clientIdentifierCommandFromApiJsonDeserializer) {
+    this.context = context;
+    this.clientRepository = clientRepository;
+    this.clientIdentifierRepository = clientIdentifierRepository;
+    this.codeValueRepository = codeValueRepository;
+    this.clientIdentifierCommandFromApiJsonDeserializer =
+        clientIdentifierCommandFromApiJsonDeserializer;
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult addClientIdentifier(
+      final Long clientId, final JsonCommand command) {
+
+    this.context.authenticatedUser();
+    final ClientIdentifierCommand clientIdentifierCommand =
+        this.clientIdentifierCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+    clientIdentifierCommand.validateForCreate();
+
+    final String documentKey = clientIdentifierCommand.getDocumentKey();
+    String documentTypeLabel = null;
+    Long documentTypeId = null;
+    try {
+      final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+
+      final CodeValue documentType =
+          this.codeValueRepository.findOneWithNotFoundDetection(
+              clientIdentifierCommand.getDocumentTypeId());
+      documentTypeId = documentType.getId();
+      documentTypeLabel = documentType.label();
+
+      final ClientIdentifier clientIdentifier =
+          ClientIdentifier.fromJson(client, documentType, command);
+
+      this.clientIdentifierRepository.save(clientIdentifier);
+
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .withOfficeId(client.officeId()) //
+          .withClientId(clientId) //
+          .withEntityId(clientIdentifier.getId()) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      handleClientIdentifierDataIntegrityViolation(
+          documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
+      return CommandProcessingResult.empty();
+    } catch (final PersistenceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleClientIdentifierDataIntegrityViolation(
+          documentTypeLabel, documentTypeId, documentKey, throwable, dve);
+      return CommandProcessingResult.empty();
     }
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult addClientIdentifier(final Long clientId, final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult updateClientIdentifier(
+      final Long clientId, final Long identifierId, final JsonCommand command) {
 
-        this.context.authenticatedUser();
-        final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        clientIdentifierCommand.validateForCreate();
+    this.context.authenticatedUser();
+    final ClientIdentifierCommand clientIdentifierCommand =
+        this.clientIdentifierCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+    clientIdentifierCommand.validateForUpdate();
 
-        final String documentKey = clientIdentifierCommand.getDocumentKey();
-        String documentTypeLabel = null;
-        Long documentTypeId = null;
-        try {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+    String documentTypeLabel = null;
+    String documentKey = null;
+    Long documentTypeId = clientIdentifierCommand.getDocumentTypeId();
+    try {
+      CodeValue documentType = null;
 
-            final CodeValue documentType = this.codeValueRepository.findOneWithNotFoundDetection(clientIdentifierCommand
-                    .getDocumentTypeId());
-            documentTypeId = documentType.getId();
-            documentTypeLabel = documentType.label();
+      final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+      final ClientIdentifier clientIdentifierForUpdate =
+          this.clientIdentifierRepository
+              .findById(identifierId)
+              .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
 
-            final ClientIdentifier clientIdentifier = ClientIdentifier.fromJson(client, documentType, command);
+      final Map<String, Object> changes = clientIdentifierForUpdate.update(command);
 
-            this.clientIdentifierRepository.save(clientIdentifier);
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withOfficeId(client.officeId()) //
-                    .withClientId(clientId) //
-                    .withEntityId(clientIdentifier.getId()) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
-            return CommandProcessingResult.empty();
-        }catch(final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
-             return CommandProcessingResult.empty();
+      if (changes.containsKey("documentTypeId")) {
+        documentType = this.codeValueRepository.findOneWithNotFoundDetection(documentTypeId);
+        if (documentType == null) {
+          throw new CodeValueNotFoundException(documentTypeId);
         }
+
+        documentTypeId = documentType.getId();
+        documentTypeLabel = documentType.label();
+        clientIdentifierForUpdate.update(documentType);
+      }
+
+      if (changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
+        documentTypeId = clientIdentifierCommand.getDocumentTypeId();
+        documentKey = clientIdentifierCommand.getDocumentKey();
+      } else if (changes.containsKey("documentTypeId") && !changes.containsKey("documentKey")) {
+        documentTypeId = clientIdentifierCommand.getDocumentTypeId();
+        documentKey = clientIdentifierForUpdate.documentKey();
+      } else if (!changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
+        documentTypeId = clientIdentifierForUpdate.documentTypeId();
+        documentKey = clientIdentifierForUpdate.documentKey();
+      }
+
+      if (!changes.isEmpty()) {
+        this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
+      }
+
+      return new CommandProcessingResultBuilder() //
+          .withCommandId(command.commandId()) //
+          .withOfficeId(client.officeId()) //
+          .withClientId(clientId) //
+          .withEntityId(identifierId) //
+          .with(changes) //
+          .build();
+    } catch (final DataIntegrityViolationException dve) {
+      handleClientIdentifierDataIntegrityViolation(
+          documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
+      return new CommandProcessingResult(Long.valueOf(-1));
+    } catch (final PersistenceException dve) {
+      Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+      handleClientIdentifierDataIntegrityViolation(
+          documentTypeLabel, documentTypeId, documentKey, throwable, dve);
+      return CommandProcessingResult.empty();
+    }
+  }
+
+  @Transactional
+  @Override
+  public CommandProcessingResult deleteClientIdentifier(
+      final Long clientId, final Long identifierId, final Long commandId) {
+
+    final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+
+    final ClientIdentifier clientIdentifier =
+        this.clientIdentifierRepository
+            .findById(identifierId)
+            .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
+    this.clientIdentifierRepository.delete(clientIdentifier);
+
+    return new CommandProcessingResultBuilder() //
+        .withCommandId(commandId) //
+        .withOfficeId(client.officeId()) //
+        .withClientId(clientId) //
+        .withEntityId(identifierId) //
+        .build();
+  }
+
+  private void handleClientIdentifierDataIntegrityViolation(
+      final String documentTypeLabel,
+      final Long documentTypeId,
+      final String documentKey,
+      final Throwable cause,
+      final Exception dve) {
+    if (cause.getMessage().contains("unique_active_client_identifier")) {
+      throw new DuplicateClientIdentifierException(documentTypeLabel);
+    } else if (cause.getMessage().contains("unique_identifier_key")) {
+      throw new DuplicateClientIdentifierException(documentTypeId, documentTypeLabel, documentKey);
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult updateClientIdentifier(final Long clientId, final Long identifierId, final JsonCommand command) {
+    logAsErrorUnexpectedDataIntegrityException(dve);
+    throw new PlatformDataIntegrityException(
+        "error.msg.clientIdentifier.unknown.data.integrity.issue",
+        "Unknown data integrity issue with resource.");
+  }
 
-        this.context.authenticatedUser();
-        final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        clientIdentifierCommand.validateForUpdate();
-
-        String documentTypeLabel = null;
-        String documentKey = null;
-        Long documentTypeId = clientIdentifierCommand.getDocumentTypeId();
-        try {
-            CodeValue documentType = null;
-
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findById(identifierId)
-                    .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
-
-            final Map<String, Object> changes = clientIdentifierForUpdate.update(command);
-
-            if (changes.containsKey("documentTypeId")) {
-                documentType = this.codeValueRepository.findOneWithNotFoundDetection(documentTypeId);
-                if (documentType == null) { throw new CodeValueNotFoundException(documentTypeId); }
-
-                documentTypeId = documentType.getId();
-                documentTypeLabel = documentType.label();
-                clientIdentifierForUpdate.update(documentType);
-            }
-
-            if (changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
-                documentTypeId = clientIdentifierCommand.getDocumentTypeId();
-                documentKey = clientIdentifierCommand.getDocumentKey();
-            } else if (changes.containsKey("documentTypeId") && !changes.containsKey("documentKey")) {
-                documentTypeId = clientIdentifierCommand.getDocumentTypeId();
-                documentKey = clientIdentifierForUpdate.documentKey();
-            } else if (!changes.containsKey("documentTypeId") && changes.containsKey("documentKey")) {
-                documentTypeId = clientIdentifierForUpdate.documentTypeId();
-                documentKey = clientIdentifierForUpdate.documentKey();
-            }
-
-            if (!changes.isEmpty()) {
-                this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
-            }
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withOfficeId(client.officeId()) //
-                    .withClientId(clientId) //
-                    .withEntityId(identifierId) //
-                    .with(changes) //
-                    .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
-        }catch(final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
-             return CommandProcessingResult.empty();
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
-
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-
-        final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findById(identifierId)
-                .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
-        this.clientIdentifierRepository.delete(clientIdentifier);
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(commandId) //
-                .withOfficeId(client.officeId()) //
-                .withClientId(clientId) //
-                .withEntityId(identifierId) //
-                .build();
-    }
-
-    private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
-            final String documentKey, final Throwable cause, final Exception dve) {
-        if (cause.getMessage().contains("unique_active_client_identifier")) {
-            throw new DuplicateClientIdentifierException(documentTypeLabel);
-        } else if (cause.getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
-                documentTypeId, documentTypeLabel, documentKey); }
-
-        logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.clientIdentifier.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
-    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error("Error occured.", dve);
-    }
+  private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
+    logger.error("Error occured.", dve);
+  }
 }

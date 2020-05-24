@@ -50,34 +50,36 @@ import org.xml.sax.SAXException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class XBRLBuilderTest {
-    private final static Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
-    @Mock
-    private NamespaceReadPlatformServiceImpl readNamespaceService;
+  private static final Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
+  @Mock private NamespaceReadPlatformServiceImpl readNamespaceService;
 
-    @InjectMocks
-    private final XBRLBuilder xbrlBuilder = new XBRLBuilder();
+  @InjectMocks private final XBRLBuilder xbrlBuilder = new XBRLBuilder();
 
-    @Before
-    public void setUp() {
-        this.readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
-        lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
-                .thenReturn(new NamespaceData(1l, "mockedprefix", "mockedurl"));
-    }
+  @Before
+  public void setUp() {
+    this.readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
+    lenient()
+        .when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
+        .thenReturn(new NamespaceData(1l, "mockedprefix", "mockedurl"));
+  }
 
-    @Test
-    public void shouldCorrectlyBuildMap() throws SAXException, IOException, ParserConfigurationException {
-        final HashMap<MixTaxonomyData, BigDecimal> map = new HashMap<MixTaxonomyData, BigDecimal>();
-        final MixTaxonomyData data1 = Mockito.mock(MixTaxonomyData.class);
-        when(data1.getName()).thenReturn("Assets");
-        map.put(data1, new BigDecimal(10000));
-        final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"),
-                "USD");
-        LOG.info("{}", result);
-        NodeList nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                .parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8)))
-                .getElementsByTagName("Assets");
-        assertNotNull(nodes);
-        assertNotNull(nodes.item(0));
-        assertEquals("Assets", nodes.item(0).getNodeName());
-    }
+  @Test
+  public void shouldCorrectlyBuildMap()
+      throws SAXException, IOException, ParserConfigurationException {
+    final HashMap<MixTaxonomyData, BigDecimal> map = new HashMap<MixTaxonomyData, BigDecimal>();
+    final MixTaxonomyData data1 = Mockito.mock(MixTaxonomyData.class);
+    when(data1.getName()).thenReturn("Assets");
+    map.put(data1, new BigDecimal(10000));
+    final String result =
+        this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
+    LOG.info("{}", result);
+    NodeList nodes =
+        DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder()
+            .parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8)))
+            .getElementsByTagName("Assets");
+    assertNotNull(nodes);
+    assertNotNull(nodes.item(0));
+    assertEquals("Assets", nodes.item(0).getNodeName());
+  }
 }

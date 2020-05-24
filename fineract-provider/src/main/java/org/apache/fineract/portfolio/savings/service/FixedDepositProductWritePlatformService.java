@@ -23,9 +23,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface FixedDepositProductWritePlatformService {
 
-    CommandProcessingResult create(JsonCommand command);
+  CommandProcessingResult create(JsonCommand command);
 
-    CommandProcessingResult update(Long productId, JsonCommand command);
+  CommandProcessingResult update(Long productId, JsonCommand command);
 
-    CommandProcessingResult delete(Long productId);
+  CommandProcessingResult delete(Long productId);
 }

@@ -22,7 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class TaxComponentNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public TaxComponentNotFoundException(final Long id) {
-        super("error.msg.tax.component.id.invalid", "tax component with identifier " + id + " does not exist", id);
-    }
+  public TaxComponentNotFoundException(final Long id) {
+    super(
+        "error.msg.tax.component.id.invalid",
+        "tax component with identifier " + id + " does not exist",
+        id);
+  }
 }

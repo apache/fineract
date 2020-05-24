@@ -25,17 +25,23 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SmsCampaignRepository extends JpaRepository<SmsCampaign, Long>, JpaSpecificationExecutor<SmsCampaign> {
+public interface SmsCampaignRepository
+    extends JpaRepository<SmsCampaign, Long>, JpaSpecificationExecutor<SmsCampaign> {
 
-    List<SmsCampaign> findByCampaignType(final Integer campaignType);
+  List<SmsCampaign> findByCampaignType(final Integer campaignType);
 
-    Collection<SmsCampaign> findByCampaignTypeAndTriggerTypeAndStatus(final Integer campaignType, final Integer triggerType,
-            final Integer status);
+  Collection<SmsCampaign> findByCampaignTypeAndTriggerTypeAndStatus(
+      final Integer campaignType, final Integer triggerType, final Integer status);
 
-    Collection<SmsCampaign> findByTriggerTypeAndStatus(final Integer triggerType, final Integer status);
+  Collection<SmsCampaign> findByTriggerTypeAndStatus(
+      final Integer triggerType, final Integer status);
 
-    Collection<SmsCampaign> findByTriggerType(final Integer triggerType) ;
+  Collection<SmsCampaign> findByTriggerType(final Integer triggerType);
 
-    @Query("SELECT campaign FROM SmsCampaign campaign WHERE campaign.paramValue LIKE :reportPattern AND campaign.triggerType=:triggerType AND campaign.status=300")
-    List<SmsCampaign> findActiveSmsCampaigns(@Param("reportPattern") final String reportPattern, @Param("triggerType") final Integer triggerType) ;
+  @Query(
+      "SELECT campaign FROM SmsCampaign campaign WHERE campaign.paramValue LIKE :reportPattern AND"
+          + " campaign.triggerType=:triggerType AND campaign.status=300")
+  List<SmsCampaign> findActiveSmsCampaigns(
+      @Param("reportPattern") final String reportPattern,
+      @Param("triggerType") final Integer triggerType);
 }

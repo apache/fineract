@@ -27,30 +27,31 @@ import org.joda.time.LocalDate;
 
 public interface LoanScheduleModelPeriod {
 
-    LoanSchedulePeriodData toData();
+  LoanSchedulePeriodData toData();
 
-    boolean isRepaymentPeriod();
+  boolean isRepaymentPeriod();
 
-    Integer periodNumber();
+  Integer periodNumber();
 
-    LocalDate periodFromDate();
+  LocalDate periodFromDate();
 
-    LocalDate periodDueDate();
+  LocalDate periodDueDate();
 
-    BigDecimal principalDue();
+  BigDecimal principalDue();
 
-    BigDecimal interestDue();
+  BigDecimal interestDue();
 
-    BigDecimal feeChargesDue();
+  BigDecimal feeChargesDue();
 
-    BigDecimal penaltyChargesDue();
+  BigDecimal penaltyChargesDue();
 
-    void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge);
+  void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge);
 
-    boolean isRecalculatedInterestComponent();
+  boolean isRecalculatedInterestComponent();
 
-    void addPrincipalAmount(Money principalDue);
+  void addPrincipalAmount(Money principalDue);
 
-    void addInterestAmount(Money interestDue);
-    Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
+  void addInterestAmount(Money interestDue);
+
+  Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
 }

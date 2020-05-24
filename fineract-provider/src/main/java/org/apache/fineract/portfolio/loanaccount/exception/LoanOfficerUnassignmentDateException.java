@@ -22,8 +22,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class LoanOfficerUnassignmentDateException extends AbstractPlatformDomainRuleException {
 
-    public LoanOfficerUnassignmentDateException(final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg.loan.loanofficer.unassign.date." + postFix, defaultUserMessage, defaultUserMessageArgs);
-    }
+  public LoanOfficerUnassignmentDateException(
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg.loan.loanofficer.unassign.date." + postFix,
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.self.shareaccounts.service;
 
 public interface AppUserShareAccountsMapperReadPlatformService {
 
-    public Boolean isShareAccountsMappedToUser(Long accountId, Long appUserId);
-
+  public Boolean isShareAccountsMappedToUser(Long accountId, Long appUserId);
 }

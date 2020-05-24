@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "ASSOCIATECLIENTS")
 public class AssociateClientsToGroupCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService writePlatformService;
+  private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Autowired
-    public AssociateClientsToGroupCommandHandler(final GroupingTypesWritePlatformService clientWritePlatformService) {
-        this.writePlatformService = clientWritePlatformService;
-    }
+  @Autowired
+  public AssociateClientsToGroupCommandHandler(
+      final GroupingTypesWritePlatformService clientWritePlatformService) {
+    this.writePlatformService = clientWritePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.associateClientsToGroup(command.entityId(), command);
-    }
+    return this.writePlatformService.associateClientsToGroup(command.entityId(), command);
+  }
 }

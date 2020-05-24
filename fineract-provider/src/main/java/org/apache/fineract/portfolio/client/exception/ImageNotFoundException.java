@@ -22,8 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 
 public class ImageNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ImageNotFoundException(final String resource, final Long resourceId) {
-        super("error.msg.entity.image.invalid", "Image for resource " + resource + " with Identifier " + resourceId + " does not exist",
-                resource, resourceId);
-    }
+  public ImageNotFoundException(final String resource, final Long resourceId) {
+    super(
+        "error.msg.entity.image.invalid",
+        "Image for resource " + resource + " with Identifier " + resourceId + " does not exist",
+        resource,
+        resourceId);
+  }
 }

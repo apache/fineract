@@ -26,64 +26,71 @@ import java.util.List;
  * Created by Chirag Gupta on 12/17/17.
  */
 final class CollectionSheetApiResourceSwagger {
-    private CollectionSheetApiResourceSwagger() {
+  private CollectionSheetApiResourceSwagger() {}
+
+  @ApiModel(value = "PostCollectionSheetRequest")
+  public static final class PostCollectionSheetRequest {
+    private PostCollectionSheetRequest() {}
+
+    final class PostCollectionSheetBulkRepaymentTransactions {
+      private PostCollectionSheetBulkRepaymentTransactions() {}
+
+      @ApiModelProperty(example = "10")
+      public Integer loanId;
+
+      @ApiModelProperty(example = "1221.36")
+      public Double transactionAmount;
+
+      @ApiModelProperty(example = "19")
+      public Integer paymentTypeId;
+
+      @ApiModelProperty(example = "1245356")
+      public Long receiptNumber;
     }
 
-    @ApiModel(value = "PostCollectionSheetRequest")
-    public final static class PostCollectionSheetRequest {
-        private PostCollectionSheetRequest() {
-        }
+    @ApiModelProperty(example = "dd MMMM yyyy")
+    public String dateFormat;
 
-        final class PostCollectionSheetBulkRepaymentTransactions {
-            private PostCollectionSheetBulkRepaymentTransactions() {
-            }
+    @ApiModelProperty(example = "en")
+    public String locale;
 
-            @ApiModelProperty(example = "10")
-            public Integer loanId;
-            @ApiModelProperty(example = "1221.36")
-            public Double transactionAmount;
-            @ApiModelProperty(example = "19")
-            public Integer paymentTypeId;
-            @ApiModelProperty(example = "1245356")
-            public Long receiptNumber;
-        }
+    @ApiModelProperty(example = "04 May 2014")
+    public String transactionDate;
 
-        @ApiModelProperty(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @ApiModelProperty(example = "en")
-        public String locale;
-        @ApiModelProperty(example = "04 May 2014")
-        public String transactionDate;
-        @ApiModelProperty(example = "04 May 2014")
-        public String actualDisbursementDate;
-        public List<Integer> bulkDisbursementTransactions;
-        public PostCollectionSheetBulkRepaymentTransactions bulkRepaymentTransactions;
-        public List<Integer> bulkSavingsDueTransactions;
+    @ApiModelProperty(example = "04 May 2014")
+    public String actualDisbursementDate;
+
+    public List<Integer> bulkDisbursementTransactions;
+    public PostCollectionSheetBulkRepaymentTransactions bulkRepaymentTransactions;
+    public List<Integer> bulkSavingsDueTransactions;
+  }
+
+  @ApiModel(value = "PostCollectionSheetResponse")
+  public static final class PostCollectionSheetResponse {
+    private PostCollectionSheetResponse() {}
+
+    final class PostCollectionSheetChanges {
+      private PostCollectionSheetChanges() {}
+
+      @ApiModelProperty(example = "en")
+      public String locale;
+
+      @ApiModelProperty(example = "dd MMMM yyyy")
+      public String dateFormat;
+
+      @ApiModelProperty(example = "[15]")
+      public List<Integer> loanTransactions;
+
+      @ApiModelProperty(example = "[]")
+      public List<Integer> SavingsTransactions;
     }
 
-    @ApiModel(value = "PostCollectionSheetResponse")
-    public final static class PostCollectionSheetResponse {
-        private PostCollectionSheetResponse() {
-        }
+    @ApiModelProperty(example = "10")
+    public Integer groupId;
 
-        final class PostCollectionSheetChanges {
-            private PostCollectionSheetChanges() {
-            }
+    @ApiModelProperty(example = "10")
+    public Integer resourceId;
 
-            @ApiModelProperty(example = "en")
-            public String locale;
-            @ApiModelProperty(example = "dd MMMM yyyy")
-            public String dateFormat;
-            @ApiModelProperty(example = "[15]")
-            public List<Integer> loanTransactions;
-            @ApiModelProperty(example = "[]")
-            public List<Integer> SavingsTransactions;
-        }
-
-        @ApiModelProperty(example = "10")
-        public Integer groupId;
-        @ApiModelProperty(example = "10")
-        public Integer resourceId;
-        public PostCollectionSheetChanges changes;
-    }
+    public PostCollectionSheetChanges changes;
+  }
 }

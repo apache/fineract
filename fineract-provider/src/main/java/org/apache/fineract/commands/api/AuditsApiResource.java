@@ -56,130 +56,272 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Api(tags = {"Audits"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Audits", description = "Every non-read Mifos API request is audited. A fully processed request can not be changed or deleted. See maker checker api for situations where an audit is not fully processed.\n" + "\n" + "Permissions: To search and look at audit entries a user needs to be attached to a role that has one of the ALL_FUNCTIONS, ALL_FUNCTIONS_READ or READ_AUDIT permissions.\n" + "\n" + "Data Scope: A user can only see audits that are within their data scope. However, 'head office' users can see all audits including those that aren't office/branch related e.g. Loan Product changes.\")")
-})
+@SwaggerDefinition(
+    tags = {
+      @Tag(
+          name = "Audits",
+          description =
+              "Every non-read Mifos API request is audited. A fully processed request can not be"
+                  + " changed or deleted. See maker checker api for situations where an audit is"
+                  + " not fully processed.\n"
+                  + "\n"
+                  + "Permissions: To search and look at audit entries a user needs to be attached"
+                  + " to a role that has one of the ALL_FUNCTIONS, ALL_FUNCTIONS_READ or"
+                  + " READ_AUDIT permissions.\n"
+                  + "\n"
+                  + "Data Scope: A user can only see audits that are within their data scope."
+                  + " However, 'head office' users can see all audits including those that aren't"
+                  + " office/branch related e.g. Loan Product changes.\")")
+    })
 public class AuditsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
-            "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
-            "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId", "url"));
+  private final Set<String> RESPONSE_DATA_PARAMETERS =
+      new HashSet<>(
+          Arrays.asList(
+              "id",
+              "actionName",
+              "entityName",
+              "resourceId",
+              "subresourceId",
+              "maker",
+              "madeOnDate",
+              "checker",
+              "checkedOnDate",
+              "processingResult",
+              "commandAsJson",
+              "officeName",
+              "groupLevelName",
+              "groupName",
+              "clientName",
+              "loanAccountNo",
+              "savingsAccountNo",
+              "clientId",
+              "loanId",
+              "url"));
 
-    private final String resourceNameForPermissions = "AUDIT";
+  private final String resourceNameForPermissions = "AUDIT";
 
-    private final PlatformSecurityContext context;
-    private final AuditReadPlatformService auditReadPlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
+  private final PlatformSecurityContext context;
+  private final AuditReadPlatformService auditReadPlatformService;
+  private final ApiRequestParameterHelper apiRequestParameterHelper;
+  private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer;
+  private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
 
-    @Autowired
-    public AuditsApiResource(final PlatformSecurityContext context, final AuditReadPlatformService auditReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate) {
-        this.context = context;
-        this.auditReadPlatformService = auditReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
+  @Autowired
+  public AuditsApiResource(
+      final PlatformSecurityContext context,
+      final AuditReadPlatformService auditReadPlatformService,
+      final ApiRequestParameterHelper apiRequestParameterHelper,
+      final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializer,
+      final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate) {
+    this.context = context;
+    this.auditReadPlatformService = auditReadPlatformService;
+    this.apiRequestParameterHelper = apiRequestParameterHelper;
+    this.toApiJsonSerializer = toApiJsonSerializer;
+    this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
+  }
+
+  @GET
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "List Audits",
+      notes =
+          "Get a 200 list of audits that match the criteria supplied and sorted by audit id in"
+              + " descending order, and are within the requestors' data scope. Also it supports"
+              + " pagination and sorting\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "audits\n"
+              + "\n"
+              + "audits?fields=madeOnDate,maker,processingResult\n"
+              + "\n"
+              + "audits?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04"
+              + " 18:00:00\n"
+              + "\n"
+              + "audits?officeId=1\n"
+              + "\n"
+              + "audits?officeId=1&includeJson=true")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class,
+        responseContainer = "list")
+  })
+  public String retrieveAuditEntries(
+      @Context final UriInfo uriInfo,
+      @QueryParam("actionName") @ApiParam(value = "actionName") final String actionName,
+      @QueryParam("entityName") @ApiParam(value = "entityName") final String entityName,
+      @QueryParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
+      @QueryParam("makerId") @ApiParam(value = "makerId") final Long makerId,
+      @QueryParam("makerDateTimeFrom") @ApiParam(value = "makerDateTimeFrom")
+          final String makerDateTimeFrom,
+      @QueryParam("makerDateTimeTo") @ApiParam(value = "makerDateTimeTo")
+          final String makerDateTimeTo,
+      @QueryParam("checkerId") @ApiParam(value = "checkerId") final Long checkerId,
+      @QueryParam("checkerDateTimeFrom") @ApiParam(value = "checkerDateTimeFrom")
+          final String checkerDateTimeFrom,
+      @QueryParam("checkerDateTimeTo") @ApiParam(value = "checkerDateTimeTo")
+          final String checkerDateTimeTo,
+      @QueryParam("processingResult") @ApiParam(value = "processingResult")
+          final Integer processingResult,
+      @QueryParam("officeId") @ApiParam(value = "officeId") final Integer officeId,
+      @QueryParam("groupId") @ApiParam(value = "groupId") final Integer groupId,
+      @QueryParam("clientId") @ApiParam(value = "clientId") final Integer clientId,
+      @QueryParam("loanid") @ApiParam(value = "loanid") final Integer loanId,
+      @QueryParam("savingsAccountId") @ApiParam(value = "savingsAccountId")
+          final Integer savingsAccountId,
+      @QueryParam("paged") @ApiParam(value = "paged") final Boolean paged,
+      @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+      @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+      @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+      @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
+
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    final PaginationParameters parameters =
+        PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
+    final SQLBuilder extraCriteria =
+        getExtraCriteria(
+            actionName,
+            entityName,
+            resourceId,
+            makerId,
+            makerDateTimeFrom,
+            makerDateTimeTo,
+            checkerId,
+            checkerDateTimeFrom,
+            checkerDateTimeTo,
+            processingResult,
+            officeId,
+            groupId,
+            clientId,
+            loanId,
+            savingsAccountId);
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+    if (parameters.isPaged()) {
+      final Page<AuditData> auditEntries =
+          this.auditReadPlatformService.retrievePaginatedAuditEntries(
+              extraCriteria, settings.isIncludeJson(), parameters);
+      return this.toApiJsonSerializer.serialize(
+          settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
     }
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "List Audits", notes = "Get a 200 list of audits that match the criteria supplied and sorted by audit id in descending order, and are within the requestors' data scope. Also it supports pagination and sorting\n" + "\n" + "Example Requests:\n" + "\n" + "audits\n" + "\n" + "audits?fields=madeOnDate,maker,processingResult\n" + "\n" + "audits?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n" + "audits?officeId=1\n" + "\n" + "audits?officeId=1&includeJson=true")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class, responseContainer = "list")})
-    public String retrieveAuditEntries(@Context final UriInfo uriInfo, @QueryParam("actionName") @ApiParam(value = "actionName") final String actionName,
-            @QueryParam("entityName") @ApiParam(value = "entityName") final String entityName, @QueryParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
-            @QueryParam("makerId") @ApiParam(value = "makerId") final Long makerId, @QueryParam("makerDateTimeFrom") @ApiParam(value = "makerDateTimeFrom") final String makerDateTimeFrom,
-            @QueryParam("makerDateTimeTo") @ApiParam(value = "makerDateTimeTo") final String makerDateTimeTo, @QueryParam("checkerId") @ApiParam(value = "checkerId") final Long checkerId,
-            @QueryParam("checkerDateTimeFrom") @ApiParam(value = "checkerDateTimeFrom") final String checkerDateTimeFrom,
-            @QueryParam("checkerDateTimeTo") @ApiParam(value = "checkerDateTimeTo") final String checkerDateTimeTo,
-            @QueryParam("processingResult") @ApiParam(value = "processingResult") final Integer processingResult, @QueryParam("officeId") @ApiParam(value = "officeId") final Integer officeId,
-            @QueryParam("groupId") @ApiParam(value = "groupId") final Integer groupId, @QueryParam("clientId") @ApiParam(value = "clientId") final Integer clientId,
-            @QueryParam("loanid") @ApiParam(value = "loanid") final Integer loanId, @QueryParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Integer savingsAccountId,
-            @QueryParam("paged") @ApiParam(value = "paged") final Boolean paged, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
-            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
+    final Collection<AuditData> auditEntries =
+        this.auditReadPlatformService.retrieveAuditEntries(extraCriteria, settings.isIncludeJson());
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-        final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
-        final SQLBuilder extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
-                checkerId, checkerDateTimeFrom, checkerDateTimeTo, processingResult, officeId, groupId, clientId, loanId, savingsAccountId);
+    return this.toApiJsonSerializer.serialize(
+        settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
+  }
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+  @GET
+  @Path("{auditId}")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Retrieve an Audit Entry",
+      notes =
+          "Example Requests:\n"
+              + "\n"
+              + "audits/20\n"
+              + "audits/20?fields=madeOnDate,maker,processingResult")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)
+  })
+  public String retrieveAuditEntry(
+      @PathParam("auditId") @ApiParam(value = "auditId") final Long auditId,
+      @Context final UriInfo uriInfo) {
 
-        if (parameters.isPaged()) {
-            final Page<AuditData> auditEntries = this.auditReadPlatformService.retrievePaginatedAuditEntries(extraCriteria,
-                    settings.isIncludeJson(), parameters);
-            return this.toApiJsonSerializer.serialize(settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
-        }
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<AuditData> auditEntries = this.auditReadPlatformService.retrieveAuditEntries(extraCriteria,
-                settings.isIncludeJson());
+    final AuditData auditEntry = this.auditReadPlatformService.retrieveAuditEntry(auditId);
 
-        return this.toApiJsonSerializer.serialize(settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, auditEntry, this.RESPONSE_DATA_PARAMETERS);
+  }
+
+  @GET
+  @Path("/searchtemplate")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(
+      value = "Audit Search Template",
+      notes =
+          "This is a convenience resource. It can be useful when building an Audit Search UI."
+              + " \"appUsers\" are data scoped to the office/branch the requestor is associated"
+              + " with.\n"
+              + "\n"
+              + "Example Requests:\n"
+              + "\n"
+              + "audits/searchtemplate\n"
+              + "audits/searchtemplate?fields=actionNames")
+  @ApiResponses({
+    @ApiResponse(
+        code = 200,
+        message = "",
+        response = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class)
+  })
+  public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
+
+    this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+    final ApiRequestJsonSerializationSettings settings =
+        this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+    final AuditSearchData auditSearchData =
+        this.auditReadPlatformService.retrieveSearchTemplate("audit");
+
+    final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE =
+        new HashSet<>(Arrays.asList("appUsers", "actionNames", "entityNames", "processingResults"));
+
+    return this.toApiJsonSerializerSearchTemplate.serialize(
+        settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
+  }
+
+  private SQLBuilder getExtraCriteria(
+      final String actionName,
+      final String entityName,
+      final Long resourceId,
+      final Long makerId,
+      final String makerDateTimeFrom,
+      final String makerDateTimeTo,
+      final Long checkerId,
+      final String checkerDateTimeFrom,
+      final String checkerDateTimeTo,
+      final Integer processingResult,
+      final Integer officeId,
+      final Integer groupId,
+      final Integer clientId,
+      final Integer loanId,
+      final Integer savingsAccountId) {
+
+    SQLBuilder extraCriteria = new SQLBuilder();
+    extraCriteria.addNonNullCriteria("aud.action_name = ", actionName);
+    if (entityName != null) {
+      extraCriteria.addCriteria("aud.entity_name like", entityName + "%");
     }
+    extraCriteria.addNonNullCriteria("aud.resource_id = ", resourceId);
+    extraCriteria.addNonNullCriteria("aud.maker_id = ", makerId);
+    extraCriteria.addNonNullCriteria("aud.checker_id = ", checkerId);
+    extraCriteria.addNonNullCriteria("aud.made_on_date >= ", makerDateTimeFrom);
+    extraCriteria.addNonNullCriteria("aud.made_on_date <= ", makerDateTimeTo);
+    extraCriteria.addNonNullCriteria("aud.checked_on_date >= ", checkerDateTimeFrom);
+    extraCriteria.addNonNullCriteria("aud.checked_on_date <= ", checkerDateTimeTo);
+    extraCriteria.addNonNullCriteria("aud.processing_result_enum = ", processingResult);
+    extraCriteria.addNonNullCriteria("aud.office_id = ", officeId);
+    extraCriteria.addNonNullCriteria("aud.group_id = ", groupId);
+    extraCriteria.addNonNullCriteria("aud.client_id = ", clientId);
+    extraCriteria.addNonNullCriteria("aud.loan_id = ", loanId);
+    extraCriteria.addNonNullCriteria("aud.savings_account_id = ", savingsAccountId);
 
-    @GET
-    @Path("{auditId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve an Audit Entry", notes = "Example Requests:\n" + "\n" + "audits/20\n" + "audits/20?fields=madeOnDate,maker,processingResult")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)})
-    public String retrieveAuditEntry(@PathParam("auditId") @ApiParam(value = "auditId") final Long auditId, @Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
-        final AuditData auditEntry = this.auditReadPlatformService.retrieveAuditEntry(auditId);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, auditEntry, this.RESPONSE_DATA_PARAMETERS);
-    }
-
-    @GET
-    @Path("/searchtemplate")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Audit Search Template", notes = "This is a convenience resource. It can be useful when building an Audit Search UI. \"appUsers\" are data scoped to the office/branch the requestor is associated with.\n" + "\n" + "Example Requests:\n" + "\n" + "audits/searchtemplate\n" + "audits/searchtemplate?fields=actionNames")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class)})
-    public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        final AuditSearchData auditSearchData = this.auditReadPlatformService.retrieveSearchTemplate("audit");
-
-        final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<>(Arrays.asList("appUsers", "actionNames",
-                "entityNames", "processingResults"));
-
-        return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
-    }
-
-    private SQLBuilder getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
-            final String makerDateTimeFrom, final String makerDateTimeTo, final Long checkerId, final String checkerDateTimeFrom,
-            final String checkerDateTimeTo, final Integer processingResult, final Integer officeId, final Integer groupId,
-            final Integer clientId, final Integer loanId, final Integer savingsAccountId) {
-
-        SQLBuilder extraCriteria = new SQLBuilder();
-        extraCriteria.addNonNullCriteria("aud.action_name = ", actionName);
-        if (entityName != null) {
-            extraCriteria.addCriteria("aud.entity_name like", entityName + "%");
-        }
-        extraCriteria.addNonNullCriteria("aud.resource_id = ", resourceId);
-        extraCriteria.addNonNullCriteria("aud.maker_id = ", makerId);
-        extraCriteria.addNonNullCriteria("aud.checker_id = ", checkerId);
-        extraCriteria.addNonNullCriteria("aud.made_on_date >= ", makerDateTimeFrom);
-        extraCriteria.addNonNullCriteria("aud.made_on_date <= ", makerDateTimeTo);
-        extraCriteria.addNonNullCriteria("aud.checked_on_date >= ", checkerDateTimeFrom);
-        extraCriteria.addNonNullCriteria("aud.checked_on_date <= ", checkerDateTimeTo);
-        extraCriteria.addNonNullCriteria("aud.processing_result_enum = ", processingResult);
-        extraCriteria.addNonNullCriteria("aud.office_id = ", officeId);
-        extraCriteria.addNonNullCriteria("aud.group_id = ", groupId);
-        extraCriteria.addNonNullCriteria("aud.client_id = ", clientId);
-        extraCriteria.addNonNullCriteria("aud.loan_id = ", loanId);
-        extraCriteria.addNonNullCriteria("aud.savings_account_id = ", savingsAccountId);
-
-        return extraCriteria;
-    }
+    return extraCriteria;
+  }
 }

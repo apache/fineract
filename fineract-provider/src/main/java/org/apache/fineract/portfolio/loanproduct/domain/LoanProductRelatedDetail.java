@@ -48,625 +48,739 @@ import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 @Embeddable
 public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentScheduleRelatedDetail {
 
-    @Embedded
-    private MonetaryCurrency currency;
+  @Embedded private MonetaryCurrency currency;
 
-    @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal principal;
+  @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal principal;
 
-    @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
-    private BigDecimal nominalInterestRatePerPeriod;
+  @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
+  private BigDecimal nominalInterestRatePerPeriod;
 
-    // FIXME - move away form JPA ordinal use for enums using just integer -
-    // requires sql patch for existing users of software.
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "interest_period_frequency_enum", nullable = true)
-    private PeriodFrequencyType interestPeriodFrequencyType;
+  // FIXME - move away form JPA ordinal use for enums using just integer -
+  // requires sql patch for existing users of software.
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "interest_period_frequency_enum", nullable = true)
+  private PeriodFrequencyType interestPeriodFrequencyType;
 
-    @Column(name = "annual_nominal_interest_rate", scale = 6, precision = 19, nullable = true)
-    private BigDecimal annualNominalInterestRate;
+  @Column(name = "annual_nominal_interest_rate", scale = 6, precision = 19, nullable = true)
+  private BigDecimal annualNominalInterestRate;
 
-    // FIXME - move away form JPA ordinal use for enums using just integer -
-    // requires sql patch for existing users of software.
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "interest_method_enum", nullable = false)
-    private InterestMethod interestMethod;
+  // FIXME - move away form JPA ordinal use for enums using just integer -
+  // requires sql patch for existing users of software.
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "interest_method_enum", nullable = false)
+  private InterestMethod interestMethod;
 
-    // FIXME - move away form JPA ordinal use for enums using just integer -
-    // requires sql patch for existing users of software.
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "interest_calculated_in_period_enum", nullable = false)
-    private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
+  // FIXME - move away form JPA ordinal use for enums using just integer -
+  // requires sql patch for existing users of software.
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "interest_calculated_in_period_enum", nullable = false)
+  private InterestCalculationPeriodMethod interestCalculationPeriodMethod;
 
-    @Column(name = "allow_partial_period_interest_calcualtion", nullable = false)
-    private boolean allowPartialPeriodInterestCalcualtion;
+  @Column(name = "allow_partial_period_interest_calcualtion", nullable = false)
+  private boolean allowPartialPeriodInterestCalcualtion;
 
-    @Column(name = "repay_every", nullable = false)
-    private Integer repayEvery;
+  @Column(name = "repay_every", nullable = false)
+  private Integer repayEvery;
 
-    // FIXME - move away form JPA ordinal use for enums using just integer -
-    // requires sql patch for existing users of software.
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "repayment_period_frequency_enum", nullable = false)
-    private PeriodFrequencyType repaymentPeriodFrequencyType;
+  // FIXME - move away form JPA ordinal use for enums using just integer -
+  // requires sql patch for existing users of software.
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "repayment_period_frequency_enum", nullable = false)
+  private PeriodFrequencyType repaymentPeriodFrequencyType;
 
-    @Column(name = "number_of_repayments", nullable = false)
-    private Integer numberOfRepayments;
+  @Column(name = "number_of_repayments", nullable = false)
+  private Integer numberOfRepayments;
 
-    @Column(name = "grace_on_principal_periods", nullable = true)
-    private Integer graceOnPrincipalPayment;
+  @Column(name = "grace_on_principal_periods", nullable = true)
+  private Integer graceOnPrincipalPayment;
 
-    @Column(name = "recurring_moratorium_principal_periods", nullable = true)
-    private Integer recurringMoratoriumOnPrincipalPeriods;
+  @Column(name = "recurring_moratorium_principal_periods", nullable = true)
+  private Integer recurringMoratoriumOnPrincipalPeriods;
 
-    @Column(name = "grace_on_interest_periods", nullable = true)
-    private Integer graceOnInterestPayment;
+  @Column(name = "grace_on_interest_periods", nullable = true)
+  private Integer graceOnInterestPayment;
 
-    @Column(name = "grace_interest_free_periods", nullable = true)
-    private Integer graceOnInterestCharged;
+  @Column(name = "grace_interest_free_periods", nullable = true)
+  private Integer graceOnInterestCharged;
 
-    // FIXME - move away form JPA ordinal use for enums using just integer -
-    // requires sql patch for existing users of software.
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "amortization_method_enum", nullable = false)
-    private AmortizationMethod amortizationMethod;
+  // FIXME - move away form JPA ordinal use for enums using just integer -
+  // requires sql patch for existing users of software.
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "amortization_method_enum", nullable = false)
+  private AmortizationMethod amortizationMethod;
 
-    @Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal inArrearsTolerance;
+  @Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
+  private BigDecimal inArrearsTolerance;
 
-    @Column(name = "grace_on_arrears_ageing", nullable = true)
-    private Integer graceOnArrearsAgeing;
+  @Column(name = "grace_on_arrears_ageing", nullable = true)
+  private Integer graceOnArrearsAgeing;
 
-    @Column(name = "days_in_month_enum", nullable = false)
-    private Integer daysInMonthType;
+  @Column(name = "days_in_month_enum", nullable = false)
+  private Integer daysInMonthType;
 
-    @Column(name = "days_in_year_enum", nullable = false)
-    private Integer daysInYearType;
+  @Column(name = "days_in_year_enum", nullable = false)
+  private Integer daysInYearType;
 
-    @Column(name = "interest_recalculation_enabled")
-    private boolean isInterestRecalculationEnabled;
+  @Column(name = "interest_recalculation_enabled")
+  private boolean isInterestRecalculationEnabled;
 
-    @Column(name = "is_equal_amortization", nullable = false)
-    private boolean isEqualAmortization = false;
+  @Column(name = "is_equal_amortization", nullable = false)
+  private boolean isEqualAmortization = false;
 
-    public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
-            final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
-            final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
-            final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
-            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing,
-            final Integer daysInMonthType, final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization) {
+  public static LoanProductRelatedDetail createFrom(
+      final MonetaryCurrency currency,
+      final BigDecimal principal,
+      final BigDecimal nominalInterestRatePerPeriod,
+      final PeriodFrequencyType interestRatePeriodFrequencyType,
+      final BigDecimal nominalAnnualInterestRate,
+      final InterestMethod interestMethod,
+      final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
+      final boolean allowPartialPeriodInterestCalcualtion,
+      final Integer repaymentEvery,
+      final PeriodFrequencyType repaymentPeriodFrequencyType,
+      final Integer numberOfRepayments,
+      final Integer graceOnPrincipalPayment,
+      final Integer recurringMoratoriumOnPrincipalPeriods,
+      final Integer graceOnInterestPayment,
+      final Integer graceOnInterestCharged,
+      final AmortizationMethod amortizationMethod,
+      final BigDecimal inArrearsTolerance,
+      final Integer graceOnArrearsAgeing,
+      final Integer daysInMonthType,
+      final Integer daysInYearType,
+      final boolean isInterestRecalculationEnabled,
+      final boolean isEqualAmortization) {
 
-        return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
-                nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
-                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
-                graceOnInterestCharged, amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType,
-                isInterestRecalculationEnabled, isEqualAmortization);
+    return new LoanProductRelatedDetail(
+        currency,
+        principal,
+        nominalInterestRatePerPeriod,
+        interestRatePeriodFrequencyType,
+        nominalAnnualInterestRate,
+        interestMethod,
+        interestCalculationPeriodMethod,
+        allowPartialPeriodInterestCalcualtion,
+        repaymentEvery,
+        repaymentPeriodFrequencyType,
+        numberOfRepayments,
+        graceOnPrincipalPayment,
+        recurringMoratoriumOnPrincipalPeriods,
+        graceOnInterestPayment,
+        graceOnInterestCharged,
+        amortizationMethod,
+        inArrearsTolerance,
+        graceOnArrearsAgeing,
+        daysInMonthType,
+        daysInYearType,
+        isInterestRecalculationEnabled,
+        isEqualAmortization);
+  }
+
+  protected LoanProductRelatedDetail() {
+    //
+  }
+
+  public LoanProductRelatedDetail(
+      final MonetaryCurrency currency,
+      final BigDecimal defaultPrincipal,
+      final BigDecimal defaultNominalInterestRatePerPeriod,
+      final PeriodFrequencyType interestPeriodFrequencyType,
+      final BigDecimal defaultAnnualNominalInterestRate,
+      final InterestMethod interestMethod,
+      final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
+      final boolean allowPartialPeriodInterestCalcualtion,
+      final Integer repayEvery,
+      final PeriodFrequencyType repaymentFrequencyType,
+      final Integer defaultNumberOfRepayments,
+      final Integer graceOnPrincipalPayment,
+      final Integer recurringMoratoriumOnPrincipalPeriods,
+      final Integer graceOnInterestPayment,
+      final Integer graceOnInterestCharged,
+      final AmortizationMethod amortizationMethod,
+      final BigDecimal inArrearsTolerance,
+      final Integer graceOnArrearsAgeing,
+      final Integer daysInMonthType,
+      final Integer daysInYearType,
+      final boolean isInterestRecalculationEnabled,
+      final boolean isEqualAmortization) {
+    this.currency = currency;
+    this.principal = defaultPrincipal;
+    this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
+    this.interestPeriodFrequencyType = interestPeriodFrequencyType;
+    this.annualNominalInterestRate = defaultAnnualNominalInterestRate;
+    this.interestMethod = interestMethod;
+    this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
+    this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
+    this.repayEvery = repayEvery;
+    this.repaymentPeriodFrequencyType = repaymentFrequencyType;
+    this.numberOfRepayments = defaultNumberOfRepayments;
+    this.graceOnPrincipalPayment = defaultToNullIfZero(graceOnPrincipalPayment);
+    this.recurringMoratoriumOnPrincipalPeriods = recurringMoratoriumOnPrincipalPeriods;
+    this.graceOnInterestPayment = defaultToNullIfZero(graceOnInterestPayment);
+    this.graceOnInterestCharged = defaultToNullIfZero(graceOnInterestCharged);
+    this.amortizationMethod = amortizationMethod;
+    if (inArrearsTolerance != null && BigDecimal.ZERO.compareTo(inArrearsTolerance) == 0) {
+      this.inArrearsTolerance = null;
+    } else {
+      this.inArrearsTolerance = inArrearsTolerance;
+    }
+    this.graceOnArrearsAgeing = graceOnArrearsAgeing;
+    this.daysInMonthType = daysInMonthType;
+    this.daysInYearType = daysInYearType;
+    this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
+    this.isEqualAmortization = isEqualAmortization;
+  }
+
+  private Integer defaultToNullIfZero(final Integer value) {
+    Integer defaultTo = value;
+    if (value != null && Integer.valueOf(0).equals(value)) {
+      defaultTo = null;
+    }
+    return defaultTo;
+  }
+
+  @Override
+  public MonetaryCurrency getCurrency() {
+    return this.currency.copy();
+  }
+
+  @Override
+  public Money getPrincipal() {
+    return Money.of(this.currency, this.principal);
+  }
+
+  public void setPrincipal(BigDecimal principal) {
+    this.principal = principal;
+  }
+
+  @Override
+  public Integer graceOnInterestCharged() {
+    return this.graceOnInterestCharged;
+  }
+
+  @Override
+  public Integer graceOnInterestPayment() {
+    return this.graceOnInterestPayment;
+  }
+
+  @Override
+  public Integer graceOnPrincipalPayment() {
+    return this.graceOnPrincipalPayment;
+  }
+
+  @Override
+  public Integer recurringMoratoriumOnPrincipalPeriods() {
+    return this.recurringMoratoriumOnPrincipalPeriods;
+  }
+
+  @Override
+  public Money getInArrearsTolerance() {
+    return Money.of(this.currency, this.inArrearsTolerance);
+  }
+
+  @Override
+  public BigDecimal getNominalInterestRatePerPeriod() {
+    return this.nominalInterestRatePerPeriod == null
+        ? null
+        : BigDecimal.valueOf(
+            Double.valueOf(this.nominalInterestRatePerPeriod.stripTrailingZeros().toString()));
+  }
+
+  @Override
+  public PeriodFrequencyType getInterestPeriodFrequencyType() {
+    return this.interestPeriodFrequencyType == null
+        ? PeriodFrequencyType.INVALID
+        : this.interestPeriodFrequencyType;
+  }
+
+  @Override
+  public BigDecimal getAnnualNominalInterestRate() {
+    return this.annualNominalInterestRate == null
+        ? null
+        : BigDecimal.valueOf(
+            Double.valueOf(this.annualNominalInterestRate.stripTrailingZeros().toString()));
+  }
+
+  @Override
+  public InterestMethod getInterestMethod() {
+    return this.interestMethod;
+  }
+
+  @Override
+  public InterestCalculationPeriodMethod getInterestCalculationPeriodMethod() {
+    return this.interestCalculationPeriodMethod;
+  }
+
+  @Override
+  public Integer getRepayEvery() {
+    return this.repayEvery;
+  }
+
+  @Override
+  public PeriodFrequencyType getRepaymentPeriodFrequencyType() {
+    return this.repaymentPeriodFrequencyType;
+  }
+
+  @Override
+  public Integer getNumberOfRepayments() {
+    return this.numberOfRepayments;
+  }
+
+  @Override
+  public AmortizationMethod getAmortizationMethod() {
+    return this.amortizationMethod;
+  }
+
+  public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
+
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
+
+    final String localeAsInput = command.locale();
+
+    String currencyCode = this.currency.getCode();
+    Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
+    Integer inMultiplesOf = this.currency.getCurrencyInMultiplesOf();
+
+    final String digitsAfterDecimalParamName = "digitsAfterDecimal";
+    if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
+      final Integer newValue = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
+      actualChanges.put(digitsAfterDecimalParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      digitsAfterDecimal = newValue;
+      this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
     }
 
-    protected LoanProductRelatedDetail() {
-        //
+    final String currencyCodeParamName = "currencyCode";
+    if (command.isChangeInStringParameterNamed(currencyCodeParamName, currencyCode)) {
+      final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
+      actualChanges.put(currencyCodeParamName, newValue);
+      currencyCode = newValue;
+      this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
     }
 
-    public LoanProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
-            final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
-            final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
-            final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
-            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing,
-            final Integer daysInMonthType, final Integer daysInYearType, final boolean isInterestRecalculationEnabled, final boolean isEqualAmortization) {
-        this.currency = currency;
-        this.principal = defaultPrincipal;
-        this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
-        this.interestPeriodFrequencyType = interestPeriodFrequencyType;
-        this.annualNominalInterestRate = defaultAnnualNominalInterestRate;
-        this.interestMethod = interestMethod;
-        this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
-        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
-        this.repayEvery = repayEvery;
-        this.repaymentPeriodFrequencyType = repaymentFrequencyType;
-        this.numberOfRepayments = defaultNumberOfRepayments;
-        this.graceOnPrincipalPayment = defaultToNullIfZero(graceOnPrincipalPayment);
-        this.recurringMoratoriumOnPrincipalPeriods = recurringMoratoriumOnPrincipalPeriods;
-        this.graceOnInterestPayment = defaultToNullIfZero(graceOnInterestPayment);
-        this.graceOnInterestCharged = defaultToNullIfZero(graceOnInterestCharged);
-        this.amortizationMethod = amortizationMethod;
-        if (inArrearsTolerance != null && BigDecimal.ZERO.compareTo(inArrearsTolerance) == 0) {
-            this.inArrearsTolerance = null;
-        } else {
-            this.inArrearsTolerance = inArrearsTolerance;
-        }
-        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
-        this.daysInMonthType = daysInMonthType;
-        this.daysInYearType = daysInYearType;
-        this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
-        this.isEqualAmortization = isEqualAmortization;
+    final String inMultiplesOfParamName = "inMultiplesOf";
+    if (command.isChangeInStringParameterNamed(inMultiplesOfParamName, currencyCode)) {
+      final Integer newValue = command.integerValueOfParameterNamed(inMultiplesOfParamName);
+      actualChanges.put(inMultiplesOfParamName, newValue);
+      inMultiplesOf = newValue;
+      this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
     }
 
-    private Integer defaultToNullIfZero(final Integer value) {
-        Integer defaultTo = value;
-        if (value != null && Integer.valueOf(0).equals(value)) {
-            defaultTo = null;
-        }
-        return defaultTo;
+    final Map<String, Object> loanApplicationAttributeChanges =
+        updateLoanApplicationAttributes(command, aprCalculator);
+
+    actualChanges.putAll(loanApplicationAttributeChanges);
+
+    return actualChanges;
+  }
+
+  public Map<String, Object> updateLoanApplicationAttributes(
+      final JsonCommand command, final AprCalculator aprCalculator) {
+    final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
+
+    final String localeAsInput = command.locale();
+
+    final String principalParamName = "principal";
+    if (command.isChangeInBigDecimalParameterNamed(principalParamName, this.principal)) {
+      final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(principalParamName);
+      actualChanges.put(principalParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.principal = newValue;
     }
 
-    @Override
-    public MonetaryCurrency getCurrency() {
-        return this.currency.copy();
+    final String repaymentEveryParamName = "repaymentEvery";
+    if (command.isChangeInIntegerParameterNamed(repaymentEveryParamName, this.repayEvery)) {
+      final Integer newValue = command.integerValueOfParameterNamed(repaymentEveryParamName);
+      actualChanges.put(repaymentEveryParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.repayEvery = newValue;
     }
 
-    @Override
-    public Money getPrincipal() {
-        return Money.of(this.currency, this.principal);
+    final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
+    if (command.isChangeInIntegerParameterNamed(
+        repaymentFrequencyTypeParamName, this.repaymentPeriodFrequencyType.getValue())) {
+      Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyTypeParamName);
+      actualChanges.put(repaymentFrequencyTypeParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
+    }
+    if (this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
+      Integer newValue = null;
+      final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
+      newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
+      actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
+
+      final String repaymentFrequencyDayOfWeekTypeParamName = "repaymentFrequencyDayOfWeekType";
+      newValue = command.integerValueOfParameterNamed(repaymentFrequencyDayOfWeekTypeParamName);
+      actualChanges.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
+
+      actualChanges.put("locale", localeAsInput);
     }
 
-    public void setPrincipal(BigDecimal principal) {
-        this.principal = principal;
+    final String numberOfRepaymentsParamName = "numberOfRepayments";
+    if (command.isChangeInIntegerParameterNamed(
+        numberOfRepaymentsParamName, this.numberOfRepayments)) {
+      final Integer newValue = command.integerValueOfParameterNamed(numberOfRepaymentsParamName);
+      actualChanges.put(numberOfRepaymentsParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.numberOfRepayments = newValue;
     }
 
-    @Override
-    public Integer graceOnInterestCharged() {
-        return this.graceOnInterestCharged;
+    final String amortizationTypeParamName = "amortizationType";
+    if (command.isChangeInIntegerParameterNamed(
+        amortizationTypeParamName, this.amortizationMethod.getValue())) {
+      final Integer newValue = command.integerValueOfParameterNamed(amortizationTypeParamName);
+      actualChanges.put(amortizationTypeParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.amortizationMethod = AmortizationMethod.fromInt(newValue);
     }
 
-    @Override
-    public Integer graceOnInterestPayment() {
-        return this.graceOnInterestPayment;
+    final String inArrearsToleranceParamName = "inArrearsTolerance";
+    if (command.isChangeInBigDecimalParameterNamed(
+        inArrearsToleranceParamName, this.inArrearsTolerance)) {
+      final BigDecimal newValue =
+          command.bigDecimalValueOfParameterNamed(inArrearsToleranceParamName);
+      actualChanges.put(inArrearsToleranceParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.inArrearsTolerance = newValue;
     }
 
-    @Override
-    public Integer graceOnPrincipalPayment() {
-        return this.graceOnPrincipalPayment;
+    final String interestRatePerPeriodParamName = "interestRatePerPeriod";
+    if (command.isChangeInBigDecimalParameterNamed(
+        interestRatePerPeriodParamName, this.nominalInterestRatePerPeriod)) {
+      final BigDecimal newValue =
+          command.bigDecimalValueOfParameterNamed(interestRatePerPeriodParamName);
+      actualChanges.put(interestRatePerPeriodParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.nominalInterestRatePerPeriod = newValue;
+      updateInterestRateDerivedFields(aprCalculator);
     }
 
-    @Override
-    public Integer recurringMoratoriumOnPrincipalPeriods() {
-        return this.recurringMoratoriumOnPrincipalPeriods;
+    final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
+    final int interestPeriodFrequencyType =
+        this.interestPeriodFrequencyType == null
+            ? PeriodFrequencyType.INVALID.getValue()
+            : this.interestPeriodFrequencyType.getValue();
+    if (command.isChangeInIntegerParameterNamed(
+        interestRateFrequencyTypeParamName, interestPeriodFrequencyType)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(interestRateFrequencyTypeParamName);
+      actualChanges.put(interestRateFrequencyTypeParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
+      updateInterestRateDerivedFields(aprCalculator);
     }
 
-    @Override
-    public Money getInArrearsTolerance() {
-        return Money.of(this.currency, this.inArrearsTolerance);
+    final String interestTypeParamName = "interestType";
+    if (command.isChangeInIntegerParameterNamed(
+        interestTypeParamName, this.interestMethod.getValue())) {
+      final Integer newValue = command.integerValueOfParameterNamed(interestTypeParamName);
+      actualChanges.put(interestTypeParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.interestMethod = InterestMethod.fromInt(newValue);
     }
 
-    @Override
-    public BigDecimal getNominalInterestRatePerPeriod() {
-        return this.nominalInterestRatePerPeriod == null ? null : BigDecimal.valueOf(Double.valueOf(this.nominalInterestRatePerPeriod
-                .stripTrailingZeros().toString()));
+    final String interestCalculationPeriodTypeParamName = "interestCalculationPeriodType";
+    if (command.isChangeInIntegerParameterNamed(
+        interestCalculationPeriodTypeParamName, this.interestCalculationPeriodMethod.getValue())) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(interestCalculationPeriodTypeParamName);
+      actualChanges.put(interestCalculationPeriodTypeParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(newValue);
     }
 
-    @Override
-    public PeriodFrequencyType getInterestPeriodFrequencyType() {
-        return this.interestPeriodFrequencyType == null ? PeriodFrequencyType.INVALID : this.interestPeriodFrequencyType;
+    if (command.isChangeInBooleanParameterNamed(
+        LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName,
+        this.allowPartialPeriodInterestCalcualtion)) {
+      final boolean newValue =
+          command.booleanPrimitiveValueOfParameterNamed(
+              LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName);
+      actualChanges.put(
+          LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, newValue);
+      this.allowPartialPeriodInterestCalcualtion = newValue;
     }
 
-    @Override
-    public BigDecimal getAnnualNominalInterestRate() {
-        return this.annualNominalInterestRate == null ? null : BigDecimal.valueOf(Double.valueOf(this.annualNominalInterestRate
-                .stripTrailingZeros().toString()));
+    if (this.interestCalculationPeriodMethod.isDaily()) {
+      this.allowPartialPeriodInterestCalcualtion = false;
     }
 
-    @Override
-    public InterestMethod getInterestMethod() {
-        return this.interestMethod;
+    final String graceOnPrincipalPaymentParamName = "graceOnPrincipalPayment";
+    if (command.isChangeInIntegerParameterNamed(
+        graceOnPrincipalPaymentParamName, this.graceOnPrincipalPayment)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(graceOnPrincipalPaymentParamName);
+      actualChanges.put(graceOnPrincipalPaymentParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.graceOnPrincipalPayment = newValue;
     }
 
-    @Override
-    public InterestCalculationPeriodMethod getInterestCalculationPeriodMethod() {
-        return this.interestCalculationPeriodMethod;
+    final String recurringMoratoriumOnPrincipalPeriodsParamName =
+        "recurringMoratoriumOnPrincipalPeriods";
+    if (command.isChangeInIntegerParameterNamed(
+        recurringMoratoriumOnPrincipalPeriodsParamName,
+        this.recurringMoratoriumOnPrincipalPeriods)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName);
+      actualChanges.put(recurringMoratoriumOnPrincipalPeriodsParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.recurringMoratoriumOnPrincipalPeriods = newValue;
     }
 
-    @Override
-    public Integer getRepayEvery() {
-        return this.repayEvery;
+    final String graceOnInterestPaymentParamName = "graceOnInterestPayment";
+    if (command.isChangeInIntegerParameterNamed(
+        graceOnInterestPaymentParamName, this.graceOnInterestPayment)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(graceOnInterestPaymentParamName);
+      actualChanges.put(graceOnInterestPaymentParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.graceOnInterestPayment = newValue;
     }
 
-    @Override
-    public PeriodFrequencyType getRepaymentPeriodFrequencyType() {
-        return this.repaymentPeriodFrequencyType;
+    final String graceOnInterestChargedParamName = "graceOnInterestCharged";
+    if (command.isChangeInIntegerParameterNamed(
+        graceOnInterestChargedParamName, this.graceOnInterestCharged)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(graceOnInterestChargedParamName);
+      actualChanges.put(graceOnInterestChargedParamName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.graceOnInterestCharged = newValue;
     }
 
-    @Override
-    public Integer getNumberOfRepayments() {
-        return this.numberOfRepayments;
+    if (command.isChangeInIntegerParameterNamed(
+        LoanProductConstants.graceOnArrearsAgeingParameterName, this.graceOnArrearsAgeing)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(
+              LoanProductConstants.graceOnArrearsAgeingParameterName);
+      actualChanges.put(LoanProductConstants.graceOnArrearsAgeingParameterName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.graceOnArrearsAgeing = newValue;
     }
 
-    @Override
-    public AmortizationMethod getAmortizationMethod() {
-        return this.amortizationMethod;
+    if (command.isChangeInIntegerParameterNamed(
+        LoanProductConstants.daysInMonthTypeParameterName, this.daysInMonthType)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(LoanProductConstants.daysInMonthTypeParameterName);
+      actualChanges.put(LoanProductConstants.daysInMonthTypeParameterName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.daysInMonthType = newValue;
     }
 
-    public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
-
-        final String localeAsInput = command.locale();
-
-        String currencyCode = this.currency.getCode();
-        Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
-        Integer inMultiplesOf = this.currency.getCurrencyInMultiplesOf();
-
-        final String digitsAfterDecimalParamName = "digitsAfterDecimal";
-        if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
-            final Integer newValue = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
-            actualChanges.put(digitsAfterDecimalParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            digitsAfterDecimal = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
-        }
-
-        final String currencyCodeParamName = "currencyCode";
-        if (command.isChangeInStringParameterNamed(currencyCodeParamName, currencyCode)) {
-            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
-            actualChanges.put(currencyCodeParamName, newValue);
-            currencyCode = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
-        }
-
-        final String inMultiplesOfParamName = "inMultiplesOf";
-        if (command.isChangeInStringParameterNamed(inMultiplesOfParamName, currencyCode)) {
-            final Integer newValue = command.integerValueOfParameterNamed(inMultiplesOfParamName);
-            actualChanges.put(inMultiplesOfParamName, newValue);
-            inMultiplesOf = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
-        }
-
-        final Map<String, Object> loanApplicationAttributeChanges = updateLoanApplicationAttributes(command, aprCalculator);
-
-        actualChanges.putAll(loanApplicationAttributeChanges);
-
-        return actualChanges;
+    if (command.isChangeInIntegerParameterNamed(
+        LoanProductConstants.daysInYearTypeParameterName, this.daysInYearType)) {
+      final Integer newValue =
+          command.integerValueOfParameterNamed(LoanProductConstants.daysInYearTypeParameterName);
+      actualChanges.put(LoanProductConstants.daysInYearTypeParameterName, newValue);
+      actualChanges.put("locale", localeAsInput);
+      this.daysInYearType = newValue;
     }
 
-    public Map<String, Object> updateLoanApplicationAttributes(final JsonCommand command, final AprCalculator aprCalculator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
-
-        final String localeAsInput = command.locale();
-
-        final String principalParamName = "principal";
-        if (command.isChangeInBigDecimalParameterNamed(principalParamName, this.principal)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(principalParamName);
-            actualChanges.put(principalParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.principal = newValue;
-        }
-
-        final String repaymentEveryParamName = "repaymentEvery";
-        if (command.isChangeInIntegerParameterNamed(repaymentEveryParamName, this.repayEvery)) {
-            final Integer newValue = command.integerValueOfParameterNamed(repaymentEveryParamName);
-            actualChanges.put(repaymentEveryParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.repayEvery = newValue;
-        }
-
-        final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
-        if (command.isChangeInIntegerParameterNamed(repaymentFrequencyTypeParamName, this.repaymentPeriodFrequencyType.getValue())) {
-            Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyTypeParamName);
-            actualChanges.put(repaymentFrequencyTypeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
-        }
-            if (this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
-            Integer newValue = null;
-                final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
-                newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
-                actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
-
-                final String repaymentFrequencyDayOfWeekTypeParamName = "repaymentFrequencyDayOfWeekType";
-                newValue = command.integerValueOfParameterNamed(repaymentFrequencyDayOfWeekTypeParamName);
-                actualChanges.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
-
-                actualChanges.put("locale", localeAsInput);
-        }
-
-        final String numberOfRepaymentsParamName = "numberOfRepayments";
-        if (command.isChangeInIntegerParameterNamed(numberOfRepaymentsParamName, this.numberOfRepayments)) {
-            final Integer newValue = command.integerValueOfParameterNamed(numberOfRepaymentsParamName);
-            actualChanges.put(numberOfRepaymentsParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.numberOfRepayments = newValue;
-        }
-
-        final String amortizationTypeParamName = "amortizationType";
-        if (command.isChangeInIntegerParameterNamed(amortizationTypeParamName, this.amortizationMethod.getValue())) {
-            final Integer newValue = command.integerValueOfParameterNamed(amortizationTypeParamName);
-            actualChanges.put(amortizationTypeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.amortizationMethod = AmortizationMethod.fromInt(newValue);
-        }
-
-        final String inArrearsToleranceParamName = "inArrearsTolerance";
-        if (command.isChangeInBigDecimalParameterNamed(inArrearsToleranceParamName, this.inArrearsTolerance)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(inArrearsToleranceParamName);
-            actualChanges.put(inArrearsToleranceParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.inArrearsTolerance = newValue;
-        }
-
-        final String interestRatePerPeriodParamName = "interestRatePerPeriod";
-        if (command.isChangeInBigDecimalParameterNamed(interestRatePerPeriodParamName, this.nominalInterestRatePerPeriod)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRatePerPeriodParamName);
-            actualChanges.put(interestRatePerPeriodParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.nominalInterestRatePerPeriod = newValue;
-            updateInterestRateDerivedFields(aprCalculator);
-        }
-
-        final String interestRateFrequencyTypeParamName = "interestRateFrequencyType";
-        final int interestPeriodFrequencyType = this.interestPeriodFrequencyType == null ? PeriodFrequencyType.INVALID.getValue()
-                : this.interestPeriodFrequencyType.getValue();
-        if (command.isChangeInIntegerParameterNamed(interestRateFrequencyTypeParamName, interestPeriodFrequencyType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(interestRateFrequencyTypeParamName);
-            actualChanges.put(interestRateFrequencyTypeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.interestPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
-            updateInterestRateDerivedFields(aprCalculator);
-        }
-
-        final String interestTypeParamName = "interestType";
-        if (command.isChangeInIntegerParameterNamed(interestTypeParamName, this.interestMethod.getValue())) {
-            final Integer newValue = command.integerValueOfParameterNamed(interestTypeParamName);
-            actualChanges.put(interestTypeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.interestMethod = InterestMethod.fromInt(newValue);
-        }
-
-        final String interestCalculationPeriodTypeParamName = "interestCalculationPeriodType";
-        if (command
-                .isChangeInIntegerParameterNamed(interestCalculationPeriodTypeParamName, this.interestCalculationPeriodMethod.getValue())) {
-            final Integer newValue = command.integerValueOfParameterNamed(interestCalculationPeriodTypeParamName);
-            actualChanges.put(interestCalculationPeriodTypeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(newValue);
-        }
-
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName,
-                this.allowPartialPeriodInterestCalcualtion)) {
-            final boolean newValue = command
-                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName);
-            actualChanges.put(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, newValue);
-            this.allowPartialPeriodInterestCalcualtion = newValue;
-        }
-
-        if (this.interestCalculationPeriodMethod.isDaily()) {
-            this.allowPartialPeriodInterestCalcualtion = false;
-        }
-
-        final String graceOnPrincipalPaymentParamName = "graceOnPrincipalPayment";
-        if (command.isChangeInIntegerParameterNamed(graceOnPrincipalPaymentParamName, this.graceOnPrincipalPayment)) {
-            final Integer newValue = command.integerValueOfParameterNamed(graceOnPrincipalPaymentParamName);
-            actualChanges.put(graceOnPrincipalPaymentParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.graceOnPrincipalPayment = newValue;
-        }
-
-        final String recurringMoratoriumOnPrincipalPeriodsParamName = "recurringMoratoriumOnPrincipalPeriods";
-        if (command.isChangeInIntegerParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName, this.recurringMoratoriumOnPrincipalPeriods)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName);
-            actualChanges.put(recurringMoratoriumOnPrincipalPeriodsParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.recurringMoratoriumOnPrincipalPeriods = newValue;
-        }
-
-        final String graceOnInterestPaymentParamName = "graceOnInterestPayment";
-        if (command.isChangeInIntegerParameterNamed(graceOnInterestPaymentParamName, this.graceOnInterestPayment)) {
-            final Integer newValue = command.integerValueOfParameterNamed(graceOnInterestPaymentParamName);
-            actualChanges.put(graceOnInterestPaymentParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.graceOnInterestPayment = newValue;
-        }
-
-        final String graceOnInterestChargedParamName = "graceOnInterestCharged";
-        if (command.isChangeInIntegerParameterNamed(graceOnInterestChargedParamName, this.graceOnInterestCharged)) {
-            final Integer newValue = command.integerValueOfParameterNamed(graceOnInterestChargedParamName);
-            actualChanges.put(graceOnInterestChargedParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.graceOnInterestCharged = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName, this.graceOnArrearsAgeing)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName);
-            actualChanges.put(LoanProductConstants.graceOnArrearsAgeingParameterName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.graceOnArrearsAgeing = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.daysInMonthTypeParameterName, this.daysInMonthType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.daysInMonthTypeParameterName);
-            actualChanges.put(LoanProductConstants.daysInMonthTypeParameterName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.daysInMonthType = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.daysInYearTypeParameterName, this.daysInYearType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.daysInYearTypeParameterName);
-            actualChanges.put(LoanProductConstants.daysInYearTypeParameterName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.daysInYearType = newValue;
-        }
-
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isInterestRecalculationEnabledParameterName,
-                this.isInterestRecalculationEnabled)) {
-            final boolean newValue = command
-                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isInterestRecalculationEnabledParameterName);
-            actualChanges.put(LoanProductConstants.isInterestRecalculationEnabledParameterName, newValue);
-            this.isInterestRecalculationEnabled = newValue;
-        }
-
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isEqualAmortizationParam, this.isEqualAmortization)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam);
-            actualChanges.put(LoanProductConstants.isEqualAmortizationParam, newValue);
-            this.isEqualAmortization = newValue;
-        }
-
-        validateRepaymentPeriodWithGraceSettings();
-
-        return actualChanges;
+    if (command.isChangeInBooleanParameterNamed(
+        LoanProductConstants.isInterestRecalculationEnabledParameterName,
+        this.isInterestRecalculationEnabled)) {
+      final boolean newValue =
+          command.booleanPrimitiveValueOfParameterNamed(
+              LoanProductConstants.isInterestRecalculationEnabledParameterName);
+      actualChanges.put(LoanProductConstants.isInterestRecalculationEnabledParameterName, newValue);
+      this.isInterestRecalculationEnabled = newValue;
     }
 
-    public void updateCurrency(final MonetaryCurrency currency) {
-        this.currency = currency ;
+    if (command.isChangeInBooleanParameterNamed(
+        LoanProductConstants.isEqualAmortizationParam, this.isEqualAmortization)) {
+      final boolean newValue =
+          command.booleanPrimitiveValueOfParameterNamed(
+              LoanProductConstants.isEqualAmortizationParam);
+      actualChanges.put(LoanProductConstants.isEqualAmortizationParam, newValue);
+      this.isEqualAmortization = newValue;
     }
 
-    public void validateRepaymentPeriodWithGraceSettings() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
+    validateRepaymentPeriodWithGraceSettings();
 
-        if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnPrincipalPayment)) {
-            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(this.graceOnPrincipalPayment)
-                    .failWithCode(".mustBeLessThan.numberOfRepayments");
-        }
+    return actualChanges;
+  }
 
-        if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnInterestPayment)) {
-            baseDataValidator.reset().parameter("graceOnInterestPayment").value(this.graceOnInterestPayment)
-                    .failWithCode(".mustBeLessThan.numberOfRepayments");
-        }
+  public void updateCurrency(final MonetaryCurrency currency) {
+    this.currency = currency;
+  }
 
-        if (this.numberOfRepayments < defaultToZeroIfNull(this.graceOnInterestCharged)) {
-            baseDataValidator.reset().parameter("graceOnInterestCharged").value(this.graceOnInterestCharged)
-                    .failWithCode(".mustBeLessThan.numberOfRepayments");
-        }
+  public void validateRepaymentPeriodWithGraceSettings() {
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    final DataValidatorBuilder baseDataValidator =
+        new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
 
-        int graceOnPrincipal = 0;
-        if (this.getGraceOnPrincipalPayment() != null) {
-            graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
-        }
-        int recurMoratoriumOnPrincipal = 0;
-        if (this.recurringMoratoriumOnPrincipalPeriods() != null) {
-            recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
-        }
-
-        if (  ( recurMoratoriumOnPrincipal > 0 )
-            && ( (this.numberOfRepayments - graceOnPrincipal) % ( recurMoratoriumOnPrincipal + 1) != 1) ) {
-            baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
-                    .value(graceOnPrincipal)
-                    .value(recurMoratoriumOnPrincipal)
-                    .failWithCode("causes.principal.moratorium.for.last.installment");
-        }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnPrincipalPayment)) {
+      baseDataValidator
+          .reset()
+          .parameter("graceOnPrincipalPayment")
+          .value(this.graceOnPrincipalPayment)
+          .failWithCode(".mustBeLessThan.numberOfRepayments");
     }
 
-    private Integer defaultToZeroIfNull(final Integer value) {
-        Integer result = value;
-        if (value == null) {
-            result = Integer.valueOf(0);
-        }
-        return result;
+    if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnInterestPayment)) {
+      baseDataValidator
+          .reset()
+          .parameter("graceOnInterestPayment")
+          .value(this.graceOnInterestPayment)
+          .failWithCode(".mustBeLessThan.numberOfRepayments");
     }
 
-    private void updateInterestRateDerivedFields(final AprCalculator aprCalculator) {
-       this.annualNominalInterestRate = aprCalculator.calculateFrom(this.interestPeriodFrequencyType, this.nominalInterestRatePerPeriod, this.numberOfRepayments, this.repayEvery, this.repaymentPeriodFrequencyType);
-
+    if (this.numberOfRepayments < defaultToZeroIfNull(this.graceOnInterestCharged)) {
+      baseDataValidator
+          .reset()
+          .parameter("graceOnInterestCharged")
+          .value(this.graceOnInterestCharged)
+          .failWithCode(".mustBeLessThan.numberOfRepayments");
     }
 
-    public boolean hasCurrencyCodeOf(final String currencyCode) {
-        return this.currency.getCode().equalsIgnoreCase(currencyCode);
+    int graceOnPrincipal = 0;
+    if (this.getGraceOnPrincipalPayment() != null) {
+      graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
+    }
+    int recurMoratoriumOnPrincipal = 0;
+    if (this.recurringMoratoriumOnPrincipalPeriods() != null) {
+      recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
     }
 
-    public void updatenterestPeriodFrequencyType(final PeriodFrequencyType interestPeriodFrequencyType) {
-        this.interestPeriodFrequencyType = interestPeriodFrequencyType;
+    if ((recurMoratoriumOnPrincipal > 0)
+        && ((this.numberOfRepayments - graceOnPrincipal) % (recurMoratoriumOnPrincipal + 1) != 1)) {
+      baseDataValidator
+          .reset()
+          .parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
+          .value(graceOnPrincipal)
+          .value(recurMoratoriumOnPrincipal)
+          .failWithCode("causes.principal.moratorium.for.last.installment");
     }
 
-    @Override
-    public Integer getGraceOnDueDate() {
-        return this.graceOnArrearsAgeing;
+    if (!dataValidationErrors.isEmpty()) {
+      throw new PlatformApiDataValidationException(dataValidationErrors);
     }
+  }
 
-    public DaysInMonthType fetchDaysInMonthType() {
-        return DaysInMonthType.fromInt(this.daysInMonthType);
+  private Integer defaultToZeroIfNull(final Integer value) {
+    Integer result = value;
+    if (value == null) {
+      result = Integer.valueOf(0);
     }
+    return result;
+  }
 
-    public DaysInYearType fetchDaysInYearType() {
-        return DaysInYearType.fromInt(this.daysInYearType);
-    }
+  private void updateInterestRateDerivedFields(final AprCalculator aprCalculator) {
+    this.annualNominalInterestRate =
+        aprCalculator.calculateFrom(
+            this.interestPeriodFrequencyType,
+            this.nominalInterestRatePerPeriod,
+            this.numberOfRepayments,
+            this.repayEvery,
+            this.repaymentPeriodFrequencyType);
+  }
 
-    public boolean isInterestRecalculationEnabled() {
-        return this.isInterestRecalculationEnabled;
-    }
+  public boolean hasCurrencyCodeOf(final String currencyCode) {
+    return this.currency.getCode().equalsIgnoreCase(currencyCode);
+  }
 
-    public void updateIsInterestRecalculationEnabled(final boolean isInterestRecalculationEnabled) {
-        this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
-    }
+  public void updatenterestPeriodFrequencyType(
+      final PeriodFrequencyType interestPeriodFrequencyType) {
+    this.interestPeriodFrequencyType = interestPeriodFrequencyType;
+  }
 
-    public void updateNumberOfRepayments(Integer numberOfRepayments) {
-        this.numberOfRepayments = numberOfRepayments;
-    }
+  @Override
+  public Integer getGraceOnDueDate() {
+    return this.graceOnArrearsAgeing;
+  }
 
-    public Integer getGraceOnPrincipalPayment() {
-        return graceOnPrincipalPayment;
-    }
+  public DaysInMonthType fetchDaysInMonthType() {
+    return DaysInMonthType.fromInt(this.daysInMonthType);
+  }
 
-    public void setGraceOnPrincipalPayment(Integer graceOnPrincipalPayment) {
-        this.graceOnPrincipalPayment = graceOnPrincipalPayment;
-    }
+  public DaysInYearType fetchDaysInYearType() {
+    return DaysInYearType.fromInt(this.daysInYearType);
+  }
 
-    public Integer getGraceOnInterestPayment() {
-        return graceOnInterestPayment;
-    }
+  public boolean isInterestRecalculationEnabled() {
+    return this.isInterestRecalculationEnabled;
+  }
 
-    public void setGraceOnInterestPayment(Integer graceOnInterestPayment) {
-        this.graceOnInterestPayment = graceOnInterestPayment;
-    }
+  public void updateIsInterestRecalculationEnabled(final boolean isInterestRecalculationEnabled) {
+    this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
+  }
 
-    public Integer getGraceOnArrearsAgeing() {
-        return graceOnArrearsAgeing;
-    }
+  public void updateNumberOfRepayments(Integer numberOfRepayments) {
+    this.numberOfRepayments = numberOfRepayments;
+  }
 
-    public void setGraceOnArrearsAgeing(Integer graceOnArrearsAgeing) {
-        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
-    }
+  public Integer getGraceOnPrincipalPayment() {
+    return graceOnPrincipalPayment;
+  }
 
-    public void setInterestMethod(InterestMethod interestMethod) {
-        this.interestMethod = interestMethod;
-    }
+  public void setGraceOnPrincipalPayment(Integer graceOnPrincipalPayment) {
+    this.graceOnPrincipalPayment = graceOnPrincipalPayment;
+  }
 
-    public void setInterestCalculationPeriodMethod(InterestCalculationPeriodMethod interestCalculationPeriodMethod) {
-        this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
-    }
+  public Integer getGraceOnInterestPayment() {
+    return graceOnInterestPayment;
+  }
 
-    public void setRepayEvery(Integer repayEvery) {
-        this.repayEvery = repayEvery;
-    }
+  public void setGraceOnInterestPayment(Integer graceOnInterestPayment) {
+    this.graceOnInterestPayment = graceOnInterestPayment;
+  }
 
-    public void setRepaymentPeriodFrequencyType(PeriodFrequencyType repaymentPeriodFrequencyType) {
-        this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
-    }
+  public Integer getGraceOnArrearsAgeing() {
+    return graceOnArrearsAgeing;
+  }
 
-    public void setAmortizationMethod(AmortizationMethod amortizationMethod) {
-        this.amortizationMethod = amortizationMethod;
-    }
+  public void setGraceOnArrearsAgeing(Integer graceOnArrearsAgeing) {
+    this.graceOnArrearsAgeing = graceOnArrearsAgeing;
+  }
 
-    public void setInArrearsTolerance(BigDecimal inArrearsTolerance) {
-        this.inArrearsTolerance = inArrearsTolerance;
-    }
+  public void setInterestMethod(InterestMethod interestMethod) {
+    this.interestMethod = interestMethod;
+  }
 
-    public BigDecimal getArrearsTolerance() {
-        return this.inArrearsTolerance;
-    }
+  public void setInterestCalculationPeriodMethod(
+      InterestCalculationPeriodMethod interestCalculationPeriodMethod) {
+    this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
+  }
 
-    public void updateForFloatingInterestRates() {
-        this.nominalInterestRatePerPeriod = null;
-        this.interestPeriodFrequencyType = PeriodFrequencyType.INVALID;
-        this.annualNominalInterestRate = null;
-    }
+  public void setRepayEvery(Integer repayEvery) {
+    this.repayEvery = repayEvery;
+  }
 
-    public boolean isAllowPartialPeriodInterestCalcualtion() {
-        return this.allowPartialPeriodInterestCalcualtion;
-    }
+  public void setRepaymentPeriodFrequencyType(PeriodFrequencyType repaymentPeriodFrequencyType) {
+    this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+  }
 
-    public boolean isEqualAmortization() {
-        return isEqualAmortization;
-    }
+  public void setAmortizationMethod(AmortizationMethod amortizationMethod) {
+    this.amortizationMethod = amortizationMethod;
+  }
 
-    public void setEqualAmortization(boolean isEqualAmortization) {
-        this.isEqualAmortization = isEqualAmortization;
-    }
+  public void setInArrearsTolerance(BigDecimal inArrearsTolerance) {
+    this.inArrearsTolerance = inArrearsTolerance;
+  }
 
-    public void setNominalInterestRatePerPeriod(BigDecimal nominalInterestRatePerPeriod) {
-        this.nominalInterestRatePerPeriod = nominalInterestRatePerPeriod;
-    }
+  public BigDecimal getArrearsTolerance() {
+    return this.inArrearsTolerance;
+  }
+
+  public void updateForFloatingInterestRates() {
+    this.nominalInterestRatePerPeriod = null;
+    this.interestPeriodFrequencyType = PeriodFrequencyType.INVALID;
+    this.annualNominalInterestRate = null;
+  }
+
+  public boolean isAllowPartialPeriodInterestCalcualtion() {
+    return this.allowPartialPeriodInterestCalcualtion;
+  }
+
+  public boolean isEqualAmortization() {
+    return isEqualAmortization;
+  }
+
+  public void setEqualAmortization(boolean isEqualAmortization) {
+    this.isEqualAmortization = isEqualAmortization;
+  }
+
+  public void setNominalInterestRatePerPeriod(BigDecimal nominalInterestRatePerPeriod) {
+    this.nominalInterestRatePerPeriod = nominalInterestRatePerPeriod;
+  }
 }

@@ -31,17 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GROUP", action = "UNASSIGNROLE")
 public class UnassignRoleCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupRolesWritePlatformService groupRolesWritePlatformService;
+  private final GroupRolesWritePlatformService groupRolesWritePlatformService;
 
-    @Autowired
-    public UnassignRoleCommandHandler(final GroupRolesWritePlatformService groupRolesWritePlatformService) {
-        this.groupRolesWritePlatformService = groupRolesWritePlatformService;
-    }
+  @Autowired
+  public UnassignRoleCommandHandler(
+      final GroupRolesWritePlatformService groupRolesWritePlatformService) {
+    this.groupRolesWritePlatformService = groupRolesWritePlatformService;
+  }
 
-    @Override
-    @Transactional
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupRolesWritePlatformService.deleteRole(command.entityId());
-    }
-
+  @Override
+  @Transactional
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.groupRolesWritePlatformService.deleteRole(command.entityId());
+  }
 }

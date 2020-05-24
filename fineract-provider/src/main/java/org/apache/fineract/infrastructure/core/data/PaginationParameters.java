@@ -27,114 +27,116 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class PaginationParameters {
 
-    private final boolean paged;
-    private final Integer offset;
-    private final Integer limit;
-    private final String orderBy;
-    private final String sortOrder;
+  private final boolean paged;
+  private final Integer offset;
+  private final Integer limit;
+  private final String orderBy;
+  private final String sortOrder;
 
-    public static PaginationParameters instance(Boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
-        if (null == paged) {
-            paged = false;
-        }
-
-        final Integer maxLimitAllowed = getCheckedLimit(limit);
-
-        return new PaginationParameters(paged, offset, maxLimitAllowed, orderBy, sortOrder);
+  public static PaginationParameters instance(
+      Boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
+    if (null == paged) {
+      paged = false;
     }
 
-    private PaginationParameters(boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
-        this.paged = paged;
-        this.offset = offset;
-        this.limit = limit;
-        this.orderBy = orderBy;
-        this.sortOrder = sortOrder;
+    final Integer maxLimitAllowed = getCheckedLimit(limit);
+
+    return new PaginationParameters(paged, offset, maxLimitAllowed, orderBy, sortOrder);
+  }
+
+  private PaginationParameters(
+      boolean paged, Integer offset, Integer limit, String orderBy, String sortOrder) {
+    this.paged = paged;
+    this.offset = offset;
+    this.limit = limit;
+    this.orderBy = orderBy;
+    this.sortOrder = sortOrder;
+  }
+
+  public static Integer getCheckedLimit(final Integer limit) {
+
+    final Integer maxLimitAllowed = 200;
+    // default to max limit first off
+    Integer checkedLimit = maxLimitAllowed;
+
+    if (limit != null && limit > 0) {
+      checkedLimit = limit;
+    } else if (limit != null) {
+      // unlimited case: limit provided and 0 or less
+      checkedLimit = null;
     }
 
-    public static Integer getCheckedLimit(final Integer limit) {
+    return checkedLimit;
+  }
 
-        final Integer maxLimitAllowed = 200;
-        // default to max limit first off
-        Integer checkedLimit = maxLimitAllowed;
+  public boolean isPaged() {
+    return this.paged;
+  }
 
-        if (limit != null && limit > 0) {
-            checkedLimit = limit;
-        } else if (limit != null) {
-            // unlimited case: limit provided and 0 or less
-            checkedLimit = null;
-        }
+  public Integer getOffset() {
+    return this.offset;
+  }
 
-        return checkedLimit;
+  public Integer getLimit() {
+    return this.limit;
+  }
+
+  public String getOrderBy() {
+    return this.orderBy;
+  }
+
+  public String getSortOrder() {
+    return this.sortOrder;
+  }
+
+  public boolean isOrderByRequested() {
+    return StringUtils.isNotBlank(this.orderBy);
+  }
+
+  public boolean isSortOrderProvided() {
+    return StringUtils.isNotBlank(this.sortOrder);
+  }
+
+  public boolean isLimited() {
+    return this.limit != null && this.limit.intValue() > 0;
+  }
+
+  public boolean isOffset() {
+    return this.offset != null;
+  }
+
+  public String orderBySql() {
+    final StringBuilder sql = new StringBuilder();
+
+    if (this.isOrderByRequested()) {
+      sql.append(" order by ").append(this.getOrderBy());
+      if (this.isSortOrderProvided()) {
+        sql.append(' ').append(this.getSortOrder());
+      }
+    }
+    return sql.toString();
+  }
+
+  public String limitSql() {
+    final StringBuilder sql = new StringBuilder();
+    if (this.isLimited()) {
+      sql.append(" limit ").append(this.getLimit());
+      if (this.isOffset()) {
+        sql.append(" offset ").append(this.getOffset());
+      }
+    }
+    return sql.toString();
+  }
+
+  public String paginationSql() {
+    final StringBuilder sqlBuilder = new StringBuilder(50);
+    if (this.isOrderByRequested()) {
+      sqlBuilder.append(' ').append(this.orderBySql());
+    }
+    if (this.isLimited()) {
+      sqlBuilder.append(' ').append(this.limitSql());
     }
 
-    public boolean isPaged() {
-        return this.paged;
-    }
-
-    public Integer getOffset() {
-        return this.offset;
-    }
-
-    public Integer getLimit() {
-        return this.limit;
-    }
-
-    public String getOrderBy() {
-        return this.orderBy;
-    }
-
-    public String getSortOrder() {
-        return this.sortOrder;
-    }
-
-    public boolean isOrderByRequested() {
-        return StringUtils.isNotBlank(this.orderBy);
-    }
-
-    public boolean isSortOrderProvided() {
-        return StringUtils.isNotBlank(this.sortOrder);
-    }
-
-    public boolean isLimited() {
-        return this.limit != null && this.limit.intValue() > 0;
-    }
-
-    public boolean isOffset() {
-        return this.offset != null;
-    }
-
-    public String orderBySql() {
-        final StringBuilder sql = new StringBuilder();
-
-        if (this.isOrderByRequested()) {
-            sql.append(" order by ").append(this.getOrderBy());
-            if (this.isSortOrderProvided()) {
-                sql.append(' ').append(this.getSortOrder());
-            }
-        }
-        return sql.toString();
-    }
-
-    public String limitSql() {
-        final StringBuilder sql = new StringBuilder();
-        if (this.isLimited()) {
-            sql.append(" limit ").append(this.getLimit());
-            if (this.isOffset()) {
-                sql.append(" offset ").append(this.getOffset());
-            }
-        }
-        return sql.toString();
-    }
-
-    public String paginationSql(){
-        final StringBuilder sqlBuilder = new StringBuilder(50);
-        if (this.isOrderByRequested()) {
-            sqlBuilder.append(' ').append(this.orderBySql());
-        }
-        if (this.isLimited()) {
-            sqlBuilder.append(' ').append(this.limitSql());
-        }
-
-        return sqlBuilder.toString();
-    }
+    return sqlBuilder.toString();
+  }
 }

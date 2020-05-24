@@ -38,11 +38,14 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
-public class InvalidTenantIdentifierExceptionMapper implements ExceptionMapper<InvalidTenantIdentiferException> {
+public class InvalidTenantIdentifierExceptionMapper
+    implements ExceptionMapper<InvalidTenantIdentiferException> {
 
-    @Override
-    public Response toResponse(@SuppressWarnings("unused") final InvalidTenantIdentiferException e) {
-        return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.invalidTenantIdentifier())
-                .type(MediaType.APPLICATION_JSON).build();
-    }
+  @Override
+  public Response toResponse(@SuppressWarnings("unused") final InvalidTenantIdentiferException e) {
+    return Response.status(Status.UNAUTHORIZED)
+        .entity(ApiGlobalErrorResponse.invalidTenantIdentifier())
+        .type(MediaType.APPLICATION_JSON)
+        .build();
+  }
 }

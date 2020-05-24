@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PASSWORD_PREFERENCES", action = "UPDATE")
 public class UpdatePasswordPreferencesCommandHandler implements NewCommandSourceHandler {
 
-    private final PasswordPreferencesWritePlatformService writePlatformService;
+  private final PasswordPreferencesWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdatePasswordPreferencesCommandHandler(final PasswordPreferencesWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdatePasswordPreferencesCommandHandler(
+      final PasswordPreferencesWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updatePreferences(command);
-    }
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
+    return this.writePlatformService.updatePreferences(command);
+  }
 }

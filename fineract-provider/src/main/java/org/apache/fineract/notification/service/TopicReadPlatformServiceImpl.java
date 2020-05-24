@@ -33,65 +33,65 @@ import org.springframework.stereotype.Service;
 @Service
 public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+  @Autowired
+  public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
+
+  private static final class TopicMapper implements RowMapper<TopicData> {
+
+    private final String schema;
+
+    public TopicMapper() {
+      final StringBuilder sqlBuilder = new StringBuilder(200);
+      sqlBuilder.append("t.id as id, t.title as title, t.enabled as enabled, ");
+      sqlBuilder.append("t.entity_id as entityId, t.entity_type as entityType, ");
+      sqlBuilder.append("t.member_type as memberType, from topic t");
+      this.schema = sqlBuilder.toString();
     }
 
-    private static final class TopicMapper implements RowMapper<TopicData> {
-
-        private final String schema;
-
-        public TopicMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder(200);
-            sqlBuilder.append("t.id as id, t.title as title, t.enabled as enabled, ");
-            sqlBuilder.append("t.entity_id as entityId, t.entity_type as entityType, ");
-            sqlBuilder.append("t.member_type as memberType, from topic t");
-            this.schema = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schema;
-        }
-
-        @Override
-        public TopicData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long id = rs.getLong("id");
-            final String title = rs.getString("title");
-            final Boolean enabled = rs.getBoolean("enabled");
-            final Long entityId = rs.getLong("entityId");
-            final String entityType = rs.getString("entityType");
-            final String memberType = rs.getString("memberType");
-
-            return new TopicData(id, title, enabled, entityId, entityType, memberType);
-        }
-
+    public String schema() {
+      return this.schema;
     }
 
     @Override
-    public Collection<TopicData> getAllTopics() {
-        final TopicMapper tm = new TopicMapper();
-        String sql = "select " + tm.schema();
-        return this.jdbcTemplate.query(sql, tm, new Object[] {});
-    }
+    public TopicData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        throws SQLException {
+      final Long id = rs.getLong("id");
+      final String title = rs.getString("title");
+      final Boolean enabled = rs.getBoolean("enabled");
+      final Long entityId = rs.getLong("entityId");
+      final String entityType = rs.getString("entityType");
+      final String memberType = rs.getString("memberType");
 
-    @Override
-    public Collection<TopicData> getAllEnabledTopics() {
-        final TopicMapper tm = new TopicMapper();
-        final String sql = "select " + tm.schema() + " where t.is_active = ?";
-        return this.jdbcTemplate.query(sql, tm, new Object[] { true });
+      return new TopicData(id, title, enabled, entityId, entityType, memberType);
     }
+  }
 
-    @Override
-    public TopicData findById(Long topicId) {
-        try {
-            final TopicMapper tm = new TopicMapper();
-            final String sql = "select " + tm.schema() + " where t.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new TopicNotFoundException(topicId);
-        }
+  @Override
+  public Collection<TopicData> getAllTopics() {
+    final TopicMapper tm = new TopicMapper();
+    String sql = "select " + tm.schema();
+    return this.jdbcTemplate.query(sql, tm, new Object[] {});
+  }
+
+  @Override
+  public Collection<TopicData> getAllEnabledTopics() {
+    final TopicMapper tm = new TopicMapper();
+    final String sql = "select " + tm.schema() + " where t.is_active = ?";
+    return this.jdbcTemplate.query(sql, tm, new Object[] {true});
+  }
+
+  @Override
+  public TopicData findById(Long topicId) {
+    try {
+      final TopicMapper tm = new TopicMapper();
+      final String sql = "select " + tm.schema() + " where t.id = ?";
+      return this.jdbcTemplate.queryForObject(sql, tm, new Object[] {topicId});
+    } catch (final EmptyResultDataAccessException e) {
+      throw new TopicNotFoundException(topicId);
     }
+  }
 }

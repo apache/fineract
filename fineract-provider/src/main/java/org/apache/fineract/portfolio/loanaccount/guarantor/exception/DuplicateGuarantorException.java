@@ -22,9 +22,12 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class DuplicateGuarantorException extends AbstractPlatformDomainRuleException {
 
-    public DuplicateGuarantorException(final String action, final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
-        // TODO Auto-generated constructor stub
-    }
+  public DuplicateGuarantorException(
+      final String action,
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super("error.msg." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
+    // TODO Auto-generated constructor stub
+  }
 }

@@ -28,28 +28,29 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 
 public interface ContentRepository {
 
-    public StorageType type = null;
+  public StorageType type = null;
 
-    // TODO:Vishwas Need to move these settings to the Database
-    public static final Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
+  // TODO:Vishwas Need to move these settings to the Database
+  public static final Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
 
-    // TODO:Vishwas Need to move these settings to the Database
-    public static final Integer MAX_IMAGE_UPLOAD_SIZE_IN_MB = 1;
+  // TODO:Vishwas Need to move these settings to the Database
+  public static final Integer MAX_IMAGE_UPLOAD_SIZE_IN_MB = 1;
 
-    public abstract String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand);
+  public abstract String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand);
 
-    public abstract void deleteFile(String fileName, String documentPath);
+  public abstract void deleteFile(String fileName, String documentPath);
 
-    public abstract FileData fetchFile(DocumentData documentData);
+  public abstract FileData fetchFile(DocumentData documentData);
 
-    public abstract String saveImage(InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize);
+  public abstract String saveImage(
+      InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize);
 
-    public abstract String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName);
+  public abstract String saveImage(
+      Base64EncodedImage base64EncodedImage, Long resourceId, String imageName);
 
-    public abstract void deleteImage(final Long resourceId, final String location);
+  public abstract void deleteImage(final Long resourceId, final String location);
 
-    public abstract ImageData fetchImage(ImageData imageData);
+  public abstract ImageData fetchImage(ImageData imageData);
 
-    public abstract StorageType getStorageType();
-
+  public abstract StorageType getStorageType();
 }

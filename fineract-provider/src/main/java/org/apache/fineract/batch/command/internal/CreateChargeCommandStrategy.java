@@ -45,48 +45,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateChargeCommandStrategy implements CommandStrategy {
 
-    private final LoanChargesApiResource loanChargesApiResource;
+  private final LoanChargesApiResource loanChargesApiResource;
 
-    @Autowired
-    public CreateChargeCommandStrategy(final LoanChargesApiResource loanChargesApiResource) {
-        this.loanChargesApiResource = loanChargesApiResource;
+  @Autowired
+  public CreateChargeCommandStrategy(final LoanChargesApiResource loanChargesApiResource) {
+    this.loanChargesApiResource = loanChargesApiResource;
+  }
+
+  @Override
+  public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
+
+    final BatchResponse response = new BatchResponse();
+    final String responseBody;
+
+    response.setRequestId(request.getRequestId());
+    response.setHeaders(request.getHeaders());
+
+    final String[] pathParameters = request.getRelativeUrl().split("/");
+    Long loanId = Long.parseLong(pathParameters[1]);
+
+    // Try-catch blocks to map exceptions to appropriate status codes
+    try {
+
+      // Calls 'executeLoanCharge' function from 'LoanChargesApiResource'
+      // to create
+      // a new charge for a loan
+      responseBody = loanChargesApiResource.executeLoanCharge(loanId, null, request.getBody());
+
+      response.setStatusCode(200);
+      // Sets the body of the response after Charge has been successfully
+      // created
+      response.setBody(responseBody);
+
+    } catch (RuntimeException e) {
+
+      // Gets an object of type ErrorInfo, containing information about
+      // raised exception
+      ErrorInfo ex = ErrorHandler.handler(e);
+
+      response.setStatusCode(ex.getStatusCode());
+      response.setBody(ex.getMessage());
     }
 
-    @Override
-    public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
-
-        final BatchResponse response = new BatchResponse();
-        final String responseBody;
-
-        response.setRequestId(request.getRequestId());
-        response.setHeaders(request.getHeaders());
-
-        final String[] pathParameters = request.getRelativeUrl().split("/");
-        Long loanId = Long.parseLong(pathParameters[1]);
-
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
-
-            // Calls 'executeLoanCharge' function from 'LoanChargesApiResource'
-            // to create
-            // a new charge for a loan
-            responseBody = loanChargesApiResource.executeLoanCharge(loanId, null, request.getBody());
-
-            response.setStatusCode(200);
-            // Sets the body of the response after Charge has been successfully
-            // created
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
-
-        return response;
-    }
+    return response;
+  }
 }

@@ -26,132 +26,147 @@ import org.joda.time.DateTime;
  * Created by Chirag Gupta on 12/29/17.
  */
 final class NotesApiResourceSwagger {
-    private NotesApiResourceSwagger() {
+  private NotesApiResourceSwagger() {}
+
+  @ApiModel(value = "GetResourceTypeResourceIdNotesResponse")
+  public static final class GetResourceTypeResourceIdNotesResponse {
+    private GetResourceTypeResourceIdNotesResponse() {}
+
+    final class GetNotesNoteType {
+      private GetNotesNoteType() {}
+
+      @ApiModelProperty(example = "100")
+      public Integer id;
+
+      @ApiModelProperty(example = "noteType.client")
+      public String code;
+
+      @ApiModelProperty(example = "Client note")
+      public String value;
     }
 
-    @ApiModel(value = "GetResourceTypeResourceIdNotesResponse")
-    public final static class GetResourceTypeResourceIdNotesResponse {
-        private GetResourceTypeResourceIdNotesResponse() {
-        }
+    @ApiModelProperty(example = "2")
+    public Integer id;
 
-        final class GetNotesNoteType {
-            private GetNotesNoteType() {
-            }
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
 
-            @ApiModelProperty(example = "100")
-            public Integer id;
-            @ApiModelProperty(example = "noteType.client")
-            public String code;
-            @ApiModelProperty(example = "Client note")
-            public String value;
-        }
+    public GetNotesNoteType noteType;
 
-        @ApiModelProperty(example = "2")
-        public Integer id;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        public GetNotesNoteType noteType;
-        @ApiModelProperty(example = "First note edited")
-        public String note;
-        @ApiModelProperty(example = "1")
-        public Integer createdById;
-        @ApiModelProperty(example = "mifos")
-        public String createdByUsername;
-        @ApiModelProperty(example = "1342498505000")
-        public DateTime createdOn;
-        @ApiModelProperty(example = "1")
-        public Integer updatedById;
-        @ApiModelProperty(example = "mifos")
-        public String updatedByUsername;
-        @ApiModelProperty(example = "1342498517000")
-        public DateTime updatedOn;
+    @ApiModelProperty(example = "First note edited")
+    public String note;
+
+    @ApiModelProperty(example = "1")
+    public Integer createdById;
+
+    @ApiModelProperty(example = "mifos")
+    public String createdByUsername;
+
+    @ApiModelProperty(example = "1342498505000")
+    public DateTime createdOn;
+
+    @ApiModelProperty(example = "1")
+    public Integer updatedById;
+
+    @ApiModelProperty(example = "mifos")
+    public String updatedByUsername;
+
+    @ApiModelProperty(example = "1342498517000")
+    public DateTime updatedOn;
+  }
+
+  @ApiModel(value = "GetResourceTypeResourceIdNotesNoteIdResponse")
+  public static final class GetResourceTypeResourceIdNotesNoteIdResponse {
+    private GetResourceTypeResourceIdNotesNoteIdResponse() {}
+
+    @ApiModelProperty(example = "76")
+    public Integer id;
+
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
+
+    public GetResourceTypeResourceIdNotesResponse.GetNotesNoteType noteType;
+
+    @ApiModelProperty(example = "a note about the client")
+    public String note;
+
+    @ApiModelProperty(example = "1")
+    public Integer createdById;
+
+    @ApiModelProperty(example = "mifos")
+    public String createdByUsername;
+
+    @ApiModelProperty(example = "1359463135000")
+    public DateTime createdOn;
+
+    @ApiModelProperty(example = "1")
+    public Integer updatedById;
+
+    @ApiModelProperty(example = "mifos")
+    public String updatedByUsername;
+
+    @ApiModelProperty(example = "1359463135000")
+    public DateTime updatedOn;
+  }
+
+  @ApiModel(value = "PostResourceTypeResourceIdNotesRequest")
+  public static final class PostResourceTypeResourceIdNotesRequest {
+    private PostResourceTypeResourceIdNotesRequest() {}
+
+    @ApiModelProperty(example = "a note about the client")
+    public String note;
+  }
+
+  @ApiModel(value = "PostResourceTypeResourceIdNotesResponse")
+  public static final class PostResourceTypeResourceIdNotesResponse {
+    private PostResourceTypeResourceIdNotesResponse() {}
+
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
+
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
+
+    @ApiModelProperty(example = "76")
+    public Integer resourceId;
+  }
+
+  @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdRequest")
+  public static final class PutResourceTypeResourceIdNotesNoteIdRequest {
+    private PutResourceTypeResourceIdNotesNoteIdRequest() {}
+
+    @ApiModelProperty(example = "a note about the client")
+    public String note;
+  }
+
+  @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdResponse")
+  public static final class PutResourceTypeResourceIdNotesNoteIdResponse {
+    private PutResourceTypeResourceIdNotesNoteIdResponse() {}
+
+    final class PutNotesChanges {
+      private PutNotesChanges() {}
+
+      @ApiModelProperty(example = "a note about the client")
+      public String note;
     }
 
-    @ApiModel(value = "GetResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class GetResourceTypeResourceIdNotesNoteIdResponse {
-        private GetResourceTypeResourceIdNotesNoteIdResponse() {
-        }
+    @ApiModelProperty(example = "1")
+    public Integer officeId;
 
-        @ApiModelProperty(example = "76")
-        public Integer id;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        public GetResourceTypeResourceIdNotesResponse.GetNotesNoteType noteType;
-        @ApiModelProperty(example = "a note about the client")
-        public String note;
-        @ApiModelProperty(example = "1")
-        public Integer createdById;
-        @ApiModelProperty(example = "mifos")
-        public String createdByUsername;
-        @ApiModelProperty(example = "1359463135000")
-        public DateTime createdOn;
-        @ApiModelProperty(example = "1")
-        public Integer updatedById;
-        @ApiModelProperty(example = "mifos")
-        public String updatedByUsername;
-        @ApiModelProperty(example = "1359463135000")
-        public DateTime updatedOn;
-    }
+    @ApiModelProperty(example = "1")
+    public Integer clientId;
 
-    @ApiModel(value = "PostResourceTypeResourceIdNotesRequest")
-    public final static class PostResourceTypeResourceIdNotesRequest {
-        private PostResourceTypeResourceIdNotesRequest() {
-        }
+    @ApiModelProperty(example = "76")
+    public Integer resourceId;
 
-        @ApiModelProperty(example = "a note about the client")
-        public String note;
-    }
+    public PutNotesChanges changes;
+  }
 
-    @ApiModel(value = "PostResourceTypeResourceIdNotesResponse")
-    public final static class PostResourceTypeResourceIdNotesResponse {
-        private PostResourceTypeResourceIdNotesResponse() {
-        }
+  @ApiModel(value = "DeleteResourceTypeResourceIdNotesNoteIdResponse")
+  public static final class DeleteResourceTypeResourceIdNotesNoteIdResponse {
+    private DeleteResourceTypeResourceIdNotesNoteIdResponse() {}
 
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        @ApiModelProperty(example = "76")
-        public Integer resourceId;
-    }
-
-    @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdRequest")
-    public final static class PutResourceTypeResourceIdNotesNoteIdRequest {
-        private PutResourceTypeResourceIdNotesNoteIdRequest() {
-        }
-
-        @ApiModelProperty(example = "a note about the client")
-        public String note;
-    }
-
-    @ApiModel(value = "PutResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class PutResourceTypeResourceIdNotesNoteIdResponse {
-        private PutResourceTypeResourceIdNotesNoteIdResponse() {
-        }
-
-        final class PutNotesChanges {
-            private PutNotesChanges() {
-            }
-
-            @ApiModelProperty(example = "a note about the client")
-            public String note;
-        }
-
-        @ApiModelProperty(example = "1")
-        public Integer officeId;
-        @ApiModelProperty(example = "1")
-        public Integer clientId;
-        @ApiModelProperty(example = "76")
-        public Integer resourceId;
-        public PutNotesChanges changes;
-    }
-
-    @ApiModel(value = "DeleteResourceTypeResourceIdNotesNoteIdResponse")
-    public final static class DeleteResourceTypeResourceIdNotesNoteIdResponse {
-        private DeleteResourceTypeResourceIdNotesNoteIdResponse() {
-        }
-
-        @ApiModelProperty(example = "76")
-        public Integer resourceId;
-    }
+    @ApiModelProperty(example = "76")
+    public Integer resourceId;
+  }
 }

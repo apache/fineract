@@ -41,135 +41,158 @@ import org.joda.time.LocalDate;
 @Embeddable
 public class InterestRateChartFields {
 
-    @Column(name = "name", length = 100, unique = false, nullable = false)
-    private String name;
+  @Column(name = "name", length = 100, unique = false, nullable = false)
+  private String name;
 
-    @Column(name = "description", nullable = true)
-    private String description;
+  @Column(name = "description", nullable = true)
+  private String description;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "from_date", nullable = false)
-    private Date fromDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "from_date", nullable = false)
+  private Date fromDate;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "end_date", nullable = true)
-    private Date endDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "end_date", nullable = true)
+  private Date endDate;
 
-    @Column(name = "is_primary_grouping_by_amount", nullable = false)
-    private boolean isPrimaryGroupingByAmount;
+  @Column(name = "is_primary_grouping_by_amount", nullable = false)
+  private boolean isPrimaryGroupingByAmount;
 
-    protected InterestRateChartFields() {
-        //
+  protected InterestRateChartFields() {
+    //
+  }
+
+  public static InterestRateChartFields createNew(
+      String name,
+      String description,
+      LocalDate fromDate,
+      LocalDate toDate,
+      boolean isPrimaryGroupingByAmount) {
+    return new InterestRateChartFields(
+        name, description, fromDate, toDate, isPrimaryGroupingByAmount);
+  }
+
+  private InterestRateChartFields(
+      String name,
+      String description,
+      LocalDate fromDate,
+      LocalDate toDate,
+      boolean isPrimaryGroupingByAmount) {
+    this.name = name;
+    this.description = description;
+    this.fromDate = fromDate.toDate();
+    this.endDate = (toDate == null) ? null : toDate.toDate();
+    this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
+  }
+
+  public void update(
+      JsonCommand command,
+      final Map<String, Object> actualChanges,
+      final DataValidatorBuilder baseDataValidator) {
+
+    if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+      final String newValue = command.stringValueOfParameterNamed(nameParamName);
+      actualChanges.put(nameParamName, newValue);
+      this.name = newValue;
     }
 
-    public static InterestRateChartFields createNew(String name, String description, LocalDate fromDate, LocalDate toDate,
-            boolean isPrimaryGroupingByAmount) {
-        return new InterestRateChartFields(name, description, fromDate, toDate, isPrimaryGroupingByAmount);
+    if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+      final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+      actualChanges.put(descriptionParamName, newValue);
+      this.description = newValue;
     }
 
-    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate, boolean isPrimaryGroupingByAmount) {
-        this.name = name;
-        this.description = description;
-        this.fromDate = fromDate.toDate();
-        this.endDate = (toDate == null) ? null : toDate.toDate();
-        this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
+    final String localeAsInput = command.locale();
+    final String dateFormat = command.dateFormat();
+
+    if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateAsLocalDate())) {
+      final LocalDate newValue = command.localDateValueOfParameterNamed(fromDateParamName);
+      final String newValueAsString = command.stringValueOfParameterNamed(fromDateParamName);
+      actualChanges.put(fromDateParamName, newValueAsString);
+      actualChanges.put(localeParamName, localeAsInput);
+      actualChanges.put(dateFormatParamName, dateFormat);
+      this.fromDate = newValue.toDate();
     }
 
-    public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator) {
-
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
-        }
-
-        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, newValue);
-            this.description = newValue;
-        }
-
-        final String localeAsInput = command.locale();
-        final String dateFormat = command.dateFormat();
-
-        if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateAsLocalDate())) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(fromDateParamName);
-            final String newValueAsString = command.stringValueOfParameterNamed(fromDateParamName);
-            actualChanges.put(fromDateParamName, newValueAsString);
-            actualChanges.put(localeParamName, localeAsInput);
-            actualChanges.put(dateFormatParamName, dateFormat);
-            this.fromDate = newValue.toDate();
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateAsLocalDate())) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            final String newValueAsString = command.stringValueOfParameterNamed(endDateParamName);
-            actualChanges.put(endDateParamName, newValueAsString);
-            actualChanges.put(localeParamName, localeAsInput);
-            actualChanges.put(dateFormatParamName, dateFormat);
-            this.endDate = newValue.toDate();
-        }
-
-        if (command.isChangeInBooleanParameterNamed(isPrimaryGroupingByAmountParamName, this.isPrimaryGroupingByAmount)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isPrimaryGroupingByAmountParamName);
-            actualChanges.put(isPrimaryGroupingByAmountParamName, newValue);
-            this.isPrimaryGroupingByAmount = newValue;
-        }
-
-        if (isFromDateAfterToDate()) {
-            baseDataValidator.parameter(fromDateParamName).value(fromDate).failWithCode("from.date.is.after.to.date");
-        }
+    if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateAsLocalDate())) {
+      final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
+      final String newValueAsString = command.stringValueOfParameterNamed(endDateParamName);
+      actualChanges.put(endDateParamName, newValueAsString);
+      actualChanges.put(localeParamName, localeAsInput);
+      actualChanges.put(dateFormatParamName, dateFormat);
+      this.endDate = newValue.toDate();
     }
 
-    public boolean isFromDateAfterToDate() {
-        return isFromDateAfter(getEndDateAsLocalDate());
+    if (command.isChangeInBooleanParameterNamed(
+        isPrimaryGroupingByAmountParamName, this.isPrimaryGroupingByAmount)) {
+      final boolean newValue =
+          command.booleanPrimitiveValueOfParameterNamed(isPrimaryGroupingByAmountParamName);
+      actualChanges.put(isPrimaryGroupingByAmountParamName, newValue);
+      this.isPrimaryGroupingByAmount = newValue;
     }
 
-    public boolean isFromDateAfter(LocalDate compare) {
-        final LocalDate fromDate = getFromDateAsLocalDate();
-        if (fromDate != null && compare != null) { return fromDate.isAfter(compare); }
-        return false;
+    if (isFromDateAfterToDate()) {
+      baseDataValidator
+          .parameter(fromDateParamName)
+          .value(fromDate)
+          .failWithCode("from.date.is.after.to.date");
     }
+  }
 
-    public LocalDate getFromDateAsLocalDate() {
-        LocalDate fromDate = null;
-        if (this.fromDate != null) {
-            fromDate = new LocalDate(this.fromDate);
-        }
-        return fromDate;
+  public boolean isFromDateAfterToDate() {
+    return isFromDateAfter(getEndDateAsLocalDate());
+  }
+
+  public boolean isFromDateAfter(LocalDate compare) {
+    final LocalDate fromDate = getFromDateAsLocalDate();
+    if (fromDate != null && compare != null) {
+      return fromDate.isAfter(compare);
     }
+    return false;
+  }
 
-    public LocalDate getEndDateAsLocalDate() {
-        LocalDate endDate = null;
-        if (this.endDate != null) {
-            endDate = new LocalDate(this.endDate);
-        }
-        return endDate;
+  public LocalDate getFromDateAsLocalDate() {
+    LocalDate fromDate = null;
+    if (this.fromDate != null) {
+      fromDate = new LocalDate(this.fromDate);
     }
+    return fromDate;
+  }
 
-    public boolean isOverlapping(InterestRateChartFields that) {
-        final LocalDate thisFromDate = this.getFromDateAsLocalDate();
-        LocalDate thisEndDate = this.getEndDateAsLocalDate();
-        thisEndDate = thisEndDate == null ? DateUtils.getLocalDateOfTenant() : thisEndDate;
-        final LocalDate thatFromDate = that.getFromDateAsLocalDate();
-        LocalDate thatEndDate = that.getEndDateAsLocalDate();
-        thatEndDate = thatEndDate == null ? DateUtils.getLocalDateOfTenant() : thatEndDate;
-
-        final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
-        final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
-
-        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) { return true; }
-        return false;// no overlapping
+  public LocalDate getEndDateAsLocalDate() {
+    LocalDate endDate = null;
+    if (this.endDate != null) {
+      endDate = new LocalDate(this.endDate);
     }
+    return endDate;
+  }
 
-    public boolean isApplicableChartFor(final LocalDate target) {
-        final LocalDate endDate = this.endDate == null ? DateUtils.getLocalDateOfTenant() : this.getEndDateAsLocalDate();
-        final LocalDateInterval interval = LocalDateInterval.create(getFromDateAsLocalDate(), endDate);
-        return interval.contains(target);
+  public boolean isOverlapping(InterestRateChartFields that) {
+    final LocalDate thisFromDate = this.getFromDateAsLocalDate();
+    LocalDate thisEndDate = this.getEndDateAsLocalDate();
+    thisEndDate = thisEndDate == null ? DateUtils.getLocalDateOfTenant() : thisEndDate;
+    final LocalDate thatFromDate = that.getFromDateAsLocalDate();
+    LocalDate thatEndDate = that.getEndDateAsLocalDate();
+    thatEndDate = thatEndDate == null ? DateUtils.getLocalDateOfTenant() : thatEndDate;
+
+    final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
+    final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
+
+    if (thisInterval.containsPortionOf(thatInterval)
+        || thatInterval.containsPortionOf(thisInterval)) {
+      return true;
     }
+    return false; // no overlapping
+  }
 
-    public boolean isPrimaryGroupingByAmount() {
-        return this.isPrimaryGroupingByAmount;
-    }
+  public boolean isApplicableChartFor(final LocalDate target) {
+    final LocalDate endDate =
+        this.endDate == null ? DateUtils.getLocalDateOfTenant() : this.getEndDateAsLocalDate();
+    final LocalDateInterval interval = LocalDateInterval.create(getFromDateAsLocalDate(), endDate);
+    return interval.contains(target);
+  }
 
+  public boolean isPrimaryGroupingByAmount() {
+    return this.isPrimaryGroupingByAmount;
+  }
 }

@@ -20,19 +20,20 @@ package org.apache.fineract.infrastructure.security.service;
 
 public class RandomOTPGenerator {
 
-    private static final String allowedCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVQXYZ";
-    private final int tokenLength;
+  private static final String allowedCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVQXYZ";
+  private final int tokenLength;
 
-    public RandomOTPGenerator(int tokenLength) {
-        this.tokenLength = tokenLength;
+  public RandomOTPGenerator(int tokenLength) {
+    this.tokenLength = tokenLength;
+  }
+
+  public String generate() {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < tokenLength; i++) {
+      builder.append(
+          allowedCharacters.charAt((int) (Math.random() * (allowedCharacters.length()))));
     }
 
-    public String generate() {
-        StringBuilder builder = new StringBuilder();
-        for(int i = 0; i < tokenLength; i++) {
-            builder.append(allowedCharacters.charAt((int) (Math.random() * (allowedCharacters.length()))));
-        }
-
-        return builder.toString();
-    }
+    return builder.toString();
+  }
 }

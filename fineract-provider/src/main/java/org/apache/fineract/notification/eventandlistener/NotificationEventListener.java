@@ -39,57 +39,58 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationEventListener implements SessionAwareMessageListener {
 
-    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+  private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
 
-    private final NotificationWritePlatformService notificationWritePlatformService;
+  private final NotificationWritePlatformService notificationWritePlatformService;
 
-    private final AppUserRepository appUserRepository;
+  private final AppUserRepository appUserRepository;
 
-    @Autowired
-    public NotificationEventListener(BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-                                     NotificationWritePlatformService notificationWritePlatformService,
-                                     AppUserRepository appUserRepository) {
-        this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
-        this.notificationWritePlatformService = notificationWritePlatformService;
-        this.appUserRepository = appUserRepository;
-    }
+  @Autowired
+  public NotificationEventListener(
+      BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+      NotificationWritePlatformService notificationWritePlatformService,
+      AppUserRepository appUserRepository) {
+    this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
+    this.notificationWritePlatformService = notificationWritePlatformService;
+    this.appUserRepository = appUserRepository;
+  }
 
-    @Override
-    public void onMessage(Message message, Session session) throws JMSException {
-        if (message instanceof ObjectMessage) {
-            NotificationData notificationData = (NotificationData) ((ObjectMessage) message).getObject();
+  @Override
+  public void onMessage(Message message, Session session) throws JMSException {
+    if (message instanceof ObjectMessage) {
+      NotificationData notificationData = (NotificationData) ((ObjectMessage) message).getObject();
 
-            final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService
-                    .loadTenantById(notificationData.getTenantIdentifier(), false);
-            ThreadLocalContextUtil.setTenant(tenant);
+      final FineractPlatformTenant tenant =
+          this.basicAuthTenantDetailsService.loadTenantById(
+              notificationData.getTenantIdentifier(), false);
+      ThreadLocalContextUtil.setTenant(tenant);
 
-            Long appUserId = notificationData.getActor();
+      Long appUserId = notificationData.getActor();
 
-            List<Long> userIds = notificationData.getUserIds();
+      List<Long> userIds = notificationData.getUserIds();
 
-            if (notificationData.getOfficeId() != null) {
-                List<Long> tempUserIds = new ArrayList<>(userIds);
-                for (Long userId : tempUserIds) {
-                    AppUser appUser = appUserRepository.findById(userId).get();
-                    if (!Objects.equals(appUser.getOffice().getId(), notificationData.getOfficeId())) {
-                        userIds.remove(userId);
-                    }
-                }
-            }
-
-            if (userIds.contains(appUserId)) {
-                userIds.remove(appUserId);
-            }
-
-            notificationWritePlatformService.notify(
-                    userIds,
-                    notificationData.getObjectType(),
-                    notificationData.getObjectIdentfier(),
-                    notificationData.getAction(),
-                    notificationData.getActor(),
-                    notificationData.getContent(),
-                    notificationData.isSystemGenerated()
-            );
+      if (notificationData.getOfficeId() != null) {
+        List<Long> tempUserIds = new ArrayList<>(userIds);
+        for (Long userId : tempUserIds) {
+          AppUser appUser = appUserRepository.findById(userId).get();
+          if (!Objects.equals(appUser.getOffice().getId(), notificationData.getOfficeId())) {
+            userIds.remove(userId);
+          }
         }
+      }
+
+      if (userIds.contains(appUserId)) {
+        userIds.remove(appUserId);
+      }
+
+      notificationWritePlatformService.notify(
+          userIds,
+          notificationData.getObjectType(),
+          notificationData.getObjectIdentfier(),
+          notificationData.getAction(),
+          notificationData.getActor(),
+          notificationData.getContent(),
+          notificationData.isSystemGenerated());
     }
+  }
 }

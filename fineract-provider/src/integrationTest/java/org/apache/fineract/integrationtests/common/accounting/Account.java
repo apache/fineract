@@ -20,34 +20,38 @@ package org.apache.fineract.integrationtests.common.accounting;
 
 public class Account {
 
-    public enum AccountType {
-        ASSET("1"), INCOME("4"), EXPENSE("5"), LIABILITY("2"), EQUITY("3");
+  public enum AccountType {
+    ASSET("1"),
+    INCOME("4"),
+    EXPENSE("5"),
+    LIABILITY("2"),
+    EQUITY("3");
 
-        private final String accountValue;
+    private final String accountValue;
 
-        AccountType(final String accountValue) {
-            this.accountValue = accountValue;
-        }
-
-        @Override
-        public String toString() {
-            return this.accountValue;
-        }
+    AccountType(final String accountValue) {
+      this.accountValue = accountValue;
     }
 
-    private final AccountType accountType;
-    private final Integer accountID;
-
-    public Account(final Integer accountID, final AccountType accountType) {
-        this.accountID = accountID;
-        this.accountType = accountType;
+    @Override
+    public String toString() {
+      return this.accountValue;
     }
+  }
 
-    public AccountType getAccountType() {
-        return this.accountType;
-    }
+  private final AccountType accountType;
+  private final Integer accountID;
 
-    public Integer getAccountID() {
-        return this.accountID;
-    }
+  public Account(final Integer accountID, final AccountType accountType) {
+    this.accountID = accountID;
+    this.accountType = accountType;
+  }
+
+  public AccountType getAccountType() {
+    return this.accountType;
+  }
+
+  public Integer getAccountID() {
+    return this.accountID;
+  }
 }

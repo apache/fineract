@@ -35,75 +35,103 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerTriggerListener implements TriggerListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(SchedulerTriggerListener.class);
+  private static final Logger logger = LoggerFactory.getLogger(SchedulerTriggerListener.class);
 
-    private final SchedularWritePlatformService schedularService;
-    private final TenantDetailsService tenantDetailsService;
+  private final SchedularWritePlatformService schedularService;
+  private final TenantDetailsService tenantDetailsService;
 
-    @Autowired
-    public SchedulerTriggerListener(final SchedularWritePlatformService schedularService, final TenantDetailsService tenantDetailsService) {
-        this.schedularService = schedularService;
-        this.tenantDetailsService = tenantDetailsService;
+  @Autowired
+  public SchedulerTriggerListener(
+      final SchedularWritePlatformService schedularService,
+      final TenantDetailsService tenantDetailsService) {
+    this.schedularService = schedularService;
+    this.tenantDetailsService = tenantDetailsService;
+  }
 
+  @Override
+  public String getName() {
+    return "Fineract Global Scheduler Trigger Listener";
+  }
+
+  @Override
+  public void triggerFired(Trigger trigger, JobExecutionContext context) {
+    logger.debug("triggerFired() trigger={}, context={}", trigger, context);
+  }
+
+  @Override
+  public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
+    final String tenantIdentifier =
+        trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
+    final FineractPlatformTenant tenant =
+        this.tenantDetailsService.loadTenantById(tenantIdentifier);
+    ThreadLocalContextUtil.setTenant(tenant);
+    final JobKey key = trigger.getJobKey();
+    final String jobKey =
+        key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
+    String triggerType = SchedulerServiceConstants.TRIGGER_TYPE_CRON;
+    if (context
+        .getMergedJobDataMap()
+        .containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
+      triggerType =
+          context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
     }
-
-    @Override
-    public String getName() {
-        return "Fineract Global Scheduler Trigger Listener";
-    }
-
-    @Override
-    public void triggerFired(Trigger trigger, JobExecutionContext context) {
-        logger.debug("triggerFired() trigger={}, context={}", trigger, context);
-    }
-
-    @Override
-    public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
-        final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
-        final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
-        ThreadLocalContextUtil.setTenant(tenant);
-        final JobKey key = trigger.getJobKey();
-        final String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
-        String triggerType = SchedulerServiceConstants.TRIGGER_TYPE_CRON;
-        if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
-            triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
+    Integer maxNumberOfRetries =
+        ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
+    Integer maxIntervalBetweenRetries =
+        ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
+    Integer numberOfRetries = 0;
+    boolean vetoJob = false;
+    while (numberOfRetries <= maxNumberOfRetries) {
+      try {
+        vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
+        numberOfRetries = maxNumberOfRetries + 1;
+      } catch (Exception exception) { // Adding generic exception as it depends on JPA provider
+        logger.warn(
+            "vetoJobExecution() not able to acquire the lock to update job running status at retry"
+                + " {} (of {}) for JobKey: {}",
+            numberOfRetries,
+            maxNumberOfRetries,
+            jobKey,
+            exception);
+        try {
+          Random random = new Random();
+          int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
+          Thread.sleep(1000 + (randomNum * 1000));
+          numberOfRetries = numberOfRetries + 1;
+        } catch (InterruptedException e) {
+          logger.error("vetoJobExecution() caught an InterruptedException", e);
         }
-        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
-        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
-        Integer numberOfRetries = 0;
-        boolean vetoJob = false;
-        while (numberOfRetries <= maxNumberOfRetries) {
-            try {
-                vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
-                numberOfRetries = maxNumberOfRetries + 1;
-            } catch (Exception exception) { // Adding generic exception as it depends on JPA provider
-                logger.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
-                        numberOfRetries, maxNumberOfRetries, jobKey, exception);
-                try {
-                    Random random = new Random();
-                    int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
-                    Thread.sleep(1000 + (randomNum * 1000));
-                    numberOfRetries = numberOfRetries + 1;
-                } catch (InterruptedException e) {
-                    logger.error("vetoJobExecution() caught an InterruptedException", e);
-                }
-            }
-        }
-        if (vetoJob) {
-            logger.warn("vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
-                    + "maxNumberOfRetries={}, tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
-                    maxNumberOfRetries, tenantIdentifier, jobKey, triggerType, trigger, context);
-        }
-        return vetoJob;
+      }
     }
+    if (vetoJob) {
+      logger.warn(
+          "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's"
+              + " execute method will NOT be called); maxNumberOfRetries={}, tenant={}, jobKey={},"
+              + " triggerType={}, trigger={}, context={}",
+          maxNumberOfRetries,
+          tenantIdentifier,
+          jobKey,
+          triggerType,
+          trigger,
+          context);
+    }
+    return vetoJob;
+  }
 
-    @Override
-    public void triggerMisfired(final Trigger trigger) {
-        logger.error("triggerMisfired() trigger={}", trigger);
-    }
+  @Override
+  public void triggerMisfired(final Trigger trigger) {
+    logger.error("triggerMisfired() trigger={}", trigger);
+  }
 
-    @Override
-    public void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction triggerInstructionCode) {
-        logger.debug("triggerComplete() trigger={}, context={}, completedExecutionInstruction={}", trigger, context, triggerInstructionCode);
-    }
+  @Override
+  public void triggerComplete(
+      Trigger trigger,
+      JobExecutionContext context,
+      CompletedExecutionInstruction triggerInstructionCode) {
+    logger.debug(
+        "triggerComplete() trigger={}, context={}, completedExecutionInstruction={}",
+        trigger,
+        context,
+        triggerInstructionCode);
+  }
 }

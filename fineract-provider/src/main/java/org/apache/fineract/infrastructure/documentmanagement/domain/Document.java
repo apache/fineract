@@ -29,139 +29,164 @@ import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCom
 @Table(name = "m_document")
 public class Document extends AbstractPersistableCustom {
 
-    @Column(name = "parent_entity_type", length = 50)
-    private String parentEntityType;
+  @Column(name = "parent_entity_type", length = 50)
+  private String parentEntityType;
 
-    @Column(name = "parent_entity_id", length = 1000)
-    private Long parentEntityId;
+  @Column(name = "parent_entity_id", length = 1000)
+  private Long parentEntityId;
 
-    @Column(name = "name", length = 250)
-    private String name;
+  @Column(name = "name", length = 250)
+  private String name;
 
-    @Column(name = "file_name", length = 250)
-    private String fileName;
+  @Column(name = "file_name", length = 250)
+  private String fileName;
 
-    @Column(name = "size")
-    private Long size;
+  @Column(name = "size")
+  private Long size;
 
-    @Column(name = "type", length = 50)
-    private String type;
+  @Column(name = "type", length = 50)
+  private String type;
 
-    @Column(name = "description", length = 1000)
-    private String description;
+  @Column(name = "description", length = 1000)
+  private String description;
 
-    @Column(name = "location", length = 500)
-    private String location;
+  @Column(name = "location", length = 500)
+  private String location;
 
-    @Column(name = "storage_type_enum")
-    private Integer storageType;
+  @Column(name = "storage_type_enum")
+  private Integer storageType;
 
-    public Document() {}
+  public Document() {}
 
-    public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location, final StorageType storageType) {
-        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType);
+  public static Document createNew(
+      final String parentEntityType,
+      final Long parentEntityId,
+      final String name,
+      final String fileName,
+      final Long size,
+      final String type,
+      final String description,
+      final String location,
+      final StorageType storageType) {
+    return new Document(
+        parentEntityType,
+        parentEntityId,
+        name,
+        fileName,
+        size,
+        type,
+        description,
+        location,
+        storageType);
+  }
+
+  private Document(
+      final String parentEntityType,
+      final Long parentEntityId,
+      final String name,
+      final String fileName,
+      final Long size,
+      final String type,
+      final String description,
+      final String location,
+      final StorageType storageType) {
+    this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
+    this.parentEntityId = parentEntityId;
+    this.name = StringUtils.defaultIfEmpty(name, null);
+    this.fileName = StringUtils.defaultIfEmpty(fileName, null);
+    this.size = size;
+    this.type = StringUtils.defaultIfEmpty(type, null);
+    this.description = StringUtils.defaultIfEmpty(description, null);
+    this.location = StringUtils.defaultIfEmpty(location, null);
+    this.storageType = storageType.getValue();
+  }
+
+  public void update(final DocumentCommand command) {
+    if (command.isDescriptionChanged()) {
+      this.description = command.getDescription();
     }
-
-    private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
-            final String type, final String description, final String location, final StorageType storageType) {
-        this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
-        this.parentEntityId = parentEntityId;
-        this.name = StringUtils.defaultIfEmpty(name, null);
-        this.fileName = StringUtils.defaultIfEmpty(fileName, null);
-        this.size = size;
-        this.type = StringUtils.defaultIfEmpty(type, null);
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        this.location = StringUtils.defaultIfEmpty(location, null);
-        this.storageType = storageType.getValue();
+    if (command.isFileNameChanged()) {
+      this.fileName = command.getFileName();
     }
-
-    public void update(final DocumentCommand command) {
-        if (command.isDescriptionChanged()) {
-            this.description = command.getDescription();
-        }
-        if (command.isFileNameChanged()) {
-            this.fileName = command.getFileName();
-        }
-        if (command.isFileTypeChanged()) {
-            this.type = command.getType();
-        }
-        if (command.isLocationChanged()) {
-            this.location = command.getLocation();
-        }
-        if (command.isNameChanged()) {
-            this.name = command.getName();
-        }
-        if (command.isSizeChanged()) {
-            this.size = command.getSize();
-        }
+    if (command.isFileTypeChanged()) {
+      this.type = command.getType();
     }
-
-    public String getParentEntityType() {
-        return this.parentEntityType;
+    if (command.isLocationChanged()) {
+      this.location = command.getLocation();
     }
-
-    public void setParentEntityType(final String parentEntityType) {
-        this.parentEntityType = parentEntityType;
+    if (command.isNameChanged()) {
+      this.name = command.getName();
     }
-
-    public Long getParentEntityId() {
-        return this.parentEntityId;
+    if (command.isSizeChanged()) {
+      this.size = command.getSize();
     }
+  }
 
-    public void setParentEntityId(final Long parentEntityId) {
-        this.parentEntityId = parentEntityId;
-    }
+  public String getParentEntityType() {
+    return this.parentEntityType;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public void setParentEntityType(final String parentEntityType) {
+    this.parentEntityType = parentEntityType;
+  }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
+  public Long getParentEntityId() {
+    return this.parentEntityId;
+  }
 
-    public String getFileName() {
-        return this.fileName;
-    }
+  public void setParentEntityId(final Long parentEntityId) {
+    this.parentEntityId = parentEntityId;
+  }
 
-    public void setFileName(final String fileName) {
-        this.fileName = fileName;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public Long getSize() {
-        return this.size;
-    }
+  public void setName(final String name) {
+    this.name = name;
+  }
 
-    public void setSize(final Long size) {
-        this.size = size;
-    }
+  public String getFileName() {
+    return this.fileName;
+  }
 
-    public String getType() {
-        return this.type;
-    }
+  public void setFileName(final String fileName) {
+    this.fileName = fileName;
+  }
 
-    public void setType(final String type) {
-        this.type = type;
-    }
+  public Long getSize() {
+    return this.size;
+  }
 
-    public String getDescription() {
-        return this.description;
-    }
+  public void setSize(final Long size) {
+    this.size = size;
+  }
 
-    public void setDescription(final String description) {
-        this.description = description;
-    }
+  public String getType() {
+    return this.type;
+  }
 
-    public String getLocation() {
-        return this.location;
-    }
+  public void setType(final String type) {
+    this.type = type;
+  }
 
-    public void setLocation(final String location) {
-        this.location = location;
-    }
+  public String getDescription() {
+    return this.description;
+  }
 
-    public StorageType storageType() {
-        return StorageType.fromInt(this.storageType);
-    }
+  public void setDescription(final String description) {
+    this.description = description;
+  }
+
+  public String getLocation() {
+    return this.location;
+  }
+
+  public void setLocation(final String location) {
+    this.location = location;
+  }
+
+  public StorageType storageType() {
+    return StorageType.fromInt(this.storageType);
+  }
 }

@@ -25,7 +25,13 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class MeetingFrequencyMismatchException extends AbstractPlatformDomainRuleException {
 
-    public MeetingFrequencyMismatchException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
-        super("error.msg.calendar." + postFix + ".not.the.same.as.meeting.frequency", defaultUserMessage, defaultUserMessageArgs);
-    }
+  public MeetingFrequencyMismatchException(
+      final String postFix,
+      final String defaultUserMessage,
+      final Object... defaultUserMessageArgs) {
+    super(
+        "error.msg.calendar." + postFix + ".not.the.same.as.meeting.frequency",
+        defaultUserMessage,
+        defaultUserMessageArgs);
+  }
 }

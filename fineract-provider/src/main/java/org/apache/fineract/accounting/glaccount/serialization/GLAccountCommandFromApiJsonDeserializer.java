@@ -39,37 +39,68 @@ import org.springframework.stereotype.Component;
  * {@link GuarantorCommand}'s.
  */
 @Component
-public final class GLAccountCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<GLAccountCommand> {
+public final class GLAccountCommandFromApiJsonDeserializer
+    extends AbstractFromApiJsonDeserializer<GLAccountCommand> {
 
-    private final FromJsonHelper fromApiJsonHelper;
+  private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public GLAccountCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonfromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonfromApiJsonHelper;
+  @Autowired
+  public GLAccountCommandFromApiJsonDeserializer(
+      final FromJsonHelper fromApiJsonfromApiJsonHelper) {
+    this.fromApiJsonHelper = fromApiJsonfromApiJsonHelper;
+  }
+
+  @Override
+  public GLAccountCommand commandFromApiJson(final String json) {
+    if (StringUtils.isBlank(json)) {
+      throw new InvalidJsonException();
     }
 
-    @Override
-    public GLAccountCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    final Set<String> supportedParameters = GLAccountJsonInputParams.getAllValues();
+    this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Set<String> supportedParameters = GLAccountJsonInputParams.getAllValues();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+    final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+    final Long id =
+        this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.ID.getValue(), element);
+    final String name =
+        this.fromApiJsonHelper.extractStringNamed(
+            GLAccountJsonInputParams.NAME.getValue(), element);
+    final Long parentId =
+        this.fromApiJsonHelper.extractLongNamed(
+            GLAccountJsonInputParams.PARENT_ID.getValue(), element);
+    final String glCode =
+        this.fromApiJsonHelper.extractStringNamed(
+            GLAccountJsonInputParams.GL_CODE.getValue(), element);
+    final Boolean disabled =
+        this.fromApiJsonHelper.extractBooleanNamed(
+            GLAccountJsonInputParams.DISABLED.getValue(), element);
+    final Boolean manualEntriesAllowed =
+        this.fromApiJsonHelper.extractBooleanNamed(
+            GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue(), element);
+    final Integer type =
+        this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+            GLAccountJsonInputParams.TYPE.getValue(), element);
+    final Integer usage =
+        this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+            GLAccountJsonInputParams.USAGE.getValue(), element);
+    final String description =
+        this.fromApiJsonHelper.extractStringNamed(
+            GLAccountJsonInputParams.DESCRIPTION.getValue(), element);
+    final Long tagId =
+        this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.TAGID.getValue(), element);
 
-        final Long id = this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.ID.getValue(), element);
-        final String name = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.NAME.getValue(), element);
-        final Long parentId = this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.PARENT_ID.getValue(), element);
-        final String glCode = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.GL_CODE.getValue(), element);
-        final Boolean disabled = this.fromApiJsonHelper.extractBooleanNamed(GLAccountJsonInputParams.DISABLED.getValue(), element);
-        final Boolean manualEntriesAllowed = this.fromApiJsonHelper.extractBooleanNamed(
-                GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue(), element);
-        final Integer type = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.TYPE.getValue(), element);
-        final Integer usage = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.USAGE.getValue(), element);
-        final String description = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.DESCRIPTION.getValue(), element);
-        final Long tagId = this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.TAGID.getValue(), element);
-
-        return new GLAccountCommand(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, tagId);
-    }
+    return new GLAccountCommand(
+        id,
+        name,
+        parentId,
+        glCode,
+        disabled,
+        manualEntriesAllowed,
+        type,
+        usage,
+        description,
+        tagId);
+  }
 }

@@ -32,29 +32,28 @@ import org.joda.time.LocalDate;
 @Table(name = "m_loan_interest_recalculation_additional_details")
 public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersistableCustom {
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "effective_date")
-    private Date effectiveDate;
+  @Temporal(TemporalType.DATE)
+  @Column(name = "effective_date")
+  private Date effectiveDate;
 
-    @Column(name = "amount", scale = 6, precision = 19, nullable = false)
-    private BigDecimal amount;
+  @Column(name = "amount", scale = 6, precision = 19, nullable = false)
+  private BigDecimal amount;
 
-    protected LoanInterestRecalcualtionAdditionalDetails() {
+  protected LoanInterestRecalcualtionAdditionalDetails() {}
 
+  public LoanInterestRecalcualtionAdditionalDetails(
+      final LocalDate effectiveDate, final BigDecimal amount) {
+    if (effectiveDate != null) {
+      this.effectiveDate = effectiveDate.toDate();
     }
+    this.amount = amount;
+  }
 
-    public LoanInterestRecalcualtionAdditionalDetails(final LocalDate effectiveDate, final BigDecimal amount) {
-        if (effectiveDate != null) {
-            this.effectiveDate = effectiveDate.toDate();
-        }
-        this.amount = amount;
-    }
+  public LocalDate getEffectiveDate() {
+    return new LocalDate(this.effectiveDate);
+  }
 
-    public LocalDate getEffectiveDate() {
-        return new LocalDate(this.effectiveDate);
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
+  public BigDecimal getAmount() {
+    return this.amount;
+  }
 }

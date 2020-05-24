@@ -27,16 +27,16 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface TwoFactorService {
 
-    List<OTPDeliveryMethod> getDeliveryMethodsForUser(AppUser user);
+  List<OTPDeliveryMethod> getDeliveryMethodsForUser(AppUser user);
 
-    OTPRequest createNewOTPToken(AppUser user, String deliveryMethodName, boolean extendedAccessToken);
+  OTPRequest createNewOTPToken(
+      AppUser user, String deliveryMethodName, boolean extendedAccessToken);
 
-    TFAccessToken createAccessTokenFromOTP(AppUser user, String otpToken);
+  TFAccessToken createAccessTokenFromOTP(AppUser user, String otpToken);
 
-    void validateTwoFactorAccessToken(AppUser user, String token);
+  void validateTwoFactorAccessToken(AppUser user, String token);
 
-    TFAccessToken fetchAccessTokenForUser(AppUser user, String token);
+  TFAccessToken fetchAccessTokenForUser(AppUser user, String token);
 
-    TFAccessToken invalidateAccessToken(AppUser user, JsonCommand command);
-
+  TFAccessToken invalidateAccessToken(AppUser user, JsonCommand command);
 }

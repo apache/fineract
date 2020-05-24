@@ -31,17 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PERMISSION", action = "UPDATE")
 public class UpdateMakerCheckerPermissionsCommandHandler implements NewCommandSourceHandler {
 
-    private final PermissionWritePlatformService writePlatformService;
+  private final PermissionWritePlatformService writePlatformService;
 
-    @Autowired
-    public UpdateMakerCheckerPermissionsCommandHandler(final PermissionWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
+  @Autowired
+  public UpdateMakerCheckerPermissionsCommandHandler(
+      final PermissionWritePlatformService writePlatformService) {
+    this.writePlatformService = writePlatformService;
+  }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+  @Transactional
+  @Override
+  public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateMakerCheckerPermissions(command);
-    }
+    return this.writePlatformService.updateMakerCheckerPermissions(command);
+  }
 }

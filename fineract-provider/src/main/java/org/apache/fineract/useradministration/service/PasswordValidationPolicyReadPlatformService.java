@@ -23,7 +23,7 @@ import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
 
 public interface PasswordValidationPolicyReadPlatformService {
 
-    Collection<PasswordValidationPolicyData> retrieveAll();
+  Collection<PasswordValidationPolicyData> retrieveAll();
 
-    PasswordValidationPolicyData retrieveActiveValidationPolicy();
+  PasswordValidationPolicyData retrieveActiveValidationPolicy();
 }

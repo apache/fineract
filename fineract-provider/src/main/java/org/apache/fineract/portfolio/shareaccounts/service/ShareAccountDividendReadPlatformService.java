@@ -26,8 +26,7 @@ import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData
 
 public interface ShareAccountDividendReadPlatformService {
 
-    List<Map<String, Object>> retriveDividendDetailsForPostDividents();
+  List<Map<String, Object>> retriveDividendDetailsForPostDividents();
 
-    Page<ShareAccountDividendData> retriveAll(Long payoutDetailId, SearchParameters searchParameters);
-
+  Page<ShareAccountDividendData> retriveAll(Long payoutDetailId, SearchParameters searchParameters);
 }

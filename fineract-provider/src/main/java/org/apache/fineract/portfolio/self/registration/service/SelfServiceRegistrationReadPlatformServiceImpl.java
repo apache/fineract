@@ -24,27 +24,34 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SelfServiceRegistrationReadPlatformServiceImpl implements SelfServiceRegistrationReadPlatformService {
+public class SelfServiceRegistrationReadPlatformServiceImpl
+    implements SelfServiceRegistrationReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public SelfServiceRegistrationReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+  @Autowired
+  public SelfServiceRegistrationReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
+
+  @Override
+  public boolean isClientExist(
+      String accountNumber,
+      String firstName,
+      String lastName,
+      String mobileNumber,
+      boolean isEmailAuthenticationMode) {
+    String sql =
+        "select count(*) from m_client where account_no = ? and firstname = ? and lastname = ?";
+    Object[] params = new Object[] {accountNumber, firstName, lastName};
+    if (!isEmailAuthenticationMode) {
+      sql = sql + " and mobile_no = ?";
+      params = new Object[] {accountNumber, firstName, lastName, mobileNumber};
     }
-
-    @Override
-    public boolean isClientExist(String accountNumber, String firstName, String lastName, String mobileNumber,
-            boolean isEmailAuthenticationMode) {
-        String sql = "select count(*) from m_client where account_no = ? and firstname = ? and lastname = ?";
-        Object[] params = new Object[] { accountNumber, firstName, lastName };
-        if (!isEmailAuthenticationMode) {
-            sql = sql + " and mobile_no = ?";
-            params = new Object[] { accountNumber, firstName, lastName, mobileNumber };
-        }
-        Integer count = this.jdbcTemplate.queryForObject(sql, params, Integer.class);
-        if (count == 0) { return false; }
-        return true;
+    Integer count = this.jdbcTemplate.queryForObject(sql, params, Integer.class);
+    if (count == 0) {
+      return false;
     }
-
+    return true;
+  }
 }
