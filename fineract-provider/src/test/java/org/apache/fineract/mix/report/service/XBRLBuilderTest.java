@@ -61,7 +61,7 @@ public class XBRLBuilderTest {
     public void setUp() {
         this.readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
         lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
-                .thenReturn(new NamespaceData(1l, "mockedprefix", "mockedurl"));
+                .thenReturn(new NamespaceData(1L, "mockedprefix", "mockedurl"));
     }
 
     @Test

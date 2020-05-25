@@ -235,7 +235,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         this.nominalAnnualInterestRate = applicableInterestRate;
 
-        return applicableInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
 
     public void updateMaturityDateAndAmount(final MathContext mc, final boolean isPreMatureClosure,

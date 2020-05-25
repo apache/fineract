@@ -86,6 +86,7 @@
             <property name="allowByTailComment" value="true"/>
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
+          <module name="UpperEll"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -147,7 +148,7 @@
         <module name="ArrayTypeStyle"/>
         <module name="MissingSwitchDefault"/>
         <module name="FallThrough"/>
-        <module name="UpperEll"/>
+      
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
         <module name="EmptyLineSeparator">

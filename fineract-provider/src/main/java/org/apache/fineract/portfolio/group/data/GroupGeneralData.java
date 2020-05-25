@@ -251,7 +251,7 @@ public class GroupGeneralData implements Serializable {
         this.externalId = externalId;
         this.status = status;
         if (status != null) {
-            this.active = status.getId().equals(300l);
+            this.active = status.getId().equals(300L);
         } else {
             this.active = null;
         }
