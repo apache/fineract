@@ -623,7 +623,7 @@ public class LoanCharge extends AbstractPersistableCustom {
 
         if (isGreaterThanZero(value)) {
             final MathContext mc = new MathContext(8, MoneyHelper.getRoundingMode());
-            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
         return percentageOf;

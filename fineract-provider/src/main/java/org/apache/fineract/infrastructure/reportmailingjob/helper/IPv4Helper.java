@@ -69,7 +69,7 @@ public class IPv4Helper {
      */
     public static String longToIpAddress(long ip) {
         // if ip is bigger than 255.255.255.255 or smaller than 0.0.0.0
-        if (ip > 4294967295l || ip < 0) {
+        if (ip > 4294967295L || ip < 0) {
             throw new IllegalArgumentException("invalid ip");
         }
 

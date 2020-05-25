@@ -238,7 +238,7 @@ public class ShareAccountCharge extends AbstractPersistableCustom {
         BigDecimal percentageOf = BigDecimal.ZERO;
         if (isGreaterThanZero(value)) {
             final MathContext mc = new MathContext(8, MoneyHelper.getRoundingMode());
-            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
         return percentageOf;
@@ -341,7 +341,7 @@ public class ShareAccountCharge extends AbstractPersistableCustom {
         if (ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
             amountPaybale = this.amount;
         } else if (ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount()) {
-            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100l));
+            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L));
         }
         this.amountOutstanding = amountPaybale;
         return amountPaybale;

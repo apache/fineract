@@ -782,12 +782,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     private BigDecimal getEffectiveOverdraftInterestRateAsFraction(MathContext mc) {
-        return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100l), mc);
+        return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100L), mc);
     }
 
     @SuppressWarnings("unused")
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
-        return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
 
     protected List<SavingsAccountTransaction> retreiveOrderedNonInterestPostingTransactions() {
