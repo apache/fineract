@@ -342,43 +342,6 @@ modernizer {
     ]
 }
 
-task dist(type:Zip){
-	baseName = 'fineractplatform'
-	version = qualifyVersionIfNecessary(releaseVersion)
-    includeEmptyDirs = true
-	from('../') {
-		fileMode = 0755
-		include '*.md'
-	}
-    from('src/main/dist') {
-        fileMode = 0755
-        include '*'
-    }
-	from('../apps') {
-		fileMode = 0755
-        include '**/*'
-		into('apps')
-	}
-    from('../api-docs/') {
-        fileMode = 0755
-        include '*'
-        into('api-docs')
-    }
-    from('../fineract-db/') {
-        fileMode = 0755
-        include '*.sql'
-        into('database')
-    }
-    from('src/main/resources/sql/migrations') {
-        fileMode = 0755
-        include '**/*'
-        into('database/migrations')
-    }
-
-    from war.outputs.files
-    into(baseName + '-' + version)
-}
-
 compileJava{
     dependsOn rat
 }
@@ -559,25 +522,6 @@ task setBlankPassword {
         sql.execute('USE `fineract_tenants`')
         sql.execute('UPDATE fineract_tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
     }
-}
-
-
-/*
-* Support publication of artifacts versioned by topic branch.
-* CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
-* If <TOPIC> starts with 'MIFOSX-', change version
-* from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
-* e.g. 1.1.0.BUILD-SNAPSHOT => 1.0.0.MIFOSX-1234-SNAPSHOT
-*/
-def qualifyVersionIfNecessary(version) {
-
-	if (rootProject.hasProperty("BRANCH_NAME")) {
-		def qualifier = rootProject.getProperty("BRANCH_NAME")
-		if (qualifier.startsWith("MIFOSX-")) {
-			return version.replace('BUILD', qualifier)
-		}
-	}
-	return version
 }
 
 springBoot {
