@@ -83,7 +83,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
     private LoanTransactionData readLoanRepayment(Row row,String locale, String dateFormat) {
         String loanaccountInfo=ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo!=null){
-            String loanAccountAr[]=loanaccountInfo.split("-");
+            String[] loanAccountAr=loanaccountInfo.split("-");
             loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr[0]);
         }
         BigDecimal repaymentAmount=null;

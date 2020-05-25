@@ -84,7 +84,7 @@ public class GuarantorImportHandler implements ImportHandler {
     private GuarantorData ReadGuarantor(Row row,String locale,String dateFormat) {
         String loanaccountInfo=ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo!=null){
-            String loanAccountAr[]=loanaccountInfo.split("-");
+            String[] loanAccountAr=loanaccountInfo.split("-");
             loanAccountId=Long.parseLong(loanAccountAr[0]);
         }
         String guarantorType = ImportHandlerUtils.readAsString(GuarantorConstants.GUARANTO_TYPE_COL, row);
@@ -102,7 +102,7 @@ public class GuarantorImportHandler implements ImportHandler {
         String clientRelationshipTypeInfo=ImportHandlerUtils.readAsString(GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, row);
         Integer clientRelationshipTypeId=null;
         if (clientRelationshipTypeInfo!=null){
-            String clientRelationshipTypeAr[]=clientRelationshipTypeInfo.split("-");
+            String[] clientRelationshipTypeAr=clientRelationshipTypeInfo.split("-");
             clientRelationshipTypeId=Integer.parseInt(clientRelationshipTypeAr[1]);
         }
         String firstname = ImportHandlerUtils.readAsString(GuarantorConstants.FIRST_NAME_COL, row);

@@ -99,7 +99,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         String clientType=ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;
         if (clientType!=null) {
-            String clientTypeAr[] =clientType .split("-");
+            String[] clientTypeAr =clientType .split("-");
             if (clientTypeAr[1] != null) {
                 clientTypeId = Long.parseLong(clientTypeAr[1]);
             }
@@ -107,7 +107,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         String clientClassification= ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_CLASSIFICATION_COL, row);
         Long clientClassicationId = null;
         if (clientClassification!=null) {
-            String clientClassificationAr[] =clientClassification.split("-");
+            String[] clientClassificationAr =clientClassification.split("-");
             if (clientClassificationAr[1] != null) {
                 clientClassicationId = Long.parseLong(clientClassificationAr[1]);
             }
@@ -117,7 +117,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         String mainBusinessLine=ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE,row);
         Long mainBusinessId = null;
         if (mainBusinessLine!=null) {
-            String mainBusinessLineAr[] = ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE, row).split("-");
+            String[] mainBusinessLineAr = ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE, row).split("-");
             if (mainBusinessLineAr[1] != null) {
                 mainBusinessId = Long.parseLong(mainBusinessLineAr[1]);
             }
@@ -125,7 +125,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         String constitution= ImportHandlerUtils.readAsString(ClientEntityConstants.CONSTITUTION_COL,row);
         Long constitutionId = null;
         if (constitution!=null) {
-            String constitutionAr[] = constitution.split("-");
+            String[] constitutionAr = constitution.split("-");
             if (constitutionAr[1] != null) {
                 constitutionId = Long.parseLong(constitutionAr[1]);
             }
@@ -151,7 +151,7 @@ public class ClientEntityImportHandler implements ImportHandler {
             String addressType = ImportHandlerUtils.readAsString(ClientEntityConstants.ADDRESS_TYPE_COL, row);
             Long addressTypeId = null;
             if (addressType!=null) {
-                String addressTypeAr[] = addressType.split("-");
+                String[] addressTypeAr = addressType.split("-");
                 if (addressTypeAr[1] != null) {
                     addressTypeId = Long.parseLong(addressTypeAr[1]);
                 }
@@ -168,7 +168,7 @@ public class ClientEntityImportHandler implements ImportHandler {
             String stateProvince=ImportHandlerUtils.readAsString(ClientEntityConstants.STATE_PROVINCE_COL, row);
             Long stateProvinceId = null;
             if (stateProvince!=null) {
-                String stateProvinceAr[] = stateProvince.split("-");
+                String[] stateProvinceAr = stateProvince.split("-");
                 if (stateProvinceAr[1] != null) {
                     stateProvinceId = Long.parseLong(stateProvinceAr[1]);
                 }
@@ -176,7 +176,7 @@ public class ClientEntityImportHandler implements ImportHandler {
             String country= ImportHandlerUtils.readAsString(ClientEntityConstants.COUNTRY_COL, row);
             Long countryId = null;
             if (country!=null) {
-                String countryAr[] = country.split("-");
+                String[] countryAr = country.split("-");
                 if (countryAr[1] != null) {
                     countryId = Long.parseLong(countryAr[1]);
                 }

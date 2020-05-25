@@ -184,7 +184,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
              if (!accountNamesandTags.isEmpty()){
                  for (String accountNameandTag:accountNamesandTags) {
                      if (chartOfAccountsSheet.getRow(rowIndex)!=null){
-                         String accountNameAndTagAr[]=accountNameandTag.split("-");
+                         String[] accountNameAndTagAr=accountNameandTag.split("-");
                          writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL,row,accountNameAndTagAr[0]);
                          writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL,row,accountNameAndTagAr[1]);
                          writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL,row,accountNameAndTagAr[2]);
@@ -192,7 +192,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                          rowIndex++;
                      }else{
                          row =chartOfAccountsSheet.createRow(rowIndex);
-                         String accountNameAndTagAr[]=accountNameandTag.split("-");
+                         String[] accountNameAndTagAr=accountNameandTag.split("-");
                          writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL,row,accountNameAndTagAr[0]);
                          writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL,row,accountNameAndTagAr[1]);
                          writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL,row,accountNameAndTagAr[2]);
