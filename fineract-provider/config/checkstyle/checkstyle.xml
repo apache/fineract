@@ -120,7 +120,7 @@
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
         </module>
       
-        <module name="SuppressWarningsHolder" />
+
         <module name="OuterTypeFilename"/>
         <module name="OneTopLevelClass"/>
        
