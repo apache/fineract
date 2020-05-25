@@ -89,7 +89,7 @@
           <module name="UpperEll"/>
           <module name="NeedBraces"/>
           <module name="ArrayTypeStyle"/>     
-          
+          <module name="NoLineWrap"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -124,7 +124,7 @@
         </module>
        
         <module name="OneTopLevelClass"/>
-        <module name="NoLineWrap"/>
+       
         <module name="EmptyBlock">
             <property name="option" value="TEXT"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
