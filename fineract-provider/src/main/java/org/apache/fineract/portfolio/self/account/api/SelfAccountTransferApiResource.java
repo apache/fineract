@@ -143,7 +143,7 @@ public class SelfAccountTransferApiResource {
   if (type.equals("tpt")) {
    checkForLimits(params);
   }
-  return this.accountTransfersApiResource.create(apiRequestBodyAsJson);
+  return this.accountTransfersApiResource.create(null, apiRequestBodyAsJson);
  }
 
  private void checkForLimits(Map<String, Object> params) {
