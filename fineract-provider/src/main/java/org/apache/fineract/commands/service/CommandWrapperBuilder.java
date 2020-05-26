@@ -1202,7 +1202,6 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder createAccountTransfer() {
         this.actionName = "CREATE";
         this.entityName = "ACCOUNTTRANSFER";
-        this.topicName = "topic_account_transfers";
         this.entityId = null;
         this.href = "/accounttransfers";
         return this;
