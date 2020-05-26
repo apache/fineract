@@ -89,8 +89,7 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-email:1.5'
         dependency 'org.apache.commons:commons-io:+'
         dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
-        dependency 'com.lowagie:itext:2.1.7'
-        dependency 'com.lowagie:itext-rtf:2.1.7'
+        dependency 'com.github.librepdf:openpdf:1.1.0'
         dependency 'org.mnode.ical4j:ical4j:3.0.18'
         dependency 'org.flywaydb:flyway-core:6.4.1'
         dependency 'org.quartz-scheduler:quartz:+'
@@ -182,6 +181,7 @@ openjpa {
 jacoco {
     toolVersion = jacocoVersion
     reportsDir = file("$buildDir/reports/jacoco")
+
 }
 
 jacocoTestReport{
