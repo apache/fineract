@@ -1232,4 +1232,8 @@ public class RecurringDepositAccount extends SavingsAccount {
         super.loadLazyCollections();
         this.chart.getId() ;
     }
+
+    public BigDecimal getDepositAmount() {
+        return this.accountTermAndPreClosure.depositAmount();
+    }
 }

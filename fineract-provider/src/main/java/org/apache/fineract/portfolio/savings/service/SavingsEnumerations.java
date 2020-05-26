@@ -795,10 +795,14 @@ public class SavingsEnumerations {
                 optionData = new EnumOptionData(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getValue().longValue(),
                         DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getCode(), "Transfer to Savings");
             break;
-            case REINVEST:
-                optionData = new EnumOptionData(DepositAccountOnClosureType.REINVEST.getValue().longValue(),
-                        DepositAccountOnClosureType.REINVEST.getCode(), "Re-Invest");
+            case REINVEST_PRINCIPAL_AND_INTEREST:
+                optionData = new EnumOptionData(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST.getValue().longValue(),
+                        DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST.getCode(), "Re-Invest Maturity Amount");
             break;
+            case REINVEST_PRINCIPAL_ONLY:
+                optionData = new EnumOptionData(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY.getValue().longValue(),
+                                                DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY.getCode(), "Re-Invest Principal Only");
+                break;
         }
         return optionData;
     }
@@ -835,5 +839,4 @@ public class SavingsEnumerations {
         }
         return optionData;
     }
-
 }
