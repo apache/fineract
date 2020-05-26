@@ -109,7 +109,7 @@ dependencyManagement {
         dependency 'junit:junit:+'
         dependency 'org.mockito:mockito-core:+'
         dependency 'io.github.classgraph:classgraph:4.8.78'
-        dependency 'org.dom4j:dom4j:2.1.0'
+        dependency 'org.dom4j:dom4j:2.1.3'
         dependency 'org.awaitility:awaitility:4.0.2'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.0.3'
 
