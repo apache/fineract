@@ -407,7 +407,7 @@ cargo {
       downloadDir = file("$buildDir/download")
       extractDir = file("$buildDir/tomcat")
     }
-
+    startStopTimeout = 240000
     containerProperties {
       property 'cargo.tomcat.connector.keystoreFile', file('src/main/resources/keystore.jks')
       property 'cargo.tomcat.connector.keystorePass', 'openmf'
