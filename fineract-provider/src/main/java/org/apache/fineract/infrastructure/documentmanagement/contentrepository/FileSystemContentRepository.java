@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
-import com.lowagie.text.pdf.codec.Base64;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Base64;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
@@ -76,14 +76,18 @@ public class FileSystemContentRepository implements ContentRepository {
         makeDirectories(uploadImageLocation);
 
         final String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
+        final String base64EncodedImageString = base64EncodedImage.getBase64EncodedString();
         try {
             final OutputStream out = new FileOutputStream(new File(fileLocation));
-            final byte[] imgBytes = Base64.decode(base64EncodedImage.getBase64EncodedString());
+            final byte[] imgBytes = Base64.getMimeDecoder().decode(base64EncodedImageString);
             out.write(imgBytes);
             out.flush();
             out.close();
         } catch (final IOException ioe) {
             throw new ContentManagementException(imageName, ioe.getMessage());
+        } catch (IllegalArgumentException iae) {
+            logger.error("IllegalArgumentException due to invalid Base64 encoding: {}", base64EncodedImageString, iae);
+            throw iae;
         }
         return fileLocation;
     }
@@ -128,10 +132,6 @@ public class FileSystemContentRepository implements ContentRepository {
 
     /**
      * Generate the directory path for storing the new document
-     *
-     * @param entityType
-     * @param entityId
-     * @return
      */
     private String generateFileParentDirectory(final String entityType, final Long entityId) {
         return FileSystemContentRepository.FINERACT_BASE_DIR + File.separator
@@ -149,7 +149,7 @@ public class FileSystemContentRepository implements ContentRepository {
     }
 
     /**
-     * Recursively create the directory if it does not exist *
+     * Recursively create the directory if it does not exist.
      */
     private void makeDirectories(final String uploadDocumentLocation) {
         if (!new File(uploadDocumentLocation).isDirectory()) {
@@ -169,6 +169,7 @@ public class FileSystemContentRepository implements ContentRepository {
             out.flush();
             out.close();
         } catch (final IOException ioException) {
+            logger.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)", ioException);
             throw new ContentManagementException(fileName, ioException.getMessage());
         }
     }

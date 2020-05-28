@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
-import com.lowagie.text.pdf.codec.Base64;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 import io.swagger.annotations.Api;
 import java.io.InputStream;
+import java.util.Base64;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -140,7 +140,8 @@ public class ImagesApiResource {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
         }
 
-        final String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeBytes(imageData.getContentOfSize(maxWidth, maxHeight));
+        byte[] resizedImage = imageData.getContentOfSize(maxWidth, maxHeight);
+        final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImage);
         return Response.ok(clientImageAsBase64Text).build();
     }
 
@@ -162,7 +163,7 @@ public class ImagesApiResource {
         final ResponseBuilder response = Response.ok(imageData.getContentOfSize(maxWidth, maxHeight));
         String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
         response.header("Content-Disposition", dispositionType + "; filename=\"" + imageData.getEntityDisplayName()
-                + ImageFileExtension.JPEG + "\"");
+        + ImageFileExtension.JPEG + "\"");
 
         // TODO: Need a better way of determining image type
 
@@ -207,7 +208,7 @@ public class ImagesApiResource {
     }
 
     /*** Entities for document Management **/
-    public static enum EntityTypeForImages {
+    public enum EntityTypeForImages {
         STAFF, CLIENTS;
 
         @Override

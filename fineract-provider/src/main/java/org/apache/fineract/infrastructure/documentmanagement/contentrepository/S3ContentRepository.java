@@ -30,10 +30,10 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.lowagie.text.pdf.codec.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Base64;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
@@ -94,7 +94,7 @@ public class S3ContentRepository implements ContentRepository {
     public String saveImage(final Base64EncodedImage base64EncodedImage, final Long resourceId, final String imageName) {
         final String uploadImageLocation = generateClientImageParentDirectory(resourceId);
         final String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
-        final InputStream toUploadInputStream = new ByteArrayInputStream(Base64.decode(base64EncodedImage.getBase64EncodedString()));
+        final InputStream toUploadInputStream = new ByteArrayInputStream(Base64.getMimeDecoder().decode(base64EncodedImage.getBase64EncodedString()));
 
         uploadDocument(imageName, toUploadInputStream, fileLocation);
         return fileLocation;
