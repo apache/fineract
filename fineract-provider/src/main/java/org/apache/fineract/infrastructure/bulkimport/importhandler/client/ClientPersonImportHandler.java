@@ -150,8 +150,10 @@ public class ClientPersonImportHandler implements ImportHandler {
 
             String stateProvince=ImportHandlerUtils.readAsString(ClientPersonConstants.STATE_PROVINCE_COL, row);
             Long stateProvinceId = null;
-            if (stateProvince!=null) {
+            if (stateProvince!=null && stateProvince.isBlank()) {
                 String[] stateProvinceAr = stateProvince.split("-");
+                // Arkansas-AL <-- expected format of the cell
+                // but probably it's either an empty cell or it is missing a hyphen
                 if (stateProvinceAr[1] != null) {
                     stateProvinceId = Long.parseLong(stateProvinceAr[1]);
                 }
