@@ -62,6 +62,7 @@ import org.springframework.stereotype.Component;
 @SwaggerDefinition(tags = {
         @Tag(name = "Fetch authenticated user details", description = "")
 })
+@SuppressWarnings("deprecation") // TODO FINERACT-1012
 public class UserDetailsApiResource {
 
     private final ResourceServerTokenServices tokenServices;
