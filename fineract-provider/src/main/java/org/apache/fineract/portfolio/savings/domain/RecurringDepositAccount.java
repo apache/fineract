@@ -230,7 +230,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         if (applyPreMaturePenalty) {
             applicableInterestRate = applicableInterestRate.subtract(penalInterest);
-            applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) == -1 ? BigDecimal.ZERO : applicableInterestRate;
+            applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
         }
 
         this.nominalAnnualInterestRate = applicableInterestRate;

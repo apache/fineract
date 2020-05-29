@@ -144,7 +144,7 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(withdrawBalanceParamName).value(withdrawBalance).isOneOfTheseValues(true, false);
         }
 
-        if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                     "amount.is.on.hold.release.the.amount.to.continue", account.getId());
         }
@@ -198,7 +198,7 @@ public class SavingsAccountTransactionDataValidator {
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
         account.holdAmount(amount);
-        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO)==-1){
+        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0){
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
         }
         LocalDate lastTransactionDate = account.retrieveLastTransactionDate();

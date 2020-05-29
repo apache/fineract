@@ -501,7 +501,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) == 1;
+        return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
     public LocalDate getDueLocalDate() {
@@ -840,7 +840,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     public boolean isChargeIsOverPaid(final LocalDate nextDueDate) {
         final BigDecimal amountPaid = this.amountPaid == null ? BigDecimal.ZERO : amountPaid();
-        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) == 1;
+        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private BigDecimal amountPaid() {

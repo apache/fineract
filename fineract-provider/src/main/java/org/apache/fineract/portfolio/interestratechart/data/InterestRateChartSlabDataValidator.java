@@ -154,7 +154,7 @@ public class InterestRateChartSlabDataValidator {
         }
 
         if (amountRangeFrom != null && amountRangeTo != null) {
-            if (amountRangeFrom.compareTo(amountRangeTo) > 1) {
+            if (amountRangeFrom.compareTo(amountRangeTo) > 0) {
                 baseDataValidator.parameter(amountRangeFromParamName).value(fromPeriod).failWithCode("from.amount.greater.than.to.amount");
             }
         }
@@ -239,7 +239,7 @@ public class InterestRateChartSlabDataValidator {
         }
 
         if (amountRangeFrom != null && amountRangeTo != null) {
-            if (amountRangeFrom.compareTo(amountRangeTo) > 1) {
+            if (amountRangeFrom.compareTo(amountRangeTo) > 0) {
                 baseDataValidator.parameter(fromPeriodParamName).value(fromPeriod).failWithCode("fromperiod.greater.than.toperiod");
             }
         }

@@ -309,7 +309,6 @@ tasks.withType(JavaCompile) {
                 "UnnecessaryParentheses",
                 "ClassCanBeStatic",
                 "MissingCasesInEnumSwitch",
-                "CompareToZero",
                 "OperatorPrecedence",
                 "MixedMutabilityReturnType",
                 "SameNameButDifferent",
@@ -332,11 +331,13 @@ tasks.withType(JavaCompile) {
                 "UnusedNestedClass",
                 "UndefinedEquals",
                 "JdkObsolete",
-                "OperatorPrecedence",
-                "NarrowingCompoundAssignment"
+                "OperatorPrecedence"
         )
         //TODO gradually enable these checks
         error(  "DefaultCharset",
+                "RemoveUnusedImports",
+                "WaitNotInLoop",
+                "ThreeLetterTimeZoneID",
 //                "ReturnMissingNullable",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",
@@ -348,7 +349,6 @@ tasks.withType(JavaCompile) {
 //                "MultiVariableDeclaration",
 //                "PackageLocation",
 //                "PrivateConstructorForNoninstantiableModule",
-//                "RemoveUnusedImports",
 //                "UnnecessaryStaticImport",
 //                "UseBinds",
 //                "WildcardImport",
@@ -357,11 +357,9 @@ tasks.withType(JavaCompile) {
 //                "FloatCast",
 //                "ClassNewInstance",
 //                "ConstructorInvokesOverridable",
-//                "ThreeLetterTimeZoneID",
 //                "UnsafeFinalization",
 //                "MutableMethodReturnType",
 //                "SynchronizeOnNonFinalField",
-//                "WaitNotInLoop",
 //                "SwitchDefault",
 //                "ReachabilityFenceUsage",
 //                "BoxedPrimitiveConstructor",

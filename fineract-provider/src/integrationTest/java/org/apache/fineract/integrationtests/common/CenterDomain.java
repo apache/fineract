@@ -231,7 +231,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         }
         if (this.status != null) {
             if ((Double) this.status.get("id") >= 0) {
-                hash += (Double) this.status.get("id");
+                hash = (int) (hash + (Double) this.status.get("id"));
             }
             if ((String) this.status.get("code") != null) {
                 hash += this.status.get("code").hashCode();
