@@ -73,7 +73,7 @@ public class TaxUtils {
     public static BigDecimal addTax(final BigDecimal amount, final LocalDate date, final List<TaxGroupMappings> taxGroupMappings,
             final int scale) {
         BigDecimal totalAmount = null;
-        if (amount != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+        if (amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             double percentageVal = 0;
             double amountVal = amount.doubleValue();
             double cent_percentage = Double.valueOf("100.0");

@@ -610,10 +610,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
-            if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
+            if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
                         Money.of(currency, totalTax), taxSplit);
                 addTransaction(withholdTransaction);
@@ -625,11 +625,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected boolean updateWithHoldTransaction(final BigDecimal amount, final SavingsAccountTransaction withholdTransaction) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, withholdTransaction.transactionLocalDate(),
                     this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
-            if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
+            if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 if (withholdTransaction.getId() == null) {
                     withholdTransaction.updateAmount(Money.of(currency, totalTax));
                     withholdTransaction.getTaxDetails().clear();
@@ -1143,7 +1143,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
         }
 
-        if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
+        if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
             if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
                         transactionAmount);
@@ -2690,7 +2690,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (this.overdraftLimit != null && this.product.overdraftLimit() != null
-                && this.overdraftLimit.compareTo(this.product.overdraftLimit()) == 1) {
+                && this.overdraftLimit.compareTo(this.product.overdraftLimit()) > 0) {
             baseDataValidator.reset().parameter(SavingsApiConstants.overdraftLimitParamName).value(this.overdraftLimit)
                     .failWithCode("cannot.exceed.product.value");
         }

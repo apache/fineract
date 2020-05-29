@@ -120,7 +120,7 @@ public class GuarantorFundingDetails extends AbstractPersistableCustom {
     public void undoReleaseFunds(final BigDecimal amount) {
         this.amountReleased = getAmountReleased().subtract(amount);
         this.amountRemaining = getAmountRemaining().add(amount);
-        if (getStatus().isCompleted() && this.amountRemaining.compareTo(BigDecimal.ZERO) == 1) {
+        if (getStatus().isCompleted() && this.amountRemaining.compareTo(BigDecimal.ZERO) > 0) {
             this.updateStatus(GuarantorFundStatusType.ACTIVE);
         }
     }

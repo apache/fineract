@@ -262,7 +262,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
             List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-            if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+            if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
                 depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                         .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
             }
@@ -379,7 +379,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                         financialYearBeginningMonth, postInterestOnDate);
             }
             List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-            if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+            if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
                 depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                         .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
             }
@@ -645,7 +645,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -748,7 +748,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -1194,7 +1194,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -1329,7 +1329,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }

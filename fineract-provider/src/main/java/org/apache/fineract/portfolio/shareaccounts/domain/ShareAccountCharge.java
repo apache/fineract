@@ -205,7 +205,7 @@ public class ShareAccountCharge extends AbstractPersistableCustom {
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) == 1;
+        return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private boolean determineIfFullyPaid() {

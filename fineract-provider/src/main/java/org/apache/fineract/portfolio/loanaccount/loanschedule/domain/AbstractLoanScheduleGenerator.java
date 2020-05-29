@@ -278,7 +278,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // will check for EMI amount greater than interest calculated
             if (loanApplicationTerms.getFixedEmiAmount() != null
-                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) == -1) {
+                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) < 0) {
                 String errorMsg = "EMI amount must be greater than : " + principalInterestForThisPeriod.interest().getAmount();
                 throw new MultiDisbursementEmiAmountException(errorMsg, principalInterestForThisPeriod.interest().getAmount(),
                         loanApplicationTerms.getFixedEmiAmount());

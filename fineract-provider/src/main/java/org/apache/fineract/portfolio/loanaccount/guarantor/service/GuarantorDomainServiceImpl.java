@@ -141,17 +141,17 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.guarantor");
-            if (actualSelfAmount.compareTo(minSelfAmount) == -1) {
+            if (actualSelfAmount.compareTo(minSelfAmount) < 0) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_SELF_GUARANTEE_ERROR,
                         minSelfAmount);
             }
 
-            if (actualExtGuarantee.compareTo(minExtGuarantee) == -1) {
+            if (actualExtGuarantee.compareTo(minExtGuarantee) < 0) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_EXTERNAL_GUARANTEE_ERROR,
                         minExtGuarantee);
             }
             actualAmount = actualAmount.add(actualExtGuarantee).add(actualSelfAmount);
-            if (actualAmount.compareTo(mandatoryAmount) == -1) {
+            if (actualAmount.compareTo(mandatoryAmount) < 0) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_MANDATORY_GUARANTEE_ERROR,
                         mandatoryAmount);
             }
@@ -171,7 +171,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         if (guarantorFundingDetails.getStatus().isActive()) {
             SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
             savingsAccount.holdFunds(guarantorFundingDetails.getAmount());
-            if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) == -1) {
+            if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.guarantor");
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(GuarantorConstants.GUARANTOR_INSUFFICIENT_BALANCE_ERROR,
@@ -195,7 +195,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     @Override
     public void releaseGuarantor(final GuarantorFundingDetails guarantorFundingDetails, final LocalDate transactionDate) {
         BigDecimal amoutForWithdraw = guarantorFundingDetails.getAmountRemaining();
-        if (amoutForWithdraw.compareTo(BigDecimal.ZERO) == 1 && (guarantorFundingDetails.getStatus().isActive())) {
+        if (amoutForWithdraw.compareTo(BigDecimal.ZERO) > 0 && (guarantorFundingDetails.getStatus().isActive())) {
             SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
             savingsAccount.releaseFunds(amoutForWithdraw);
             DepositAccountOnHoldTransaction onHoldTransaction = DepositAccountOnHoldTransaction.release(savingsAccount, amoutForWithdraw,
@@ -218,7 +218,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      */
     @Override
     public void transaferFundsFromGuarantor(final Loan loan) {
-        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) != 1) { return; }
+        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) <= 0) { return; }
         final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
         final boolean isRegularTransaction = true;
         final boolean isExceptionForBalanceCheck = true;
@@ -252,7 +252,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                     releaseLoanIds.put(loanId, guarantorFundingDetails.getId());
                     try {
                         BigDecimal remainingAmount = guarantorFundingDetails.getAmountRemaining();
-                        if (loan.getGuaranteeAmount().compareTo(loan.getPrincpal().getAmount()) == 1) {
+                        if (loan.getGuaranteeAmount().compareTo(loan.getPrincpal().getAmount()) > 0) {
                             remainingAmount = remainingAmount.multiply(loan.getPrincpal().getAmount()).divide(loan.getGuaranteeAmount(),
                                     MoneyHelper.getRoundingMode());
                         }
@@ -295,7 +295,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      */
     private void reverseAllFundTransaction(final Loan loan) {
 
-        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) == 1) {
+        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) > 0) {
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             List<GuarantorFundingDetails> guarantorFundingDetailList = new ArrayList<>();
             for (Guarantor guarantor : existGuarantorList) {
@@ -349,7 +349,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                                 null, onHoldTransaction);
                         guarantorFundingDetails.addGuarantorFundingTransactions(guarantorFundingTransaction);
                         guarantorFundingDetailList.add(guarantorFundingDetails);
-                        if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) == -1) {
+                        if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
                             insufficientBalanceIds.add(savingsAccount.getId());
                         }
                         savingsAccount.updateSavingsAccountSummary(savingsAccount.getTransactions());
@@ -382,7 +382,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      */
     private void releaseGuarantorFunds(final LoanTransaction loanTransaction) {
         final Loan loan = loanTransaction.getLoan();
-        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) == 1) {
+        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) > 0) {
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             List<GuarantorFundingDetails> externalGuarantorList = new ArrayList<>();
             List<GuarantorFundingDetails> selfGuarantorList = new ArrayList<>();
@@ -413,7 +413,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 BigDecimal amountLeft = calculateAndRelaseGuarantorFunds(externalGuarantorList, guarantorGuarantee, amountForRelease,
                         loanTransaction, accountOnHoldTransactions);
 
-                if (amountLeft.compareTo(BigDecimal.ZERO) == 1) {
+                if (amountLeft.compareTo(BigDecimal.ZERO) > 0) {
                     calculateAndRelaseGuarantorFunds(selfGuarantorList, selfGuarantee, amountLeft, loanTransaction,
                             accountOnHoldTransactions);
                     externalGuarantorList.addAll(selfGuarantorList);
@@ -435,7 +435,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      */
     private void releaseAllGuarantors(final LoanTransaction loanTransaction) {
         Loan loan = loanTransaction.getLoan();
-        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) == 1) {
+        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) > 0) {
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             List<GuarantorFundingDetails> saveGuarantorFundingDetails = new ArrayList<>();
             List<DepositAccountOnHoldTransaction> onHoldTransactions = new ArrayList<>();
@@ -443,7 +443,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 final List<GuarantorFundingDetails> fundingDetails = guarantor.getGuarantorFundDetails();
                 for (GuarantorFundingDetails guarantorFundingDetails : fundingDetails) {
                     BigDecimal amoutForRelease = guarantorFundingDetails.getAmountRemaining();
-                    if (amoutForRelease.compareTo(BigDecimal.ZERO) == 1 && (guarantorFundingDetails.getStatus().isActive())) {
+                    if (amoutForRelease.compareTo(BigDecimal.ZERO) > 0 && (guarantorFundingDetails.getStatus().isActive())) {
                         SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
                         savingsAccount.releaseFunds(amoutForRelease);
                         DepositAccountOnHoldTransaction onHoldTransaction = DepositAccountOnHoldTransaction.release(savingsAccount,
@@ -495,7 +495,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         for (GuarantorFundingDetails fundingDetails : guarantorList) {
             BigDecimal guarantorAmount = amountForRelease.multiply(fundingDetails.getAmountRemaining()).divide(totalGuaranteeAmount,
                     MoneyHelper.getRoundingMode());
-            if (fundingDetails.getAmountRemaining().compareTo(guarantorAmount) < 1) {
+            if (fundingDetails.getAmountRemaining().compareTo(guarantorAmount) <= 0) {
                 guarantorAmount = fundingDetails.getAmountRemaining();
             }
             fundingDetails.releaseFunds(guarantorAmount);

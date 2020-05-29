@@ -1144,7 +1144,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     i++;
                 } while (i < variationArray.size());
 
-                if (tatalDisbursement.compareTo(totalPrincipal) == 1) {
+                if (tatalDisbursement.compareTo(totalPrincipal) > 0) {
                     baseDataValidator.reset().parameter(LoanApiConstants.disbursementPrincipalParameterName)
                             .failWithCode(LoanApiConstants.APPROVED_AMOUNT_IS_LESS_THAN_SUM_OF_TRANCHES);
                 }

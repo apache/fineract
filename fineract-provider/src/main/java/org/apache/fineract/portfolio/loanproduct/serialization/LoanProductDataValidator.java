@@ -193,9 +193,9 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).ignoreIfNull().positiveAmount();
         }
 
-        if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) != -1) {
+        if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) >= 0) {
 
-            if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) != -1) {
+            if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) >= 0) {
                 baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).notLessThanMin(minPrincipalAmount);
                 if (minPrincipalAmount.compareTo(maxPrincipalAmount) <= 0 && principal != null) {
                     baseDataValidator.reset().parameter("principal").value(principal)
@@ -204,7 +204,7 @@ public final class LoanProductDataValidator {
             } else if (principal != null) {
                 baseDataValidator.reset().parameter("principal").value(principal).notGreaterThanMax(maxPrincipalAmount);
             }
-        } else if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) != -1 && principal != null) {
+        } else if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) >= 0 && principal != null) {
             baseDataValidator.reset().parameter("principal").value(principal).notLessThanMin(minPrincipalAmount);
         }
 
@@ -227,8 +227,8 @@ public final class LoanProductDataValidator {
                     .integerGreaterThanZero();
         }
 
-        if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1) {
-            if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+        if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) > 0) {
+            if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) > 0) {
                 baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments)
                         .notLessThanMin(minNumberOfRepayments);
                 if (minNumberOfRepayments.compareTo(maxNumberOfRepayments) <= 0) {
@@ -239,7 +239,7 @@ public final class LoanProductDataValidator {
                 baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments)
                         .notGreaterThanMax(maxNumberOfRepayments);
             }
-        } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+        } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) > 0) {
             baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).notLessThanMin(minNumberOfRepayments);
         }
 
@@ -397,22 +397,22 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).notNull()
                     .zeroOrPositiveAmount();
 
-            if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
-                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
+            if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
+                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter("defaultDifferentialLendingRate").value(defaultDifferentialLendingRate)
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
 
-            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
-                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
+            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
+                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
 
-            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
-                if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
+            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
+                if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(defaultDifferentialLendingRate);
                 }
@@ -493,8 +493,8 @@ public final class LoanProductDataValidator {
                         .zeroOrPositiveAmount();
             }
 
-            if (maxInterestRatePerPeriod != null && maxInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1) {
-                if (minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1) {
+            if (maxInterestRatePerPeriod != null && maxInterestRatePerPeriod.compareTo(BigDecimal.ZERO) >= 0) {
+                if (minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod)
                             .notLessThanMin(minInterestRatePerPeriod);
                     if (minInterestRatePerPeriod.compareTo(maxInterestRatePerPeriod) <= 0) {
@@ -505,7 +505,7 @@ public final class LoanProductDataValidator {
                     baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod)
                             .notGreaterThanMax(maxInterestRatePerPeriod);
                 }
-            } else if (minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1) {
+            } else if (minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) >= 0) {
                 baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod)
                         .notLessThanMin(minInterestRatePerPeriod);
             }
@@ -1260,22 +1260,22 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).notNull()
                     .zeroOrPositiveAmount();
 
-            if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
-                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
+            if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
+                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter("defaultDifferentialLendingRate").value(defaultDifferentialLendingRate)
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
 
-            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
-                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
+            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
+                if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
 
-            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
-                if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
+            if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
+                if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(defaultDifferentialLendingRate);
                 }
@@ -1594,14 +1594,14 @@ public final class LoanProductDataValidator {
             maxPrincipalAmount = minmaxValues.get(LoanProductConstants.maxPrincipal);
         }
 
-        if ((minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)
-                && (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)) {
+        if ((minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) > 0)
+                && (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) > 0)) {
             baseDataValidator.reset().parameter(principalParameterName).value(principalAmount)
                     .inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
         } else {
-            if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) {
+            if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) > 0) {
                 baseDataValidator.reset().parameter(principalParameterName).value(principalAmount).notLessThanMin(minPrincipalAmount);
-            } else if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) {
+            } else if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) > 0) {
                 baseDataValidator.reset().parameter(principalParameterName).value(principalAmount).notGreaterThanMax(maxPrincipalAmount);
             }
         }
@@ -1620,15 +1620,15 @@ public final class LoanProductDataValidator {
             }
         }
 
-        if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1) {
-            if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+        if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) > 0) {
+            if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) > 0) {
                 baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
                         .inMinMaxRange(minNumberOfRepayments, maxNumberOfRepayments);
             } else {
                 baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
                         .notGreaterThanMax(maxNumberOfRepayments);
             }
-        } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+        } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) > 0) {
             baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
                     .notLessThanMin(minNumberOfRepayments);
         }
@@ -1700,14 +1700,14 @@ public final class LoanProductDataValidator {
 
         if ((principalUpdated || minPrincipalUpdated || maxPrincipalUpdated)) {
 
-            if ((minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)
-                    && (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)) {
+            if ((minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) > 0)
+                    && (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) > 0)) {
                 baseDataValidator.reset().parameter(principalParameterName).value(principalAmount)
                         .inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
             } else {
-                if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) {
+                if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) > 0) {
                     baseDataValidator.reset().parameter(principalParameterName).value(principalAmount).notLessThanMin(minPrincipalAmount);
-                } else if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) {
+                } else if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) > 0) {
                     baseDataValidator.reset().parameter(principalParameterName).value(principalAmount)
                             .notGreaterThanMax(maxPrincipalAmount);
                 }
@@ -1759,15 +1759,15 @@ public final class LoanProductDataValidator {
         }
 
         if (numberOfRepaymentsUpdated || minNumberOfRepaymentsUpdated || maxNumberOfRepaymentsUpdated) {
-            if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1) {
-                if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+            if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) > 0) {
+                if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) > 0) {
                     baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
                             .inMinMaxRange(minNumberOfRepayments, maxNumberOfRepayments);
                 } else {
                     baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
                             .notGreaterThanMax(maxNumberOfRepayments);
                 }
-            } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+            } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) > 0) {
                 baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
                         .notLessThanMin(minNumberOfRepayments);
             }
@@ -1924,14 +1924,14 @@ public final class LoanProductDataValidator {
                     if (maxValue != null) {
                         baseDataValidator.reset().parameter(maxParameterName).value(maxValue).notLessThanMin(minValue);
                     }
-                    if ((minValue != null && minValue.compareTo(BigDecimal.ZERO) == 1)
-                            && (maxValue != null && maxValue.compareTo(BigDecimal.ZERO) == 1)) {
+                    if ((minValue != null && minValue.compareTo(BigDecimal.ZERO) > 0)
+                            && (maxValue != null && maxValue.compareTo(BigDecimal.ZERO) > 0)) {
                         baseDataValidator.reset().parameter(defaultParameterName).value(defaultValue)
                                 .inMinAndMaxAmountRange(minValue, maxValue);
                     } else {
-                        if (minValue != null && minValue.compareTo(BigDecimal.ZERO) == 1) {
+                        if (minValue != null && minValue.compareTo(BigDecimal.ZERO) > 0) {
                             baseDataValidator.reset().parameter(defaultParameterName).value(defaultValue).notLessThanMin(minValue);
-                        } else if (maxValue != null && maxValue.compareTo(BigDecimal.ZERO) == 1) {
+                        } else if (maxValue != null && maxValue.compareTo(BigDecimal.ZERO) > 0) {
                             baseDataValidator.reset().parameter(defaultParameterName).value(defaultValue).notGreaterThanMax(maxValue);
                         }
                     }
@@ -2019,7 +2019,7 @@ public final class LoanProductDataValidator {
             }
         }
 
-        if (mandatoryGuarantee.compareTo(minimumGuaranteeFromOwnFunds.add(minimumGuaranteeFromGuarantor)) == -1) {
+        if (mandatoryGuarantee.compareTo(minimumGuaranteeFromOwnFunds.add(minimumGuaranteeFromGuarantor)) < 0) {
             baseDataValidator.parameter(LoanProductConstants.mandatoryGuaranteeParamName).failWithCode(
                     "must.be.greter.than.sum.of.min.funds");
         }

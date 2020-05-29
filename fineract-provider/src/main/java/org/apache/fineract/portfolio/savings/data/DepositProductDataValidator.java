@@ -730,8 +730,8 @@ public class DepositProductDataValidator {
             baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notNull().positiveAmount();
         }
 
-        if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) != -1) {
-            if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+        if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) >= 0) {
+            if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) >= 0) {
                 baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notLessThanMin(depositMinAmount);
                 if (depositMinAmount.compareTo(depositMaxAmount) <= 0) {
                     baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount)
@@ -740,7 +740,7 @@ public class DepositProductDataValidator {
             } else {
                 baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notGreaterThanMax(depositMaxAmount);
             }
-        } else if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+        } else if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) >= 0) {
             baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notLessThanMin(depositMinAmount);
         }
     }
@@ -766,8 +766,8 @@ public class DepositProductDataValidator {
         }
 
         if (depositAmount != null) {
-            if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) != -1) {
-                if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+            if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) >= 0) {
+                if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) >= 0) {
                     baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notLessThanMin(depositMinAmount);
                     if (depositMinAmount.compareTo(depositMaxAmount) <= 0) {
                         baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount)
@@ -776,7 +776,7 @@ public class DepositProductDataValidator {
                 } else {
                     baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notGreaterThanMax(depositMaxAmount);
                 }
-            } else if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+            } else if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) >= 0) {
                 baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notLessThanMin(depositMinAmount);
             }
         }

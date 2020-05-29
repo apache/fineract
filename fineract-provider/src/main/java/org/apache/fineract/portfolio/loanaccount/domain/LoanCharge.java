@@ -567,7 +567,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     private static boolean isGreaterThanZero(final BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) == 1;
+        return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
     public LoanChargeCommand toCommand() {
