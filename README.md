@@ -45,7 +45,7 @@ Run the following commands:
 
 Instructions to build the JAR file
 ============
-1. Clone the repository or download and extract file to your local directory.
+1. Clone the repository or download and extract the archive file to your local directory.
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
 3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
 
