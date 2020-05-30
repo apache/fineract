@@ -31,7 +31,6 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class StaffTest {
@@ -71,7 +70,7 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noFirstnameJson);
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noLastnameJson);
 
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 5));
@@ -93,10 +92,9 @@ public class StaffTest {
     }
 
     @Test
-    @Ignore //TODO FINERACT-1005
     public void testStaffCreateMaxNameLength() {
 
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 42));
@@ -107,7 +105,7 @@ public class StaffTest {
 
     @Test
     public void testStaffCreateExternalIdValidationError() {
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 5));
@@ -188,7 +186,6 @@ public class StaffTest {
     }
 
     @Test
-    @Ignore // TODO FINERACT- 1005
     public void testStaffUpdateLongExternalIdError() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("externalId", Utils.randomStringGenerator("EXT", 98));
@@ -197,7 +194,6 @@ public class StaffTest {
     }
 
     @Test
-    @Ignore // TODO FINERACT- 1005
     public void testStaffUpdateWrongActiveState() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("isActive", "xyz");
