@@ -1428,15 +1428,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             }
         }
 
-        Collection<LoanAccountSummaryData> clientActiveLoanOptions = null;
-        if(loanProduct.canUseForTopup() && clientId != null){
-            clientActiveLoanOptions = this.accountDetailsReadPlatformService.retrieveClientActiveLoanAccountSummary(clientId);
+        Collection<LoanAccountSummaryData> activeLoanOptions = null;
+        if(loanProduct.canUseForTopup() && clientId != null) {
+            activeLoanOptions = this.accountDetailsReadPlatformService.retrieveClientActiveLoanAccountSummary(clientId);
+        } else if (loanProduct.canUseForTopup() && groupId != null) {
+            activeLoanOptions = this.accountDetailsReadPlatformService.retrieveGroupActiveLoanAccountSummary(groupId);
         }
 
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDaysOfWeekTypeOptions, repaymentStrategyOptions,
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
-                fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter, clientActiveLoanOptions);
+                fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter, activeLoanOptions);
     }
 
     @Override

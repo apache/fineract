@@ -37,5 +37,7 @@ public interface AccountDetailsReadPlatformService {
 
     public List<LoanAccountSummaryData> retrieveLoanAccountDetailsByGroupIdAndGlimAccountNumber(Long groupId,final String glimAccount);
 
+    public Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(final Long groupId);
+
     AccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId, Long gsimId);
 }
