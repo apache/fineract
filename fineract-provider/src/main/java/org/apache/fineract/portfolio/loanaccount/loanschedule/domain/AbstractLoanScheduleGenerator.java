@@ -517,10 +517,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 scheduleParams.getTotalCumulativePrincipal().plus(
                                         currentPeriodParams.getPrincipalForThisPeriod().minus(principalProcessed)),
                                 scheduleParams.getPeriodNumber() + 1, mc));
-                        if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
-                                && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
-                            currentPeriodParams.setEmiAmountChanged(true);
-                        }
+                      if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+                        && fixedEmiAmount != null
+                        && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+                        currentPeriodParams.setEmiAmountChanged(true);
+                      }
 
                     }
                     adjustCompoundedAmountWithPaidDetail(scheduleParams, lastRestDate, currentTransactions, loanApplicationTerms,
@@ -636,10 +637,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduleParams.getReducePrincipal(),
                     scheduleParams.getTotalCumulativePrincipal().plus(currentPeriodParams.getPrincipalForThisPeriod())
                             .plus(currentPeriodParams.getEarlyPaidAmount()), scheduleParams.getPeriodNumber() + 1, mc));
-            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
-                    && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
-                currentPeriodParams.setEmiAmountChanged(true);
-            }
+          if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+            && fixedEmiAmount != null
+            && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+            currentPeriodParams.setEmiAmountChanged(true);
+            currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
+          }
             currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
         }
 
