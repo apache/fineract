@@ -29,23 +29,24 @@ public class CenterDomain implements Comparable<CenterDomain> {
     private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
     public static class Builder {
 
-        private Integer id;
-        private String accountNo;
-        private HashMap<String, Object> status;
-        private boolean active;
-        private String name;
-        private String externalId;
-        private Integer staffId;
-        private Integer officeId;
-        private String officeName;
-        private String hierarchy;
-        private ArrayList<HashMap> groupMembers;
+        private final Integer id;
+        private final String accountNo;
+        private final HashMap<String, Object> status;
+        private final boolean active;
+        private final String name;
+        private final String externalId;
+        private final Integer staffId;
+        private final Integer officeId;
+        private final String officeName;
+        private final String hierarchy;
+        private final ArrayList<HashMap> groupMembers;
 
         private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
                 final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
-            this.status = new HashMap<String, Object>();
+            this.accountNo = null;
+            this.status = new HashMap<>();
             this.status.put("id", statusid);
             this.status.put("code", statuscode);
             this.status.put("value", statusvalue);
@@ -88,7 +89,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
             final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
-        this.status = new HashMap<String, Object>();
+        this.status = new HashMap<>();
         this.status.put("id", statusid);
         this.status.put("code", statuscode);
         this.status.put("value", statusvalue);
@@ -230,15 +231,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
             hash += this.id;
         }
         if (this.status != null) {
-            if ((Double) this.status.get("id") >= 0) {
-                hash = (int) (hash + (Double) this.status.get("id"));
-            }
-            if ((String) this.status.get("code") != null) {
-                hash += this.status.get("code").hashCode();
-            }
-            if ((String) this.status.get("value") != null) {
-                hash += this.status.get("value").hashCode();
-            }
+            hash += this.status.hashCode();
         }
         if (this.name != null) {
             hash += this.name.hashCode();
