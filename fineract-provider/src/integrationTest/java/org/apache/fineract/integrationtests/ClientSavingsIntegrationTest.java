@@ -123,8 +123,7 @@ public class ClientSavingsIntegrationTest {
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         Assert.assertFalse(summaryBefore.equals(summary));
 
-        final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
-        // verifySavingsInterest(savingsInterest);
+        this.savingsAccountHelper.getSavingsInterest(savingsId);
     }
 
     @Test
@@ -614,7 +613,7 @@ public class ClientSavingsIntegrationTest {
 
         this.savingsAccountHelper.waiveCharge((Integer) savingsChargeForWaive.get("id"), savingsId);
         waiveCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForWaive.get("id"));
-        BigDecimal totalWaiveAmount = BigDecimal.valueOf(Double.valueOf((Float) savingsChargeForWaive.get("amount")));
+        BigDecimal totalWaiveAmount = BigDecimal.valueOf((Float) savingsChargeForWaive.get("amount"));
         totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
         assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
 
@@ -800,7 +799,6 @@ public class ClientSavingsIntegrationTest {
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountPostInterestOnLastDayWithOverdraft() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec,
@@ -946,7 +944,7 @@ public class ClientSavingsIntegrationTest {
         HashMap accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
-        Float accountDetailsPostInterest = Float.valueOf(summary.get(
+        Float.valueOf(summary.get(
                 "totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -982,7 +980,7 @@ public class ClientSavingsIntegrationTest {
         accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
-        accountDetailsPostInterest = Float.valueOf(summary.get(
+        Float.valueOf(summary.get(
                 "totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1021,7 +1019,7 @@ public class ClientSavingsIntegrationTest {
             accountTransactionDetails = this.savingsAccountHelper
                     .getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
-            accountDetailsPostInterest = Float.valueOf(summary.get(
+            Float.valueOf(summary.get(
                     "totalInterestPosted").toString());
 
             nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1064,7 +1062,7 @@ public class ClientSavingsIntegrationTest {
             accountTransactionDetails = this.savingsAccountHelper
                     .getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
-            accountDetailsPostInterest = Float.valueOf(summary.get(
+            Float.valueOf(summary.get(
                     "totalInterestPosted").toString());
 
             nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1100,7 +1098,7 @@ public class ClientSavingsIntegrationTest {
         accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
-        accountDetailsPostInterest = Float.valueOf(summary.get(
+        Float.valueOf(summary.get(
                 "totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1130,7 +1128,6 @@ public class ClientSavingsIntegrationTest {
 
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountPostInterestOnLastDayWithdrawalWithOverdraft() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec,
@@ -1217,7 +1214,7 @@ public class ClientSavingsIntegrationTest {
         transactionDate.set(Calendar.DAY_OF_MONTH, 2);
         String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
 
-         /***
+        /***
          * Perform withdraw transaction, verify account balance(account balance
          * will go to negative as no deposits are there prior to this
          * transaction)
@@ -1284,7 +1281,7 @@ public class ClientSavingsIntegrationTest {
         HashMap accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
-        Float accountDetailsPostInterest = Float.valueOf(summary.get(
+        Float.valueOf(summary.get(
                 "totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1320,7 +1317,7 @@ public class ClientSavingsIntegrationTest {
         accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
-        accountDetailsPostInterest = Float.valueOf(summary.get(
+        Float.valueOf(summary.get(
                 "totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1359,7 +1356,7 @@ public class ClientSavingsIntegrationTest {
             accountTransactionDetails = this.savingsAccountHelper
                     .getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
-            accountDetailsPostInterest = Float.valueOf(summary.get(
+            Float.valueOf(summary.get(
                     "totalInterestPosted").toString());
 
             nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1402,7 +1399,7 @@ public class ClientSavingsIntegrationTest {
             accountTransactionDetails = this.savingsAccountHelper
                     .getSavingsDetails(savingsId);
             summary = (HashMap) accountTransactionDetails.get("summary");
-            accountDetailsPostInterest = Float.valueOf(summary.get(
+            Float.valueOf(summary.get(
                     "totalInterestPosted").toString());
 
             nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1438,7 +1435,7 @@ public class ClientSavingsIntegrationTest {
         accountTransactionDetails = this.savingsAccountHelper
                 .getSavingsDetails(savingsId);
         summary = (HashMap) accountTransactionDetails.get("summary");
-        accountDetailsPostInterest = Float.valueOf(summary.get(
+        Float.valueOf(summary.get(
                 "totalInterestPosted").toString());
 
         nominalAnnualInterest = Float.valueOf(accountDetails.get(
@@ -1576,7 +1573,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
-        Float actualInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+        Float.valueOf(summary.get("totalInterestPosted").toString());
 
         /***
          * Calculate expected interest to be posted, interest should be posted
@@ -1584,7 +1581,7 @@ public class ClientSavingsIntegrationTest {
          * month before this account balance is negative.
          */
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_TRANSACTION_DATE);
-        HashMap accountDetailsPostInterest = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        this.savingsAccountHelper.getSavingsDetails(savingsId);
         summary = (HashMap) accountDetails.get("summary");
         ArrayList interestPostingTransaction = (ArrayList) ((HashMap) ((ArrayList) accountDetails.get("transactions")).get(0)).get("date");
         Float accountDetailsPostInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
@@ -1777,28 +1774,28 @@ public class ClientSavingsIntegrationTest {
         decimalFormat.applyPattern("#.###");
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
-       assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
-       LOG.info("------Post Interest As On Successful Worked--------");
+        assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
+        LOG.info("------Post Interest As On Successful Worked--------");
 
-       this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_LAST_TRANSACTION_DATE);
-       HashMap accountLastDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
-       summary = (HashMap) accountLastDetails.get("summary");
-       Float actualLastInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_LAST_TRANSACTION_DATE);
+        HashMap accountLastDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        summary = (HashMap) accountLastDetails.get("summary");
+        Float.valueOf(summary.get("totalInterestPosted").toString());
 
-       final Float nominalLastAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
-       final HashMap interestLastCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
-       final Integer daysLastInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
-       double interestLastRateInFraction = (nominalAnnualInterest / 100);
-       double perLastDay = (double) 1 / (daysInYear);
-       double interestLastPerDay = interestLastRateInFraction * perLastDay;
-       Float interestLastPosted = (float) (interestLastPerDay * balance * 1);
+        Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
+        accountDetails.get("interestCalculationDaysInYearType");
+        Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
+        double interestLastRateInFraction = (nominalAnnualInterest / 100);
+        double perLastDay = (double) 1 / (daysInYear);
+        double interestLastPerDay = interestLastRateInFraction * perLastDay;
+        Float interestLastPosted = (float) (interestLastPerDay * balance * 1);
 
-       DecimalFormat decimalLastFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-       decimalLastFormat.applyPattern("#.###");
-       interestLastPosted = Float.valueOf(decimalLastFormat.format(interestLastPosted));
-       actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
-      assertEquals("Verifying interest posted", interestLastPosted, actualInterestPosted);
-      LOG.info("------Post Interest As On Successful Worked--------");
+        DecimalFormat decimalLastFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
+        decimalLastFormat.applyPattern("#.###");
+        interestLastPosted = Float.valueOf(decimalLastFormat.format(interestLastPosted));
+        actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
+        assertEquals("Verifying interest posted", interestLastPosted, actualInterestPosted);
+        LOG.info("------Post Interest As On Successful Worked--------");
 
     }
 
@@ -1846,7 +1843,7 @@ public class ClientSavingsIntegrationTest {
         Assert.assertFalse(summaryBefore.equals(summary));
         Assert.assertNotNull(summary.get("totalWithholdTax"));
         Float expected = (Float) summary.get("totalDeposits") + (Float) summary.get("totalInterestPosted")
-                - (Float) summary.get("totalWithholdTax");
+        - (Float) summary.get("totalWithholdTax");
         Float actual = (Float) summary.get("accountBalance");
         Assert.assertEquals(expected, actual, 1);
 
@@ -1962,7 +1959,7 @@ public class ClientSavingsIntegrationTest {
         LocalDate transactionDate = new LocalDate();
         for(int i=0; i< 4; i++){
             String TRANSACTION_DATE = formatter.print(transactionDate);
-            Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
+            this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
                     TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
             transactionDate = transactionDate.minusDays(30);
         }
@@ -1994,7 +1991,7 @@ public class ClientSavingsIntegrationTest {
         assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
 
         String TRANSACTION_DATE = formatter.print(new LocalDate());
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
+        this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
@@ -2013,8 +2010,7 @@ public class ClientSavingsIntegrationTest {
         assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
 
         TRANSACTION_DATE = formatter.print(new LocalDate());
-        depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
-                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT, TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
@@ -2133,7 +2129,7 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.getSavingsSummary(savingsId);
         Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
 
         savingsStatusHashMap = this.savingsAccountHelper.blockSavings(savingsId);
@@ -2206,7 +2202,7 @@ public class ClientSavingsIntegrationTest {
         assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
+        this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
         Date today = DateUtils.getDateOfTenant();
         String todayDate = today.toString();
         SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
@@ -2273,10 +2269,10 @@ public class ClientSavingsIntegrationTest {
 
         Assert.assertNotNull(chargeId);
 
-        final Integer payChargeId = this.savingsAccountHelper.payCharge(chargeId, savingsId, chargeAmount, SavingsAccountHelper.TRANSACTION_DATE);
+        this.savingsAccountHelper.payCharge(chargeId, savingsId, chargeAmount, SavingsAccountHelper.TRANSACTION_DATE);
 
 
-        final Integer undoSavingsTransaction = this.savingsAccountHelper.undoSavingsAccountTransaction(savingsId, depositTransactionId);
+        this.savingsAccountHelper.undoSavingsAccountTransaction(savingsId, depositTransactionId);
         HashMap reversedDepositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         Assert.assertTrue((Boolean) reversedDepositTransaction.get("reversed"));
 
