@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.Assert.assertNotNull;
+
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -25,10 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.ImageHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,8 +35,6 @@ public class StaffImageApiTest {
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
 
     @Before
     public void setup() {
@@ -45,60 +42,48 @@ public class StaffImageApiTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-
     }
 
     @Test
     public void createStaffImage() {
-
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
-
+        assertNotNull("Image id should not be null", imageId);
     }
 
     @Test
     public void getStaffImage(){
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
+        assertNotNull("Image id should not be null", imageId);
         String imageAsText = ImageHelper.getStaffImageAsText(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageAsText);
+        assertNotNull("Image id should not be null", imageAsText);
     }
 
     @Test
     public void getStaffImageAsBinary(){
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
+        assertNotNull("Image id should not be null", imageId);
         byte[] imageAsBytes = ImageHelper.getStaffImageAsBinary(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image content should not be null", imageAsBytes);
+        assertNotNull("Image content should not be null", imageAsBytes);
     }
 
     @Test
     public void updateImage() {
-
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
+        assertNotNull("Image id should not be null", imageId);
         imageId = ImageHelper.updateImageForStaff(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
-
+        assertNotNull("Image id should not be null", imageId);
     }
 
     @Test
     public void deleteStaffImage() {
-
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
+        assertNotNull("Image id should not be null", imageId);
         imageId = ImageHelper.deleteStaffImage(this.requestSpec, this.responseSpec, staffId);
-        Assert.assertNotNull("Image id should not be null", imageId);
-
+        assertNotNull("Image id should not be null", imageId);
     }
-
-
-
 }
