@@ -54,7 +54,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1903,7 +1902,6 @@ public class ClientSavingsIntegrationTest {
     }
 
     @Test
-    @Ignore // TODO FINERACT-852
     public void testSavingsAccount_DormancyTracking() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
@@ -1968,7 +1966,7 @@ public class ClientSavingsIntegrationTest {
         }
 
         SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec);
-        jobHelper.executeJob("Update Savings Dormant Accounts");
+        jobHelper.executeAndAwaitJob("Update Savings Dormant Accounts");
 
         //VERIFY WITHIN PROVIDED RANGE DOESN'T INACTIVATE
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(0));
