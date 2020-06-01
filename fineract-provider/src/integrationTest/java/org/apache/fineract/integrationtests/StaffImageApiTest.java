@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import io.restassured.builder.RequestSpecBuilder;
@@ -58,6 +59,7 @@ public class StaffImageApiTest {
         assertNotNull("Image id should not be null", imageId);
         String imageAsText = ImageHelper.getStaffImageAsText(this.requestSpec, this.responseSpec, staffId);
         assertNotNull("Image id should not be null", imageAsText);
+        assertEquals(ImageHelper.generateImageAsText(), imageAsText);
     }
 
     @Test
@@ -67,6 +69,7 @@ public class StaffImageApiTest {
         assertNotNull("Image id should not be null", imageId);
         byte[] imageAsBytes = ImageHelper.getStaffImageAsBinary(this.requestSpec, this.responseSpec, staffId);
         assertNotNull("Image content should not be null", imageAsBytes);
+        assertEquals(251, imageAsBytes.length);
     }
 
     @Test
