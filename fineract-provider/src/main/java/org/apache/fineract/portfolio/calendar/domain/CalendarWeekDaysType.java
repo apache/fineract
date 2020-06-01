@@ -79,7 +79,9 @@ public enum CalendarWeekDaysType {
     public static CalendarWeekDaysType fromString(final String weekDayString) {
         CalendarWeekDaysType weekDay = CalendarWeekDaysType.INVALID;
 
-        if (StringUtils.isEmpty(weekDayString)) return weekDay;
+        if (StringUtils.isEmpty(weekDayString)) {
+            return weekDay;
+        }
 
         if (weekDayString.equalsIgnoreCase(CalendarWeekDaysType.MO.toString())) {
             weekDay = CalendarWeekDaysType.MO;

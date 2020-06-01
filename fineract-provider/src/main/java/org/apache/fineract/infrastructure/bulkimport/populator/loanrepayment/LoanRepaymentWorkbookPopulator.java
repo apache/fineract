@@ -83,16 +83,18 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         clientIdToClientExternalId =new HashMap<>();
         List<ClientData>allclients=clientSheetPopulator.getClients();
         for (ClientData client: allclients) {
-            if (client.getExternalId()!=null)
-                clientIdToClientExternalId.put(client.getId(),client.getExternalId());
+            if (client.getExternalId()!=null) {
+                clientIdToClientExternalId.put(client.getId(), client.getExternalId());
+            }
         }
     }
 
     private void setDefaults(Sheet worksheet,String dateFormat) {
         for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
             Row row = worksheet.getRow(rowNo);
-            if (row == null)
+            if (row == null) {
                 row = worksheet.createRow(rowNo);
+            }
             writeFormula(LoanRepaymentConstants.CLIENT_EXTERNAL_ID, row,
                     "IF(ISERROR(VLOOKUP($B"+(rowNo+1)+",$R$2:$S$"+(allloans.size()+1)+",2,FALSE))," +
                             "\"\",(VLOOKUP($B"+(rowNo+1)+",$R$2:$S$"+(allloans.size()+1)+",2,FALSE)))");
@@ -244,8 +246,10 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
             writeString(LoanRepaymentConstants.LOOKUP_ACCOUNT_NO_COL, row, loan.getAccountNo()+"-"+loan.getStatusStringValue());
             writeString(LoanRepaymentConstants.LOOKUP_PRODUCT_COL, row, loan.getLoanProductName());
             writeDouble(LoanRepaymentConstants.LOOKUP_PRINCIPAL_COL, row, loan.getPrincipal().doubleValue());
-            if (loan.getTotalOutstandingAmount() != null)
-                writeBigDecimal(LoanRepaymentConstants.LOOKUP_TOTAL_OUTSTANDING_AMOUNT_COL, row, loan.getTotalOutstandingAmount());
+            if (loan.getTotalOutstandingAmount() != null) {
+                writeBigDecimal(LoanRepaymentConstants.LOOKUP_TOTAL_OUTSTANDING_AMOUNT_COL, row,
+                        loan.getTotalOutstandingAmount());
+            }
             if (loan.getDisbursementDate() != null) {
                 try {
                     date = inputFormat.parse(loan.getDisbursementDate().toString());

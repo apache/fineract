@@ -183,7 +183,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
         }
 
         BigDecimal totalOverDue = principalOverdue.add(interestOverdue).add(feeOverdue).add(penaltyOverdue);
-        if (totalOverDue.compareTo(BigDecimal.ZERO) == 1) {
+        if (totalOverDue.compareTo(BigDecimal.ZERO) > 0) {
             if (isInsertStatement) {
                 updateSql = constructInsertStatement(loan.getId(), principalOverdue, interestOverdue, feeOverdue, penaltyOverdue,
                         overDueSince);
@@ -277,12 +277,12 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                             loanSchedulePeriodData.penaltyChargesPaid()));
                     if (overDueSince.isAfter(loanSchedulePeriodData.periodDueDate())
                             && loanSchedulePeriodData.principalDue().subtract(loanSchedulePeriodData.principalPaid())
-                                    .compareTo(BigDecimal.ZERO) == 1) {
+                                    .compareTo(BigDecimal.ZERO) > 0) {
                         overDueSince = loanSchedulePeriodData.periodDueDate();
                     }
                 }
             }
-            if (principalOverdue.compareTo(BigDecimal.ZERO) == 1) {
+            if (principalOverdue.compareTo(BigDecimal.ZERO) > 0) {
                 String sqlStatement = null;
                 if (isInsertStatement) {
                     sqlStatement = constructInsertStatement(loanId, principalOverdue, interestOverdue, feeOverdue, penaltyOverdue,
@@ -356,7 +356,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                     BigDecimal feeChargesPaid = null;
                     BigDecimal penaltyChargesPaid = null;
                     Boolean isComplete = true;
-                    if (loanSchedulePeriodData.principalDue().compareTo(principalAmt) == 1) {
+                    if (loanSchedulePeriodData.principalDue().compareTo(principalAmt) > 0) {
                         principalPaid = principalAmt;
                         principalAmt = BigDecimal.ZERO;
                         isComplete = false;
@@ -365,7 +365,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                         principalAmt = principalAmt.subtract(loanSchedulePeriodData.principalDue());
                     }
 
-                    if (loanSchedulePeriodData.interestDue().compareTo(interestAmt) == 1) {
+                    if (loanSchedulePeriodData.interestDue().compareTo(interestAmt) > 0) {
                         interestPaid = interestAmt;
                         interestAmt = BigDecimal.ZERO;
                         isComplete = false;
@@ -373,7 +373,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                         interestPaid = loanSchedulePeriodData.interestDue();
                         interestAmt = interestAmt.subtract(loanSchedulePeriodData.interestDue());
                     }
-                    if (loanSchedulePeriodData.feeChargesDue().compareTo(feeAmt) == 1) {
+                    if (loanSchedulePeriodData.feeChargesDue().compareTo(feeAmt) > 0) {
                         feeChargesPaid = feeAmt;
                         feeAmt = BigDecimal.ZERO;
                         isComplete = false;
@@ -381,7 +381,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                         feeChargesPaid = loanSchedulePeriodData.feeChargesDue();
                         feeAmt = feeAmt.subtract(loanSchedulePeriodData.feeChargesDue());
                     }
-                    if (loanSchedulePeriodData.penaltyChargesDue().compareTo(penaltyAmt) == 1) {
+                    if (loanSchedulePeriodData.penaltyChargesDue().compareTo(penaltyAmt) > 0) {
                         penaltyChargesPaid = penaltyAmt;
                         penaltyAmt = BigDecimal.ZERO;
                         isComplete = false;

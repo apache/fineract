@@ -340,7 +340,9 @@ public class Calendar extends AbstractAuditableCustom {
         }
 
         // if repeating is false then update recurrence to NULL
-        if (!this.repeating) this.recurrence = null;
+        if (!this.repeating) {
+            this.recurrence = null;
+        }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);

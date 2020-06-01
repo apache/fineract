@@ -168,7 +168,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public Integer retrieveFinancialYearBeginningMonth() {
         final String propertyName = "financial-year-beginning-month";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
-        if (property.isEnabled()) return property.getValue().intValue();
+        if (property.isEnabled()) {
+            return property.getValue().intValue();
+        }
         return 1;
     }
 
@@ -306,8 +308,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         int defaultValue = 6;
         int value = property.getValue().intValue();
-        if(value < 1)
+        if(value < 1) {
             return defaultValue;
+        }
         return value;
     }
 

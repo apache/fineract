@@ -154,7 +154,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             BigDecimal disbursedAmount = loan.getDisbursedAmount();
             BigDecimal principalRepaid = loan.getLoanSummary().getTotalPrincipalRepaid();
             BigDecimal principalWrittenOff = loan.getLoanSummary().getTotalPrincipalWrittenOff();
-            if (disbursedAmount.subtract(principalWrittenOff).subtract(principalRepaid).compareTo(BigDecimal.ZERO) != 1) { return; }
+            if (disbursedAmount.subtract(principalWrittenOff).subtract(principalRepaid).compareTo(BigDecimal.ZERO) <= 0) { return; }
         }
         MonetaryCurrency currency = loan.getCurrency();
         Money totalPrincipal = Money.zero(currency);

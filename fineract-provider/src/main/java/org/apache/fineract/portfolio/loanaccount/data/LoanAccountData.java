@@ -1844,10 +1844,11 @@ public class LoanAccountData {
     }
 
     public BigDecimal getTotalOutstandingAmount() {
-        if(this.summary!=null)
+        if(this.summary!=null) {
             return this.summary.getTotalOutstanding();
-        else
+        } else {
             return null;
+        }
     }
 
     public boolean isInterestRecalculationEnabled() {
@@ -1868,7 +1869,9 @@ public class LoanAccountData {
     }
 
     public BigDecimal getTotalPaidFeeCharges() {
-        if (this.summary != null) return this.summary.getTotalPaidFeeCharges();
+        if (this.summary != null) {
+            return this.summary.getTotalPaidFeeCharges();
+        }
         return BigDecimal.ZERO;
     }
 

@@ -459,8 +459,12 @@ public class ShareProductDataSerializer {
 
         BigDecimal shareCapitalValue;
         if (sharesIssued != null || unitPrice != null) {
-            if (sharesIssued == null) sharesIssued = product.getTotalShares();
-            if (unitPrice == null) unitPrice = product.getUnitPrice();
+            if (sharesIssued == null) {
+                sharesIssued = product.getTotalShares();
+            }
+            if (unitPrice == null) {
+                unitPrice = product.getUnitPrice();
+            }
             shareCapitalValue = BigDecimal.valueOf(sharesIssued).multiply(unitPrice);
             if (product.setshareCapitalValue(shareCapitalValue)) {
                 actualChanges.put(ShareProductApiConstants.sharecapital_paramname, shareCapitalValue);

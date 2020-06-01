@@ -157,7 +157,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId, loanOfficerId });
     }
 
-    @Override public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId) {
+    @Override
+    public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId) {
         final String loanWhereClause = " where l.client_id = ? and l.loan_status_id = 300 ";
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { clientId });
     }
@@ -169,6 +170,12 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final String sql = "select " + rm.loanAccountSummarySchema() + loanWhereClauseForGroupAndLoanType;
        // this.columnValidator.validateSqlInjection(rm.loanAccountSummarySchema(), loanWhereClauseForGroupAndLoanType);
         return this.jdbcTemplate.query(sql, rm, new Object[]{groupId , glimAccount});
+    }
+
+    @Override
+    public Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(final Long groupId) {
+        final String loanWhereClause = " where l.group_id = ? and l.loan_status_id = 300 and l.client_id is null";
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId });
     }
 
 

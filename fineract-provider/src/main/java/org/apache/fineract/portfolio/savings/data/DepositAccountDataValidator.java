@@ -29,6 +29,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalen
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maturityInstructionIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
@@ -39,6 +40,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClos
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferToSavingsIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
@@ -77,6 +79,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
@@ -308,6 +311,19 @@ public class DepositAccountDataValidator {
         } else {
             baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
         }
+
+        if (this.fromApiJsonHelper.parameterExists(maturityInstructionIdParamName, element)) {
+            final Integer depositRolloverId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    maturityInstructionIdParamName, element);
+            baseDataValidator.reset().parameter(maturityInstructionIdParamName).value(depositRolloverId).notNull()
+                    .isOneOfTheseValues(DepositAccountOnClosureType.integerValues());
+
+            if(depositRolloverId.equals(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getValue())){
+                final Long transferToSavingsId = this.fromApiJsonHelper.extractLongNamed(
+                        transferToSavingsIdParamName, element);
+                baseDataValidator.reset().parameter(transferToSavingsIdParamName).value(transferToSavingsId).notNull().longGreaterThanZero();
+            }
+        }
     }
 
     private void validateDepositDetailsForUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -436,6 +452,19 @@ public class DepositAccountDataValidator {
                 baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).notNull().longGreaterThanZero();
             } else {
                 baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(maturityInstructionIdParamName, element)) {
+            final Integer depositRolloverId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    maturityInstructionIdParamName, element);
+            baseDataValidator.reset().parameter(maturityInstructionIdParamName).value(depositRolloverId).notNull()
+                    .isOneOfTheseValues(DepositAccountOnClosureType.integerValues());
+
+            if(depositRolloverId.equals(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getValue())){
+                final Long transferToSavingsId = this.fromApiJsonHelper.extractLongNamed(
+                        transferToSavingsIdParamName, element);
+                baseDataValidator.reset().parameter(transferToSavingsIdParamName).value(transferToSavingsId).notNull().longGreaterThanZero();
             }
         }
 

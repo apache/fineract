@@ -495,8 +495,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Integer legalFormEnum = JdbcSupport.getInteger(rs, "legalFormEnum");
             EnumOptionData legalForm = null;
-            if(legalFormEnum != null)
-                    legalForm = ClientEnumerations.legalForm(legalFormEnum);
+            if(legalFormEnum != null) {
+                legalForm = ClientEnumerations.legalForm(legalFormEnum);
+            }
 
             final Long constitutionId = JdbcSupport.getLong(rs, "constitutionId");
             final String constitutionValue = rs.getString("constitutionValue");
@@ -679,8 +680,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Integer legalFormEnum = JdbcSupport.getInteger(rs, "legalFormEnum");
             EnumOptionData legalForm = null;
-            if(legalFormEnum != null)
-                    legalForm = ClientEnumerations.legalForm(legalFormEnum);
+            if(legalFormEnum != null) {
+                legalForm = ClientEnumerations.legalForm(legalFormEnum);
+            }
 
             final Long constitutionId = JdbcSupport.getLong(rs, "constitutionId");
             final String constitutionValue = rs.getString("constitutionValue");

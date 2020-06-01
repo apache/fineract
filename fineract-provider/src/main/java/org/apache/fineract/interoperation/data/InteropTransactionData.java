@@ -94,8 +94,9 @@ public class InteropTransactionData extends CommandProcessingResult {
     }
 
     public static InteropTransactionData build(SavingsAccountTransaction transaction) {
-        if (transaction == null)
+        if (transaction == null) {
             return null;
+        }
 
         SavingsAccount savingsAccount = transaction.getSavingsAccount();
 
@@ -119,19 +120,22 @@ public class InteropTransactionData extends CommandProcessingResult {
         int currLength = 0;
         for (Note note : transaction.getNotes()) {
             String s = note.getNote();
-            if (s == null)
+            if (s == null) {
                 continue;
+            }
 
             int availableLength = 500 - currLength;
-            if (availableLength <= 1)
+            if (availableLength <= 1) {
                 break;
+            }
 
             if (currLength > 0) {
                 sb.append(' ');
                 availableLength--;
             }
-            if (s.length() > availableLength)
+            if (s.length() > availableLength) {
                 s = s.substring(availableLength);
+            }
             sb.append(s);
             currLength = sb.length();
         }

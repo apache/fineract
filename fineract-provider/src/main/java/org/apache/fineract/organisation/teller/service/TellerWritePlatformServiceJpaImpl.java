@@ -240,17 +240,19 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                 hourStartTime = command.longValueOfParameterNamed("hourStartTime");
                 minStartTime = command.longValueOfParameterNamed("minStartTime");
 
-                if (minStartTime == 0)
+                if (minStartTime == 0) {
                     startTime = hourStartTime.toString() + ":" + minStartTime.toString() + "0";
-                else
+                } else {
                     startTime = hourStartTime.toString() + ":" + minStartTime.toString();
+                }
 
                 hourEndTime = command.longValueOfParameterNamed("hourEndTime");
                 minEndTime = command.longValueOfParameterNamed("minEndTime");
-                if (minEndTime == 0)
+                if (minEndTime == 0) {
                     endTime = hourEndTime.toString() + ":" + minEndTime.toString() + "0";
-                else
+                } else {
                     endTime = hourEndTime.toString() + ":" + minEndTime.toString();
+                }
 
             }
             final Cashier cashier = Cashier.fromJson(tellerOffice, teller, staff, startTime, endTime, command);

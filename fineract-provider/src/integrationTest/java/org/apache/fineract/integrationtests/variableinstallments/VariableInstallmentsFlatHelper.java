@@ -209,7 +209,7 @@ public class VariableInstallmentsFlatHelper {
         cal.set(Calendar.MONTH, (int) list.get(1) - 1);
         cal.set(Calendar.DAY_OF_MONTH, (int) list.get(2));
         Date date = cal.getTime();
-        DateFormat requiredFormat = new SimpleDateFormat("dd MMMM YYYY");
+        DateFormat requiredFormat = new SimpleDateFormat("dd MMMM yyyy");
         return requiredFormat.format(date);
     }
 

@@ -171,7 +171,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             this.noteRepository.deleteInBatch(relatedNotes);
 
             final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientId);
-            if (clientNonPerson != null) this.clientNonPersonRepository.delete(clientNonPerson);
+            if (clientNonPerson != null) {
+                this.clientNonPersonRepository.delete(clientNonPerson);
+            }
 
             this.clientRepository.delete(client);
             this.clientRepository.flush();
@@ -488,8 +490,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 if(legalFormValue != null)
                 {
                     LegalForm legalForm = LegalForm.fromInt(legalFormValue);
-                    if(legalForm != null)
+                    if(legalForm != null) {
                         isChangedToEntity = legalForm.isEntity();
+                    }
                 }
 
                 if(isChangedToEntity)
@@ -499,8 +502,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 else
                 {
                     final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientForUpdate.getId());
-                    if(clientNonPerson != null)
+                    if(clientNonPerson != null) {
                         this.clientNonPersonRepository.delete(clientNonPerson);
+                    }
                 }
             }
 

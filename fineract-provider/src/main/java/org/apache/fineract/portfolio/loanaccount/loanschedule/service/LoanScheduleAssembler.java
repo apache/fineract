@@ -258,7 +258,9 @@ public class LoanScheduleAssembler {
         } else {
             if (repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS && nthDay != null && !nthDay.equals(NthDayType.INVALID.getValue())) {
                 LocalDate calendarStartDate = repaymentsStartingFromDate;
-                if (calendarStartDate == null) calendarStartDate = expectedDisbursementDate;
+                if (calendarStartDate == null) {
+                    calendarStartDate = expectedDisbursementDate;
+                }
                 calendar = createLoanCalendar(calendarStartDate, repaymentEvery, CalendarFrequencyType.MONTHLY, dayOfWeek, nthDay);
             }
         }

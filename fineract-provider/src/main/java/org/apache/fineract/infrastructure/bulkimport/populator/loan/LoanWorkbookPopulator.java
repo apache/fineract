@@ -384,8 +384,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         doubleBorderStyle.setBorderRight(BorderStyle.THICK);
         for (int colNo = 0; colNo < 35; colNo++) {
             Cell cell = rowHeader.getCell(colNo);
-            if (cell == null)
-                rowHeader.createCell(colNo);
+            if (cell == null) {
+                    rowHeader.createCell(colNo);
+            }
             rowHeader.getCell(colNo).setCellStyle(borderStyle);
         }
         rowHeader.getCell(LoanConstants.FIRST_REPAYMENT_COL).setCellStyle(doubleBorderStyle);
@@ -549,8 +550,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             graceOnInterestPaymentName.setNameName("GRACE_INTEREST_PAYMENT_" + productName);
             graceOnInterestChargedName.setNameName("GRACE_INTEREST_CHARGED_" + productName);
             startDateName.setNameName("START_DATE_" + productName);
-            if (products.get(i).getFundName() != null)
-                fundName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$C$" + (i + 2));
+            if (products.get(i).getFundName() != null) {
+                    fundName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$C$" + (i + 2));
+            }
             principalName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$D$" + (i + 2));
             minPrincipalName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$E$" + (i + 2));
             maxPrincipalName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$F$" + (i + 2));

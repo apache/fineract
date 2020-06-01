@@ -126,8 +126,9 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                 if (clients != null){
                     for (ClientData client : clients) {
                         Row row = sheet.getRow(++rowIndex);
-                        if (row == null)
+                        if (row == null) {
                             row = sheet.createRow(rowIndex);
+                        }
                         writeString(nameCol, row, client.displayName().replaceAll("[ )(] ", "_") + "(" + client.id() + ")");
 
                         if (client.getActivationDate() != null) {
@@ -145,8 +146,9 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
             if (groups != null) {
                 for (GroupGeneralData group : groups) {
                     Row row = sheet.getRow(++rowIndex);
-                    if (row == null)
+                    if (row == null) {
                         row = sheet.createRow(rowIndex);
+                    }
                     writeString(nameCol, row, group.getName().replaceAll("[ )(] ", "_"));
 
                     if (group.getActivationDate() != null) {

@@ -326,7 +326,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         for (Map<String, Object> details : scheduleDetails) {
             Long count = (Long) details.get("futureInstallemts");
             if (count == null) {
-                count = 0l;
+                count = 0L;
             }
             final Long savingsId = (Long) details.get("savingsId");
             final BigDecimal amount = (BigDecimal) details.get("amount");

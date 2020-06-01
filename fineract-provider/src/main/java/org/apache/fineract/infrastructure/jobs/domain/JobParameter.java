@@ -37,6 +37,7 @@ public class JobParameter extends AbstractPersistableCustom {
     @Column(name = "parameter_value",nullable = true)
     private String parameterValue;
 
+    public JobParameter() {}
 
     public JobParameter(final Long jobId, final String parameterName, final String parameterValue) {
         this.jobId = jobId;
@@ -75,7 +76,9 @@ public class JobParameter extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
+        if (!obj.getClass().equals(getClass())) {
+            return false;
+        }
         JobParameter jobParameter = (JobParameter) obj;
         return Objects.equals(jobParameter.getJobId(), this.getJobId())
                 && Objects.equals(jobParameter.getParameterName(), this.getParameterName())

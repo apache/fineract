@@ -65,6 +65,8 @@ public class SelfServiceRegistration extends AbstractPersistableCustom {
     @Temporal(TemporalType.DATE)
     private Date createdDate;
 
+    public SelfServiceRegistration() {}
+
     public SelfServiceRegistration(final Client client, String accountNumber, final String firstName, final String lastName,
             final String mobileNumber, final String email, final String authenticationToken, final String username, final String password) {
         this.client = client;

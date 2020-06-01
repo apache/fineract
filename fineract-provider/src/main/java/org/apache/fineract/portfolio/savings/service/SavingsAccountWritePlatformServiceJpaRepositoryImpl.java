@@ -289,7 +289,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         account.processAccountUponActivation(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, user);
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -625,7 +625,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -717,7 +717,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -1122,7 +1122,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -1255,7 +1255,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     financialYearBeginningMonth, postInterestOnDate);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
@@ -1657,7 +1657,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
             if ((transaction.getTransactionLocalDate().isEqual(transferDate)
-                    && transaction.getTransactionLocalDate().isAfter(new LocalDate(transferDate)))
+                    && transaction.getTransactionLocalDate().isAfter(transferDate))
                     || transaction.getTransactionLocalDate().isAfter(transferDate)) {
                 throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientSavingsException,
                         TransferApiConstants.transferClientSavingsException, new LocalDate(transaction.createdDate()),

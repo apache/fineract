@@ -166,7 +166,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         this.context.authenticatedUser();
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-        if (depositAccountMapper == null) return null;
+        if (depositAccountMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ");
@@ -186,7 +188,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 depositAccountType.resourceName());
 
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-        if (depositAccountMapper == null) return null;
+        if (depositAccountMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -235,7 +239,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             this.context.authenticatedUser();
 
             final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-            if (depositAccountMapper == null) return null;
+            if (depositAccountMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");
@@ -256,7 +262,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             this.context.authenticatedUser();
 
             final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-            if (depositAccountMapper == null) return null;
+            if (depositAccountMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");
@@ -378,6 +386,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
 
+            final Collection<EnumOptionData> maturityInstructionOptions = this.depositsDropdownReadPlatformService.maturityInstructionOptions();
+
             Collection<StaffData> fieldOfficerOptions = null;
 
             if (officeId != null) {
@@ -405,7 +415,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             }
 
             // retrieve chart Slabs
-            final InterestRateChartData productChartData = this.productChartReadPlatformService.retrieveActiveChartWithTemplate(productId);
+                final InterestRateChartData productChartData = this.productChartReadPlatformService.retrieveActiveChartWithTemplate(productId);
             final DepositAccountInterestRateChartData accountChart = DepositAccountInterestRateChartData.from(productChartData);
 
             if (depositAccountType.isFixedDeposit()) {
@@ -414,7 +424,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                         fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                         interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                         withdrawalFeeTypeOptions, transactions, charges, chargeOptions, preClosurePenalInterestOnTypeOptions,
-                        periodFrequencyTypeOptions, savingsAccountDatas);
+                        periodFrequencyTypeOptions, savingsAccountDatas, maturityInstructionOptions);
 
                 template = FixedDepositAccountData.withInterestChart((FixedDepositAccountData) template, accountChart);
             } else if (depositAccountType.isRecurringDeposit()) {
@@ -450,6 +460,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final Collection<SavingsAccountTransactionData> transactions = null;
             final Collection<SavingsAccountChargeData> charges = null;
+                final Collection<EnumOptionData> maturityInstructionOptions = null;
 
             final boolean feeChargesOnly = true;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
@@ -462,7 +473,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                         fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                         interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                         withdrawalFeeTypeOptions, transactions, charges, chargeOptions, preClosurePenalInterestOnTypeOptions,
-                        periodFrequencyTypeOptions, savingsAccountDatas);
+                        periodFrequencyTypeOptions, savingsAccountDatas, maturityInstructionOptions);
             } else if (depositAccountType.isRecurringDeposit()) {
 
                 template = RecurringDepositAccountData.withClientTemplate(clientId, clientName, groupId, groupName);
@@ -778,7 +789,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.deposit_period as depositPeriod, ");
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
             sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
-            sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings ");
+            sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings, ");
+            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId ");
 
             sqlBuilder.append(super.selectTablesSql());
 
@@ -826,10 +838,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .depositAccountOnClosureType(onAccountClosureId);
             final Boolean transferInterestToSavings = rs.getBoolean("transferInterestToSavings");
 
+            final Long transferToSavingsId = JdbcSupport.getLong(rs, "transferToSavingsId");
+
+
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId);
         }
     }
 
@@ -1266,7 +1281,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null);
         }
     }
 

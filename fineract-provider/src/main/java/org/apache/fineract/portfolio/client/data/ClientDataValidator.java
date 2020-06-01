@@ -66,8 +66,10 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientNonPersonDetailsParamName, element)) {
             final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
-            if(clientNonPersonJson != null)
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS);
+            if(clientNonPersonJson != null) {
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson,
+                        ClientApiCollectionConstants.CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS);
+            }
         }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -346,8 +348,10 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientNonPersonDetailsParamName, element)) {
             final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
-            if(clientNonPersonJson != null)
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS);
+            if(clientNonPersonJson != null) {
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson,
+                        ClientApiCollectionConstants.CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS);
+            }
         }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

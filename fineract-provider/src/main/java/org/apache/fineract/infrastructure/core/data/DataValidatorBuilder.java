@@ -708,7 +708,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder comapareMinimumAndMaximumAmounts(final BigDecimal minimumBalance, final BigDecimal maximumBalance) {
         if (minimumBalance != null && maximumBalance != null) {
-            if (maximumBalance.compareTo(minimumBalance) == -1) {
+            if (maximumBalance.compareTo(minimumBalance) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.not.within.expected.range");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(" minimum amount ")
@@ -725,7 +725,7 @@ public class DataValidatorBuilder {
     public DataValidatorBuilder inMinAndMaxAmountRange(final BigDecimal minimumAmount, final BigDecimal maximumAmount) {
         if (minimumAmount != null && maximumAmount != null && this.value != null) {
             final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
-            if (amount.compareTo(minimumAmount) == -1 || amount.compareTo(maximumAmount) == 1) {
+            if (amount.compareTo(minimumAmount) < 0 || amount.compareTo(maximumAmount) > 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".amount.is.not.within.min.max.range");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.parameter).append(" amount ")
@@ -743,7 +743,7 @@ public class DataValidatorBuilder {
     public DataValidatorBuilder notLessThanMin(final BigDecimal min) {
         if (min != null && this.value != null) {
             final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
-            if (amount.compareTo(min) == -1) {
+            if (amount.compareTo(min) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.less.than.min");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.parameter).append(" value ")
@@ -760,7 +760,7 @@ public class DataValidatorBuilder {
     public DataValidatorBuilder notGreaterThanMax(final BigDecimal max) {
         if (max != null && this.value != null) {
             final BigDecimal amount = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
-            if (amount.compareTo(max) == 1) {
+            if (amount.compareTo(max) > 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.max");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.parameter).append(" value ")
@@ -776,7 +776,7 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder comapareMinAndMaxOfTwoBigDecmimalNos(final BigDecimal min, final BigDecimal max) {
         if (min != null && max != null) {
-            if (max.compareTo(min) == -1) {
+            if (max.compareTo(min) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.not.within.expected.range");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(" min number ").append(min)

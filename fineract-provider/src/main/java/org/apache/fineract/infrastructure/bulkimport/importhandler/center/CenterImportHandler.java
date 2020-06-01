@@ -101,15 +101,16 @@ public class CenterImportHandler implements ImportHandler {
         Integer interval = ImportHandlerUtils.readAsInt(CenterConstants.INTERVAL_COL, row);
         String repeatsOnDay = ImportHandlerUtils.readAsString(CenterConstants.REPEATS_ON_DAY_COL, row);
         EnumOptionData repeatsOnDayEnum=new EnumOptionData(null,null,ImportHandlerUtils.getRepeatsOnDayId(repeatsOnDay));
-        if(meetingStartDate==null)
+        if(meetingStartDate==null) {
             return null;
-        else {
-            if(repeatsOnDay==null)
-                return CalendarData.importInstanceNoRepeatsOnDay(meetingStartDate, isRepeating,
-                        frequencyEnum, interval, row.getRowNum(),locale,dateFormat);
-            else
-                return CalendarData.importInstanceWithRepeatsOnDay(meetingStartDate, isRepeating,
-                        frequencyEnum, interval, repeatsOnDayEnum, row.getRowNum(),locale,dateFormat);
+        } else {
+            if(repeatsOnDay==null) {
+                return CalendarData.importInstanceNoRepeatsOnDay(meetingStartDate, isRepeating, frequencyEnum, interval,
+                        row.getRowNum(), locale, dateFormat);
+            } else {
+                return CalendarData.importInstanceWithRepeatsOnDay(meetingStartDate, isRepeating, frequencyEnum,
+                        interval, repeatsOnDayEnum, row.getRowNum(), locale, dateFormat);
+            }
         }
     }
 
@@ -136,8 +137,9 @@ public class CenterImportHandler implements ImportHandler {
         List<GroupGeneralData> groupMembers = new ArrayList<GroupGeneralData>();
         for (int cellNo =CenterConstants. GROUP_NAMES_STARTING_COL; cellNo < CenterConstants.GROUP_NAMES_ENDING_COL; cellNo++) {
             String groupName = ImportHandlerUtils.readAsString(cellNo, row);
-            if (groupName==null||groupName.equals(""))
+            if (groupName==null||groupName.equals("")) {
                 break;
+            }
             Long groupId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME), groupName);
             GroupGeneralData group = new GroupGeneralData(groupId);
             if (!containsGroupId(groupMembers,groupId)) {
@@ -179,11 +181,15 @@ public class CenterImportHandler implements ImportHandler {
                     result = importCenter(i, dateFormat);
                     centerId = result.getGroupId().toString();
                     progressLevel = 1;
-                } else
-                    centerId = ImportHandlerUtils.readAsInt(CenterConstants.CENTER_ID_COL, centerSheet.getRow(centers.get(i).getRowIndex())).toString();
+                } else {
+                    centerId = ImportHandlerUtils
+                            .readAsInt(CenterConstants.CENTER_ID_COL, centerSheet.getRow(centers.get(i).getRowIndex()))
+                            .toString();
+                }
 
-                if (meetings.get(i) != null)
+                if (meetings.get(i) != null) {
                     progressLevel = importCenterMeeting(result, i, dateFormat);
+                }
                 successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
@@ -200,24 +206,27 @@ public class CenterImportHandler implements ImportHandler {
 
     private void writeCenterErrorMessage(String centerId,String errorMessage,int progressLevel,Cell statusCell,Cell errorReportCell,Row row){
         String status = "";
-        if (progressLevel == 0)
+        if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
-        else if (progressLevel == 1)
+        } else if (progressLevel == 1) {
             status = TemplatePopulateImportConstants.STATUS_MEETING_FAILED;
+        }
         statusCell.setCellValue(status);
         statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.RED));
 
-        if (progressLevel > 0)
+        if (progressLevel > 0) {
             row.createCell(CenterConstants.CENTER_ID_COL).setCellValue(Integer.parseInt(centerId));
+        }
         errorReportCell.setCellValue(errorMessage);
     }
 
     private int getProgressLevel(String status) {
 
-        if(status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED))
+        if(status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
-        else if(status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED))
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED)) {
             return 1;
+        }
         return 0;
     }
     private CommandProcessingResult importCenter(int rowIndex,String dateFormat) {

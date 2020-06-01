@@ -61,20 +61,22 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
         int paymentTypeRowIndex = 1;
         for (PaymentTypeData paymentType : paymentTypes) {
             Row row;
-            if (paymentTypeRowIndex < fundRowIndex)
+            if (paymentTypeRowIndex < fundRowIndex) {
                 row = extrasSheet.getRow(paymentTypeRowIndex++);
-            else
+            } else {
                 row = extrasSheet.createRow(paymentTypeRowIndex++);
+            }
             writeLong(PAYMENT_TYPE_ID_COL, row, paymentType.getId());
             writeString(PAYMENT_TYPE_NAME_COL, row, paymentType.getName().trim().replaceAll("[ )(]", "_"));
         }
         int currencyCodeRowIndex = 1;
         for (CurrencyData currencies : currencies) {
             Row row;
-            if (currencyCodeRowIndex < paymentTypeRowIndex)
+            if (currencyCodeRowIndex < paymentTypeRowIndex) {
                 row = extrasSheet.getRow(currencyCodeRowIndex++);
-            else
+            } else {
                 row = extrasSheet.createRow(currencyCodeRowIndex++);
+            }
 
             writeString(CURRENCY_NAME_COL, row, currencies.getName().trim().replaceAll("[ )(]", "_"));
             writeString(CURRENCY_CODE_COL, row, currencies.code());

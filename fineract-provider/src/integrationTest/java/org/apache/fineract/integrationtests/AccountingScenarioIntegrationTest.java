@@ -95,8 +95,8 @@ public class AccountingScenarioIntegrationTest {
     Float SP_WITHDRAWAL_AMOUNT = Float.valueOf(WITHDRAWAL_AMOUNT);
     Float SP_WITHDRAWAL_AMOUNT_ADJUSTED = Float.valueOf(WITHDRAWAL_AMOUNT_ADJUSTED);
 
-    private final String REPAYMENT_DATE[] = { "", "04 May 2011", "04 July 2011", "04 September 2011", "04 November 2011", "04 January 2012" };
-    private final Float REPAYMENT_AMOUNT[] = { .0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f };
+    private final String[] REPAYMENT_DATE = { "", "04 May 2011", "04 July 2011", "04 September 2011", "04 November 2011", "04 January 2012" };
+    private final Float[] REPAYMENT_AMOUNT = { .0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f };
 
     private final Float AMOUNT_TO_BE_WAIVE = 400.0f;
     private LoanTransactionHelper loanTransactionHelper;

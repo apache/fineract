@@ -120,18 +120,19 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         chain.doFilter(req, res);
     }
 
+    @SuppressWarnings("deprecation") // TODO FINERACT-1012
     private Authentication createUpdatedAuthentication(final Authentication currentAuthentication,
-                              final List<GrantedAuthority> updatedAuthorities) {
+            final List<GrantedAuthority> updatedAuthorities) {
 
-            final UsernamePasswordAuthenticationToken authentication = new
-                    UsernamePasswordAuthenticationToken(currentAuthentication.getPrincipal(),
-                    currentAuthentication.getCredentials(), updatedAuthorities);
+        final UsernamePasswordAuthenticationToken authentication = new
+                UsernamePasswordAuthenticationToken(currentAuthentication.getPrincipal(),
+                        currentAuthentication.getCredentials(), updatedAuthorities);
 
-            if(currentAuthentication instanceof OAuth2Authentication) {
-                final OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) currentAuthentication;
-                return new OAuth2Authentication(oAuth2Authentication.getOAuth2Request(), authentication);
-            }
+        if(currentAuthentication instanceof OAuth2Authentication) {
+            final OAuth2Authentication oAuth2Authentication = (OAuth2Authentication) currentAuthentication;
+            return new OAuth2Authentication(oAuth2Authentication.getOAuth2Request(), authentication);
+        }
 
-            return authentication;
+        return authentication;
     }
 }

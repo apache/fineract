@@ -130,8 +130,9 @@ public class SavingsImportHandlerTest {
         String currentdirectory = new File("").getAbsolutePath();
         File directory=new File(currentdirectory+File.separator+"src"+File.separator+"integrationTest"+File.separator+
                 "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"savings") ;
-        if (!directory.exists())
+        if (!directory.exists()) {
             directory.mkdirs();
+        }
         File file= new File(directory+File.separator+"Savings.xls");
         OutputStream outputStream=new FileOutputStream(file);
         workbook.write(outputStream);

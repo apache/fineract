@@ -1124,7 +1124,7 @@ public class AccountingProcessorHelper {
         if (accountMappingTypeId == CashAccountsForLoan.INCOME_FROM_FEES.getValue()
                 || accountMappingTypeId == CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue()) {
             final ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
-                    .findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(loanProductId, PortfolioProductType.LOAN.getValue(),
+                    .findProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(loanProductId, PortfolioProductType.LOAN.getValue(),
                             accountMappingTypeId, chargeId);
             if (chargeSpecificIncomeAccountMapping != null) {
                 accountMapping = chargeSpecificIncomeAccountMapping;
@@ -1147,7 +1147,7 @@ public class AccountingProcessorHelper {
         if (accountMappingTypeId == CashAccountsForSavings.INCOME_FROM_FEES.getValue()
                 || accountMappingTypeId == CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue()) {
             final ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
-                    .findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(savingsProductId,
+                    .findProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(savingsProductId,
                             PortfolioProductType.SAVING.getValue(), accountMappingTypeId, chargeId);
             if (chargeSpecificIncomeAccountMapping != null) {
                 accountMapping = chargeSpecificIncomeAccountMapping;
@@ -1218,7 +1218,7 @@ public class AccountingProcessorHelper {
          *****/
 
         final ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
-                .findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(shareProductId, PortfolioProductType.SHARES.getValue(),
+                .findProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(shareProductId, PortfolioProductType.SHARES.getValue(),
                         accountMappingTypeId, chargeId);
         if (chargeSpecificIncomeAccountMapping != null) {
             accountMapping = chargeSpecificIncomeAccountMapping;

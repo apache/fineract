@@ -1161,7 +1161,9 @@ public class Loan extends AbstractPersistableCustom {
 
             } else {
                 charge = fetchLoanChargesById(charge.getId());
-                if (charge != null) existingCharges.remove(charge.getId());
+                if (charge != null) {
+                    existingCharges.remove(charge.getId());
+                }
             }
             final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
             BigDecimal chargeAmt = BigDecimal.ZERO;
@@ -1174,8 +1176,10 @@ public class Loan extends AbstractPersistableCustom {
             } else {
                 chargeAmt = loanCharge.amountOrPercentage();
             }
-            if (charge != null)
-                charge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
+            if (charge != null) {
+                charge.update(chargeAmt, loanCharge.getDueLocalDate(), amount,
+                        fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
+            }
 
         }
 
@@ -1780,7 +1784,9 @@ public class Loan extends AbstractPersistableCustom {
         boolean removeAllChages = false;
         if (jsonCommand.parameterExists(LoanApiConstants.chargesParameterName)) {
             JsonArray chargesArray = jsonCommand.arrayOfParameterNamed(LoanApiConstants.chargesParameterName);
-            if (chargesArray.size() == 0) removeAllChages = true;
+            if (chargesArray.size() == 0) {
+                removeAllChages = true;
+            }
         }
 
         if (jsonCommand.parameterExists(LoanApiConstants.disbursementDataParameterName)) {
@@ -2197,7 +2203,7 @@ public class Loan extends AbstractPersistableCustom {
                 // Approved amount has to be less than or equal to principal
                 // amount demanded
 
-                if (approvedLoanAmount.compareTo(this.proposedPrincipal) == -1) {
+                if (approvedLoanAmount.compareTo(this.proposedPrincipal) < 0) {
 
                     this.approvedPrincipal = approvedLoanAmount;
 
@@ -2211,7 +2217,7 @@ public class Loan extends AbstractPersistableCustom {
 
                     actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
                     actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
-                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) == 1) {
+                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
                     final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
                     throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
                             errorMessage, this.proposedPrincipal, approvedLoanAmount);
@@ -2505,7 +2511,7 @@ public class Loan extends AbstractPersistableCustom {
                     totalAmount = totalAmount.add(disbursementDetails.principal());
                 }
                 this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
-                if (totalAmount.compareTo(this.approvedPrincipal) == 1) {
+                if (totalAmount.compareTo(this.approvedPrincipal) > 0) {
                     final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
                     throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", principalDisbursed,
                             this.approvedPrincipal);
@@ -2513,7 +2519,7 @@ public class Loan extends AbstractPersistableCustom {
             } else {
                 this.loanRepaymentScheduleDetail.setPrincipal(this.loanRepaymentScheduleDetail.getPrincipal().minus(diff).getAmount());
             }
-            if (!(this.loanProduct().isMultiDisburseLoan()) && diff.compareTo(BigDecimal.ZERO) == -1) {
+            if (!(this.loanProduct().isMultiDisburseLoan()) && diff.compareTo(BigDecimal.ZERO) < 0) {
                 final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved amount ";
                 throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.amount", principalDisbursed,
                         this.loanRepaymentScheduleDetail.getPrincipal().getAmount());
@@ -2998,7 +3004,7 @@ public class Loan extends AbstractPersistableCustom {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         if (status().isOverpaid()) {
-            if (this.totalOverpaid.compareTo(loanTransaction.getAmount(getCurrency()).getAmount()) == -1) {
+            if (this.totalOverpaid.compareTo(loanTransaction.getAmount(getCurrency()).getAmount()) < 0) {
                 final String errorMessage = "The refund amount must be less than or equal to overpaid amount ";
                 throw new InvalidLoanStateTransitionException("transaction", "is.exceeding.overpaid.amount", errorMessage,
                         this.totalOverpaid, loanTransaction.getAmount(getCurrency()).getAmount());
@@ -3252,7 +3258,7 @@ public class Loan extends AbstractPersistableCustom {
 
         boolean isAllChargesPaid = true;
         for (final LoanCharge loanCharge : this.charges) {
-            if (loanCharge.isActive() && loanCharge.amount().compareTo(BigDecimal.ZERO) == 1 && !(loanCharge.isPaid() || loanCharge.isWaived())) {
+            if (loanCharge.isActive() && loanCharge.amount().compareTo(BigDecimal.ZERO) > 0 && !(loanCharge.isPaid() || loanCharge.isWaived())) {
                 isAllChargesPaid = false;
                 break;
             }
@@ -5681,8 +5687,12 @@ public class Loan extends AbstractPersistableCustom {
             nthDayType = CalendarUtils.getRepeatsOnNthDayOfMonth(loanCalendar.getRecurrence());
             CalendarWeekDaysType getRepeatsOnDay = CalendarUtils.getRepeatsOnDay(loanCalendar.getRecurrence());
             Integer getRepeatsOnDayValue = null;
-            if (getRepeatsOnDay != null) getRepeatsOnDayValue = getRepeatsOnDay.getValue();
-            if (getRepeatsOnDayValue != null) dayOfWeekType = DayOfWeekType.fromInt(getRepeatsOnDayValue);
+            if (getRepeatsOnDay != null) {
+                getRepeatsOnDayValue = getRepeatsOnDay.getValue();
+            }
+            if (getRepeatsOnDayValue != null) {
+                dayOfWeekType = DayOfWeekType.fromInt(getRepeatsOnDayValue);
+            }
         }
 
         final Integer numberOfRepayments = this.loanRepaymentScheduleDetail.getNumberOfRepayments();

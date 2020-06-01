@@ -55,7 +55,7 @@ public enum EntityTables {
     private static final Map<String, EntityTables> lookup = new HashMap<String, EntityTables>();
     static {
         for (EntityTables d : EntityTables.values())
-            lookup.put(d.getName(), d);
+           { lookup.put(d.getName(), d);}
     }
 
     private String name;
