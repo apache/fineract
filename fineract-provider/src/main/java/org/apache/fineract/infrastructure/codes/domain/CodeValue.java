@@ -93,18 +93,13 @@ public class CodeValue extends AbstractPersistableCustom {
             isActive = isActiveObj;
         }
         if (position == null) {
-            position = Integer.valueOf(0);
+            position = 0;
         }
 
         Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(
                 CodevalueJSONinputParams.IS_MANDATORY.getValue());
 
-        // if the "mandatory" Boolean object is null, then set it to false by default
-        if (mandatory == null) {
-            mandatory = false;
-        }
-
-        return new CodeValue(code, label, position.intValue(), description, isActive, mandatory);
+        return new CodeValue(code, label, position, description, isActive, mandatory);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -129,14 +124,14 @@ public class CodeValue extends AbstractPersistableCustom {
         if (command.isChangeInIntegerSansLocaleParameterNamed(positionParamName, this.position)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(positionParamName);
             actualChanges.put(positionParamName, newValue);
-            this.position = newValue.intValue();
+            this.position = newValue;
         }
 
         final String isActiveParamName = CodevalueJSONinputParams.IS_ACTIVE.getValue();
         if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
             final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
             actualChanges.put(isActiveParamName, newValue);
-            this.isActive = newValue.booleanValue();
+            this.isActive = newValue;
         }
 
         return actualChanges;
