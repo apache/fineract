@@ -324,7 +324,6 @@ tasks.withType(JavaCompile) {
                 "BadImport",
                 "UnusedMethod",
                 "ModifiedButNotUsed",
-                "ArgumentSelectionDefectChecker",
                 "JodaPlusMinusLong",
                 "TypeParameterUnusedInFormals",
                 "DoubleBraceInitialization",
