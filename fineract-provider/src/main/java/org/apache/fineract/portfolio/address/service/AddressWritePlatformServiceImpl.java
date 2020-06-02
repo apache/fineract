@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.domain.Address;
 import org.apache.fineract.portfolio.address.domain.AddressRepository;
+import org.apache.fineract.portfolio.address.exception.AddressNotFoundException;
 import org.apache.fineract.portfolio.address.serialization.AddressCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
@@ -183,6 +184,10 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper
                 .findOneByClientIdAndAddressId(clientId, addressId);
 
+        if (clientAddressObj == null) {
+            throw new AddressNotFoundException(clientId);
+        }
+
         final Address addobj = this.addressRepository.getOne(addressId);
 
         if (!(command.stringValueOfParameterNamed("street").isEmpty())) {
@@ -281,10 +286,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         final Boolean testActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
         if (testActive != null) {
-
             final boolean active = command.booleanPrimitiveValueOfParameterNamed("isActive");
             clientAddressObj.setIs_active(active);
-
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId())
