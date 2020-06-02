@@ -164,13 +164,6 @@ if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
     sourceSets.main.java.outputDir = new File(rootProject.projectDir, "bin/main")
 }
 
-eclipse 
-{
-    project {
-        buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
-    }
-}
-
 openjpa {
     includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
     enhance {
