@@ -597,7 +597,7 @@ configurations {
 dependencies {
     driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
     checkstyle 'com.puppycrawl.tools:checkstyle:8.32'
-    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.36.0'
+    checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.37.1'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
