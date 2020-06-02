@@ -1967,7 +1967,7 @@ public class ClientSavingsIntegrationTest {
             transactionDate = transactionDate.minusDays(30);
         }
 
-        SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec);
         jobHelper.executeJob("Update Savings Dormant Accounts");
 
         //VERIFY WITHIN PROVIDED RANGE DOESN'T INACTIVATE

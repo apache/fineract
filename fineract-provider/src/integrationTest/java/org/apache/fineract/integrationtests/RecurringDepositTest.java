@@ -26,8 +26,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +58,6 @@ import org.joda.time.Months;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +100,11 @@ public class RecurringDepositTest {
     public static final Integer ANNUL_INTERVAL = 12;
 
     public static final Float DEPOSIT_AMOUNT = 2000.0f;
+
+    // TODO Given the difference in calculation methods in test vs application, the exact values
+    // returned may differ enough to cause differences in rounding. Given this, we only compare the full
+    // digits. A proper solution would be to implement the exact interest calculation in this test,
+    // and then to compare the exact results
 
     @Before
     public void setup() {
@@ -462,14 +464,12 @@ public class RecurringDepositTest {
         Float prematurityAmount = (Float) recurringDepositData.get("maturityAmount");
 
         HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
-        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
+        Double balanceAfter = Math.floor((Float) savingsSummaryAfter.get("accountBalance"));
+        Double expectedSavingsBalance = Math.floor(balanceBefore + prematurityAmount);
 
-        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", decimalFormat.format(expectedSavingsBalance),
-                decimalFormat.format(balanceAfter));
+        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", expectedSavingsBalance,
+                balanceAfter);
 
     }
 
@@ -676,21 +676,18 @@ public class RecurringDepositTest {
                 JournalEntry.TransactionType.CREDIT));
 
         HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
-        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
+        Double balanceAfter = Math.floor((Float) savingsSummaryAfter.get("accountBalance"));
+        Double expectedSavingsBalance = Math.floor(balanceBefore + prematurityAmount);
 
-        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", decimalFormat.format(expectedSavingsBalance),
-                decimalFormat.format(balanceAfter));
+        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", expectedSavingsBalance,
+                balanceAfter);
 
     }
 
 
 
     @Test
-    @Ignore // TODO FINERACT-855
     public void testRecurringDepositAccountWithClosureTypeTransferToSavings_WITH_HOLD_TAX() throws InterruptedException {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
@@ -829,9 +826,9 @@ public class RecurringDepositTest {
          * FD account verify whether account is matured
          */
 
-        SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec, responseSpec);
+        SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec);
         String JobName = "Update Deposit Accounts Maturity details";
-        schedulerJobHelper.executeJob(JobName);
+        schedulerJobHelper.executeAndAwaitJob(JobName);
 
         HashMap accountDetails = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
@@ -857,7 +854,6 @@ public class RecurringDepositTest {
      * transaction type ReInvest and Cash Based accounting enabled
      */
     @Test
-    @Ignore // TODO FINERACT-855
     public void testRecurringDepositAccountWithPrematureClosureTypeReinvest() {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
@@ -1430,10 +1426,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositAmount,
                 depositPeriod, interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
     }
@@ -1515,10 +1509,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositAmount,
                 depositPeriod, interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
     }
@@ -1593,16 +1585,13 @@ public class RecurringDepositTest {
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
-        Float interestToBePosted = Float.valueOf(decimalFormat.format(interestPerDay * principal * daysInMonth));
+        Float interestToBePosted = (float) (interestPerDay * principal * daysInMonth);
         principal += interestToBePosted;
 
-        Float expectedBalanceAfter = Float.valueOf(decimalFormat.format(principal));
+        Float expectedBalanceAfter = (float) Math.floor(principal);
         LOG.info("{}",expectedBalanceAfter.toString());
 
         Integer transactionIdForPostInterest = this.recurringDepositAccountHelper
@@ -1610,8 +1599,9 @@ public class RecurringDepositTest {
         Assert.assertNotNull(transactionIdForPostInterest);
 
         HashMap recurringDepositAccountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
-        Float interestAmountPosted = Float.valueOf(decimalFormat.format(recurringDepositAccountSummary.get("totalInterestPosted")));
-        Float principalAfter = Float.valueOf(decimalFormat.format(recurringDepositAccountSummary.get("accountBalance")));
+        Float interestAmountPosted = (float) Math.floor((Float) recurringDepositAccountSummary.get("totalInterestPosted"));
+        Float principalAfter = (float) Math.floor((Float) recurringDepositAccountSummary.get("accountBalance"));
+        interestToBePosted = (float) Math.floor(interestToBePosted);
 
         Assert.assertEquals("Verifying Amount of Interest Posted to Recurring Deposit Account", interestToBePosted, interestAmountPosted);
         Assert.assertEquals("Verifying Principal Amount after Interest Posting", expectedBalanceAfter, principalAfter);
@@ -1735,11 +1725,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1867,11 +1855,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -2007,11 +1993,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -2152,11 +2136,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -2237,10 +2219,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
                 depositPeriod, interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
 
@@ -2322,10 +2302,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
                 depositPeriod, interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
 
@@ -2413,10 +2391,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2504,10 +2481,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2595,10 +2571,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2686,10 +2661,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2777,10 +2751,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2868,10 +2841,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
