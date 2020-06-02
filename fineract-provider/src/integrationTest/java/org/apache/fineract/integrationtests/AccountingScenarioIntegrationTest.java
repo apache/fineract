@@ -120,7 +120,7 @@ public class AccountingScenarioIntegrationTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
         this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
     }
 

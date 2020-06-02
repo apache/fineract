@@ -56,10 +56,10 @@ public class SchedulerJobHelper {
         this.response202Spec = new ResponseSpecBuilder().expectStatusCode(202).build();
     }
 
-    public SchedulerJobHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public SchedulerJobHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec200, final ResponseSpecification responseSpec202) {
         this.requestSpec = requestSpec;
-        this.response200Spec = responseSpec;
-        this.response202Spec = responseSpec;
+        this.response200Spec = responseSpec200;
+        this.response202Spec = responseSpec202;
     }
 
     private List<Map<String, Object>> getAllSchedulerJobs() {
