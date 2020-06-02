@@ -641,9 +641,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             && fixedEmiAmount != null
             && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
             currentPeriodParams.setEmiAmountChanged(true);
-            currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
           }
-            currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
+          currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
         }
 
         // update outstandingLoanBlance using current period
