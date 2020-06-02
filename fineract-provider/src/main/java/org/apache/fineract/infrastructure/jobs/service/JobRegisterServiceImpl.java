@@ -432,7 +432,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private JobKey constructJobKey(final String Key) {
         final String[] keyParams = Key.split(SchedulerServiceConstants.JOB_KEY_SEPERATOR);
-        final JobKey JobKey = new JobKey(keyParams[0], keyParams[1]);
-        return JobKey;
+        final JobKey jobKey = new JobKey(keyParams[0], keyParams[1]);
+        return jobKey;
     }
 }

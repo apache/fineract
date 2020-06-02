@@ -70,8 +70,8 @@ public enum RepaymentRescheduleType {
     }
 
     public static RepaymentRescheduleType fromInt(final int i) {
-        final RepaymentRescheduleType RepaymentRescheduleType = intToEnumMap.get(Integer.valueOf(i));
-        return RepaymentRescheduleType;
+        final RepaymentRescheduleType repaymentRescheduleType = intToEnumMap.get(Integer.valueOf(i));
+        return repaymentRescheduleType;
     }
 
     public static int getMinValue() {
