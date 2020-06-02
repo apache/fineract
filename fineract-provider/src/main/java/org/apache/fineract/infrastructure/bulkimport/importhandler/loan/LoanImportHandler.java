@@ -111,9 +111,9 @@ public class LoanImportHandler implements ImportHandler {
         if (repaymentAmount!=null&&lastRepaymentDate!=null&&repaymentType!=null&&repaymentTypeId!=null) {
             return LoanTransactionData.importInstance(repaymentAmount, lastRepaymentDate, repaymentTypeId,
                     row.getRowNum(), locale, dateFormat);
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     private DisbursementData readDisbursalData(Row row,String locale,String dateFormat) {
@@ -133,9 +133,9 @@ public class LoanImportHandler implements ImportHandler {
         LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row);
         if (approvedDate!=null) {
             return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat);
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     private LoanAccountData readLoan(Row row,String locale,String dateFormat) {
@@ -324,9 +324,9 @@ public class LoanImportHandler implements ImportHandler {
                         repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, linkAccountId,locale,dateFormat);
             }
-        }else {
-            return null;
         }
+
+        return null;
     }
 
     public Count importEntity(String dateFormat) {
@@ -419,7 +419,8 @@ public class LoanImportHandler implements ImportHandler {
                 .loanRepaymentTransaction(result.getLoanId()) //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult loanRepaymentResult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return 4;
     }
 
@@ -436,14 +437,15 @@ public class LoanImportHandler implements ImportHandler {
                         .disburseLoanToSavingsApplication(result.getLoanId()) //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult loanDisburseToSavingsResult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
             } else {
                 String payload = gsonBuilder.create().toJson(disbusalData);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .disburseLoanApplication(result.getLoanId()) //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult loanDisburseResult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
             }
         }
         return 3;
@@ -458,7 +460,8 @@ public class LoanImportHandler implements ImportHandler {
                     .approveLoanApplication(result.getLoanId()) //
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult loanapprovalresult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 2;
     }
@@ -471,6 +474,7 @@ public class LoanImportHandler implements ImportHandler {
         loanJsonOb.remove("isLoanProductLinkedToFloatingRate");
         loanJsonOb.remove("isInterestRecalculationEnabled");
         loanJsonOb.remove("isFloatingInterestRate");
+        loanJsonOb.remove("isRatesEnabled");
         JsonArray chargesJsonAr=loanJsonOb.getAsJsonArray("charges");
         if (chargesJsonAr!=null) {
             for (int i = 0; i < chargesJsonAr.size(); i++) {

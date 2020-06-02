@@ -100,6 +100,16 @@
 			<bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
 		</property>
 	</bean>
+	
+	<!--  The application events (for importing) rely on the inheritable thread local security context strategy
+		  This is NOT compatible with threadpools so if we use threadpools the below will need to be reworked -->
+	<bean
+        class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass"
+            value="org.springframework.security.core.context.SecurityContextHolder" />
+        <property name="targetMethod" value="setStrategyName" />
+        <property name="arguments" value="MODE_INHERITABLETHREADLOCAL" />
+    </bean>
 
 	<import resource="spmContext.xml"/>
 
