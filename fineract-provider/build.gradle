@@ -345,6 +345,24 @@ tasks.withType(JavaCompile) {
                 "TypeParameterUnusedInFormals",
                 "UnusedNestedClass",
                 "UndefinedEquals",
+                "JdkObsolete",
+                "OperatorPrecedence",
+                "EmptyBlockTag",
+                "MissingSummary",
+                "MutablePublicArray",
+                "InvalidParam",
+                "ReturnFromVoid",
+                "AlmostJavadoc",
+                "PublicConstructorForAbstractClass",
+                "ProtectedMembersInFinalClass",
+                "StaticAssignmentInConstructor",
+                "UnescapedEntity",
+                "EmptyCatch",
+                "InvalidBlockTag",
+                "ModifyCollectionInEnhancedForLoop",
+                "NonCanonicalType",
+                "InvalidInlineTag",
+                "InvalidBlockTag"
         )
         //TODO gradually enable these checks
         error(
