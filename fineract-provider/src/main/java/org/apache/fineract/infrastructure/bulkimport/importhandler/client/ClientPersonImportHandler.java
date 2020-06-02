@@ -105,7 +105,7 @@ public class ClientPersonImportHandler implements ImportHandler {
         Long clientTypeId = null;
         if (clientType!=null) {
             String[] clientTypeAr = clientType.split("-");
-            if (clientTypeAr[1] != null) {
+            if (clientTypeAr.length > 1 && clientTypeAr[1] != null) {
                 clientTypeId = Long.parseLong(clientTypeAr[1]);
             }
         }
@@ -113,16 +113,16 @@ public class ClientPersonImportHandler implements ImportHandler {
         Long genderId = null;
         if (gender!=null) {
             String[] genderAr = gender.split("-");
-            if (genderAr[1] != null) {
+            if (genderAr.length > 1 && genderAr[1] != null) {
                 genderId = Long.parseLong(genderAr[1]);
             }
         }
         String clientClassification= ImportHandlerUtils.readAsString(ClientPersonConstants.CLIENT_CLASSIFICATION_COL, row);
-        Long clientClassicationId = null;
+        Long clientClassificationId = null;
         if (clientClassification!=null) {
             String[] clientClassificationAr = clientClassification.split("-");
-            if (clientClassificationAr[1] != null) {
-                clientClassicationId = Long.parseLong(clientClassificationAr[1]);
+            if (clientClassificationAr.length > 1 && clientClassificationAr[1] != null) {
+                clientClassificationId = Long.parseLong(clientClassificationAr[1]);
             }
         }
         Boolean isStaff = ImportHandlerUtils.readAsBoolean(ClientPersonConstants.IS_STAFF_COL, row);
@@ -135,7 +135,7 @@ public class ClientPersonImportHandler implements ImportHandler {
             if (addressType!=null) {
                 String[] addressTypeAr = addressType.split("-");
 
-                if (addressTypeAr[1] != null) {
+                if (addressTypeAr.length > 1 && addressTypeAr[1] != null) {
                     addressTypeId = Long.parseLong(addressTypeAr[1]);
                 }
             }
@@ -150,11 +150,11 @@ public class ClientPersonImportHandler implements ImportHandler {
 
             String stateProvince=ImportHandlerUtils.readAsString(ClientPersonConstants.STATE_PROVINCE_COL, row);
             Long stateProvinceId = null;
-            if (stateProvince!=null && stateProvince.isBlank()) {
+            if (stateProvince != null) {
                 String[] stateProvinceAr = stateProvince.split("-");
                 // Arkansas-AL <-- expected format of the cell
                 // but probably it's either an empty cell or it is missing a hyphen
-                if (stateProvinceAr[1] != null) {
+                if (stateProvinceAr.length > 1 && stateProvinceAr[1] != null) {
                     stateProvinceId = Long.parseLong(stateProvinceAr[1]);
                 }
             }
@@ -162,7 +162,7 @@ public class ClientPersonImportHandler implements ImportHandler {
             Long countryId=null;
             if (country!=null) {
                 String[] countryAr = country.split("-");
-                if (countryAr[1] != null) {
+                if (countryAr.length > 1 && countryAr[1] != null) {
                     countryId = Long.parseLong(countryAr[1]);
                 }
             }
@@ -171,7 +171,7 @@ public class ClientPersonImportHandler implements ImportHandler {
              addressList = new ArrayList<AddressData>(Arrays.asList(addressDataObj));
         }
         return ClientData.importClientPersonInstance(legalFormId,row.getRowNum(),firstName,lastName,middleName,submittedOn,activationDate,active,externalId,
-                officeId, staffId, mobileNo, dob, clientTypeId, genderId, clientClassicationId, isStaff,
+                officeId, staffId, mobileNo, dob, clientTypeId, genderId, clientClassificationId, isStaff,
                 addressList, locale, dateFormat);
 
     }
