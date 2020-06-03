@@ -303,8 +303,8 @@ tasks.withType(JavaCompile) {
     options.errorprone {
         disableWarningsInGeneratedCode = true
         //Todo Remove necessary checks from this list
-        disable("UnusedVariable",
-                "VariableNameSameAsType",
+        disable(
+                "UnusedVariable",
                 "InconsistentCapitalization",
                 "UnnecessaryParentheses",
                 "ClassCanBeStatic",
@@ -333,10 +333,12 @@ tasks.withType(JavaCompile) {
                 "OperatorPrecedence"
         )
         //TODO gradually enable these checks
-        error(  "DefaultCharset",
+        error(
+                "DefaultCharset",
                 "RemoveUnusedImports",
                 "WaitNotInLoop",
                 "ThreeLetterTimeZoneID",
+                "VariableNameSameAsType",
 //                "ReturnMissingNullable",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",
