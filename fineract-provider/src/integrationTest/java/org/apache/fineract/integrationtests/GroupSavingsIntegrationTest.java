@@ -696,7 +696,7 @@ public class GroupSavingsIntegrationTest {
         Assert.assertEquals(1, charges.size());
 
         HashMap savingsChargeForPay = charges.get(0);
-        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.dateFormat, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar cal = Calendar.getInstance();
         List dates = (List) savingsChargeForPay.get("dueDate");
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
@@ -783,7 +783,7 @@ public class GroupSavingsIntegrationTest {
         map.put("groupId", groupId);
         map.put("productId", productId);
         map.put("submittedOnDate", submittedOnDate);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("isParentAccount", "1");
         map.put("isGSIM", "true");
@@ -793,7 +793,7 @@ public class GroupSavingsIntegrationTest {
     private Map<String, Object> savingsArray(final Integer paymentId, final Integer savingsId, final Integer transactionAmount,  final String transactionDate) {
         Map<String, Object> map = new HashMap<>();
         map.put("transactionDate", transactionDate);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("transactionAmount",transactionAmount);
         map.put("paymentTypeId", paymentId);

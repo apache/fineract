@@ -106,13 +106,13 @@ public class AccountTransferTest {
 
             /*** Create A Financial Activity to Account Mapping **/
             financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                    FinancialActivityAccountsTest.liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(),
+                    FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount.getAccountID(),
                     responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
             Assert.assertNotNull(financialActivityAccountId);
         } else {
             for (HashMap financialActivity : financialActivities) {
                 HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
-                if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.liabilityTransferFinancialActivityId)) {
+                if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
                     HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
                     liabilityTransferAccount = new Account((Integer) glAccountData.get("id"), AccountType.LIABILITY);
                     financialActivityAccountId = (Integer) financialActivity.get("id");

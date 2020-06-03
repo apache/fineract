@@ -930,7 +930,7 @@ public class SchedulerJobsTestResults {
                 Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
                 Assert.assertNotNull(clientId);
                 Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE)
-                                + Float.valueOf(FixedDepositAccountHelper.depositAmount);
+                                + Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
                 final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec,
                                 String.valueOf(balance));
                 Assert.assertNotNull(savingsProductID);
@@ -979,12 +979,12 @@ public class SchedulerJobsTestResults {
 
                 HashMap fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
                 Float interestPosted = (Float) fixedDepositSummary.get("accountBalance")
-                                - Float.valueOf(FixedDepositAccountHelper.depositAmount);
+                                - Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
 
                 String JobName = "Transfer Interest To Savings";
                 this.schedulerJobHelper.executeJob(JobName);
                 fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
-                assertEquals("Verifying opening Balance", Float.valueOf(FixedDepositAccountHelper.depositAmount),
+                assertEquals("Verifying opening Balance", Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT),
                                 fixedDepositSummary.get("accountBalance"));
 
                 summary = savingsAccountHelper.getSavingsSummary(savingsId);

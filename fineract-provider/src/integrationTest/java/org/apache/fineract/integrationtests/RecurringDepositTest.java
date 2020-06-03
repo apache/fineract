@@ -3109,7 +3109,7 @@ public class RecurringDepositTest {
     }
 
     private Account getMappedLiabilityFinancialAccount() {
-        final Integer liabilityTransferFinancialActivityId = FinancialActivity.LIABILITY_TRANSFER.getValue();
+        final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID = FinancialActivity.LIABILITY_TRANSFER.getValue();
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         final Account financialAccount;
         /***
@@ -3117,7 +3117,7 @@ public class RecurringDepositTest {
          * liability financial accounting mappings
          */
         if (financialActivities.isEmpty()) {
-            financialAccount = createLiabilityFinancialAccountTransferType(liabilityTransferFinancialActivityId);
+            financialAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);
         } else {
             /***
              * extract mapped liability financial account
@@ -3125,7 +3125,7 @@ public class RecurringDepositTest {
             Account mappedLiabilityAccount = null;
             for (HashMap financialActivity : financialActivities) {
                 HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
-                if (financialActivityData.get("id").equals(liabilityTransferFinancialActivityId)) {
+                if (financialActivityData.get("id").equals(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
                     HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
                     mappedLiabilityAccount = new Account((Integer) glAccountData.get("id"), AccountType.LIABILITY);
                     break;
@@ -3135,23 +3135,23 @@ public class RecurringDepositTest {
              * If liability transfer is not defined create liability transfer
              */
             if (mappedLiabilityAccount == null) {
-                mappedLiabilityAccount = createLiabilityFinancialAccountTransferType(liabilityTransferFinancialActivityId);
+                mappedLiabilityAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);
             }
             financialAccount = mappedLiabilityAccount;
         }
         return financialAccount;
     }
 
-    private Account createLiabilityFinancialAccountTransferType(final Integer liabilityTransferFinancialActivityId) {
+    private Account createLiabilityFinancialAccountTransferType(final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID) {
         /***
          * Create and verify financial account transfer type is created
          */
         final Account liabilityAccountForMapping = this.accountHelper.createLiabilityAccount();
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                liabilityTransferFinancialActivityId, liabilityAccountForMapping.getAccountID(), this.responseSpec,
+                LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping.getAccountID(), this.responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(financialActivityAccountId);
-        assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId, liabilityAccountForMapping);
+        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping);
         return liabilityAccountForMapping;
     }
 

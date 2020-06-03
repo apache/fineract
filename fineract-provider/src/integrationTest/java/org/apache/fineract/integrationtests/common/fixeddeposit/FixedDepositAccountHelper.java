@@ -71,7 +71,7 @@ public class FixedDepositAccountHelper {
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
-    public final static String depositAmount = "100000";
+    public final static String DEPOSIT_AMOUNT = "100000";
     private String newDepositAmount = null;
 
     private String interestCompoundingPeriodType = MONTHLY;
@@ -324,8 +324,8 @@ public class FixedDepositAccountHelper {
 
     private String getApproveFixedDepositAccountAsJSON(final String approvedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedOnDate", approvedOnDate);
         map.put("note", "Approval NOTE");
         String fixedDepositAccountApproveJson = new Gson().toJson(map);
@@ -335,8 +335,8 @@ public class FixedDepositAccountHelper {
 
     private String getRejectedFixedDepositAsJSON(final String rejectedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectedOnDate", rejectedOnDate);
         map.put("note", "Rejected NOTE");
         String fixedDepositAccountJson = new Gson().toJson(map);
@@ -346,8 +346,8 @@ public class FixedDepositAccountHelper {
 
     private String getWithdrawnFixedDepositAccountAsJSON(final String withdrawnApplicationOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawnOnDate", withdrawnApplicationOnDate);
         map.put("note", "Withdraw NOTE");
         String fixedDepositAccountJson = new Gson().toJson(map);
@@ -357,8 +357,8 @@ public class FixedDepositAccountHelper {
 
     private String getActivatedFixedDepositAccountAsJSON(final String activationDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activatedOnDate", activationDate);
         String fixedDepositAccountActivateJson = new Gson().toJson(map);
         LOG.info("{}", fixedDepositAccountActivateJson);
@@ -374,8 +374,8 @@ public class FixedDepositAccountHelper {
 
     private String getCalculatedPrematureAmountForFixedDepositAccountAsJSON(final String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         String fixedDepositAccountPrematureClosureJson = new Gson().toJson(map);
         LOG.info(fixedDepositAccountPrematureClosureJson);
@@ -385,8 +385,8 @@ public class FixedDepositAccountHelper {
     private String getPrematureCloseForFixedDepositAccountAsJSON(final String closedOnDate, final String closureType,
             final Integer toSavingsId) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         map.put("onAccountClosureId", closureType);
         if (toSavingsId != null) {
@@ -487,7 +487,7 @@ public class FixedDepositAccountHelper {
 
     private String getDepositAmount() {
         if (this.newDepositAmount == null) {
-            return depositAmount;
+            return DEPOSIT_AMOUNT;
         }
         return this.newDepositAmount;
     }

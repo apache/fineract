@@ -88,7 +88,7 @@ public class SavingsAccountHelper {
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
-    private static final Boolean isBlock = false;
+    private static final Boolean IS_BLOCK = false;
 
     public SavingsAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -96,7 +96,7 @@ public class SavingsAccountHelper {
     }
 
     public static String getFutureDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.dateFormat, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
         return sdf.format(calendar.getTime());
@@ -190,21 +190,21 @@ public class SavingsAccountHelper {
         LOG.info("--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
         final String savingsOperationURL = createSavingsOperationURL(APPROVE_SAVINGS_COMMAND, savingsID);
         if (approvalDate == null || approvalDate.equals("")) {
-            return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), isBlock);
+            return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), IS_BLOCK);
         }
-        return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), isBlock);
+        return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), IS_BLOCK);
     }
 
     public HashMap undoApproval(final Integer savingsID) {
         LOG.info("--------------------------------- UNDO APPROVING SAVINGS APPLICATION -------------------------------");
         final String undoBodyJson = "{'note':'UNDO APPROVAL'}";
-        return performSavingApplicationActions(createSavingsOperationURL(UNDO_APPROVAL_SAVINGS_COMMAND, savingsID), undoBodyJson, isBlock);
+        return performSavingApplicationActions(createSavingsOperationURL(UNDO_APPROVAL_SAVINGS_COMMAND, savingsID), undoBodyJson, IS_BLOCK);
     }
 
     public HashMap rejectApplication(final Integer savingsID) {
         LOG.info("--------------------------------- REJECT SAVINGS APPLICATION -------------------------------");
         return performSavingApplicationActions(createSavingsOperationURL(REJECT_SAVINGS_COMMAND, savingsID),
-                getRejectedSavingsAsJSON(CREATED_DATE_PLUS_ONE), isBlock);
+                getRejectedSavingsAsJSON(CREATED_DATE_PLUS_ONE), IS_BLOCK);
     }
 
     public List rejectApplicationWithErrorCode(final Integer savingsId, final String date) {
@@ -216,18 +216,18 @@ public class SavingsAccountHelper {
     public HashMap withdrawApplication(final Integer savingsID) {
         LOG.info("--------------------------------- Withdraw SAVINGS APPLICATION -------------------------------");
         return performSavingApplicationActions(createSavingsOperationURL(WITHDRAWN_BY_CLIENT_SAVINGS_COMMAND, savingsID),
-                getWithdrawnSavingsAsJSON(), isBlock);
+                getWithdrawnSavingsAsJSON(), IS_BLOCK);
     }
 
     public HashMap activateSavings(final Integer savingsID) {
         LOG.info("---------------------------------- ACTIVATING SAVINGS APPLICATION ----------------------------------");
-        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID), getActivatedSavingsAsJSON(), isBlock);
+        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID), getActivatedSavingsAsJSON(), IS_BLOCK);
     }
 
     public HashMap closeSavingsAccount(final Integer savingsID, String withdrawBalance) {
         LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
-                getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), isBlock);
+                getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), IS_BLOCK);
     }
 
     public Object deleteSavingsApplication(final Integer savingsId, final String jsonAttributeToGetBack) {
@@ -374,8 +374,8 @@ public class SavingsAccountHelper {
 
     private String getApproveSavingsAsJsonOnDate(final String approvalDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedOnDate", approvalDate);
         map.put("note", "Approval NOTE");
         String savingsAccountApproveJson = new Gson().toJson(map);
@@ -385,8 +385,8 @@ public class SavingsAccountHelper {
 
     private String getRejectedSavingsAsJSON(final String rejectedOnDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectedOnDate", rejectedOnDate);
         map.put("note", "Rejected NOTE");
         String savingsAccountJson = new Gson().toJson(map);
@@ -396,8 +396,8 @@ public class SavingsAccountHelper {
 
     private String getWithdrawnSavingsAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawnOnDate", CREATED_DATE_PLUS_ONE);
         map.put("note", "Rejected NOTE");
         String savingsAccountJson = new Gson().toJson(map);
@@ -407,8 +407,8 @@ public class SavingsAccountHelper {
 
     private String getActivatedSavingsAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activatedOnDate", TRANSACTION_DATE);
         String savingsAccountActivateJson = new Gson().toJson(map);
         LOG.info(savingsAccountActivateJson);
@@ -417,8 +417,8 @@ public class SavingsAccountHelper {
 
     private String getSavingsTransactionJSON(final String amount, final String transactionDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amount);
         String savingsAccountWithdrawalJson = new Gson().toJson(map);
@@ -435,8 +435,8 @@ public class SavingsAccountHelper {
 
     private String getCalculatedInterestForSavingsApplicationAsJSON(final String today) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", today);
         map.put("postInterestManualOrAutomatic", "true");
         String savingsAccountCalculatedInterestJson = new Gson().toJson(map);
@@ -445,8 +445,8 @@ public class SavingsAccountHelper {
 
     private String getSavingsPayChargeJSON(final String amount, final String dueDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("dueDate", dueDate);
         String josn = new Gson().toJson(map);
@@ -455,16 +455,16 @@ public class SavingsAccountHelper {
 
     private String getSavingsWaiveChargeJSON() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         String josn = new Gson().toJson(map);
         return josn;
     }
 
     private String getModifyChargeJSON() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", "50");
         String josn = new Gson().toJson(map);
         return josn;
@@ -472,8 +472,8 @@ public class SavingsAccountHelper {
 
     private String getCloseAccountJSON(String withdrawBalance, String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         map.put("withdrawBalance", withdrawBalance);
         map.put("note", "Close Test");
@@ -484,8 +484,8 @@ public class SavingsAccountHelper {
 
     private String getCloseAccountPostInterestJSON(String withdrawBalance, String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         map.put("withdrawBalance", withdrawBalance);
         map.put("note", "Close Test");
@@ -585,13 +585,13 @@ public class SavingsAccountHelper {
         return response;
     }
 
-    private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent, final Boolean isBlock) {
+    private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent, final Boolean IS_BLOCK) {
         HashMap status = null;
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
                 CommonConstants.RESPONSE_CHANGES);
         if (response != null) {
             status = (HashMap) response.get("status");
-            if (isBlock != null && isBlock) {
+            if (IS_BLOCK != null && IS_BLOCK) {
                 status = (HashMap) response.get("subStatus");
             }
         }
@@ -623,7 +623,7 @@ public class SavingsAccountHelper {
         map.put("chargeId", chargeId);
         map.put("amount", amount);
         map.put("feeOnMonthDay", "15 January");
-        map.put("locale", CommonConstants.locale);
+        map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", "dd MMMM");
         map.put("dateFormat", "dd MMMM yyy");
         if(addDueDate){
@@ -637,7 +637,7 @@ public class SavingsAccountHelper {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("chargeId", chargeId);
         map.put("amount", amount);
-        map.put("locale", CommonConstants.locale);
+        map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", "dd MMMM yyy");
         map.put("dueDate", addDueDate);
         String json = new Gson().toJson(map);
@@ -646,8 +646,8 @@ public class SavingsAccountHelper {
 
     private String getAccountActivationJSON(final String activationDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activatedOnDate", activationDate);
         String savingsAccountActivateJson = new Gson().toJson(map);
         return savingsAccountActivateJson;
@@ -655,7 +655,7 @@ public class SavingsAccountHelper {
 
     public HashMap activateSavingsAccount(Integer savingsID, String activationDate) {
         return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID),
-                getAccountActivationJSON(activationDate), isBlock);
+                getAccountActivationJSON(activationDate), IS_BLOCK);
     }
 
     public Object inactivateCharge(final Integer chargeId, final Integer savingsId, final String jsonAttributeToGetBack) {
@@ -665,8 +665,8 @@ public class SavingsAccountHelper {
 
     private String getSavingsInactivateChargeJSON() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         String josn = new Gson().toJson(map);
         return josn;
     }
@@ -754,15 +754,15 @@ public class SavingsAccountHelper {
         final String savingsOperationURL = createSavingsGsimOperationURL(APPROVE_SAVINGS_COMMAND, gsimID);
 
         if (approvalDate == null || approvalDate.equals("")) {
-            return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), isBlock);
+            return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), IS_BLOCK);
         }
-        return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), isBlock);
+        return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), IS_BLOCK);
     }
 
     public HashMap rejectGsimApplication(final Integer gsimID) {
         LOG.info("--------------------------------- REJECT SAVINGS APPLICATION -------------------------------");
         return performSavingApplicationActions(createSavingsGsimOperationURL(REJECT_SAVINGS_COMMAND, gsimID),
-                getRejectedSavingsAsJSON(CREATED_DATE_PLUS_ONE), isBlock);
+                getRejectedSavingsAsJSON(CREATED_DATE_PLUS_ONE), IS_BLOCK);
     }
 
 
@@ -775,7 +775,7 @@ public class SavingsAccountHelper {
     public HashMap undoApprovalGsimSavings(final Integer gsimId) {
         LOG.info("--------------------------------- UNDO APPROVING GSIM SAVINGS APPLICATION -------------------------------");
         final String undoBodyJson = "{'note':'UNDO APPROVAL'}";
-        return performSavingApplicationActions(createSavingsGsimOperationURL(UNDO_APPROVAL_SAVINGS_COMMAND, gsimId), undoBodyJson, isBlock);
+        return performSavingApplicationActions(createSavingsGsimOperationURL(UNDO_APPROVAL_SAVINGS_COMMAND, gsimId), undoBodyJson, IS_BLOCK);
     }
 
     public Integer depositGsimApplication(Integer savingsID, List<Map<String, Object>> savingsArray) {
@@ -798,13 +798,13 @@ public class SavingsAccountHelper {
 
     public HashMap activateGsimSavings(final Integer gsimID) {
         LOG.info("---------------------------------- ACTIVATING GSIM SAVINGS APPLICATION ----------------------------------");
-        return performSavingApplicationActions(createSavingsGsimOperationURL(ACTIVATE_SAVINGS_COMMAND, gsimID), getActivatedSavingsAsJSON(), isBlock);
+        return performSavingApplicationActions(createSavingsGsimOperationURL(ACTIVATE_SAVINGS_COMMAND, gsimID), getActivatedSavingsAsJSON(), IS_BLOCK);
     }
 
     public HashMap closeGsimSavingsAccount(final Integer gsimID, String withdrawBalance) {
         LOG.info("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingApplicationActions(createSavingsGsimOperationURL(CLOSE_SAVINGS_COMMAND, gsimID),
-                getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), isBlock);
+                getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE), IS_BLOCK);
     }
 
     public Object closeGsimSavingsAccountAndGetBackRequiredField(final Integer gsimId, String withdrawBalance,
