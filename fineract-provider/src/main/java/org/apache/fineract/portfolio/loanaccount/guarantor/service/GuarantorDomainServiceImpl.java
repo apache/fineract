@@ -195,7 +195,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     @Override
     public void releaseGuarantor(final GuarantorFundingDetails guarantorFundingDetails, final LocalDate transactionDate) {
         BigDecimal amoutForWithdraw = guarantorFundingDetails.getAmountRemaining();
-        if (amoutForWithdraw.compareTo(BigDecimal.ZERO) > 0 && (guarantorFundingDetails.getStatus().isActive())) {
+        if (amoutForWithdraw.compareTo(BigDecimal.ZERO) > 0 && guarantorFundingDetails.getStatus().isActive()) {
             SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
             savingsAccount.releaseFunds(amoutForWithdraw);
             DepositAccountOnHoldTransaction onHoldTransaction = DepositAccountOnHoldTransaction.release(savingsAccount, amoutForWithdraw,
@@ -443,7 +443,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 final List<GuarantorFundingDetails> fundingDetails = guarantor.getGuarantorFundDetails();
                 for (GuarantorFundingDetails guarantorFundingDetails : fundingDetails) {
                     BigDecimal amoutForRelease = guarantorFundingDetails.getAmountRemaining();
-                    if (amoutForRelease.compareTo(BigDecimal.ZERO) > 0 && (guarantorFundingDetails.getStatus().isActive())) {
+                    if (amoutForRelease.compareTo(BigDecimal.ZERO) > 0 && guarantorFundingDetails.getStatus().isActive()) {
                         SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
                         savingsAccount.releaseFunds(amoutForRelease);
                         DepositAccountOnHoldTransaction onHoldTransaction = DepositAccountOnHoldTransaction.release(savingsAccount,

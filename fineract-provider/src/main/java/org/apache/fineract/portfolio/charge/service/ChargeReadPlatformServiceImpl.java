@@ -264,7 +264,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         // charges mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.CHARGE);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if ((inClause != null) && !inClause.trim().isEmpty()) {
             sql += " and c.id in ( " + inClause + " ) ";
         }
 

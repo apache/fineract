@@ -66,10 +66,10 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         String configName = "interest-charged-from-date-same-as-disbursal-date";
         boolean newBooleanValue = true;
 
-        for (Integer configIndex = 0; configIndex < (globalConfig.size()); configIndex++) {
+        for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
                 if (globalConfig.get(configIndex).get("name")
                                 .equals(configName)) {
-                        String configId = (globalConfig.get(configIndex).get("id"))
+                        String configId = globalConfig.get(configIndex).get("id")
                                         .toString();
                         Integer updateConfigId = this.globalConfigurationHelper
                                         .updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,

@@ -573,7 +573,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
         List<SavingsAccountTransaction> trans = getTransactions() ;
         for (final SavingsAccountTransaction transaction : trans) {
-            if ((transaction.isWithHoldTaxAndNotReversed())) {
+            if (transaction.isWithHoldTaxAndNotReversed()) {
                 withholdTransactions.add(transaction);
             }
         }

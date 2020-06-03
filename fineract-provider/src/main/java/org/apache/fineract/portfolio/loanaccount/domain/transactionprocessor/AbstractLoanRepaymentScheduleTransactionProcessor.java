@@ -615,7 +615,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         installemntCharge = loanCharge;
                         chargePerInstallment = paidLoanChargePerInstallment;
                     }
-                } else if (latestPaidCharge == null || (loanCharge.isPaidOrPartiallyPaid(currency))
+                } else if (latestPaidCharge == null || loanCharge.isPaidOrPartiallyPaid(currency)
                         && loanCharge.getDueLocalDate().isAfter(latestPaidCharge.getDueLocalDate())) {
                     latestPaidCharge = loanCharge;
                 }

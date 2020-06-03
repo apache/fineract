@@ -108,7 +108,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " where lp.id in ( " + inClause + " ) ";
         }
 
@@ -124,7 +124,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         String sql = "select " + rm.schema();
 
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " where lp.id in ("+inClause+") ";
             //Here no need to check injection as this is internal where clause
            // SQLInjectionValidator.validateSQLInput(inClause);
@@ -155,7 +155,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             if (activeOnly) {
                 sql += " and id in ( " + inClause + " )";
             } else {
@@ -552,7 +552,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and id in (" + inClause + ") ";
         }
 
@@ -572,7 +572,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and lp.id in ( " + inClause + " ) ";
         }
 
@@ -591,7 +591,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause1 = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause1 != null) && (!(inClause1.trim().isEmpty()))) {
+        if (inClause1 != null && !inClause1.trim().isEmpty()) {
             sql += " and rp.id in ( " + inClause1 + " ) ";
         }
 
@@ -601,7 +601,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause2 = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause2 != null) && (!(inClause2.trim().isEmpty()))) {
+        if (inClause2 != null && !inClause2.trim().isEmpty()) {
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
 
@@ -621,7 +621,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " lp.id in ( " + inClause + " ) and ";
         }
 

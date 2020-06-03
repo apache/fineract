@@ -326,7 +326,7 @@ public final class GroupingTypesDataValidator {
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
                 element);
         if ((active != null && active)
-                || (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
+                || this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.activationDateParamName, element)) {
             final LocalDate joinedDate = this.fromApiJsonHelper
                     .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)
@@ -380,8 +380,8 @@ public final class GroupingTypesDataValidator {
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
                 element);
-        if ((active != null && active) || (this.fromApiJsonHelper
-                .parameterExists(GroupingTypesApiConstants.activationDateParamName, element))) {
+        if ((active != null && active) || this.fromApiJsonHelper
+                .parameterExists(GroupingTypesApiConstants.activationDateParamName, element)) {
             final LocalDate joinedDate = this.fromApiJsonHelper
                     .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(joinedDate)

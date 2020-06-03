@@ -499,7 +499,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private String datatableColumnNameToCodeValueName(final String columnName, final String code) {
 
-        return (code + "_cd_" + columnName);
+        return code + "_cd_" + columnName;
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
@@ -511,11 +511,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final StringBuilder constrainBuilder, final String dataTableNameAlias, final Map<String, Long> codeMappings,
             final boolean isConstraintApproach) {
 
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        final String type = (column.has("type")) ? column.get("type").getAsString().toLowerCase() : null;
-        final Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
-        final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-        final String code = (column.has("code")) ? column.get("code").getAsString() : null;
+        String name = column.has("name") ? column.get("name").getAsString() : null;
+        final String type = column.has("type") ? column.get("type").getAsString().toLowerCase() : null;
+        final Integer length = column.has("length") ? column.get("length").getAsInt() : null;
+        final Boolean mandatory = column.has("mandatory") ? column.get("mandatory").getAsBoolean() : false;
+        final String code = column.has("code") ? column.get("code").getAsString() : null;
 
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
@@ -662,14 +662,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final List<String> removeMappings,
             final boolean isConstraintApproach) {
 
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        final String lengthStr = (column.has("length")) ? column.get("length").getAsString() : null;
-        Integer length = (StringUtils.isNotBlank(lengthStr)) ? Integer.parseInt(lengthStr) : null;
-        String newName = (column.has("newName")) ? column.get("newName").getAsString() : name;
-        final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-        final String after = (column.has("after")) ? column.get("after").getAsString() : null;
-        final String code = (column.has("code")) ? column.get("code").getAsString() : null;
-        final String newCode = (column.has("newCode")) ? column.get("newCode").getAsString() : null;
+        String name = column.has("name") ? column.get("name").getAsString() : null;
+        final String lengthStr = column.has("length") ? column.get("length").getAsString() : null;
+        Integer length = StringUtils.isNotBlank(lengthStr) ? Integer.parseInt(lengthStr) : null;
+        String newName = column.has("newName") ? column.get("newName").getAsString() : name;
+        final Boolean mandatory = column.has("mandatory") ? column.get("mandatory").getAsBoolean() : false;
+        final String after = column.has("after") ? column.get("after").getAsString() : null;
+        final String code = column.has("code") ? column.get("code").getAsString() : null;
+        final String newCode = column.has("newCode") ? column.get("newCode").getAsString() : null;
         final String dataTableNameAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
         if (isConstraintApproach) {
             if (StringUtils.isBlank(newName)) {
@@ -759,12 +759,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void parseDatatableColumnForAdd(final JsonObject column, StringBuilder sqlBuilder, final String dataTableNameAlias,
             final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final boolean isConstraintApproach) {
 
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        final String type = (column.has("type")) ? column.get("type").getAsString().toLowerCase() : null;
-        final Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
-        final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-        final String after = (column.has("after")) ? column.get("after").getAsString() : null;
-        final String code = (column.has("code")) ? column.get("code").getAsString() : null;
+        String name = column.has("name") ? column.get("name").getAsString() : null;
+        final String type = column.has("type") ? column.get("type").getAsString().toLowerCase() : null;
+        final Integer length = column.has("length") ? column.get("length").getAsInt() : null;
+        final Boolean mandatory = column.has("mandatory") ? column.get("mandatory").getAsBoolean() : false;
+        final String after = column.has("after") ? column.get("after").getAsString() : null;
+        final String code = column.has("code") ? column.get("code").getAsString() : null;
 
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
@@ -803,7 +803,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void parseDatatableColumnForDrop(final JsonObject column, StringBuilder sqlBuilder, final String datatableName,
             final StringBuilder constrainBuilder, final List<String> codeMappings) {
         final String datatableAlias = datatableName.toLowerCase().replaceAll("\\s", "_");
-        final String name = (column.has("name")) ? column.get("name").getAsString() : null;
+        final String name = column.has("name") ? column.get("name").getAsString() : null;
         //sqlBuilder = sqlBuilder.append(", DROP COLUMN `" + name + "`");
         final StringBuilder findFKSql = new StringBuilder();
         findFKSql.append("SELECT count(*)").append("FROM information_schema.TABLE_CONSTRAINTS i")
@@ -855,9 +855,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
      **/
     private void removeNullValuesFromStringColumn(final String datatableName, final JsonObject column,
             final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
-        final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-        final String name = (column.has("name")) ? column.get("name").getAsString() : "";
-        final String type = (mapColumnNameDefinition.containsKey(name)) ? mapColumnNameDefinition.get(name).getColumnType() : "";
+        final Boolean mandatory = column.has("mandatory") ? column.get("mandatory").getAsBoolean() : false;
+        final String name = column.has("name") ? column.get("name").getAsString() : "";
+        final String type = mapColumnNameDefinition.containsKey(name) ? mapColumnNameDefinition.get(name).getColumnType() : "";
 
         if (StringUtils.isNotEmpty(type)) {
             if (mandatory && stringDataTypes.contains(type.toLowerCase())) {
@@ -1578,7 +1578,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String dateFormat = queryParams.get("dateFormat");
         Locale clientApplicationLocale = null;
         final String localeQueryParam = queryParams.get("locale");
-        if (!(StringUtils.isBlank(localeQueryParam))) {
+        if (!StringUtils.isBlank(localeQueryParam)) {
             clientApplicationLocale = new Locale(queryParams.get("locale"));
         }
 
@@ -1595,8 +1595,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // ignores id and foreign key fields
             // also ignores locale and dateformat fields that are used for
             // validating numeric and date data
-            if (!((key.equalsIgnoreCase("id")) || (key.equalsIgnoreCase(keyFieldName)) || (key.equals("locale"))
-                    || (key.equals("dateFormat")))) {
+            if (!(key.equalsIgnoreCase("id") || key.equalsIgnoreCase(keyFieldName) || key.equals("locale")
+                    || key.equals("dateFormat"))) {
                 notFound = true;
                 // matches incoming fields with and without underscores (spaces
                 // and underscores considered the same)
@@ -1782,7 +1782,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         builder.append(" JOIN m_entity_datatable_check edc ON edc.`x_registered_table_name` = xrt.`registered_table_name`");
         builder.append(" WHERE edc.`x_registered_table_name` = '" + datatableName + "'");
         final Long count = this.jdbcTemplate.queryForObject(builder.toString(), Long.class);
-        return (count > 0) ? true : false;
+        return count > 0 ? true : false;
     }
 
 }

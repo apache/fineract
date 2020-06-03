@@ -160,8 +160,8 @@ public class TellerApiResource {
             @QueryParam("todate") @ApiParam(value = "todate") final String toDateStr) {
         final DateTimeFormatter dateFormatter = ISODateTimeFormat.basicDate();
 
-        final Date fromDate = (fromDateStr != null ? dateFormatter.parseDateTime(fromDateStr).toDate() : new Date());
-        final Date toDate = (toDateStr != null ? dateFormatter.parseDateTime(toDateStr).toDate() : new Date());
+        final Date fromDate = fromDateStr != null ? dateFormatter.parseDateTime(fromDateStr).toDate() : new Date();
+        final Date toDate = toDateStr != null ? dateFormatter.parseDateTime(toDateStr).toDate() : new Date();
 
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final Collection<CashierData> cashiers = this.readPlatformService.getCashiersForTeller(tellerId, fromDate, toDate);

@@ -270,6 +270,6 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     @Override
     public int compareTo(CenterDomain cd) {
-        return ( this.id).compareTo(cd.getId());
+        return this.id.compareTo(cd.getId());
     }
 }

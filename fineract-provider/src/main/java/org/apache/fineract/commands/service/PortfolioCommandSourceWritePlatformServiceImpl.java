@@ -166,7 +166,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         final CommandSource commandSourceInput = this.commandSourceRepository.findById(makerCheckerId)
                 .orElseThrow(() -> new CommandNotFoundException(makerCheckerId));
-        if (!(commandSourceInput.isMarkedAsAwaitingApproval())) { throw new CommandNotAwaitingApprovalException(makerCheckerId); }
+        if (!commandSourceInput.isMarkedAsAwaitingApproval()) { throw new CommandNotAwaitingApprovalException(makerCheckerId); }
 
         this.context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 

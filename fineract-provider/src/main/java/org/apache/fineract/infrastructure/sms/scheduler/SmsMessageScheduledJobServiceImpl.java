@@ -281,7 +281,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                         Integer deliveryStatus = smsMessageDeliveryReportData.getDeliveryStatus();
 
                         if (!smsMessageDeliveryReportData.getHasError()
-                                && (deliveryStatus != 100)) {
+                                && deliveryStatus != 100) {
                             SmsMessage smsMessage = this.smsMessageRepository.findById(smsMessageDeliveryReportData.getId()).orElse(null);
                             Integer statusType = smsMessage.getStatusType();
 

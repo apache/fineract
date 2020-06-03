@@ -134,7 +134,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 TransferNotSupportedReason.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId, destinationGroupId); }
 
         /*** Do not allow bulk client transfers across branches ***/
-        if (!(sourceOffice.getId().equals(destinationGroup.getOffice().getId()))) { throw new TransferNotSupportedException(
+        if (!sourceOffice.getId().equals(destinationGroup.getOffice().getId())) { throw new TransferNotSupportedException(
                 TransferNotSupportedReason.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId, destinationGroupId); }
 
         for (final Client client : clients) {

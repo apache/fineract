@@ -109,6 +109,6 @@ public class ShareAccountChargeData implements Serializable {
 
 
     private BigDecimal getAmountOrPercentage() {
-        return (this.chargeCalculationType != null) && (this.chargeCalculationType.getId().intValue() > 1) ? this.percentage : this.amount;
+        return this.chargeCalculationType != null && this.chargeCalculationType.getId().intValue() > 1 ? this.percentage : this.amount;
     }
 }

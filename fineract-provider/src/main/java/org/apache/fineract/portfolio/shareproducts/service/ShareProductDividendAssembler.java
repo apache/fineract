@@ -115,7 +115,7 @@ public class ShareProductDividendAssembler {
                     }
 
                     if (lastDividendAppliedDate != null) {
-                        numberOfShareDaysPerAccount += (Days.daysBetween(lastDividendAppliedDate, shareStartDate).getDays() * numberOfShares);
+                        numberOfShareDaysPerAccount += Days.daysBetween(lastDividendAppliedDate, shareStartDate).getDays() * numberOfShares;
                     }
                     lastDividendAppliedDate = shareStartDate;
                     if (type.isPurchased()) {
@@ -127,7 +127,7 @@ public class ShareProductDividendAssembler {
                 }
             }
             if (lastDividendAppliedDate != null) {
-                numberOfShareDaysPerAccount += (Days.daysBetween(lastDividendAppliedDate, postingDate).getDays() * numberOfShares);
+                numberOfShareDaysPerAccount += Days.daysBetween(lastDividendAppliedDate, postingDate).getDays() * numberOfShares;
             }
             numberOfShareDays += numberOfShareDaysPerAccount;
             numberOfSharesdaysPerAccount.put(accountData.getId(), numberOfShareDaysPerAccount);

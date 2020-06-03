@@ -60,7 +60,7 @@ public class ExternalServicesConfigurationTest {
         ArrayList<HashMap> externalServicesConfig = this.externalServicesConfigurationHelper
                 .getExternalServicesConfigurationByServiceName(requestSpec, responseSpec, "S3");
         Assert.assertNotNull(externalServicesConfig);
-        for (Integer configIndex = 0; configIndex < (externalServicesConfig.size()); configIndex++) {
+        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
             String name = (String) externalServicesConfig.get(configIndex).get("name");
             String value = null;
             if (name.equals(configName)) {
@@ -88,7 +88,7 @@ public class ExternalServicesConfigurationTest {
         externalServicesConfig = this.externalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
                 responseSpec, "SMTP");
         Assert.assertNotNull(externalServicesConfig);
-        for (Integer configIndex = 0; configIndex < (externalServicesConfig.size()); configIndex++) {
+        for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
             String name = (String) externalServicesConfig.get(configIndex).get("name");
             String value = null;
             if (name.equals(configName)) {

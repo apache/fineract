@@ -207,9 +207,9 @@ public class Utils {
         final Random rnd = new Random();
         final StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-            sb.append((sourceSetString).charAt(rnd.nextInt(lengthOfSource)));
+            sb.append(sourceSetString.charAt(rnd.nextInt(lengthOfSource)));
         }
-        return (prefix + (sb.toString()));
+        return prefix + sb.toString();
     }
 
     public static String randomStringGenerator(final String prefix, final int len) {

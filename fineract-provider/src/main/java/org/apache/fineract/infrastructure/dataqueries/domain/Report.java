@@ -188,7 +188,7 @@ public final class Report extends AbstractPersistableCustom {
         if (!actualChanges.isEmpty()) {
             if (isCoreReport()) {
                 for (final String key : actualChanges.keySet()) {
-                    if (!(key.equals("useReport"))) { throw new PlatformDataIntegrityException(
+                    if (!key.equals("useReport")) { throw new PlatformDataIntegrityException(
                             "error.msg.only.use.report.can.be.updated.for.core.report",
                             "Only the Use Report field can be updated for Core Reports", key); }
                 }
@@ -238,7 +238,7 @@ public final class Report extends AbstractPersistableCustom {
         baseDataValidator.reset().parameter("reportCategory").value(this.reportCategory).notExceedingLengthOf(45);
 
         if (StringUtils.isNotBlank(this.reportType)) {
-            if ((this.reportType.equals("Table")) || (this.reportType.equals("Chart"))) {
+            if (this.reportType.equals("Table") || this.reportType.equals("Chart")) {
                 baseDataValidator.reset().parameter("reportSql").value(this.reportSql)
                         .cantBeBlankWhenParameterProvidedIs("reportType", this.reportType);
             } else {
@@ -272,7 +272,7 @@ public final class Report extends AbstractPersistableCustom {
 
     private boolean changeInReportParameters(final Set<ReportParameterUsage> newReportParameterUsages) {
 
-        if (!(this.reportParameterUsages.equals(newReportParameterUsages))) { return true; }
+        if (!this.reportParameterUsages.equals(newReportParameterUsages)) { return true; }
 
         return false;
     }

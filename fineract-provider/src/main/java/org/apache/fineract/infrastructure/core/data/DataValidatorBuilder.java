@@ -176,7 +176,7 @@ public class DataValidatorBuilder {
 
         if(trueOfFalseField!=null)
         {
-            if((!trueOfFalseField.toString().equalsIgnoreCase("true")) && (!trueOfFalseField.toString().equalsIgnoreCase("false")) )
+            if(!trueOfFalseField.toString().equalsIgnoreCase("true") && !trueOfFalseField.toString().equalsIgnoreCase("false"))
             {
                   final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                             .append(this.parameter).append(".must.be.true.or.false");

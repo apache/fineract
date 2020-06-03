@@ -1101,7 +1101,7 @@ public final class LoanApplicationTerms {
         }
         switch (this.interestCalculationPeriodMethod) {
             case DAILY:
-                periodsInOneYear = (!this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")) ? this.daysInYearType
+                periodsInOneYear = !this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual") ? this.daysInYearType
                         .getValue().longValue() : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
             break;
             case INVALID:

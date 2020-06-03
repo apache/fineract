@@ -30,7 +30,7 @@ public class RandomOTPGenerator {
     public String generate() {
         StringBuilder builder = new StringBuilder();
         for(int i = 0; i < tokenLength; i++) {
-            builder.append(allowedCharacters.charAt((int) (Math.random() * (allowedCharacters.length()))));
+            builder.append(allowedCharacters.charAt((int) (Math.random() * allowedCharacters.length())));
         }
 
         return builder.toString();
