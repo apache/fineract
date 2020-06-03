@@ -562,7 +562,7 @@ public class ClientSavingsIntegrationTest {
         assertEquals("validation.msg.savingsaccountcharge.inactivation.of.charge.not.allowed.when.charge.is.due", savingsAccountErrorData
                 .get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.dateFormat, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar cal = Calendar.getInstance();
         List dates = (List) savingsChargeForPay.get("dueDate");
         cal.set(Calendar.YEAR, (Integer) dates.get(0));

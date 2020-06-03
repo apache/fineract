@@ -40,10 +40,10 @@ public class CurrencyHelper {
     private static final String CURRENCY_URL = "/fineract-provider/api/v1/currencies?" + Utils.TENANT_IDENTIFIER;
     private static final String CURRENCY_URL_SELECTED = CURRENCY_URL + "&fields=selectedCurrencyOptions";
 
-    private static final List<String> permittedCurrencyArray = Arrays.asList("currencyOptions",
+    private static final List<String> PERMITTED_CURRENCY_ARRAY = Arrays.asList("currencyOptions",
             "selectedCurrencyOptions");
 
-    private static final List<String> permittedCurrencyArraySelected = Arrays.asList("selectedCurrencyOptions");
+    private static final List<String> PERMITTED_CURRENCY_ARRAY_SELECTED = Arrays.asList("selectedCurrencyOptions");
 
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -54,11 +54,11 @@ public class CurrencyHelper {
     }
 
     public ArrayList<Currency> getPermittedCurrencies() {
-        return getCurrencies(CURRENCY_URL, permittedCurrencyArray);
+        return getCurrencies(CURRENCY_URL, PERMITTED_CURRENCY_ARRAY);
     }
 
     public ArrayList<Currency> getSelectedCurrencies() {
-        return getCurrencies(CURRENCY_URL_SELECTED, permittedCurrencyArraySelected);
+        return getCurrencies(CURRENCY_URL_SELECTED, PERMITTED_CURRENCY_ARRAY_SELECTED);
     }
 
     private ArrayList<Currency> getCurrencies(final String getUrl, final List<String> permittedCurrencyArrays) {
