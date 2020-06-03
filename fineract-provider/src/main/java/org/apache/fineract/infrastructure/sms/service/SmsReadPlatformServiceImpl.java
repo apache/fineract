@@ -131,7 +131,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Collection<SmsData> retrieveAllPending(final Long campaignId, final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.PENDING.getValue();
         if (campaignId != null) {
             sql += " and smo.campaign_id = " + campaignId;
@@ -144,7 +144,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Collection<SmsData> retrieveAllSent(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum IN (" + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue()
                 + "," + SmsMessageStatusType.SENT.getValue() + ")" + sqlPlusLimit;
 
@@ -153,7 +153,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         final String sql = "select external_id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.SENT.getValue() + sqlPlusLimit;
 
@@ -162,7 +162,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Page<Long> retrieveAllWaitingForDeliveryReport(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         final String sql = "select id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue() + sqlPlusLimit;
         final String sqlCountRows = "SELECT FOUND_ROWS()";
@@ -172,7 +172,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public List<Long> retrieveAllPending(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         final String sql = "select external_id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.PENDING.getValue() + sqlPlusLimit;
 
@@ -181,7 +181,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Collection<SmsData> retrieveAllDelivered(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.DELIVERED.getValue()
                 + sqlPlusLimit;
 
@@ -190,7 +190,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Collection<SmsData> retrieveAllFailed(final Integer limit) {
-        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sqlPlusLimit = limit > 0 ? " limit 0, " + limit : "";
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.FAILED.getValue()
                 + sqlPlusLimit;
 

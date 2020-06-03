@@ -338,7 +338,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
 
         // entityType should be center if it's within a center
-        final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
+        final CalendarEntityType entityType = group.isChildGroup() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
 
         Long entityId = null;
         if(group.isChildGroup()){

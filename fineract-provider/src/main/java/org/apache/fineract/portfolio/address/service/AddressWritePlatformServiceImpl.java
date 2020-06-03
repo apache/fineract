@@ -190,14 +190,14 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         final Address addobj = this.addressRepository.getOne(addressId);
 
-        if (!(command.stringValueOfParameterNamed("street").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("street").isEmpty()) {
 
             is_address_update = true;
             final String street = command.stringValueOfParameterNamed("street");
             addobj.setStreet(street);
         }
 
-        if (!(command.stringValueOfParameterNamed("addressLine1").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("addressLine1").isEmpty()) {
 
             is_address_update = true;
             final String addressLine1 = command.stringValueOfParameterNamed("addressLine1");
@@ -205,7 +205,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         }
 
-        if (!(command.stringValueOfParameterNamed("addressLine2").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("addressLine2").isEmpty()) {
 
             is_address_update = true;
             final String addressLine2 = command.stringValueOfParameterNamed("addressLine2");
@@ -213,34 +213,34 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         }
 
-        if (!(command.stringValueOfParameterNamed("addressLine3").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("addressLine3").isEmpty()) {
             is_address_update = true;
             final String addressLine3 = command.stringValueOfParameterNamed("addressLine3");
             addobj.setAddressLine3(addressLine3);
 
         }
 
-        if (!(command.stringValueOfParameterNamed("townVillage").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("townVillage").isEmpty()) {
 
             is_address_update = true;
             final String townVillage = command.stringValueOfParameterNamed("townVillage");
             addobj.setTownVillage(townVillage);
         }
 
-        if (!(command.stringValueOfParameterNamed("city").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("city").isEmpty()) {
             is_address_update = true;
             final String city = command.stringValueOfParameterNamed("city");
             addobj.setCity(city);
         }
 
-        if (!(command.stringValueOfParameterNamed("countyDistrict").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("countyDistrict").isEmpty()) {
             is_address_update = true;
             final String countyDistrict = command.stringValueOfParameterNamed("countyDistrict");
             addobj.setCountyDistrict(countyDistrict);
         }
 
-        if ((command.longValueOfParameterNamed("stateProvinceId") != null)) {
-            if ((command.longValueOfParameterNamed("stateProvinceId") != 0)) {
+        if (command.longValueOfParameterNamed("stateProvinceId") != null) {
+            if (command.longValueOfParameterNamed("stateProvinceId") != 0) {
                 is_address_update = true;
                 stateId = command.longValueOfParameterNamed("stateProvinceId");
                 stateIdobj = this.codeValueRepository.getOne(stateId);
@@ -248,8 +248,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             }
 
         }
-        if ((command.longValueOfParameterNamed("countryId") != null)) {
-            if ((command.longValueOfParameterNamed("countryId") != 0)) {
+        if (command.longValueOfParameterNamed("countryId") != null) {
+            if (command.longValueOfParameterNamed("countryId") != 0) {
                 is_address_update = true;
                 countryId = command.longValueOfParameterNamed("countryId");
                 countryIdObj = this.codeValueRepository.getOne(countryId);
@@ -258,7 +258,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         }
 
-        if (!(command.stringValueOfParameterNamed("postalCode").isEmpty())) {
+        if (!command.stringValueOfParameterNamed("postalCode").isEmpty()) {
             is_address_update = true;
             final String postalCode = command.stringValueOfParameterNamed("postalCode");
             addobj.setPostalCode(postalCode);

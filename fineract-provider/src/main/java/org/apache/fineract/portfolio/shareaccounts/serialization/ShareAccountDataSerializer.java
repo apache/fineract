@@ -490,7 +490,7 @@ public class ShareAccountDataSerializer {
         if(totalSubsribedShares == null) {
             totalSubsribedShares = Long.valueOf(0);
         }
-        if((totalSubsribedShares+requested) > totalSharesIssuable) {
+        if(totalSubsribedShares+requested > totalSharesIssuable) {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(requested)
             .failWithCodeNoParameterAddedToErrorCode("shares.requested.can.not.be.approved.exceeding.totalshares.issuable");
         }

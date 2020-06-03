@@ -98,7 +98,7 @@ public class ShareAccountCharge extends AbstractPersistableCustom {
 
         this.shareAccount = shareAccount;
         this.charge = chargeDefinition;
-        this.chargeTime = (chargeTime == null) ? chargeDefinition.getChargeTimeType() : chargeTime.getValue();
+        this.chargeTime = chargeTime == null ? chargeDefinition.getChargeTimeType() : chargeTime.getValue();
 
         this.chargeCalculation = chargeDefinition.getChargeCalculation();
         if (chargeCalculation != null) {

@@ -127,7 +127,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         Collection<FineractEntityToEntityMappingData> entityAccessData = null;
         GetOneEntityMapper mapper = new GetOneEntityMapper();
 
-        if (includeAllSubOffices && (firstEntityType.getTable().equals("m_office"))) {
+        if (includeAllSubOffices && firstEntityType.getTable().equals("m_office")) {
             sql += " where firstentity.hierarchy like ? order by firstEntity.hierarchy";
             entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { fromEntityId, fromEntityId, hierarchySearchString });
         } else {

@@ -434,12 +434,12 @@ public class LoanProduct extends AbstractPersistableCustom {
                     }
                     if (jsonObject.has(LoanProductConstants.minValueParameterName)
                             && jsonObject.get(LoanProductConstants.minValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.minValueParameterName).getAsString()))) {
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.minValueParameterName).getAsString())) {
                         minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.minValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.maxValueParameterName)
                             && jsonObject.get(LoanProductConstants.maxValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString()))) {
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString())) {
                         maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.maxValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.borrowerCycleNumberParamName)
@@ -502,12 +502,12 @@ public class LoanProduct extends AbstractPersistableCustom {
                     }
                     if (jsonObject.has(LoanProductConstants.minValueParameterName)
                             && jsonObject.get(LoanProductConstants.minValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.minValueParameterName).getAsString()))) {
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.minValueParameterName).getAsString())) {
                         minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.minValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.maxValueParameterName)
                             && jsonObject.get(LoanProductConstants.maxValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString()))) {
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString())) {
                         maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.maxValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.borrowerCycleNumberParamName)
@@ -520,7 +520,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                     }
                     if (jsonObject.has(LoanProductConstants.borrowerCycleIdParameterName)
                             && jsonObject.get(LoanProductConstants.borrowerCycleIdParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.borrowerCycleIdParameterName).getAsString()))) {
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.borrowerCycleIdParameterName).getAsString())) {
                         id = jsonObject.getAsJsonPrimitive(LoanProductConstants.borrowerCycleIdParameterName).getAsLong();
                     }
                     LoanProductBorrowerCycleVariations borrowerCycleVariations = new LoanProductBorrowerCycleVariations(cycleNumber,

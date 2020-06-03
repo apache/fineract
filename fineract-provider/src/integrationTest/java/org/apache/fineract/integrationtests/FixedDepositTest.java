@@ -154,7 +154,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -290,7 +290,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -434,7 +434,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         Calendar closedOn = Calendar.getInstance();
         closedOn.add(Calendar.MONTH, -6);
@@ -726,7 +726,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -897,7 +897,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -1225,8 +1225,8 @@ public class FixedDepositTest {
         ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper.getInterestRateChartSlabsByProductId(
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1297,8 +1297,8 @@ public class FixedDepositTest {
         ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper.getInterestRateChartSlabsByProductId(
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1374,8 +1374,8 @@ public class FixedDepositTest {
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1383,7 +1383,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
@@ -1480,8 +1480,8 @@ public class FixedDepositTest {
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1489,7 +1489,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
@@ -1591,8 +1591,8 @@ public class FixedDepositTest {
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1600,7 +1600,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
@@ -1706,8 +1706,8 @@ public class FixedDepositTest {
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1715,7 +1715,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
@@ -1804,8 +1804,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1879,8 +1879,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1915,7 +1915,7 @@ public class FixedDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -1961,8 +1961,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1998,7 +1998,7 @@ public class FixedDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2044,8 +2044,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2082,7 +2082,7 @@ public class FixedDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2125,8 +2125,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2163,7 +2163,7 @@ public class FixedDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2206,8 +2206,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" ,perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2244,7 +2244,7 @@ public class FixedDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2287,8 +2287,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2324,7 +2324,7 @@ public class FixedDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2367,8 +2367,8 @@ public class FixedDepositTest {
                 this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2421,7 +2421,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -2503,7 +2503,7 @@ public class FixedDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);

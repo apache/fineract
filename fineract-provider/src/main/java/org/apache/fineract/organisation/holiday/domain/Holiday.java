@@ -211,7 +211,7 @@ public class Holiday extends AbstractPersistableCustom {
             final Set<Office> currentSetOfOffices = new HashSet<>(this.offices);
             final Set<Office> newSetOfOffices = new HashSet<>(newOffices);
 
-            if (!(currentSetOfOffices.equals(newSetOfOffices))) {
+            if (!currentSetOfOffices.equals(newSetOfOffices)) {
                 updated = true;
                 this.offices = newOffices;
             }

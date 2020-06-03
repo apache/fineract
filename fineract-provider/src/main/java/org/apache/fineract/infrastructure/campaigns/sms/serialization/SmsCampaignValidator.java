@@ -324,11 +324,11 @@ public class SmsCampaignValidator {
             if (client != null) {
                 DeviceRegistration deviceRegistration = this.deviceRegistrationRepository
                         .findDeviceRegistrationByClientId(client.getId());
-                return (deviceRegistration != null);
+                return deviceRegistration != null;
             }
             return false;
         }
-        return (mobileNo != null);
+        return mobileNo != null;
     }
 
 }

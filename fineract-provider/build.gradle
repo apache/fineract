@@ -306,7 +306,6 @@ tasks.withType(JavaCompile) {
         disable(
                 "UnusedVariable",
                 "InconsistentCapitalization",
-                "UnnecessaryParentheses",
                 "ClassCanBeStatic",
                 "MissingCasesInEnumSwitch",
                 "OperatorPrecedence",
@@ -339,6 +338,7 @@ tasks.withType(JavaCompile) {
                 "WaitNotInLoop",
                 "ThreeLetterTimeZoneID",
                 "VariableNameSameAsType",
+                "UnnecessaryParentheses",
 //                "ReturnMissingNullable",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",

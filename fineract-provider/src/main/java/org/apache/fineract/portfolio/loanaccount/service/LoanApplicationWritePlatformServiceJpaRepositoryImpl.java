@@ -552,7 +552,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 if(gsimClientMembers.contains(BigDecimal.valueOf(newLoanApplication.getClientId())))
                 {
-                    savingsAccount = this.savingsAccountAssembler.assembleFrom((clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId()))).longValue());
+                    savingsAccount = this.savingsAccountAssembler.assembleFrom(clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId())).longValue());
 
                         this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
                     boolean isActive = true;

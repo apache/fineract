@@ -230,7 +230,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
         }
 
         if (command.isChangeInLongParameterNamed(SmsCampaignValidator.runReportId,
-                (this.businessRuleId != null) ? this.businessRuleId.getId() : null)) {
+                this.businessRuleId != null ? this.businessRuleId.getId() : null)) {
             final String newValue = command.stringValueOfParameterNamed(SmsCampaignValidator.runReportId);
             actualChanges.put(SmsCampaignValidator.runReportId, newValue);
         }
