@@ -174,7 +174,9 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
                 accountTypesNoDuplicatesList.add(glAccounts.get(i).getType().getValue());
             }
         }
-        int rowIndex=1,startIndex=1,accountTypeIndex=0;
+        int rowIndex = 1;
+        int startIndex = 1;
+        int accountTypeIndex = 0;
         accountTypeToBeginEndIndexesofAccountNames= new HashMap<Integer,Integer[]>();
         for (String accountType: accountTypesNoDuplicatesList) {
              startIndex=rowIndex+1;

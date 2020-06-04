@@ -72,7 +72,9 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
 
 
   private void populateStaffByOfficeName(Sheet staffSheet) {
-    int rowIndex = 1, startIndex = 1, officeIndex = 0;
+    int rowIndex = 1;
+    int startIndex = 1;
+    int officeIndex = 0;
     officeNameToBeginEndIndexesOfStaff = new HashMap<>();
     Row row = staffSheet.createRow(rowIndex);
     for (OfficeData office : offices) {

@@ -191,7 +191,8 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<String, Integer[]>();
         ArrayList<String> clientsWithActiveLoans = new ArrayList<String>();
         ArrayList<String> clientIdsWithActiveLoans = new ArrayList<String>();
-        int startIndex = 1, endIndex = 1;
+        int startIndex = 1;
+        int endIndex = 1;
         String clientName = "";
         String clientId = "";
         for (int i = 0; i < allloans.size(); i++) {
