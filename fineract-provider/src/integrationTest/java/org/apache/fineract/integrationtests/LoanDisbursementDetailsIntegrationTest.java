@@ -94,7 +94,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 loanIDWithEmi, "repaymentSchedule");
 
         ArrayList<HashMap> periods = (ArrayList<HashMap>) repaymentScheduleWithEmi.get("periods");
-        assertEquals(periods.size(), 15);
+        assertEquals(15, periods.size());
 
         this.validateRepaymentScheduleWithEMI(periods);
 
@@ -115,7 +115,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 loanIDWithoutEmi, "repaymentSchedule");
 
         ArrayList<HashMap> periods1 = (ArrayList<HashMap>) repaymentScheduleWithEmi.get("periods");
-        assertEquals(periods1.size(), 15);
+        assertEquals(15, periods1.size());
 
         LOG.info("-----------------------------------LOAN CREATED WITHOUT EMI LOANID------------------------------------------------- {}"
                         , loanIDWithoutEmi);

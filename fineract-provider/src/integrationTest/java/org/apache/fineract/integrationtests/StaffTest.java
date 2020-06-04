@@ -55,7 +55,7 @@ public class StaffTest {
         Map<String, Object> response = StaffHelper.createStaffMap(requestSpec, responseSpec);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.get("officeId"), 1);
+        Assert.assertEquals(1, response.get("officeId"));
         Assert.assertNotNull(response.get("resourceId"));
     }
 
@@ -120,7 +120,7 @@ public class StaffTest {
         Map<String, Object> response = StaffHelper.getStaff(requestSpec, responseSpec, 1);
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.get("id"));
-        Assert.assertEquals(response.get("id"), 1);
+        Assert.assertEquals(1, response.get("id"));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class StaffTest {
         List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
         for(final Map<String, Object> staff : responseActive) {
             Assert.assertNotNull(staff.get("id"));
-            Assert.assertEquals(staff.get("isActive"), true);
+            Assert.assertEquals(true, staff.get("isActive"));
         }
     }
 
@@ -147,7 +147,7 @@ public class StaffTest {
         List<Map<String, Object>> responseInactive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
         for(final Map<String, Object> staff : responseInactive) {
             Assert.assertNotNull(staff.get("id"));
-            Assert.assertEquals(staff.get("isActive"), false);
+            Assert.assertEquals(false, staff.get("isActive"));
         }
     }
 

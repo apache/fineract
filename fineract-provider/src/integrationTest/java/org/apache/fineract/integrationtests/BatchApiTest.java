@@ -155,7 +155,7 @@ public class BatchApiTest {
         BatchHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId12");
 
         // Asserts that all the transactions have been successfully rolled back
-        Assert.assertEquals(response.size(), 1);
+        Assert.assertEquals(1, response.size());
         Assert.assertEquals("Verify Status code 400", (long) 400, (long) response.get(0).getStatusCode());
     }
 

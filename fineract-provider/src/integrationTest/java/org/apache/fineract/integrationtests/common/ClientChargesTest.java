@@ -175,7 +175,7 @@ public class ClientChargesTest {
      * @param expectedAmount
      */
     private void isValidOutstandingAmount(Object outStandingAmount, Object expectedAmount) {
-        Assert.assertEquals((float) outStandingAmount, expectedAmount);
+        Assert.assertEquals(expectedAmount, (float) outStandingAmount);
     }
 
 }
