@@ -47,10 +47,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientEntityImportHandlerTest {
+    private final static Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandlerTest.class);
+
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
@@ -63,36 +66,33 @@ public class ClientEntityImportHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testClientImport() throws InterruptedException, IOException, ParseException {
 
         //in order to populate helper sheets
-        StaffHelper staffHelper=new StaffHelper();
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec,responseSpec);
         Assert.assertNotNull("Could not create staff",outcome_staff_creation);
 
         //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
+        OfficeHelper officeHelper = new OfficeHelper(requestSpec,responseSpec);
         Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
         Assert.assertNotNull("Could not create office" ,outcome_office_creation);
 
         //in order to populate helper columns in client entity sheet
-        CodeHelper codeHelper=new CodeHelper();
         //create constitution
-        codeHelper.retrieveOrCreateCodeValue(24,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(24,requestSpec,responseSpec);
         //create client classification
-        codeHelper.retrieveOrCreateCodeValue(17,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(17,requestSpec,responseSpec);
         //create client types
-        codeHelper.retrieveOrCreateCodeValue(16,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(16,requestSpec,responseSpec);
         //create Address types
-        codeHelper.retrieveOrCreateCodeValue(29,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(29,requestSpec,responseSpec);
         //create State
-        codeHelper.retrieveOrCreateCodeValue(27,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(27,requestSpec,responseSpec);
         //create Country
-        codeHelper.retrieveOrCreateCodeValue(28,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(28,requestSpec,responseSpec);
         //create Main business line
-        codeHelper.retrieveOrCreateCodeValue(25,requestSpec,responseSpec);
+        CodeHelper.retrieveOrCreateCodeValue(25,requestSpec,responseSpec);
 
         ClientHelper clientHelper=new ClientHelper(requestSpec,responseSpec);
         Workbook workbook=clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY,"dd MMMM yyyy");
@@ -134,7 +134,7 @@ public class ClientEntityImportHandlerTest {
         Assert.assertNotNull(importDocumentId);
 
         //Wait for the creation of output excel
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
         //check status column of output excel
         String location=clientHelper.getOutputTemplateLocation(importDocumentId);
@@ -142,7 +142,11 @@ public class ClientEntityImportHandlerTest {
         Workbook outputWorkbook=new HSSFWorkbook(fileInputStream);
         Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
         Row row= outputClientEntitySheet.getRow(1);
-        Assert.assertEquals("Imported",row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
 
+        LOG.info("Output location: {}", location);
+        LOG.info("Failure reason column: {}", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+
+        Assert.assertEquals("Imported",row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+        outputWorkbook.close();
     }
 }
