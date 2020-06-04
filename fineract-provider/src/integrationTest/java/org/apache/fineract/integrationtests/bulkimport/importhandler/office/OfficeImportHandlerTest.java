@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -46,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OfficeImportHandlerTest {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(OfficeImportHandlerTest.class);
 
     private ResponseSpecification responseSpec;
@@ -84,7 +83,7 @@ public class OfficeImportHandlerTest {
                 "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"office");
         if (!directory.exists()) {
             directory.mkdirs();
-        } 
+        }
         File file= new File(directory+File.separator+"Office.xls");
         OutputStream outputStream=new FileOutputStream(file);
         workbook.write(outputStream);
@@ -103,10 +102,10 @@ public class OfficeImportHandlerTest {
         Workbook outputWorkbook=new HSSFWorkbook(fileInputStream);
         Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row row= officeSheet.getRow(1);
-        
+
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
-        
+
         Assert.assertEquals("Imported",row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
         outputWorkbook.close();
     }

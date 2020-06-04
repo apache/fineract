@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.bulkimport.importhandler.savings;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -31,12 +32,14 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
+import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
@@ -48,12 +51,19 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SavingsImportHandlerTest {
+
+    private final static Logger LOG = LoggerFactory.getLogger(SavingsImportHandlerTest.class);
+
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+
+    private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
+    public static final String DATE_FORMAT = "dd MMMM yyyy";
 
     @Before
     public void setup() {
@@ -64,7 +74,6 @@ public class SavingsImportHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testSavingsImport() throws InterruptedException, IOException, ParseException {
 
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -73,24 +82,41 @@ public class SavingsImportHandlerTest {
         Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
         Assert.assertNotNull("Could not create office" ,outcome_office_creation);
 
-        //in order to populate helper sheets
-        ClientHelper clientHelper=new ClientHelper(requestSpec,responseSpec);
-        Integer outcome_client_creation=clientHelper.createClient(requestSpec,responseSpec);
+        OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
+        Assert.assertNotNull("Could not retrieve created office", office);
+
+        String firstName = Utils.randomNameGenerator("Client_FirstName_", 5);
+        String lastName = Utils.randomNameGenerator("Client_LastName_", 4);
+        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+        final HashMap<String, String> clientMap = new HashMap<>();
+        clientMap.put("officeId", outcome_office_creation.toString());
+        clientMap.put("firstname", firstName);
+        clientMap.put("lastname", lastName);
+        clientMap.put("externalId", externalId);
+        clientMap.put("dateFormat", DATE_FORMAT);
+        clientMap.put("locale", "en");
+        clientMap.put("active", "true");
+        clientMap.put("activationDate", "04 March 2011");
+
+        Integer outcome_client_creation= Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                new Gson().toJson(clientMap), "clientId");
         Assert.assertNotNull("Could not create client" ,outcome_client_creation);
 
         //in order to populate helper sheets
-        GroupHelper groupHelper=new GroupHelper(requestSpec,responseSpec);
-        Integer outcome_group_creation=groupHelper.createGroup(requestSpec,responseSpec,true);
+        Integer outcome_group_creation=GroupHelper.createGroup(requestSpec,responseSpec,true);
         Assert.assertNotNull("Could not create group" ,outcome_group_creation);
 
         //in order to populate helper sheets
-        StaffHelper staffHelper=new StaffHelper();
-        Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
+        Integer outcome_staff_creation =StaffHelper.createStaff(requestSpec,responseSpec);
         Assert.assertNotNull("Could not create staff",outcome_staff_creation);
 
-        SavingsProductHelper savingsProductHelper=new SavingsProductHelper();
+        Map<String, Object> staffMap = StaffHelper.getStaff(requestSpec, responseSpec, outcome_staff_creation);
+        Assert.assertNotNull("Could not retrieve created staff", staffMap);
+
+        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         String jsonSavingsProduct=savingsProductHelper.build();
-        Integer outcome_sp_creaction=savingsProductHelper.createSavingsProduct(jsonSavingsProduct,requestSpec,responseSpec);
+        Integer outcome_sp_creaction=SavingsProductHelper.createSavingsProduct(jsonSavingsProduct,requestSpec,responseSpec);
         Assert.assertNotNull("Could not create Savings product",outcome_sp_creaction);
 
         SavingsAccountHelper savingsAccountHelper=new SavingsAccountHelper(requestSpec,responseSpec);
@@ -99,14 +125,12 @@ public class SavingsImportHandlerTest {
         //insert dummy data into Savings sheet
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         Row firstSavingsRow=savingsSheet.getRow(1);
-        Sheet officeSheet=workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        firstSavingsRow.createCell(SavingsConstants.OFFICE_NAME_COL).setCellValue(officeSheet.getRow(1).getCell(1).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.OFFICE_NAME_COL).setCellValue(office.getName());
         firstSavingsRow.createCell(SavingsConstants.SAVINGS_TYPE_COL).setCellValue("Individual");
-        firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL).setCellValue(savingsSheet.getRow(1).getCell(SavingsConstants.LOOKUP_CLIENT_NAME_COL).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL).setCellValue(firstName + " " + lastName + "(" + outcome_client_creation + ")");
         Sheet savingsProductSheet=workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
         firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(1).getStringCellValue());
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
-        firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellValue(staffSheet.getRow(1).getCell(1).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("dd MMMM yyyy");
         Date date=simpleDateFormat.parse("13 May 2017");
         firstSavingsRow.createCell(SavingsConstants.SUBMITTED_ON_DATE_COL).setCellValue(date);
@@ -151,6 +175,11 @@ public class SavingsImportHandlerTest {
         Workbook Outputworkbook=new HSSFWorkbook(fileInputStream);
         Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         Row row= OutputSavingsSheet.getRow(1);
+
+        LOG.info("Output location: {}", location);
+        LOG.info("Failure reason column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
+
         Assert.assertEquals("Imported",row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
+        Outputworkbook.close();
     }
 }
