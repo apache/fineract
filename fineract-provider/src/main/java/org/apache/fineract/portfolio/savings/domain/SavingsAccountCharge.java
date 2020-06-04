@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeInter
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
@@ -423,6 +424,8 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         }
     }
 
+
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_NONVIRTUAL") // https://issues.apache.org/jira/browse/FINERACT-987
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -465,6 +468,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
             actualChanges.put(amountParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
+
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case INVALID:
                 break;
@@ -497,7 +501,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) == 1;
+        return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
     public LocalDate getDueLocalDate() {
@@ -540,7 +544,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
         if (isGreaterThanZero(value)) {
             final MathContext mc = new MathContext(8, MoneyHelper.getRoundingMode());
-            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100L), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
 
@@ -690,8 +694,12 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SavingsAccountCharge)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SavingsAccountCharge)) {
+            return false;
+        }
         SavingsAccountCharge that = (SavingsAccountCharge) o;
         return Objects.equals(penaltyCharge, that.penaltyCharge) &&
                Objects.equals(paid, that.paid) &&
@@ -832,7 +840,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     public boolean isChargeIsOverPaid(final LocalDate nextDueDate) {
         final BigDecimal amountPaid = this.amountPaid == null ? BigDecimal.ZERO : amountPaid();
-        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) == 1;
+        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) > 0;
     }
 
     private BigDecimal amountPaid() {

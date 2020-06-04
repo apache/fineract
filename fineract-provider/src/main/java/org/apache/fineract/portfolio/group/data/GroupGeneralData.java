@@ -251,7 +251,7 @@ public class GroupGeneralData implements Serializable {
         this.externalId = externalId;
         this.status = status;
         if (status != null) {
-            this.active = status.getId().equals(300l);
+            this.active = status.getId().equals(300L);
         } else {
             this.active = null;
         }
@@ -366,8 +366,12 @@ public class GroupGeneralData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GroupGeneralData)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GroupGeneralData)) {
+            return false;
+        }
         GroupGeneralData that = (GroupGeneralData) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(accountNo, that.accountNo) &&

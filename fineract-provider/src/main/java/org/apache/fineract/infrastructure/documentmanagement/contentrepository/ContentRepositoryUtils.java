@@ -33,12 +33,12 @@ public class ContentRepositoryUtils {
 
     private static final Random random = new Random();
 
-    public static enum IMAGE_MIME_TYPE {
+    public static enum ImageMIMEtype {
         GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
 
         private final String value;
 
-        private IMAGE_MIME_TYPE(final String value) {
+        private ImageMIMEtype(final String value) {
             this.value = value;
         }
 
@@ -46,27 +46,27 @@ public class ContentRepositoryUtils {
             return this.value;
         }
 
-        public static IMAGE_MIME_TYPE fromFileExtension(IMAGE_FILE_EXTENSION fileExtension) {
+        public static ImageMIMEtype fromFileExtension(ImageFileExtension fileExtension) {
             switch (fileExtension) {
                 case GIF:
-                    return IMAGE_MIME_TYPE.GIF;
+                    return ImageMIMEtype.GIF;
                 case JPG:
                 case JPEG:
-                    return IMAGE_MIME_TYPE.JPEG;
+                    return ImageMIMEtype.JPEG;
                 case PNG:
-                    return IMAGE_MIME_TYPE.PNG;
+                    return ImageMIMEtype.PNG;
                 default:
                     throw new IllegalArgumentException();
             }
         }
     }
 
-    public static enum IMAGE_FILE_EXTENSION {
+    public static enum ImageFileExtension {
         GIF(".gif"), JPEG(".jpeg"), JPG(".jpg"), PNG(".png");
 
         private final String value;
 
-        private IMAGE_FILE_EXTENSION(final String value) {
+        private ImageFileExtension(final String value) {
             this.value = value;
         }
 
@@ -78,27 +78,27 @@ public class ContentRepositoryUtils {
             return this.value.substring(1);
         }
 
-        public IMAGE_FILE_EXTENSION getFileExtension() {
+        public ImageFileExtension getFileExtension() {
             switch (this) {
                 case GIF:
-                    return IMAGE_FILE_EXTENSION.GIF;
+                    return ImageFileExtension.GIF;
                 case JPEG:
-                    return IMAGE_FILE_EXTENSION.JPEG;
+                    return ImageFileExtension.JPEG;
                 case PNG:
-                    return IMAGE_FILE_EXTENSION.PNG;
+                    return ImageFileExtension.PNG;
                 default:
                     throw new IllegalArgumentException();
             }
         }
     }
 
-    public static enum IMAGE_DATA_URI_SUFFIX {
-        GIF("data:" + IMAGE_MIME_TYPE.GIF.getValue() + ";base64,"), JPEG("data:" + IMAGE_MIME_TYPE.JPEG.getValue() + ";base64,"), PNG(
-                "data:" + IMAGE_MIME_TYPE.PNG.getValue() + ";base64,");
+    public static enum ImageDataURIsuffix {
+        GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"), PNG(
+                "data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
 
         private final String value;
 
-        private IMAGE_DATA_URI_SUFFIX(final String value) {
+        private ImageDataURIsuffix(final String value) {
             this.value = value;
         }
 
@@ -113,8 +113,8 @@ public class ContentRepositoryUtils {
      * @param mimeType
      */
     public static void validateImageMimeType(final String mimeType) {
-        if (!(mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.GIF.getValue()) || mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.JPEG.getValue()) || mimeType
-                .equalsIgnoreCase(IMAGE_MIME_TYPE.PNG.getValue()))) { throw new ImageUploadException(); }
+        if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue()) || mimeType
+                .equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) { throw new ImageUploadException(); }
     }
 
     /**
@@ -125,15 +125,15 @@ public class ContentRepositoryUtils {
     public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
         String fileExtension = "";
         String base64EncodedString = null;
-        if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.GIF.getValue())) {
-            base64EncodedString = dataURL.replaceAll(IMAGE_DATA_URI_SUFFIX.GIF.getValue(), "");
-            fileExtension = IMAGE_FILE_EXTENSION.GIF.getValue();
-        } else if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.PNG.getValue())) {
-            base64EncodedString = dataURL.replaceAll(IMAGE_DATA_URI_SUFFIX.PNG.getValue(), "");
-            fileExtension = IMAGE_FILE_EXTENSION.PNG.getValue();
-        } else if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.JPEG.getValue())) {
-            base64EncodedString = dataURL.replaceAll(IMAGE_DATA_URI_SUFFIX.JPEG.getValue(), "");
-            fileExtension = IMAGE_FILE_EXTENSION.JPEG.getValue();
+        if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.GIF.getValue())) {
+            base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.GIF.getValue(), "");
+            fileExtension = ImageFileExtension.GIF.getValue();
+        } else if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.PNG.getValue())) {
+            base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.PNG.getValue(), "");
+            fileExtension = ImageFileExtension.PNG.getValue();
+        } else if (StringUtils.startsWith(dataURL, ImageDataURIsuffix.JPEG.getValue())) {
+            base64EncodedString = dataURL.replaceAll(ImageDataURIsuffix.JPEG.getValue(), "");
+            fileExtension = ImageFileExtension.JPEG.getValue();
         } else {
             throw new ImageDataURLNotValidException();
         }

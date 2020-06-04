@@ -42,10 +42,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class JournalEntriesImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(JournalEntriesImportHandler.class);
     private Workbook workbook;
     private List<JournalEntryData> gltransaction;
     private LocalDate transactionDate;
@@ -97,11 +101,15 @@ public class JournalEntriesImportHandler implements ImportHandler {
                                 workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME), debitGLAcct);
 
                         BigDecimal creditAmt=null;
-                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row)!=null)
-                        creditAmt = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row));
+                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row)!=null) {
+                            creditAmt = BigDecimal.valueOf(
+                                    ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row));
+                        }
                         BigDecimal debitAmount=null;
-                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row)!=null)
-                        debitAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row));
+                        if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row)!=null) {
+                            debitAmount = BigDecimal.valueOf(
+                                    ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row));
+                        }
 
                         if (creditGLAcct!=null) {
 
@@ -134,8 +142,9 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
     private JournalEntryData readAddJournalEntries(Row row,String locale,String dateFormat) {
         LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row);
-        if (transactionDateCheck!=null)
+        if (transactionDateCheck!=null) {
             transactionDate = transactionDateCheck;
+        }
 
         String officeName = ImportHandlerUtils.readAsString(JournalEntryConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
@@ -212,7 +221,7 @@ public class JournalEntriesImportHandler implements ImportHandler {
                         IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(addJournalEntriesSheet,transaction.getRowIndex(),errorMessage, JournalEntryConstants.STATUS_COL);
             }

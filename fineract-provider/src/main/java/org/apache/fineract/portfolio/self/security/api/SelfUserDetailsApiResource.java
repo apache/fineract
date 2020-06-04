@@ -56,7 +56,7 @@ public class SelfUserDetailsApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Fetch authenticated user details", httpMethod = "GET", notes = "Checks the Authentication and returns the set roles and permissions allowed\n\n" + "For more info visit this link - https://demo.mifos.io/api-docs/apiLive.htm#selfoauth")
+    @ApiOperation(value = "Fetch authenticated user details", httpMethod = "GET", notes = "Checks the Authentication and returns the set roles and permissions allowed\n\n" + "For more info visit this link - https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#selfoauth")
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class)})
     public String fetchAuthenticatedUserData(
             @QueryParam("access_token") @ApiParam(value = "äccess_token") final String accessToken) {

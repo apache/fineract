@@ -97,8 +97,9 @@ public class InteropAccountData extends CommandProcessingResult {
     }
 
     public static InteropAccountData build(SavingsAccount account) {
-        if (account == null)
+        if (account == null) {
             return null;
+        }
 
         List<InteropIdentifierData> ids = new ArrayList<>();
         for (InteropIdentifier identifier : account.getIdentifiers()) {
@@ -116,18 +117,24 @@ public class InteropAccountData extends CommandProcessingResult {
 
     private static LocalDate calcStatusUpdateOn(@NotNull SavingsAccount account) {
         LocalDate date = account.getClosedOnDate();
-        if (date != null)
+        if (date != null) {
             return date;
-        if ((date = account.getWithdrawnOnDate()) != null)
+        }
+        if ((date = account.getWithdrawnOnDate()) != null) {
             return date;
-        if ((date = account.getActivationLocalDate()) != null)
+        }
+        if ((date = account.getActivationLocalDate()) != null) {
             return date;
-        if ((date = account.getRejectedOnDate()) != null)
+        }
+        if ((date = account.getRejectedOnDate()) != null) {
             return date;
-        if ((date = account.getApprovedOnDate()) != null)
+        }
+        if ((date = account.getApprovedOnDate()) != null) {
             return date;
-        if ((date = account.getSubmittedOnDate()) != null)
+        }
+        if ((date = account.getSubmittedOnDate()) != null) {
             return date;
+        }
         return null;
     }
 }

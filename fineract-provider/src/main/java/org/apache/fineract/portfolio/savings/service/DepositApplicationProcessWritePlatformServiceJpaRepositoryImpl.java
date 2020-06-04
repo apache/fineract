@@ -65,8 +65,8 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -232,11 +232,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             final Long savingsId = account.getId();
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -295,11 +295,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     financialYearBeginningMonth);
             account.validateApplicableInterestRate();
             this.savingAccountRepository.save(account);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted( BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -786,8 +786,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
     }
 
-    private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
-        Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
+        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }

@@ -39,6 +39,8 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -46,8 +48,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BulkImportEventListener implements ApplicationListener<BulkImportEvent> {
-
-
+    private final static Logger LOG = LoggerFactory.getLogger(BulkImportEventListener.class);
     private final TenantDetailsService tenantDetailsService;
     private final ApplicationContext applicationContext;
     private final ImportDocumentRepository importRepository;
@@ -163,7 +164,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
                 bos.close();
             }
         } catch (IOException io) {
-            io.printStackTrace();
+            LOG.error("Problem occurred in onApplicationEvent function",io);
         }
         byte[] bytes = bos.toByteArray();
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);

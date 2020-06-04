@@ -364,7 +364,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     }
 
     @Test
-    public void createApproveAndValidateMultiDisburseLoan() {
+    public void createApproveAndValidateMultiDisburseLoan() throws ParseException{
 
         List<HashMap> createTranches = new ArrayList<>();
         String id = null;
@@ -399,13 +399,13 @@ public class LoanDisbursementDetailsIntegrationTest {
         this.editLoanDisbursementDetails();
     }
 
-    private void editLoanDisbursementDetails() {
+    private void editLoanDisbursementDetails() throws ParseException {
         this.editDateAndPrincipalOfExistingTranche();
         this.addNewDisbursementDetails();
         this.deleteDisbursmentDetails();
     }
 
-    private void addNewDisbursementDetails() {
+    private void addNewDisbursementDetails() throws ParseException {
         List<HashMap> addTranches = new ArrayList<>();
         ArrayList<HashMap> disbursementDetails = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanDetail(this.requestSpec,
                 this.responseSpec, this.loanID, "disbursementDetails");
@@ -423,7 +423,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 addTranches, "");
     }
 
-    private void deleteDisbursmentDetails() {
+    private void deleteDisbursmentDetails() throws ParseException{
         List<HashMap> deleteTranches = new ArrayList<>();
         ArrayList<HashMap> disbursementDetails = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanDetail(this.requestSpec,
                 this.responseSpec, this.loanID, "disbursementDetails");
@@ -440,7 +440,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 deleteTranches, "");
     }
 
-    private void editDateAndPrincipalOfExistingTranche() {
+    private void editDateAndPrincipalOfExistingTranche() throws ParseException{
         String updatedExpectedDisbursementDate = "01 March 2014";
         String updatedPrincipal = "900";
         /* Update */
@@ -456,16 +456,12 @@ public class LoanDisbursementDetailsIntegrationTest {
 
     }
 
-    private String formatExpectedDisbursementDate(String expectedDisbursementDate) {
+    private String formatExpectedDisbursementDate(String expectedDisbursementDate) throws ParseException {
 
         SimpleDateFormat source = new SimpleDateFormat("[yyyy, MM, dd]");
         SimpleDateFormat target = new SimpleDateFormat("dd MMMM yyyy");
-        String date = null;
-        try {
-            date = target.format(source.parse(expectedDisbursementDate));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        String date = target.format(source.parse(expectedDisbursementDate));
+
         return date;
     }
 

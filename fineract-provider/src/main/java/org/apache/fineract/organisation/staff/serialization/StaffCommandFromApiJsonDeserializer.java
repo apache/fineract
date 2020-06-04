@@ -87,13 +87,13 @@ public final class StaffCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
-            baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed("isLoanOfficer", element);
+            baseDataValidator.reset().parameter("isLoanOfficer").trueOrFalseRequired(loanOfficerFlag);
         }
 
         if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
-            baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
+            final String activeFlag = this.fromApiJsonHelper.extractStringNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(activeFlag);
         }
 
         final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
@@ -107,6 +107,11 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("locale", element)) {
             final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
             baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("externalId", element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+            baseDataValidator.reset().parameter("externalId").value(externalId).notBlank().notExceedingLengthOf(100);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -147,16 +152,20 @@ public final class StaffCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
-            baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed("isLoanOfficer", element);
+            baseDataValidator.reset().parameter("isLoanOfficer").trueOrFalseRequired(loanOfficerFlag);
         }
 
         if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
+            final String activeFlagStr = this.fromApiJsonHelper.extractStringNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(activeFlagStr);
+
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+
             //Need to add here check to see if any clients, group, account and loans are assigned to this staff if staff is being set to inactive --LJB
             final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed("forceStatus", element);
-            if ((!activeFlag && forceStatus == null) ||
-                (!activeFlag && forceStatus)) {
+            if (!activeFlag && forceStatus == null ||
+                    !activeFlag && forceStatus) {
                  Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
 
                 if (result != null && result.length > 0) {
@@ -180,6 +189,11 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("locale", element)) {
             final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
             baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("externalId", element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+            baseDataValidator.reset().parameter("externalId").value(externalId).notBlank().notExceedingLengthOf(100);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

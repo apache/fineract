@@ -74,7 +74,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
         sqlBuilder.append(this.standingInstructionHistoryMapper.schema());
         if (standingInstructionDTO.transferType() != null || standingInstructionDTO.clientId() != null
                 || standingInstructionDTO.clientName() != null
-                || (standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null)
+                || standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null
                 || standingInstructionDTO.startDateRange() != null || standingInstructionDTO.endDateRange() != null) {
             sqlBuilder.append(" where ");
         }

@@ -278,7 +278,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // will check for EMI amount greater than interest calculated
             if (loanApplicationTerms.getFixedEmiAmount() != null
-                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) == -1) {
+                    && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) < 0) {
                 String errorMsg = "EMI amount must be greater than : " + principalInterestForThisPeriod.interest().getAmount();
                 throw new MultiDisbursementEmiAmountException(errorMsg, principalInterestForThisPeriod.interest().getAmount(),
                         loanApplicationTerms.getFixedEmiAmount());
@@ -517,10 +517,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 scheduleParams.getTotalCumulativePrincipal().plus(
                                         currentPeriodParams.getPrincipalForThisPeriod().minus(principalProcessed)),
                                 scheduleParams.getPeriodNumber() + 1, mc));
-                        if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
-                                && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
-                            currentPeriodParams.setEmiAmountChanged(true);
-                        }
+                      if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+                        && fixedEmiAmount != null
+                        && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+                        currentPeriodParams.setEmiAmountChanged(true);
+                      }
 
                     }
                     adjustCompoundedAmountWithPaidDetail(scheduleParams, lastRestDate, currentTransactions, loanApplicationTerms,
@@ -636,11 +637,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduleParams.getReducePrincipal(),
                     scheduleParams.getTotalCumulativePrincipal().plus(currentPeriodParams.getPrincipalForThisPeriod())
                             .plus(currentPeriodParams.getEarlyPaidAmount()), scheduleParams.getPeriodNumber() + 1, mc));
-            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
-                    && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
-                currentPeriodParams.setEmiAmountChanged(true);
-            }
-            currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
+          if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment()
+            && fixedEmiAmount != null
+            && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+            currentPeriodParams.setEmiAmountChanged(true);
+          }
+          currentPeriodParams.plusPrincipalForThisPeriod(currentPeriodParams.getEarlyPaidAmount());
         }
 
         // update outstandingLoanBlance using current period

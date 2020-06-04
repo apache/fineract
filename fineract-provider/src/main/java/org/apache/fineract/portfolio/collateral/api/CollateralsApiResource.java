@@ -137,16 +137,16 @@ public class CollateralsApiResource {
             @PathParam("collateralId") @ApiParam(value = "collateralId") final Long CollateralId) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        CollateralData CollateralData = this.collateralReadPlatformService.retrieveCollateral(loanId, CollateralId);
+        CollateralData collateralData = this.collateralReadPlatformService.retrieveCollateral(loanId, CollateralId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService
                     .retrieveCodeValuesByCode(CollateralApiConstants.COLLATERAL_CODE_NAME);
-            CollateralData = CollateralData.template(CollateralData, codeValues);
+            collateralData = collateralData.template(collateralData, codeValues);
         }
 
-        return this.apiJsonSerializerService.serialize(settings, CollateralData, RESPONSE_DATA_PARAMETERS);
+        return this.apiJsonSerializerService.serialize(settings, collateralData, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

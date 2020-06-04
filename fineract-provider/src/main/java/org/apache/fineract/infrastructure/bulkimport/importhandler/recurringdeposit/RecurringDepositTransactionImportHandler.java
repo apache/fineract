@@ -43,11 +43,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class RecurringDepositTransactionImportHandler implements ImportHandler {
 
+    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositTransactionImportHandler.class);
     private Workbook workbook;
     private List<SavingsAccountTransactionData> savingsTransactions;
     private String savingsAccountId = "";
@@ -73,23 +77,28 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
                 row = savingsTransactionSheet.getRow(rowIndex);
-                if(ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL))
-                    savingsTransactions.add(readSavingsTransaction(row,locale,dateFormat));
+                if(ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL)) {
+                    savingsTransactions.add(readSavingsTransaction(row, locale, dateFormat));
+                }
         }
     }
 
     private SavingsAccountTransactionData readSavingsTransaction(Row row,String locale, String dateFormat) {
         String savingsAccountIdCheck=null;
-        if (ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row)!=null)
-        savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row).toString();
-        if(savingsAccountIdCheck!=null)
+        if (ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row)!=null) {
+            savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row)
+                    .toString();
+        }
+        if(savingsAccountIdCheck!=null) {
             savingsAccountId = savingsAccountIdCheck;
+        }
         String transactionType = ImportHandlerUtils.readAsString(TransactionConstants.TRANSACTION_TYPE_COL, row);
         SavingsAccountTransactionEnumData savingsAccountTransactionEnumData=new SavingsAccountTransactionEnumData(null,null,transactionType);
 
         BigDecimal amount=null;
-        if (ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row)!=null)
+        if (ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row)!=null) {
             amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(TransactionConstants.AMOUNT_COL, row));
+        }
 
         LocalDate transactionDate = ImportHandlerUtils.readAsDate(TransactionConstants.TRANSACTION_DATE_COL, row);
         String paymentType = ImportHandlerUtils.readAsString(TransactionConstants.PAYMENT_TYPE_COL, row);
@@ -141,12 +150,12 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (AbstractPlatformDomainRuleException e) {
                 errorCount++;
-                e.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",e);
                 errorMessage = e.getDefaultUserMessage();
                 ImportHandlerUtils.writeErrorMessage(savingsTransactionSheet,transaction.getRowIndex(),errorMessage,TransactionConstants.STATUS_COL);
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(savingsTransactionSheet,transaction.getRowIndex(),errorMessage,TransactionConstants.STATUS_COL);
             }

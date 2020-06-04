@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FineractEntityAccessWriteServiceImpl implements FineractEntityAccessWriteService {
 
-    private final static Logger logger = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
     private final FineractEntityAccessRepository entityAccessRepository;
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
@@ -164,8 +164,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-
-        realCause.printStackTrace();
+        LOG.error("Problem occurred in handleDataIntegrityIssues function",realCause);
         if (realCause.getMessage().contains("rel_id_from_id_to_id")) {
             final String fromId = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
             final String toId = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
@@ -178,7 +177,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     /*

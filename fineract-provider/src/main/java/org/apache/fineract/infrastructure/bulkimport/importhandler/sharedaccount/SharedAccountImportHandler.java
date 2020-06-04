@@ -40,10 +40,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class SharedAccountImportHandler implements ImportHandler {
+
+    private final static Logger LOG = LoggerFactory.getLogger(SharedAccountImportHandler.class);
     private Workbook workbook;
     private List<ShareAccountData> shareAccountDataList;
     private List<String>statuses;
@@ -124,8 +129,9 @@ public class SharedAccountImportHandler implements ImportHandler {
             Long chargeId=ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),chargeName);
 
             BigDecimal amount=null;
-            if(ImportHandlerUtils.readAsDouble(cellNo+1,row)!=null)
-            amount=BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(cellNo+1,row));
+            if(ImportHandlerUtils.readAsDouble(cellNo+1,row)!=null) {
+                amount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(cellNo + 1, row));
+            }
 
             ShareAccountChargeData shareAccountChargeData=new ShareAccountChargeData(chargeId,amount);
             charges.add(shareAccountChargeData);
@@ -161,7 +167,7 @@ public class SharedAccountImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(sharedAccountsSheet,shareAccountData.getRowIndex(),errorMessage,SharedAccountsConstants.STATUS_COL);
             }

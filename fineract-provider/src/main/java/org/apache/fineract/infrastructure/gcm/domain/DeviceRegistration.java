@@ -45,6 +45,8 @@ public class DeviceRegistration extends AbstractPersistableCustom {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOnDate;
 
+    private DeviceRegistration() {}
+
     private DeviceRegistration(final Client client, final String registrationId) {
         this.client = client;
         this.registrationId = registrationId;

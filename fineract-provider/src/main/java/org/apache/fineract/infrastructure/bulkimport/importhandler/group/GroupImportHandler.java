@@ -46,11 +46,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GroupImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(GroupImportHandler.class);
     private List<GroupGeneralData> groups;
     private List<CalendarData> meetings;
     private Workbook workbook;
@@ -95,13 +98,16 @@ public class GroupImportHandler implements ImportHandler {
         Integer interval = ImportHandlerUtils.readAsInt(GroupConstants.INTERVAL_COL, row);
         String repeatsOnDay = ImportHandlerUtils.readAsString(GroupConstants.REPEATS_ON_DAY_COL, row);
         EnumOptionData repeatsOnDayEnum=new EnumOptionData(null,null,ImportHandlerUtils.getRepeatsOnDayId(repeatsOnDay));
-        if(meetingStartDate==null)
+        if(meetingStartDate==null) {
             return null;
-        else {
-            if(repeatsOnDay==null)
-                return CalendarData.importInstanceNoRepeatsOnDay(meetingStartDate, isRepeating, frequencyEnum, interval, row.getRowNum(),locale,dateFormat);
-            else
-                return CalendarData.importInstanceWithRepeatsOnDay(meetingStartDate, isRepeating, frequencyEnum, interval, repeatsOnDayEnum, row.getRowNum(),locale,dateFormat);
+        } else {
+            if(repeatsOnDay==null) {
+                return CalendarData.importInstanceNoRepeatsOnDay(meetingStartDate, isRepeating, frequencyEnum, interval,
+                        row.getRowNum(), locale, dateFormat);
+            } else {
+                return CalendarData.importInstanceWithRepeatsOnDay(meetingStartDate, isRepeating, frequencyEnum,
+                        interval, repeatsOnDayEnum, row.getRowNum(), locale, dateFormat);
+            }
         }
     }
     private GroupGeneralData readGroup(Row row,String locale,String dateFormat) {
@@ -112,8 +118,10 @@ public class GroupImportHandler implements ImportHandler {
         Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
         String centerName = ImportHandlerUtils.readAsString(GroupConstants.CENTER_NAME_COL, row);
         Long centerId=null;
-        if(centerName!=null)
-        centerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME), centerName);
+        if(centerName!=null) {
+            centerId = ImportHandlerUtils
+                    .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME), centerName);
+        }
         String externalId = ImportHandlerUtils.readAsString(GroupConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(GroupConstants.ACTIVE_COL, row);
         LocalDate submittedOnDate=ImportHandlerUtils.readAsDate(GroupConstants.SUBMITTED_ON_DATE_COL,row);
@@ -130,8 +138,9 @@ public class GroupImportHandler implements ImportHandler {
         List<ClientData> clientMembers = new ArrayList<>();
         for (int cellNo = GroupConstants.CLIENT_NAMES_STARTING_COL; cellNo <GroupConstants.CLIENT_NAMES_ENDING_COL; cellNo++) {
             String clientName = ImportHandlerUtils.readAsString(cellNo, row);
-            if (clientName==null)
+            if (clientName==null) {
                 break;
+            }
             Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
             ClientData clientData = ClientData.emptyInstance(clientId);
             if (!containsClientId(clientMembers,clientId)) {
@@ -173,17 +182,21 @@ public class GroupImportHandler implements ImportHandler {
                     result = importGroup(i,dateFormat);
                     groupId = result.getGroupId().toString();
                     progressLevel = 1;
-                } else
-                    groupId = ImportHandlerUtils.readAsInt(GroupConstants.GROUP_ID_COL, groupSheet.getRow(groups.get(i).getRowIndex())).toString();
+                } else {
+                    groupId = ImportHandlerUtils
+                            .readAsInt(GroupConstants.GROUP_ID_COL, groupSheet.getRow(groups.get(i).getRowIndex()))
+                            .toString();
+                }
 
-                if(meetings.get(i) != null && groups.get(i).getCenterId() == null)
-                    progressLevel = importGroupMeeting(result, i,dateFormat);
+                if(meetings.get(i) != null && groups.get(i).getCenterId() == null) {
+                    progressLevel = importGroupMeeting(result, i, dateFormat);
+                }
 
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 writeGroupErrorMessage(groupId,errorMessage,progressLevel,statusCell,errorReportCell,row);
             }
@@ -193,15 +206,17 @@ public class GroupImportHandler implements ImportHandler {
     }
     private void writeGroupErrorMessage(String groupId,String errorMessage,int progressLevel,Cell statusCell,Cell errorReportCell,Row row){
         String status = "";
-        if(progressLevel == 0)
+        if(progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
-        else if(progressLevel == 1)
-            status =TemplatePopulateImportConstants.STATUS_MEETING_FAILED ;
+        } else if (progressLevel == 1) {
+            status = TemplatePopulateImportConstants.STATUS_MEETING_FAILED;
+        }
         statusCell.setCellValue(status);
         statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.RED));
 
-        if(progressLevel>0)
+        if(progressLevel>0) {
             row.createCell(GroupConstants.GROUP_ID_COL).setCellValue(Integer.parseInt(groupId));
+        }
         errorReportCell.setCellValue(errorMessage);
     }
     private void setReportHeaders(Sheet groupSheet) {
@@ -248,10 +263,11 @@ public class GroupImportHandler implements ImportHandler {
     }
 
     private int getProgressLevel(String status) {
-        if(status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED))
+        if(status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
-        else if(status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED))
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED)) {
             return 1;
+        }
         return 0;
     }
 

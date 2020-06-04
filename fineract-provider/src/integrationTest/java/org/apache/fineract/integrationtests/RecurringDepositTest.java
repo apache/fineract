@@ -26,8 +26,6 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +33,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -60,7 +58,6 @@ import org.joda.time.Months;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +100,11 @@ public class RecurringDepositTest {
     public static final Integer ANNUL_INTERVAL = 12;
 
     public static final Float DEPOSIT_AMOUNT = 2000.0f;
+
+    // TODO Given the difference in calculation methods in test vs application, the exact values
+    // returned may differ enough to cause differences in rounding. Given this, we only compare the full
+    // digits. A proper solution would be to implement the exact interest calculation in this test,
+    // and then to compare the exact results
 
     @Before
     public void setup() {
@@ -153,7 +155,7 @@ public class RecurringDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -305,7 +307,7 @@ public class RecurringDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -462,14 +464,12 @@ public class RecurringDepositTest {
         Float prematurityAmount = (Float) recurringDepositData.get("maturityAmount");
 
         HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
-        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
+        Double balanceAfter = Math.floor((Float) savingsSummaryAfter.get("accountBalance"));
+        Double expectedSavingsBalance = Math.floor(balanceBefore + prematurityAmount);
 
-        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", decimalFormat.format(expectedSavingsBalance),
-                decimalFormat.format(balanceAfter));
+        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", expectedSavingsBalance,
+                balanceAfter);
 
     }
 
@@ -510,7 +510,7 @@ public class RecurringDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -676,21 +676,18 @@ public class RecurringDepositTest {
                 JournalEntry.TransactionType.CREDIT));
 
         HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
-        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
+        Double balanceAfter = Math.floor((Float) savingsSummaryAfter.get("accountBalance"));
+        Double expectedSavingsBalance = Math.floor(balanceBefore + prematurityAmount);
 
-        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", decimalFormat.format(expectedSavingsBalance),
-                decimalFormat.format(balanceAfter));
+        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", expectedSavingsBalance,
+                balanceAfter);
 
     }
 
 
 
     @Test
-    @Ignore // TODO FINERACT-855
     public void testRecurringDepositAccountWithClosureTypeTransferToSavings_WITH_HOLD_TAX() throws InterruptedException {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
@@ -727,7 +724,7 @@ public class RecurringDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         Calendar closedOn = Calendar.getInstance();
@@ -829,9 +826,9 @@ public class RecurringDepositTest {
          * FD account verify whether account is matured
          */
 
-        SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec, responseSpec);
+        SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec);
         String JobName = "Update Deposit Accounts Maturity details";
-        schedulerJobHelper.executeJob(JobName);
+        schedulerJobHelper.executeAndAwaitJob(JobName);
 
         HashMap accountDetails = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
@@ -857,7 +854,6 @@ public class RecurringDepositTest {
      * transaction type ReInvest and Cash Based accounting enabled
      */
     @Test
-    @Ignore // TODO FINERACT-855
     public void testRecurringDepositAccountWithPrematureClosureTypeReinvest() {
         this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
@@ -895,7 +891,7 @@ public class RecurringDepositTest {
 
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
@@ -1420,8 +1416,8 @@ public class RecurringDepositTest {
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1430,10 +1426,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositAmount,
                 depositPeriod, interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
     }
@@ -1505,8 +1499,8 @@ public class RecurringDepositTest {
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1515,10 +1509,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositAmount,
                 depositPeriod, interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
     }
@@ -1588,21 +1580,18 @@ public class RecurringDepositTest {
         Float principal = (Float) recurringDepositSummary.get("totalDeposits");
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
-        Float interestToBePosted = Float.valueOf(decimalFormat.format(interestPerDay * principal * daysInMonth));
+        daysInMonth = daysInMonth - currentDate + 1;
+        Float interestToBePosted = (float) (interestPerDay * principal * daysInMonth);
         principal += interestToBePosted;
 
-        Float expectedBalanceAfter = Float.valueOf(decimalFormat.format(principal));
+        Float expectedBalanceAfter = (float) Math.floor(principal);
         LOG.info("{}",expectedBalanceAfter.toString());
 
         Integer transactionIdForPostInterest = this.recurringDepositAccountHelper
@@ -1610,8 +1599,9 @@ public class RecurringDepositTest {
         Assert.assertNotNull(transactionIdForPostInterest);
 
         HashMap recurringDepositAccountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
-        Float interestAmountPosted = Float.valueOf(decimalFormat.format(recurringDepositAccountSummary.get("totalInterestPosted")));
-        Float principalAfter = Float.valueOf(decimalFormat.format(recurringDepositAccountSummary.get("accountBalance")));
+        Float interestAmountPosted = (float) Math.floor((Float) recurringDepositAccountSummary.get("totalInterestPosted"));
+        Float principalAfter = (float) Math.floor((Float) recurringDepositAccountSummary.get("accountBalance"));
+        interestToBePosted = (float) Math.floor(interestToBePosted);
 
         Assert.assertEquals("Verifying Amount of Interest Posted to Recurring Deposit Account", interestToBePosted, interestAmountPosted);
         Assert.assertEquals("Verifying Principal Amount after Interest Posting", expectedBalanceAfter, principalAfter);
@@ -1696,8 +1686,8 @@ public class RecurringDepositTest {
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1705,7 +1695,7 @@ public class RecurringDepositTest {
         calendar.add(Calendar.MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
@@ -1735,11 +1725,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1828,8 +1816,8 @@ public class RecurringDepositTest {
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1837,7 +1825,7 @@ public class RecurringDepositTest {
         calendar.add(Calendar.MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
@@ -1867,11 +1855,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -1967,8 +1953,8 @@ public class RecurringDepositTest {
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -1977,7 +1963,7 @@ public class RecurringDepositTest {
         calendar.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
@@ -2007,11 +1993,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -2112,8 +2096,8 @@ public class RecurringDepositTest {
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2122,7 +2106,7 @@ public class RecurringDepositTest {
         calendar.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = Integer.valueOf(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
-        daysInMonth = (daysInMonth - currentDate) + 1;
+        daysInMonth = daysInMonth - currentDate + 1;
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth + depositAmount;
         calendar.add(Calendar.DATE, daysInMonth);
@@ -2152,11 +2136,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
 
-        principal = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+        principal = (float) Math.floor(principal);
+        Float maturityAmount = (float) Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
 
@@ -2227,8 +2209,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2237,10 +2219,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
                 depositPeriod, interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
 
@@ -2312,8 +2292,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2322,10 +2302,8 @@ public class RecurringDepositTest {
         principal = this.recurringDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, recurringDepositAmount,
                 depositPeriod, interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = Float.valueOf(decimalFormat.format(principal));
-        maturityAmount = Float.valueOf(decimalFormat.format(maturityAmount));
+        principal = (float) Math.floor(principal);
+        maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
         Assert.assertEquals("Verifying Maturity amount for Recurring Deposit Account", principal, maturityAmount);
 
@@ -2355,7 +2333,7 @@ public class RecurringDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2403,8 +2381,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}" , perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2413,10 +2391,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2446,7 +2423,7 @@ public class RecurringDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2494,8 +2471,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2504,10 +2481,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2536,7 +2512,7 @@ public class RecurringDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2585,8 +2561,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2595,10 +2571,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2627,7 +2602,7 @@ public class RecurringDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2676,8 +2651,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2686,10 +2661,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2719,7 +2693,7 @@ public class RecurringDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2767,8 +2741,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2777,10 +2751,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -2810,7 +2783,7 @@ public class RecurringDepositTest {
         Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         Integer daysLeft = daysInMonth - currentDate;
-        todaysDate.add(Calendar.DATE, (daysLeft + 1));
+        todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         LOG.info("{}",dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
@@ -2858,8 +2831,8 @@ public class RecurringDepositTest {
                 this.requestSpec, this.responseSpec, recurringDepositProductId);
 
         Float interestRate = this.recurringDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
-        double interestRateInFraction = (interestRate / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = interestRate / 100;
+        double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {} " ,  perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
@@ -2868,10 +2841,9 @@ public class RecurringDepositTest {
 
         recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        Float expectedPrematureAmount = Float.valueOf(decimalFormat.format(principal));
-        Float maturityAmount = Float.valueOf(decimalFormat.format(recurringDepositAccountData.get("maturityAmount")));
+
+        Double expectedPrematureAmount = Math.floor(principal);
+        Double maturityAmount = Math.floor((Float) recurringDepositAccountData.get("maturityAmount"));
 
         Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
 
@@ -3137,7 +3109,7 @@ public class RecurringDepositTest {
     }
 
     private Account getMappedLiabilityFinancialAccount() {
-        final Integer liabilityTransferFinancialActivityId = FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue();
+        final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID = FinancialActivity.LIABILITY_TRANSFER.getValue();
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         final Account financialAccount;
         /***
@@ -3145,7 +3117,7 @@ public class RecurringDepositTest {
          * liability financial accounting mappings
          */
         if (financialActivities.isEmpty()) {
-            financialAccount = createLiabilityFinancialAccountTransferType(liabilityTransferFinancialActivityId);
+            financialAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);
         } else {
             /***
              * extract mapped liability financial account
@@ -3153,7 +3125,7 @@ public class RecurringDepositTest {
             Account mappedLiabilityAccount = null;
             for (HashMap financialActivity : financialActivities) {
                 HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
-                if (financialActivityData.get("id").equals(liabilityTransferFinancialActivityId)) {
+                if (financialActivityData.get("id").equals(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
                     HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
                     mappedLiabilityAccount = new Account((Integer) glAccountData.get("id"), AccountType.LIABILITY);
                     break;
@@ -3163,23 +3135,23 @@ public class RecurringDepositTest {
              * If liability transfer is not defined create liability transfer
              */
             if (mappedLiabilityAccount == null) {
-                mappedLiabilityAccount = createLiabilityFinancialAccountTransferType(liabilityTransferFinancialActivityId);
+                mappedLiabilityAccount = createLiabilityFinancialAccountTransferType(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID);
             }
             financialAccount = mappedLiabilityAccount;
         }
         return financialAccount;
     }
 
-    private Account createLiabilityFinancialAccountTransferType(final Integer liabilityTransferFinancialActivityId) {
+    private Account createLiabilityFinancialAccountTransferType(final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID) {
         /***
          * Create and verify financial account transfer type is created
          */
         final Account liabilityAccountForMapping = this.accountHelper.createLiabilityAccount();
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                liabilityTransferFinancialActivityId, liabilityAccountForMapping.getAccountID(), this.responseSpec,
+                LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping.getAccountID(), this.responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(financialActivityAccountId);
-        assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId, liabilityAccountForMapping);
+        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping);
         return liabilityAccountForMapping;
     }
 

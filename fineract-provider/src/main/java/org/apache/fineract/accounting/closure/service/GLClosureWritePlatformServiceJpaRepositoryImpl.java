@@ -27,7 +27,7 @@ import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
 import org.apache.fineract.accounting.closure.exception.GLClosureDuplicateException;
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidDeleteException;
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException;
-import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException.GL_CLOSURE_INVALID_REASON;
+import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException.GlClosureInvalidReason;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -75,12 +75,12 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             // ensure closure date is not in the future
             final Date todaysDate = new Date();
             final Date closureDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
-            if (closureDate.after(todaysDate)) { throw new GLClosureInvalidException(GL_CLOSURE_INVALID_REASON.FUTURE_DATE, closureDate); }
+            if (closureDate.after(todaysDate)) { throw new GLClosureInvalidException(GlClosureInvalidReason.FUTURE_DATE, closureDate); }
             // shouldn't be before an existing accounting closure
             final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
             if (latestGLClosure != null) {
                 if (latestGLClosure.getClosingDate().after(closureDate)) { throw new GLClosureInvalidException(
-                        GL_CLOSURE_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate()); }
+                        GlClosureInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate()); }
             }
             final GLClosure glClosure = GLClosure.fromJson(office, command);
 

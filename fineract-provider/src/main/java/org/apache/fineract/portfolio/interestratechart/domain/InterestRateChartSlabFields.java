@@ -163,7 +163,7 @@ public class InterestRateChartSlabFields {
 
     public boolean isFromPeriodGreaterThanToPeriod() {
         boolean isGreater = false;
-        if (this.toPeriod != null && this.fromPeriod.compareTo(this.toPeriod) > 1) {
+        if (this.toPeriod != null && this.fromPeriod.compareTo(this.toPeriod) > 0) {
             isGreater = true;
         }
         return isGreater;
@@ -171,7 +171,7 @@ public class InterestRateChartSlabFields {
 
     public boolean isAmountRangeFromGreaterThanTo() {
         boolean isGreater = false;
-        if (this.amountRangeFrom != null && this.amountRangeTo != null && this.amountRangeFrom.compareTo(this.amountRangeTo) > 1) {
+        if (this.amountRangeFrom != null && this.amountRangeTo != null && this.amountRangeFrom.compareTo(this.amountRangeTo) > 0) {
             isGreater = true;
         }
         return isGreater;
@@ -281,8 +281,8 @@ public class InterestRateChartSlabFields {
             return true;
         } else if (this.amountRangeTo == null) {
             return true;
-        } else if (that.amountRangeTo == null) { return that.amountRangeFrom.compareTo(this.amountRangeTo) < 1; }
-        return this.amountRangeFrom.compareTo(that.amountRangeTo) < 1 && that.amountRangeFrom.compareTo(this.amountRangeTo) < 1;
+        } else if (that.amountRangeTo == null) { return that.amountRangeFrom.compareTo(this.amountRangeTo) <= 0; }
+        return this.amountRangeFrom.compareTo(that.amountRangeTo) <= 0 && that.amountRangeFrom.compareTo(this.amountRangeTo) <= 0;
     }
 
     public boolean isAmountSame(final InterestRateChartSlabFields that) {

@@ -81,8 +81,8 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collateral.domain.LoanCollateral;
 import org.apache.fineract.portfolio.collateral.service.CollateralAssembler;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -513,7 +513,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         && repaymentFrequencyNthDayType != null) {
                     final String title = "loan_schedule_" + newLoanApplication.getId();
                     LocalDate calendarStartDate = loanApplicationTerms.getRepaymentsStartingFromLocalDate();
-                    if (calendarStartDate == null) calendarStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+                    if (calendarStartDate == null) {
+                        calendarStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+                    }
                     final CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.MONTHLY;
                     final Integer frequency = loanApplicationTerms.getRepaymentEvery();
                     final Integer repeatsOnDay = loanApplicationTerms.getWeekDayType().getValue();
@@ -550,7 +552,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 if(gsimClientMembers.contains(BigDecimal.valueOf(newLoanApplication.getClientId())))
                 {
-                    savingsAccount = this.savingsAccountAssembler.assembleFrom((clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId()))).longValue());
+                    savingsAccount = this.savingsAccountAssembler.assembleFrom(clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId())).longValue());
 
                         this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
                     boolean isActive = true;
@@ -585,8 +587,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     EntityTables.LOAN.getName(), StatusEnum.CREATE.getCode().longValue(),
                     EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), newLoanApplication.productId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_CREATE,
-                    constructEntityMap(BUSINESS_ENTITY.LOAN, newLoanApplication));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_CREATE,
+                    constructEntityMap(BusinessEntity.LOAN, newLoanApplication));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -1095,7 +1097,9 @@ public void checkForProductMixRestrictions(final Loan loan) {
                                 final CalendarFrequencyType repaymentFrequencyType = CalendarFrequencyType.MONTHLY;
                                 final Integer interval = command.integerValueOfParameterNamed("repaymentEvery");
                                 LocalDate startDate = command.localDateValueOfParameterNamed("repaymentsStartingFromDate");
-                                if (startDate == null) startDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
+                                if (startDate == null) {
+                                    startDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
+                                }
                                 final Calendar newCalendar = Calendar.createRepeatingCalendar(title, startDate, typeId,
                                         repaymentFrequencyType, interval, (Integer) changes.get("repaymentFrequencyDayOfWeekType"),
                                         (Integer) changes.get("repaymentFrequencyNthDayType"));
@@ -1434,8 +1438,8 @@ public void checkForProductMixRestrictions(final Loan loan) {
                 this.noteRepository.save(note);
             }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_APPROVED,
-                    constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_APPROVED,
+                    constructEntityMap(BusinessEntity.LOAN, loan));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -1516,8 +1520,8 @@ public void checkForProductMixRestrictions(final Loan loan) {
                 final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_UNDO_APPROVAL,
-                    constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_UNDO_APPROVAL,
+                    constructEntityMap(BusinessEntity.LOAN, loan));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -1591,7 +1595,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
                 this.noteRepository.save(note);
             }
         }
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_REJECTED, constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_REJECTED, constructEntityMap(BusinessEntity.LOAN, loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
@@ -1712,8 +1716,8 @@ public void checkForProductMixRestrictions(final Loan loan) {
         return user;
     }
 
-    private Map<BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
-        Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
+        Map<BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }

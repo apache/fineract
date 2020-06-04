@@ -348,8 +348,8 @@ public class ClientHelper {
         Integer closureReasonId = (Integer) codeValue.get("id");
 
         map.put("closureReasonId", closureReasonId.toString());
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closureDate", CREATED_DATE_PLUS_ONE);
 
         String clientJson = new Gson().toJson(map);
@@ -360,8 +360,8 @@ public class ClientHelper {
 
     private String getReactivateClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reactivationDate", CREATED_DATE_PLUS_ONE);
         String clientJson = new Gson().toJson(map);
         LOG.info(clientJson);
@@ -371,8 +371,8 @@ public class ClientHelper {
 
     private String getUndoRejectClientAsJSON(final String date) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reopenedDate", date);
         String clientJson = new Gson().toJson(map);
         LOG.info(clientJson);
@@ -382,8 +382,8 @@ public class ClientHelper {
 
     private String getUndoWithdrawnClientAsJSON(final String date) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reopenedDate", date);
         String clientJson = new Gson().toJson(map);
         LOG.info(clientJson);
@@ -403,8 +403,8 @@ public class ClientHelper {
                 this.requestSpec, this.responseSpec);
         Integer rejectionReasonId = (Integer) codeValue.get("id");
 
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectionDate", CREATED_DATE_PLUS_ONE);
         map.put("rejectionReasonId", rejectionReasonId.toString());
         String clientJson = new Gson().toJson(map);
@@ -415,8 +415,8 @@ public class ClientHelper {
 
     private String getActivateClientAsJSON(String date) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activationDate", date);
         String clientJson = new Gson().toJson(map);
         LOG.info(clientJson);
@@ -435,8 +435,8 @@ public class ClientHelper {
                 this.requestSpec, this.responseSpec);
         Integer withdrawalReasonId = (Integer) codeValue.get("id");
 
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawalDate", CREATED_DATE_PLUS_ONE);
         map.put("withdrawalReasonId", withdrawalReasonId.toString());
         String clientJson = new Gson().toJson(map);

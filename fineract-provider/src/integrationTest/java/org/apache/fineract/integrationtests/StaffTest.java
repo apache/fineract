@@ -70,7 +70,7 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noFirstnameJson);
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, noLastnameJson);
 
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 5));
@@ -91,9 +91,10 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
     }
 
+    @Test
     public void testStaffCreateMaxNameLength() {
 
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 42));
@@ -102,8 +103,9 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
     }
 
+    @Test
     public void testStaffCreateExternalIdValidationError() {
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
 
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 5));
@@ -183,6 +185,7 @@ public class StaffTest {
         Assert.assertEquals(mobileNo, changes.get("mobileNo"));
     }
 
+    @Test
     public void testStaffUpdateLongExternalIdError() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("externalId", Utils.randomStringGenerator("EXT", 98));
@@ -190,6 +193,7 @@ public class StaffTest {
         StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
     }
 
+    @Test
     public void testStaffUpdateWrongActiveState() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("isActive", "xyz");

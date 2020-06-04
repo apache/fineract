@@ -62,6 +62,8 @@ public class GroupSavingsIndividualMonitoring extends AbstractPersistableCustom
      @Column(name = "application_id", nullable = true)
      private BigDecimal applicationId;
 
+     private GroupSavingsIndividualMonitoring() {}
+
      private GroupSavingsIndividualMonitoring(String accountNumber,Group group,BigDecimal parentDeposit,Long childAccountsCount,
                Boolean isAcceptingChild,Integer savingsStatus,BigDecimal applicationId)
      {

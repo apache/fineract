@@ -192,7 +192,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
         Collection<SmsProviderData> smsProviders = this.smsCampaignDropdownReadPlatformService.retrieveSmsProviders();
         if (smsProviders.isEmpty()) { throw new PlatformDataIntegrityException("error.msg.mobile.service.provider.not.available",
                 "Mobile service provider not available."); }
-        Long providerId = (new ArrayList<>(smsProviders)).get(0).getId();
+        Long providerId = new ArrayList<>(smsProviders).get(0).getId();
         final String message = "Hi  " + selfServiceRegistration.getFirstName() + "," + "\n"
                 + "To create user, please use following details \n" + "Request Id : " + selfServiceRegistration.getId()
                 + "\n Authentication Token : " + selfServiceRegistration.getAuthenticationToken();

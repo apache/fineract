@@ -40,10 +40,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class LoanRepaymentImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(LoanRepaymentImportHandler.class);
     private  Workbook workbook;
     private  List<LoanTransactionData> loanRepayments;
     private Long loanAccountId;
@@ -70,20 +74,23 @@ public class LoanRepaymentImportHandler implements ImportHandler {
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
                 row = loanRepaymentSheet.getRow(rowIndex);
-                if(ImportHandlerUtils.isNotImported(row, LoanRepaymentConstants.STATUS_COL))
-                    loanRepayments.add(readLoanRepayment(row,locale,dateFormat));
+                if(ImportHandlerUtils.isNotImported(row, LoanRepaymentConstants.STATUS_COL)) {
+                    loanRepayments.add(readLoanRepayment(row, locale, dateFormat));
+                }
         }
     }
 
     private LoanTransactionData readLoanRepayment(Row row,String locale, String dateFormat) {
         String loanaccountInfo=ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo!=null){
-            String loanAccountAr[]=loanaccountInfo.split("-");
+            String[] loanAccountAr=loanaccountInfo.split("-");
             loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr[0]);
         }
         BigDecimal repaymentAmount=null;
-        if (ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row)!=null)
-         repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row));
+        if (ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row)!=null) {
+            repaymentAmount = BigDecimal
+                    .valueOf(ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row));
+        }
         LocalDate repaymentDate = ImportHandlerUtils.readAsDate(LoanRepaymentConstants.REPAID_ON_DATE_COL, row);
         String repaymentType = ImportHandlerUtils.readAsString(LoanRepaymentConstants.REPAYMENT_TYPE_COL, row);
         Long repaymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), repaymentType);
@@ -121,7 +128,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(loanRepaymentSheet,loanRepayment.getRowIndex(),errorMessage,LoanRepaymentConstants.STATUS_COL);
             }

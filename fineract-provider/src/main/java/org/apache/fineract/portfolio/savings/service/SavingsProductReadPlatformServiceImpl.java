@@ -68,7 +68,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and sp.id in ( " + inClause + " ) ";
         }
 
@@ -84,7 +84,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and id in ( " + inClause + " ) ";
         }
 
@@ -254,7 +254,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " where id in ( " + inClause + " ) ";
             inClauseAdded = true;
         }
@@ -288,7 +288,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
-        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+        if (inClause != null && !inClause.trim().isEmpty()) {
             sql += " and id in ( " + inClause + " ) ";
         }
 

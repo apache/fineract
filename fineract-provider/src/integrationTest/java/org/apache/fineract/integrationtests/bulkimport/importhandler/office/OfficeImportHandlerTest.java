@@ -78,8 +78,9 @@ public class OfficeImportHandlerTest {
         String currentdirectory = new File("").getAbsolutePath();
         File directory=new File(currentdirectory+File.separator+"src"+File.separator+"integrationTest"+File.separator+
                 "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"office");
-        if (!directory.exists())
+        if (!directory.exists()) {
             directory.mkdirs();
+        }
         File file= new File(directory+File.separator+"Office.xls");
         OutputStream outputStream=new FileOutputStream(file);
         workbook.write(outputStream);

@@ -20,6 +20,7 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
     spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
+    spotbugs 'com.github.spotbugs:spotbugs:4.0.3'
 
 	// Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
 	// Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.
@@ -65,13 +66,15 @@ dependencies {
             'org.flywaydb:flyway-core',
 
             'net.sf.ehcache:ehcache',
-            'com.lowagie:itext',
+            'com.github.librepdf:openpdf',
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
 
              // JAX-B dependencies for JDK 9+
-             "jakarta.xml.bind:jakarta.xml.bind-api",
-             "org.dom4j:dom4j"
+             'jakarta.xml.bind:jakarta.xml.bind-api',
+             'org.dom4j:dom4j',
+
+             'com.github.spotbugs:spotbugs-annotations',
     )
     implementation ('io.swagger:swagger-jersey-jaxrs') {
 		exclude group: 'javax.validation'

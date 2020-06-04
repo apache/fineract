@@ -61,6 +61,8 @@ public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCus
      @Column(name = "application_id", nullable = true)
      private BigDecimal applicationId;
 
+     private GroupLoanIndividualMonitoringAccount() {}
+
      private GroupLoanIndividualMonitoringAccount(String accountNumber,Group group,BigDecimal principalAmount,Long childAccountsCount,
                Boolean isAcceptingChild,Integer loanStatus,BigDecimal applicationId)
      {

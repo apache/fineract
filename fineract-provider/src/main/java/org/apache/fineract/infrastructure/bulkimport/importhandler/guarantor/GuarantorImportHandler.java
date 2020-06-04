@@ -40,11 +40,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GuarantorImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
     private Workbook workbook;
     private List<GuarantorData> guarantors;
     private Long loanAccountId ;
@@ -71,8 +74,9 @@ public class GuarantorImportHandler implements ImportHandler {
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
                 row = addGuarantorSheet.getRow(rowIndex);
-                if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL))
-                    guarantors.add(ReadGuarantor(row,locale,dateFormat));
+                if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL)) {
+                    guarantors.add(ReadGuarantor(row, locale, dateFormat));
+                }
 
         }
     }
@@ -80,24 +84,25 @@ public class GuarantorImportHandler implements ImportHandler {
     private GuarantorData ReadGuarantor(Row row,String locale,String dateFormat) {
         String loanaccountInfo=ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo!=null){
-            String loanAccountAr[]=loanaccountInfo.split("-");
+            String[] loanAccountAr=loanaccountInfo.split("-");
             loanAccountId=Long.parseLong(loanAccountAr[0]);
         }
         String guarantorType = ImportHandlerUtils.readAsString(GuarantorConstants.GUARANTO_TYPE_COL, row);
 
         Integer guarantorTypeId = null;
         if (guarantorType!=null) {
-            if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_INTERNAL))
+            if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_INTERNAL)) {
                 guarantorTypeId = 1;
-            else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL))
+            } else if (guarantorType.equalsIgnoreCase(TemplatePopulateImportConstants.GUARANTOR_EXTERNAL)) {
                 guarantorTypeId = 3;
+            }
         }
         String clientName = ImportHandlerUtils.readAsString(GuarantorConstants.ENTITY_ID_COL, row);
         Long entityId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
         String clientRelationshipTypeInfo=ImportHandlerUtils.readAsString(GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, row);
         Integer clientRelationshipTypeId=null;
         if (clientRelationshipTypeInfo!=null){
-            String clientRelationshipTypeAr[]=clientRelationshipTypeInfo.split("-");
+            String[] clientRelationshipTypeAr=clientRelationshipTypeInfo.split("-");
             clientRelationshipTypeId=Integer.parseInt(clientRelationshipTypeAr[1]);
         }
         String firstname = ImportHandlerUtils.readAsString(GuarantorConstants.FIRST_NAME_COL, row);
@@ -137,7 +142,7 @@ public class GuarantorImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(addGuarantorSheet,guarantor.getRowIndex(),errorMessage,GuarantorConstants.STATUS_COL);
             }

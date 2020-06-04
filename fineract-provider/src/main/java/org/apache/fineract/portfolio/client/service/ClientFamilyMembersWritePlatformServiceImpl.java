@@ -37,13 +37,15 @@ import org.apache.fineract.portfolio.client.domain.ClientFamilyMembers;
 import org.apache.fineract.portfolio.client.domain.ClientFamilyMembersRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.serialization.ClientFamilyMemberCommandFromApiJsonDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamilyMembersWritePlatformService
 {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ClientFamilyMembersWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final CodeValueRepository codeValueRepository;
     private final ClientFamilyMembersRepository clientFamilyRepository;
@@ -265,7 +267,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
                     dateOfBirth=date;
                 } catch (ParseException e) {
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("Problem occurred in addClientFamilyMember function",e);
                 }
 
 

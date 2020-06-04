@@ -95,7 +95,9 @@ public final class SavingsHelper {
         LocalDate periodEndDate = interestPostingUpToDate;
         final Integer monthOfYear = periodStartDate.getMonthOfYear();
         financialYearBeginningMonth--;
-        if (financialYearBeginningMonth == 0) financialYearBeginningMonth = 12;
+        if (financialYearBeginningMonth == 0) {
+            financialYearBeginningMonth = 12;
+        }
 
         final ArrayList<LocalDate> quarterlyDates = new ArrayList<>();
         quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
@@ -130,7 +132,9 @@ public final class SavingsHelper {
                     }
                 }
 
-                if (!isEndDateSet) periodEndDate = quarterlyDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+                if (!isEndDateSet) {
+                    periodEndDate = quarterlyDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+                }
             break;
             case BIANNUAL:
                 for (LocalDate biannualDate : biannualDates) {
@@ -141,7 +145,9 @@ public final class SavingsHelper {
                     }
                 }
 
-                if (!isEndDateSet) periodEndDate = biannualDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+                if (!isEndDateSet) {
+                    periodEndDate = biannualDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+                }
             break;
             case ANNUAL:
                 if (financialYearBeginningMonth < monthOfYear) {

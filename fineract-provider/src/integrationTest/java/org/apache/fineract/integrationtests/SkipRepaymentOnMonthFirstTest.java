@@ -79,9 +79,9 @@ public class SkipRepaymentOnMonthFirstTest {
         String configName = "skip-repayment-on-first-day-of-month";
         boolean newBooleanValue = true;
 
-        for (Integer configIndex = 0; configIndex < (globalConfig.size()); configIndex++) {
+        for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
-                String configId = (globalConfig.get(configIndex).get("id")).toString();
+                String configId = globalConfig.get(configIndex).get("id").toString();
                 Integer updateConfigId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(
                         this.requestSpec, this.responseSpec, configId.toString(), newBooleanValue);
                 Assert.assertNotNull(updateConfigId);

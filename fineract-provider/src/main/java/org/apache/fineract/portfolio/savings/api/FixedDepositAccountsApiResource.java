@@ -239,6 +239,7 @@ public class FixedDepositAccountsApiResource {
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
         PortfolioAccountData linkedAccount = null;
+        PortfolioAccountData transferToSavingsAccount = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -272,6 +273,10 @@ public class FixedDepositAccountsApiResource {
             }
         }
 
+        if(savingsAccount.getTransferToSavingsId() !=null){
+            transferToSavingsAccount = this.accountAssociationsReadPlatformService.retriveSavingsAccount(savingsAccount.getTransferToSavingsId());
+        }
+
         FixedDepositAccountData templateData = null;
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -281,7 +286,7 @@ public class FixedDepositAccountsApiResource {
                     staffInSelectedOfficeOnly);
         }
 
-        return FixedDepositAccountData.associationsAndTemplate(savingsAccount, templateData, transactions, charges, linkedAccount);
+        return FixedDepositAccountData.associationsAndTemplate(savingsAccount, templateData, transactions, charges, linkedAccount, transferToSavingsAccount);
     }
 
     @PUT

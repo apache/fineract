@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class CollateralCannotBeDeletedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
-    public static enum LOAN_COLLATERAL_CANNOT_BE_DELETED_REASON {
+    public static enum LoanCollateralCannotBeDeletedReason {
         LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
         public String errorMessage() {
@@ -37,7 +37,7 @@ public class CollateralCannotBeDeletedException extends AbstractPlatformDomainRu
         }
     }
 
-    public CollateralCannotBeDeletedException(final LOAN_COLLATERAL_CANNOT_BE_DELETED_REASON reason, final Long loanId,
+    public CollateralCannotBeDeletedException(final LoanCollateralCannotBeDeletedReason reason, final Long loanId,
             final Long loanCollateralId) {
         super(reason.errorCode(), reason.errorMessage(), loanId, loanCollateralId);
     }

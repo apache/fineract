@@ -90,22 +90,34 @@ public class StaffHelper {
         return Utils.performServerPut(requestSpec, responseSpec, url, json, "");
     }
 
-    public static String createStaffAsJSON(){
-        final HashMap<String, Object> map = new HashMap<>();
+    public static String createStaffAsJSON() {
+
+        final Map<String, Object> map = getMapWithJoiningDate();
+
         map.put("officeId", 1);
         map.put("firstname", Utils.randomNameGenerator("michael_", 5));
         map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
         map.put("isLoanOfficer", true);
-        map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
-        map.put("joiningDate", "20 September 2011") ;
+
         LOG.info("map :  {}" , map);
         return new Gson().toJson(map);
     }
 
+    public static Map<String, Object> getMapWithJoiningDate()
+    {
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("joiningDate", "20 September 2011");
+
+        return map;
+    }
+
     public static String createStaffWithJSONFields(String... fields) {
-        final HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = getMapWithJoiningDate();
         final List<String> fieldList = Arrays.asList(fields);
+
         if(fieldList.contains("officeId")) {
             map.put("officeId", 1);
         }

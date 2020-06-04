@@ -38,11 +38,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StaffImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(StaffImportHandler.class);
     private List<StaffData> staffList;
     private Workbook workbook;
 
@@ -81,8 +84,9 @@ public class StaffImportHandler implements ImportHandler {
         String lastName = ImportHandlerUtils.readAsString(StaffConstants.LAST_NAME_COL, row);
         Boolean isLoanOfficer=ImportHandlerUtils.readAsBoolean(StaffConstants.IS_LOAN_OFFICER,row);
         String mobileNo=null;
-        if (ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL,row)!=null)
-            mobileNo=ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL,row).toString();
+        if (ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL,row)!=null) {
+            mobileNo = ImportHandlerUtils.readAsLong(StaffConstants.MOBILE_NO_COL, row).toString();
+        }
         LocalDate joinedOnDate=ImportHandlerUtils.readAsDate(StaffConstants.JOINED_ON_COL,row);
         String externalId=ImportHandlerUtils.readAsString(StaffConstants.EXTERNAL_ID_COL,row);
         Boolean isActive=ImportHandlerUtils.readAsBoolean(StaffConstants.IS_ACTIVE_COL,row);
@@ -112,7 +116,7 @@ public class StaffImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(staffSheet,staff.getRowIndex(),errorMessage,StaffConstants.STATUS_COL);
             }

@@ -258,7 +258,9 @@ public class LoanScheduleAssembler {
         } else {
             if (repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS && nthDay != null && !nthDay.equals(NthDayType.INVALID.getValue())) {
                 LocalDate calendarStartDate = repaymentsStartingFromDate;
-                if (calendarStartDate == null) calendarStartDate = expectedDisbursementDate;
+                if (calendarStartDate == null) {
+                    calendarStartDate = expectedDisbursementDate;
+                }
                 calendar = createLoanCalendar(calendarStartDate, repaymentEvery, CalendarFrequencyType.MONTHLY, dayOfWeek, nthDay);
             }
         }
@@ -516,7 +518,7 @@ public class LoanScheduleAssembler {
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString()))) {
+                            && StringUtils.isNotBlank(jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString())) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
                     BigDecimal waivedChargeAmount = null;

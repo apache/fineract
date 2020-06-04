@@ -118,7 +118,9 @@ public class InterestRateChartSlabAssembler {
         final InterestRateChart chart = this.interestRateChartRepositoryWrapper.findOneWithNotFoundDetection(chartId);
         final InterestRateChartSlab interestRateChartSlab = chart.findChartSlab(chartSlabId);
 
-        if (interestRateChartSlab == null) throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+        if (interestRateChartSlab == null) {
+            throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+        }
 
         return interestRateChartSlab;
     }

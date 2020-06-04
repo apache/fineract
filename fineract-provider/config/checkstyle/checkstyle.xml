@@ -49,6 +49,7 @@
   -->
    
     <module name="TreeWalker">
+    <module name="SuppressWarningsHolder" />
     <module name="RegexpSinglelineJava">
             <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
             <property name="message" value="Line contains console output."/>
@@ -66,6 +67,40 @@
         </module>
            <module name="OneStatementPerLine"/>
            <module name="EmptyStatement"/>
+             <module name="RegexpSinglelineJava">
+            <property name="format" value="\.printStackTrace?\("/>
+            <property name="message" value="Line contains printStacktrace()."/>
+            <property name="ignoreComments" value="false" />
+            </module>
+        <module name="TypeName">
+            <message key="name.invalidPattern"
+             value="Type name ''{0}'' must match pattern ''{1}''."/>
+        </module>
+            <module name="MethodTypeParameterName">
+            <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
+            <message key="name.invalidPattern"
+             value="Method type name ''{0}'' must match pattern ''{1}''."/>
+        </module>
+          <module name="PackageName">
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
+            <message key="name.invalidPattern"
+             value="Package name ''{0}'' must match pattern ''{1}''."/>
+        </module>
+         <module name="AvoidEscapedUnicodeCharacters">
+            <property name="allowEscapesForControlCharacters" value="true"/>
+            <property name="allowByTailComment" value="true"/>
+            <property name="allowNonPrintableEscapes" value="true"/>
+        </module>
+          <module name="UpperEll"/>
+          <module name="NeedBraces"/>
+          <module name="ArrayTypeStyle"/>     
+          <module name="NoLineWrap"/>
+         <module name="IllegalTokenText">
+            <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
+            <property name="format" value="\\u00(08|09|0(a|A)|0(c|C)|0(d|D)|22|27|5(C|c))|\\(0(10|11|12|14|15|42|47)|134)"/>
+            <property name="message" value="Avoid using corresponding octal or Unicode escape."/>
+        </module>
+          <module name="OneTopLevelClass"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -90,30 +125,16 @@
             <property name="forbiddenImportsExcludesRegexp" value="" />
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
         </module>
-        <module name="RegexpSinglelineJava">
-            <property name="format" value="\.printStackTrace?\("/>
-            <property name="message" value="Line contains printStacktrace()."/>
-            <property name="ignoreComments" value="false" />
-        </module>
-        <module name="SuppressWarningsHolder" />
+      
+
         <module name="OuterTypeFilename"/>
-        <module name="IllegalTokenText">
-            <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
-            <property name="format" value="\\u00(08|09|0(a|A)|0(c|C)|0(d|D)|22|27|5(C|c))|\\(0(10|11|12|14|15|42|47)|134)"/>
-            <property name="message" value="Avoid using corresponding octal or Unicode escape."/>
-        </module>
-        <module name="AvoidEscapedUnicodeCharacters">
-            <property name="allowEscapesForControlCharacters" value="true"/>
-            <property name="allowByTailComment" value="true"/>
-            <property name="allowNonPrintableEscapes" value="true"/>
-        </module>
-        <module name="OneTopLevelClass"/>
-        <module name="NoLineWrap"/>
+        
+       
         <module name="EmptyBlock">
             <property name="option" value="TEXT"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
         </module>
-        <module name="NeedBraces"/>
+      
         <module name="LeftCurly" />
         <module name="RightCurly">
             <property name="option" value="alone"/>
@@ -132,10 +153,10 @@
         <module name="ParenPad" />
      
         <module name="MultipleVariableDeclarations"/>
-        <module name="ArrayTypeStyle"/>
+  
         <module name="MissingSwitchDefault"/>
         <module name="FallThrough"/>
-        <module name="UpperEll"/>
+      
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
         <module name="EmptyLineSeparator">
@@ -150,15 +171,6 @@
         <module name="SeparatorWrap">
             <property name="tokens" value="COMMA"/>
             <property name="option" value="EOL"/>
-        </module>
-        <module name="PackageName">
-            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
-            <message key="name.invalidPattern"
-             value="Package name ''{0}'' must match pattern ''{1}''."/>
-        </module>
-        <module name="TypeName">
-            <message key="name.invalidPattern"
-             value="Type name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="MemberName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
@@ -187,11 +199,7 @@
             <message key="name.invalidPattern"
              value="Method name ''{0}'' must match pattern ''{1}''."/>
         </module>
-        <module name="MethodTypeParameterName">
-            <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
-            <message key="name.invalidPattern"
-             value="Method type name ''{0}'' must match pattern ''{1}''."/>
-        </module>
+    
         <module name="ConstantName" />
         <module name="NoFinalizer"/>
         <module name="GenericWhitespace">

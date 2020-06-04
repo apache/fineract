@@ -18,6 +18,7 @@ on:
 jobs:
   setup-build-deploy:
     name: Deploy on Fineract.dev
+    if: github.repository == 'apache/fineract'
     runs-on: ubuntu-latest
 
     steps:

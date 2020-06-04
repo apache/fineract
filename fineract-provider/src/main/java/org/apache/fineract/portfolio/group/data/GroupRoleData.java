@@ -46,8 +46,12 @@ public class GroupRoleData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GroupRoleData)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GroupRoleData)) {
+            return false;
+        }
         GroupRoleData that = (GroupRoleData) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(role, that.role) &&

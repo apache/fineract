@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class LoanChargeCannotBeWaivedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
-    public static enum LOAN_CHARGE_CANNOT_BE_WAIVED_REASON {
+    public static enum LoanChargeCannotBeWaivedReason {
         ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, WAIVE_NOT_ALLOWED_FOR_CHARGE;
 
         public String errorMessage() {
@@ -50,7 +50,7 @@ public class LoanChargeCannotBeWaivedException extends AbstractPlatformDomainRul
         }
     }
 
-    public LoanChargeCannotBeWaivedException(final LOAN_CHARGE_CANNOT_BE_WAIVED_REASON reason, final Long loanChargeId) {
+    public LoanChargeCannotBeWaivedException(final LoanChargeCannotBeWaivedReason reason, final Long loanChargeId) {
         super(reason.errorCode(), reason.errorMessage(), loanChargeId);
     }
 }

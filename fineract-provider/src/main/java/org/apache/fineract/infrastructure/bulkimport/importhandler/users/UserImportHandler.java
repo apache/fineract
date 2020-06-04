@@ -37,10 +37,15 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @Service
 public class UserImportHandler implements ImportHandler{
+
+    private final static Logger LOG = LoggerFactory.getLogger(UserImportHandler.class);
     private Workbook workbook;
     private List<AppUserData> users;
     private List<String> statuses;
@@ -91,11 +96,13 @@ public class UserImportHandler implements ImportHandler{
         List<Long> rolesIds=new ArrayList<>();
         for (int cellNo=UserConstants.ROLE_NAME_START_COL;cellNo<UserConstants.ROLE_NAME_END_COL;cellNo++){
             String roleName=ImportHandlerUtils.readAsString(cellNo,row);
-            if (roleName==null)
+            if (roleName==null) {
                 break;
+            }
             Long roleId=ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.ROLES_SHEET_NAME),roleName);
-            if (!rolesIds.contains(roleId))
-             rolesIds.add(roleId);
+            if (!rolesIds.contains(roleId)) {
+                rolesIds.add(roleId);
+            }
         }
         return AppUserData.importInstance(officeId,staffId,userName,firstName,lastName,email,
                 autoGenPw,overridepw,rolesIds,row.getRowNum());
@@ -124,7 +131,7 @@ public class UserImportHandler implements ImportHandler{
 
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(userSheet,user.getRowIndex(),errorMessage,UserConstants.STATUS_COL);
             }

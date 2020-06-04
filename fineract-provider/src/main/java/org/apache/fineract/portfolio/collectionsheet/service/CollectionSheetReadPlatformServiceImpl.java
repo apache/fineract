@@ -338,7 +338,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
 
         // entityType should be center if it's within a center
-        final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
+        final CalendarEntityType entityType = group.isChildGroup() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
 
         Long entityId = null;
         if(group.isChildGroup()){
@@ -407,7 +407,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private void mergeGroup(final JLGGroupData groupSavingsData, final List<JLGGroupData> groupsWithLoanData) {
         final int index = groupsWithLoanData.indexOf(groupSavingsData);
 
-        if (index < 0) return;
+        if (index < 0) {
+            return;
+        }
 
         JLGGroupData groupLoanData = groupsWithLoanData.get(index);
         List<JLGClientData> clientsLoanData = (List<JLGClientData>) groupLoanData.getClients();
@@ -425,7 +427,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private void mergeClient(final JLGClientData clientSavingsData, List<JLGClientData> clientsLoanData) {
         final int index = clientsLoanData.indexOf(clientSavingsData);
 
-        if (index < 0) return;
+        if (index < 0) {
+            return;
+        }
 
         JLGClientData clientLoanData = clientsLoanData.get(index);
         clientLoanData.setSavings(clientSavingsData.getSavings());
@@ -886,7 +890,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             if (clientSavingsData == null || !clientSavingsData.equals(clientData)) {
                 if (clientDatas.contains(clientData)) {
                     final int index = clientDatas.indexOf(clientData);
-                    if (index < 0) return;
+                    if (index < 0) {
+                        return;
+                    }
                     clientSavingsData = clientDatas.get(index);
                     clientSavingsData.setLoans(new ArrayList<LoanDueData>());
                 } else {

@@ -30,8 +30,9 @@ public interface ProductToGLAccountMappingRepository extends JpaRepository<Produ
     ProductToGLAccountMapping findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(Long productId, int productType,
             int financialAccountType, Long paymentType);
 
-    ProductToGLAccountMapping findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(Long productId, int productType,
-            int financialAccountType, Long chargeId);
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId= :productId and mapping.productType= :productType and mapping.financialAccountType= :financialAccountType and mapping.charge.id= :chargeId")
+    ProductToGLAccountMapping findProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(@Param("productId") Long productId, @Param("productType") int productType,
+            @Param("financialAccountType") int financialAccountType, @Param("chargeId") Long ChargeId);
 
     @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=:financialAccountType and mapping.paymentType is NULL and mapping.charge is NULL")
     ProductToGLAccountMapping findCoreProductToFinAccountMapping(@Param("productId") Long productId, @Param("productType") int productType,

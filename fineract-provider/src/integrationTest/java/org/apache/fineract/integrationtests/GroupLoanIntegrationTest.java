@@ -182,7 +182,7 @@ public class GroupLoanIntegrationTest {
         Map<String, Object> map = new HashMap<>();
         map.put("loanId", loanId);
         map.put("approvedOnDate", approvedOnDate);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         return map;
     }

@@ -230,12 +230,12 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         if (applyPreMaturePenalty) {
             applicableInterestRate = applicableInterestRate.subtract(penalInterest);
-            applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) == -1 ? BigDecimal.ZERO : applicableInterestRate;
+            applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
         }
 
         this.nominalAnnualInterestRate = applicableInterestRate;
 
-        return applicableInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
 
     public void updateMaturityDateAndAmount(final MathContext mc, final boolean isPreMatureClosure,
@@ -421,7 +421,9 @@ public class RecurringDepositAccount extends SavingsAccount {
 
     public LocalDate depositStartDate() {
         final LocalDate depositStartDate = accountTermAndPreClosure.getExpectedFirstDepositOnDate();
-        if (depositStartDate == null) return accountSubmittedOrActivationDate();
+        if (depositStartDate == null) {
+            return accountSubmittedOrActivationDate();
+        }
         return depositStartDate;
     }
 
@@ -1110,7 +1112,9 @@ public class RecurringDepositAccount extends SavingsAccount {
 
     private boolean firstDepositDateBeforeAccountSubmittedOrActivationDate() {
         final LocalDate expectedFirstDepositLocalDate = accountTermAndPreClosure.getExpectedFirstDepositOnDate();
-        if (expectedFirstDepositLocalDate == null) return false;
+        if (expectedFirstDepositLocalDate == null) {
+            return false;
+        }
         return expectedFirstDepositLocalDate.isBefore(accountSubmittedOrActivationDate());
     }
 
@@ -1231,5 +1235,9 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.depositScheduleInstallments.size() ;
         super.loadLazyCollections();
         this.chart.getId() ;
+    }
+
+    public BigDecimal getDepositAmount() {
+        return this.accountTermAndPreClosure.depositAmount();
     }
 }

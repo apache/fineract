@@ -31,9 +31,12 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
+  private final static Logger LOG = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
   protected void writeInt(int colIndex, Row row, int value) {
       row.createCell(colIndex).setCellValue(value);
   }
@@ -123,8 +126,9 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                 if (clients != null){
                     for (ClientData client : clients) {
                         Row row = sheet.getRow(++rowIndex);
-                        if (row == null)
+                        if (row == null) {
                             row = sheet.createRow(rowIndex);
+                        }
                         writeString(nameCol, row, client.displayName().replaceAll("[ )(] ", "_") + "(" + client.id() + ")");
 
                         if (client.getActivationDate() != null) {
@@ -142,8 +146,9 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
             if (groups != null) {
                 for (GroupGeneralData group : groups) {
                     Row row = sheet.getRow(++rowIndex);
-                    if (row == null)
+                    if (row == null) {
                         row = sheet.createRow(rowIndex);
+                    }
                     writeString(nameCol, row, group.getName().replaceAll("[ )(] ", "_"));
 
                     if (group.getActivationDate() != null) {
@@ -154,7 +159,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                 }
             }
             } catch (ParseException e) {
-                e.printStackTrace();
+                LOG.error("Problem occurred in setClientAndGroupDateLookupTable function",e);
             }
     }
 

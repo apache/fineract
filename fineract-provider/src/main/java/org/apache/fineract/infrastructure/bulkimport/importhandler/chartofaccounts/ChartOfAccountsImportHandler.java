@@ -42,10 +42,15 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
 @Service
 public class ChartOfAccountsImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(ChartOfAccountsImportHandler.class);
     private  List<GLAccountData> glAccounts;
     private  Workbook workbook;
 
@@ -99,8 +104,9 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         }
         String glCode=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.GL_CODE_COL,row);
         Long tagId=null;
-        if(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row)!=null)
-            tagId=Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row));
+        if(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL,row)!=null) {
+            tagId = Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row));
+        }
         CodeValueData tagIdCodeValueData=new CodeValueData(tagId);
         String description=ImportHandlerUtils.readAsString(ChartOfAcountsConstants.DESCRIPTION_COL,row);
         return GLAccountData.importInstance(accountName,parentId,glCode,manualEntriesAllowed,accountTypeEnum,
@@ -130,7 +136,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 ImportHandlerUtils.writeErrorMessage(chartOfAccountsSheet,glAccount.getRowIndex(),errorMessage,ChartOfAcountsConstants.STATUS_COL);
             }

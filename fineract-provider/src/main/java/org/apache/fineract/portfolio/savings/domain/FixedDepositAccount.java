@@ -177,12 +177,12 @@ public class FixedDepositAccount extends SavingsAccount {
 
             if (applyPreMaturePenalty) {
                 applicableInterestRate = applicableInterestRate.subtract(penalInterest);
-                applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) == -1 ? BigDecimal.ZERO : applicableInterestRate;
+                applicableInterestRate = applicableInterestRate.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : applicableInterestRate;
             }
         }
         this.nominalAnnualInterestRate = applicableInterestRate;
 
-        return applicableInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        return applicableInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
 
     public void updateMaturityDateAndAmountBeforeAccountActivation(final MathContext mc, final boolean isPreMatureClosure,
@@ -258,6 +258,8 @@ public class FixedDepositAccount extends SavingsAccount {
             postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         }
     }
+
+
 
     public LocalDate calculateMaturityDate() {
 
@@ -487,6 +489,14 @@ public class FixedDepositAccount extends SavingsAccount {
         this.closedBy = currentUser;
         // this.summary.updateSummary(this.currency,
         // this.savingsAccountTransactionSummaryWrapper, this.transactions);
+    }
+
+    public void updateClosedStatus(){
+        this.status = SavingsAccountStatusType.CLOSED.getValue();
+    }
+
+    public void updateOnAccountClosureStatus(DepositAccountOnClosureType onClosureType){
+        this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
     }
 
     public void postMaturityInterest(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
@@ -756,6 +766,14 @@ public class FixedDepositAccount extends SavingsAccount {
         return this.accountTermAndPreClosure.isTransferToSavingsOnClosure();
     }
 
+    public Integer getOnAccountClosureId(){
+        return this.accountTermAndPreClosure.getOnAccountClosureType();
+    }
+
+    public Long getTransferToSavingsAccountId() {
+        return this.accountTermAndPreClosure.getTransferToSavingsAccountId();
+    }
+
     public FixedDepositAccount reInvest(BigDecimal depositAmount) {
 
         final DepositAccountTermAndPreClosure newAccountTermAndPreClosure = this.accountTermAndPreClosure.copy(depositAmount);
@@ -830,4 +848,16 @@ public class FixedDepositAccount extends SavingsAccount {
         super.loadLazyCollections();
         this.chart.getId() ;
     }
+
+    public BigDecimal getDepositAmount() {
+        return this.accountTermAndPreClosure.depositAmount();
+    }
+    @Override
+    public BigDecimal getAccountBalance() {
+        return this.summary.getAccountBalance(this.currency).getAmount();
+    }
+    public boolean isMatured(){
+        return SavingsAccountStatusType.MATURED.getValue().equals(this.status);
+    }
+
 }

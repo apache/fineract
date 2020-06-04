@@ -74,7 +74,9 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
     }
 
     public void setProvisioningEntries(Collection<LoanProductProvisioningEntry> provisioningEntries) {
-        if(this.provisioningEntries == null) this.provisioningEntries = new HashSet<>();
+        if(this.provisioningEntries == null) {
+            this.provisioningEntries = new HashSet<>();
+        }
         this.provisioningEntries.addAll(provisioningEntries) ;
     }
 

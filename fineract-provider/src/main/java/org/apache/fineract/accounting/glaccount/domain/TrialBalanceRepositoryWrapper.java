@@ -34,8 +34,9 @@ public class TrialBalanceRepositoryWrapper {
 
     public List<TrialBalance> findNewByOfficeAndAccount(final Long officeId, final Long accountId){
         final List<TrialBalance> trialBalanceList=this.repository.findNewByOfficeAndAccount(officeId,accountId);
-        if (trialBalanceList==null)
-            throw new TrialBalanceNotFoundException(officeId,accountId);
+        if (trialBalanceList==null) {
+            throw new TrialBalanceNotFoundException(officeId, accountId);
+        }
         return trialBalanceList;
 
     }

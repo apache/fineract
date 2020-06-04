@@ -25,7 +25,7 @@ public class CalendarConstants {
 
     public static final String CALENDAR_RESOURCE_NAME = "calendar";
 
-    public static enum CALENDAR_SUPPORTED_PARAMETERS {
+    public static enum CalendarSupportedParameters {
         CALENDAR_ID("id"), ENTITY_TYPE("entityType"), ENTITY_ID("entityId"), TITLE("title"), DESCRIPTION("description"), LOCATION(
                 "location"), START_DATE("startDate"), END_DATE("endDate"), CREATED_DATE("createdDate"), DURATION("duration"), TYPE_ID(
                 "typeId"), REPEATING("repeating"), REMIND_BY_ID("remindById"), FIRST_REMINDER("firstReminder"), SECOND_REMINDER(
@@ -36,13 +36,13 @@ public class CalendarConstants {
 
         private final String value;
 
-        private CALENDAR_SUPPORTED_PARAMETERS(final String value) {
+        private CalendarSupportedParameters(final String value) {
             this.value = value;
         }
 
         private static final Set<String> values = new HashSet<>();
         static {
-            for (final CALENDAR_SUPPORTED_PARAMETERS param : CALENDAR_SUPPORTED_PARAMETERS.values()) {
+            for (final CalendarSupportedParameters param : CalendarSupportedParameters.values()) {
                 values.add(param.value);
             }
         }

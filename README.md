@@ -3,7 +3,7 @@ Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci
 
 Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.
 
-[Have a look at the FAQ on our Wiki at apache.org](https://cwiki.apache.org/confluence/display/FINERACT/FAQ) if this README does not answer what you are looking for.
+[Have a look at the FAQ on our Wiki at apache.org](https://cwiki.apache.org/confluence/display/FINERACT/FAQ) if this README does not answer what you are looking for.  [Visit our JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12335824) to find issues to work on, see what others are working on, or open new issues.
 
 [![Code Now! (Gitpod)](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/fineract)
 to start contributing to this project in the online web-based IDE GitPod.io right away!
@@ -45,14 +45,14 @@ Run the following commands:
 
 Instructions to build the JAR file
 ============
-1. Extract the archive file to your local directory.
+1. Clone the repository or download and extract the archive file to your local directory.
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
 3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
 
 
 Instructions to build a WAR file
 ============
-1. Extract the archive file to your local directory.
+1. Clone the repository or download and extract the archive file to your local directory.
 2. Run `./gradlew clean bootWar` to build a traditional WAR file which will be created at `build/libs` directory.  
 3. Deploy this WAR to your Tomcat v9 Servlet Container.
 
@@ -67,6 +67,24 @@ Run the following commands, very similarly to how [.travis.yml](.travis.yml) doe
 1. `./gradlew createDB -PdbName=fineract_tenants`
 1. `./gradlew createDB -PdbName=fineract_default`
 1. `./gradlew clean integrationTest`
+
+
+Instructions to run and debug in Eclipse IDE
+============
+
+It is possible to run Fineract in Eclipse IDE and also to debug Fineract using Eclipse's debugging facilities. 
+To do this, you need to create the Eclipse project files and import the project into an Eclipse workspace:
+
+1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
+2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
+3. Do a clean build of the project in Eclipse (Project->Clean...)
+3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected. 
+
+If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
+
+You can also use Eclipse Junit support to run tests in Eclipse (Run As->Junit Test)
+
+Finally, modifying source code in Eclipse automatically triggers hot code replace to a running instance, allowing you to immediately test your changes 
 
 
 Instructions to run using Docker and docker-compose
@@ -222,7 +240,7 @@ complies with the [Apache Software Foundation third-party license policy](https:
 Apache Fineract Platform API
 ============
 
-The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.mifos.io/api-docs/apiLive.htm "API Documentation").
+The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").
 
 
 API clients (Web UIs, Mobile, etc.)
@@ -249,12 +267,7 @@ Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+1
 
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
-Please visit <https://issues.apache.org/jira/projects/FINERACT/> to open or find issues.
-
-Roadmap
-============
-
-[Project Release Roadmap on JIRA (Detailed View)](https://issues.apache.org/jira/browse/FINERACT-268?jql=project%20%3D%20FINERACT "Project Release Roadmap on JIRA (Detailed View)")
+Please visit [our JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12335824) to find issues to work on, see what others are working on, or open new issues.
 
 
 Video Demonstration
@@ -269,6 +282,25 @@ Governance and Policies
 [Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer)
 documents the process through which you can become a committer in this project.
 
+
+Error Handling Guidelines
+------------------
+* When catching exceptions, either rethrow them, or log them.  Either way, include the root cause by using `catch (SomeException e)` and then either `throw AnotherException("..details..", e)` or `LOG.error("...context...", e)`.
+* Completely empty catch blocks are VERY suspicous!  Are you sure that you want to just "swallow" an exception?  Really, 100% totally absolutely sure?? ;-) Such "normal exceptions which just happen sometimes but are actually not really errors" are almost always a bad idea, can be a performance issue, and typically are an indication of another problem - e.g. the use of a wrong API which throws an Exception for an expected condition, when really you would want to use another API that instead returns something empty or optional.
+* In tests, you'll typically never catch exceptions, but just propagate them, with `@Test void testXYZ() throws SomeException, AnotherException`..., so that the test fails if the exception happens.  Unless you actually really want to test for the occurence of a problem - in that case, use [JUnit's Assert.assertThrows()](https://github.com/junit-team/junit4/wiki/Exception-testing) (but not `@Test(expected = SomeException.class)`).
+* Never catch `NullPointerException` & Co.
+
+Logging Guidelines
+------------------
+* We use [SLF4J](http://www.slf4j.org) as our logging API.
+* Never, ever, use `System.out` and `System.err` or `printStackTrace()` anywhere, but always `LOG.info()` or `LOG.error()` instead.
+* Use placeholder (`LOG.error("Could not... details: {}", something, exception)`) and never String concatenation (`LOG.error("Could not... details: " + something, exception)`)
+* Which Log Level is appropriate?
+  * `LOG.error()` should be used to inform an "operator" running Fineract who supervises error logs of an unexpected condition.  This includes technical problems with an external "environment" (e.g. can't reach a database), and situations which are likely bugs which need to be fixed in the code.  They do NOT include e.g. validation errors for incoming API requests - that is signaled through the API response - and does (should) not be logged as an error.  (Note that there is no _FATAL_ level in SLF4J; a "FATAL" event should just be logged as an _ERROR_.)
+  * `LOG.warn()` should be using sparingly.  Make up your mind if it's an error (above) - or not!
+  * `LOG.info()` can be used notably for one-time actions taken during start-up.  It should typically NOT be used to print out "regular" application usage information.  The default logging configuration always outputs the application INFO logs, and in production under load, there's really no point to constantly spew out lots of information from frequently traversed paths in the code about what's going on.  (Metrics are a better way.)  `LOG.info()` *can* be used freely in tests though.
+  * `LOG.debug()` can be used anywhere in the code to log things that may be useful during investigations of specific problems.  They are not shown in the default logging configuration, but can be enabled for troubleshooting.  Developers should typically "turn down" most `LOG.info()` which they used while writing a new feature to "follow along what happens during local testing" to `LOG.debug()` for production before we merge their PRs.
+  * `LOG.trace()` is not used in Fineract.
 
 Pull Requests
 -------------

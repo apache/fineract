@@ -66,7 +66,7 @@ public class GlobalConfigurationTest {
         Assert.assertNotNull(globalConfig);
 
         String configName = "penalty-wait-period";
-        for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
+        for (Integer configIndex = 0; configIndex < globalConfig.size() - 1; configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
                 Integer configId = (Integer) globalConfig.get(configIndex).get("id");
                 Assert.assertNotNull(configId);
@@ -120,7 +120,7 @@ public class GlobalConfigurationTest {
                 this.responseSpec);
         Assert.assertNotNull(isCacheGlobalConfig);
 
-        for (Integer cacheType = 0; cacheType <= ((isCacheGlobalConfig.size()) - 1); cacheType++) {
+        for (Integer cacheType = 0; cacheType <= isCacheGlobalConfig.size() - 1; cacheType++) {
 
             // Retrieving Is Cache Enabled Global Configuration details
             isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec, this.responseSpec);
@@ -155,7 +155,7 @@ public class GlobalConfigurationTest {
         String newValue = "0";
         String newBooleanValue = "true";
 
-        for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
+        for (Integer configIndex = 0; configIndex < globalConfig.size() - 1; configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
                 Integer configId = (Integer) globalConfig.get(configIndex).get(
                         "id");
@@ -210,10 +210,10 @@ public class GlobalConfigurationTest {
         }
         /* Update other global configuration property */
         String otherConfigName = "maker-checker";
-        for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
+        for (Integer configIndex = 0; configIndex < globalConfig.size() - 1; configIndex++) {
             if (globalConfig.get(configIndex).get("name")
                     .equals(otherConfigName)) {
-                String configId = (globalConfig.get(configIndex).get("id"))
+                String configId = globalConfig.get(configIndex).get("id")
                         .toString();
                 Integer updateConfigId = this.globalConfigurationHelper
                         .updateValueForGlobalConfiguration(this.requestSpec,

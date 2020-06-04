@@ -573,7 +573,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
         List<SavingsAccountTransaction> trans = getTransactions() ;
         for (final SavingsAccountTransaction transaction : trans) {
-            if ((transaction.isWithHoldTaxAndNotReversed())) {
+            if (transaction.isWithHoldTaxAndNotReversed()) {
                 withholdTransactions.add(transaction);
             }
         }
@@ -610,10 +610,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
-            if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
+            if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
                         Money.of(currency, totalTax), taxSplit);
                 addTransaction(withholdTransaction);
@@ -625,11 +625,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected boolean updateWithHoldTransaction(final BigDecimal amount, final SavingsAccountTransaction withholdTransaction) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, withholdTransaction.transactionLocalDate(),
                     this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
-            if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
+            if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 if (withholdTransaction.getId() == null) {
                     withholdTransaction.updateAmount(Money.of(currency, totalTax));
                     withholdTransaction.getTaxDetails().clear();
@@ -744,8 +744,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
 
             periodStartingBalance = transaction.getRunningBalance(this.currency);
-        } else
+        } else {
             periodStartingBalance = Money.zero(this.currency);
+        }
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
@@ -782,12 +783,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     private BigDecimal getEffectiveOverdraftInterestRateAsFraction(MathContext mc) {
-        return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100l), mc);
+        return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100L), mc);
     }
 
     @SuppressWarnings("unused")
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
-        return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100L), mc);
     }
 
     protected List<SavingsAccountTransaction> retreiveOrderedNonInterestPostingTransactions() {
@@ -978,8 +979,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         LocalDate startInterestCalculationLocalDate = null;
         if (this.startInterestCalculationDate != null) {
             startInterestCalculationLocalDate = new LocalDate(this.startInterestCalculationDate);
-        } else
+        } else {
             startInterestCalculationLocalDate = getActivationLocalDate();
+        }
         return startInterestCalculationLocalDate;
     }
 
@@ -1141,7 +1143,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
         }
 
-        if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
+        if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
             if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
                         transactionAmount);
@@ -1433,7 +1435,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 baseDataValidator.reset().parameter(withHoldTaxParamName).failWithCode("not.supported.for.this.account");
             }
         }
-
         validateLockinDetails(baseDataValidator);
         esnureOverdraftLimitsSetForOverdraftAccounts();
     }
@@ -2533,14 +2534,18 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private boolean isWithDrawalFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee()) return true;
+            if (charge.isWithdrawalFee()) {
+                return true;
+            }
         }
         return false;
     }
 
     private boolean isAnnualFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isAnnualFee()) return true;
+            if (charge.isAnnualFee()) {
+                return true;
+            }
         }
         return false;
     }
@@ -2685,7 +2690,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (this.overdraftLimit != null && this.product.overdraftLimit() != null
-                && this.overdraftLimit.compareTo(this.product.overdraftLimit()) == 1) {
+                && this.overdraftLimit.compareTo(this.product.overdraftLimit()) > 0) {
             baseDataValidator.reset().parameter(SavingsApiConstants.overdraftLimitParamName).value(this.overdraftLimit)
                     .failWithCode("cannot.exceed.product.value");
         }
@@ -2770,8 +2775,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean isTransactionAllowed(SavingsAccountTransactionType transactionType, LocalDate transactionDate) {
-        if (!isTransactionsAllowed())
+        if (!isTransactionsAllowed()) {
             return false;
+        }
 
         Client client = getClient();
         if (client != null && !client.isActive()) {
@@ -2782,12 +2788,15 @@ public class SavingsAccount extends AbstractPersistableCustom {
             return false;
         }
 
-        if (transactionDate == null)
+        if (transactionDate == null) {
             return true;
-        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate()))
+        }
+        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate())) {
             return false;
-        if (transactionType.isCredit())
+        }
+        if (transactionType.isCredit()) {
             return true;
+        }
         return !isAccountLocked(transactionDate);
     }
 

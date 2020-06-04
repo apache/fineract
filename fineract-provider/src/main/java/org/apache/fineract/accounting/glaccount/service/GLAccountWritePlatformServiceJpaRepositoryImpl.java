@@ -29,10 +29,10 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountDisableException;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountDuplicateException;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidDeleteException;
-import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidDeleteException.GlAccountInvalidDeleteReason;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidParentException;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidUpdateException;
-import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidUpdateException.GL_ACCOUNT_INVALID_UPDATE_REASON;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidUpdateException.GlAccountInvalidUpdateReason;
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.accounting.glaccount.exception.InvalidParentGLAccountHeadException;
 import org.apache.fineract.accounting.glaccount.serialization.GLAccountCommandFromApiJsonDeserializer;
@@ -160,7 +160,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                     final List<JournalEntry> journalEntriesForAccount = this.glJournalEntryRepository
                             .findFirstJournalEntryForAccount(glAccountId);
                     if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidUpdateException(
-                            GL_ACCOUNT_INVALID_UPDATE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
+                            GlAccountInvalidUpdateReason.TRANSANCTIONS_LOGGED, glAccountId); }
                 }
             }
 
@@ -195,12 +195,12 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 
         // validate this isn't a header account that has children
         if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
-                GL_ACCOUNT_INVALID_DELETE_REASON.HAS_CHILDREN, glAccountId); }
+                GlAccountInvalidDeleteReason.HAS_CHILDREN, glAccountId); }
 
         // does this account have transactions logged against it
         final List<JournalEntry> journalEntriesForAccount = this.glJournalEntryRepository.findFirstJournalEntryForAccount(glAccountId);
         if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidDeleteException(
-                GL_ACCOUNT_INVALID_DELETE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
+                GlAccountInvalidDeleteReason.TRANSANCTIONS_LOGGED, glAccountId); }
         this.glAccountRepository.delete(glAccount);
 
         return new CommandProcessingResultBuilder().withEntityId(glAccountId).build();

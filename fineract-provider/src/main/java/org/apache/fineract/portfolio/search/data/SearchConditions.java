@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.search.data;
 
-import org.apache.fineract.portfolio.search.SearchConstants.SEARCH_SUPPORTED_RESOURCES;
+import org.apache.fineract.portfolio.search.SearchConstants.SearchSupportedResources;
 
 public class SearchConditions {
 
@@ -37,17 +37,17 @@ public class SearchConditions {
         this.searchResource = searchResource;
         this.exactMatch=exactMatch;
         this.clientSearch = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.CLIENTS.name().toLowerCase())) ? true : false;
+                SearchSupportedResources.CLIENTS.name().toLowerCase())) ? true : false;
         this.groupSearch = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.GROUPS.name().toLowerCase())) ? true : false;
+                SearchSupportedResources.GROUPS.name().toLowerCase())) ? true : false;
         this.loanSeach = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.LOANS.name().toLowerCase())) ? true : false;
+                SearchSupportedResources.LOANS.name().toLowerCase())) ? true : false;
         this.savingSeach = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.SAVINGS.name().toLowerCase())) ? true : false;
+                SearchSupportedResources.SAVINGS.name().toLowerCase())) ? true : false;
         this.shareSeach = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.SHARES.name().toLowerCase())) ? true : false;
+                SearchSupportedResources.SHARES.name().toLowerCase())) ? true : false;
           this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
-                SEARCH_SUPPORTED_RESOURCES.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
+                SearchSupportedResources.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
     }
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,

@@ -54,7 +54,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -563,7 +562,7 @@ public class ClientSavingsIntegrationTest {
         assertEquals("validation.msg.savingsaccountcharge.inactivation.of.charge.not.allowed.when.charge.is.due", savingsAccountErrorData
                 .get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.dateFormat, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar cal = Calendar.getInstance();
         List dates = (List) savingsChargeForPay.get("dueDate");
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
@@ -776,8 +775,8 @@ public class ClientSavingsIntegrationTest {
         final Float nominalAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
         final HashMap interestCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
         final Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
-        double interestRateInFraction = (nominalAnnualInterest / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = nominalAnnualInterest / 100;
+        double perDay = (double) 1 / daysInYear;
         double interestPerDay = interestRateInFraction * perDay;
         Float interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -923,8 +922,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        double interestRateInFraction = (nominalAnnualInterest / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = nominalAnnualInterest / 100;
+        double perDay = (double) 1 / daysInYear;
         double interestPerDay = interestRateInFraction * perDay;
         Float interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -955,8 +954,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        interestRateInFraction = (nominalAnnualInterest / 100);
-        perDay = (double) 1 / (daysInYear);
+        interestRateInFraction = nominalAnnualInterest / 100;
+        perDay = (double) 1 / daysInYear;
         interestPerDay = interestRateInFraction * perDay;
         interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -991,8 +990,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        interestRateInFraction = (nominalAnnualInterest / 100);
-        perDay = (double) 1 / (daysInYear);
+        interestRateInFraction = nominalAnnualInterest / 100;
+        perDay = (double) 1 / daysInYear;
         interestPerDay = interestRateInFraction * perDay;
         interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1030,8 +1029,8 @@ public class ClientSavingsIntegrationTest {
                     .get("interestCalculationDaysInYearType");
             daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
                     "id").toString());
-            interestRateInFraction = (nominalAnnualInterest / 100);
-            perDay = (double) 1 / (daysInYear);
+            interestRateInFraction = nominalAnnualInterest / 100;
+            perDay = (double) 1 / daysInYear;
             interestPerDay = interestRateInFraction * perDay;
             interestPosted = (float) (interestPerDay * balance * 19);
 
@@ -1073,8 +1072,8 @@ public class ClientSavingsIntegrationTest {
                     .get("interestCalculationDaysInYearType");
             daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
                     "id").toString());
-            interestRateInFraction = (nominalAnnualInterest / 100);
-            perDay = (double) 1 / (daysInYear);
+            interestRateInFraction = nominalAnnualInterest / 100;
+            perDay = (double) 1 / daysInYear;
             interestPerDay = interestRateInFraction * perDay;
             interestPosted = (float) (interestPerDay * balance * 8);
 
@@ -1109,8 +1108,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        interestRateInFraction = (nominalAnnualInterest / 100);
-        perDay = (double) 1 / (daysInYear);
+        interestRateInFraction = nominalAnnualInterest / 100;
+        perDay = (double) 1 / daysInYear;
         interestPerDay = interestRateInFraction * perDay;
         interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1261,8 +1260,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        double interestRateInFraction = (nominalAnnualInterest / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = nominalAnnualInterest / 100;
+        double perDay = (double) 1 / daysInYear;
         double interestPerDay = interestRateInFraction * perDay;
         Float interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1293,8 +1292,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        interestRateInFraction = (nominalAnnualInterest / 100);
-        perDay = (double) 1 / (daysInYear);
+        interestRateInFraction = nominalAnnualInterest / 100;
+        perDay = (double) 1 / daysInYear;
         interestPerDay = interestRateInFraction * perDay;
         interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1329,8 +1328,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        interestRateInFraction = (nominalAnnualInterest / 100);
-        perDay = (double) 1 / (daysInYear);
+        interestRateInFraction = nominalAnnualInterest / 100;
+        perDay = (double) 1 / daysInYear;
         interestPerDay = interestRateInFraction * perDay;
         interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1368,8 +1367,8 @@ public class ClientSavingsIntegrationTest {
                     .get("interestCalculationDaysInYearType");
             daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
                     "id").toString());
-            interestRateInFraction = (nominalAnnualInterest / 100);
-            perDay = (double) 1 / (daysInYear);
+            interestRateInFraction = nominalAnnualInterest / 100;
+            perDay = (double) 1 / daysInYear;
             interestPerDay = interestRateInFraction * perDay;
             interestPosted = (float) (interestPerDay * balance * 19);
 
@@ -1411,8 +1410,8 @@ public class ClientSavingsIntegrationTest {
                     .get("interestCalculationDaysInYearType");
             daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
                     "id").toString());
-            interestRateInFraction = (nominalAnnualInterest / 100);
-            perDay = (double) 1 / (daysInYear);
+            interestRateInFraction = nominalAnnualInterest / 100;
+            perDay = (double) 1 / daysInYear;
             interestPerDay = interestRateInFraction * perDay;
             interestPosted = (float) (interestPerDay * balance * 8);
 
@@ -1447,8 +1446,8 @@ public class ClientSavingsIntegrationTest {
                 .get("interestCalculationDaysInYearType");
         daysInYear = Integer.valueOf(interestCalculationDaysInYearType
                 .get("id").toString());
-        interestRateInFraction = (nominalAnnualInterest / 100);
-        perDay = (double) 1 / (daysInYear);
+        interestRateInFraction = nominalAnnualInterest / 100;
+        perDay = (double) 1 / daysInYear;
         interestPerDay = interestRateInFraction * perDay;
         interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1597,8 +1596,8 @@ public class ClientSavingsIntegrationTest {
         final Float nominalAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
         final HashMap interestCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
         final Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
-        double interestRateInFraction = (nominalAnnualInterest / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = nominalAnnualInterest / 100;
+        double perDay = (double) 1 / daysInYear;
         double interestPerDay = interestRateInFraction * perDay;
         Float interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1764,8 +1763,8 @@ public class ClientSavingsIntegrationTest {
         final Float nominalAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
         final HashMap interestCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
         final Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
-        double interestRateInFraction = (nominalAnnualInterest / 100);
-        double perDay = (double) 1 / (daysInYear);
+        double interestRateInFraction = nominalAnnualInterest / 100;
+        double perDay = (double) 1 / daysInYear;
         double interestPerDay = interestRateInFraction * perDay;
         Float interestPosted = (float) (interestPerDay * balance * 1);
 
@@ -1788,8 +1787,8 @@ public class ClientSavingsIntegrationTest {
        final Float nominalLastAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
        final HashMap interestLastCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
        final Integer daysLastInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
-       double interestLastRateInFraction = (nominalAnnualInterest / 100);
-       double perLastDay = (double) 1 / (daysInYear);
+       double interestLastRateInFraction = nominalAnnualInterest / 100;
+       double perLastDay = (double) 1 / daysInYear;
        double interestLastPerDay = interestLastRateInFraction * perLastDay;
        Float interestLastPosted = (float) (interestLastPerDay * balance * 1);
 
@@ -1903,7 +1902,6 @@ public class ClientSavingsIntegrationTest {
     }
 
     @Test
-    @Ignore // TODO FINERACT-852
     public void testSavingsAccount_DormancyTracking() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
@@ -1967,8 +1965,8 @@ public class ClientSavingsIntegrationTest {
             transactionDate = transactionDate.minusDays(30);
         }
 
-        SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        jobHelper.executeJob("Update Savings Dormant Accounts");
+        SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec);
+        jobHelper.executeAndAwaitJob("Update Savings Dormant Accounts");
 
         //VERIFY WITHIN PROVIDED RANGE DOESN'T INACTIVATE
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(0));

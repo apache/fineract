@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.service;
 
-import com.google.common.io.Files;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,10 +32,8 @@ import javax.ws.rs.core.Response;
 import org.apache.fineract.infrastructure.bulkimport.data.BulkImportEvent;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.data.ImportData;
-import org.apache.fineract.infrastructure.bulkimport.data.ImportFormatType;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
@@ -55,15 +52,17 @@ import org.apache.tika.Tika;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.io.TikaInputStream;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService {
+    private final static Logger LOG = LoggerFactory.getLogger(BulkImportWorkbookServiceImpl.class);
     private final ApplicationContext applicationContext;
     private final PlatformSecurityContext securityContext;
     private final DocumentWritePlatformService documentWritePlatformService;
@@ -99,8 +98,6 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final Tika tika = new Tika();
                 final TikaInputStream tikaInputStream = TikaInputStream.get(clonedInputStream);
                 final String fileType = tika.detect(tikaInputStream);
-                final String fileExtension = Files.getFileExtension(fileDetail.getFileName()).toLowerCase();
-                ImportFormatType format = ImportFormatType.of(fileExtension);
                 if (!fileType.contains("msoffice") && !fileType.contains("application/vnd.ms-excel")) {
                     // We had a problem where we tried to upload the downloaded file from the import options, it was somehow changed the
                     // extension we use this fix.
@@ -111,7 +108,6 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 Workbook workbook = new HSSFWorkbook(clonedInputStreamWorkbook);
                 GlobalEntityType entityType=null;
                 int primaryColumn=0;
-                ImportHandler importHandler = null;
                 if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
                     entityType = GlobalEntityType.CLIENTS_PERSON;
                     primaryColumn = 0;
@@ -170,16 +166,17 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     entityType = GlobalEntityType.USERS;
                     primaryColumn = 0;
                 }else{
+                    workbook.close();
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource",
                             "Unable to find requested resource");
+
                 }
                 return publishEvent(primaryColumn, fileDetail, clonedInputStreamWorkbook, entityType,
                         workbook, locale, dateFormat);
-            }else {
-                throw new GeneralPlatformDomainRuleException("error.msg.null","One or more of the given parameters not found");
             }
+            throw new GeneralPlatformDomainRuleException("error.msg.null","One or more of the given parameters not found");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Problem occurred in importWorkbook function",e);
             throw new GeneralPlatformDomainRuleException("error.msg.io.exception","IO exception occured with "+fileDetail.getFileName()+" "+e.getMessage());
 
         }
@@ -193,10 +190,8 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
 
         final String fileName = fileDetail.getFileName();
 
-        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
-
         final Long documentId = this.documentWritePlatformService.createInternalDocument(
-                DocumentWritePlatformServiceJpaRepositoryImpl.DOCUMENT_MANAGEMENT_ENTITY.IMPORT.name(),
+                DocumentWritePlatformServiceJpaRepositoryImpl.DocumentManagementEntity.IMPORT.name(),
                 this.securityContext.authenticatedUser().getId(), null, clonedInputStreamWorkbook,
                 URLConnection.guessContentTypeFromName(fileName), fileName, null, fileName);
         final Document document = this.documentRepository.findById(documentId).orElse(null);
@@ -277,7 +272,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         String fileName="Output"+documentData.fileName();
         String fileLocation=documentData.fileLocation();
         File file=new File(fileLocation);
-        final Response.ResponseBuilder response = Response.ok((Object)file);
+        final Response.ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         response.header("Content-Type", "application/vnd.ms-excel");
         return response.build();
@@ -292,7 +287,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
             return sql.toString();
         }
             @Override
-            public DocumentData mapRow (ResultSet rs,int rowNum) throws SQLException {
+            public DocumentData mapRow (ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
                 final String location = rs.getString("location");
                 final String fileName=rs.getString("file_name");
                 return new DocumentData(null,null,null,null,fileName,

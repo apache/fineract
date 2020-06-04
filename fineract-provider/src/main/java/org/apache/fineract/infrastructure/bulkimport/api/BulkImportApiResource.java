@@ -77,14 +77,17 @@ public class BulkImportApiResource {
         if (entityType.equals(GlobalEntityType.CLIENT.getCode())){
             final Collection<ImportData> importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTTTY);
             final Collection<ImportData> importForClientPerson=this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_PERSON);
-            if (importForClientEntity!=null)
-            importData.addAll(importForClientEntity);
-            if (importForClientPerson!=null)
-            importData.addAll(importForClientPerson);
+            if (importForClientEntity!=null) {
+                importData.addAll(importForClientEntity);
+            }
+            if (importForClientPerson!=null) {
+                importData.addAll(importForClientPerson);
+            }
         }else {
             final GlobalEntityType type = GlobalEntityType.fromCode(entityType);
-            if (type == null)
+            if (type == null) {
                 throw new ImportTypeNotFoundException(entityType);
+            }
                 importData = this.bulkImportWorkbookService.getImports(type);
         }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

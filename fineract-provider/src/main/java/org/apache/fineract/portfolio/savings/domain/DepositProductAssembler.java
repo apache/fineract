@@ -426,9 +426,15 @@ public class DepositProductAssembler {
         Boolean adjustAdvanceTowardsFuturePayments = command
                 .booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
 
-        if (isMandatoryDeposit == null) isMandatoryDeposit = false;
-        if (allowWithdrawal == null) allowWithdrawal = false;
-        if (adjustAdvanceTowardsFuturePayments == null) adjustAdvanceTowardsFuturePayments = false;
+        if (isMandatoryDeposit == null) {
+            isMandatoryDeposit = false;
+        }
+        if (allowWithdrawal == null) {
+            allowWithdrawal = false;
+        }
+        if (adjustAdvanceTowardsFuturePayments == null) {
+            adjustAdvanceTowardsFuturePayments = false;
+        }
 
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
                 adjustAdvanceTowardsFuturePayments);

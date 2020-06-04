@@ -49,11 +49,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanImportHandler implements ImportHandler {
+    private final static Logger LOG = LoggerFactory.getLogger(LoanImportHandler.class);
     private Workbook workbook;
     private List<LoanAccountData> loans;
     private List<LoanApprovalData> approvalDates;
@@ -98,22 +101,27 @@ public class LoanImportHandler implements ImportHandler {
 
     private LoanTransactionData readLoanRepayment(Row row,String locale,String dateFormat) {
         BigDecimal repaymentAmount=null;
-        if (ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row)!=null)
-            repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row));
+        if (ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row)!=null) {
+            repaymentAmount = BigDecimal
+                    .valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row));
+        }
         LocalDate lastRepaymentDate = ImportHandlerUtils.readAsDate(LoanConstants.LAST_REPAYMENT_DATE_COL, row);
         String repaymentType = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_TYPE_COL, row);
         Long repaymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), repaymentType);
-        if (repaymentAmount!=null&&lastRepaymentDate!=null&&repaymentType!=null&&repaymentTypeId!=null)
-            return  LoanTransactionData.importInstance(repaymentAmount, lastRepaymentDate, repaymentTypeId, row.getRowNum(),locale,dateFormat);
-        else
-            return null;
+        if (repaymentAmount!=null&&lastRepaymentDate!=null&&repaymentType!=null&&repaymentTypeId!=null) {
+            return LoanTransactionData.importInstance(repaymentAmount, lastRepaymentDate, repaymentTypeId,
+                    row.getRowNum(), locale, dateFormat);
+        }
+
+        return null;
     }
 
     private DisbursementData readDisbursalData(Row row,String locale,String dateFormat) {
         LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row);
         String linkAccountId=null;
-        if ( ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row)!=null)
-         linkAccountId =  ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row).toString();
+        if ( ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row)!=null) {
+            linkAccountId = ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row).toString();
+        }
 
         if (disbursedDate!=null) {
             return DisbursementData.importInstance(disbursedDate,linkAccountId,row.getRowNum(),locale,dateFormat);
@@ -123,10 +131,11 @@ public class LoanImportHandler implements ImportHandler {
 
     private LoanApprovalData readLoanApproval(Row row,String locale,String dateFormat) {
         LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row);
-        if (approvedDate!=null)
-            return LoanApprovalData.importInstance(approvedDate, row.getRowNum(),locale,dateFormat);
-        else
-            return null;
+        if (approvedDate!=null) {
+            return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat);
+        }
+
+        return null;
     }
 
     private LoanAccountData readLoan(Row row,String locale,String dateFormat) {
@@ -139,25 +148,30 @@ public class LoanImportHandler implements ImportHandler {
         LocalDate submittedOnDate =  ImportHandlerUtils.readAsDate(LoanConstants.SUBMITTED_ON_DATE_COL, row);
         String fundName =  ImportHandlerUtils.readAsString(LoanConstants.FUND_NAME_COL, row);
         Long fundId;
-        if (fundName == null)
+        if (fundName == null) {
             fundId = null;
-        else
-            fundId =  ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), fundName);
+        } else {
+            fundId = ImportHandlerUtils
+                    .getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), fundName);
+        }
 
         BigDecimal principal = null;
-        if ( ImportHandlerUtils.readAsDouble(LoanConstants.PRINCIPAL_COL, row) != null)
-            principal = BigDecimal.valueOf( ImportHandlerUtils.readAsDouble(LoanConstants.PRINCIPAL_COL, row));
+        if ( ImportHandlerUtils.readAsDouble(LoanConstants.PRINCIPAL_COL, row) != null) {
+            principal = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.PRINCIPAL_COL, row));
+        }
         Integer numberOfRepayments =  ImportHandlerUtils.readAsInt(LoanConstants.NO_OF_REPAYMENTS_COL, row);
         Integer repaidEvery =  ImportHandlerUtils.readAsInt(LoanConstants.REPAID_EVERY_COL, row);
         String repaidEveryFrequency =  ImportHandlerUtils.readAsString(LoanConstants.REPAID_EVERY_FREQUENCY_COL, row);
         String repaidEveryFrequencyId = "";
         EnumOptionData repaidEveryFrequencyEnums = null;
         if (repaidEveryFrequency != null) {
-            if (repaidEveryFrequency.equalsIgnoreCase("Days"))
+            if (repaidEveryFrequency.equalsIgnoreCase("Days")) {
                 repaidEveryFrequencyId = "0";
-            else if (repaidEveryFrequency.equalsIgnoreCase("Weeks"))
+            } else if (repaidEveryFrequency.equalsIgnoreCase("Weeks")) {
                 repaidEveryFrequencyId = "1";
-            else if (repaidEveryFrequency.equalsIgnoreCase("Months")) repaidEveryFrequencyId = "2";
+            } else if (repaidEveryFrequency.equalsIgnoreCase("Months")) {
+                repaidEveryFrequencyId = "2";
+            }
             repaidEveryFrequencyEnums = new EnumOptionData(null, null, repaidEveryFrequencyId);
         }
         Integer loanTerm =  ImportHandlerUtils.readAsInt(LoanConstants.LOAN_TERM_COL, row);
@@ -165,66 +179,77 @@ public class LoanImportHandler implements ImportHandler {
         EnumOptionData loanTermFrequencyEnum = null;
         if (loanTermFrequency != null) {
             String loanTermFrequencyId = "";
-            if (loanTermFrequency.equalsIgnoreCase("Days"))
+            if (loanTermFrequency.equalsIgnoreCase("Days")) {
                 loanTermFrequencyId = "0";
-            else if (loanTermFrequency.equalsIgnoreCase("Weeks"))
+            } else if (loanTermFrequency.equalsIgnoreCase("Weeks")) {
                 loanTermFrequencyId = "1";
-            else if (loanTermFrequency.equalsIgnoreCase("Months"))
+            } else if (loanTermFrequency.equalsIgnoreCase("Months")) {
                 loanTermFrequencyId = "2";
+            }
             loanTermFrequencyEnum = new EnumOptionData(null, null, loanTermFrequencyId);
         }
         BigDecimal nominalInterestRate = null;
-        if ( ImportHandlerUtils.readAsDouble(LoanConstants.NOMINAL_INTEREST_RATE_COL, row) != null)
-            nominalInterestRate = BigDecimal.valueOf( ImportHandlerUtils.readAsDouble(LoanConstants.NOMINAL_INTEREST_RATE_COL, row));
+        if ( ImportHandlerUtils.readAsDouble(LoanConstants.NOMINAL_INTEREST_RATE_COL, row) != null) {
+            nominalInterestRate = BigDecimal
+                    .valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.NOMINAL_INTEREST_RATE_COL, row));
+        }
         String amortization =  ImportHandlerUtils.readAsString(LoanConstants.AMORTIZATION_COL, row);
         String amortizationId = "";
         EnumOptionData amortizationEnumOption = null;
         if (amortization != null) {
-            if (amortization.equalsIgnoreCase("Equal principal payments"))
+            if (amortization.equalsIgnoreCase("Equal principal payments")) {
                 amortizationId = "0";
-            else if (amortization.equalsIgnoreCase("Equal installments")) amortizationId = "1";
+            } else if (amortization.equalsIgnoreCase("Equal installments")) {
+                amortizationId = "1";
+            }
             amortizationEnumOption = new EnumOptionData(null, null, amortizationId);
         }
         String interestMethod =  ImportHandlerUtils.readAsString(LoanConstants.INTEREST_METHOD_COL, row);
         String interestMethodId = "";
         EnumOptionData interestMethodEnum = null;
         if (interestMethod != null) {
-            if (interestMethod.equalsIgnoreCase("Flat"))
+            if (interestMethod.equalsIgnoreCase("Flat")) {
                 interestMethodId = "1";
-            else if (interestMethod.equalsIgnoreCase("Declining Balance")) interestMethodId = "0";
+            } else if (interestMethod.equalsIgnoreCase("Declining Balance")) {
+                interestMethodId = "0";
+            }
             interestMethodEnum = new EnumOptionData(null, null, interestMethodId);
         }
         String interestCalculationPeriod = ImportHandlerUtils.readAsString(LoanConstants.INTEREST_CALCULATION_PERIOD_COL, row);
         String interestCalculationPeriodId = "";
         EnumOptionData interestCalculationPeriodEnum = null;
         if (interestCalculationPeriod != null) {
-            if (interestCalculationPeriod.equalsIgnoreCase("Daily"))
+            if (interestCalculationPeriod.equalsIgnoreCase("Daily")) {
                 interestCalculationPeriodId = "0";
-            else if (interestCalculationPeriod.equalsIgnoreCase("Same as repayment period"))
+            } else if (interestCalculationPeriod.equalsIgnoreCase("Same as repayment period")) {
                 interestCalculationPeriodId = "1";
+            }
             interestCalculationPeriodEnum = new EnumOptionData(null, null, interestCalculationPeriodId);
 
         }
         BigDecimal arrearsTolerance = null;
-        if ( ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row) != null)
-            arrearsTolerance = BigDecimal.valueOf( ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row));
+        if ( ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row) != null) {
+            arrearsTolerance = BigDecimal
+                    .valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row));
+        }
         String repaymentStrategy =  ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL, row);
         Long repaymentStrategyId = null;
         if (repaymentStrategy!=null) {
-            if (repaymentStrategy.equalsIgnoreCase("Penalties, Fees, Interest, Principal order"))
+            if (repaymentStrategy.equalsIgnoreCase("Penalties, Fees, Interest, Principal order")) {
                 repaymentStrategyId = 1L;
-            else if (repaymentStrategy.equalsIgnoreCase("HeavensFamily Unique"))
+            } else if (repaymentStrategy.equalsIgnoreCase("HeavensFamily Unique")) {
                 repaymentStrategyId = 2L;
-            else if (repaymentStrategy.equalsIgnoreCase("Creocore Unique"))
+            } else if (repaymentStrategy.equalsIgnoreCase("Creocore Unique")) {
                 repaymentStrategyId = 3L;
-            else if (repaymentStrategy.equalsIgnoreCase("Overdue/Due Fee/Int,Principal"))
+            } else if (repaymentStrategy.equalsIgnoreCase("Overdue/Due Fee/Int,Principal")) {
                 repaymentStrategyId = 4L;
-            else if (repaymentStrategy.equalsIgnoreCase("Principal, Interest, Penalties, Fees Order"))
+            } else if (repaymentStrategy.equalsIgnoreCase("Principal, Interest, Penalties, Fees Order")) {
                 repaymentStrategyId = 5L;
-            else if (repaymentStrategy.equalsIgnoreCase("Interest, Principal, Penalties, Fees Order"))
+            } else if (repaymentStrategy.equalsIgnoreCase("Interest, Principal, Penalties, Fees Order")) {
                 repaymentStrategyId = 6L;
-            else if (repaymentStrategy.equalsIgnoreCase("Early Repayment Strategy"))
+            } else if (repaymentStrategy.equalsIgnoreCase("Early Repayment Strategy")) {
                 repaymentStrategyId = 7L;
+            }
         }
         Integer graceOnPrincipalPayment =  ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
         Integer graceOnInterestPayment =  ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL, row);
@@ -299,9 +324,9 @@ public class LoanImportHandler implements ImportHandler {
                         repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, linkAccountId,locale,dateFormat);
             }
-        }else {
-            return null;
         }
+
+        return null;
     }
 
     public Count importEntity(String dateFormat) {
@@ -325,21 +350,29 @@ public class LoanImportHandler implements ImportHandler {
                     result = importLoan(i,dateFormat);
                     loanId = result.getLoanId().toString();
                     progressLevel = 1;
-                } else
-                    loanId = ImportHandlerUtils.readAsString(LoanConstants.LOAN_ID_COL, loanSheet.getRow(loans.get(i).getRowIndex()));
+                } else {
+                    loanId = ImportHandlerUtils.readAsString(LoanConstants.LOAN_ID_COL,
+                            loanSheet.getRow(loans.get(i).getRowIndex()));
+                }
 
-                if (progressLevel <= 1 && approvalDates.get(i)!=null) progressLevel = importLoanApproval(result, i,dateFormat);
+                if (progressLevel <= 1 && approvalDates.get(i)!=null) {
+                    progressLevel = importLoanApproval(result, i, dateFormat);
+                }
 
-                if (progressLevel <= 2 && disbursalDates.get(i)!=null) progressLevel = importDisbursalData(result, i,dateFormat);
+                if (progressLevel <= 2 && disbursalDates.get(i)!=null) {
+                    progressLevel = importDisbursalData(result, i, dateFormat);
+                }
 
-                if (loanRepayments.get(i) != null) progressLevel = importLoanRepayment(result, i,dateFormat);
+                if (loanRepayments.get(i) != null) {
+                    progressLevel = importLoanRepayment(result, i, dateFormat);
+                }
 
                 successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             }catch (RuntimeException ex){
                 errorCount++;
-                ex.printStackTrace();
+                LOG.error("Problem occurred in importEntity function",ex);
                 errorMessage=ImportHandlerUtils.getErrorMessage(ex);
                 writeLoanErrorMessage(loanId,errorMessage,progressLevel,statusCell,errorReportCell,row);
             }
@@ -351,17 +384,21 @@ public class LoanImportHandler implements ImportHandler {
 
     private void writeLoanErrorMessage(String loanId,String errorMessage,int progressLevel,Cell statusCell,Cell errorReportCell,Row row){
         String status = "";
-        if (progressLevel == 0)
+        if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
-        else if (progressLevel == 1)
+        } else if (progressLevel == 1) {
             status = TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED;
-        else if (progressLevel == 2)
+        } else if (progressLevel == 2) {
             status = TemplatePopulateImportConstants.STATUS_DISBURSAL_FAILED;
-        else if (progressLevel == 3) status = TemplatePopulateImportConstants.STATUS_DISBURSAL_REPAYMENT_FAILED;
+        } else if (progressLevel == 3) {
+            status = TemplatePopulateImportConstants.STATUS_DISBURSAL_REPAYMENT_FAILED;
+        }
         statusCell.setCellValue(status);
         statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.RED));
 
-        if (progressLevel > 0) row.createCell(LoanConstants.LOAN_ID_COL).setCellValue(Integer.parseInt(loanId));
+        if (progressLevel > 0) {
+            row.createCell(LoanConstants.LOAN_ID_COL).setCellValue(Integer.parseInt(loanId));
+        }
         errorReportCell.setCellValue(errorMessage);
     }
     private void setReportHeaders(Sheet sheet) {
@@ -382,7 +419,8 @@ public class LoanImportHandler implements ImportHandler {
                 .loanRepaymentTransaction(result.getLoanId()) //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult loanRepaymentResult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return 4;
     }
 
@@ -399,14 +437,15 @@ public class LoanImportHandler implements ImportHandler {
                         .disburseLoanToSavingsApplication(result.getLoanId()) //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult loanDisburseToSavingsResult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
             } else {
                 String payload = gsonBuilder.create().toJson(disbusalData);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .disburseLoanApplication(result.getLoanId()) //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult loanDisburseResult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
             }
         }
         return 3;
@@ -421,7 +460,8 @@ public class LoanImportHandler implements ImportHandler {
                     .approveLoanApplication(result.getLoanId()) //
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult loanapprovalresult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 2;
     }
@@ -434,6 +474,7 @@ public class LoanImportHandler implements ImportHandler {
         loanJsonOb.remove("isLoanProductLinkedToFloatingRate");
         loanJsonOb.remove("isInterestRecalculationEnabled");
         loanJsonOb.remove("isFloatingInterestRate");
+        loanJsonOb.remove("isRatesEnabled");
         JsonArray chargesJsonAr=loanJsonOb.getAsJsonArray("charges");
         if (chargesJsonAr!=null) {
             for (int i = 0; i < chargesJsonAr.size(); i++) {
@@ -456,13 +497,15 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private int getProgressLevel(String status) {
-        if (status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED))
+        if (status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
-        else if (status.equals(TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED))
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED)) {
             return 1;
-        else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_FAILED))
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_FAILED)) {
             return 2;
-        else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_REPAYMENT_FAILED)) return 3;
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_REPAYMENT_FAILED)) {
+            return 3;
+        }
         return 0;
     }
 

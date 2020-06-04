@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class LoanChargeCannotBeUpdatedException extends AbstractPlatformDomainRuleException {
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
-    public static enum LOAN_CHARGE_CANNOT_BE_UPDATED_REASON {
+    public static enum LoanChargeCannotBeUpdatedReason {
         ALREADY_PAID, ALREADY_WAIVED, LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
         public String errorMessage() {
@@ -45,7 +45,7 @@ public class LoanChargeCannotBeUpdatedException extends AbstractPlatformDomainRu
         }
     }
 
-    public LoanChargeCannotBeUpdatedException(final LOAN_CHARGE_CANNOT_BE_UPDATED_REASON reason, final Long loanChargeId) {
+    public LoanChargeCannotBeUpdatedException(final LoanChargeCannotBeUpdatedReason reason, final Long loanChargeId) {
         super(reason.errorCode(), reason.errorMessage(), loanChargeId);
     }
 }

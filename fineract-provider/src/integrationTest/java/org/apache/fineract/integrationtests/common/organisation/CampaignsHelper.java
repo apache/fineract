@@ -162,7 +162,7 @@ public class CampaignsHelper {
 
     public String getJSONForCampaignAction(String command, String actionDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        String dateString = ("close".equalsIgnoreCase(command)) ? "closureDate" : "activationDate";
+        String dateString = "close".equalsIgnoreCase(command) ? "closureDate" : "activationDate";
         map.put(dateString, actionDate);
         map.put("locale", "en");
         map.put("dateFormat", DATE_FORMAT);

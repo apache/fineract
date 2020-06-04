@@ -59,7 +59,7 @@ public class ProvisioningIntegrationTest {
     private LoanTransactionHelper loanTransactionHelper;
 
     @Before
-    public void setup() {
+    public void setup() throws ParseException{
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -172,7 +172,9 @@ public class ProvisioningIntegrationTest {
                     break ; //internal loop
                 }
             }
-            if(!found) Assert.fail("No Category found with Id:"+requestedCategoryId);
+            if(!found) {
+                Assert.fail("No Category found with Id:" + requestedCategoryId);
+            }
         }
     }
 
@@ -223,7 +225,7 @@ public class ProvisioningIntegrationTest {
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
-    private boolean isAlreadyProvisioningEntriesCreated() {
+    private boolean isAlreadyProvisioningEntriesCreated() throws ParseException {
         ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
         Map entries = transactionHelper.retrieveAllProvisioningEntries() ;
         ArrayList<Map> pageItems = (ArrayList)entries.get("pageItems") ;
@@ -232,20 +234,16 @@ public class ProvisioningIntegrationTest {
             for(Map item: pageItems) {
                 String date = (String)item.get("createdDate") ;
                 DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
-                try {
-                    Date date1 = formatter.parse(date) ;
-                    DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
-                    String formattedString = simple.format(Utils.getLocalDateOfTenant().toDate());
-                    Date currentDate = simple.parse(formattedString) ;
-                    if(date1.getTime() == currentDate.getTime()) {
-                        provisioningetryAlreadyCreated = true ;
-                        break ;
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                Date date1 = formatter.parse(date) ;
+                DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+                String formattedString = simple.format(Utils.getLocalDateOfTenant().toDate());
+                Date currentDate = simple.parse(formattedString) ;
+                if(date1.getTime() == currentDate.getTime()) {
+                    provisioningetryAlreadyCreated = true ;
+                    break;
                 }
             }
         }
-        return provisioningetryAlreadyCreated ;
+        return provisioningetryAlreadyCreated;
     }
 }

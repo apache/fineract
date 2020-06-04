@@ -379,8 +379,8 @@ public class RecurringDepositAccountHelper {
 
     private String getApproveRecurringDepositAccountAsJSON(final String approvedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedOnDate", approvedOnDate);
         map.put("note", "Approval NOTE");
         String recurringDepositAccountApproveJson = new Gson().toJson(map);
@@ -390,8 +390,8 @@ public class RecurringDepositAccountHelper {
 
     private String getUpdateTransactionAsJSON(final String transactionDate, final Float transactionAmount) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount);
         String updateTransactionJson = new Gson().toJson(map);
@@ -401,8 +401,8 @@ public class RecurringDepositAccountHelper {
 
     private String getRejectedRecurringDepositAsJSON(final String rejectedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectedOnDate", rejectedOnDate);
         map.put("note", "Rejected NOTE");
         String recurringDepositAccountJson = new Gson().toJson(map);
@@ -412,8 +412,8 @@ public class RecurringDepositAccountHelper {
 
     private String getWithdrawnRecurringDepositAccountAsJSON(final String withdrawnApplicationOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawnOnDate", withdrawnApplicationOnDate);
         map.put("note", "Withdraw NOTE");
         String recurringDepositAccountJson = new Gson().toJson(map);
@@ -423,8 +423,8 @@ public class RecurringDepositAccountHelper {
 
     private String getActivatedRecurringDepositAccountAsJSON(final String activationDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activatedOnDate", activationDate);
         String recurringDepositAccountActivateJson = new Gson().toJson(map);
         LOG.info(recurringDepositAccountActivateJson);
@@ -440,8 +440,8 @@ public class RecurringDepositAccountHelper {
 
     private String getCalculatedPrematureAmountForRecurringDepositAccountAsJSON(final String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         String recurringDepositAccountPrematureClosureJson = new Gson().toJson(map);
         LOG.info(recurringDepositAccountPrematureClosureJson);
@@ -450,8 +450,8 @@ public class RecurringDepositAccountHelper {
 
     private String getDepositToRecurringDepositAccountAsJSON(final Float depositAmount, final String depositedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionAmount", depositAmount);
         map.put("transactionDate", depositedOnDate);
         String recurringDepositAccountPrematureClosureJson = new Gson().toJson(map);
@@ -462,8 +462,8 @@ public class RecurringDepositAccountHelper {
     private String getPrematureCloseForRecurringDepositAccountAsJSON(final String closedOnDate,
             final String closureType, final Integer toSavingsId) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("locale", CommonConstants.locale);
-        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closedOnDate", closedOnDate);
         map.put("onAccountClosureId", closureType);
         if (toSavingsId != null) {

@@ -26,7 +26,7 @@ public interface DepositAccountInterestRateChartReadPlatformService {
 
     DepositAccountInterestRateChartData retrieveOneWithSlabs(Long interestChartId);
 
-    DepositAccountInterestRateChartData retrieveWithTemplate(DepositAccountInterestRateChartData DepositAccountInterestRateChartData);
+    DepositAccountInterestRateChartData retrieveWithTemplate(DepositAccountInterestRateChartData depositAccountInterestRateChartData);
 
     DepositAccountInterestRateChartData retrieveOneWithSlabsOnAccountId(Long accountId);
 

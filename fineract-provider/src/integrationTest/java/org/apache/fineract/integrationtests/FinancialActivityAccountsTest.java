@@ -27,7 +27,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.exception.DuplicateFinancialActivityAccountFoundException;
 import org.apache.fineract.accounting.financialactivityaccount.exception.FinancialActivityAccountInvalidException;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -50,8 +50,8 @@ public class FinancialActivityAccountsTest {
     private RequestSpecification requestSpec;
     private AccountHelper accountHelper;
     private FinancialActivityAccountHelper financialActivityAccountHelper;
-    private final Integer assetTransferFinancialActivityId = FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue();
-    public static final Integer liabilityTransferFinancialActivityId = FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue();
+    private final Integer assetTransferFinancialActivityId = FinancialActivity.ASSET_TRANSFER.getValue();
+    public static final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID = FinancialActivity.LIABILITY_TRANSFER.getValue();
 
     @Before
     public void setup() {
@@ -78,7 +78,7 @@ public class FinancialActivityAccountsTest {
 
         /*** Create A Financial Activity to Account Mapping **/
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(), responseSpec,
+                LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount.getAccountID(), responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(financialActivityAccountId);
 
@@ -86,7 +86,7 @@ public class FinancialActivityAccountsTest {
          * Fetch Created Financial Activity to Account Mapping and validate
          * created values
          **/
-        assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId, liabilityTransferAccount);
+        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount);
 
         /**
          * Update Existing Financial Activity to Account Mapping and assert
@@ -96,12 +96,12 @@ public class FinancialActivityAccountsTest {
         Assert.assertNotNull(newLiabilityTransferAccount);
 
         HashMap changes = (HashMap) financialActivityAccountHelper.updateFinancialActivityAccount(financialActivityAccountId,
-                liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(), responseSpec,
+                LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, newLiabilityTransferAccount.getAccountID(), responseSpec,
                 CommonConstants.RESPONSE_CHANGES);
         Assert.assertEquals(newLiabilityTransferAccount.getAccountID(), changes.get("glAccountId"));
 
         /** Validate update works correctly **/
-        assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId,
+        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
                 newLiabilityTransferAccount);
 
         /** Update with Invalid Financial Activity should fail **/
@@ -113,7 +113,7 @@ public class FinancialActivityAccountsTest {
 
         /** Creating Duplicate Financial Activity should fail **/
         List<HashMap> duplicateFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper
-                .createFinancialActivityAccount(liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(),
+                .createFinancialActivityAccount(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount.getAccountID(),
                         responseSpecForDomainRuleViolation, CommonConstants.RESPONSE_ERROR);
         assertEquals(DuplicateFinancialActivityAccountFoundException.getErrorcode(),
                 duplicateFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));

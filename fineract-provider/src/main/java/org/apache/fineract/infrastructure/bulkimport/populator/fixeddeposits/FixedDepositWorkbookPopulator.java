@@ -39,9 +39,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
-
+    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositWorkbookPopulator.class);
     private OfficeSheetPopulator officeSheetPopulator;
     private ClientSheetPopulator clientSheetPopulator;
     private PersonnelSheetPopulator personnelSheetPopulator;
@@ -293,7 +295,7 @@ public class FixedDepositWorkbookPopulator extends AbstractWorkbookPopulator {
                         + "))),\"\",INDIRECT(CONCATENATE(\"Term_Type_\",$C" + (rowNo + 1) + ")))");
             }
         } catch (RuntimeException re) {
-            re.printStackTrace();
+                LOG.error("Problem occurred in setDefaults function",re);
         }
     }
     private void setLayout(Sheet worksheet) {

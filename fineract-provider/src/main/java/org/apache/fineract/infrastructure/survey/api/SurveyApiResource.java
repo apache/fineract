@@ -114,7 +114,7 @@ public class SurveyApiResource {
     @Path("{surveyName}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.mifos.io/api-docs/apiLive.htm#survey_create ] ")
+    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#survey_create ] ")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class)})
     public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,

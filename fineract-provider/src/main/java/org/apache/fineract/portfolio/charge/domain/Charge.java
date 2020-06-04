@@ -598,8 +598,12 @@ public class Charge extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Charge)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Charge)) {
+            return false;
+        }
         Charge other= (Charge) o;
         return Objects.equals(name, other.name) &&
    Objects.equals(amount, other.amount) &&

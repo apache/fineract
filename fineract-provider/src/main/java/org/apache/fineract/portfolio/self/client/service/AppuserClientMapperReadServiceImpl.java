@@ -56,8 +56,9 @@ public class AppuserClientMapperReadServiceImpl implements
             if (!mappedClientId) {
                 throw new ClientNotFoundException(clientId);
             }
-        } else
+        } else {
             throw new ClientNotFoundException(clientId);
+        }
 
     }
 

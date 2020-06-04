@@ -192,15 +192,13 @@ public class Utils {
         return (T) (jsonAttributeToGetBack == null ? json : from(json).get(jsonAttributeToGetBack));
     }
 
-    public static String convertDateToURLFormat(final String dateToBeConvert) {
+    public static String convertDateToURLFormat(final String dateToBeConvert) throws ParseException{
         final SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy", Locale.US);
         final SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
         String reformattedStr = "";
-        try {
-            reformattedStr = newFormat.format(oldFormat.parse(dateToBeConvert));
-        } catch (final ParseException e) {
-            e.printStackTrace();
-        }
+
+        reformattedStr = newFormat.format(oldFormat.parse(dateToBeConvert));
+
         return reformattedStr;
     }
 
@@ -209,9 +207,9 @@ public class Utils {
         final Random rnd = new Random();
         final StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-            sb.append((sourceSetString).charAt(rnd.nextInt(lengthOfSource)));
+            sb.append(sourceSetString.charAt(rnd.nextInt(lengthOfSource)));
         }
-        return (prefix + (sb.toString()));
+        return prefix + sb.toString();
     }
 
     public static String randomStringGenerator(final String prefix, final int len) {

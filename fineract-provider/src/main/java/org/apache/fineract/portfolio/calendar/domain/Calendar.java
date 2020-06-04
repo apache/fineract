@@ -42,7 +42,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
+import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.exception.CalendarDateException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -113,7 +113,7 @@ public class Calendar extends AbstractAuditableCustom {
 
         final CalendarType calendarType = CalendarType.fromInt(typeId);
         if (calendarType.isCollection() && !repeating) {
-            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue())
+            baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue())
                     .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
@@ -172,20 +172,20 @@ public class Calendar extends AbstractAuditableCustom {
         // final Integer entityTypeId =
         // CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
         Date meetingtime=null;
-        final String title = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue());
-        final String description = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.DESCRIPTION.getValue());
-        final String location = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.LOCATION.getValue());
-        final LocalDate startDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue());
-        final LocalDate endDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.END_DATE.getValue());
-        final Integer duration = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.DURATION.getValue());
-        final Integer typeId = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue());
-        final boolean repeating = command.booleanPrimitiveValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue());
-        final Integer remindById = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REMIND_BY_ID.getValue());
-        final Integer firstReminder = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.FIRST_REMINDER
+        final String title = command.stringValueOfParameterNamed(CalendarSupportedParameters.TITLE.getValue());
+        final String description = command.stringValueOfParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue());
+        final String location = command.stringValueOfParameterNamed(CalendarSupportedParameters.LOCATION.getValue());
+        final LocalDate startDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
+        final LocalDate endDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.END_DATE.getValue());
+        final Integer duration = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.DURATION.getValue());
+        final Integer typeId = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.TYPE_ID.getValue());
+        final boolean repeating = command.booleanPrimitiveValueOfParameterNamed(CalendarSupportedParameters.REPEATING.getValue());
+        final Integer remindById = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.REMIND_BY_ID.getValue());
+        final Integer firstReminder = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.FIRST_REMINDER
                 .getValue());
-        final Integer secondReminder = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER
+        final Integer secondReminder = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.SECOND_REMINDER
                 .getValue());
-       final LocalDateTime time= command.localTimeValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue());
+       final LocalDateTime time= command.localTimeValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());
        if(time!=null){
         meetingtime=time.toDate();
        }
@@ -213,7 +213,7 @@ public class Calendar extends AbstractAuditableCustom {
                     getStartDateLocalDate());
         } else {
 
-            actualChanges.put(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue(), newMeetingStartDate.toString());
+            actualChanges.put(CalendarSupportedParameters.START_DATE.getValue(), newMeetingStartDate.toString());
             this.startDate = newMeetingStartDate.toDate();
 
             /*
@@ -251,27 +251,27 @@ public class Calendar extends AbstractAuditableCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if (command.isChangeInStringParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue(), this.title)) {
-            final String newValue = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue());
-            actualChanges.put(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue(), newValue);
+        if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.TITLE.getValue(), this.title)) {
+            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.TITLE.getValue());
+            actualChanges.put(CalendarSupportedParameters.TITLE.getValue(), newValue);
             this.title = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        if (command.isChangeInStringParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.DESCRIPTION.getValue(), this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.DESCRIPTION.getValue());
-            actualChanges.put(CALENDAR_SUPPORTED_PARAMETERS.DESCRIPTION.getValue(), newValue);
+        if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue(), this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue());
+            actualChanges.put(CalendarSupportedParameters.DESCRIPTION.getValue(), newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        if (command.isChangeInStringParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.LOCATION.getValue(), this.location)) {
-            final String newValue = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.LOCATION.getValue());
-            actualChanges.put(CALENDAR_SUPPORTED_PARAMETERS.LOCATION.getValue(), newValue);
+        if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.LOCATION.getValue(), this.location)) {
+            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.LOCATION.getValue());
+            actualChanges.put(CalendarSupportedParameters.LOCATION.getValue(), newValue);
             this.location = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
-        final String startDateParamName = CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue();
+        final String startDateParamName = CalendarSupportedParameters.START_DATE.getValue();
         if (command.isChangeInLocalDateParameterNamed(startDateParamName, getStartDateLocalDate())) {
 
             final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
@@ -295,7 +295,7 @@ public class Calendar extends AbstractAuditableCustom {
             }
         }
 
-        final String endDateParamName = CALENDAR_SUPPORTED_PARAMETERS.END_DATE.getValue();
+        final String endDateParamName = CalendarSupportedParameters.END_DATE.getValue();
         if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateLocalDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(endDateParamName);
             actualChanges.put(endDateParamName, valueAsInput);
@@ -306,7 +306,7 @@ public class Calendar extends AbstractAuditableCustom {
             this.endDate = newValue.toDate();
         }
 
-        final String durationParamName = CALENDAR_SUPPORTED_PARAMETERS.DURATION.getValue();
+        final String durationParamName = CalendarSupportedParameters.DURATION.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(durationParamName, this.duration)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(durationParamName);
             actualChanges.put(durationParamName, newValue);
@@ -316,7 +316,7 @@ public class Calendar extends AbstractAuditableCustom {
         // Do not allow to change calendar type
         // TODO: AA Instead of throwing an exception, do not allow meeting
         // calendar type to update.
-        final String typeParamName = CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue();
+        final String typeParamName = CalendarSupportedParameters.TYPE_ID.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(typeParamName, this.typeId)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
             final String defaultUserMessage = "Meeting calendar type update is not supported";
@@ -332,7 +332,7 @@ public class Calendar extends AbstractAuditableCustom {
              */
         }
 
-        final String repeatingParamName = CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue();
+        final String repeatingParamName = CalendarSupportedParameters.REPEATING.getValue();
         if (command.isChangeInBooleanParameterNamed(repeatingParamName, this.repeating)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(repeatingParamName);
             actualChanges.put(repeatingParamName, newValue);
@@ -340,14 +340,16 @@ public class Calendar extends AbstractAuditableCustom {
         }
 
         // if repeating is false then update recurrence to NULL
-        if (!this.repeating) this.recurrence = null;
+        if (!this.repeating) {
+            this.recurrence = null;
+        }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
 
         final CalendarType calendarType = CalendarType.fromInt(this.typeId);
         if (calendarType.isCollection() && !this.repeating) {
-            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue())
+            baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue())
                     .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
@@ -378,32 +380,32 @@ public class Calendar extends AbstractAuditableCustom {
             this.recurrence = StringUtils.defaultIfEmpty(newRecurrence, null);
         }
 
-        final String remindByParamName = CALENDAR_SUPPORTED_PARAMETERS.REMIND_BY_ID.getValue();
+        final String remindByParamName = CalendarSupportedParameters.REMIND_BY_ID.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(remindByParamName, this.remindById)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(remindByParamName);
             actualChanges.put(remindByParamName, newValue);
             this.remindById = newValue;
         }
 
-        final String firstRemindarParamName = CALENDAR_SUPPORTED_PARAMETERS.FIRST_REMINDER.getValue();
+        final String firstRemindarParamName = CalendarSupportedParameters.FIRST_REMINDER.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(firstRemindarParamName, this.firstReminder)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(firstRemindarParamName);
             actualChanges.put(firstRemindarParamName, newValue);
             this.firstReminder = newValue;
         }
 
-        final String secondRemindarParamName = CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue();
+        final String secondRemindarParamName = CalendarSupportedParameters.SECOND_REMINDER.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(secondRemindarParamName, this.secondReminder)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(secondRemindarParamName);
             actualChanges.put(secondRemindarParamName, newValue);
             this.secondReminder = newValue;
         }
 
-        final String timeFormat = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.Time_Format.getValue());
-        final String time = CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue();
-        if (command.isChangeInTimeParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), this.meetingtime,timeFormat)) {
-            final String newValue = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue());
-            actualChanges.put(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), newValue);
+        final String timeFormat = command.stringValueOfParameterNamed(CalendarSupportedParameters.Time_Format.getValue());
+        final String time = CalendarSupportedParameters.MEETING_TIME.getValue();
+        if (command.isChangeInTimeParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue(), this.meetingtime,timeFormat)) {
+            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());
+            actualChanges.put(CalendarSupportedParameters.MEETING_TIME.getValue(), newValue);
             LocalDateTime timeInLocalDateTimeFormat=command.localTimeValueOfParameterNamed(time);
             if(timeInLocalDateTimeFormat!=null){
             this.meetingtime= timeInLocalDateTimeFormat.toDate();
@@ -546,8 +548,8 @@ public class Calendar extends AbstractAuditableCustom {
 
     private static String constructRecurrence(final JsonCommand command, final Calendar calendar) {
         final boolean repeating;
-        if (command.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue())) {
-            repeating = command.booleanPrimitiveValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue());
+        if (command.parameterExists(CalendarSupportedParameters.REPEATING.getValue())) {
+            repeating = command.booleanPrimitiveValueOfParameterNamed(CalendarSupportedParameters.REPEATING.getValue());
         } else if (calendar != null) {
             repeating = calendar.isRepeating();
         } else {
@@ -555,22 +557,22 @@ public class Calendar extends AbstractAuditableCustom {
         }
 
         if (repeating) {
-            final Integer frequency = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue());
+            final Integer frequency = command.integerValueOfParameterNamed(CalendarSupportedParameters.FREQUENCY.getValue());
             final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(frequency);
-            final Integer interval = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue());
+            final Integer interval = command.integerValueOfParameterNamed(CalendarSupportedParameters.INTERVAL.getValue());
             Integer repeatsOnDay = null;
             if (frequencyType.isWeekly()) {
-                repeatsOnDay = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
+                repeatsOnDay = command.integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_DAY.getValue());
             }
             Integer repeatsOnNthDayOfMonth = null;
             if (frequencyType.isMonthly()) {
-                repeatsOnNthDayOfMonth = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_NTH_DAY_OF_MONTH
+                repeatsOnNthDayOfMonth = command.integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_NTH_DAY_OF_MONTH
                         .getValue());
                 final NthDayType nthDay = NthDayType.fromInt(repeatsOnNthDayOfMonth);
-                repeatsOnDay = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_LAST_WEEKDAY_OF_MONTH
+                repeatsOnDay = command.integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_LAST_WEEKDAY_OF_MONTH
                         .getValue());
                 if (nthDay.isOnDay()) {
-                    repeatsOnNthDayOfMonth = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY_OF_MONTH
+                    repeatsOnNthDayOfMonth = command.integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_DAY_OF_MONTH
                             .getValue());
                     repeatsOnDay = null;
                 }

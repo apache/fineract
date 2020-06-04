@@ -658,7 +658,7 @@ public class SavingsProduct extends AbstractPersistableCustom {
             final Set<Charge> currentSetOfCharges = new HashSet<>(this.charges);
             final Set<Charge> newSetOfCharges = new HashSet<>(newSavingsProductCharges);
 
-            if (!(currentSetOfCharges.equals(newSetOfCharges))) {
+            if (!currentSetOfCharges.equals(newSetOfCharges)) {
                 updated = true;
                 this.charges = newSavingsProductCharges;
             }
