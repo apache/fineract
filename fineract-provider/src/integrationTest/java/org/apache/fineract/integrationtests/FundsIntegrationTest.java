@@ -202,7 +202,7 @@ public class FundsIntegrationTest {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, this.requestSpec, responseSpec);
         HashMap<String, Object> map = new Gson().fromJson(jsonData, new TypeToken<HashMap<String, Object>>(){}.getType());
-        assertEquals(map.get("userMessageGlobalisationCode"), "error.msg.resource.not.found");
+        assertEquals("error.msg.resource.not.found", map.get("userMessageGlobalisationCode"));
     }
 
     @Test

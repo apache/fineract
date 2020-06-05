@@ -237,9 +237,9 @@ public class SystemCodeTest {
         final HashMap codeValueChanges = (HashMap) CodeHelper.updateCodeValue(this.requestSpec, this.responseSpec, createCodeResponseId,
                 createCodeValueResponseId1, codeValue1 + "CHANGE", codeDescription1 + "CHANGE", 4, "changes");
 
-        assertEquals("Verify changed code value name", codeValueChanges.get("name"), codeValue1 + "CHANGE");
+        assertEquals("Verify changed code value name", codeValue1 + "CHANGE", codeValueChanges.get("name"));
 
-        assertEquals("Verify changed code value description", codeValueChanges.get("description"), codeDescription1 + "CHANGE");
+        assertEquals("Verify changed code value description", codeDescription1 + "CHANGE", codeValueChanges.get("description"));
 
         // delete code value
         Integer deletedCodeValueResponseId1 = (Integer) CodeHelper.deleteCodeValueById(this.requestSpec, this.generalResponseSpec,

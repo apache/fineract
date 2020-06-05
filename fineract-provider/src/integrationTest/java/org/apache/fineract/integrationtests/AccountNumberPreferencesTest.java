@@ -376,7 +376,7 @@ public class AccountNumberPreferencesTest {
             Assert.assertEquals(accountNumber.length(), prefix.length() + 9);
             Assert.assertTrue(accountNumber.startsWith(prefix));
         } else {
-            Assert.assertEquals(accountNumber.length(), 9);
+            Assert.assertEquals(9, accountNumber.length());
         }
     }
 
