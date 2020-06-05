@@ -81,7 +81,7 @@ public class RolesTest {
         assertEquals(disableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
-        assertEquals((Boolean) role.get("disabled"), true);
+        assertEquals(true, (Boolean) role.get("disabled"));
 
     }
 
@@ -102,14 +102,14 @@ public class RolesTest {
         assertEquals(disableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
-        assertEquals((Boolean) role.get("disabled"), true);
+        assertEquals(true, (Boolean) role.get("disabled"));
 
         LOG.info("--------------------------------- ENABLING ROLE -------------------------------");
         final Integer enableRoleId = RolesHelper.enableRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(enableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
-        assertEquals((Boolean) role.get("disabled"), false);
+        assertEquals(false,(Boolean) role.get("disabled"));
 
     }
 
