@@ -46,7 +46,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
     @Override
     public Collection<ReportMailingJobConfigurationData> retrieveAllReportMailingJobConfigurations() {
         final ReportMailingJobConfigurationMapper mapper = new ReportMailingJobConfigurationMapper();
-        final String sql = "select " + mapper.ReportMailingJobConfigurationSchema();
+        final String sql = "select " + mapper.reportMailingJobConfigurationSchema();
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
@@ -55,7 +55,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
     public ReportMailingJobConfigurationData retrieveReportMailingJobConfiguration(String name) {
         try {
             final ReportMailingJobConfigurationMapper mapper = new ReportMailingJobConfigurationMapper();
-            final String sql = "select " + mapper.ReportMailingJobConfigurationSchema() + " where rmjc.name = ?";
+            final String sql = "select " + mapper.reportMailingJobConfigurationSchema() + " where rmjc.name = ?";
 
             return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { name });
         }
@@ -66,7 +66,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
     }
 
     private static final class ReportMailingJobConfigurationMapper implements RowMapper<ReportMailingJobConfigurationData> {
-        public String ReportMailingJobConfigurationSchema() {
+        public String reportMailingJobConfigurationSchema() {
             return "rmjc.id, rmjc.name, rmjc.value "
                     + "from m_report_mailing_job_configuration rmjc";
         }

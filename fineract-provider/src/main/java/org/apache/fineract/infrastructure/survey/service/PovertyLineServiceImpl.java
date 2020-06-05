@@ -46,9 +46,9 @@ public class PovertyLineServiceImpl implements PovertyLineService {
     @Override
     public PpiPovertyLineData retrieveAll(final String ppiName) {
 
-        final SqlRowSet povertyLines = this._getPovertyLines(ppiName);
+        final SqlRowSet povertyLines = this.getPovertyLines(ppiName);
 
-        final SqlRowSet likelihoods = this._getLikelihoods();
+        final SqlRowSet likelihoods = this.getLikelihoods();
 
         List<LikeliHoodPovertyLineData> listOfLikeliHoodPovertyLineData = new ArrayList<>();
 
@@ -88,7 +88,7 @@ public class PovertyLineServiceImpl implements PovertyLineService {
     @Override
     public LikeliHoodPovertyLineData retrieveForLikelihood(final String ppiName, final Long likelihoodId) {
 
-        final SqlRowSet povertyLines = this._getPovertyLines(likelihoodId);
+        final SqlRowSet povertyLines = this.getPovertyLines(likelihoodId);
 
         List<PovertyLineData> povertyLineDatas = new ArrayList<>();
 
@@ -108,13 +108,13 @@ public class PovertyLineServiceImpl implements PovertyLineService {
 
     }
 
-    private SqlRowSet _getLikelihoods() {
+    private SqlRowSet getLikelihoods() {
         String sql = "SELECT lkp.id, lkh.code , lkh.name, lkp.enabled " + " FROM ppi_likelihoods lkh "
                 + " JOIN ppi_likelihoods_ppi lkp on lkp.likelihood_id = lkh.id ";
         return this.jdbcTemplate.queryForRowSet(sql);
     }
 
-    private SqlRowSet _getPovertyLines(final String ppiName) {
+    private SqlRowSet getPovertyLines(final String ppiName) {
         String sql = "SELECT pl.id, sc.score_from, sc.score_to , pl.poverty_line,lkh.code ,  lkh.name , lkp.ppi_name "
                 + " FROM ppi_poverty_line pl " + " JOIN ppi_likelihoods lkh on lkh.id = pl.likelihood_ppi_id "
                 + " JOIN ppi_likelihoods_ppi lkp on lkp.id = pl.likelihood_ppi_id " + " JOIN ppi_scores sc on sc.id = pl.score_id "
@@ -124,7 +124,7 @@ public class PovertyLineServiceImpl implements PovertyLineService {
 
     }
 
-    private SqlRowSet _getPovertyLines(final Long likelihoodId) {
+    private SqlRowSet getPovertyLines(final Long likelihoodId) {
         String sql = "SELECT pl.id, sc.score_from, sc.score_to , pl.poverty_line,lkh.code , lkp.enabled, lkp.id as likelihood_id , lkh.name , lkp.ppi_name "
                 + " FROM ppi_poverty_line pl "
                 + " JOIN ppi_likelihoods_ppi lkp on lkp.id = pl.likelihood_ppi_id "

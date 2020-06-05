@@ -259,7 +259,7 @@ public class LoanTransactionData {
                 manuallyReversed);
     }
 
-    public static LoanTransactionData LoanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate,
+    public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate,
             final BigDecimal disburseAmountForTemplate,    final Collection<PaymentTypeData> paymentOptions,
             final BigDecimal retriveLastEmiAmount, final LocalDate possibleNextRepaymentDate) {
             final Long id = null;

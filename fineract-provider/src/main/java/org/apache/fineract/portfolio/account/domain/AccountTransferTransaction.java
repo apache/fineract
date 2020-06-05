@@ -90,7 +90,7 @@ public class AccountTransferTransaction extends AbstractPersistableCustom {
                 transactionAmount, description);
     }
 
-    public static AccountTransferTransaction LoanTosavingsTransfer(final AccountTransferDetails accountTransferDetails,
+    public static AccountTransferTransaction loanTosavingsTransfer(final AccountTransferDetails accountTransferDetails,
             final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
             final Money transactionAmount, final String description) {
         return new AccountTransferTransaction(accountTransferDetails, null, deposit, null, loanRefundTransaction, transactionDate,
@@ -144,7 +144,7 @@ public class AccountTransferTransaction extends AbstractPersistableCustom {
         return this.accountTransferDetails;
     }
 
-        public static AccountTransferTransaction LoanToLoanTransfer(AccountTransferDetails accountTransferDetails, LoanTransaction disburseTransaction,
+        public static AccountTransferTransaction loanToLoanTransfer(AccountTransferDetails accountTransferDetails, LoanTransaction disburseTransaction,
                 LoanTransaction repaymentTransaction, LocalDate transactionDate, Money transactionMonetaryAmount, String description) {
             return new AccountTransferTransaction(accountTransferDetails, null, null, repaymentTransaction, disburseTransaction, transactionDate,
                     transactionMonetaryAmount, description);

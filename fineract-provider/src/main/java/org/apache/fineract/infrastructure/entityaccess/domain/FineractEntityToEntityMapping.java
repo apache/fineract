@@ -95,14 +95,14 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
         if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.startDate, this.startDate)) {
             final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
             actualChanges.put(FineractEntityApiResourceConstants.startDate, valueAsInput);
-            final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+            final Date startDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
             this.startDate = startDate;
         }
 
         if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.endDate, this.endDate)) {
             final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
             actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
-            final Date endDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+            final Date endDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
             this.endDate = endDate;
         }
         if (startDate != null && endDate != null) {

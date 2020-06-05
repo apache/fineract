@@ -297,7 +297,7 @@ public class SmsCampaignValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void ValidateClosure(String json) {
+    public void validateClosure(String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();

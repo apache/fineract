@@ -113,7 +113,7 @@ public class LoanSchedulePeriodData {
                 totalActualCostOfLoanForPeriod, totalInstallmentAmountForPeriod);
     }
 
-    public static LoanSchedulePeriodData WithPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
+    public static LoanSchedulePeriodData withPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
             final BigDecimal principalPaid, final BigDecimal interestPaid, final BigDecimal feeChargesPaid,
             final BigDecimal penaltyChargesPaid) {
 

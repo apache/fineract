@@ -101,6 +101,11 @@
             <property name="message" value="Avoid using corresponding octal or Unicode escape."/>
         </module>
           <module name="OneTopLevelClass"/>
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+            <message key="name.invalidPattern"
+             value="Method name ''{0}'' must match pattern ''{1}''."/>
+        </module>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -240,11 +245,6 @@
             <property name="allowSamelineMultipleAnnotations" value="true"/>
         </module>
 
-        <module name="MethodName">
-            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
-            <message key="name.invalidPattern"
-             value="Method name ''{0}'' must match pattern ''{1}''."/>
-        </module>
 
         <! - - Enable some JavaDoc validation (requires quite a lot of manual clean up work; not a top priority for initial Checkstyle adoption - ->
         <module name="JavadocTagContinuationIndentation"/>

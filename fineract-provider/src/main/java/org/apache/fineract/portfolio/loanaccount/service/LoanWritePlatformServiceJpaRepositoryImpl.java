@@ -367,7 +367,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkClientOrGroupActive(loan);
 
         final LocalDate nextPossibleRepaymentDate = loan.getNextPossibleRepaymentDateForRescheduling();
-        final Date rescheduledRepaymentDate = command.DateValueOfParameterNamed("adjustRepaymentDate");
+        final Date rescheduledRepaymentDate = command.dateValueOfParameterNamed("adjustRepaymentDate");
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.DISBURSE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());

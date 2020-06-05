@@ -130,7 +130,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
             final Long id = rs.getLong("id");
             final BigDecimal amount = rs.getBigDecimal("amount");
             final Integer status = JdbcSupport.getInteger(rs, "status");
-            final EnumOptionData statusEnum = SharesEnumerations.ShareAccountDividendStatusEnum(status);
+            final EnumOptionData statusEnum = SharesEnumerations.shareAccountDividendStatusEnum(status);
             final Long savingsTransactionId = JdbcSupport.getLong(rs, "savingsTransactionId");
 
             final Long accounId = rs.getLong("accountId");

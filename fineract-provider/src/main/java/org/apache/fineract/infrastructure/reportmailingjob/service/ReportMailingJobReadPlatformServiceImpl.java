@@ -64,7 +64,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
         final PaginationHelper<ReportMailingJobData> paginationHelper = new PaginationHelper<>();
 
         sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlStringBuilder.append(mapper.ReportMailingJobSchema());
+        sqlStringBuilder.append(mapper.reportMailingJobSchema());
         sqlStringBuilder.append(" where rmj.is_deleted = 0");
 
         if (searchParameters.isOrderByRequested()) {
@@ -93,7 +93,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     @Override
     public Collection<ReportMailingJobData> retrieveAllActiveReportMailingJobs() {
         final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-        final String sql = "select " + mapper.ReportMailingJobSchema() + " where rmj.is_deleted = 0 and is_active = 1"
+        final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.is_deleted = 0 and is_active = 1"
                 + " order by rmj.name";
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
@@ -103,7 +103,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     public ReportMailingJobData retrieveReportMailingJob(final Long reportMailingJobId) {
         try {
             final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
-            final String sql = "select " + mapper.ReportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = 0";
+            final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = 0";
 
             return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { reportMailingJobId });
         }
@@ -122,7 +122,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     }
 
     private static final class ReportMailingJobMapper implements RowMapper<ReportMailingJobData> {
-        public String ReportMailingJobSchema() {
+        public String reportMailingJobSchema() {
             return "rmj.id, rmj.name, rmj.description, rmj.start_datetime as startDateTime, rmj.recurrence, rmj.created_date as createdOnDate, "
                     + "cbu.username as createdByUsername, cbu.firstname as createdByFirstname, cbu.lastname as createdByLastname, "
                     + "rmj.lastmodified_date as updatedOnDate, "

@@ -75,13 +75,13 @@ public class GuarantorImportHandler implements ImportHandler {
             Row row;
                 row = addGuarantorSheet.getRow(rowIndex);
                 if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL)) {
-                    guarantors.add(ReadGuarantor(row, locale, dateFormat));
+                    guarantors.add(readGuarantor(row, locale, dateFormat));
                 }
 
         }
     }
 
-    private GuarantorData ReadGuarantor(Row row,String locale,String dateFormat) {
+    private GuarantorData readGuarantor(Row row,String locale,String dateFormat) {
         String loanaccountInfo=ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo!=null){
             String[] loanAccountAr=loanaccountInfo.split("-");

@@ -179,7 +179,7 @@ public class SharesEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData ShareAccountDividendStatusEnum(ShareAccountDividendStatusType type) {
+    public static EnumOptionData shareAccountDividendStatusEnum(ShareAccountDividendStatusType type) {
         EnumOptionData data = new EnumOptionData(ShareAccountDividendStatusType.INVALID.getValue().longValue(),
                 ShareAccountDividendStatusType.INVALID.getCode(), "Invalid");
         switch (type) {
@@ -198,11 +198,11 @@ public class SharesEnumerations {
         return data;
     }
 
-    public static EnumOptionData ShareAccountDividendStatusEnum(final Integer enumValue) {
-        return ShareAccountDividendStatusEnum(ShareAccountDividendStatusType.fromInt(enumValue));
+    public static EnumOptionData shareAccountDividendStatusEnum(final Integer enumValue) {
+        return shareAccountDividendStatusEnum(ShareAccountDividendStatusType.fromInt(enumValue));
     }
 
-    public static EnumOptionData ShareProductDividendStatusEnum(ShareProductDividendStatusType type) {
+    public static EnumOptionData shareProductDividendStatusEnum(ShareProductDividendStatusType type) {
         EnumOptionData data = new EnumOptionData(ShareAccountDividendStatusType.INVALID.getValue().longValue(),
                 ShareAccountDividendStatusType.INVALID.getCode(), "Invalid");
         switch (type) {
@@ -221,7 +221,7 @@ public class SharesEnumerations {
         return data;
     }
 
-    public static EnumOptionData ShareProductDividendStatusEnum(final Integer enumValue) {
-        return ShareProductDividendStatusEnum(ShareProductDividendStatusType.fromInt(enumValue));
+    public static EnumOptionData shareProductDividendStatusEnum(final Integer enumValue) {
+        return shareProductDividendStatusEnum(ShareProductDividendStatusType.fromInt(enumValue));
     }
 }

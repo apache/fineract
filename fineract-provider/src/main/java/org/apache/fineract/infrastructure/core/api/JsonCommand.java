@@ -410,7 +410,7 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractMonthDayNamed(parameterName, this.parsedCommand);
     }
 
-    public Date DateValueOfParameterNamed(final String parameterName) {
+    public Date dateValueOfParameterNamed(final String parameterName) {
         final LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
         if (localDate == null) { return null; }
         return localDate.toDateTimeAtStartOfDay().toDate();

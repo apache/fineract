@@ -96,7 +96,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
         this.meetingDataValidator.validateForCreate(command);
 
-        final Date meetingDate = command.DateValueOfParameterNamed(meetingDateParamName);
+        final Date meetingDate = command.dateValueOfParameterNamed(meetingDateParamName);
         final Boolean isTransactionDateOnNonMeetingDate = false;
         /*Boolean isSkipRepaymentOnFirstMonth = false;
         Integer numberOfDays = 0;
@@ -305,7 +305,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
     @Override
     public void updateCollectionSheetAttendance(final JsonCommand command) {
-        final Date meetingDate = command.DateValueOfParameterNamed(transactionDateParamName);
+        final Date meetingDate = command.dateValueOfParameterNamed(transactionDateParamName);
         final Boolean isTransactionDateOnNonMeetingDate = command.booleanPrimitiveValueOfParameterNamed(isTransactionDateOnNonMeetingDateParamName);
 
         try {

@@ -74,7 +74,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             // TODO: Get Tenant specific date
             // ensure closure date is not in the future
             final Date todaysDate = new Date();
-            final Date closureDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
+            final Date closureDate = command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
             if (closureDate.after(todaysDate)) { throw new GLClosureInvalidException(GlClosureInvalidReason.FUTURE_DATE, closureDate); }
             // shouldn't be before an existing accounting closure
             final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
@@ -142,7 +142,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("office_id_closing_date")) { throw new GLClosureDuplicateException(
                 command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue()), new LocalDate(
-                        command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()))); }
+                        command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()))); }
 
         logger.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",

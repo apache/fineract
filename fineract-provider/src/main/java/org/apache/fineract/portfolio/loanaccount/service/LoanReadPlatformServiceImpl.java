@@ -285,7 +285,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
              * TODO Vishwas: Remove references to "Contra" from the codebase
              ***/
             final String sql = "select "
-                    + rm.LoanPaymentsSchema()
+                    + rm.loanPaymentsSchema()
                     + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) and  (tr.is_reversed=0 or tr.manually_adjusted_or_reversed = 1) order by tr.transaction_date ASC,id ";
             return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
         } catch (final EmptyResultDataAccessException e) {
@@ -546,7 +546,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         if (paymentDetailsRequired) {
             paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         }
-        return LoanTransactionData.LoanTransactionDataForDisbursalTemplate(transactionType, loan.getExpectedDisbursedOnLocalDateForTemplate(), loan.getDisburseAmountForTemplate(),
+        return LoanTransactionData.loanTransactionDataForDisbursalTemplate(transactionType, loan.getExpectedDisbursedOnLocalDateForTemplate(), loan.getDisburseAmountForTemplate(),
                 paymentOptions, loan.retriveLastEmiAmount(), loan.getNextPossibleRepaymentDateForRescheduling());
 
     }
@@ -556,7 +556,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.context.authenticatedUser();
         try {
             final LoanTransactionsMapper rm = new LoanTransactionsMapper();
-            final String sql = "select " + rm.LoanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
+            final String sql = "select " + rm.loanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, transactionId });
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId);
@@ -1278,7 +1278,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     private static final class LoanTransactionsMapper implements RowMapper<LoanTransactionData> {
 
-        public String LoanPaymentsSchema() {
+        public String loanPaymentsSchema() {
 
             return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as `date`, tr.amount as total, "
                     + " tr.principal_portion_derived as principal, tr.interest_portion_derived as interest, "

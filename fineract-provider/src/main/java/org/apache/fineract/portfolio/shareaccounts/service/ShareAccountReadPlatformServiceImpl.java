@@ -494,7 +494,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final BigDecimal postedAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
             final Long savingTransactionId = rs.getLong("savings_transaction_id");
             final Integer status = rs.getInt("status") ;
-            final EnumOptionData statusEnum = SharesEnumerations.ShareAccountDividendStatusEnum(status);
+            final EnumOptionData statusEnum = SharesEnumerations.shareAccountDividendStatusEnum(status);
             final ShareAccountData shareAccountData = null;
             return new ShareAccountDividendData(id, postedDate, shareAccountData, postedAmount, statusEnum, savingTransactionId);
         }
