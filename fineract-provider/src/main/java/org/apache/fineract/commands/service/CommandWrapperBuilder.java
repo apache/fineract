@@ -2434,7 +2434,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder SavingsInterestPostingAsOnDate(final Long accountId) {
+    public CommandWrapperBuilder savingsInterestPostingAsOnDate(final Long accountId) {
         this.actionName = "POSTINTERESTASONDATE";
         this.entityName = "SAVINGSACCOUNT";
         this.savingsId = accountId;

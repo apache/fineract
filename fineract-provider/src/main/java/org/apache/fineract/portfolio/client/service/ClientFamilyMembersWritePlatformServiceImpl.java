@@ -146,9 +146,9 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             profession = this.codeValueRepository.getOne(professionId);
         }
 
-        if(command.DateValueOfParameterNamed("dateOfBirth")!=null)
+        if(command.dateValueOfParameterNamed("dateOfBirth")!=null)
         {
-            dateOfBirth=command.DateValueOfParameterNamed("dateOfBirth");
+            dateOfBirth=command.dateValueOfParameterNamed("dateOfBirth");
 
         }
 
@@ -391,9 +391,9 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             clientFamilyMember.setProfession(profession);
         }
 
-        if(command.DateValueOfParameterNamed("dateOfBirth")!=null)
+        if(command.dateValueOfParameterNamed("dateOfBirth")!=null)
         {
-            dateOfBirth=command.DateValueOfParameterNamed("dateOfBirth");
+            dateOfBirth=command.dateValueOfParameterNamed("dateOfBirth");
             clientFamilyMember.setDateOfBirth(dateOfBirth);
 
 

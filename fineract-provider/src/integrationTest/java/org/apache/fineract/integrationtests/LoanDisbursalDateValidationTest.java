@@ -57,7 +57,7 @@ public class LoanDisbursalDateValidationTest {
     }
 
     @Test
-    public void LoanApplicationValidateDisbursalDate() {
+    public void loanApplicationValidateDisbursalDate() {
 
         final String proposedAmount = "5000";
         final String approveDate = "1 March 2014";

@@ -215,8 +215,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         Integer category = DataTableApiConstant.CATEGORY_DEFAULT;
 
-        final String permissionSql = this._getPermissionSql(dataTableName);
-        this._registerDataTable(applicationTableName, dataTableName, category, permissionSql);
+        final String permissionSql = this.getPermissionSql(dataTableName);
+        this.registerDataTable(applicationTableName, dataTableName, category, permissionSql);
 
     }
 
@@ -230,8 +230,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         Integer category = this.getCategory(command);
 
         this.dataTableValidator.validateDataTableRegistration(command.json());
-        final String permissionSql = this._getPermissionSql(dataTableName);
-        this._registerDataTable(applicationTableName, dataTableName, category, permissionSql);
+        final String permissionSql = this.getPermissionSql(dataTableName);
+        this.registerDataTable(applicationTableName, dataTableName, category, permissionSql);
 
     }
 
@@ -245,12 +245,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         this.dataTableValidator.validateDataTableRegistration(command.json());
 
-        this._registerDataTable(applicationTableName, dataTableName, category, permissionSql);
+        this.registerDataTable(applicationTableName, dataTableName, category, permissionSql);
 
     }
 
     @Transactional
-    private void _registerDataTable(final String applicationTableName, final String dataTableName, final Integer category,
+    private void registerDataTable(final String applicationTableName, final String dataTableName, final Integer category,
             final String permissionsSql) {
 
         validateAppTable(applicationTableName);
@@ -301,7 +301,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    private String _getPermissionSql(final String dataTableName) {
+    private String getPermissionSql(final String dataTableName) {
         final String createPermission = "'CREATE_" + dataTableName + "'";
         final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
         final String readPermission = "'READ_" + dataTableName + "'";

@@ -95,7 +95,7 @@ public class AccountTransferDetails extends AbstractPersistableCustom {
                 transferType, null);
     }
 
-    public static AccountTransferDetails LoanTosavingsTransfer(final Office fromOffice, final Client fromClient,
+    public static AccountTransferDetails loanTosavingsTransfer(final Office fromOffice, final Client fromClient,
             final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
             Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, toSavingsAccount, null,
@@ -154,7 +154,7 @@ public class AccountTransferDetails extends AbstractPersistableCustom {
         return AccountTransferType.fromInt(this.transferType);
     }
 
-    public static AccountTransferDetails LoanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice, Client toClient,
+    public static AccountTransferDetails loanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice, Client toClient,
             Loan toLoanAccount, Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
                 transferType, null);

@@ -139,7 +139,7 @@ public class Guarantor extends AbstractPersistableCustom {
         if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
             final String firstname = command.stringValueOfParameterNamed(GuarantorJSONinputParams.FIRSTNAME.getValue());
             final String lastname = command.stringValueOfParameterNamed(GuarantorJSONinputParams.LASTNAME.getValue());
-            final Date dateOfBirth = command.DateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
+            final Date dateOfBirth = command.dateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
             final String addressLine1 = command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue());
             final String addressLine2 = command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue());
             final String city = command.stringValueOfParameterNamed(GuarantorJSONinputParams.CITY.getValue());
@@ -252,7 +252,7 @@ public class Guarantor extends AbstractPersistableCustom {
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
             Date propertyToBeUpdated) {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
-            final Date newValue = command.DateValueOfParameterNamed(paramName);
+            final Date newValue = command.dateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             //propertyToBeUpdated = newValue;
 

@@ -111,7 +111,7 @@ public class ClientAddressApiResources {
     @ApiOperation(value = "Create an address for a Client", notes = "Mandatory Fields : \n" + "type and clientId")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesRequest.class)})
     @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesResponse.class)})
-    public String AddClientAddress(@QueryParam("type") @ApiParam(value = "type") final long addressTypeId,
+    public String addClientAddress(@QueryParam("type") @ApiParam(value = "type") final long addressTypeId,
             @PathParam("clientid") @ApiParam(value = "clientId") final long clientid, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().addClientAddress(clientid, addressTypeId)
@@ -157,7 +157,7 @@ public class ClientAddressApiResources {
     @ApiOperation(value = "Update an address for a Client", notes = "All the address fields can be updated by using update client address API\n" + "\n" + "Mandatory Fields\n" + "type and addressId")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesRequest.class)})
     @ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesResponse.class)})
-    public String UpdateClientAddress(@PathParam("clientid") @ApiParam(value = "clientId") final long clientid, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    public String updateClientAddress(@PathParam("clientid") @ApiParam(value = "clientId") final long clientid, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientAddress(clientid)
                 .withJson(apiRequestBodyAsJson).build();

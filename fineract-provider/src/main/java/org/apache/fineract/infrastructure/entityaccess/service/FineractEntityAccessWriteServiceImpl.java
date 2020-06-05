@@ -93,8 +93,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
             final Long fromId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
             final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
-            final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-            final Date endDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
+            final Date startDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+            final Date endDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
 
             fromApiJsonDeserializer.checkForEntity(relId.toString(), fromId, toId);
             if (startDate != null && endDate != null) {

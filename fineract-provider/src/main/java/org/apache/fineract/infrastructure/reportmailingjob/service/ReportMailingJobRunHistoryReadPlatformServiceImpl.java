@@ -57,7 +57,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
         final List<Object> queryParameters = new ArrayList<>();
 
         sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlStringBuilder.append(this.reportMailingJobRunHistoryMapper.ReportMailingJobRunHistorySchema());
+        sqlStringBuilder.append(this.reportMailingJobRunHistoryMapper.reportMailingJobRunHistorySchema());
 
         if (reportMailingJobId != null) {
             sqlStringBuilder.append(" where rmjrh.job_id = ? ");
@@ -86,7 +86,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
     }
 
     private static final class ReportMailingJobRunHistoryMapper implements RowMapper<ReportMailingJobRunHistoryData> {
-        public String ReportMailingJobRunHistorySchema() {
+        public String reportMailingJobRunHistorySchema() {
             return "rmjrh.id, rmjrh.job_id as reportMailingJobId, rmjrh.start_datetime as startDateTime, "
                     + "rmjrh.end_datetime as endDateTime, rmjrh.status, rmjrh.error_message as errorMessage, "
                     + "rmjrh.error_log as errorLog "

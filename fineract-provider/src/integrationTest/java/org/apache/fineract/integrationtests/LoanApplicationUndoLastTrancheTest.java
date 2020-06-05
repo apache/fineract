@@ -57,7 +57,7 @@ public class LoanApplicationUndoLastTrancheTest {
     }
 
     @Test
-    public void LoanApplicationUndoLastTranche() {
+    public void loanApplicationUndoLastTranche() {
 
         final String proposedAmount = "5000";
         final String approvalAmount = "2000";

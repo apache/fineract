@@ -390,7 +390,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                         penaltyAmt = penaltyAmt.subtract(loanSchedulePeriodData.penaltyChargesDue());
                     }
 
-                    LoanSchedulePeriodData periodData = LoanSchedulePeriodData.WithPaidDetail(loanSchedulePeriodData, isComplete,
+                    LoanSchedulePeriodData periodData = LoanSchedulePeriodData.withPaidDetail(loanSchedulePeriodData, isComplete,
                             principalPaid, interestPaid, feeChargesPaid, penaltyChargesPaid);
                     updatedPeriodData.add(periodData);
                 }

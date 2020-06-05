@@ -107,7 +107,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
 
         final String dateValueParamName = "dateValue";
         if(command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)){
-            final Date newDateValue = command.DateValueOfParameterNamed(dateValueParamName);
+            final Date newDateValue = command.dateValueOfParameterNamed(dateValueParamName);
             actualChanges.put(dateValueParamName, newDateValue);
             this.dateValue = newDateValue;
         }
