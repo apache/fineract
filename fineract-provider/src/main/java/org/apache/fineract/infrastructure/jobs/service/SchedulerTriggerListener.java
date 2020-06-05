@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerTriggerListener implements TriggerListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(SchedulerTriggerListener.class);
+    private final static Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
 
     private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
@@ -54,7 +54,7 @@ public class SchedulerTriggerListener implements TriggerListener {
 
     @Override
     public void triggerFired(Trigger trigger, JobExecutionContext context) {
-        logger.debug("triggerFired() trigger={}, context={}", trigger, context);
+        LOG.debug("triggerFired() trigger={}, context={}", trigger, context);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SchedulerTriggerListener implements TriggerListener {
                 vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (Exception exception) { // Adding generic exception as it depends on JPA provider
-                logger.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
+                LOG.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
                         numberOfRetries, maxNumberOfRetries, jobKey, exception);
                 try {
                     Random random = new Random();
@@ -85,12 +85,12 @@ public class SchedulerTriggerListener implements TriggerListener {
                     Thread.sleep(1000 + (randomNum * 1000));
                     numberOfRetries = numberOfRetries + 1;
                 } catch (InterruptedException e) {
-                    logger.error("vetoJobExecution() caught an InterruptedException", e);
+                    LOG.error("vetoJobExecution() caught an InterruptedException", e);
                 }
             }
         }
         if (vetoJob) {
-            logger.warn("vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
+            LOG.warn("vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
                     + "maxNumberOfRetries={}, tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
                     maxNumberOfRetries, tenantIdentifier, jobKey, triggerType, trigger, context);
         }
@@ -99,11 +99,11 @@ public class SchedulerTriggerListener implements TriggerListener {
 
     @Override
     public void triggerMisfired(final Trigger trigger) {
-        logger.error("triggerMisfired() trigger={}", trigger);
+        LOG.error("triggerMisfired() trigger={}", trigger);
     }
 
     @Override
     public void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction triggerInstructionCode) {
-        logger.debug("triggerComplete() trigger={}, context={}, completedExecutionInstruction={}", trigger, context, triggerInstructionCode);
+        LOG.debug("triggerComplete() trigger={}, context={}, completedExecutionInstruction={}", trigger, context, triggerInstructionCode);
     }
 }

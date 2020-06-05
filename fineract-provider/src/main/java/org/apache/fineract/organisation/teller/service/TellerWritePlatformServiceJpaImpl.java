@@ -63,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -211,7 +211,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.teller.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

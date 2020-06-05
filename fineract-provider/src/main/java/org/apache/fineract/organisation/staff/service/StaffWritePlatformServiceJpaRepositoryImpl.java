@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
 
     private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final StaffRepository staffRepository;
@@ -139,7 +139,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
                     + displayName + "' already exists", "displayName", displayName);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.staff.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RateWriteServiceImpl implements RateWriteService {
 
-    private final static Logger logger = LoggerFactory.getLogger(RateWriteServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(RateWriteServiceImpl.class);
 
     private final RateRepository rateRepository;
     private final AppUserRepository appUserRepository;
@@ -146,7 +146,7 @@ public class RateWriteServiceImpl implements RateWriteService {
                     + "' already exists", "name", name);
         }
 
-        logger.error("Error due to Exception", dve);
+        LOG.error("Error due to Exception", dve);
         throw new PlatformDataIntegrityException("error.msg.fund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

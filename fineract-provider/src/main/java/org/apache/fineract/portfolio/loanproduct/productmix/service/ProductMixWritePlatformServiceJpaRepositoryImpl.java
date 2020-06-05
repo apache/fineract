@@ -49,7 +49,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductMixWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProductMixWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ProductMixWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final ProductMixDataValidator fromApiJsonDeserializer;
     private final ProductMixRepository productMixRepository;
@@ -194,7 +194,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     private List<ProductMix> updateRestrictedIds(final Set<String> restrictedIds, final List<ProductMix> existedProductMixes) {

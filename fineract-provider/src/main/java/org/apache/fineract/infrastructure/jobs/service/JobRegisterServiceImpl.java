@@ -66,7 +66,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
 
-    private final static Logger logger = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
     // MIFOSX-1184: This class cannot use constructor injection, because one of
     // its dependencies (SchedulerStopListener) has a circular dependency to
@@ -164,7 +164,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         } catch (final Exception e) {
             final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
-            logger.error("{}", msg, e);
+            LOG.error("{}", msg, e);
             throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId());
         }
 
@@ -223,7 +223,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                                     }
                                 }
                             } catch (final SchedulerException e) {
-                                logger.error("Error occured.", e);
+                                LOG.error("Error occured.", e);
                             }
                         }
                         jobDetail.updateTriggerMisfired(false);
@@ -281,7 +281,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             scheduledJobDetails.updateNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
-            logger.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
+            LOG.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
     }
@@ -292,7 +292,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             try {
                 scheduler.shutdown();
             } catch (final SchedulerException e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             }
         }
     }
@@ -317,7 +317,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         try {
             scheduler.shutdown();
         } catch (final SchedulerException e) {
-            logger.error("Error occured.", e);
+            LOG.error("Error occured.", e);
         }
     }
 

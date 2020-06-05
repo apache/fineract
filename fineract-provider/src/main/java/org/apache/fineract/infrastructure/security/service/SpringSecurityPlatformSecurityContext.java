@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
-    // private final static Logger logger =
+    // private final static Logger LOG =
     // LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
 
     private final ConfigurationDomainService configurationDomainService;

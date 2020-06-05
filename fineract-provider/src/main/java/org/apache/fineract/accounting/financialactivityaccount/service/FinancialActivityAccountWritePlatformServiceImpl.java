@@ -47,7 +47,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
     private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
     private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
-    private final static Logger logger = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
 
     @Autowired
     public FinancialActivityAccountWritePlatformServiceImpl(
@@ -154,7 +154,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }

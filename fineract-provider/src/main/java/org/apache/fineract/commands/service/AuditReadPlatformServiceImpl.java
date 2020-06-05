@@ -74,7 +74,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
     private final static Set<String> supportedOrderByValues = new HashSet<>(
             Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId", "madeOnDate", "checkedOnDate", "officeName",
                     "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId"));
@@ -214,7 +214,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
         }
 
-        logger.info("sql: {}", sqlBuilder);
+        LOG.info("sql: {}", sqlBuilder);
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(), rm);
@@ -251,7 +251,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         }
         sql += extraCriteria.getSQLTemplate();
         sql += groupAndOrderBySQL;
-        logger.info("sql: {}", sql);
+        LOG.info("sql: {}", sql);
 
         return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
     }

@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements AccountingRuleWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AccountingRuleWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AccountingRuleWritePlatformServiceJpaRepositoryImpl.class);
 
     private final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper;
     private final AccountingRuleRepository accountingRuleRepository;
@@ -89,7 +89,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
         } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Accounting Rule: " + realCause.getMessage());
     }

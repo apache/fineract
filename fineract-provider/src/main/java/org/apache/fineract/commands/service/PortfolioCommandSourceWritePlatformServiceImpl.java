@@ -50,7 +50,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final FromJsonHelper fromApiJsonHelper;
     private final CommandProcessingService processAndLogCommandService;
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
-    private final static Logger logger = LoggerFactory.getLogger(PortfolioCommandSourceWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(PortfolioCommandSourceWritePlatformServiceImpl.class);
 
     @Autowired
     public PortfolioCommandSourceWritePlatformServiceImpl(final PlatformSecurityContext context,
@@ -96,13 +96,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                logger.info("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
+                LOG.info("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
                 /***
                  * Fail if the transaction has been retired for
                  * maxNumberOfRetries
                  **/
                 if (numberOfRetries >= maxNumberOfRetries) {
-                    logger.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
+                    LOG.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
                         command.json(), numberOfRetries);
                     throw (exception);
                 }

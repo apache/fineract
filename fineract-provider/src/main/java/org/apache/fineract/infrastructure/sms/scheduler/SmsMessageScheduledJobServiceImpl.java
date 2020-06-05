@@ -69,7 +69,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
     private final SmsMessageRepository smsMessageRepository;
     private final SmsReadPlatformService smsReadPlatformService;
-    private static final Logger logger = LoggerFactory.getLogger(SmsMessageScheduledJobServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmsMessageScheduledJobServiceImpl.class);
     private final RestTemplate restTemplate = new RestTemplate();
     private  ExecutorService genericExecutorService ;
     private ExecutorService triggeredExecutorService ;
@@ -168,7 +168,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         @Override
         public void onApplicationEvent(ContextClosedEvent event) {
             genericExecutorService.shutdown();
-            logger.info("Shutting down the ExecutorService");
+            LOG.info("Shutting down the ExecutorService");
         }
     }
 
@@ -181,7 +181,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         if (responseOne != null) {
 //            String smsResponse = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.ACCEPTED)) {
-                logger.debug("{}", responseOne.getStatusCode().name());
+                LOG.debug("{}", responseOne.getStatusCode().name());
                 throw new ConnectionFailureException(SmsCampaignConstants.SMS);
             }
         }
@@ -223,7 +223,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                 }
             }
         } catch (Exception e) {
-            logger.error("Error occured.", e);
+            LOG.error("Error occured.", e);
         }
     }
 
@@ -242,11 +242,11 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             }
             this.smsMessageRepository.saveAll(smsMessages);
             request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
-            logger.info("Sending triggered SMS to specific provider with request - {}", request);
+            LOG.info("Sending triggered SMS to specific provider with request - {}", request);
             this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(),
                     apiQueueResourceDatas));
         } catch (Exception e) {
-            logger.error("Error occured.", e);
+            LOG.error("Error occured.", e);
         }
     }
 
@@ -320,19 +320,19 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                             this.smsMessageRepository.save(smsMessage);
 
                             if (statusChanged) {
-                                logger.info("Status of SMS message id: {} successfully changed to {}", smsMessage.getId(), statusType);
+                                LOG.info("Status of SMS message id: {} successfully changed to {}", smsMessage.getId(), statusType);
                             }
                         }
                     }
 
                     if (smsMessageDeliveryReportDatas.size() > 0) {
-                        logger.info("{} delivery report(s) successfully received from the intermediate gateway - sms", smsMessageDeliveryReportDatas.size());
+                        LOG.info("{} delivery report(s) successfully received from the intermediate gateway - sms", smsMessageDeliveryReportDatas.size());
                     }
                 }
             }
 
             catch (Exception e) {
-                logger.error("Error occured.", e);
+                LOG.error("Error occured.", e);
             }
             page ++;
             totalRecords = smsMessageInternalIds.getTotalFilteredRecords();

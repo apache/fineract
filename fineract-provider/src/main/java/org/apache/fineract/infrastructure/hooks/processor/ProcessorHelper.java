@@ -38,7 +38,7 @@ import retrofit.client.Response;
 @SuppressWarnings("unused")
 public class ProcessorHelper {
 
-    private final static Logger logger = LoggerFactory
+    private final static Logger LOG = LoggerFactory
             .getLogger(ProcessorHelper.class);
 
     @SuppressWarnings("null")
@@ -95,12 +95,12 @@ public class ProcessorHelper {
         return new Callback() {
             @Override
             public void success(final Object o, final Response response) {
-                logger.info("URL: {}\tStatus: {}", url, response.getStatus());
+                LOG.info("URL: {}\tStatus: {}", url, response.getStatus());
             }
 
             @Override
             public void failure(final RetrofitError retrofitError) {
-                logger.info("Error occured.", retrofitError);
+                LOG.info("Error occured.", retrofitError);
             }
         };
     }

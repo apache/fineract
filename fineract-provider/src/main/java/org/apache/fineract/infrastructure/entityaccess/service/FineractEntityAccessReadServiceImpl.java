@@ -46,7 +46,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final static Logger logger = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
 
     @Autowired
@@ -106,7 +106,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         if (accessListCSVStrBuf != null) {
             returnIdListStr = accessListCSVStrBuf.toString();
         }
-        logger.debug("List of IDs applicable: {}", returnIdListStr);
+        LOG.debug("List of IDs applicable: {}", returnIdListStr);
         return returnIdListStr;
     }
 
@@ -143,7 +143,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                 str.append("from  m_entity_to_entity_mapping eem ");
                 str.append("where eem.rel_id = ? ");
                 str.append("and eem.from_id = ? ");
-        logger.debug("{}", str);
+        LOG.debug("{}", str);
         return str.toString();
     }
 

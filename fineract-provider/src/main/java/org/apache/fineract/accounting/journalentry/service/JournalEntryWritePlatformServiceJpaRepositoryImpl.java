@@ -88,7 +88,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements JournalEntryWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final GLAccountRepository glAccountRepository;
@@ -640,7 +640,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         return new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());
     }

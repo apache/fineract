@@ -71,7 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanProductWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoanProductWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(LoanProductWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final LoanProductDataValidator fromApiJsonDeserializer;
     private final LoanProductRepository loanProductRepository;
@@ -377,7 +377,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {

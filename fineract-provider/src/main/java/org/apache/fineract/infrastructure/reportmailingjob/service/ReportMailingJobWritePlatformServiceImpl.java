@@ -73,7 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJobWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReportMailingJobWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ReportMailingJobWritePlatformServiceImpl.class);
     private final ReportRepositoryWrapper reportRepositoryWrapper;
     private final ReportMailingJobValidator reportMailingJobValidator;
     private final ReportMailingJobRepositoryWrapper reportMailingJobRepositoryWrapper;
@@ -399,7 +399,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     ReportMailingJobConstants.NAME_PARAM_NAME, name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
 
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

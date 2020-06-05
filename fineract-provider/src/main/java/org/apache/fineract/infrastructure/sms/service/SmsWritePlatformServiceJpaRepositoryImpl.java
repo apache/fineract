@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(SmsWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(SmsWritePlatformServiceJpaRepositoryImpl.class);
 
     private final SmsMessageAssembler assembler;
     private final SmsMessageRepository repository;
@@ -126,7 +126,7 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
         if (realCause.getMessage().contains("mobile_no")) { throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists",
                 "The group, client or staff provided has no mobile no.", "id"); }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.sms.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

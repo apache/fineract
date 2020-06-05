@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implements ProvisioningCriteriaWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final ProvisioningCriteriaAssembler provisioningCriteriaAssembler;
@@ -169,7 +169,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                     "error.msg.provisioning.product.id(s).already.associated.existing.criteria",
                     "The selected products already associated with another Provisioning Criteria");
         }
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

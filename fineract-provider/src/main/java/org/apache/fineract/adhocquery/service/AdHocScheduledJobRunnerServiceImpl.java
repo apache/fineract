@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service(value = "adHocScheduledJobRunnerService")
 public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunnerService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
 
@@ -105,17 +105,17 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             .append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = this.jdbcTemplate.update(insertSqlBuilder.toString());
-                        logger.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+                        LOG.info("{}: Results affected by inserted: {}", ThreadLocalContextUtil.getTenant().getName(), result);
 
                         this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
                     }
                 } else {
-                    logger.info("{}: Skipping execution of {}, scheduled for execution on {}",
+                    LOG.info("{}: Skipping execution of {}, scheduled for execution on {}",
                         new Object[] { ThreadLocalContextUtil.getTenant().getName(), adhoc.getName(), next });
                 }
             });
         }else{
-            logger.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
+            LOG.info("{} Nothing to update", ThreadLocalContextUtil.getTenant().getName());
         }
 
 

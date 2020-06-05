@@ -73,7 +73,7 @@ public class DatatablesApiResource {
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(DatatablesApiResource.class);
+    private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(DatatablesApiResource.class);
 
     @Autowired
     public DatatablesApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
@@ -227,7 +227,7 @@ public class DatatablesApiResource {
     public String getDatatableManyEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             @PathParam("datatableId") final Long datatableId, @QueryParam("order") final String order, @Context final UriInfo uriInfo) {
 
-        logger.debug("::1 we came in the getDatatbleManyEntry apiRessource method");
+        LOG.debug("::1 we came in the getDatatbleManyEntry apiRessource method");
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 

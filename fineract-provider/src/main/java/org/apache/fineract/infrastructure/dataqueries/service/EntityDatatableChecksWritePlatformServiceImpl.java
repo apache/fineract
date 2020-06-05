@@ -56,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EntityDatatableChecksWritePlatformServiceImpl implements EntityDatatableChecksWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(EntityDatatableChecksWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksWritePlatformServiceImpl.class);
 
     private final PlatformSecurityContext context;
     private final EntityDatatableChecksDataValidator fromApiJsonDeserializer;
@@ -105,7 +105,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             final String foreignKeyColumnName = EntityTables.getForeignKeyColumnNameOnDatatable(entity);
             final boolean columnExist = datatableData.hasColumn(foreignKeyColumnName);
 
-            logger.info("{} has column {} ? {}", new Object[] { datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist });
+            LOG.info("{} has column {} ? {}", new Object[] { datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist });
 
             if (!columnExist) { throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity); }
 
@@ -163,7 +163,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 final String datatableName = t.getDatatableName();
                 final Long countEntries = readWriteNonCoreDataService.countDatatableEntries(datatableName, entityId, foreignKeyColumn);
 
-                logger.info("The are {} entries in the table {}", countEntries, datatableName);
+                LOG.info("The are {} entries in the table {}", countEntries, datatableName);
                 if (countEntries.intValue() == 0) {
                     reqDatatables.add(datatableName);
                 }
@@ -189,7 +189,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 final String datatableName = t.getDatatableName();
                 final Long countEntries = readWriteNonCoreDataService.countDatatableEntries(datatableName, entityId, foreignKeyColumn);
 
-                logger.info("The are {} entries in the table {}", countEntries, datatableName);
+                LOG.info("The are {} entries in the table {}", countEntries, datatableName);
                 if (countEntries.intValue() == 0) {
                     reqDatatables.add(datatableName);
                 }
@@ -289,7 +289,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName, productId);
         }
 
-        logger.error("Error occured.", dae);
+        LOG.error("Error occured.", dae);
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

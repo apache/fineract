@@ -51,7 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(OfficeWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(OfficeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -239,7 +239,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

@@ -67,7 +67,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReadReportingServiceImpl implements ReadReportingService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
     private final static String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
     private final JdbcTemplate jdbcTemplate;
@@ -127,7 +127,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final StringBuilder writer = new StringBuilder();
 
         final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-        logger.info("NO. of Columns: {}", columnHeaders.size());
+        LOG.info("NO. of Columns: {}", columnHeaders.size());
         final Integer chSize = columnHeaders.size();
         for (int i = 0; i < chSize; i++) {
             writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
@@ -145,7 +145,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         String currVal;
         final String doubleQuote = "\"";
         final String twoDoubleQuotes = doubleQuote + doubleQuote;
-        logger.info("NO. of Rows: {}", data.size());
+        LOG.info("NO. of Rows: {}", data.size());
         for (int i = 0; i < data.size(); i++) {
             row = data.get(i).getRow();
             rSize = row.size();
@@ -177,14 +177,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
-        logger.info("STARTING REPORT: {}   Type: {}", name, type);
+        LOG.info("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
+        LOG.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
         return result;
     }
 
@@ -196,7 +196,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final Set<String> keys = queryParams.keySet();
         for (final String key : keys) {
             final String pValue = queryParams.get(key);
-            // logger.info("({} : {})", key, pValue);
+            // LOG.info("({} : {})", key, pValue);
             sql = this.genericDataService.replace(sql, key, pValue);
         }
 
@@ -264,7 +264,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final List<ResultsetRowData> data = result.getData();
             List<String> row;
 
-            logger.info("NO. of Columns: {}", columnHeaders.size());
+            LOG.info("NO. of Columns: {}", columnHeaders.size());
             final Integer chSize = columnHeaders.size();
 
             final Document document = new Document(PageSize.B0.rotate());
@@ -285,7 +285,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             Integer rSize;
             String currColType;
             String currVal;
-            logger.info("NO. of Rows: {}", data.size());
+            LOG.info("NO. of Rows: {}", data.size());
             for (int i = 0; i < data.size(); i++) {
                 row = data.get(i).getRow();
                 rSize = row.size();
@@ -308,7 +308,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             document.close();
             return genaratePdf;
         } catch (final Exception e) {
-            logger.error("error.msg.reporting.error:", e);
+            LOG.error("error.msg.reporting.error:", e);
             throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
         }
     }
@@ -507,14 +507,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
         final long startTime = System.currentTimeMillis();
-        logger.info("STARTING REPORT: {}   Type: {}", name, type);
+        LOG.info("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        logger.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
+        LOG.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", new Object[] { name, type, elapsed });
         return result;
     }
 
@@ -525,7 +525,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final Set<String> keys = queryParams.keySet();
         for (String key : keys) {
             final String pValue = queryParams.get(key);
-            // logger.info("(" + key + " : " + pValue + ")");
+            // LOG.info("(" + key + " : " + pValue + ")");
             key = "${" + key + "}";
             sql = this.genericDataService.replace(sql, key, pValue);
         }
@@ -554,7 +554,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final String reportPath = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "pentahoReports" + File.separator
                 + reportName + ".prpt";
-        logger.info("Report path: {}", reportPath);
+        LOG.info("Report path: {}", reportPath);
 
         // load report definition
         final ResourceManager manager = new ResourceManager();

@@ -58,7 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements SavingsProductWritePlatformService {
 
-    private final Logger logger;
+    private final Logger LOG;
     private final PlatformSecurityContext context;
     private final SavingsProductRepository savingProductRepository;
     private final SavingsProductDataValidator fromApiJsonDataValidator;
@@ -76,7 +76,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingProductRepository = savingProductRepository;
         this.fromApiJsonDataValidator = fromApiJsonDataValidator;
         this.savingsProductAssembler = savingsProductAssembler;
-        this.logger = LoggerFactory.getLogger(SavingsProductWritePlatformServiceJpaRepositoryImpl.class);
+        this.LOG = LoggerFactory.getLogger(SavingsProductWritePlatformServiceJpaRepositoryImpl.class);
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
     }
@@ -105,7 +105,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
-        this.logger.error("Error occured.", dae);
+        this.LOG.error("Error occured.", dae);
     }
 
     @Transactional

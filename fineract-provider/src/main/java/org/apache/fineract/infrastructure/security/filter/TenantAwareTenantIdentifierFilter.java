@@ -61,7 +61,7 @@ import org.springframework.web.filter.GenericFilterBean;
 public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
 
     private static boolean firstRequestProcessed = false;
-    private final static Logger logger = LoggerFactory.getLogger(TenantAwareTenantIdentifierFilter.class);
+    private final static Logger LOG = LoggerFactory.getLogger(TenantAwareTenantIdentifierFilter.class);
 
     private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
@@ -152,7 +152,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
         } finally {
             task.stop();
             final PlatformRequestLog log = PlatformRequestLog.from(task, request);
-            logger.info("{}", this.toApiJsonSerializer.serialize(log));
+            LOG.info("{}", this.toApiJsonSerializer.serialize(log));
         }
 
     }

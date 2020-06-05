@@ -95,7 +95,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl implements SavingsApplicationProcessWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
@@ -181,7 +181,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         errorCodeBuilder.append(".unknown.data.integrity.issue");
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Unknown data integrity issue with savings account.");
     }
 

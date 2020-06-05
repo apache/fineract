@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
 
     private final EmailMessageAssembler assembler;
     private final EmailMessageRepository repository;
@@ -126,7 +126,7 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
         if (realCause.getMessage().contains("email_address")) { throw new PlatformDataIntegrityException("error.msg.email.no.email.address.exists",
                 "The group, client or staff provided has no email address.", "id"); }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.email.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

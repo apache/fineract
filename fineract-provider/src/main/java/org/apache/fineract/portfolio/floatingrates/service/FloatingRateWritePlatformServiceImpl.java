@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FloatingRateWritePlatformServiceImpl implements
         FloatingRateWritePlatformService {
 
-    private final static Logger logger = LoggerFactory
+    private final static Logger LOG = LoggerFactory
             .getLogger(FloatingRateWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final FloatingRateDataValidator fromApiJsonDeserializer;
@@ -138,7 +138,7 @@ public class FloatingRateWritePlatformServiceImpl implements
 
     private void logAsErrorUnexpectedDataIntegrityException(
             Exception dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
 
     }
 
