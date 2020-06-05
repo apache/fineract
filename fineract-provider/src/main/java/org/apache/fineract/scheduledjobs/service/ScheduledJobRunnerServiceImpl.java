@@ -62,7 +62,7 @@ import org.springframework.util.CollectionUtils;
 @Service(value = "scheduledJobRunnerService")
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
 
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
@@ -174,7 +174,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Transactional
@@ -209,7 +209,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -226,14 +226,14 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             } catch (final PlatformApiDataValidationException e) {
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Apply annual fee failed for account: {} with message {}", savingsAccountReference.getAccountNo(), error);
+                    LOG.error("Apply annual fee failed for account: {} with message {}", savingsAccountReference.getAccountNo(), error);
                 }
             } catch (final Exception ex) {
                 // need to handle this scenario
             }
         }
 
-        logger.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), annualFeeData.size());
+        LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), annualFeeData.size());
     }
 
     @Override
@@ -248,11 +248,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 exceptions.add(e);
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
+                    LOG.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
                 }
             }
         }
-        logger.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
+        LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
         if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
     }
 
@@ -288,7 +288,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
-        logger.info("{} : Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        LOG.info("{} : Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -304,14 +304,14 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             } catch (final PlatformApiDataValidationException e) {
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Update maturity details failed for account: {} with message {}", depositAccount.accountNo(), error.getDeveloperMessage());
+                    LOG.error("Update maturity details failed for account: {} with message {}", depositAccount.accountNo(), error.getDeveloperMessage());
                 }
             } catch (final Exception ex) {
                 // need to handle this scenario
             }
         }
 
-        logger.info("{}: Deposit accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), depositAccounts.size());
+        LOG.info("{}: Deposit accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), depositAccounts.size());
     }
 
     @Override
@@ -392,12 +392,12 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 exceptions.add(e);
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error(
+                    LOG.error(
                             "Post Dividends to savings failed due to ApiParameterError for Divident detail Id: {} and savings Id: {} with message: {}",
                             id, savingsId, error.getDeveloperMessage(), e);
                 }
             } catch (final Exception e) {
-                logger.error("Post Dividends to savings failed for Divident detail Id: {} and savings Id: {}", id, savingsId, e);
+                LOG.error("Post Dividends to savings failed for Divident detail Id: {} and savings Id: {}", id, savingsId, e);
                 exceptions.add(e);
             }
         }
@@ -431,7 +431,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
 
             final int result = jdbcTemplate.update(sqlBuilder.toString(), formattedDate);
-            logger.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+            LOG.info("{}: Results affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         }
 
         // Updating closing balance

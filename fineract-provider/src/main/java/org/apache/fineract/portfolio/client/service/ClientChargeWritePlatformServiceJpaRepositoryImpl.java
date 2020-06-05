@@ -65,7 +65,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements ClientChargeWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ChargeRepositoryWrapper chargeRepository;
@@ -438,7 +438,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                 "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
                 "clientChargeId", clientChargeId); }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.charges.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

@@ -92,7 +92,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanRescheduleRequestWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
 
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final PlatformSecurityContext platformSecurityContext;
@@ -606,7 +606,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      **/
     private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
 
         throw new PlatformDataIntegrityException("error.msg.loan.reschedule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

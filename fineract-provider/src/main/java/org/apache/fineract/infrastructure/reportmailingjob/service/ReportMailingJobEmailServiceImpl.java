@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailService {
-    private final static Logger logger = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
     private final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService;
     private Collection<ReportMailingJobConfigurationData> reportMailingJobConfigurationDataCollection;
 
@@ -80,7 +80,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
 
         catch (MessagingException e) {
             // handle the exception
-            logger.error("Problem occurred in sendEmailWithAttachment function",e);
+            LOG.error("Problem occurred in sendEmailWithAttachment function",e);
         }
     }
 

@@ -99,7 +99,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampaignWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
 
     private final PlatformSecurityContext context;
 
@@ -293,7 +293,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 LocalDateTime tenantDateNow = tenantDateTime();
                 LocalDateTime nextTriggerDate = emailCampaignData.getNextTriggerDate().toLocalDateTime();
 
-                logger.info("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
+                LOG.info("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoEmailOutboundTable(emailCampaignData.getParamValue(), emailCampaignData.getEmailSubject(),
                             emailCampaignData.getMessage(), emailCampaignData.getCampaignName(), emailCampaignData.getId());

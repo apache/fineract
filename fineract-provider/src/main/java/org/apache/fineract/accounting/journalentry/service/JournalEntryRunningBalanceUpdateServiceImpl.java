@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntryRunningBalanceUpdateService {
 
-    private final static Logger logger = LoggerFactory.getLogger(JournalEntryRunningBalanceUpdateServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(JournalEntryRunningBalanceUpdateServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -103,7 +103,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class);
             updateOrganizationRunningBalance(entityDate);
         } catch (EmptyResultDataAccessException e) {
-            logger.debug("No results found for updation of running balance ");
+            LOG.debug("No results found for updation of running balance ");
         }
     }
 
@@ -124,7 +124,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class, officeId);
                 updateRunningBalance(officeId, entityDate);
             } catch (EmptyResultDataAccessException e) {
-                logger.debug("No results found for updation of office running balance with office id: {}", officeId);
+                LOG.debug("No results found for updation of office running balance with office id: {}", officeId);
             }
             commandProcessingResultBuilder.withOfficeId(officeId);
         }

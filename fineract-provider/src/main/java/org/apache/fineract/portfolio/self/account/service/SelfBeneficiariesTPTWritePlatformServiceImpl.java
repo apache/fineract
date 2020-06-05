@@ -53,7 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
         SelfBeneficiariesTPTWritePlatformService {
 
-    private final Logger logger;
+    private final Logger LOG;
     private final PlatformSecurityContext context;
     private final SelfBeneficiariesTPTRepository repository;
     private final SelfBeneficiariesTPTDataValidator validator;
@@ -72,7 +72,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
         this.validator = validator;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.savingRepositoryWrapper = savingRepositoryWrapper;
-        this.logger = LoggerFactory
+        this.LOG = LoggerFactory
                 .getLogger(SelfBeneficiariesTPTWritePlatformServiceImpl.class);
     }
 
@@ -200,7 +200,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
                     NAME_PARAM_NAME, name);
         }
 
-        this.logger.error("Error occured.", dae);
+        this.LOG.error("Error occured.", dae);
         throw new PlatformDataIntegrityException(
                 "error.msg.beneficiary.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

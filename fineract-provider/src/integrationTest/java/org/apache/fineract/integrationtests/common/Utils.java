@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    private final static Logger logger = LoggerFactory.getLogger(Utils.class);
+    private final static Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
@@ -80,15 +80,15 @@ public class Utils {
                 response = RestAssured.get(HEALTH_URL);
                 int healthHttpStatus = response.statusCode();
                 if (healthHttpStatus == 200) {
-                    logger.info("{} return HTTP 200, application is now ready for integration testing!", HEALTH_URL);
+                    LOG.info("{} return HTTP 200, application is now ready for integration testing!", HEALTH_URL);
                     return;
                 } else {
-                    logger.info("{} returned HTTP {}, going to wait and retry (attempt {})", HEALTH_URL,
+                    LOG.info("{} returned HTTP {}, going to wait and retry (attempt {})", HEALTH_URL,
                             healthHttpStatus, attempt++);
                     sleep(3);
                 }
             } catch (Exception e) {
-                logger.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, e.getMessage(),
+                LOG.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, e.getMessage(),
                         attempt++);
                 lastException = e;
                 sleep(3);
@@ -96,10 +96,10 @@ public class Utils {
         } while (attempt < max_attempts);
 
         if (lastException != null) {
-            logger.error("{} still not reachable, giving up", HEALTH_URL, lastException);
+            LOG.error("{} still not reachable, giving up", HEALTH_URL, lastException);
             throw new AssertionError(HEALTH_URL + " not reachable", lastException);
         } else {
-            logger.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL,
+            LOG.error("{} still has not returned HTTP 200, giving up (last) body: {}", HEALTH_URL,
                     response.prettyPrint());
             fail(HEALTH_URL + " returned " + response.prettyPrint());
         }
@@ -109,7 +109,7 @@ public class Utils {
         try {
             Thread.sleep(seconds * 1000);
         } catch (InterruptedException e) {
-            logger.warn("Unexpected InterruptedException", e);
+            LOG.warn("Unexpected InterruptedException", e);
             throw new IllegalStateException("Unexpected InterruptedException", e);
         }
     }
@@ -117,7 +117,7 @@ public class Utils {
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         awaitSpringBootActuatorHealthyUp();
         try {
-            logger.info("Logging in, for integration test...");
+            LOG.info("Logging in, for integration test...");
             // system.out.println("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.given().contentType(ContentType.JSON)
                     .body("{\"username\":\"mifos\", \"password\":\"password\"}").expect().log().ifError().when()

@@ -53,7 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportWritePlatformServiceImpl implements ReportWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
 
     private final PlatformSecurityContext context;
     private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -185,7 +185,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

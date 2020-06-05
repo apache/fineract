@@ -88,7 +88,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private final static String CODE_VALUES_TABLE = "m_code_value";
 
-    private final static Logger logger = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
     private final static HashMap<String, String> apiTypeToMySQL = new HashMap<String, String>() {
 
         {
@@ -206,7 +206,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
     }
 
     @Transactional
@@ -751,7 +751,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         try {
             codeId = this.jdbcTemplate.queryForObject(checkColumnCodeMapping.toString(), Integer.class);
         } catch (final EmptyResultDataAccessException e) {
-            logger.info("Error occured.", e);
+            LOG.info("Error occured.", e);
         }
         return ObjectUtils.defaultIfNull(codeId, 0);
     }
@@ -1135,13 +1135,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 pkValue = datatableId;
             }
             final String sql = getUpdateSql(grs.getColumnHeaders(), dataTableName, pkName, pkValue, changes);
-            logger.info("Update sql: {}", sql);
+            LOG.info("Update sql: {}", sql);
             if (StringUtils.isNotBlank(sql)) {
                 this.jdbcTemplate.update(sql);
                 changes.put("locale", dataParams.get("locale"));
                 changes.put("dateFormat", "yyyy-MM-dd");
             } else {
-                logger.info("No Changes");
+                LOG.info("No Changes");
             }
         }
 
@@ -1242,7 +1242,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private CommandProcessingResult checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
 
         final String sql = dataScopedSQL(appTable, appTableId);
-        logger.info("data scoped sql: {}", sql);
+        LOG.info("data scoped sql: {}", sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
         if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
@@ -1434,7 +1434,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         addSql = "insert into `" + datatable + "` (`" + fkName + "` " + insertColumns + ")" + " select " + appTableId + " as id"
                 + selectColumns;
 
-        logger.info("{}", addSql);
+        LOG.info("{}", addSql);
 
         return addSql;
     }
@@ -1485,7 +1485,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + " as id" + selectColumns + " , ( SELECT SUM( code_score ) FROM m_code_value WHERE m_code_value.id IN (" + scoresId
                 + " ) ) as score";
 
-        logger.info("{}", vaddSql);
+        LOG.info("{}", vaddSql);
 
         return vaddSql;
     }

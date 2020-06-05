@@ -48,7 +48,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TemplateMergeService {
-    private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
+    private final static Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
 
 
     // private final FromJsonHelper fromApiJsonHelper;
@@ -95,7 +95,7 @@ public class TemplateMergeService {
                 try {
                     this.scopes.put(entry.getKey(), getMapFromUrl(url));
                 } catch (final IOException e) {
-                    logger.error("getCompiledMapFromMappers() failed", e);
+                    LOG.error("getCompiledMapFromMappers() failed", e);
                 }
             }
         }
@@ -140,7 +140,7 @@ public class TemplateMergeService {
             connection.setDoInput(true);
 
         } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-            logger.error("getConnection() failed, return null", e);
+            LOG.error("getConnection() failed, return null", e);
         }
 
         return connection;
@@ -160,13 +160,13 @@ public class TemplateMergeService {
             }
 
         } catch (final IOException e) {
-            logger.error("getStringFromInputStream() failed", e);
+            LOG.error("getStringFromInputStream() failed", e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (final IOException e) {
-                    logger.error("Problem occurred in getStringFromInputStream function",e);
+                    LOG.error("Problem occurred in getStringFromInputStream function",e);
                 }
             }
         }

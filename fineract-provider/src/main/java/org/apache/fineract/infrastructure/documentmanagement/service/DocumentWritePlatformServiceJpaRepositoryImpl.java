@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(DocumentWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final DocumentRepository documentRepository;
@@ -80,7 +80,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             return document.getId();
         } catch (final DataIntegrityViolationException dve) {
-            logger.error("Error occured.", dve);
+            LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
@@ -136,11 +136,11 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             return new CommandProcessingResult(documentForUpdate.getId());
         } catch (final DataIntegrityViolationException dve) {
-            logger.error("Error occured.", dve);
+            LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         } catch (final ContentManagementException cme) {
-            logger.error("Error occured.", cme);
+            LOG.error("Error occured.", cme);
             throw new ContentManagementException(documentCommand.getName(), cme.getMessage());
         }
     }

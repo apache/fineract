@@ -71,7 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StandingInstructionWritePlatformServiceImpl implements StandingInstructionWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(StandingInstructionWritePlatformServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(StandingInstructionWritePlatformServiceImpl.class);
 
     private final StandingInstructionDataValidator standingInstructionDataValidator;
     private final StandingInstructionAssembler standingInstructionAssembler;
@@ -146,7 +146,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             throw new PlatformDataIntegrityException("error.msg.standinginstruction.duplicate.name", "Standinginstruction with name `"
                     + name + "` already exists", "name", name);
         }
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

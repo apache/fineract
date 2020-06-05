@@ -64,7 +64,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmsCampaignDomainServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmsCampaignDomainServiceImpl.class);
 
     //private final static int POOL_SIZE = 5 ;
 
@@ -235,9 +235,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         }
                     }
                 } catch (final IOException e) {
-                    logger.error("smsParams does not contain the key: ", e);
+                    LOG.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
-                    logger.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
+                    LOG.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
                 }
             }
         }
@@ -293,9 +293,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
                     }
                 } catch (final IOException e) {
-                    logger.error("smsParams does not contain the key: ", e);
+                    LOG.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
-                    logger.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
+                    LOG.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
                 }
             }
         }

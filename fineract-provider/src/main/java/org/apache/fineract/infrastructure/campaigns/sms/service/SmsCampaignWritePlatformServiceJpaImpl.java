@@ -94,7 +94,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(SmsCampaignWritePlatformServiceJpaImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(SmsCampaignWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
 
@@ -240,7 +240,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         }
 
     }
@@ -302,9 +302,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         } catch (final RuntimeException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         }
     }
 
@@ -347,9 +347,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         } catch (final RuntimeException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         }
     }
 
@@ -391,9 +391,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         } catch (final RuntimeException e) {
-            logger.error("Error occured.", e) ;
+            LOG.error("Error occured.", e) ;
         }
     }
 
@@ -537,7 +537,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
             resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
         } catch (JsonParseException e) {
-            logger.info("Conversion of report query results to JSON failed", e);
+            LOG.info("Conversion of report query results to JSON failed", e);
             return resultList;
         }
         // loop changes array date to string date
@@ -656,7 +656,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 LocalDateTime tenantDateNow = tenantDateTime();
                 LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
 
-                logger.info("tenant time {} trigger time {} {}",
+                LOG.info("tenant time {} trigger time {} {}",
                     new Object[] { tenantDateNow, nextTriggerDate, JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name() });
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
@@ -697,7 +697,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 //        }
 //
 //        catch (Exception e) {
-//            logger.error("Invalid phone number or country calling code, must contain only numbers", e);
+//            LOG.error("Invalid phone number or country calling code, must contain only numbers", e);
 //        }
 //
 //        return formatedPhoneNumber.toString();

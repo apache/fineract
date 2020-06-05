@@ -54,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
 
     private final HolidayDataValidator fromApiJsonDeserializer;
     private final HolidayRepositoryWrapper holidayRepository;
@@ -183,7 +183,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                     "name", name);
         }
 
-        logger.error("Error occured.", dve);
+        LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

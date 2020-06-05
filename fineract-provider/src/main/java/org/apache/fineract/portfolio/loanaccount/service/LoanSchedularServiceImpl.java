@@ -54,7 +54,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class LoanSchedularServiceImpl implements LoanSchedularService {
 
-    private final static Logger logger = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
 
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -103,14 +103,14 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 } catch (final PlatformApiDataValidationException e) {
                     final List<ApiParameterError> errors = e.getErrors();
                     for (final ApiParameterError error : errors) {
-                        logger.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, error.getDeveloperMessage(), e);
+                        LOG.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, error.getDeveloperMessage(), e);
                     }
                     exceptions.add(e);
                 } catch (final AbstractPlatformDomainRuleException e) {
-                    logger.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, e.getDefaultUserMessage(), e);
+                    LOG.error("Apply Charges due for overdue loans failed for account {} with message: {}", loanId, e.getDefaultUserMessage(), e);
                     exceptions.add(e);
                 } catch (Exception e) {
-                    logger.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
+                    LOG.error("Apply Charges due for overdue loans failed for account {}", loanId, e);
                     exceptions.add(e);
                 }
             }
@@ -131,7 +131,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         if (!loanIds.isEmpty()) {
             List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
-                logger.info("recalculateInterest: Loan ID = {}", loanId);
+                LOG.info("recalculateInterest: Loan ID = {}", loanId);
                 Integer numberOfRetries = 0;
                 while (numberOfRetries <= maxNumberOfRetries) {
                     try {
@@ -139,10 +139,10 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException
                             | ObjectOptimisticLockingFailureException exception) {
-                        logger.info("Recalulate interest job has been retried {} time(s)", numberOfRetries);
+                        LOG.info("Recalulate interest job has been retried {} time(s)", numberOfRetries);
                         // Fail if the transaction has been retried for maxNumberOfRetries
                         if (numberOfRetries >= maxNumberOfRetries) {
-                            logger.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back", numberOfRetries);
+                            LOG.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back", numberOfRetries);
                             errors.add(exception);
                             break;
                         }
@@ -153,18 +153,18 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                             Thread.sleep(1000 + (randomNum * 1000));
                             numberOfRetries = numberOfRetries + 1;
                         } catch (InterruptedException e) {
-                            logger.error("Interest recalculation for loans retry failed due to InterruptedException", e) ;
+                            LOG.error("Interest recalculation for loans retry failed due to InterruptedException", e) ;
                             errors.add(e);
                             break;
                         }
                     } catch (Exception e) {
-                        logger.error("Interest recalculation for loans failed for account {}", loanId, e);
+                        LOG.error("Interest recalculation for loans failed for account {}", loanId, e);
                         numberOfRetries = maxNumberOfRetries + 1;
                         errors.add(e);
                     }
                     i++;
                 }
-                logger.info("recalculateInterest: Loans count {}", i);
+                LOG.info("recalculateInterest: Loans count {}", i);
             }
             if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
         }
@@ -176,7 +176,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     public void recalculateInterest(Map<String, String> jobParameters) {
         // gets the officeId
         final String officeId = jobParameters.get("officeId");
-        logger.info("recalculateInterest: officeId={}", officeId);
+        LOG.info("recalculateInterest: officeId={}", officeId);
         Long officeIdLong = Long.valueOf(officeId);
 
         // gets the Office object
@@ -206,7 +206,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         // gets the loanIds data set iteratively and call addAccuruals for that paginated dataset
         do {
             int totalFilteredRecords = loanIds.size();
-            logger.info("Starting accrual - total filtered records - {}", totalFilteredRecords);
+            LOG.info("Starting accrual - total filtered records - {}", totalFilteredRecords);
             recalculateInterest(loanIds, threadPoolSize, batchSize, executorService);
             maxLoanIdInList+= pageSize+1;
             loanIds = Collections.synchronizedList(this.loanReadPlatformService
@@ -262,7 +262,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             List<Future<Void>> responses = executorService.invokeAll(posters);
             checkCompletion(responses);
         } catch (InterruptedException e1) {
-            logger.error("Interrupted while recalculateInterest", e1);
+            LOG.error("Interrupted while recalculateInterest", e1);
         }
     }
 
@@ -294,12 +294,12 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             }
             allThreadsExecuted = noOfThreadsExecuted == responses.size();
             if(!allThreadsExecuted) {
-                logger.error("All threads could not execute.");
+                LOG.error("All threads could not execute.");
             }
         } catch (InterruptedException e1) {
-            logger.error("Interrupted while posting IR entries", e1);
+            LOG.error("Interrupted while posting IR entries", e1);
         }  catch (ExecutionException e2) {
-            logger.error("Execution exception while posting IR entries", e2);
+            LOG.error("Execution exception while posting IR entries", e2);
         }
     }
 }
