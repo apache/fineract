@@ -64,7 +64,9 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void populateCentersByOfficeName(Sheet centerSheet) {
-        int rowIndex = 1, officeIndex = 0, startIndex = 1;
+        int rowIndex = 1;
+        int officeIndex = 0;
+        int startIndex = 1;
         officeNameToBeginEndIndexesOfCenters = new HashMap<Integer, Integer[]>();
         Row row = centerSheet.createRow(rowIndex);
         for (OfficeData office : offices) {

@@ -386,7 +386,9 @@ public class Sender {
                     + attempt + " attempts");
         }
         // calculate summary
-        int success = 0, failure = 0, canonicalIds = 0;
+        int success = 0;
+        int failure = 0;
+        int canonicalIds = 0;
         for (Result result : results.values()) {
             if (result.getMessageId() != null) {
                 success++;

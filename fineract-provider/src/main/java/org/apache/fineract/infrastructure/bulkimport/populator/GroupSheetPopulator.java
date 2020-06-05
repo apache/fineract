@@ -84,7 +84,9 @@ public class GroupSheetPopulator extends AbstractWorkbookPopulator {
         officeToGroups.put(key, values);
     }
     private void populateGroupsByOfficeName(Sheet groupSheet) {
-        int rowIndex = 1, officeIndex = 0, startIndex = 1;
+        int rowIndex = 1;
+        int officeIndex = 0;
+        int startIndex = 1;
         officeNameToBeginEndIndexesOfGroups = new HashMap<>();
         Row row = groupSheet.createRow(rowIndex);
         for(OfficeData office : offices) {

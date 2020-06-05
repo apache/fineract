@@ -105,7 +105,9 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     private void populateClientsByOfficeName(Sheet clientSheet) {
-        int rowIndex = 1, startIndex = 1, officeIndex = 0;
+        int rowIndex = 1;
+        int startIndex = 1;
+        int officeIndex = 0;
         officeNameToBeginEndIndexesOfClients = new HashMap<>();
         Row row = clientSheet.createRow(rowIndex);
         for (OfficeData office : officesDataList) {

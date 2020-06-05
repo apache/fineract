@@ -146,7 +146,8 @@ public class FixedDepositTransactionWorkbookPopulator extends AbstractWorkbookPo
         HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<>();
         ArrayList<String> clientsWithActiveSavings = new ArrayList<>();
         ArrayList<Long> clientIdsWithActiveSavings = new ArrayList<>();
-        int startIndex = 1, endIndex = 1;
+        int startIndex = 1;
+        int endIndex = 1;
         String clientName = "";
         Long clientId = null;
         for(int i = 0; i < savingsAccounts.size(); i++){

@@ -1313,7 +1313,8 @@ public void checkForProductMixRestrictions(final Loan loan) {
 
 
         CommandProcessingResult result=null;
-        int count=0,j=0;
+        int count = 0;
+        int j = 0;
         for(JsonElement approvals:approvalFormData)
         {
 

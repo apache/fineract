@@ -46,11 +46,20 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    private final String LP_PRINCIPAL = "12,000.00", LP_REPAYMENTS = "2", LP_REPAYMENT_PERIOD = "6", LP_INTEREST_RATE = "1",
-            PRINCIPAL = "4,500.00", LOAN_TERM_FREQUENCY = "18", NUMBER_OF_REPAYMENTS = "9", REPAYMENT_PERIOD = "2",
-            DISBURSEMENT_DATE = "30 October 2010", LOAN_APPLICATION_SUBMISSION_DATE = "23 September 2010",
-            EXPECTED_DISBURSAL_DATE = "28 October 2010", RATE_OF_INTEREST_PER_PERIOD = "2", DATE_OF_JOINING = "04 March 2009",
-            INTEREST_VALUE_AMOUNT = "40.00";
+    private final String LP_PRINCIPAL = "12,000.00";
+    private final String LP_REPAYMENTS = "2";
+    private final String LP_REPAYMENT_PERIOD = "6";
+    private final String LP_INTEREST_RATE = "1";
+    private final String PRINCIPAL = "4,500.00";
+    private final String LOAN_TERM_FREQUENCY = "18";
+    private final String NUMBER_OF_REPAYMENTS = "9";
+    private final String REPAYMENT_PERIOD = "2";
+    private final String DISBURSEMENT_DATE = "30 October 2010";
+    private final String LOAN_APPLICATION_SUBMISSION_DATE = "23 September 2010";
+    private final String EXPECTED_DISBURSAL_DATE = "28 October 2010";
+    private final String RATE_OF_INTEREST_PER_PERIOD = "2";
+    private final String DATE_OF_JOINING = "04 March 2009";
+    private final String INTEREST_VALUE_AMOUNT = "40.00";
     private LoanTransactionHelper loanTransactionHelper;
 
     @Before
