@@ -80,14 +80,14 @@ public class LoanApplicationTestBuilder {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("groupId", groupID);
         map.put("clientId", clientID);
-        if (this.loanType == "jlg") {
+        if ("jlg".equals(this.loanType)) {
             if (this.calendarId != null) {
                 map.put("calendarId", this.calendarId);
             }
             map.put("syncDisbursementWithMeeting", this.syncDisbursementWithMeeting);
         }
 
-        if (this.loanType == "glim") {
+        if ("glim".equals(this.loanType)) {
             if (isParentAccount!=null){
                 map.put("isParentAccount", this.isParentAccount);
             }
@@ -103,7 +103,7 @@ public class LoanApplicationTestBuilder {
 
         final HashMap<String, Object> map = new HashMap<>();
 
-        if (this.loanType == "group") {
+        if ("group".equals(this.loanType)) {
             map.put("groupId", ID);
         } else {
             map.put("clientId", ID);

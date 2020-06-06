@@ -27,7 +27,7 @@ public class ContextData {
     public ContextData(final String dimensionType, final String dimension, final Integer taxonomyType) {
         this.dimensionType = dimensionType;
         this.dimension = dimension;
-        this.periodType = taxonomyType == MixTaxonomyData.BALANCESHEET || taxonomyType == MixTaxonomyData.PORTFOLIO ? 0 : 1;
+        this.periodType = taxonomyType.equals(MixTaxonomyData.BALANCESHEET) || taxonomyType.equals(MixTaxonomyData.PORTFOLIO) ? 0 : 1;
     }
 
     public String getDimensionType() {

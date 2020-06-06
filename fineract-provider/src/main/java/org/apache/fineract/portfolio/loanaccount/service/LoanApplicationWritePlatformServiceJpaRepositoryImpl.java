@@ -903,7 +903,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
                     final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
                     LoanTopupDetails existingLoanTopupDetails = existingLoanApplication.getTopupLoanDetails();
                     if(existingLoanTopupDetails == null
-                            || (existingLoanTopupDetails != null && existingLoanTopupDetails.getLoanIdToClose() != loanIdToClose)
+                            || (existingLoanTopupDetails != null && !existingLoanTopupDetails.getLoanIdToClose().equals(loanIdToClose))
                             || changes.containsKey("submittedOnDate")
                             || changes.containsKey("expectedDisbursementDate")
                             || changes.containsKey("principal")
@@ -947,7 +947,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
                                     "Topup loan amount should be greater than outstanding amount of loan to be closed.");
                         }
 
-                        if(existingLoanIdToClose != loanIdToClose){
+                        if(!existingLoanIdToClose.equals(loanIdToClose)) {
                             final LoanTopupDetails topupDetails = new LoanTopupDetails(existingLoanApplication, loanIdToClose);
                             existingLoanApplication.setTopupLoanDetails(topupDetails);
                             changes.put(LoanApiConstants.loanIdToClose, loanIdToClose);
@@ -1056,7 +1056,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
                     if (isCalendarAssociatedWithEntity && calendarId == null) {
                         this.calendarRepository.delete(calendarInstance.getCalendar());
                     }
-                    if (calendarInstance.getCalendar().getId() != calendar.getId()) {
+                    if (!calendarInstance.getCalendar().getId().equals(calendar.getId())) {
                         calendarInstance.updateCalendar(calendar);
                         this.calendarInstanceRepository.saveAndFlush(calendarInstance);
                     }
