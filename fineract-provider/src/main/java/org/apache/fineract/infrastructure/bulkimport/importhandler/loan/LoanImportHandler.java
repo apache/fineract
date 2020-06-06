@@ -431,7 +431,7 @@ public class LoanImportHandler implements ImportHandler {
             String linkAccountId = disbusalData.getLinkAccountId();
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-            if (linkAccountId != null && linkAccountId != "") {
+            if (linkAccountId != null && !"".equals(linkAccountId)) {
                 String payload =gsonBuilder.create().toJson(disbusalData);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .disburseLoanToSavingsApplication(result.getLoanId()) //

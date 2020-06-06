@@ -122,7 +122,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
         Boolean enabled = (Boolean) globalConfig.get(10).get("enabled");
 
-        if (enabled != periodEndEnable) {
+        if (!enabled.equals(periodEndEnable)) {
             periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
                     this.responseSpec, periodEndConfigId.toString(), periodEndEnable);
         }

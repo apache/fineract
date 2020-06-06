@@ -110,7 +110,7 @@ public class SchedulerJobListener implements JobListener {
         if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
         }
-        if (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && trigger.getNextFireTime() != null
+        if (SchedulerServiceConstants.TRIGGER_TYPE_CRON.equals(triggerType) && trigger.getNextFireTime() != null
                 && trigger.getNextFireTime().after(scheduledJobDetails.getNextRunTime())) {
             scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
         }
