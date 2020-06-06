@@ -4501,6 +4501,7 @@ public class Loan extends AbstractPersistableCustom {
             break;
             case INVALID:
             break;
+            default:
         }
         return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from
                                                    // startDate

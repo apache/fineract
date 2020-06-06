@@ -927,6 +927,7 @@ public class ShareAccountDataSerializer {
                 case YEARS:
                     lockinDate = purchaseDate.plusYears(lockinPeriod) ;
                     break ;
+                default:
             }
         }
         return lockinDate ;

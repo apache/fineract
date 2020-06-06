@@ -45,6 +45,7 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case INVALID:
                 paymentPeriodsInOneYear = Integer.valueOf(0);
             break;
+            default:
         }
         return paymentPeriodsInOneYear;
     }
@@ -91,6 +92,7 @@ public class DefaultPaymentPeriodsInOneYearCalculator implements PaymentPeriodsI
             case INVALID:
                 fraction = Double.valueOf("0");
             break;
+            default:
         }
         return fraction;
     }

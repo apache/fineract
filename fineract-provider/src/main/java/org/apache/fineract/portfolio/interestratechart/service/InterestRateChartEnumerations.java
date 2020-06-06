@@ -52,6 +52,7 @@ public class InterestRateChartEnumerations {
                 optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
                         PeriodFrequencyType.YEARS.getCode(), "Years");
             break;
+            default:
         }
 
         return optionData;

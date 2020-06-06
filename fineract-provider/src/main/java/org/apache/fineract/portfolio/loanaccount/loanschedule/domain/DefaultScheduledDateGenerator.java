@@ -227,6 +227,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case INVALID:
             break;
+            default:
         }
         return dueRepaymentPeriodDate;
     }
@@ -281,6 +282,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case INVALID:
             break;
+            default:
         }
         return isScheduledDate;
     }
@@ -315,6 +317,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case INVALID:
             break;
+            default:
         }
 
         return idealDisbursementDate;

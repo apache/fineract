@@ -228,6 +228,7 @@ public class NotesApiResource {
                 resourceNameForPermissions = "GROUPNOTE";
                 resourceDetails.withGroupId(resourceId);
             break;
+            default:
 
         }
 

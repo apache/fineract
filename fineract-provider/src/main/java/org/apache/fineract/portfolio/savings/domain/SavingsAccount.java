@@ -2337,6 +2337,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             case YEARS:
                 lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
             break;
+            default:
         }
 
         return lockedInUntilLocalDate;

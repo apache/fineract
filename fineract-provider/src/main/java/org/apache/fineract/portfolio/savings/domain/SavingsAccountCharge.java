@@ -292,6 +292,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
             break;
+            default:
         }
     }
 
@@ -420,6 +421,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
+                default:
             }
         }
     }
@@ -494,6 +496,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
+                default:
             }
         }
 
