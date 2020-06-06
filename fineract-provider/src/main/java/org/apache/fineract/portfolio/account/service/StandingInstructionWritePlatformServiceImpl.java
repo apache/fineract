@@ -222,7 +222,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             }
             BigDecimal transactionAmount = data.amount();
             if (data.toAccountType().isLoanAccount()
-                    && (recurrenceType.isDuesRecurrence() || isDueForTransfer && instructionType.isDuesAmoutTransfer())) {
+                    && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
                 StandingInstructionDuesData standingInstructionDuesData = this.standingInstructionReadPlatformService
                         .retriveLoanDuesData(data.toAccount().accountId());
                 if (data.instructionType().isDuesAmoutTransfer()) {
