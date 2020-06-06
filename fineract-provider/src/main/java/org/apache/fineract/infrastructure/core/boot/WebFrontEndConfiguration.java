@@ -34,5 +34,11 @@ public class WebFrontEndConfiguration implements WebMvcConfigurer {
         if (!registry.hasMappingForPattern("/**")) {
             registry.addResourceHandler("/**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
         }
+
+        // TODO: The below path should be version agnostic
+        String[] SWAGGER_RESOURCE_LOCATIONS = { "classpath:/static/swagger-ui/",
+                "classpath:/META-INF/resources/webjars/swagger-ui-dist/3.26.0/" };
+
+        registry.addResourceHandler("/swagger-ui/**").addResourceLocations(SWAGGER_RESOURCE_LOCATIONS);
     }
 }
