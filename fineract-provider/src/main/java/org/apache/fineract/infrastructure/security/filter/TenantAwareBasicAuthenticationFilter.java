@@ -172,8 +172,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         String pathURL = request.getRequestURI();
         boolean isSelfServiceRequest = pathURL != null && pathURL.contains("/self/");
 
-        boolean notAllowed = isSelfServiceRequest && !user.isSelfServiceUser()
-                || !isSelfServiceRequest && user.isSelfServiceUser();
+        boolean notAllowed = (isSelfServiceRequest && !user.isSelfServiceUser())
+                || (!isSelfServiceRequest && user.isSelfServiceUser());
 
         if(notAllowed){
             throw new BadCredentialsException("User not authorised to use the requested resource.");

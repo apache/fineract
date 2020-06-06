@@ -204,9 +204,9 @@ public class CommandWrapper {
 
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
-        return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource()
-                && isUpdateOperation() || isWorkingDaysResource() && isUpdateOperation() || isPasswordPreferencesResource()
-                && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
+        return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation()) || (isCacheResource()
+                && isUpdateOperation()) || (isWorkingDaysResource() && isUpdateOperation()) || (isPasswordPreferencesResource()
+                && isUpdateOperation()) || (isUpdateOperation() && (this.entityId != null));
     }
 
     public boolean isCacheResource() {

@@ -327,7 +327,6 @@ tasks.withType(JavaCompile) {
                 "UnusedNestedClass",
                 "UndefinedEquals",
                 "JdkObsolete",
-                "OperatorPrecedence"
         )
         //TODO gradually enable these checks
         error(
@@ -368,6 +367,7 @@ tasks.withType(JavaCompile) {
                 "CompareToZero",
                 "NarrowingCompoundAssignment",
                 "MissingCasesInEnumSwitch",
+                "OperatorPrecedence",
 //                "ReturnMissingNullable",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",

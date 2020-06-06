@@ -1266,8 +1266,8 @@ public class Loan extends AbstractPersistableCustom {
                     if (installment.getFeeChargesCharged(getCurrency()).isLessThan(fee)
                             || installment.getInterestCharged(getCurrency()).isLessThan(interest)
                             || installment.getPenaltyChargesCharged(getCurrency()).isLessThan(penality)
-                            || getAccruedTill().isEqual(loanTransaction.getTransactionDate()) && !installment.getDueDate().isEqual(
-                                    getAccruedTill())) {
+                            || (getAccruedTill().isEqual(loanTransaction.getTransactionDate()) && !installment.getDueDate().isEqual(
+                                    getAccruedTill()))) {
                         interest = interest.minus(loanTransaction.getInterestPortion(getCurrency()));
                         fee = fee.minus(loanTransaction.getFeeChargesPortion(getCurrency()));
                         penality = penality.minus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
@@ -2384,7 +2384,7 @@ public class Loan extends AbstractPersistableCustom {
          **/
 
         if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()
-                        && (isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1 || !isMultiDisburmentLoan())) {
+                        && ((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())) {
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
                     actualDisbursementDate, createdDate, currentUser);
             addLoanTransaction(interestAppliedTransaction) ;
@@ -2733,12 +2733,12 @@ public class Loan extends AbstractPersistableCustom {
         final Integer installmentNumber = null;
         for (final LoanCharge charge : charges()) {
             Date actualDisbursementDate = getActualDisbursementDate(charge);
-            if (charge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue())
-                    && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && actualDisbursementDate != null && !charge.isWaived() && !charge
-                        .isFullyPaid()
-                    || charge.getCharge().getChargeTimeType().equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())
-                            && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && actualDisbursementDate != null
-                            && !charge.isWaived() && !charge.isFullyPaid()) {
+            if ((charge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue())
+                    && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && (actualDisbursementDate != null) && !charge.isWaived() && !charge
+                    .isFullyPaid())
+                    || (charge.getCharge().getChargeTimeType().equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())
+                    && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && (actualDisbursementDate != null)
+                    && !charge.isWaived() && !charge.isFullyPaid())) {
                 if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                     charge.markAsFullyPaid();
                     // Add "Loan Charge Paid By" details to this transaction
@@ -4525,7 +4525,7 @@ public class Loan extends AbstractPersistableCustom {
             }
 
             if (oldDueDate.equals(holiday.getFromDateLocalDate()) || oldDueDate.equals(holiday.getToDateLocalDate())
-                    || oldDueDate.isAfter(holiday.getFromDateLocalDate()) && oldDueDate.isBefore(holiday.getToDateLocalDate())) {
+                    || (oldDueDate.isAfter(holiday.getFromDateLocalDate()) && oldDueDate.isBefore(holiday.getToDateLocalDate()))) {
                 // FIXME: AA do we need to apply non-working days.
                 // Assuming holiday's repayment reschedule to date cannot be
                 // created on a non-working day.
@@ -4856,8 +4856,8 @@ public class Loan extends AbstractPersistableCustom {
                 }
             break;
             case LOAN_DISBURSED:
-                if (!(isApproved() && isNotDisbursed()) && !this.loanProduct.isMultiDisburseLoan()
-                        || this.loanProduct.isMultiDisburseLoan() && !isAllTranchesNotDisbursed()) {
+                if ((!(isApproved() && isNotDisbursed()) && !this.loanProduct.isMultiDisburseLoan())
+                        || (this.loanProduct.isMultiDisburseLoan() && !isAllTranchesNotDisbursed())) {
                     final String defaultUserMessage = "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
                     final ApiParameterError error = ApiParameterError.generalError(
                             "error.msg.loan.disbursal.account.is.not.approve.not.disbursed.state", defaultUserMessage);
@@ -6020,10 +6020,10 @@ public class Loan extends AbstractPersistableCustom {
         updateLoanToLastDisbursalState(actualDisbursementDate);
         for (Iterator<LoanTermVariations> iterator = this.loanTermVariations.iterator(); iterator.hasNext();) {
             LoanTermVariations loanTermVariations = iterator.next();
-            if (loanTermVariations.getTermType().isDueDateVariation()
-                    && loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate)
-                    || loanTermVariations.getTermType().isEMIAmountVariation()
-                    && loanTermVariations.getTermApplicableFrom().equals(actualDisbursementDate.toDate())
+            if ((loanTermVariations.getTermType().isDueDateVariation()
+                    && loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate))
+                    || (loanTermVariations.getTermType().isEMIAmountVariation()
+                    && loanTermVariations.getTermApplicableFrom().equals(actualDisbursementDate.toDate()))
                     || loanTermVariations.getTermApplicableFrom().after(actualDisbursementDate.toDate())) {
                 iterator.remove();
             }
@@ -6138,8 +6138,8 @@ public class Loan extends AbstractPersistableCustom {
                 List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments() ;
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     if (installment.getDueDate().isEqual(loanDisbursementDetail.expectedDisbursementDateAsLocalDate())
-                            || installment.getDueDate().isAfter(loanDisbursementDetail.expectedDisbursementDateAsLocalDate())
-                            && installment.isNotFullyPaidOff()) {
+                            || (installment.getDueDate().isAfter(loanDisbursementDetail.expectedDisbursementDateAsLocalDate())
+                            && installment.isNotFullyPaidOff())) {
                         nextRepaymentDate = installment.getDueDate();
                         break;
                     }
@@ -6384,9 +6384,9 @@ public class Loan extends AbstractPersistableCustom {
                 double interest = calculateInterestForDays(daysInPeriod, installment.getInterestCharged(getCurrency()).getAmount(),
                         tillDays);
                 actualAmountTobeAccrued = actualAmountTobeAccrued.plus(interest);
-            } else if (tillDate.isAfter(installment.getFromDate()) && tillDate.isEqual(installment.getDueDate())
-                    || tillDate.isEqual(installment.getFromDate()) && tillDate.isEqual(installment.getDueDate())
-                    || tillDate.isAfter(installment.getFromDate()) && tillDate.isAfter(installment.getDueDate())) {
+            } else if ((tillDate.isAfter(installment.getFromDate()) && tillDate.isEqual(installment.getDueDate()))
+                    || (tillDate.isEqual(installment.getFromDate()) && tillDate.isEqual(installment.getDueDate()))
+                    || (tillDate.isAfter(installment.getFromDate()) && tillDate.isAfter(installment.getDueDate()))) {
                 actualAmountTobeAccrued = actualAmountTobeAccrued.plus(installment.getInterestAccrued(getCurrency()));
             }
         }
@@ -6478,12 +6478,12 @@ public class Loan extends AbstractPersistableCustom {
             if (loanTransaction.isChargesWaiver()) {
                 for (LoanChargePaidBy chargePaidBy : loanTransaction
                         .getLoanChargesPaid()) {
-                    if (chargePaidBy.getLoanCharge().isDueDateCharge() && chargePaidBy
+                    if ((chargePaidBy.getLoanCharge().isDueDateCharge() && chargePaidBy
                             .getLoanCharge().getDueLocalDate()
-                            .isAfter(transactionDate)
-                            || chargePaidBy.getLoanCharge().isInstalmentFee() && chargePaidBy
+                            .isAfter(transactionDate))
+                            || (chargePaidBy.getLoanCharge().isInstalmentFee() && chargePaidBy
                             .getInstallmentNumber() != null && chargePaidBy
-                            .getInstallmentNumber() > installmentNumber) {
+                            .getInstallmentNumber() > installmentNumber)) {
                         loanTransaction.reverse();
                     }
                 }
