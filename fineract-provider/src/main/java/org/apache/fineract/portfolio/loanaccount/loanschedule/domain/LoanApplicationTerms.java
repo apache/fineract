@@ -658,6 +658,7 @@ public final class LoanApplicationTerms {
             break;
             case INVALID:
             break;
+            default:
         }
         return dueRepaymentPeriodDate;
     }
@@ -1050,6 +1051,7 @@ public final class LoanApplicationTerms {
                         }
                         periodicInterestRate = oneDayOfYearInterestRate.multiply(numberOfDaysInPeriod, mc);
                     break;
+                    default:
                 }
             break;
             case SAME_AS_REPAYMENT_PERIOD:

@@ -57,6 +57,7 @@ public class AprCalculator {
                              case YEARS:
                                  defaultAnnualNominalInterestRate = ratePerPeriod.multiply(BigDecimal.valueOf(1));
                              break;
+                             default:
                          }
              break;
             case INVALID:

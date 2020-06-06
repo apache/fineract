@@ -127,6 +127,7 @@ public class AccountNumberFormatDataValidator {
         case GROUP:
             validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
             break;
+        default:
         }
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();

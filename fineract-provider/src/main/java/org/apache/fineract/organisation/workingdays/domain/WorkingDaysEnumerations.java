@@ -53,6 +53,7 @@ public class WorkingDaysEnumerations {
                 optionData = new EnumOptionData(RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getValue().longValue(),RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY.getCode(),
                         "move to previous working day");
                 break;
+            default:
         }
 
         return optionData;

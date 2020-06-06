@@ -437,6 +437,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             // break;
             case SAVING_ACCOUNT:
             break;
+            default:
         }
         if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
         return noteForUpdate;

@@ -145,6 +145,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             case GROUP :
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
             break;
+            default:
         }
 
         Object[] array = accountNumberPrefixTypesSet.toArray();
