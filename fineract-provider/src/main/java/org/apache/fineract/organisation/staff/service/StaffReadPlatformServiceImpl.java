@@ -245,9 +245,10 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
                 extraCriteria.append(" and s.is_active = 1 ");
             } else if (status.equalsIgnoreCase("inActive")) {
                 extraCriteria.append(" and s.is_active = 0 ");
-            } else if (status.equalsIgnoreCase("all")) {
-            } else {
+            } else{
+                if (!status.equalsIgnoreCase("all")) {
                 throw new UnrecognizedQueryParamException("status", status, new Object[]{"all", "active", "inactive"});
+                }
             }
         }
         //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.

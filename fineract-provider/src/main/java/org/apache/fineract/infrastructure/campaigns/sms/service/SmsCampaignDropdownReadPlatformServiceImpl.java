@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignEnu
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
 import org.apache.fineract.infrastructure.campaigns.sms.data.SmsProviderData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -70,19 +71,18 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
     public Collection<SmsProviderData> retrieveSmsProviders() {
         Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
         String hostName = "" ;
-        try {
             Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
             URI uri = (URI) hostConfig.get("uri");
             hostName = uri.getHost() ;
             HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
             ResponseEntity<Collection<SmsProviderData>> responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
                     new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
+             if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
+                throw new PlatformDataIntegrityException("error.msg.mobile.service.provider.not.available",
+                "Mobile service provider not available.");
+             }
             smsProviderOptions = responseOne.getBody();
-            if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
-            }
-        } catch (Exception e) {
-        }
-        return smsProviderOptions;
+            return smsProviderOptions;
     }
 
     @Override

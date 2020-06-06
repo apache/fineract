@@ -261,8 +261,10 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             extraCriteria.append(" and status = 300 ");
         } else if (status.equalsIgnoreCase("inActive")) {
             extraCriteria.append(" and status = 0 ");
-        } else if (status.equalsIgnoreCase("all")) {} else {
+        } else {
+            if (!status.equalsIgnoreCase("all")){
             throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
+            }
         }
 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {

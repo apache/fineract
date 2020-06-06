@@ -105,6 +105,10 @@
             <property name="allowByTailComment" value="true"/>
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
+        <module name="EmptyBlock">
+            <property name="option" value="TEXT"/>
+            <property name="tokens" value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
+        </module>
           <module name="UpperEll"/>
           <module name="NeedBraces"/>
           <module name="ArrayTypeStyle"/>     
@@ -144,10 +148,6 @@
         <module name="OuterTypeFilename"/>
         
        
-        <module name="EmptyBlock">
-            <property name="option" value="TEXT"/>
-            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
-        </module>
       
         <module name="LeftCurly" />
         <module name="RightCurly">

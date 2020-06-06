@@ -114,11 +114,6 @@ public class XBRLBuilder {
 
             if (dims.length == 2) {
                 context = new ContextData(dims[0], dims[1], taxonomy.getType());
-                if (this.contextMap.containsKey(context)) {
-
-                } else {
-
-                }
             }
         }
 
