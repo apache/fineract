@@ -93,6 +93,7 @@ public class InteropQuoteRequestData extends InteropRequestData {
         return fees;
     }
 
+    @Override
     public void normalizeAmounts(@NotNull MonetaryCurrency currency) {
         super.normalizeAmounts(currency);
         if (fees != null) {
