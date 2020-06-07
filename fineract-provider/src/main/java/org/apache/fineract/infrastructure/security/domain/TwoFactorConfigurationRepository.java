@@ -29,5 +29,6 @@ public interface TwoFactorConfigurationRepository extends
 
     TwoFactorConfiguration findByName(final String name);
 
+    @Override
     List<TwoFactorConfiguration> findAll();
 }

@@ -2277,7 +2277,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
     }
 
-
+    @Override
     public String retrieveAccountNumberByAccountId(Long accountId) {
         try {
             final String sql = "select loan.account_no from m_loan loan where loan.id = ?";

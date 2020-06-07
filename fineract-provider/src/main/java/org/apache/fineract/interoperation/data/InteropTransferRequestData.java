@@ -88,6 +88,7 @@ public class InteropTransferRequestData extends InteropRequestData {
         return fspCommission;
     }
 
+    @Override
     public void normalizeAmounts(@NotNull MonetaryCurrency currency) {
         super.normalizeAmounts(currency);
         if (fspFee != null) {
