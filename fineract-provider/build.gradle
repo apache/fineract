@@ -501,7 +501,7 @@ configurations
 }
 
 dependencies {
-  tomcat "org.apache.tomcat:tomcat:9.0.34@zip"
+  tomcat "org.apache.tomcat:tomcat:9.0.35@zip"
 }
 
 dependencies {
