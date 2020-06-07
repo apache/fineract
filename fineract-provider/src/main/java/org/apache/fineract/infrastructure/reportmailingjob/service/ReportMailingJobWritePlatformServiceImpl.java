@@ -60,6 +60,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -351,7 +352,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
         // the recurrence pattern/rule cannot be empty
         if (StringUtils.isNotBlank(recurrencePattern) && startDateTime != null) {
-            final LocalDate nextDayLocalDate = startDateTime.plus(1).toLocalDate();
+            final LocalDate nextDayLocalDate = startDateTime.plus(Duration.standardDays(1)).toLocalDate();
             final LocalDate nextRecurringLocalDate = CalendarUtils.getNextRecurringDate(recurrencePattern, startDateTime.toLocalDate(),
                     nextDayLocalDate);
             final String nextDateTimeString = nextRecurringLocalDate + " " + startDateTime.getHourOfDay() + ":" + startDateTime.getMinuteOfHour()
