@@ -22,8 +22,6 @@ import static java.time.Instant.now;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -114,14 +112,6 @@ public class SchedulerJobHelper {
         return new Gson().toJson(map);
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> getSchedulerJobHistory(int jobId) {
-        final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/jobs/" + jobId + "/runhistory?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("------------------------ RETRIEVING SCHEDULER JOB HISTORY -------------------------");
-        final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_STATUS_URL, "");
-        return (List<Map<String, Object>>) response.get("pageItems");
-    }
-
     private void runSchedulerJob(int jobId) {
         final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
         final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
@@ -144,42 +134,6 @@ public class SchedulerJobHelper {
             }
         }
         throw new IllegalArgumentException("No such named Job (see org.apache.fineract.infrastructure.jobs.service.JobName enum):" + jobName);
-    }
-
-    // FINERACT-922 TODO Gradually replace use of this method with new executeAndAwaitJob() below, if it proves to be more stable than this one
-    public void executeJob(String jobName) throws InterruptedException {
-        // Stop the Scheduler while we manually trigger execution of job, to avoid side effects and simplify debugging when readings logs
-        updateSchedulerStatus(false);
-
-        int jobId = getSchedulerJobIdByName(jobName);
-
-        // Executing Scheduler Job
-        runSchedulerJob(jobId);
-
-        // Retrieving Scheduler Job by ID
-        Map<String, Object> schedulerJob = getSchedulerJobById(jobId);
-
-        // Waiting for Job to complete
-        while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-            Thread.sleep(15000);
-            schedulerJob = getSchedulerJobById(jobId);
-            assertNotNull(schedulerJob);
-            LOG.info("Job is Still Running");
-        }
-
-        List<Map<String, Object>> jobHistoryData = getSchedulerJobHistory(jobId);
-
-        // print error associated with recent job failure (if any)
-        LOG.error("Last Job run error message (only relevent if the job fails: {}",
-                jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorMessage"));
-        LOG.error("Lsat Job failure error log (only relevent if the job fails: {}",
-                jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorLog"));
-
-        assertFalse(jobHistoryData.isEmpty(), "Job History is empty :(  Was it too slow? Failures in background job?");
-
-        // Verifying the Status of the Recently executed Scheduler Job
-        assertEquals("success", jobHistoryData.get(jobHistoryData.size() - 1).get("status"),
-            "Verifying Last Scheduler Job Status");
     }
 
     /**
