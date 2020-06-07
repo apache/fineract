@@ -56,7 +56,7 @@
             <property name="ignoreComments" value="false" />
         </module>
         <module name="EqualsHashCode"/>
-
+        <module name="FallThrough"/>
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="AvoidStarImport"/>
@@ -160,7 +160,7 @@
         <module name="MultipleVariableDeclarations"/>
   
         <module name="MissingSwitchDefault"/>
-        <module name="FallThrough"/>
+
       
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
