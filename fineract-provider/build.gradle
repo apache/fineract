@@ -321,7 +321,6 @@ tasks.withType(JavaCompile) {
                 "ModifiedButNotUsed",
                 "JodaPlusMinusLong",
                 "TypeParameterUnusedInFormals",
-                "DoubleBraceInitialization",
                 "UnusedNestedClass",
                 "UndefinedEquals",
         )
@@ -367,6 +366,7 @@ tasks.withType(JavaCompile) {
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "JdkObsolete",
+                "DoubleBraceInitialization",
 //                "ReturnMissingNullable",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",
