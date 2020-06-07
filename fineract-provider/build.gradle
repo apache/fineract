@@ -307,7 +307,6 @@ tasks.withType(JavaCompile) {
                 "UnusedVariable",
                 "InconsistentCapitalization",
                 "ClassCanBeStatic",
-                "OperatorPrecedence",
                 "MixedMutabilityReturnType",
                 "SameNameButDifferent",
                 "ReferenceEquality",
@@ -325,7 +324,6 @@ tasks.withType(JavaCompile) {
                 "DoubleBraceInitialization",
                 "UnusedNestedClass",
                 "UndefinedEquals",
-                "JdkObsolete",
         )
         //TODO gradually enable these checks
         error(
@@ -368,6 +366,7 @@ tasks.withType(JavaCompile) {
                 "MissingCasesInEnumSwitch",
                 "OperatorPrecedence",
                 "EqualsGetClass",
+                "JdkObsolete",
 //                "ReturnMissingNullable",
 //                "InconsistentOverloads",
 //                "MethodCanBeStatic",

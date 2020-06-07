@@ -19,9 +19,9 @@
 package org.apache.fineract.organisation.office.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
@@ -48,7 +48,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private List<Office> children = new LinkedList<>();
+    private List<Office> children = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
