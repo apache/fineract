@@ -63,7 +63,6 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access", "cast" })
@@ -113,7 +112,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-924
         public void testApplyAnnualFeeForSavingsJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -149,7 +147,7 @@ public class SchedulerJobsTestResults {
 
                 String JobName = "Apply Annual Fee For Savings";
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec,
                                 annualFeeChargeId);
 
@@ -168,7 +166,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore
         public void testInterestPostingForSavingsJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -198,7 +195,7 @@ public class SchedulerJobsTestResults {
 
                 String JobName = "Post Interest For Savings";
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
                 Assert.assertNotSame("Verifying the Balance after running Post Interest for Savings Job",
@@ -207,7 +204,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testTransferFeeForLoansFromSavingsJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -265,7 +261,7 @@ public class SchedulerJobsTestResults {
                 final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
                 String JobName = "Transfer Fee For Loans From Savings";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
                 final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec,
@@ -281,7 +277,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-923
         public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
                 this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -342,7 +337,7 @@ public class SchedulerJobsTestResults {
 
                 String JobName = "Apply Holidays To Loans";
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper
                                 .getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
 
@@ -361,7 +356,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -399,7 +393,7 @@ public class SchedulerJobsTestResults {
 
                 String JobName = "Pay Due Savings Charges";
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
                 final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec,
@@ -414,7 +408,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testUpdateAccountingRunningBalancesJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -456,7 +449,7 @@ public class SchedulerJobsTestResults {
 
                 String JobName = "Update Accounting Running Balances";
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 final HashMap runningBalanceAfter = this.accountHelper
                                 .getAccountingWithRunningBalanceById(accountID.toString());
 
@@ -469,7 +462,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testUpdateLoanArrearsAgingJobOutcome() throws InterruptedException {
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
                 this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -497,7 +489,7 @@ public class SchedulerJobsTestResults {
 
                 String JobName = "Update Loan Arrears Ageing";
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 HashMap loanSummaryData = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec,
                                 loanID);
 
@@ -510,7 +502,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testUpdateLoanPaidInAdvanceJobOutcome() throws InterruptedException {
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
                 this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -558,7 +549,7 @@ public class SchedulerJobsTestResults {
                                 loanID);
 
                 String JobName = "Update Loan Paid In Advance";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 // Retrieving Loan Repayment Schedule after the successful
                 // completion of
                 // Update Loan Paid in Advance Scheduler Job
@@ -575,9 +566,6 @@ public class SchedulerJobsTestResults {
 
         }
 
-        // Invalid test case as it won't affect summary (Loan summary is properly
-        // updated before running this job)
-        @Ignore
         @Test
         public void testUpdateLoanSummaryJobOutcome() throws InterruptedException {
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -628,7 +616,7 @@ public class SchedulerJobsTestResults {
                                 this.responseSpec, loanID);
 
                 String JobName = "Update loan Summary";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 Float expectedSummaryAfterJob = (Float) loanSummaryBefore.get("totalExpectedRepayment")
                 /* - (Float) loanSummaryBefore.get("feeChargesPaid") */;
                 HashMap loanSummaryAfter = this.loanTransactionHelper.getLoanSummary(this.requestSpec,
@@ -639,7 +627,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -704,7 +691,7 @@ public class SchedulerJobsTestResults {
                 Assert.assertNotNull(standingInstructionId);
 
                 String JobName = "Execute Standing Instruction";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
                 Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
 
@@ -735,7 +722,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore
         public void testApplyPenaltyForOverdueLoansJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -770,7 +756,7 @@ public class SchedulerJobsTestResults {
                                 .getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
 
                 String JobName = "Apply penalty to overdue loans";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
 
                 final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec,
                                 overdueFeeChargeId);
@@ -791,7 +777,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testAvoidUnncessaryPenaltyWhenAmountZeroForOverdueLoansJobOutcome() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -828,7 +813,7 @@ public class SchedulerJobsTestResults {
                 String JobName = "Apply penalty to overdue loans";
                 Integer jobId = 12;
 
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
 
                 Map<String, Object> schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
 
@@ -861,7 +846,6 @@ public class SchedulerJobsTestResults {
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testUpdateOverdueDaysForNPA() throws InterruptedException {
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
                 this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -892,14 +876,13 @@ public class SchedulerJobsTestResults {
                 Assert.assertFalse(isNPABefore);
                 // Integer jobId = (Integer) allSchedulerJobsData.get(1).get("jobId");
                 String JobName = "Update Non Performing Assets";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec,
                                 loanID, "isNPA");
                 Assert.assertTrue(isNPAAfter);
         }
 
         @Test
-        @Ignore // TODO FINERACT-857
         public void testInterestTransferForSavings() throws InterruptedException {
                 this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
                 this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
@@ -982,7 +965,7 @@ public class SchedulerJobsTestResults {
                                 - Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
 
                 String JobName = "Transfer Interest To Savings";
-                this.schedulerJobHelper.executeJob(JobName);
+                this.schedulerJobHelper.executeAndAwaitJob(JobName);
                 fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
                 assertEquals("Verifying opening Balance", Float.valueOf(FixedDepositAccountHelper.DEPOSIT_AMOUNT),
                                 fixedDepositSummary.get("accountBalance"));
