@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -89,19 +90,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final static String CODE_VALUES_TABLE = "m_code_value";
 
     private final static Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
-    private final static HashMap<String, String> apiTypeToMySQL = new HashMap<String, String>() {
-
-        {
-            put("string", "VARCHAR");
-            put("number", "INT");
-            put("boolean", "BIT");
-            put("decimal", "DECIMAL");
-            put("date", "DATE");
-            put("datetime", "DATETIME");
-            put("text", "TEXT");
-            put("dropdown", "INT");
-        }
-    };
+    private final static ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String>builder()
+            .put("string", "VARCHAR")
+            .put("number", "INT")
+            .put("boolean", "BIT")
+            .put("decimal", "DECIMAL")
+            .put("date", "DATE")
+            .put("datetime", "DATETIME")
+            .put("text", "TEXT")
+            .put("dropdown", "INT")
+            .build();
 
     private final static List<String> stringDataTypes = Arrays.asList("char", "varchar", "blob", "text", "tinyblob", "tinytext",
             "mediumblob", "mediumtext", "longblob", "longtext");
