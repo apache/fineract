@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,7 +106,7 @@ public final class Group extends AbstractPersistableCustom {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private List<Group> groupMembers = new LinkedList<>();
+    private List<Group> groupMembers = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
