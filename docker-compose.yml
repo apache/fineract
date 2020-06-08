@@ -16,9 +16,9 @@
 # under the License.
 #
 
-# NB: Travis CI (dist: trusty) supports only v3.3
+# NB: Travis CI (dist: bionic) supports up to v3.7
 # (unless we'd install a more recent version in .travis.yml)
-version: '3.3'
+version: '3.7'
 services:
   # Backend service
   fineractmysql:
@@ -29,7 +29,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "--password=skdcnwauicn2ucnaecasdsajdnizucawencascdca" ]
       timeout: 10s
       retries: 10
     ports:
@@ -37,8 +37,7 @@ services:
   fineract-server:
     build:
       context: .
-      # NB: Target is Docker Compose 3.4+ only (but it works without as well)
-      # target: fineract
+      target: fineract
     ports: 
       - 8443:8443
     depends_on:
