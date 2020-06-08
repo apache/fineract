@@ -1018,7 +1018,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
             }
 
             //Changes to modify loan rates.
-            if (command.hasParameter(LoanProductConstants.ratesParamName)) {
+            if (command.hasParameter(LoanProductConstants.RATES_PARAM_NAME)) {
                 existingLoanApplication.updateLoanRates(rateAssembler.fromParsedJson(command.parsedJson()));
             }
 
@@ -1200,7 +1200,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
 
             if (productRelatedDetail.isInterestRecalculationEnabled()) {
                 this.fromApiJsonDeserializer.validateLoanForInterestRecalculation(existingLoanApplication);
-                if (changes.containsKey(LoanProductConstants.isInterestRecalculationEnabledParameterName)) {
+                if (changes.containsKey(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME)) {
                     createAndPersistCalendarInstanceForInterestRecalculation(existingLoanApplication);
 
                 }

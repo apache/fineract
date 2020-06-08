@@ -55,7 +55,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.loanTermFrequencyTypeParameterName, LoanApiConstants.repaymentFrequencyTypeParameterName,
             LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.interestTypeParameterName,
             LoanApiConstants.interestCalculationPeriodTypeParameterName,
-            LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, LoanApiConstants.interestRateFrequencyTypeParameterName,
+            LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, LoanApiConstants.interestRateFrequencyTypeParameterName,
             LoanApiConstants.disbursementDateParameterName, LoanApiConstants.repaymentsStartingFromDateParameterName,
             LoanApiConstants.graceOnPrincipalPaymentParameterName, LoanApiConstants.graceOnInterestPaymentParameterName,
             LoanApiConstants.graceOnInterestChargedParameterName, LoanApiConstants.interestChargedFromDateParameterName,
@@ -64,11 +64,11 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.collateralParameterName, LoanApiConstants.syncDisbursementWithMeetingParameterName,
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
-            LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
             LoanApiConstants.isFloatingInterestRateParameterName, LoanApiConstants.interestRateDifferentialParameterName,
             LoanApiConstants.repaymentFrequencyNthDayTypeParameterName, LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName,
             LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam,
-            LoanProductConstants.ratesParamName));
+            LoanProductConstants.RATES_PARAM_NAME));
 
     private final FromJsonHelper fromApiJsonHelper;
 

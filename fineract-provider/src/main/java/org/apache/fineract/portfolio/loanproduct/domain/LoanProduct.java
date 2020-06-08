@@ -193,7 +193,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final List<Rate> productRates) {
 
         final String name = command.stringValueOfParameterNamed("name");
-        final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.shortName);
+        final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.SHORT_NAME);
         final String description = command.stringValueOfParameterNamed("description");
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
@@ -208,7 +208,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command
                 .integerValueOfParameterNamed("interestCalculationPeriodType"));
         final boolean allowPartialPeriodInterestCalcualtion = command
-                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName);
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME);
         final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("amortizationType"));
         final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command
                 .integerValueOfParameterNamed("repaymentFrequencyType"));
@@ -263,7 +263,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         final Integer graceOnInterestPayment = command.integerValueOfParameterNamed("graceOnInterestPayment");
         final Integer graceOnInterestCharged = command.integerValueOfParameterNamed("graceOnInterestCharged");
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = command
-                .integerValueOfParameterNamed(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment);
+                .integerValueOfParameterNamed(LoanProductConstants.MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT);
 
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
         final boolean includeInBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed("includeInBorrowerCycle");
@@ -272,7 +272,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
         final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
-        final boolean useBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.useBorrowerCycleParameterName);
+        final boolean useBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME);
         final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations = new HashSet<>();
 
         if (useBorrowerCycle) {
@@ -280,26 +280,26 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
 
         final boolean multiDisburseLoan = command
-                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.multiDisburseLoanParameterName);
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME);
         Integer maxTrancheCount = null;
         BigDecimal outstandingLoanBalance = null;
         if (multiDisburseLoan) {
-            outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName);
-            maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.maxTrancheCountParameterName);
+            outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME);
+            maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME);
         }
 
-        final Integer graceOnArrearsAgeing = command.integerValueOfParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName);
+        final Integer graceOnArrearsAgeing = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME);
 
-        final Integer overdueDaysForNPA = command.integerValueOfParameterNamed(LoanProductConstants.overdueDaysForNPAParameterName);
+        final Integer overdueDaysForNPA = command.integerValueOfParameterNamed(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME);
 
         // Interest recalculation settings
         final boolean isInterestRecalculationEnabled = command
-                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isInterestRecalculationEnabledParameterName);
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME);
         final DaysInMonthType daysInMonthType = DaysInMonthType.fromInt(command
-                .integerValueOfParameterNamed(LoanProductConstants.daysInMonthTypeParameterName));
+                .integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));
 
         final DaysInYearType daysInYearType = DaysInYearType.fromInt(command
-                .integerValueOfParameterNamed(LoanProductConstants.daysInYearTypeParameterName));
+                .integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME));
 
         LoanProductInterestRecalculationDetails interestRecalculationSettings = null;
 
@@ -328,7 +328,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                     : LoanProductConstants.DEFAULT_PRINCIPAL_THRESHOLD_FOR_SINGLE_DISBURSE_LOAN;
         }
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = command
-                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName);
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ACCOUNT_MOVES_OUT_OF_NPA_ONLY_ON_ARREARS_COMPLETION_PARAM_NAME);
         final boolean canDefineEmiAmount = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
         final Integer installmentAmountInMultiplesOf = command
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
@@ -336,12 +336,12 @@ public class LoanProduct extends AbstractPersistableCustom {
         final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
 
 
-        final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
-                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
+        final boolean canUseForTopup = command.parameterExists(LoanProductConstants.CAN_USE_FOR_TOPUP)
+                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.CAN_USE_FOR_TOPUP)
                 : false;
 
-        final boolean isEqualAmortization = command.parameterExists(LoanProductConstants.isEqualAmortizationParam) ? command
-                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam) : false;
+        final boolean isEqualAmortization = command.parameterExists(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM) ? command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM) : false;
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -389,7 +389,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     private static void assembleInterestRateVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assembleVaritions(command, loanProductBorrowerCycleVariations, LoanProductParamType.INTERESTRATE.getValue(),
-                LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName);
+                LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
 
     }
 
@@ -400,7 +400,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     private static void assembleRepaymentVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assembleVaritions(command, loanProductBorrowerCycleVariations, LoanProductParamType.REPAYMENT.getValue(),
-                LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName);
+                LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
 
     }
 
@@ -411,7 +411,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     private static void assemblePrincipalVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assembleVaritions(command, loanProductBorrowerCycleVariations, LoanProductParamType.PRINCIPAL.getValue(),
-                LoanProductConstants.principalVariationsForBorrowerCycleParameterName);
+                LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
     }
 
     private static void assembleVaritions(final JsonCommand command,
@@ -428,27 +428,27 @@ public class LoanProduct extends AbstractPersistableCustom {
                     BigDecimal maxValue = null;
                     Integer cycleNumber = null;
                     Integer valueUsageCondition = null;
-                    if (jsonObject.has(LoanProductConstants.defaultValueParameterName)
-                            && jsonObject.get(LoanProductConstants.defaultValueParameterName).isJsonPrimitive()) {
-                        defaultValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.defaultValueParameterName).getAsBigDecimal();
+                    if (jsonObject.has(LoanProductConstants.DEFAULT_VALUE_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.DEFAULT_VALUE_PARAMETER_NAME).isJsonPrimitive()) {
+                        defaultValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.DEFAULT_VALUE_PARAMETER_NAME).getAsBigDecimal();
                     }
-                    if (jsonObject.has(LoanProductConstants.minValueParameterName)
-                            && jsonObject.get(LoanProductConstants.minValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.minValueParameterName).getAsString())) {
-                        minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.minValueParameterName).getAsBigDecimal();
+                    if (jsonObject.has(LoanProductConstants.MIN_VALUE_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.MIN_VALUE_PARAMETER_NAME).isJsonPrimitive()
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.MIN_VALUE_PARAMETER_NAME).getAsString())) {
+                        minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.MIN_VALUE_PARAMETER_NAME).getAsBigDecimal();
                     }
-                    if (jsonObject.has(LoanProductConstants.maxValueParameterName)
-                            && jsonObject.get(LoanProductConstants.maxValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString())) {
-                        maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.maxValueParameterName).getAsBigDecimal();
+                    if (jsonObject.has(LoanProductConstants.MAX_VALUE_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.MAX_VALUE_PARAMETER_NAME).isJsonPrimitive()
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.MAX_VALUE_PARAMETER_NAME).getAsString())) {
+                        maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.MAX_VALUE_PARAMETER_NAME).getAsBigDecimal();
                     }
-                    if (jsonObject.has(LoanProductConstants.borrowerCycleNumberParamName)
-                            && jsonObject.get(LoanProductConstants.borrowerCycleNumberParamName).isJsonPrimitive()) {
-                        cycleNumber = jsonObject.getAsJsonPrimitive(LoanProductConstants.borrowerCycleNumberParamName).getAsInt();
+                    if (jsonObject.has(LoanProductConstants.BORROWER_CYCLE_NUMBER_PARAM_NAME)
+                            && jsonObject.get(LoanProductConstants.BORROWER_CYCLE_NUMBER_PARAM_NAME).isJsonPrimitive()) {
+                        cycleNumber = jsonObject.getAsJsonPrimitive(LoanProductConstants.BORROWER_CYCLE_NUMBER_PARAM_NAME).getAsInt();
                     }
-                    if (jsonObject.has(LoanProductConstants.valueConditionTypeParamName)
-                            && jsonObject.get(LoanProductConstants.valueConditionTypeParamName).isJsonPrimitive()) {
-                        valueUsageCondition = jsonObject.getAsJsonPrimitive(LoanProductConstants.valueConditionTypeParamName).getAsInt();
+                    if (jsonObject.has(LoanProductConstants.VALUE_CONDITION_TYPE_PARAM_NAME)
+                            && jsonObject.get(LoanProductConstants.VALUE_CONDITION_TYPE_PARAM_NAME).isJsonPrimitive()) {
+                        valueUsageCondition = jsonObject.getAsJsonPrimitive(LoanProductConstants.VALUE_CONDITION_TYPE_PARAM_NAME).getAsInt();
                     }
                     LoanProductBorrowerCycleVariations borrowerCycleVariations = new LoanProductBorrowerCycleVariations(cycleNumber,
                             paramType, valueUsageCondition, minValue, maxValue, defaultValue);
@@ -463,11 +463,11 @@ public class LoanProduct extends AbstractPersistableCustom {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
         List<Long> variationIds = fetchAllVariationIds();
         updateBorrowerCycleVaritions(command, LoanProductParamType.PRINCIPAL.getValue(),
-                LoanProductConstants.principalVariationsForBorrowerCycleParameterName, actualChanges, variationIds);
+                LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, actualChanges, variationIds);
         updateBorrowerCycleVaritions(command, LoanProductParamType.INTERESTRATE.getValue(),
-                LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName, actualChanges, variationIds);
+                LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, actualChanges, variationIds);
         updateBorrowerCycleVaritions(command, LoanProductParamType.REPAYMENT.getValue(),
-                LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName, actualChanges, variationIds);
+                LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, actualChanges, variationIds);
         for (Long id : variationIds) {
             this.borrowerCycleVariations.remove(fetchLoanProductBorrowerCycleVariationById(id));
         }
@@ -496,32 +496,32 @@ public class LoanProduct extends AbstractPersistableCustom {
                     Integer cycleNumber = null;
                     Integer valueUsageCondition = null;
                     Long id = null;
-                    if (jsonObject.has(LoanProductConstants.defaultValueParameterName)
-                            && jsonObject.get(LoanProductConstants.defaultValueParameterName).isJsonPrimitive()) {
-                        defaultValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.defaultValueParameterName).getAsBigDecimal();
+                    if (jsonObject.has(LoanProductConstants.DEFAULT_VALUE_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.DEFAULT_VALUE_PARAMETER_NAME).isJsonPrimitive()) {
+                        defaultValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.DEFAULT_VALUE_PARAMETER_NAME).getAsBigDecimal();
                     }
-                    if (jsonObject.has(LoanProductConstants.minValueParameterName)
-                            && jsonObject.get(LoanProductConstants.minValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.minValueParameterName).getAsString())) {
-                        minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.minValueParameterName).getAsBigDecimal();
+                    if (jsonObject.has(LoanProductConstants.MIN_VALUE_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.MIN_VALUE_PARAMETER_NAME).isJsonPrimitive()
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.MIN_VALUE_PARAMETER_NAME).getAsString())) {
+                        minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.MIN_VALUE_PARAMETER_NAME).getAsBigDecimal();
                     }
-                    if (jsonObject.has(LoanProductConstants.maxValueParameterName)
-                            && jsonObject.get(LoanProductConstants.maxValueParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString())) {
-                        maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.maxValueParameterName).getAsBigDecimal();
+                    if (jsonObject.has(LoanProductConstants.MAX_VALUE_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.MAX_VALUE_PARAMETER_NAME).isJsonPrimitive()
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.MAX_VALUE_PARAMETER_NAME).getAsString())) {
+                        maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.MAX_VALUE_PARAMETER_NAME).getAsBigDecimal();
                     }
-                    if (jsonObject.has(LoanProductConstants.borrowerCycleNumberParamName)
-                            && jsonObject.get(LoanProductConstants.borrowerCycleNumberParamName).isJsonPrimitive()) {
-                        cycleNumber = jsonObject.getAsJsonPrimitive(LoanProductConstants.borrowerCycleNumberParamName).getAsInt();
+                    if (jsonObject.has(LoanProductConstants.BORROWER_CYCLE_NUMBER_PARAM_NAME)
+                            && jsonObject.get(LoanProductConstants.BORROWER_CYCLE_NUMBER_PARAM_NAME).isJsonPrimitive()) {
+                        cycleNumber = jsonObject.getAsJsonPrimitive(LoanProductConstants.BORROWER_CYCLE_NUMBER_PARAM_NAME).getAsInt();
                     }
-                    if (jsonObject.has(LoanProductConstants.valueConditionTypeParamName)
-                            && jsonObject.get(LoanProductConstants.valueConditionTypeParamName).isJsonPrimitive()) {
-                        valueUsageCondition = jsonObject.getAsJsonPrimitive(LoanProductConstants.valueConditionTypeParamName).getAsInt();
+                    if (jsonObject.has(LoanProductConstants.VALUE_CONDITION_TYPE_PARAM_NAME)
+                            && jsonObject.get(LoanProductConstants.VALUE_CONDITION_TYPE_PARAM_NAME).isJsonPrimitive()) {
+                        valueUsageCondition = jsonObject.getAsJsonPrimitive(LoanProductConstants.VALUE_CONDITION_TYPE_PARAM_NAME).getAsInt();
                     }
-                    if (jsonObject.has(LoanProductConstants.borrowerCycleIdParameterName)
-                            && jsonObject.get(LoanProductConstants.borrowerCycleIdParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.borrowerCycleIdParameterName).getAsString())) {
-                        id = jsonObject.getAsJsonPrimitive(LoanProductConstants.borrowerCycleIdParameterName).getAsLong();
+                    if (jsonObject.has(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME)
+                            && jsonObject.get(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).isJsonPrimitive()
+                            && StringUtils.isNotBlank(jsonObject.get(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).getAsString())) {
+                        id = jsonObject.getAsJsonPrimitive(LoanProductConstants.BORROWER_CYCLE_ID_PARAMETER_NAME).getAsLong();
                     }
                     LoanProductBorrowerCycleVariations borrowerCycleVariations = new LoanProductBorrowerCycleVariations(cycleNumber,
                             paramType, valueUsageCondition, minValue, maxValue, defaultValue);
@@ -790,7 +790,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.name = newValue;
         }
 
-        final String shortNameParamName = LoanProductConstants.shortName;
+        final String shortNameParamName = LoanProductConstants.SHORT_NAME;
         if (command.isChangeInStringParameterNamed(shortNameParamName, this.shortName)) {
             final String newValue = command.stringValueOfParameterNamed(shortNameParamName);
             actualChanges.put(shortNameParamName, newValue);
@@ -839,9 +839,9 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.includeInBorrowerCycle = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.useBorrowerCycleParameterName, this.useBorrowerCycle)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.useBorrowerCycleParameterName);
-            actualChanges.put(LoanProductConstants.useBorrowerCycleParameterName, newValue);
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME, this.useBorrowerCycle)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.USE_BORROWER_CYCLE_PARAMETER_NAME, newValue);
             this.useBorrowerCycle = newValue;
         }
 
@@ -894,18 +894,18 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
         loanProducTrancheDetails.update(command, actualChanges, localeAsInput);
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.overdueDaysForNPAParameterName, this.overdueDaysForNPA)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.overdueDaysForNPAParameterName);
-            actualChanges.put(LoanProductConstants.overdueDaysForNPAParameterName, newValue);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME, this.overdueDaysForNPA)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME, newValue);
             actualChanges.put("locale", localeAsInput);
             this.overdueDaysForNPA = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment,
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT,
                 this.minimumDaysBetweenDisbursalAndFirstRepayment)) {
             final Integer newValue = command
-                    .integerValueOfParameterNamed(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment);
-            actualChanges.put(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, newValue);
+                    .integerValueOfParameterNamed(LoanProductConstants.MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT);
+            actualChanges.put(LoanProductConstants.MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT, newValue);
             actualChanges.put("locale", localeAsInput);
             this.minimumDaysBetweenDisbursalAndFirstRepayment = newValue;
         }
@@ -921,7 +921,7 @@ public class LoanProduct extends AbstractPersistableCustom {
          * Update interest recalculation settings
          */
         final boolean isInterestRecalculationEnabledChanged = actualChanges
-                .containsKey(LoanProductConstants.isInterestRecalculationEnabledParameterName);
+                .containsKey(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME);
 
         if (isInterestRecalculationEnabledChanged) {
             if (this.isInterestRecalculationEnabled()) {
@@ -1008,11 +1008,11 @@ public class LoanProduct extends AbstractPersistableCustom {
                 }
 
                 if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                        .getAsJsonPrimitive(LoanProductConstants.graceOnArrearsAgeingParameterName).getAsBoolean() != this.loanConfigurableAttributes
+                        .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).getAsBoolean() != this.loanConfigurableAttributes
                         .getGraceOnArrearsAgingBoolean()) {
                     this.loanConfigurableAttributes.setGraceOnArrearsAgeing(command.parsedJson().getAsJsonObject()
                             .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                            .getAsJsonPrimitive(LoanProductConstants.graceOnArrearsAgeingParameterName).getAsBoolean());
+                            .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).getAsBoolean());
                 }
             } else {
                 this.loanConfigurableAttributes = LoanProductConfigurableAttributes.populateDefaultsForConfigurableAttributes();
@@ -1045,11 +1045,11 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(LoanProductConstants.principalThresholdForLastInstallmentParamName, newValue);
             this.principalThresholdForLastInstallment = newValue;
         }
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName,
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ACCOUNT_MOVES_OUT_OF_NPA_ONLY_ON_ARREARS_COMPLETION_PARAM_NAME,
                 this.accountMovesOutOfNPAOnlyOnArrearsCompletion)) {
             final boolean newValue = command
-                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName);
-            actualChanges.put(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, newValue);
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ACCOUNT_MOVES_OUT_OF_NPA_ONLY_ON_ARREARS_COMPLETION_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.ACCOUNT_MOVES_OUT_OF_NPA_ONLY_ON_ARREARS_COMPLETION_PARAM_NAME, newValue);
             this.accountMovesOutOfNPAOnlyOnArrearsCompletion = newValue;
         }
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canDefineEmiAmountParamName, this.canDefineInstallmentAmount)) {
@@ -1066,16 +1066,16 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.installmentAmountInMultiplesOf = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canUseForTopup, this.canUseForTopup)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup);
-            actualChanges.put(LoanProductConstants.canUseForTopup, newValue);
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.CAN_USE_FOR_TOPUP, this.canUseForTopup)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.CAN_USE_FOR_TOPUP);
+            actualChanges.put(LoanProductConstants.CAN_USE_FOR_TOPUP, newValue);
             this.canUseForTopup = newValue;
         }
 
-        if (command.hasParameter(LoanProductConstants.ratesParamName)) {
-            final JsonArray jsonArray = command.arrayOfParameterNamed(LoanProductConstants.ratesParamName);
+        if (command.hasParameter(LoanProductConstants.RATES_PARAM_NAME)) {
+            final JsonArray jsonArray = command.arrayOfParameterNamed(LoanProductConstants.RATES_PARAM_NAME);
             if (jsonArray != null) {
-                actualChanges.put(LoanProductConstants.ratesParamName, command.jsonFragment(LoanProductConstants.ratesParamName));
+                actualChanges.put(LoanProductConstants.RATES_PARAM_NAME, command.jsonFragment(LoanProductConstants.RATES_PARAM_NAME));
             }
         }
 
@@ -1236,29 +1236,29 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
         Map<String, BigDecimal> borrowerCycleVariations = new HashMap<>();
-        borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
-        borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
+        borrowerCycleVariations.put(LoanProductConstants.PRINCIPAL, this.loanProductRelatedDetail.getPrincipal().getAmount());
+        borrowerCycleVariations.put(LoanProductConstants.INTEREST_RATE_PER_PERIOD,
                 this.loanProductRelatedDetail.getNominalInterestRatePerPeriod());
         if (this.loanProductRelatedDetail.getNumberOfRepayments() != null) {
-            borrowerCycleVariations.put(LoanProductConstants.numberOfRepayments,
+            borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD,
                     BigDecimal.valueOf(this.loanProductRelatedDetail.getNumberOfRepayments()));
         }
 
         if (this.loanProductMinMaxConstraints != null) {
-            borrowerCycleVariations.put(LoanProductConstants.minPrincipal, this.loanProductMinMaxConstraints.getMinPrincipal());
-            borrowerCycleVariations.put(LoanProductConstants.maxPrincipal, this.loanProductMinMaxConstraints.getMaxPrincipal());
-            borrowerCycleVariations.put(LoanProductConstants.minInterestRatePerPeriod,
+            borrowerCycleVariations.put(LoanProductConstants.MIN_PRINCIPAL, this.loanProductMinMaxConstraints.getMinPrincipal());
+            borrowerCycleVariations.put(LoanProductConstants.MAX_PRINCIPAL, this.loanProductMinMaxConstraints.getMaxPrincipal());
+            borrowerCycleVariations.put(LoanProductConstants.MIN_INTEREST_RATE_PER_PERIOD,
                     this.loanProductMinMaxConstraints.getMinNominalInterestRatePerPeriod());
-            borrowerCycleVariations.put(LoanProductConstants.maxInterestRatePerPeriod,
+            borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD,
                     this.loanProductMinMaxConstraints.getMaxNominalInterestRatePerPeriod());
 
             if (this.loanProductMinMaxConstraints.getMinNumberOfRepayments() != null) {
-                borrowerCycleVariations.put(LoanProductConstants.minNumberOfRepayments,
+                borrowerCycleVariations.put(LoanProductConstants.MIN_NUMBER_OF_REPAYMENTS,
                         BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMinNumberOfRepayments()));
             }
 
             if (this.loanProductMinMaxConstraints.getMaxNumberOfRepayments() != null) {
-                borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments,
+                borrowerCycleVariations.put(LoanProductConstants.MAX_NUMBER_OF_REPAYMENTS,
                         BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments()));
             }
         }
@@ -1271,21 +1271,21 @@ public class LoanProduct extends AbstractPersistableCustom {
                         && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.EQUAL)) {
                     switch (cycleVariation.getParamType()) {
                         case PRINCIPAL:
-                            borrowerCycleVariations.put(LoanProductConstants.principal, cycleVariation.getDefaultValue());
-                            borrowerCycleVariations.put(LoanProductConstants.minPrincipal, cycleVariation.getMinValue());
-                            borrowerCycleVariations.put(LoanProductConstants.maxPrincipal, cycleVariation.getMaxValue());
+                            borrowerCycleVariations.put(LoanProductConstants.PRINCIPAL, cycleVariation.getDefaultValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MIN_PRINCIPAL, cycleVariation.getMinValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MAX_PRINCIPAL, cycleVariation.getMaxValue());
                             principalCycleUsed = cycleVariation.getBorrowerCycleNumber();
                         break;
                         case INTERESTRATE:
-                            borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod, cycleVariation.getDefaultValue());
-                            borrowerCycleVariations.put(LoanProductConstants.minInterestRatePerPeriod, cycleVariation.getMinValue());
-                            borrowerCycleVariations.put(LoanProductConstants.maxInterestRatePerPeriod, cycleVariation.getMaxValue());
+                            borrowerCycleVariations.put(LoanProductConstants.INTEREST_RATE_PER_PERIOD, cycleVariation.getDefaultValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MIN_INTEREST_RATE_PER_PERIOD, cycleVariation.getMinValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD, cycleVariation.getMaxValue());
                             interestCycleUsed = cycleVariation.getBorrowerCycleNumber();
                         break;
                         case REPAYMENT:
-                            borrowerCycleVariations.put(LoanProductConstants.numberOfRepayments, cycleVariation.getDefaultValue());
-                            borrowerCycleVariations.put(LoanProductConstants.minNumberOfRepayments, cycleVariation.getMinValue());
-                            borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments, cycleVariation.getMaxValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD, cycleVariation.getDefaultValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MIN_NUMBER_OF_REPAYMENTS, cycleVariation.getMinValue());
+                            borrowerCycleVariations.put(LoanProductConstants.MAX_NUMBER_OF_REPAYMENTS, cycleVariation.getMaxValue());
                             repaymentCycleUsed = cycleVariation.getBorrowerCycleNumber();
                         break;
                         default:
@@ -1296,25 +1296,25 @@ public class LoanProduct extends AbstractPersistableCustom {
                     switch (cycleVariation.getParamType()) {
                         case PRINCIPAL:
                             if (principalCycleUsed < cycleVariation.getBorrowerCycleNumber()) {
-                                borrowerCycleVariations.put(LoanProductConstants.principal, cycleVariation.getDefaultValue());
-                                borrowerCycleVariations.put(LoanProductConstants.minPrincipal, cycleVariation.getMinValue());
-                                borrowerCycleVariations.put(LoanProductConstants.maxPrincipal, cycleVariation.getMaxValue());
+                                borrowerCycleVariations.put(LoanProductConstants.PRINCIPAL, cycleVariation.getDefaultValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MIN_PRINCIPAL, cycleVariation.getMinValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MAX_PRINCIPAL, cycleVariation.getMaxValue());
                                 principalCycleUsed = cycleVariation.getBorrowerCycleNumber();
                             }
                         break;
                         case INTERESTRATE:
                             if (interestCycleUsed < cycleVariation.getBorrowerCycleNumber()) {
-                                borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod, cycleVariation.getDefaultValue());
-                                borrowerCycleVariations.put(LoanProductConstants.minInterestRatePerPeriod, cycleVariation.getMinValue());
-                                borrowerCycleVariations.put(LoanProductConstants.maxInterestRatePerPeriod, cycleVariation.getMaxValue());
+                                borrowerCycleVariations.put(LoanProductConstants.INTEREST_RATE_PER_PERIOD, cycleVariation.getDefaultValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MIN_INTEREST_RATE_PER_PERIOD, cycleVariation.getMinValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD, cycleVariation.getMaxValue());
                                 interestCycleUsed = cycleVariation.getBorrowerCycleNumber();
                             }
                         break;
                         case REPAYMENT:
                             if (repaymentCycleUsed < cycleVariation.getBorrowerCycleNumber()) {
-                                borrowerCycleVariations.put(LoanProductConstants.numberOfRepayments, cycleVariation.getDefaultValue());
-                                borrowerCycleVariations.put(LoanProductConstants.minNumberOfRepayments, cycleVariation.getMinValue());
-                                borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments, cycleVariation.getMaxValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD, cycleVariation.getDefaultValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MIN_NUMBER_OF_REPAYMENTS, cycleVariation.getMinValue());
+                                borrowerCycleVariations.put(LoanProductConstants.MAX_NUMBER_OF_REPAYMENTS, cycleVariation.getMaxValue());
                                 repaymentCycleUsed = cycleVariation.getBorrowerCycleNumber();
                             }
                         break;

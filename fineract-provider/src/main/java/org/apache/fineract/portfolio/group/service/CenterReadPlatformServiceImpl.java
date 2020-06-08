@@ -98,7 +98,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     private final PaginationHelper<CenterData> paginationHelper = new PaginationHelper<>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
-    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
+    private final static Set<String> SUPPORTED_ORDER_BY_VALUES = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -172,7 +172,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         return extraCriteria.toString();
     }
 
-    private static final String sqlQuery = "g.id as id, g.account_no as accountNo, g.external_id as externalId, g.display_name as name, "
+    private static final String SQL_QUERY = "g.id as id, g.account_no as accountNo, g.external_id as externalId, g.display_name as name, "
             + "g.office_id as officeId, o.name as officeName, " //
             + "g.staff_id as staffId, s.display_name as staffName, " //
             + "g.status_enum as statusEnum, g.activation_date as activationDate, " //
@@ -194,7 +194,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         public CenterDataMapper() {
 
-            this.schemaSql = sqlQuery;
+            this.schemaSql = SQL_QUERY;
         }
 
         public String schema() {
@@ -320,7 +320,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         public GroupDataMapper() {
 
-            this.schemaSql = sqlQuery;
+            this.schemaSql = SQL_QUERY;
         }
 
         public String schema() {
@@ -372,7 +372,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Page<CenterData> retrievePagedAll(final SearchParameters searchParameters, final PaginationParameters parameters) {
 
-        this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
+        this.paginationParametersDataValidator.validateParameterValues(parameters, SUPPORTED_ORDER_BY_VALUES, "audits");
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
@@ -411,7 +411,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters) {
         if (parameters!=null) {
-            this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
+            this.paginationParametersDataValidator.validateParameterValues(parameters, SUPPORTED_ORDER_BY_VALUES, "audits");
         }
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
