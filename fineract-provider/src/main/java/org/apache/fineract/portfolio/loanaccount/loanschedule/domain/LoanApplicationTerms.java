@@ -57,8 +57,12 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.Weeks;
 import org.joda.time.Years;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class LoanApplicationTerms {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationTerms.class);
 
     private final ApplicationCurrency currency;
 
@@ -648,7 +652,9 @@ public final class LoanApplicationTerms {
             break;
             case INVALID:
             break;
-            default:
+            case WHOLE_TERM:
+                LOG.error("TODO Implement getPeriodEndDate for WHOLE_TERM");
+            break;
         }
         return dueRepaymentPeriodDate;
     }
@@ -1038,7 +1044,9 @@ public final class LoanApplicationTerms {
                         }
                         periodicInterestRate = oneDayOfYearInterestRate.multiply(numberOfDaysInPeriod, mc);
                     break;
-                    default:
+                    case WHOLE_TERM:
+                        LOG.error("TODO Implement periodicInterestRate for WHOLE_TERM");
+                    break;
                 }
             break;
             case SAME_AS_REPAYMENT_PERIOD:

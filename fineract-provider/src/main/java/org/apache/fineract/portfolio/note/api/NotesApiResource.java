@@ -54,6 +54,8 @@ import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -69,6 +71,7 @@ public class NotesApiResource {
             Arrays.asList("id", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId", "noteType",
                     "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
 
+    private static final Logger LOG = LoggerFactory.getLogger(NotesApiResource.class);
     private final PlatformSecurityContext context;
     private final NoteReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer;
@@ -254,6 +257,8 @@ public class NotesApiResource {
                 resourceDetails.withGroupId(resourceId);
             break;
             default:
+                resourceNameForPermissions = "INVALIDNOTE";
+            break;
 
         }
 
