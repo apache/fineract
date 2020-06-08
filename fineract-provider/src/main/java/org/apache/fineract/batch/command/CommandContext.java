@@ -98,7 +98,7 @@ public class CommandContext {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof CommandContext)) {
             return false;
         }
         CommandContext other = (CommandContext) obj;

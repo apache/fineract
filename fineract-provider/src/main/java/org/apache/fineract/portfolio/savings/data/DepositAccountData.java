@@ -339,7 +339,7 @@ public class DepositAccountData {
 
         if (obj == null) { return false; }
         if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
+        if (!(obj instanceof DepositAccountData)) { return false; }
         final DepositAccountData rhs = (DepositAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
     }

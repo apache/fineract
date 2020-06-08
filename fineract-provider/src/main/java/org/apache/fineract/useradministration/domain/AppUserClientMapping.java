@@ -57,7 +57,7 @@ public class AppUserClientMapping extends AbstractPersistableCustom {
             return true;
         }
 
-        if (!getClass().equals(obj.getClass())) {
+        if (!(obj instanceof AppUserClientMapping)) {
             return false;
         }
 

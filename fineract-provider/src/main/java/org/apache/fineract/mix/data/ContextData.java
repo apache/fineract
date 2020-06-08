@@ -56,7 +56,7 @@ public class ContextData {
     public boolean equals(final Object obj) {
         if (this == obj) { return true; }
         if (obj == null) { return false; }
-        if (getClass() != obj.getClass()) { return false; }
+        if (!(obj instanceof ContextData)) { return false; }
         final ContextData other = (ContextData) obj;
         if (this.dimension == null) {
             if (other.dimension != null) { return false; }

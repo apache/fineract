@@ -775,7 +775,7 @@ public class SavingsAccountData implements Serializable {
 
         if (obj == null) { return false; }
         if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
+        if (!(obj instanceof SavingsAccountData)) { return false; }
         final SavingsAccountData rhs = (SavingsAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
     }

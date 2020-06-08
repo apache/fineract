@@ -119,7 +119,7 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) {
+        if (!(obj instanceof LoanProductProvisioningEntry)) {
           return false;
         }
         LoanProductProvisioningEntry other = (LoanProductProvisioningEntry) obj;

@@ -773,7 +773,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         @Override
         public boolean equals(Object obj) {
-            if (!obj.getClass().equals(this.getClass())) {
+            if (!(obj instanceof JournalEntryWritePlatformServiceJpaRepositoryImpl)) {
                 return false;
             }
             OfficeCurrencyKey copy = (OfficeCurrencyKey) obj;

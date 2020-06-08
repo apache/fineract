@@ -81,7 +81,7 @@ public class SelfAccountTemplateData implements
         if (obj == this) {
             return true;
         }
-        if (obj.getClass() != getClass()) {
+        if (!(obj instanceof SelfAccountTemplateData)) {
             return false;
         }
         final SelfAccountTemplateData rhs = (SelfAccountTemplateData) obj;

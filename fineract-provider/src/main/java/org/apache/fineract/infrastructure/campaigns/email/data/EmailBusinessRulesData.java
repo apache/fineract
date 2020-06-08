@@ -83,7 +83,7 @@ public class EmailBusinessRulesData {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || !(o instanceof EmailBusinessRulesData)) {
             return false;
         }
 

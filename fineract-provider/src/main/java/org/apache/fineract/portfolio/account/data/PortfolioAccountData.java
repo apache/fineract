@@ -89,7 +89,7 @@ public class PortfolioAccountData implements Serializable {
 
         if (obj == null) { return false; }
         if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
+        if (!(obj instanceof PortfolioAccountData)) { return false; }
         final PortfolioAccountData rhs = (PortfolioAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).append(this.productId, rhs.productId)
                 .append(this.productName, rhs.productName).isEquals();
