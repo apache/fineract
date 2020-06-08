@@ -69,7 +69,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.interestRatePerPeriodParameterName, LoanApiConstants.amortizationTypeParameterName,
             LoanApiConstants.interestTypeParameterName, LoanApiConstants.isFloatingInterestRate, LoanApiConstants.interestRateDifferential,
             LoanApiConstants.interestCalculationPeriodTypeParameterName,
-            LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, LoanApiConstants.interestRateFrequencyTypeParameterName,
+            LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, LoanApiConstants.interestRateFrequencyTypeParameterName,
             LoanApiConstants.disbursementDateParameterName, LoanApiConstants.repaymentsStartingFromDateParameterName,
             LoanApiConstants.graceOnPrincipalPaymentParameterName,
             LoanApiConstants.graceOnInterestPaymentParameterName,
@@ -90,8 +90,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.syncDisbursementWithMeetingParameterName,// optional
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
-            LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam,LoanProductConstants.ratesParamName,
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
+            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam,LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.applicationId,                   // glim specific
             LoanApiConstants.lastApplication));              // glim specific
 
@@ -334,8 +334,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
 
         final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                LoanProductConstants.graceOnArrearsAgeingParameterName, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
+                LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
                 .zeroOrPositiveAmount();
 
         final String interestChargedFromDateParameterName = "interestChargedFromDate";
@@ -545,9 +545,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         boolean isEqualAmortization = existingLoanApplication.getLoanProductRelatedDetail().isEqualAmortization();
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
-            isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
-            baseDataValidator.reset().parameter(LoanProductConstants.isEqualAmortizationParam).value(isEqualAmortization).ignoreIfNull()
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, element)) {
+            isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM).value(isEqualAmortization).ignoreIfNull()
                     .validateForBooleanValue();
             if (isEqualAmortization && loanProduct.isInterestRecalculationEnabled()) { throw new EqualAmortizationUnsupportedFeatureException(
                     "interest.recalculation", "interest recalculation"); }
@@ -782,10 +782,10 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.graceOnArrearsAgeingParameterName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element)) {
             final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                    LoanProductConstants.graceOnArrearsAgeingParameterName, element);
-            baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
+                    LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).value(graceOnArrearsAgeing)
                     .zeroOrPositiveAmount();
         }
 
@@ -1207,15 +1207,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .fromInt(interestCalculationPeriodType);
             boolean considerPartialPeriodUpdates = interestCalculationPeriodMethod.isDaily() ? interestCalculationPeriodMethod.isDaily()
                     : loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
-            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, element)) {
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, element)) {
                 final Boolean considerPartialInterestEnabled = this.fromApiJsonHelper.extractBooleanNamed(
-                        LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, element);
-                baseDataValidator.reset().parameter(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName)
+                        LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME)
                         .value(considerPartialInterestEnabled).notNull().isOneOfTheseValues(true, false);
                 boolean considerPartialPeriods = considerPartialInterestEnabled == null ? false : considerPartialInterestEnabled;
                 if (interestCalculationPeriodMethod.isDaily()) {
                     if (considerPartialPeriods) {
-                        baseDataValidator.reset().parameter(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName)
+                        baseDataValidator.reset().parameter(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME)
                                 .failWithCode("not.supported.for.daily.calcualtions");
                     }
                 } else {
@@ -1225,12 +1225,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
             if (!considerPartialPeriodUpdates) {
                 if (loanProduct.isInterestRecalculationEnabled()) {
-                    baseDataValidator.reset().parameter(LoanProductConstants.isInterestRecalculationEnabledParameterName)
+                    baseDataValidator.reset().parameter(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME)
                             .failWithCode("not.supported.for.selected.interest.calcualtion.type");
                 }
 
                 if (loanProduct.isMultiDisburseLoan()) {
-                    baseDataValidator.reset().parameter(LoanProductConstants.multiDisburseLoanParameterName)
+                    baseDataValidator.reset().parameter(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME)
                             .failWithCode("not.supported.for.selected.interest.calcualtion.type");
                 }
 

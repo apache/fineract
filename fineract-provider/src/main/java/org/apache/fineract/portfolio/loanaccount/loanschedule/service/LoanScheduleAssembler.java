@@ -213,7 +213,7 @@ public class LoanScheduleAssembler {
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
                 .fromInt(interestCalculationPeriodType);
         Boolean allowPartialPeriodInterestCalcualtion = this.fromApiJsonHelper.extractBooleanNamed(
-                LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, element);
+                LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, element);
         if (allowPartialPeriodInterestCalcualtion == null) {
             allowPartialPeriodInterestCalcualtion = loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
         }
@@ -317,7 +317,7 @@ public class LoanScheduleAssembler {
                 .isInterestChargedFromDateSameAsDisbursementDate();
 
         final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                LoanProductConstants.graceOnArrearsAgeingParameterName, element);
+                LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, element);
 
         // other
         final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);

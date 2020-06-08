@@ -71,11 +71,11 @@ public class ChargesHelper {
     private static final Integer CHARGE_FEE_FREQUENCY_MONTHS = 2;
     private static final Integer CHARGE_FEE_FREQUENCY_YEARS = 3;
 
-    private final static boolean active = true;
+    private final static boolean ACTIVE = true;
     private final static boolean PENALTY = true;
-    private final static String amount = "100";
-    private final static String currencyCode = "USD";
-    public final static String feeOnMonthDay = "04 March";
+    private final static String AMOUNT = "100";
+    private final static String CURRENCY_CODE = "USD";
+    public final static String FEE_ON_MONTH_DAY = "04 March";
     private final static String MONTH_DAY_FORMAT = "dd MMM";
 
     public static String getSavingsSpecifiedDueDateJSON() {
@@ -88,15 +88,15 @@ public class ChargesHelper {
     }
 
     public static String getSavingsActivationFeeJSON() {
-        return getSavingsJSON(amount, currencyCode, ChargeTimeType.SAVINGS_ACTIVATION);
+        return getSavingsJSON(AMOUNT, CURRENCY_CODE, ChargeTimeType.SAVINGS_ACTIVATION);
     }
 
     public static String getSavingsNoActivityFeeJSON() {
-        return getSavingsJSON(amount, currencyCode, ChargeTimeType.SAVINGS_NOACTIVITY_FEE);
+        return getSavingsJSON(AMOUNT, CURRENCY_CODE, ChargeTimeType.SAVINGS_NOACTIVITY_FEE);
     }
 
     public static String getSavingsWithdrawalFeeJSON() {
-        return getSavingsJSON(amount, currencyCode, ChargeTimeType.WITHDRAWAL_FEE);
+        return getSavingsJSON(AMOUNT, CURRENCY_CODE, ChargeTimeType.WITHDRAWAL_FEE);
     }
 
     public static String getSavingsJSON(String amount, String currencyCode, ChargeTimeType timeType) {
@@ -109,7 +109,7 @@ public class ChargesHelper {
 
     public static String getSavingsAnnualFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("feeOnMonthDay", ChargesHelper.feeOnMonthDay);
+        map.put("feeOnMonthDay", ChargesHelper.FEE_ON_MONTH_DAY);
         map.put("chargeTimeType", CHARGE_ANNUAL_FEE);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
@@ -118,7 +118,7 @@ public class ChargesHelper {
 
     public static String getSavingsMonthlyFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("feeOnMonthDay", ChargesHelper.feeOnMonthDay);
+        map.put("feeOnMonthDay", ChargesHelper.FEE_ON_MONTH_DAY);
         map.put("chargeTimeType", CHARGE_MONTHLY_FEE);
         map.put("feeInterval", 2);
         String chargesCreateJson = new Gson().toJson(map);
@@ -144,12 +144,12 @@ public class ChargesHelper {
     }
 
     public static HashMap<String, Object> populateDefaultsForSavings() {
-        return populateDefaultsForSavings(amount, currencyCode);
+        return populateDefaultsForSavings(AMOUNT, CURRENCY_CODE);
     }
 
     public static HashMap<String, Object> populateDefaultsForSavings(String amount, String currencyCode) {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.active);
+        map.put("active", ChargesHelper.ACTIVE);
         map.put("amount", amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SAVINGS);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
@@ -161,7 +161,7 @@ public class ChargesHelper {
     }
 
     public static String getLoanDisbursementJSON() {
-        return getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount);
+        return getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.AMOUNT);
     }
 
     public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount) {
@@ -187,7 +187,7 @@ public class ChargesHelper {
     }
 
     public static String getLoanSpecifiedDueDateJSON() {
-        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount,
+        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.AMOUNT,
                 ChargesHelper.PENALTY);
     }
 
@@ -218,7 +218,7 @@ public class ChargesHelper {
     }
 
     public static String getLoanSpecifiedDueDateWithAccountTransferJSON() {
-        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount,
+        return getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.AMOUNT,
                 ChargesHelper.PENALTY, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
     }
 
@@ -249,7 +249,7 @@ public class ChargesHelper {
     }
 
     public static String getLoanInstallmentFeeJSON() {
-        return getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount,
+        return getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.AMOUNT,
                 ChargesHelper.PENALTY);
     }
 
@@ -280,7 +280,7 @@ public class ChargesHelper {
         map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
         map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_MONTHS);
-        map.put("feeOnMonthDay", ChargesHelper.feeOnMonthDay);
+        map.put("feeOnMonthDay", ChargesHelper.FEE_ON_MONTH_DAY);
         map.put("feeInterval", 2);
         String chargesCreateJson = new Gson().toJson(map);
         LOG.info("{}", chargesCreateJson);
@@ -301,11 +301,11 @@ public class ChargesHelper {
 
     public static HashMap<String, Object> populateDefaultsForLoan() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.active);
-        map.put("amount", ChargesHelper.amount);
+        map.put("active", ChargesHelper.ACTIVE);
+        map.put("amount", ChargesHelper.AMOUNT);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_LOAN);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
         map.put("name", Utils.randomNameGenerator("Charge_Loans_", 6));
@@ -314,12 +314,12 @@ public class ChargesHelper {
 
     public static HashMap<String, Object> populateDefaultsClientCharge() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.active);
-        map.put("amount", ChargesHelper.amount);
+        map.put("active", ChargesHelper.ACTIVE);
+        map.put("amount", ChargesHelper.AMOUNT);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_CLIENT);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
         map.put("chargeTimeType", ChargesHelper.CHARGE_SPECIFIED_DUE_DATE);
-        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("monthDayFormat", ChargesHelper.MONTH_DAY_FORMAT);
         map.put("name", Utils.randomNameGenerator("Charge_client_", 8));
@@ -328,12 +328,12 @@ public class ChargesHelper {
 
     public static HashMap<String, Object> populateDefaultsShareActivationCharge() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.active);
-        map.put("amount", ChargesHelper.amount);
+        map.put("active", ChargesHelper.ACTIVE);
+        map.put("amount", ChargesHelper.AMOUNT);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
         map.put("chargeTimeType", ChargesHelper.SHAREACCOUNT_ACTIVATION);
-        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("name", Utils.randomNameGenerator("Charge_Share_Activation_", 8));
         return map;
@@ -341,12 +341,12 @@ public class ChargesHelper {
 
     public static HashMap<String, Object> populateDefaultsSharePurchaseFlatCharge() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.active);
-        map.put("amount", ChargesHelper.amount);
+        map.put("active", ChargesHelper.ACTIVE);
+        map.put("amount", ChargesHelper.AMOUNT);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
         map.put("chargeTimeType", ChargesHelper.SHARE_PURCHASE);
-        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("name", Utils.randomNameGenerator("Charge_Share_Purchase_", 8));
         return map;
@@ -354,12 +354,12 @@ public class ChargesHelper {
 
     public static HashMap<String, Object> populateDefaultsShareRedeemFlatCharge() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("active", ChargesHelper.active);
-        map.put("amount", ChargesHelper.amount);
+        map.put("active", ChargesHelper.ACTIVE);
+        map.put("amount", ChargesHelper.AMOUNT);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
         map.put("chargeTimeType", ChargesHelper.SHARE_REDEEM);
-        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("currencyCode", ChargesHelper.CURRENCY_CODE);
         map.put("locale", CommonConstants.LOCALE);
         map.put("name", Utils.randomNameGenerator("Charge_Share_Redeem_", 8));
         return map;

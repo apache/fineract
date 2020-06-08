@@ -52,10 +52,10 @@ public class RateAssembler {
       final JsonObject topLevelJsonElement = element.getAsJsonObject();
       final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-      if (topLevelJsonElement.has(LoanProductConstants.ratesParamName) && topLevelJsonElement
-          .get(LoanProductConstants.ratesParamName)
+      if (topLevelJsonElement.has(LoanProductConstants.RATES_PARAM_NAME) && topLevelJsonElement
+          .get(LoanProductConstants.RATES_PARAM_NAME)
           .isJsonArray()) {
-        final JsonArray array = topLevelJsonElement.get(LoanProductConstants.ratesParamName)
+        final JsonArray array = topLevelJsonElement.get(LoanProductConstants.RATES_PARAM_NAME)
             .getAsJsonArray();
         List<Long> idList = new ArrayList<>();
 

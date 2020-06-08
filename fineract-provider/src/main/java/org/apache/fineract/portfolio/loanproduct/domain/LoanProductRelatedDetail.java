@@ -423,11 +423,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(newValue);
         }
 
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName,
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
                 this.allowPartialPeriodInterestCalcualtion)) {
             final boolean newValue = command
-                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName);
-            actualChanges.put(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, newValue);
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, newValue);
             this.allowPartialPeriodInterestCalcualtion = newValue;
         }
 
@@ -467,38 +467,38 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.graceOnInterestCharged = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName, this.graceOnArrearsAgeing)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName);
-            actualChanges.put(LoanProductConstants.graceOnArrearsAgeingParameterName, newValue);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, this.graceOnArrearsAgeing)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, newValue);
             actualChanges.put("locale", localeAsInput);
             this.graceOnArrearsAgeing = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.daysInMonthTypeParameterName, this.daysInMonthType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.daysInMonthTypeParameterName);
-            actualChanges.put(LoanProductConstants.daysInMonthTypeParameterName, newValue);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, this.daysInMonthType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.DAYS_IN_MONTH_TYPE_PARAMETER_NAME, newValue);
             actualChanges.put("locale", localeAsInput);
             this.daysInMonthType = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.daysInYearTypeParameterName, this.daysInYearType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.daysInYearTypeParameterName);
-            actualChanges.put(LoanProductConstants.daysInYearTypeParameterName, newValue);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, this.daysInYearType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.DAYS_IN_YEAR_TYPE_PARAMETER_NAME, newValue);
             actualChanges.put("locale", localeAsInput);
             this.daysInYearType = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isInterestRecalculationEnabledParameterName,
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME,
                 this.isInterestRecalculationEnabled)) {
             final boolean newValue = command
-                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isInterestRecalculationEnabledParameterName);
-            actualChanges.put(LoanProductConstants.isInterestRecalculationEnabledParameterName, newValue);
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME, newValue);
             this.isInterestRecalculationEnabled = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isEqualAmortizationParam, this.isEqualAmortization)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam);
-            actualChanges.put(LoanProductConstants.isEqualAmortizationParam, newValue);
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, this.isEqualAmortization)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM);
+            actualChanges.put(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, newValue);
             this.isEqualAmortization = newValue;
         }
 

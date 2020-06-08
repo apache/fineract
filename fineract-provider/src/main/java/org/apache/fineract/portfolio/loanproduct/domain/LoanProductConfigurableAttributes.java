@@ -66,7 +66,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
             LoanProductConstants.interestCalculationPeriodTypeParamName,
             LoanProductConstants.inArrearsToleranceParamName, LoanProductConstants.repaymentEveryParamName,
             LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-            LoanProductConstants.graceOnArrearsAgeingParameterName};
+            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME};
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 
@@ -93,7 +93,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
                 .getAsJsonPrimitive(LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName).getAsBoolean();
         final Boolean graceOnArrearsAging = command.parsedJson().getAsJsonObject()
                 .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                .getAsJsonPrimitive(LoanProductConstants.graceOnArrearsAgeingParameterName).getAsBoolean();
+                .getAsJsonPrimitive(LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME).getAsBoolean();
 
         return new LoanProductConfigurableAttributes(amortization, interestMethod, transactionProcessingStrategy, interestCalcPeriod,
                 arrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAging);

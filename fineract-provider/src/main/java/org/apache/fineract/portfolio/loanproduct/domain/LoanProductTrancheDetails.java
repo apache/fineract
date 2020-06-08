@@ -48,25 +48,25 @@ public class LoanProductTrancheDetails {
     }
 
     public void update(final JsonCommand command, final Map<String, Object> actualChanges, final String localeAsInput) {
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.multiDisburseLoanParameterName, this.multiDisburseLoan)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.multiDisburseLoanParameterName);
-            actualChanges.put(LoanProductConstants.multiDisburseLoanParameterName, newValue);
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, this.multiDisburseLoan)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME);
+            actualChanges.put(LoanProductConstants.MULTI_DISBURSE_LOAN_PARAMETER_NAME, newValue);
             this.multiDisburseLoan = newValue;
         }
 
         if (this.multiDisburseLoan) {
-            if (command.isChangeInIntegerParameterNamed(LoanProductConstants.maxTrancheCountParameterName, this.maxTrancheCount)) {
-                final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.maxTrancheCountParameterName);
-                actualChanges.put(LoanProductConstants.maxTrancheCountParameterName, newValue);
+            if (command.isChangeInIntegerParameterNamed(LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, this.maxTrancheCount)) {
+                final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME);
+                actualChanges.put(LoanProductConstants.MAX_TRANCHE_COUNT_PARAMETER_NAME, newValue);
                 this.maxTrancheCount = newValue;
             }
 
-            if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName,
+            if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME,
                     this.outstandingLoanBalance)) {
                 final BigDecimal newValue = command
-                        .bigDecimalValueOfParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName);
-                actualChanges.put(LoanProductConstants.outstandingLoanBalanceParameterName, newValue);
-                actualChanges.put(LoanProductConstants.outstandingLoanBalanceParameterName, localeAsInput);
+                        .bigDecimalValueOfParameterNamed(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME);
+                actualChanges.put(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME, newValue);
+                actualChanges.put(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME, localeAsInput);
                 this.outstandingLoanBalance = newValue;
             }
         } else {

@@ -243,11 +243,11 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType());
             changes.putAll(accountingMappingChanges);
 
-            if (changes.containsKey(LoanProductConstants.ratesParamName)) {
+            if (changes.containsKey(LoanProductConstants.RATES_PARAM_NAME)) {
                 final List<Rate> productRates = assembleListOfProductRates(command);
                 final boolean updated = product.updateRates(productRates);
                 if (!updated) {
-                    changes.remove(LoanProductConstants.ratesParamName);
+                    changes.remove(LoanProductConstants.RATES_PARAM_NAME);
                 }
             }
 
