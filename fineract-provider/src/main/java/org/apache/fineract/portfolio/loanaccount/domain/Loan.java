@@ -2383,8 +2383,8 @@ public class Loan extends AbstractPersistableCustom {
          * selected
          **/
 
-        if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()
-                        && ((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())) {
+        if ((isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()
+                && isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan()) {
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
                     actualDisbursementDate, createdDate, currentUser);
             addLoanTransaction(interestAppliedTransaction) ;
