@@ -51,6 +51,8 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author dv6
@@ -59,6 +61,8 @@ import org.joda.time.MonthDay;
 @Entity
 @Table(name = "m_savings_account_charge")
 public class SavingsAccountCharge extends AbstractPersistableCustom {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountCharge.class);
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName = "id", nullable = false)
@@ -290,7 +294,15 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                 this.amountWaived = null;
                 this.amountWrittenOff = null;
             break;
-            default:
+            case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                this.percentage = null;
+                this.amount = null;
+                this.amountPercentageAppliedTo = null;
+                this.amountPaid = null;
+                this.amountOutstanding = BigDecimal.ZERO;
+                this.amountWaived = null;
+                this.amountWrittenOff = null;
+            break;
         }
     }
 
@@ -419,7 +431,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
-                default:
+                case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                    LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
+                break;
             }
         }
     }
@@ -493,7 +507,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                     this.amountPercentageAppliedTo = null;
                     this.amountOutstanding = null;
                 break;
-                default:
+                case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                    LOG.error("TODO Implement update ChargeCalculationType for PERCENT_OF_DISBURSEMENT_AMOUNT");
+                break;
             }
         }
 

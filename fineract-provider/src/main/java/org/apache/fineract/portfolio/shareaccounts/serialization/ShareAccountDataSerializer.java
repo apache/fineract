@@ -69,11 +69,15 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ShareAccountDataSerializer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ShareAccountDataSerializer.class);
 
     private final PlatformSecurityContext platformSecurityContext;
 
@@ -967,7 +971,8 @@ public class ShareAccountDataSerializer {
                 case YEARS:
                     lockinDate = purchaseDate.plusYears(lockinPeriod);
                 break;
-                default:
+                case WHOLE_TERM: // Never comes in to this state.
+                break;
             }
         }
         return lockinDate;
