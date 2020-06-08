@@ -114,7 +114,7 @@ public class FloatingRateData implements Comparable<FloatingRateData> , Serializ
         if (obj == this) {
             return true;
         }
-        if (obj.getClass() != getClass()) {
+        if (!(obj instanceof FloatingRateData)) {
             return false;
         }
         final FloatingRateData rhs = (FloatingRateData) obj;

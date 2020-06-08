@@ -525,7 +525,7 @@ public class FixedDepositAccountData extends DepositAccountData {
 
         if (obj == null) { return false; }
         if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
+        if (!(obj instanceof FixedDepositAccountData)) { return false; }
         final FixedDepositAccountData rhs = (FixedDepositAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
     }
