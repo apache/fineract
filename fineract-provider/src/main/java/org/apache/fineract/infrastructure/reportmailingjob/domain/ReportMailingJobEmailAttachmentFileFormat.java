@@ -24,9 +24,9 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     PDF(2, "ReportMailingJobEmailAttachmentFileFormat.pdf", "pdf"),
     CSV(3, "ReportMailingJobEmailAttachmentFileFormat.csv", "csv");
 
-    private String code;
-    private String value;
-    private Integer id;
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     private ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
         this.value = value;

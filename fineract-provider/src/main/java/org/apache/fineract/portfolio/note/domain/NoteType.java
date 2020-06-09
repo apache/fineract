@@ -31,9 +31,9 @@ public enum NoteType {
     SHARE_ACCOUNT(700, "noteType.shares", "accounts/share"),
     SAVINGS_TRANSACTION(800, "noteType.savings.transaction", "savingsTransactions");
 
-    private Integer value;
-    private String code;
-    private String apiUrl;
+    private final Integer value;
+    private final String code;
+    private final String apiUrl;
 
     NoteType(final Integer value, final String code, final String apiUrl) {
         this.value = value;

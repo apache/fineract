@@ -28,8 +28,8 @@ public enum TemplateEntity {
     CLIENT(0, "client"), @SerializedName("loan")
     LOAN(1, "loan");
 
-    private int id;
-    private String name;
+    private final int id;
+    private final String name;
 
     private TemplateEntity(final int id, final String name) {
         this.id = id;
@@ -40,15 +40,8 @@ public enum TemplateEntity {
         return this.name;
     }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
-
     public int getId() {
         return this.id;
     }
 
-    public void setId(final int id) {
-        this.id = id;
-    }
 }
