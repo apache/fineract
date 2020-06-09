@@ -56,7 +56,7 @@ dependencies {
 
             'org.apache.commons:commons-email',
             'org.apache.commons:commons-lang3',
-            'org.apache.commons:commons-io',
+            'commons-io:commons-io',
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
             'org.apache.poi:poi-ooxml-schemas',
