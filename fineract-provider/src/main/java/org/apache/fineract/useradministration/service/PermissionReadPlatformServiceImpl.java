@@ -107,7 +107,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
              */
 
             return "select p.grouping, p.code, p.entity_name as entityName, p.action_name as actionName, p.can_maker_checker as selected"
-                    + " from m_permission p " + " where grouping != 'special' and code not like 'READ_%' and code not like '%\\_CHECKER'"
+                    + " from m_permission p " + " where `grouping` != 'special' and code not like 'READ_%' and code not like '%\\_CHECKER'"
                     + " order by p.grouping, ifnull(entity_name, ''), p.code";
         }
 
