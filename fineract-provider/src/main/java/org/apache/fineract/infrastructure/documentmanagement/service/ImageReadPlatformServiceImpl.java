@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.EntityTypeForImages;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
@@ -33,14 +34,13 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ImageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ContentRepositoryFactory contentRepositoryFactory;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
@@ -49,7 +49,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
     public ImageReadPlatformServiceImpl(final RoutingDataSource dataSource, final ContentRepositoryFactory documentStoreFactory,
             final ClientRepositoryWrapper clientRepositoryWrapper, StaffRepositoryWrapper staffRepositoryWrapper) {
         this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.contentRepositoryFactory = documentStoreFactory;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
     }

@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformSer
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -122,7 +123,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -132,7 +132,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper ;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
@@ -182,7 +182,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;

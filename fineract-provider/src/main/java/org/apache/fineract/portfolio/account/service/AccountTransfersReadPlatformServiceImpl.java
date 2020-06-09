@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -49,7 +50,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -58,7 +58,7 @@ import org.springframework.util.CollectionUtils;
 public class AccountTransfersReadPlatformServiceImpl implements
         AccountTransfersReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
@@ -79,7 +79,7 @@ public class AccountTransfersReadPlatformServiceImpl implements
             final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;

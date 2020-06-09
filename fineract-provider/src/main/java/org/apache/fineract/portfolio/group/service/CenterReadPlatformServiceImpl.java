@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -73,7 +74,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -81,7 +81,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class CenterReadPlatformServiceImpl implements CenterReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
@@ -108,7 +108,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final CalendarReadPlatformService calendarReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;

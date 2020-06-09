@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -91,7 +92,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -100,7 +100,7 @@ import org.springframework.util.CollectionUtils;
 public class DepositAccountReadPlatformServiceImpl implements DepositAccountReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final DepositAccountInterestRateChartReadPlatformService accountChartReadPlatformService;
     private final InterestRateChartReadPlatformService productChartReadPlatformService;
     private final FixedDepositAccountMapper fixedDepositAccountRowMapper = new FixedDepositAccountMapper();
@@ -141,7 +141,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final DropdownReadPlatformService dropdownReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.accountChartReadPlatformService = chartReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.transactionsMapper = new SavingsAccountTransactionsMapper();

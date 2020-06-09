@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -65,7 +66,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -79,7 +79,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final ClientReadPlatformService clientReadPlatformService;
     private final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService;
     private final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final PaginationHelper<AccountData> shareAccountDataPaginationHelper = new PaginationHelper<>();
 
@@ -91,7 +91,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final ClientReadPlatformService clientReadPlatformService,
             final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService,
             final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.applicationContext = applicationContext;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.shareProductDropdownReadPlatformService = shareProductDropdownReadPlatformService;

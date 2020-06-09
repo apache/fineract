@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -78,7 +79,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -87,7 +87,7 @@ import org.springframework.util.CollectionUtils;
 public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
@@ -116,7 +116,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final ChargeReadPlatformService chargeReadPlatformService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService, final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.groupReadPlatformService = groupReadPlatformService;
         this.savingsProductReadPlatformService = savingProductReadPlatformService;

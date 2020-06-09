@@ -36,13 +36,13 @@ import org.apache.fineract.infrastructure.campaigns.email.exception.EmailBusines
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -51,7 +51,7 @@ import org.springframework.stereotype.Service;
 public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPlatformService {
 
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     private final BusinessRuleMapper businessRuleMapper;
 
@@ -59,7 +59,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     @Autowired
     public EmailCampaignReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.businessRuleMapper = new BusinessRuleMapper();
         this.emailCampaignMapper = new EmailCampaignMapper();
     }

@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignStatus
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignNotFound;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -46,7 +47,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -55,7 +55,7 @@ import org.springframework.stereotype.Service;
 public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatformService {
 
     private final BusinessRuleMapper businessRuleMapper;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final SmsCampaignMapper smsCampaignMapper;
     private final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService;
@@ -65,7 +65,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
     public SmsCampaignReadPlatformServiceImpl(final RoutingDataSource dataSource,
             SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService,
             final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         businessRuleMapper = new BusinessRuleMapper();
         this.smsCampaignDropdownReadPlatformService = smsCampaignDropdownReadPlatformService;
         smsCampaignMapper = new SmsCampaignMapper();

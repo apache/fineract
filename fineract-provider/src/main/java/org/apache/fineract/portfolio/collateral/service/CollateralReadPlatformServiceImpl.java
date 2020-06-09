@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -32,14 +33,13 @@ import org.apache.fineract.portfolio.collateral.exception.CollateralNotFoundExce
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CollateralReadPlatformServiceImpl implements CollateralReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
 
@@ -47,7 +47,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     public CollateralReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 

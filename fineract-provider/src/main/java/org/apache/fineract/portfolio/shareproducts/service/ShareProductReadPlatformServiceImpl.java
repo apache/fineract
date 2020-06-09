@@ -34,6 +34,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeTo
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -49,14 +50,13 @@ import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service(value = "shareReadPlatformService")
 public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService;
@@ -70,7 +70,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
             final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.shareProductDropdownReadPlatformService = shareProductDropdownReadPlatformService;

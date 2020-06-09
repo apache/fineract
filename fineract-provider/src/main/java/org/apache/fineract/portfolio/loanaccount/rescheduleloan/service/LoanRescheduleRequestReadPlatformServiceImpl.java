@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -40,14 +41,13 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanRescheduleRequestReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanRescheduleRequestRowMapper loanRescheduleRequestRowMapper = new LoanRescheduleRequestRowMapper();
     private final CodeValueReadPlatformService codeValueReadPlatformService;
@@ -55,7 +55,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     @Autowired
     public LoanRescheduleRequestReadPlatformServiceImpl(final RoutingDataSource dataSource, LoanRepositoryWrapper loanRepositoryWrapper,
             final CodeValueReadPlatformService codeValueReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
     }

@@ -28,6 +28,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrappe
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -49,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +59,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final static Logger LOG = LoggerFactory.getLogger(ChargeWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final DataSource dataSource;
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
@@ -76,7 +76,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(this.dataSource);
         this.chargeRepository = chargeRepository;
         this.loanProductRepository = loanProductRepository;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;

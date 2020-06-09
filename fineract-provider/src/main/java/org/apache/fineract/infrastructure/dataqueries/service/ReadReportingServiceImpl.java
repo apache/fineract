@@ -41,6 +41,7 @@ import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -59,7 +60,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
@@ -70,7 +70,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final static Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
     private final static String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
@@ -84,7 +84,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         this.context = context;
         this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(this.dataSource);
         this.genericDataService = genericDataService;
         this.reportingProcessServiceProvider = reportingProcessServiceProvider;
         this.columnValidator = columnValidator;

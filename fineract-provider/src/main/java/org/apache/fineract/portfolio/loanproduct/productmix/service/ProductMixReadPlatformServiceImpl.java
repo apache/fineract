@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
@@ -32,7 +33,6 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatform
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +40,14 @@ import org.springframework.stereotype.Service;
 public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
 
     @Autowired
     public ProductMixReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final LoanProductReadPlatformService loanProductReadPlatformService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.loanProductReadPlatformService = loanProductReadPlatformService;
     }
 

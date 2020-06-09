@@ -23,12 +23,12 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -39,11 +39,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetailsService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public BasicAuthTenantDetailsServiceJdbc(@Qualifier("hikariTenantDataSource") final DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     private static final class TenantMapper implements RowMapper<FineractPlatformTenant> {

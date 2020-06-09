@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -53,7 +54,6 @@ import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -61,7 +61,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
@@ -83,7 +83,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final PaginationParametersDataValidator paginationParametersDataValidator,
             final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.centerReadPlatformService = centerReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;

@@ -20,22 +20,22 @@ package org.apache.fineract.mix.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.NamespaceData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NamespaceReadPlatformServiceImpl implements NamespaceReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final NamespaceMapper namespaceMapper;
 
     @Autowired
     public NamespaceReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.namespaceMapper = new NamespaceMapper();
     }
 

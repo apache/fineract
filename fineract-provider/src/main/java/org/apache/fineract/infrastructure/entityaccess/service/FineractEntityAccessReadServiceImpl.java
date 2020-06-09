@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
@@ -37,7 +38,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 public class FineractEntityAccessReadServiceImpl implements FineractEntityAccessReadService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final static Logger LOG = LoggerFactory.getLogger(FineractEntityAccessReadServiceImpl.class);
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
 
@@ -53,7 +53,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
     }
 

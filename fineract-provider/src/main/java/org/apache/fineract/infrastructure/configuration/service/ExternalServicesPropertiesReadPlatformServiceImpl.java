@@ -26,11 +26,11 @@ import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPro
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -38,11 +38,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExternalServicesPropertiesReadPlatformServiceImpl implements ExternalServicesPropertiesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public ExternalServicesPropertiesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     private static final class S3CredentialsDataExtractor implements ResultSetExtractor<S3CredentialsData> {

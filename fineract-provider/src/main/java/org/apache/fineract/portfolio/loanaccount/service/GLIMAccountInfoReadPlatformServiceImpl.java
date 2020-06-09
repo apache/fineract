@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
@@ -35,7 +36,6 @@ import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.GroupLoanIndividualMonitoringAccountData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoReadPlatformService
 {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatforService;
 
@@ -52,7 +52,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     public GLIMAccountInfoReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final AccountDetailsReadPlatformService accountDetailsReadPlatforService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.accountDetailsReadPlatforService=accountDetailsReadPlatforService;
 
         }

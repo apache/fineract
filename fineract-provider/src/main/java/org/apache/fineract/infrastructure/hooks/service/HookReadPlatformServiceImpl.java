@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.hooks.data.Event;
 import org.apache.fineract.infrastructure.hooks.data.EventResultSetExtractor;
@@ -38,14 +39,13 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final HookRepository hookRepository;
     private final PlatformSecurityContext context;
 
@@ -55,7 +55,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final RoutingDataSource dataSource) {
         this.context = context;
         this.hookRepository = hookRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     @Override
@@ -122,9 +122,9 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     private static final class HookMapper implements RowMapper<HookData> {
 
-        private final JdbcTemplate jdbcTemplate;
+        private final JdbcTemplateCustom jdbcTemplate;
 
-        public HookMapper(final JdbcTemplate jdbcTemplate) {
+        public HookMapper(final JdbcTemplateCustom jdbcTemplate) {
             this.jdbcTemplate = jdbcTemplate;
         }
 
@@ -215,9 +215,9 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             implements
                 RowMapper<HookTemplateData> {
 
-        private final JdbcTemplate jdbcTemplate;
+        private final JdbcTemplateCustom jdbcTemplate;
 
-        public TemplateMapper(final JdbcTemplate jdbcTemplate) {
+        public TemplateMapper(final JdbcTemplateCustom jdbcTemplate) {
             this.jdbcTemplate = jdbcTemplate;
         }
 

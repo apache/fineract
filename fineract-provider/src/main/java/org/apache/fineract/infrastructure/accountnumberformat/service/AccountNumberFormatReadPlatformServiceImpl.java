@@ -33,24 +33,24 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccou
 import org.apache.fineract.infrastructure.accountnumberformat.exception.AccountNumberFormatNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumberFormatReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     // data mapper
     private final AccountNumberFormatMapper accountNumberFormatMapper = new AccountNumberFormatMapper();
 
     @Autowired
     public AccountNumberFormatReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     private static final class AccountNumberFormatMapper implements RowMapper<AccountNumberFormatData> {

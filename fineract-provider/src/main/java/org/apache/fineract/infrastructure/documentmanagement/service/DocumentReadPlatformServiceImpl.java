@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
@@ -31,14 +32,13 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentN
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ContentRepositoryFactory contentRepositoryFactory;
 
@@ -46,7 +46,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     public DocumentReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ContentRepositoryFactory documentStoreFactory) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.contentRepositoryFactory = documentStoreFactory;
     }
 

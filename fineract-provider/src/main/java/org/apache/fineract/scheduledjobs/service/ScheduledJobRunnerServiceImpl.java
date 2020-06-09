@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
@@ -54,7 +55,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -99,7 +99,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.UPDATE_LOAN_SUMMARY)
     public void updateLoanSummaryDetails() {
 
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplateCustom jdbcTemplate = new JdbcTemplateCustom(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
         final StringBuilder updateSqlBuilder = new StringBuilder(900);
         updateSqlBuilder.append("update m_loan ");
@@ -182,7 +182,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.UPDATE_LOAN_PAID_IN_ADVANCE)
     public void updateLoanPaidInAdvance() {
 
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplateCustom jdbcTemplate = new JdbcTemplateCustom(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
         jdbcTemplate.execute("truncate table m_loan_paid_in_advance");
 
@@ -261,7 +261,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.UPDATE_NPA)
     public void updateNPA() {
 
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplateCustom jdbcTemplate = new JdbcTemplateCustom(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
         final StringBuilder resetNPASqlBuilder = new StringBuilder(900);
         resetNPASqlBuilder.append("update m_loan loan ");
@@ -317,7 +317,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @Override
     @CronTarget(jobName = JobName.GENERATE_RD_SCEHDULE)
     public void generateRDSchedule() {
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplateCustom jdbcTemplate = new JdbcTemplateCustom(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final Collection<Map<String, Object>> scheduleDetails = this.depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
         String insertSql = "INSERT INTO `m_mandatory_savings_schedule` (`savings_account_id`, `duedate`, `installment`, `deposit_amount`, `completed_derived`, `created_date`, `lastmodified_date`) VALUES ";
         StringBuilder sb = new StringBuilder();
@@ -408,7 +408,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @Override
     @CronTarget(jobName = JobName.UPDATE_TRAIL_BALANCE_DETAILS)
     public void updateTrialBalanceDetails() throws JobExecutionException {
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplateCustom jdbcTemplate = new JdbcTemplateCustom(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final StringBuilder tbGapSqlBuilder = new StringBuilder(500);
         tbGapSqlBuilder.append("select distinct(je.transaction_date) ")
         .append("from acc_gl_journal_entry je ")

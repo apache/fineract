@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -31,13 +32,12 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements ReportMailingJobRunHistoryReadPlatformService {
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ReportMailingJobRunHistoryMapper reportMailingJobRunHistoryMapper;
     private final ColumnValidator columnValidator;
     private final PaginationHelper<ReportMailingJobRunHistoryData> paginationHelper = new PaginationHelper<>();
@@ -45,7 +45,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
     @Autowired
     public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.reportMailingJobRunHistoryMapper = new ReportMailingJobRunHistoryMapper();
         this.columnValidator = columnValidator;
     }

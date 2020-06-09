@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -33,14 +34,13 @@ import org.apache.fineract.notification.cache.CacheNotificationResponseHeader;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.data.NotificationMapperData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationReadPlatformServiceImpl implements NotificationReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ColumnValidator columnValidator;
     private final PaginationHelper<NotificationData> paginationHelper = new PaginationHelper<>();
@@ -53,7 +53,7 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     public NotificationReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final PlatformSecurityContext context,
             final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.context = context;
         this.columnValidator = columnValidator;
     }

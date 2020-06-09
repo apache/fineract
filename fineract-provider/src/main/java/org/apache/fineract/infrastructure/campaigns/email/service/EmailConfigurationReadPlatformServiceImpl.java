@@ -24,22 +24,22 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigurationReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final EmailConfigurationRowMapper emailConfigurationRowMapper;
 
     @Autowired
     public EmailConfigurationReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.emailConfigurationRowMapper = new EmailConfigurationRowMapper();
 
     }

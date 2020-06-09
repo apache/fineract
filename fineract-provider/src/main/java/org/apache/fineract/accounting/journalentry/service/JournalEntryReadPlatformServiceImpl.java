@@ -42,6 +42,7 @@ import org.apache.fineract.accounting.journalentry.data.TransactionTypeEnumData;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -63,7 +64,6 @@ import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -71,7 +71,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final ColumnValidator columnValidator;
@@ -85,7 +85,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final ColumnValidator columnValidator,
             final OfficeReadPlatformService officeReadPlatformService,
             final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.glAccountReadPlatformService = glAccountReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;

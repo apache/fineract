@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -44,14 +45,13 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccountChargeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
@@ -65,7 +65,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.chargeDueMapper = new SavingsAccountChargeDueMapper();
         this.dropdownReadPlatformService = dropdownReadPlatformService;
     }

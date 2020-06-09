@@ -22,24 +22,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
 import org.apache.fineract.useradministration.exception.PasswordValidationPolicyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PasswordValidationPolicyReadPlatformServiceImpl implements PasswordValidationPolicyReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PasswordValidationPolicyMapper passwordValidationPolicyMapper;
 
     @Autowired
     public PasswordValidationPolicyReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.passwordValidationPolicyMapper = new PasswordValidationPolicyMapper();
     }
 

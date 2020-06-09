@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollectionData;
@@ -31,14 +32,13 @@ import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPl
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.group.domain.GroupingTypeStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
 
@@ -46,7 +46,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
     public BulkLoansReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
     }
 

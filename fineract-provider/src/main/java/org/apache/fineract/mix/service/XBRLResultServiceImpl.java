@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
@@ -37,7 +38,6 @@ import org.apache.fineract.mix.exception.XBRLMappingInvalidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +48,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
 
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;
     private final MixTaxonomyReadPlatformService readTaxonomyService;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private HashMap<String, BigDecimal> accountBalanceMap;
 
     @Autowired
@@ -56,7 +56,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService, final MixTaxonomyReadPlatformService readTaxonomyService) {
         this.readTaxonomyMappingService = readTaxonomyMappingService;
         this.readTaxonomyService = readTaxonomyService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     @Override

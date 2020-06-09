@@ -25,6 +25,7 @@ import java.util.Collection;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
@@ -36,7 +37,6 @@ import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundExc
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 public class SavingsProductReadPlatformServiceImpl implements SavingsProductReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final SavingProductMapper savingsProductRowMapper = new SavingProductMapper();
     private final SavingProductLookupMapper savingsProductLookupsRowMapper = new SavingProductLookupMapper();
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
@@ -53,7 +53,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final FineractEntityAccessUtil fineractEntityAccessUtil) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
     }
 

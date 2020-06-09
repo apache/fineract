@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
@@ -137,7 +137,7 @@ public class TenantDatabaseUpgradeService {
 
 
     private void repairFlywayVersionSkip(DataSource source) {
-        JdbcTemplate template = new JdbcTemplate(source);
+        JdbcTemplateCustom template = new JdbcTemplateCustom(source);
         LOG.info("repairFlywayVersionSkip: Check whether the version table is in old format ");
         SqlRowSet ts = template.queryForRowSet("SHOW TABLES LIKE 'schema_version';");
         if(ts.next()){

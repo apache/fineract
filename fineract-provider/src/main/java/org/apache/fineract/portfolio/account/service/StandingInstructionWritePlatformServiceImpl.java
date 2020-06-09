@@ -32,6 +32,7 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -64,7 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +79,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     private final StandingInstructionRepository standingInstructionRepository;
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public StandingInstructionWritePlatformServiceImpl(final StandingInstructionDataValidator standingInstructionDataValidator,
@@ -94,7 +94,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         this.standingInstructionRepository = standingInstructionRepository;
         this.standingInstructionReadPlatformService = standingInstructionReadPlatformService;
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     @Transactional

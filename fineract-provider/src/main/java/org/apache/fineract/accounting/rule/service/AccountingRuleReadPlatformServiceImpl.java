@@ -35,11 +35,11 @@ import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundExcep
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -47,24 +47,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
 
     @Autowired
     public AccountingRuleReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final GLAccountReadPlatformService glAccountReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.glAccountReadPlatformService = glAccountReadPlatformService;
     }
 
     private static final class AccountingRuleDataExtractor implements ResultSetExtractor<Map<Long, AccountingRuleData>> {
 
         private final String schemaSql;
-        private final JdbcTemplate jdbcTemplate;
+        private final JdbcTemplateCustom jdbcTemplate;
         private final GLAccountReadPlatformService glAccountReadPlatformService;
         private final boolean isAssociationParametersExists;
 
-        public AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate,
+        public AccountingRuleDataExtractor(final JdbcTemplateCustom jdbcTemplate,
                 final GLAccountReadPlatformService glAccountReadPlatformService, final boolean isAssociationParametersExists) {
             this.jdbcTemplate = jdbcTemplate;
             this.glAccountReadPlatformService = glAccountReadPlatformService;

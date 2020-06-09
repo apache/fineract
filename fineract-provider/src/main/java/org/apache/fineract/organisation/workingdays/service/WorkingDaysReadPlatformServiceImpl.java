@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.workingdays.data.WorkingDaysData;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
@@ -31,18 +32,17 @@ import org.apache.fineract.organisation.workingdays.domain.WorkingDaysEnumeratio
 import org.apache.fineract.organisation.workingdays.exception.WorkingDaysNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public WorkingDaysReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     private static final class WorkingDaysMapper implements RowMapper<WorkingDaysData> {

@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -39,7 +40,6 @@ import org.apache.fineract.portfolio.interestratechart.exception.InterestRateCha
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ import org.springframework.stereotype.Service;
 public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRateChartSlabReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final InterestRateChartSlabExtractor chartSlabExtractor = new InterestRateChartSlabExtractor();
     private final InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService;
     private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
@@ -60,7 +60,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
         this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;

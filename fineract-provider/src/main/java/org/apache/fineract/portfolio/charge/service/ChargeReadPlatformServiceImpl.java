@@ -29,6 +29,7 @@ import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformServi
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
@@ -46,7 +47,6 @@ import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -58,7 +58,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
@@ -74,7 +74,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final TaxReadPlatformService taxReadPlatformService) {
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;

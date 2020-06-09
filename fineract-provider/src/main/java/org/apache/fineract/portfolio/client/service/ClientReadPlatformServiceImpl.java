@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.configuration.data.GlobalConfiguration
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -64,7 +65,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -72,7 +72,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
@@ -102,7 +102,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final ColumnValidator columnValidator) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;

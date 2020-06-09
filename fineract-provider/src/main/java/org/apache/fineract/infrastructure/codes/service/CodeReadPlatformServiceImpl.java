@@ -23,25 +23,25 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeData;
 import org.apache.fineract.infrastructure.codes.exception.CodeNotFoundException;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
 
     @Autowired
     public CodeReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     private static final class CodeMapper implements RowMapper<CodeData> {

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -54,7 +55,6 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -62,7 +62,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class TellerManagementReadPlatformServiceImpl implements TellerManagementReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final TellerLookupMapper lookupMapper = new TellerLookupMapper();
     private final TellerInOfficeHierarchyMapper tellerInOfficeHierarchyMapper = new TellerInOfficeHierarchyMapper();
@@ -77,7 +77,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
             final CurrencyReadPlatformService currencyReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;

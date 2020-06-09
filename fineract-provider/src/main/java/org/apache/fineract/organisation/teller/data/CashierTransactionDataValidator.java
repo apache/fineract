@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.teller.data;
 import java.math.BigDecimal;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -35,21 +36,20 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CashierTransactionDataValidator {
 
     private final TellerManagementReadPlatformService tellerManagementReadPlatformService;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public CashierTransactionDataValidator(
             final TellerManagementReadPlatformService tellerManagementReadPlatformService,
             final RoutingDataSource dataSource) {
         this.tellerManagementReadPlatformService = tellerManagementReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     public void validateSettleCashAndCashOutTransactions(final Long cashierId,

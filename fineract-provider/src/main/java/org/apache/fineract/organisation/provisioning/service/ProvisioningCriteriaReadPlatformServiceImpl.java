@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
@@ -35,14 +36,13 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProvisioningCriteriaReadPlatformServiceImpl implements ProvisioningCriteriaReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
@@ -54,7 +54,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final GLAccountReadPlatformService glAccountReadPlatformService,
             final LoanProductReadPlatformService loanProductReaPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.glAccountReadPlatformService = glAccountReadPlatformService;

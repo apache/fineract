@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -42,14 +43,13 @@ import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
@@ -64,7 +64,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         this.officeReadPlatformService = officeReadPlatformService;
         this.roleReadPlatformService = roleReadPlatformService;
         this.appUserRepository = appUserRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
     }
 

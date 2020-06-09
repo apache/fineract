@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -50,7 +51,6 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +59,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final DataSource dataSource;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final AppUserRepositoryWrapper userRepository;
@@ -73,7 +73,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             final LoanRepositoryWrapper loanRepositoryWrapper, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
         this.loanReadPlatformService = loanReadPlatformService;
         this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(this.dataSource);
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanChargeReadPlatformService = loanChargeReadPlatformService;
         this.userRepository = userRepository;

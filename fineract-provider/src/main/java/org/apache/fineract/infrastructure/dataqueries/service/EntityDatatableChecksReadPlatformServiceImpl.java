@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -43,14 +44,13 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatform
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatatableChecksReadService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final RegisterDataTableMapper registerDataTableMapper;
     private final EntityDataTableChecksMapper entityDataTableChecksMapper;
     private final EntityDatatableChecksRepository entityDatatableChecksRepository;
@@ -66,7 +66,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             final EntityDatatableChecksRepository entityDatatableChecksRepository,
             final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
 
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.registerDataTableMapper = new RegisterDataTableMapper();
         this.entityDataTableChecksMapper = new EntityDataTableChecksMapper();
         this.loanProductReadPlatformService = loanProductReadPlatformService;

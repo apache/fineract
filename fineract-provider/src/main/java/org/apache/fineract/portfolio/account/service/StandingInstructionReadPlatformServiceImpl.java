@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -62,7 +63,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -70,7 +70,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class StandingInstructionReadPlatformServiceImpl implements StandingInstructionReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ColumnValidator columnValidator;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
@@ -89,7 +89,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             final DropdownReadPlatformService dropdownReadPlatformService,
             final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;

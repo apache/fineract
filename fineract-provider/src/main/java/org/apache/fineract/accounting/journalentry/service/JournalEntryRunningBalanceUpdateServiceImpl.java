@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -46,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     private final static Logger LOG = LoggerFactory.getLogger(JournalEntryRunningBalanceUpdateServiceImpl.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
 
@@ -88,7 +88,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     @Autowired
     public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final JournalEntryDataValidator dataValidator, final FromJsonHelper fromApiJsonHelper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.dataValidator = dataValidator;
         this.fromApiJsonHelper = fromApiJsonHelper;

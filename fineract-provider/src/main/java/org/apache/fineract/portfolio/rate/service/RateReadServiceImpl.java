@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.rate.data.RateData;
@@ -33,7 +34,6 @@ import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -43,13 +43,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class RateReadServiceImpl implements RateReadService {
 
-  private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplateCustom jdbcTemplate;
   private final PlatformSecurityContext context;
 
   @Autowired
   public RateReadServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource) {
     this.context = context;
-    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
   }
 
   @Override

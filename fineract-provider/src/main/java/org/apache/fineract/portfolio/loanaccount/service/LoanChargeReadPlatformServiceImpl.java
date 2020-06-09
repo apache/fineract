@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -43,14 +44,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
@@ -61,7 +61,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
 

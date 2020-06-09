@@ -24,11 +24,11 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +36,11 @@ import org.springframework.stereotype.Service;
 public class PurchasedSharesReadPlatformServiceImpl implements
         PurchasedSharesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public PurchasedSharesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource) ;
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource) ;
     }
     @Override
     public Collection<ShareAccountTransactionData> retrievePurchasedShares(

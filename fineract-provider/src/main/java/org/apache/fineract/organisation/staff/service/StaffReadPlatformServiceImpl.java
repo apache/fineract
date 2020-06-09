@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -38,14 +39,13 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final StaffLookupMapper lookupMapper = new StaffLookupMapper();
     private final StaffInOfficeHierarchyMapper staffInOfficeHierarchyMapper = new StaffInOfficeHierarchyMapper();
@@ -55,7 +55,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     public StaffReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.columnValidator = columnValidator;
     }
 

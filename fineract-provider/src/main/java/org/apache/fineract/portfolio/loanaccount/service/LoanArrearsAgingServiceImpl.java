@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -48,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,11 +59,11 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
     private final static Logger LOG = LoggerFactory.getLogger(LoanArrearsAgingServiceImpl.class);
     private final BusinessEventNotifierService businessEventNotifierService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public LoanArrearsAgingServiceImpl(final RoutingDataSource dataSource, final BusinessEventNotifierService businessEventNotifierService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.businessEventNotifierService = businessEventNotifierService;
     }
 

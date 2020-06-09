@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageSta
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -38,21 +39,20 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final EmailMapper emailRowMapper = new EmailMapper();
     private final PaginationHelper<EmailData> paginationHelper = new PaginationHelper<>();
 
 
     @Autowired
     public EmailReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     private static final class EmailMapper implements RowMapper<EmailData> {

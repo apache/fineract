@@ -37,6 +37,7 @@ import org.apache.fineract.commands.data.ProcessingResultLookup;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -67,7 +68,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -79,7 +79,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId", "madeOnDate", "checkedOnDate", "officeName",
                     "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId"));
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromApiJsonHelper;
     private final AppUserReadPlatformService appUserReadPlatformService;
@@ -103,7 +103,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final DepositProductReadPlatformService depositProductReadPlatformService,
             final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.appUserReadPlatformService = appUserReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;

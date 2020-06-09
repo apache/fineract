@@ -22,21 +22,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ExternalServicesReadPlatformServiceImpl implements ExternalServicesReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public ExternalServicesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     @Override

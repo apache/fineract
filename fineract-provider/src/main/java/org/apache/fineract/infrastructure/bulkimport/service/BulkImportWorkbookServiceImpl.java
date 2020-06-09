@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -56,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +68,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
     private final DocumentWritePlatformService documentWritePlatformService;
     private final DocumentRepository documentRepository;
     private final ImportDocumentRepository importDocumentRepository;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public BulkImportWorkbookServiceImpl(final ApplicationContext applicationContext,
@@ -81,7 +81,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         this.documentWritePlatformService = documentWritePlatformService;
         this.documentRepository = documentRepository;
         this.importDocumentRepository = importDocumentRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
     }
 
     @Override

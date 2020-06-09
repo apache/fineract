@@ -26,6 +26,7 @@ import java.util.Collection;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
@@ -47,7 +48,6 @@ import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ import org.springframework.stereotype.Service;
 public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatformService {
 
     private final PlatformSecurityContext context;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final RateReadService rateReadService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
@@ -66,7 +66,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.rateReadService=rateReadService;
     }

@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -38,7 +39,6 @@ import org.apache.fineract.portfolio.client.exception.ClientChargeNotFoundExcept
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -46,14 +46,14 @@ import org.springframework.stereotype.Service;
 public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlatformService {
 
     private final PaginationHelper<ClientChargeData> paginationHelper = new PaginationHelper<>();
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ClientChargeMapper clientChargeMapper;
 
     @Autowired
     public ClientChargeReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.clientChargeMapper = new ClientChargeMapper();
     }
 

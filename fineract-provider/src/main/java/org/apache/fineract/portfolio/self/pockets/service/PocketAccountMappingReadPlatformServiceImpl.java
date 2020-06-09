@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.self.pockets.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.self.pockets.data.PocketAccountMappingData;
@@ -29,13 +30,12 @@ import org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMappingRep
 import org.apache.fineract.portfolio.self.pockets.domain.PocketRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccountMappingReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
     private final PlatformSecurityContext context;
     private final PocketRepositoryWrapper pocketRepositoryWrapper;
     private final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper;
@@ -44,7 +44,7 @@ public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccoun
     public PocketAccountMappingReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final PlatformSecurityContext context, final PocketRepositoryWrapper pocketRepositoryWrapper,
             final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.context = context;
         this.pocketRepositoryWrapper = pocketRepositoryWrapper;
         this.pocketAccountMappingRepositoryWrapper = pocketAccountMappingRepositoryWrapper;

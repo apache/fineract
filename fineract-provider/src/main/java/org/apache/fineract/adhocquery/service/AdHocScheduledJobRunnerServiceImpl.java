@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
+import org.apache.fineract.infrastructure.core.domain.JdbcTemplateCustom;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -34,7 +35,6 @@ import org.joda.time.Years;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,13 +43,13 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
 
     private final static Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplateCustom jdbcTemplate;
 
     @Autowired
     public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource,
             final AdHocReadPlatformService adHocReadPlatformService
             ) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplateCustom(dataSource);
         this.adHocReadPlatformService = adHocReadPlatformService;
 
     }
