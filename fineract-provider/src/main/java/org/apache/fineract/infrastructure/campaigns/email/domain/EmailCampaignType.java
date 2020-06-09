@@ -22,8 +22,8 @@ public enum EmailCampaignType {
     DIRECT(1,"emailCampaignStatusType.direct"),
     SCHEDULE(2,"emailCampaignStatusType.schedule");
 
-    private Integer value;
-    private String code;
+    private final Integer value;
+    private final String code;
 
     EmailCampaignType(Integer value, String code) {
         this.value = value;

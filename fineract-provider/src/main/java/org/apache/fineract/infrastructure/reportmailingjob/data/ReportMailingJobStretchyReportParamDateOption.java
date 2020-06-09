@@ -29,9 +29,9 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     YESTERDAY(2, "ReportMailingJobStretchyReportParamDateOption.YESTERDAY", "Yesterday"),
     TOMORROW(3, "ReportMailingJobStretchyReportParamDateOption.TOMORROW", "Tomorrow");
 
-    private String code;
-    private String value;
-    private Integer id;
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     /**
      * @param id

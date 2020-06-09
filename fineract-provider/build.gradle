@@ -367,6 +367,7 @@ tasks.withType(JavaCompile) {
                 "VarTypeName",
                 "ArgumentSelectionDefectChecker",
                 "CompareToZero",
+                "ImmutableEnumChecker",
                 "NarrowingCompoundAssignment",
                 "MissingCasesInEnumSwitch",
                 "ReferenceEquality",
@@ -443,7 +444,8 @@ modernizer {
 
     ignorePackages = []
     ignoreClassNamePatterns = [
-        '.*AbstractPersistableCustom'
+        '.*AbstractPersistableCustom',
+        '.*EntityTables'
     ]
     ignoreGeneratedClasses = true
 

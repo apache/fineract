@@ -24,9 +24,9 @@ public enum ScheduledEmailAttachmentFileFormat {
     PDF(2, "EmailAttachmentFileFormat.pdf", "pdf"),
     CSV(3, "EmailAttachmentFileFormat.csv", "csv");
 
-    private String code;
-    private String value;
-    private Integer id;
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     ScheduledEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
         this.value = value;

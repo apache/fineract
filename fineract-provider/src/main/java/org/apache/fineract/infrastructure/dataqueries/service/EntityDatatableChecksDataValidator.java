@@ -73,7 +73,7 @@ public final class EntityDatatableChecksDataValidator {
                 .isOneOfTheseStringValues(EntityTables.getEntitiesList());
 
         final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("status", element);
-        final Object[] entityTablesStatuses = EntityTables.getStatus(entity);
+        final Object[] entityTablesStatuses = EntityTables.getStatus(entity).toArray();
 
         baseDataValidator.reset().parameter("status").value(status).isOneOfTheseValues(entityTablesStatuses);
 

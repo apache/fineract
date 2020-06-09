@@ -23,8 +23,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 public enum CampaignType {
     INVALID(0, "campaignType.invalid"), SMS(1, "campaignType.sms"), NOTIFICATION(2, "campaignType.notification");
 
-    private Integer value;
-    private String code;
+    private final Integer value;
+    private final String code;
 
     private CampaignType(Integer value, String code) {
         this.value = value;

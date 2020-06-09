@@ -24,9 +24,9 @@ public enum ScheduledEmailStretchyReportParamDateOption {
     // YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday", "yesterday"),
     TOMORROW(3, "scheduledEmailStretchyReportParamDateOption.tomorrow", "tomorrow");
 
-    private String code;
-    private String value;
-    private Integer id;
+    private final String code;
+    private final String value;
+    private final Integer id;
 
     /**
      * @param id

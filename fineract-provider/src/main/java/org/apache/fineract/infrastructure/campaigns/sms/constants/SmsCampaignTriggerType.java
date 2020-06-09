@@ -24,8 +24,8 @@ public enum SmsCampaignTriggerType {
     INVALID(-1, "triggerType.invalid"), DIRECT(1, "triggerType.direct"), SCHEDULE(2, "triggerType.schedule"), TRIGGERED(3,
             "triggerType.triggered");
 
-    private Integer value;
-    private String code;
+    private final Integer value;
+    private final String code;
 
     private SmsCampaignTriggerType(Integer value, String code) {
         this.value = value;
