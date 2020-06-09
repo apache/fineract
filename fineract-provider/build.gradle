@@ -298,7 +298,14 @@ configurations {
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs += ["-Xlint:unchecked","-Xlint:cast","-Werror"] // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
+    options.compilerArgs += ["-Xlint:unchecked","-Xlint:cast","-Xlint:auxiliaryclass","-Xlint:deprecation",
+                             "-Xlint:dep-ann","-Xlint:divzero","-Xlint:empty","-Xlint:exports","-Xlint:fallthrough",
+                             "-Xlint:finally","-Xlint:module","-Xlint:opens","-Xlint:options","-Xlint:overloads",
+                             "-Xlint:overrides","-Xlint:path","-Xlint:processing","-Xlint:removal",
+                             "-Xlint:requires-automatic","-Xlint:requires-transitive-automatic","-Xlint:try",
+                             "-Xlint:varargs","-Xlint:preview","-Werror"]
+                            // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
+
     options.deprecation = true
     options.errorprone {
         disableWarningsInGeneratedCode = true
