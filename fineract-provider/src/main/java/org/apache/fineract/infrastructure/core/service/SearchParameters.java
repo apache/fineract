@@ -490,10 +490,6 @@ public final class SearchParameters {
     /**
      * creates an instance of the {@link SearchParameters} from a request for the report mailing job
      *
-     * @param offset
-     * @param limit
-     * @param orderBy
-     * @param sortOrder
      * @return {@link SearchParameters} object
      */
     public static SearchParameters fromReportMailingJob(final Integer offset,
