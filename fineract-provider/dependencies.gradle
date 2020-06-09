@@ -117,9 +117,8 @@ dependencies {
 	// testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
 	// Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
 	//
-    testImplementation( 'junit:junit',
-            'org.junit.platform:junit-platform-runner', // FINERACT-943
-            'org.mockito:mockito-core',
+    testImplementation( 'org.mockito:mockito-core',
+            'org.mockito:mockito-junit-jupiter',
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
 	)
@@ -129,5 +128,6 @@ dependencies {
     }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
 }

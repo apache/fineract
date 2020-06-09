@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
@@ -293,7 +293,7 @@ public class SavingsProductHelper {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
-        assertEquals("ERROR IN CREATING THE Savings Product", generatedProductID, responseSavingsProductID);
+        assertEquals(generatedProductID, responseSavingsProductID, "ERROR IN CREATING THE Savings Product");
     }
 
     public SavingsProductHelper withDormancy() {

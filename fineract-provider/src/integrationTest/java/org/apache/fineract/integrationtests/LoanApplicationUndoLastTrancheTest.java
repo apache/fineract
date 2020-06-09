@@ -32,9 +32,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class LoanApplicationUndoLastTrancheTest {
     private LoanTransactionHelper loanTransactionHelper;
     private LoanApplicationApprovalTest loanApplicationApprovalTest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -125,7 +125,7 @@ public class LoanApplicationUndoLastTrancheTest {
     }
 
     private void validateDisbursedAmount(Float disbursedAmount) {
-        Assert.assertEquals(Float.valueOf("1000.0"), disbursedAmount);
+        Assertions.assertEquals(Float.valueOf("1000.0"), disbursedAmount);
 
     }
 

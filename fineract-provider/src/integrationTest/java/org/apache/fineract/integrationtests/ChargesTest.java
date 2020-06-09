@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "rawtypes" })
 public class ChargesTest {
@@ -37,7 +37,7 @@ public class ChargesTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -50,19 +50,19 @@ public class ChargesTest {
 
         // Retrieving all Charges
         ArrayList<HashMap> allChargesData = ChargesHelper.getCharges(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allChargesData);
+        Assertions.assertNotNull(allChargesData);
 
         // Testing Creation, Updation and Deletion of Disbursement Charge
         final Integer disbursementChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getLoanDisbursementJSON());
-        Assert.assertNotNull(disbursementChargeId);
+        Assertions.assertNotNull(disbursementChargeId);
 
         // Updating Charge Amount
         HashMap changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, disbursementChargeId,
                 ChargesHelper.getModifyChargeJSON());
 
         HashMap chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, disbursementChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, disbursementChargeId,
                 ChargesHelper.getModifyChargeAsPecentageAmountJSON());
@@ -70,10 +70,10 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, disbursementChargeId);
 
         HashMap chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargePaymentMode");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargePaymentMode"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargePaymentMode"), "Verifying Charge after Modification");
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, disbursementChargeId,
                 ChargesHelper.getModifyChargeAsPecentageLoanAmountWithInterestJSON());
@@ -81,7 +81,7 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, disbursementChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, disbursementChargeId,
                 ChargesHelper.getModifyChargeAsPercentageInterestJSON());
@@ -89,22 +89,22 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, disbursementChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         Integer chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, disbursementChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", disbursementChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(disbursementChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Specified due date Charge
         final Integer specifiedDueDateChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON());
-        Assert.assertNotNull(specifiedDueDateChargeId);
+        Assertions.assertNotNull(specifiedDueDateChargeId);
 
         // Updating Charge Amount
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, specifiedDueDateChargeId,
                 ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, specifiedDueDateChargeId,
                 ChargesHelper.getModifyChargeAsPecentageAmountJSON());
@@ -112,10 +112,10 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargePaymentMode");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargePaymentMode"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargePaymentMode"), "Verifying Charge after Modification");
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, specifiedDueDateChargeId,
                 ChargesHelper.getModifyChargeAsPecentageLoanAmountWithInterestJSON());
@@ -123,7 +123,7 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, specifiedDueDateChargeId,
                 ChargesHelper.getModifyChargeAsPercentageInterestJSON());
@@ -131,10 +131,10 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, specifiedDueDateChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", specifiedDueDateChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(specifiedDueDateChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Installment Fee Charge
         final Integer installmentFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
@@ -145,7 +145,7 @@ public class ChargesTest {
                 ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, installmentFeeChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, installmentFeeChargeId,
                 ChargesHelper.getModifyChargeAsPecentageAmountJSON());
@@ -153,10 +153,10 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, installmentFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargePaymentMode");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargePaymentMode"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargePaymentMode"), "Verifying Charge after Modification");
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, installmentFeeChargeId,
                 ChargesHelper.getModifyChargeAsPecentageLoanAmountWithInterestJSON());
@@ -164,7 +164,7 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, installmentFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, installmentFeeChargeId,
                 ChargesHelper.getModifyChargeAsPercentageInterestJSON());
@@ -172,22 +172,22 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, installmentFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, installmentFeeChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", installmentFeeChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(installmentFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Overdue Installment Fee
         // Charge
         final Integer overdueFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getLoanOverdueFeeJSON());
-        Assert.assertNotNull(overdueFeeChargeId);
+        Assertions.assertNotNull(overdueFeeChargeId);
 
         // Updating Charge Amount
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, overdueFeeChargeId, ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, overdueFeeChargeId,
                 ChargesHelper.getModifyChargeAsPecentageAmountJSON());
@@ -195,10 +195,10 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargePaymentMode");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargePaymentMode"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargePaymentMode"), "Verifying Charge after Modification");
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, overdueFeeChargeId,
                 ChargesHelper.getModifyChargeAsPecentageLoanAmountWithInterestJSON());
@@ -206,7 +206,7 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, overdueFeeChargeId,
                 ChargesHelper.getModifyChargeAsPercentageInterestJSON());
@@ -214,7 +214,7 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, overdueFeeChargeId,
                 ChargesHelper.getModifyChargeFeeFrequencyAsYearsJSON());
@@ -222,10 +222,10 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
 
         chargeChangedData = (HashMap) chargeDataAfterChanges.get("feeFrequency");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("feeFrequency"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("feeFrequency"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, overdueFeeChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", overdueFeeChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(overdueFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
     }
 
     @Test
@@ -234,37 +234,37 @@ public class ChargesTest {
         // Testing Creation, Updation and Deletion of Specified due date Charge
         final Integer specifiedDueDateChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsSpecifiedDueDateJSON());
-        Assert.assertNotNull(specifiedDueDateChargeId);
+        Assertions.assertNotNull(specifiedDueDateChargeId);
 
         // Updating Charge Amount
         HashMap changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, specifiedDueDateChargeId,
                 ChargesHelper.getModifyChargeJSON());
 
         HashMap chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         Integer chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, specifiedDueDateChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", specifiedDueDateChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(specifiedDueDateChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Savings Activation Charge
         final Integer savingsActivationChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsActivationFeeJSON());
-        Assert.assertNotNull(savingsActivationChargeId);
+        Assertions.assertNotNull(savingsActivationChargeId);
 
         // Updating Charge Amount
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, savingsActivationChargeId,
                 ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, savingsActivationChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, savingsActivationChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", savingsActivationChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(savingsActivationChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Charge for Withdrawal Fee
         final Integer withdrawalFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
-        Assert.assertNotNull(withdrawalFeeChargeId);
+        Assertions.assertNotNull(withdrawalFeeChargeId);
 
         // Updating Charge-Calculation-Type to Withdrawal-Fee
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, withdrawalFeeChargeId,
@@ -273,52 +273,52 @@ public class ChargesTest {
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, withdrawalFeeChargeId);
 
         HashMap chargeChangedData = (HashMap) chargeDataAfterChanges.get("chargeCalculationType");
-        Assert.assertEquals("Verifying Charge after Modification", chargeChangedData.get("id"), changes.get("chargeCalculationType"));
+        Assertions.assertEquals(chargeChangedData.get("id"), changes.get("chargeCalculationType"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, withdrawalFeeChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", withdrawalFeeChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(withdrawalFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Charge for Annual Fee
         final Integer annualFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsAnnualFeeJSON());
-        Assert.assertNotNull(annualFeeChargeId);
+        Assertions.assertNotNull(annualFeeChargeId);
 
         // Updating Charge Amount
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, annualFeeChargeId, ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, annualFeeChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, annualFeeChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", annualFeeChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(annualFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Charge for Monthly Fee
         final Integer monthlyFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsMonthlyFeeJSON());
-        Assert.assertNotNull(monthlyFeeChargeId);
+        Assertions.assertNotNull(monthlyFeeChargeId);
 
         // Updating Charge Amount
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, monthlyFeeChargeId, ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, monthlyFeeChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, monthlyFeeChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", monthlyFeeChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(monthlyFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
 
         // Testing Creation, Updation and Deletion of Charge for Overdraft Fee
         final Integer overdraftFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsOverdraftFeeJSON());
-        Assert.assertNotNull(overdraftFeeChargeId);
+        Assertions.assertNotNull(overdraftFeeChargeId);
 
         // Updating Charge Amount
         changes = ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, overdraftFeeChargeId,
                 ChargesHelper.getModifyChargeJSON());
 
         chargeDataAfterChanges = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdraftFeeChargeId);
-        Assert.assertEquals("Verifying Charge after Modification", chargeDataAfterChanges.get("amount"), changes.get("amount"));
+        Assertions.assertEquals(chargeDataAfterChanges.get("amount"), changes.get("amount"), "Verifying Charge after Modification");
 
         chargeIdAfterDeletion = ChargesHelper.deleteCharge(this.responseSpec, this.requestSpec, overdraftFeeChargeId);
-        Assert.assertEquals("Verifying Charge ID after deletion", overdraftFeeChargeId, chargeIdAfterDeletion);
+        Assertions.assertEquals(overdraftFeeChargeId, chargeIdAfterDeletion, "Verifying Charge ID after deletion");
     }
 }

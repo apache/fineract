@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.base.Strings;
 import com.google.common.reflect.TypeToken;
@@ -169,7 +169,7 @@ public class CenterHelper {
         LOG.info("------------------------------CHECK CENTER DETAILS------------------------------------\n");
         final String CENTER_URL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseCenterID = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "id");
-        assertEquals("ERROR IN CREATING THE CENTER", generatedCenterID, responseCenterID);
+        assertEquals(generatedCenterID, responseCenterID, "ERROR IN CREATING THE CENTER");
     }
 
     public static void verifyCenterActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -177,7 +177,7 @@ public class CenterHelper {
         LOG.info("------------------------------CHECK CENTER STATUS------------------------------------\n");
         final String CENTER_URL = "/fineract-provider/api/v1/centers/" + generatedCenterID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseCenterStatus = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "active");
-        assertEquals("ERROR IN ACTIVATING THE CENTER", generatedCenterStatus, responseCenterStatus);
+        assertEquals(generatedCenterStatus, responseCenterStatus, "ERROR IN ACTIVATING THE CENTER");
     }
 
     public static Integer activateCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

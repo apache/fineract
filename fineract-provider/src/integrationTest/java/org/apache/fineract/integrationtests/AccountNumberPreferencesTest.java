@@ -40,9 +40,9 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.system.AccountNumberPreferencesHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +88,7 @@ public class AccountNumberPreferencesTest {
     private Integer centerId;
     private String groupAccountNo;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -159,7 +159,7 @@ public class AccountNumberPreferencesTest {
 
         HashMap<String, Object> deletionError = this.accountNumberPreferencesHelper.deleteAccountNumberPreference(10,
                 this.responseNotFoundError, "");
-        Assert.assertEquals("error.msg.resource.not.found", deletionError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        Assertions.assertEquals("error.msg.resource.not.found", deletionError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
 
     private void validateDefaultAccountNumberGeneration() {
@@ -216,7 +216,7 @@ public class AccountNumberPreferencesTest {
         HashMap<String, Object> creationError = this.accountNumberPreferencesHelper.createAccountNumberPreferenceWithInvalidData(
                 this.responseForbiddenError, accountType, prefixType, "");
 
-        Assert.assertEquals("error.msg.account.number.format.duplicate.account.type",
+        Assertions.assertEquals("error.msg.account.number.format.duplicate.account.type",
                 creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }
@@ -231,11 +231,11 @@ public class AccountNumberPreferencesTest {
 
         if (creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE).equals(
                 "validation.msg.accountNumberFormat.accountType.is.not.within.expected.range")) {
-            Assert.assertEquals("validation.msg.accountNumberFormat.accountType.is.not.within.expected.range",
+            Assertions.assertEquals("validation.msg.accountNumberFormat.accountType.is.not.within.expected.range",
                     creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
         } else if (creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE).equals(
                 "validation.msg.accountNumberFormat.prefixType.is.not.one.of.expected.enumerations")) {
-            Assert.assertEquals("validation.msg.accountNumberFormat.prefixType.is.not.one.of.expected.enumerations",
+            Assertions.assertEquals("validation.msg.accountNumberFormat.prefixType.is.not.one.of.expected.enumerations",
                     creationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
         }
     }
@@ -257,13 +257,13 @@ public class AccountNumberPreferencesTest {
         HashMap<String, Object> updationError = this.accountNumberPreferencesHelper.updateAccountNumberPreference(9999, "101",
                 this.responseNotFoundError, "");
         if (updationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE).equals("error.msg.resource.not.found")) {
-            Assert.assertEquals("error.msg.resource.not.found", updationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+            Assertions.assertEquals("error.msg.resource.not.found", updationError.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
         }
         /* Invalid Prefix Type */
         HashMap<String, Object> updationError1 = this.accountNumberPreferencesHelper.updateAccountNumberPreference(
                 this.clientAccountNumberPreferenceId, "103", this.responseValidationError, "");
 
-        Assert.assertEquals("validation.msg.validation.errors.exist", updationError1.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        Assertions.assertEquals("validation.msg.validation.errors.exist", updationError1.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }
 
@@ -309,8 +309,8 @@ public class AccountNumberPreferencesTest {
         String name = "CenterCreation" + new Timestamp(new java.util.Date().getTime());
         this.centerId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getName().equals(name));
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getName().equals(name));
 
         if (isAccountPreferenceSetUp) {
             String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
@@ -329,7 +329,7 @@ public class AccountNumberPreferencesTest {
 
     private void createAndValidateClientWithoutAccountPreference() {
         this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(this.clientId);
+        Assertions.assertNotNull(this.clientId);
         String clientAccountNo = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "accountNo");
         validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, null);
     }
@@ -356,14 +356,14 @@ public class AccountNumberPreferencesTest {
             this.clientId = ClientHelper.createClientForAccountPreference(this.requestSpec, this.responseSpec, this.clientCodeValueId,
                     "clientId");
 
-            Assert.assertNotNull(clientId);
+            Assertions.assertNotNull(clientId);
 
             clientAccountNo = (String) ClientHelper.getClient(this.requestSpec, this.responseSpec, this.clientId.toString(), "accountNo");
             this.validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, this.clientCodeValueName);
 
         } else if (clientPrefixName.equals(this.officeName)) {
             this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            Assert.assertNotNull(clientId);
+            Assertions.assertNotNull(clientId);
             clientAccountNo = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "accountNo");
             String officeName = (String) ClientHelper.getClient(requestSpec, responseSpec, this.clientId.toString(), "officeName");
             this.validateAccountNumberLengthAndStartsWithPrefix(clientAccountNo, officeName);
@@ -373,10 +373,10 @@ public class AccountNumberPreferencesTest {
     private void validateAccountNumberLengthAndStartsWithPrefix(final String accountNumber, String prefix) {
         if (prefix != null) {
             prefix = prefix.substring(0, Math.min(prefix.length(), 10));
-            Assert.assertEquals(accountNumber.length(), prefix.length() + 9);
-            Assert.assertTrue(accountNumber.startsWith(prefix));
+            Assertions.assertEquals(accountNumber.length(), prefix.length() + 9);
+            Assertions.assertTrue(accountNumber.startsWith(prefix));
         } else {
-            Assert.assertEquals(9, accountNumber.length());
+            Assertions.assertEquals(9, accountNumber.length());
         }
     }
 

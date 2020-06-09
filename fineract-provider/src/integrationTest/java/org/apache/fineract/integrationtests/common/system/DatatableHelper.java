@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.system;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;

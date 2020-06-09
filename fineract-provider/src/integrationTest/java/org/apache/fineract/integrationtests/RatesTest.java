@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.rates.RatesHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"rawtypes"})
 public class RatesTest {
@@ -37,7 +37,7 @@ public class RatesTest {
   private ResponseSpecification responseSpec;
   private RequestSpecification requestSpec;
 
-  @Before
+  @BeforeEach
   public void setup() {
     Utils.initializeRESTAssured();
     this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -51,12 +51,12 @@ public class RatesTest {
 
     // Retrieving all Rates
     ArrayList<HashMap> allRatesData = RatesHelper.getRates(this.requestSpec, this.responseSpec);
-    Assert.assertNotNull(allRatesData);
+    Assertions.assertNotNull(allRatesData);
 
     // Testing Creation and Update of Loan Rate
     final Integer loanRateId = RatesHelper.createRates(this.requestSpec, this.responseSpec,
         RatesHelper.getLoanRateJSON());
-    Assert.assertNotNull(loanRateId);
+    Assertions.assertNotNull(loanRateId);
 
     //Update Rate percentage
     HashMap changes = RatesHelper.updateRates(this.requestSpec, this.responseSpec, loanRateId,
@@ -64,8 +64,8 @@ public class RatesTest {
 
     HashMap rateDataAfterChanges = RatesHelper
         .getRateById(this.requestSpec, this.responseSpec, loanRateId);
-    Assert.assertEquals("Verifying Rate after modification", rateDataAfterChanges.get("percentage"),
-        changes.get("percentage"));
+    Assertions.assertEquals(rateDataAfterChanges.get("percentage"),
+        changes.get("percentage"), "Verifying Rate after modification");
 
   }
 

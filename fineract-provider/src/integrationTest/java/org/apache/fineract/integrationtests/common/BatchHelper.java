@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,8 +129,8 @@ public class BatchHelper {
                 jsonifiedRequest);
 
         // Verifies that the response result is there
-        Assert.assertNotNull(response);
-        Assert.assertTrue(response.size() > 0);
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.size() > 0);
 
         return response;
     }
@@ -427,6 +427,6 @@ public class BatchHelper {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String CLIENT_URL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
         final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
-        Assert.assertEquals("No records found with given externalId", (long) 0, (long) responseRecords);
+        Assertions.assertEquals((long) 0, (long) responseRecords, "No records found with given externalId");
     }
 }

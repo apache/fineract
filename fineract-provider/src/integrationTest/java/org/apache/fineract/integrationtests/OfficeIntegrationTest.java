@@ -26,16 +26,16 @@ import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class OfficeIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(
@@ -59,7 +59,7 @@ public class OfficeIntegrationTest {
         oh.updateOffice(officeId, name, date);
         OfficeDomain newOffice = oh.retrieveOfficeByID(officeId);
 
-        Assert.assertTrue(name.equals(newOffice.getName()));
-        Assert.assertArrayEquals(dateArr, newOffice.getOpeningDate());
+        Assertions.assertTrue(name.equals(newOffice.getName()));
+        Assertions.assertArrayEquals(dateArr, newOffice.getOpeningDate());
     }
 }

@@ -18,23 +18,23 @@
  */
 package org.apache.fineract.mix.report.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.service.XBRLResultServiceImpl;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReadTaxonomyMappingServiceImplTest {
 
     private XBRLResultServiceImpl readService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         final RoutingDataSource dataSource = Mockito.mock(RoutingDataSource.class);
         this.readService = new XBRLResultServiceImpl(dataSource, null, null);

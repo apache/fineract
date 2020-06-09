@@ -20,7 +20,7 @@ package org.apache.fineract.integrationtests.common.organisation;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -67,7 +67,7 @@ public class CampaignsHelper {
                 + Utils.TENANT_IDENTIFIER;
         final Integer responseCampaignId = Utils.performServerGet(requestSpec, responseSpec, RETRIEVE_SMS_CAMPAIGNS_URL,
                 "id");
-        assertEquals("ERROR IN CREATING THE CAMPAIGN", generatedCampaignId, responseCampaignId);
+        assertEquals(generatedCampaignId, responseCampaignId, "ERROR IN CREATING THE CAMPAIGN");
     }
 
     public Integer updateCampaign(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

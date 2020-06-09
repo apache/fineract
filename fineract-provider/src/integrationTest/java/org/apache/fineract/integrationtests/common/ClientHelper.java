@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
@@ -312,7 +312,7 @@ public class ClientHelper {
         final String CLIENT_URL = "/fineract-provider/api/v1/clients/" + generatedClientID + "?"
                 + Utils.TENANT_IDENTIFIER;
         final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
-        assertEquals("ERROR IN CREATING THE CLIENT", generatedClientID, responseClientID);
+        assertEquals(generatedClientID, responseClientID, "ERROR IN CREATING THE CLIENT");
     }
 
     public static Object getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

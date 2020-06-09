@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.organisation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -29,11 +29,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+@Disabled
 public class CampaignsTest {
 
     private RequestSpecification requestSpec;
@@ -53,7 +53,7 @@ public class CampaignsTest {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();

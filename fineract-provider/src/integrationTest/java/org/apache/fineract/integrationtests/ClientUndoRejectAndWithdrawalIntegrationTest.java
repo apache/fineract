@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -34,9 +34,9 @@ import java.util.Locale;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "unused" })
 public class ClientUndoRejectAndWithdrawalIntegrationTest {
@@ -49,7 +49,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -66,7 +66,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -90,7 +90,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -119,7 +119,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -149,7 +149,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -179,7 +179,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -204,7 +204,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -233,7 +233,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -262,7 +262,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
@@ -295,7 +295,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
                 String.valueOf(clientId));
@@ -320,7 +320,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
                 String.valueOf(clientId));

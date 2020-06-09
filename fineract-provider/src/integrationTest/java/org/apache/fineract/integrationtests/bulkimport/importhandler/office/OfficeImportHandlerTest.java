@@ -38,9 +38,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class OfficeImportHandlerTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup(){
         Utils.initializeRESTAssured();
         this.requestSpec=new RequestSpecBuilder().build();
@@ -91,7 +91,7 @@ public class OfficeImportHandlerTest {
 
         String importDocumentId=officeHelper.importOfficeTemplate(file);
         file.delete();
-        Assert.assertNotNull(importDocumentId);
+        Assertions.assertNotNull(importDocumentId);
 
         // Wait for the creation of output excel
         Thread.sleep(10000);
@@ -106,7 +106,7 @@ public class OfficeImportHandlerTest {
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
 
-        Assert.assertEquals("Imported",row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported", row.getCell(OfficeConstants.STATUS_COL).getStringCellValue());
         outputWorkbook.close();
     }
 }

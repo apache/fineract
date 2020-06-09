@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -60,9 +60,9 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,7 @@ public class AccountingScenarioIntegrationTest {
     private SchedulerJobHelper schedulerJobHelper;
     private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -282,7 +282,7 @@ public class AccountingScenarioIntegrationTest {
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Float balance = SP_BALANCE + SP_DEPOSIT_AMOUNT;
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals("Verifying Balance after Deposit", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Deposit");
 
         LOG.info("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
         final JournalEntry[] assetAccountFirstTransactionEntry = { new JournalEntry(this.SP_DEPOSIT_AMOUNT,
@@ -298,7 +298,7 @@ public class AccountingScenarioIntegrationTest {
                 CommonConstants.RESPONSE_RESOURCE_ID);
         balance -= SP_WITHDRAWAL_AMOUNT;
         summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals("Verifying Balance after Withdrawal", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance after Withdrawal");
 
         LOG.info("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
         final JournalEntry[] assetAccountSecondTransactionEntry = { new JournalEntry(this.SP_WITHDRAWAL_AMOUNT,
@@ -312,11 +312,11 @@ public class AccountingScenarioIntegrationTest {
         // Third Transaction-Add Charges for Withdrawal Fee
         final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
-        Assert.assertNotNull(withdrawalChargeId);
+        Assertions.assertNotNull(withdrawalChargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
         HashMap savingsChargeForPay = chargesPendingState.get(0);
         HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsID, (Integer) savingsChargeForPay.get("id"));
         Float chargeAmount = (Float) paidCharge.get("amount");
@@ -339,7 +339,7 @@ public class AccountingScenarioIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, this.TRANSACTION_DATE, incomeAccountThirdTransactionEntry);
 
         // Verifying Balance after applying Charge for Withdrawal Fee
-        assertEquals("Verifying Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
     }
 
     @Test
@@ -376,15 +376,15 @@ public class AccountingScenarioIntegrationTest {
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, assetAccount, incomeAccount, expenseAccount,
                 liabilityAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
                 VALID_TO, SUBMITTED_ON_DATE, FixedDepositTest.WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -407,7 +407,7 @@ public class AccountingScenarioIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(transactionIdForPostInterest);
+        Assertions.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
@@ -454,15 +454,15 @@ public class AccountingScenarioIntegrationTest {
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         Integer recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
-        Assert.assertNotNull(recurringDepositProductId);
+        Assertions.assertNotNull(recurringDepositProductId);
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
                 VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, RecurringDepositTest.WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
-        Assert.assertNotNull(recurringDepositAccountId);
+        Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(
                 this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
@@ -482,7 +482,7 @@ public class AccountingScenarioIntegrationTest {
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                 depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
-        Assert.assertNotNull(depositTransactionId);
+        Assertions.assertNotNull(depositTransactionId);
 
         // Checking initial Journal entries after Activation.
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
@@ -493,7 +493,7 @@ public class AccountingScenarioIntegrationTest {
 
         Integer interestPostingTransactionId = this.recurringDepositAccountHelper
                 .postInterestForRecurringDeposit(recurringDepositAccountId);
-        Assert.assertNotNull(interestPostingTransactionId);
+        Assertions.assertNotNull(interestPostingTransactionId);
 
         HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");

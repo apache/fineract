@@ -25,7 +25,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public class CurrencyIntegrationTest {
 
@@ -34,7 +34,7 @@ public class CurrencyIntegrationTest {
     private SavingsAccountHelper savingsAccountHelper;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();

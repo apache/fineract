@@ -53,9 +53,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +68,7 @@ public class LoanImportHandlerTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -83,10 +83,10 @@ public class LoanImportHandlerTest {
         //in order to populate helper sheets
         OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
         Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
-        Assert.assertNotNull("Could not create office" ,outcome_office_creation);
+        Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
-        Assert.assertNotNull("Could not retrieve created office", office);
+        Assertions.assertNotNull(office, "Could not retrieve created office");
 
         String firstName = Utils.randomNameGenerator("Client_FirstName_", 5);
         String lastName = Utils.randomNameGenerator("Client_LastName_", 4);
@@ -104,38 +104,38 @@ public class LoanImportHandlerTest {
 
         Integer outcome_client_creation= Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 new Gson().toJson(clientMap), "clientId");
-        Assert.assertNotNull("Could not create client" ,outcome_client_creation);
+        Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
         //in order to populate helper sheets
         Integer outcome_group_creation = GroupHelper.createGroup(requestSpec,responseSpec,true);
-        Assert.assertNotNull("Could not create group" ,outcome_group_creation);
+        Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
         //in order to populate helper sheets
         Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create staff",outcome_staff_creation);
+        Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         Map<String, Object> staffMap = StaffHelper.getStaff(requestSpec, responseSpec, outcome_staff_creation);
-        Assert.assertNotNull("Could not retrieve created staff", staffMap);
+        Assertions.assertNotNull(staffMap, "Could not retrieve created staff");
 
         LoanTransactionHelper ltHelper=new LoanTransactionHelper(requestSpec,responseSpec);
         LoanProductTestBuilder loanProductTestBuilder=new LoanProductTestBuilder();
         String jsonLoanProduct=loanProductTestBuilder.build(null);
         Integer outcome_lp_creation=ltHelper.getLoanProductId(jsonLoanProduct);
-        Assert.assertNotNull("Could not create Loan Product" ,outcome_lp_creation);
+        Assertions.assertNotNull(outcome_lp_creation, "Could not create Loan Product");
 
         String loanProductStr = ltHelper.getLoanProductDetails(requestSpec, responseSpec, outcome_lp_creation);
-        Assert.assertNotNull("Could not get created Loan Product" , loanProductStr);
+        Assertions.assertNotNull("Could not get created Loan Product" , loanProductStr);
         JsonPath loanProductJson = JsonPath.from(loanProductStr);
 
         String fundName = Utils.randomNameGenerator("",9);
         FundsHelper fh = FundsHelper.create(fundName).externalId("fund-" + fundName).build();
         Integer outcome_fund_creation= FundsResourceHandler.createFund(new Gson().toJson(fh),requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create Fund" ,outcome_fund_creation);
+        Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Integer outcome_payment_creation= PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName, paymentTypeDescription, true,1);
-        Assert.assertNotNull("Could not create payment type" ,outcome_payment_creation);
+        Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
         LoanTransactionHelper loanTransactionHelper=new LoanTransactionHelper(requestSpec,responseSpec);
         Workbook workbook=loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
@@ -190,7 +190,7 @@ public class LoanImportHandlerTest {
 
         String importDocumentId=loanTransactionHelper.importLoanTemplate(file);
         file.delete();
-        Assert.assertNotNull(importDocumentId);
+        Assertions.assertNotNull(importDocumentId);
 
         //Wait for the creation of output excel
         Thread.sleep(10000);
@@ -205,7 +205,7 @@ public class LoanImportHandlerTest {
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(LoanConstants.FAILURE_REPORT_COL).getStringCellValue());
 
-        Assert.assertEquals("Imported",row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported",row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
         outputworkbook.close();
     }
 }

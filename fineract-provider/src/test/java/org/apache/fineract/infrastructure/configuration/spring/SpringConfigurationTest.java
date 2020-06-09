@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.configuration.spring;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
@@ -37,7 +37,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
  * TestsWithoutDatabaseAndNoJobsConfiguration used extends
  * AbstractApplicationConfiguration).
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ActiveProfiles("basicauth")
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
