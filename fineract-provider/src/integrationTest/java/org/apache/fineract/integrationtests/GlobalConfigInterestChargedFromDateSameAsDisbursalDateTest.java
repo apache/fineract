@@ -58,8 +58,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
-                this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "interest-charged-from-date-same-as-disbursal-date";
@@ -68,7 +67,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
                 String configId = globalConfig.get(configIndex).get("id").toString();
-                Integer updateConfigId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
+                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
                         this.responseSpec, configId.toString(), newBooleanValue);
                 Assertions.assertNotNull(updateConfigId);
                 break;

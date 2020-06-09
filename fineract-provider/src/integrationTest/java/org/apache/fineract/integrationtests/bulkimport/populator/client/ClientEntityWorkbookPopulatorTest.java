@@ -55,9 +55,8 @@ public class ClientEntityWorkbookPopulatorTest {
     @Test
     public void testClientEntityWorkbookPopulate() throws IOException {
         // in order to populate helper sheets
-        StaffHelper staffHelper = new StaffHelper();
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Integer outcome_staff_creation = staffHelper.createStaff(requestSpec, responseSpec);
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         // in order to populate helper sheets

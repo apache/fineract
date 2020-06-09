@@ -131,7 +131,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         assertEquals("error.msg.client.undorejection.on.nonrejected.account",
                 clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        status = this.clientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
 
     }
@@ -240,7 +240,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         assertEquals("error.msg.client.undoWithdrawal.on.nonwithdrawal.account",
                 clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        status = this.clientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
 
     }

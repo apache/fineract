@@ -326,7 +326,7 @@ tasks.withType(JavaCompile) {
                              "-Xlint:finally","-Xlint:module","-Xlint:opens","-Xlint:options","-Xlint:overloads",
                              "-Xlint:overrides","-Xlint:path","-Xlint:processing","-Xlint:removal",
                              "-Xlint:requires-automatic","-Xlint:requires-transitive-automatic","-Xlint:try",
-                             "-Xlint:varargs","-Xlint:preview","-Werror"]
+                             "-Xlint:varargs","-Xlint:preview","-Xlint:static","-Werror"]
                             // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
 
     options.deprecation = true

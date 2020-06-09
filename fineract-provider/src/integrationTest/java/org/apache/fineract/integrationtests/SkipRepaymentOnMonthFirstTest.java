@@ -43,7 +43,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "static-access", "rawtypes", "unchecked", "deprecation" })
+@SuppressWarnings({ "unchecked" })
+
 public class SkipRepaymentOnMonthFirstTest {
 
     private final static Logger LOG = LoggerFactory.getLogger(SkipRepaymentOnMonthFirstTest.class);
@@ -72,8 +73,7 @@ public class SkipRepaymentOnMonthFirstTest {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
-                this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "skip-repayment-on-first-day-of-month";
@@ -82,7 +82,7 @@ public class SkipRepaymentOnMonthFirstTest {
         for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
                 String configId = globalConfig.get(configIndex).get("id").toString();
-                Integer updateConfigId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
+                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
                         this.responseSpec, configId.toString(), newBooleanValue);
                 Assertions.assertNotNull(updateConfigId);
                 break;
@@ -101,7 +101,7 @@ public class SkipRepaymentOnMonthFirstTest {
         final String startDate = "15 September 2011";
         final String frequency = "3"; // Monthly
         final String interval = "1"; // Every One Moth
-        Integer calendarID = calendarHelper.createMeetingForGroup(requestSpec, responseSpec, groupID, startDate, frequency, interval, null);
+        Integer calendarID = CalendarHelper.createMeetingForGroup(requestSpec, responseSpec, groupID, startDate, frequency, interval, null);
         LOG.info("caladerId -------------------- {}", calendarID);
         final Integer loanProductID = createLoanProduct();
         final Integer loanID = applyForLoanApplication(groupID, loanProductID, calendarID, clientID);

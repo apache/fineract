@@ -246,7 +246,7 @@ public class FixedDepositTest {
         /***
          * Verify journal entry transactions for preclosure transaction
          */
-        HashMap accountDetails = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap accountDetails = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float maturityAmount = Float.valueOf(accountDetails.get("maturityAmount").toString());
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, CLOSED_ON_DATE,
@@ -381,7 +381,7 @@ public class FixedDepositTest {
         /***
          * Verify journal entry transactions for preclosure transaction
          */
-        HashMap accountDetails = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap accountDetails = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float maturityAmount = Float.valueOf(accountDetails.get("maturityAmount").toString());
 
@@ -511,7 +511,7 @@ public class FixedDepositTest {
         String JobName = "Update Deposit Accounts Maturity details";
         schedulerJobHelper.executeAndAwaitJob(JobName);
 
-        HashMap accountDetails = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap accountDetails = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         HashMap summary = (HashMap) accountDetails.get("summary");
@@ -829,7 +829,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsPrematureClosed(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float prematurityAmount = (Float) fixedDepositData.get("maturityAmount");
 
@@ -991,9 +991,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
         Assertions.assertNotNull(fixedDepositProductId);
 
-        this.fixedDepositProductHelper.retrieveAllFixedDepositProducts(this.requestSpec, this.responseSpec);
-        this.fixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
+        FixedDepositProductHelper.retrieveAllFixedDepositProducts(this.requestSpec, this.responseSpec);
+        FixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec, fixedDepositProductId.toString());
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
                 SUBMITTED_ON_DATE, WHOLE_TERM);
@@ -1211,16 +1210,16 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
@@ -1228,8 +1227,8 @@ public class FixedDepositTest {
 
         todaysDate.getActualMaximum(Calendar.DATE);
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
         principal = (float) Math.floor(principal);
         maturityAmount = (float) Math.floor(maturityAmount);
@@ -1283,16 +1282,16 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
@@ -1300,8 +1299,8 @@ public class FixedDepositTest {
 
         todaysDate.getActualMaximum(Calendar.DATE);
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, MONTHLY_INTERVAL, MONTHLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
         principal = (float) Math.floor(principal);
         maturityAmount = (float) Math.floor(maturityAmount);
@@ -1358,17 +1357,17 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) fixedDepositAccountData.get("preClosurePenalInterest");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
@@ -1400,7 +1399,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsPrematureClosed(fixedDepositAccountStatusHashMap);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         principal = (float) Math.floor(principal);
@@ -1463,17 +1462,17 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) fixedDepositAccountData.get("preClosurePenalInterest");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
@@ -1505,7 +1504,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsPrematureClosed(fixedDepositAccountStatusHashMap);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         principal = (float) Math.floor(principal);
@@ -1564,13 +1563,13 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) fixedDepositAccountData.get("preClosurePenalInterest");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Calendar activationDate = Calendar.getInstance();
@@ -1583,7 +1582,7 @@ public class FixedDepositTest {
 
         Integer depositedPeriod = Months.monthsBetween(startDate, endDate).getMonths();
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
@@ -1615,7 +1614,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsPrematureClosed(fixedDepositAccountStatusHashMap);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -1678,13 +1677,13 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) fixedDepositAccountData.get("preClosurePenalInterest");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
         Calendar activationDate = Calendar.getInstance();
@@ -1697,7 +1696,7 @@ public class FixedDepositTest {
 
         Integer depositedPeriod = Months.monthsBetween(startDate, endDate).getMonths();
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositedPeriod);
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
@@ -1729,7 +1728,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsPrematureClosed(fixedDepositAccountStatusHashMap);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Float expectedPrematureAmount = (float) Math.floor(principal);
@@ -1785,17 +1784,17 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
@@ -1803,8 +1802,8 @@ public class FixedDepositTest {
 
         todaysDate.getActualMaximum(Calendar.DATE);
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
         principal = (float) Math.floor(principal);
         maturityAmount = (float) Math.floor(maturityAmount);
@@ -1860,17 +1859,17 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Float maturityAmount = (Float) fixedDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
@@ -1878,8 +1877,8 @@ public class FixedDepositTest {
 
         todaysDate.getActualMaximum(Calendar.DATE);
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
         principal = new BigDecimal(principal).setScale(0, RoundingMode.FLOOR).floatValue();
         maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
@@ -1943,25 +1942,25 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, DAILY_COMPOUNDING_INTERVAL, ANNUL_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                DAILY_COMPOUNDING_INTERVAL, ANNUL_INTERVAL);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -2026,25 +2025,25 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, DAILY_COMPOUNDING_INTERVAL, ANNUL_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                DAILY_COMPOUNDING_INTERVAL, ANNUL_INTERVAL);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -2107,25 +2106,25 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, BIANNULLY_INTERVAL, BIANNULLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                BIANNULLY_INTERVAL, BIANNULLY_INTERVAL);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -2188,25 +2187,25 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, BIANNULLY_INTERVAL, BIANNULLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                BIANNULLY_INTERVAL, BIANNULLY_INTERVAL);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -2269,25 +2268,25 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, QUARTERLY_INTERVAL, QUARTERLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                QUARTERLY_INTERVAL, QUARTERLY_INTERVAL);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -2349,25 +2348,25 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
         FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
 
-        HashMap fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        HashMap fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
         Float principal = (Float) fixedDepositAccountData.get("depositAmount");
         Integer depositPeriod = (Integer) fixedDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) fixedDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
-        ArrayList<ArrayList<HashMap>> interestRateChartData = this.fixedDepositProductHelper
+        ArrayList<ArrayList<HashMap>> interestRateChartData = FixedDepositProductHelper
                 .getInterestRateChartSlabsByProductId(this.requestSpec, this.responseSpec, fixedDepositProductId);
 
-        Float interestRate = this.fixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
+        Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
         LOG.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
-                interestPerDay, QUARTERLY_INTERVAL, QUARTERLY_INTERVAL);
+        principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
+                QUARTERLY_INTERVAL, QUARTERLY_INTERVAL);
 
-        fixedDepositAccountData = this.fixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
+        fixedDepositAccountData = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
 
         Double expectedPrematureAmount = Math.floor(principal);
@@ -2603,8 +2602,7 @@ public class FixedDepositTest {
         LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
-        return this.fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec,
-                this.responseSpec);
+        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
@@ -2613,8 +2611,7 @@ public class FixedDepositTest {
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).withMaturityInstructionId(maturityInstructionId)
                 .build(clientID, productID, penalInterestType);
-        return this.fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec,
-                this.responseSpec);
+        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
@@ -2624,8 +2621,7 @@ public class FixedDepositTest {
                 //
                 .withSubmittedOnDate(submittedOnDate).withDepositPeriod(depositPeriod).withDepositAmount(depositAmount)
                 .build(clientID, productID, penalInterestType);
-        return this.fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec,
-                this.responseSpec);
+        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

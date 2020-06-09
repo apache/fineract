@@ -33,7 +33,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
+@SuppressWarnings({ "unchecked" })
+
 public class GlobalConfigurationTest {
 
     private ResponseSpecification responseSpec;
@@ -61,8 +62,7 @@ public class GlobalConfigurationTest {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
-                this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "penalty-wait-period";
@@ -71,18 +71,18 @@ public class GlobalConfigurationTest {
                 Integer configId = (Integer) globalConfig.get(configIndex).get("id");
                 Assertions.assertNotNull(configId);
 
-                HashMap configDataBefore = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                HashMap configDataBefore = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
                         configId.toString());
                 Assertions.assertNotNull(configDataBefore);
 
                 Integer value = (Integer) configDataBefore.get("value") + 1;
 
                 // Updating Value for penalty-wait-period Global Configuration
-                configId = this.globalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                configId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
                         configId.toString(), value.toString());
                 Assertions.assertNotNull(configId);
 
-                HashMap configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                HashMap configDataAfter = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
                         configId.toString());
 
                 // Verifying Value for penalty-wait-period after Updation
@@ -98,10 +98,10 @@ public class GlobalConfigurationTest {
                     enabled = true;
                 }
 
-                configId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                configId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
                         configId.toString(), enabled);
 
-                configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                configDataAfter = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
                         configId.toString());
 
                 // Verifying Enabled Flag for penalty-wait-period after Updation
@@ -116,14 +116,14 @@ public class GlobalConfigurationTest {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
         // Retrieving Is Cache Enabled Global Configuration details
-        ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec,
+        ArrayList<HashMap> isCacheGlobalConfig = GlobalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec,
                 this.responseSpec);
         Assertions.assertNotNull(isCacheGlobalConfig);
 
         for (Integer cacheType = 0; cacheType <= isCacheGlobalConfig.size() - 1; cacheType++) {
 
             // Retrieving Is Cache Enabled Global Configuration details
-            isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec, this.responseSpec);
+            isCacheGlobalConfig = GlobalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec, this.responseSpec);
             Assertions.assertNotNull(isCacheGlobalConfig);
 
             HashMap cacheTypeAsHashMap = (HashMap) isCacheGlobalConfig.get(cacheType).get("cacheType");
@@ -137,7 +137,7 @@ public class GlobalConfigurationTest {
                 cacheTypeId -= 1;
             }
 
-            HashMap changes = this.globalConfigurationHelper.updateIsCacheEnabledForGlobalConfiguration(this.requestSpec, this.responseSpec,
+            HashMap changes = GlobalConfigurationHelper.updateIsCacheEnabledForGlobalConfiguration(this.requestSpec, this.responseSpec,
                     cacheTypeId.toString());
             Assertions.assertEquals(cacheTypeId, changes.get("cacheType"), "Verifying Is Cache Enabled Global Config after Updation");
         }
@@ -147,8 +147,7 @@ public class GlobalConfigurationTest {
     public void testGlobalConfigForcePasswordResetDays() {
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
-                this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "force-password-reset-days";
@@ -164,7 +163,7 @@ public class GlobalConfigurationTest {
                  * Update force-password-reset-days with value as 0 and Enable
                  * as true - failure case
                  */
-                ArrayList error = (ArrayList) this.globalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(this.requestSpec,
+                ArrayList error = (ArrayList) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(this.requestSpec,
                         this.httpStatusForidden, configId, newValue, newBooleanValue, CommonConstants.RESPONSE_ERROR);
                 HashMap hash = (HashMap) error.get(0);
 
@@ -176,12 +175,12 @@ public class GlobalConfigurationTest {
                  * Update force-password-reset-days with value as 50 and Enable
                  * as true - success case
                  */
-                final HashMap updateSuccess = (HashMap) this.globalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(
+                final HashMap updateSuccess = (HashMap) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(
                         this.requestSpec, this.responseSpec, configId, "50", newBooleanValue, "changes");
                 Assertions.assertNotNull(updateSuccess);
 
                 /* Update with value as 0 and Enable as false - success case */
-                final HashMap updateSuccess1 = (HashMap) this.globalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(
+                final HashMap updateSuccess1 = (HashMap) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(
                         this.requestSpec, this.responseSpec, configId, newValue, "false", "changes");
                 Assertions.assertNotNull(updateSuccess1);
 
@@ -189,8 +188,8 @@ public class GlobalConfigurationTest {
                  * Update without sending value and Enable as true - failure
                  * case
                  */
-                ArrayList failure = (ArrayList) this.globalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(
-                        this.requestSpec, this.httpStatusForidden, configId, null, newBooleanValue, CommonConstants.RESPONSE_ERROR);
+                ArrayList failure = (ArrayList) GlobalConfigurationHelper.updatePasswordResetDaysForGlobalConfiguration(this.requestSpec,
+                        this.httpStatusForidden, configId, null, newBooleanValue, CommonConstants.RESPONSE_ERROR);
                 HashMap failureHash = (HashMap) failure.get(0);
                 Assertions.assertEquals("error.msg.password.reset.days.value.must.be.greater.than.zero",
                         failureHash.get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),
@@ -204,8 +203,8 @@ public class GlobalConfigurationTest {
         for (Integer configIndex = 0; configIndex < globalConfig.size() - 1; configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(otherConfigName)) {
                 String configId = globalConfig.get(configIndex).get("id").toString();
-                Integer updateConfigId = this.globalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec,
-                        this.responseSpec, configId, newValue);
+                Integer updateConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                        configId, newValue);
                 Assertions.assertNotNull(updateConfigId);
                 break;
             }
