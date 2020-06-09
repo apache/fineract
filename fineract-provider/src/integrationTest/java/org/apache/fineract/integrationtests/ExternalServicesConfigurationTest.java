@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class ExternalServicesConfigurationTest {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
@@ -58,7 +57,7 @@ public class ExternalServicesConfigurationTest {
 
         // Checking for S3
         String configName = "s3_access_key";
-        ArrayList<HashMap> externalServicesConfig = this.externalServicesConfigurationHelper
+        ArrayList<HashMap> externalServicesConfig = ExternalServicesConfigurationHelper
                 .getExternalServicesConfigurationByServiceName(requestSpec, responseSpec, "S3");
         Assertions.assertNotNull(externalServicesConfig);
         for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
@@ -71,11 +70,11 @@ public class ExternalServicesConfigurationTest {
                 }
                 String newValue = "test";
                 LOG.info("{} : {}", name, value);
-                HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                HashMap arrayListValue = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "S3", name, newValue);
                 Assertions.assertNotNull(arrayListValue.get("value"));
                 Assertions.assertEquals(arrayListValue.get("value"), newValue);
-                HashMap arrayListValue1 = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                HashMap arrayListValue1 = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "S3", name, value);
                 Assertions.assertNotNull(arrayListValue1.get("value"));
                 Assertions.assertEquals(arrayListValue1.get("value"), value);
@@ -86,9 +85,10 @@ public class ExternalServicesConfigurationTest {
         // Checking for SMTP:
 
         configName = "username";
-        externalServicesConfig = this.externalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
+        externalServicesConfig = ExternalServicesConfigurationHelper.getExternalServicesConfigurationByServiceName(requestSpec,
                 responseSpec, "SMTP");
         Assertions.assertNotNull(externalServicesConfig);
+
         for (Integer configIndex = 0; configIndex < externalServicesConfig.size(); configIndex++) {
             String name = (String) externalServicesConfig.get(configIndex).get("name");
             String value = null;
@@ -99,11 +99,11 @@ public class ExternalServicesConfigurationTest {
                 }
                 String newValue = "test";
                 LOG.info("{} : {}", name, value);
-                HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                HashMap arrayListValue = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "SMTP", name, newValue);
                 Assertions.assertNotNull(arrayListValue.get("value"));
                 Assertions.assertEquals(arrayListValue.get("value"), newValue);
-                HashMap arrayListValue1 = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
+                HashMap arrayListValue1 = ExternalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "SMTP", name, value);
                 Assertions.assertNotNull(arrayListValue1.get("value"));
                 Assertions.assertEquals(arrayListValue1.get("value"), value);

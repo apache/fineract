@@ -66,7 +66,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
+@SuppressWarnings({ "unchecked" })
+
 public class AccountingScenarioIntegrationTest {
 
     private final static Logger LOG = LoggerFactory.getLogger(AccountingScenarioIntegrationTest.class);
@@ -114,15 +115,15 @@ public class AccountingScenarioIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
-        this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -135,10 +136,10 @@ public class AccountingScenarioIntegrationTest {
         final Integer loanProductID = createLoanProductWithUpfrontAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
@@ -250,7 +251,7 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     public void checkAccountingWithSavingsFlow() {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -260,10 +261,10 @@ public class AccountingScenarioIntegrationTest {
         final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
                 liabilityAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsID);
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsID);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
@@ -312,7 +313,7 @@ public class AccountingScenarioIntegrationTest {
                 liabililityAccountSecondTransactionEntry);
 
         // Third Transaction-Add Charges for Withdrawal Fee
-        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
         Assertions.assertNotNull(withdrawalChargeId);
 
@@ -345,10 +346,10 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     public void testFixedDepositAccountingFlow() {
-        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        this.fixedDepositAccountHelper = new FixedDepositAccountHelper(requestSpec, responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         DateFormat currentDateFormat = new SimpleDateFormat("dd");
@@ -376,7 +377,7 @@ public class AccountingScenarioIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
-        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, assetAccount, incomeAccount, expenseAccount,
@@ -387,8 +388,8 @@ public class AccountingScenarioIntegrationTest {
                 VALID_TO, SUBMITTED_ON_DATE, FixedDepositTest.WHOLE_TERM);
         Assertions.assertNotNull(fixedDepositAccountId);
 
-        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
-                this.responseSpec, fixedDepositAccountId.toString());
+        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(requestSpec,
+                responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
 
         fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
@@ -423,9 +424,9 @@ public class AccountingScenarioIntegrationTest {
 
     @Test
     public void testRecurringDepositAccountingFlow() {
-        this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
+        this.recurringDepositProductHelper = new RecurringDepositProductHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(requestSpec, responseSpec);
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -454,7 +455,7 @@ public class AccountingScenarioIntegrationTest {
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
         final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
 
-        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         Integer recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, assetAccount, liabilityAccount,
@@ -465,8 +466,8 @@ public class AccountingScenarioIntegrationTest {
                 VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, RecurringDepositTest.WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assertions.assertNotNull(recurringDepositAccountId);
 
-        HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker
-                .getStatusOfRecurringDepositAccount(this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
+        HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(requestSpec,
+                responseSpec, recurringDepositAccountId.toString());
         RecurringDepositAccountStatusChecker.verifyRecurringDepositIsPending(recurringDepositAccountStatusHashMap);
 
         recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.approveRecurringDeposit(recurringDepositAccountId,
@@ -477,8 +478,8 @@ public class AccountingScenarioIntegrationTest {
                 ACTIVATION_DATE);
         RecurringDepositAccountStatusChecker.verifyRecurringDepositIsActive(recurringDepositAccountStatusHashMap);
 
-        HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
-                this.responseSpec, recurringDepositAccountId);
+        HashMap recurringDepositAccountData = RecurringDepositAccountHelper.getRecurringDepositAccountById(requestSpec, responseSpec,
+                recurringDepositAccountId);
         Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
 
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
@@ -518,7 +519,7 @@ public class AccountingScenarioIntegrationTest {
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
         LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
         final String fixedDepositProductJSON = fixedDepositProductHelper //
                 .withPeriodRangeChart()//
                 .withAccountingRuleAsCashBased(accounts).build(validFrom, validTo);
@@ -528,16 +529,14 @@ public class AccountingScenarioIntegrationTest {
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
             final String validTo, final String submittedOnDate, final String penalInterestType) {
         LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
-        return this.fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec,
-                this.responseSpec);
+        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, requestSpec, responseSpec);
     }
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, Account... accounts) {
         LOG.info("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
-        RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec,
-                this.responseSpec);
+        RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(requestSpec, responseSpec);
         final String recurringDepositProductJSON = recurringDepositProductHelper //
                 .withPeriodRangeChart()//
                 .withAccountingRuleAsCashBased(accounts).build(validFrom, validTo);
@@ -547,12 +546,11 @@ public class AccountingScenarioIntegrationTest {
     private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
             final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate) {
         LOG.info("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
-        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
+        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(requestSpec, responseSpec)
                 //
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
                 .build(clientID, productID, penalInterestType);
-        return this.recurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, this.requestSpec,
-                this.responseSpec);
+        return RecurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, requestSpec, responseSpec);
     }
 
     @Test
@@ -565,10 +563,10 @@ public class AccountingScenarioIntegrationTest {
         final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
@@ -678,10 +676,10 @@ public class AccountingScenarioIntegrationTest {
         final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
@@ -733,7 +731,7 @@ public class AccountingScenarioIntegrationTest {
         final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
         final float FEE_PORTION = 50.0f;
@@ -743,7 +741,7 @@ public class AccountingScenarioIntegrationTest {
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
                 .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
@@ -786,8 +784,7 @@ public class AccountingScenarioIntegrationTest {
 
         this.schedulerJobHelper.executeAndAwaitJob(jobName);
 
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
         LocalDate fromDateLocal = LocalDate.now();
@@ -823,7 +820,7 @@ public class AccountingScenarioIntegrationTest {
         final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
         final float FEE_PORTION = 50.0f;
@@ -841,7 +838,7 @@ public class AccountingScenarioIntegrationTest {
         Integer flatSpecifiedDueDateNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
                 .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_PENALTY_PORTION), true));
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
@@ -891,8 +888,7 @@ public class AccountingScenarioIntegrationTest {
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
 
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
         LocalDate fromDateLocal = LocalDate.now();
@@ -945,10 +941,10 @@ public class AccountingScenarioIntegrationTest {
         final Integer loanProductID = createLoanProductWithCashBasedAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);

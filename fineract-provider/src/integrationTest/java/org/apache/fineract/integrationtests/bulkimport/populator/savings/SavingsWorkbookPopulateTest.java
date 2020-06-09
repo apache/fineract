@@ -63,23 +63,20 @@ public class SavingsWorkbookPopulateTest {
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        Integer outcome_client_creation = clientHelper.createClient(requestSpec, responseSpec);
+        Integer outcome_client_creation = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
         // in order to populate helper sheets
-        GroupHelper groupHelper = new GroupHelper(requestSpec, responseSpec);
-        Integer outcome_group_creation = groupHelper.createGroup(requestSpec, responseSpec, true);
+        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
         // in order to populate helper sheets
-        StaffHelper staffHelper = new StaffHelper();
-        Integer outcome_staff_creation = staffHelper.createStaff(requestSpec, responseSpec);
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         String jsonSavingsProduct = savingsProductHelper.build();
-        Integer outcome_sp_creaction = savingsProductHelper.createSavingsProduct(jsonSavingsProduct, requestSpec, responseSpec);
+        Integer outcome_sp_creaction = SavingsProductHelper.createSavingsProduct(jsonSavingsProduct, requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_sp_creaction, "Could not create Savings product");
 
         SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);

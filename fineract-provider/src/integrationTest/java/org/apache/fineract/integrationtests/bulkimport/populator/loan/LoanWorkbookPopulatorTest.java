@@ -65,18 +65,15 @@ public class LoanWorkbookPopulatorTest {
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         // in order to populate helper sheets
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        Integer outcome_client_creation = clientHelper.createClient(requestSpec, responseSpec);
+        Integer outcome_client_creation = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
         // in order to populate helper sheets
-        GroupHelper groupHelper = new GroupHelper(requestSpec, responseSpec);
-        Integer outcome_group_creation = groupHelper.createGroup(requestSpec, responseSpec, true);
+        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
         // in order to populate helper sheets
-        StaffHelper staffHelper = new StaffHelper();
-        Integer outcome_staff_creation = staffHelper.createStaff(requestSpec, responseSpec);
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
@@ -85,17 +82,15 @@ public class LoanWorkbookPopulatorTest {
         Integer outcome_lp_creaion = loanTransactionHelper.getLoanProductId(jsonLoanProduct);
         Assertions.assertNotNull(outcome_lp_creaion, "Could not create Loan Product");
 
-        FundsResourceHandler fundsResourceHandler = new FundsResourceHandler();
         String jsonFund = "{\n" + "\t\"name\": \"" + Utils.randomNameGenerator("Fund_Name", 9) + "\"\n" + "}";
-        Integer outcome_fund_creation = fundsResourceHandler.createFund(jsonFund, requestSpec, responseSpec);
+        Integer outcome_fund_creation = FundsResourceHandler.createFund(jsonFund, requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
-        PaymentTypeHelper paymentTypeHelper = new PaymentTypeHelper();
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
         Integer position = 1;
-        Integer outcome_payment_creation = paymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
+        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
                 position);
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
