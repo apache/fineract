@@ -49,9 +49,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class SavingsImportHandlerTest {
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -80,10 +80,10 @@ public class SavingsImportHandlerTest {
         //in order to populate helper sheets
         OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
         Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
-        Assert.assertNotNull("Could not create office" ,outcome_office_creation);
+        Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
-        Assert.assertNotNull("Could not retrieve created office", office);
+        Assertions.assertNotNull(office, "Could not retrieve created office");
 
         String firstName = Utils.randomNameGenerator("Client_FirstName_", 5);
         String lastName = Utils.randomNameGenerator("Client_LastName_", 4);
@@ -101,23 +101,23 @@ public class SavingsImportHandlerTest {
 
         Integer outcome_client_creation= Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 new Gson().toJson(clientMap), "clientId");
-        Assert.assertNotNull("Could not create client" ,outcome_client_creation);
+        Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
         //in order to populate helper sheets
         Integer outcome_group_creation=GroupHelper.createGroup(requestSpec,responseSpec,true);
-        Assert.assertNotNull("Could not create group" ,outcome_group_creation);
+        Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
         //in order to populate helper sheets
         Integer outcome_staff_creation =StaffHelper.createStaff(requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create staff",outcome_staff_creation);
+        Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         Map<String, Object> staffMap = StaffHelper.getStaff(requestSpec, responseSpec, outcome_staff_creation);
-        Assert.assertNotNull("Could not retrieve created staff", staffMap);
+        Assertions.assertNotNull(staffMap, "Could not retrieve created staff");
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         String jsonSavingsProduct=savingsProductHelper.build();
         Integer outcome_sp_creaction=SavingsProductHelper.createSavingsProduct(jsonSavingsProduct,requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create Savings product",outcome_sp_creaction);
+        Assertions.assertNotNull(outcome_sp_creaction, "Could not create Savings product");
 
         SavingsAccountHelper savingsAccountHelper=new SavingsAccountHelper(requestSpec,responseSpec);
         Workbook workbook=savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
@@ -164,7 +164,7 @@ public class SavingsImportHandlerTest {
 
         String importDocumentId=savingsAccountHelper.importSavingsTemplate(file);
         file.delete();
-        Assert.assertNotNull(importDocumentId);
+        Assertions.assertNotNull(importDocumentId);
 
         //Wait for the creation of output excel
         Thread.sleep(10000);
@@ -179,7 +179,7 @@ public class SavingsImportHandlerTest {
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
 
-        Assert.assertEquals("Imported",row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported",row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
         Outputworkbook.close();
     }
 }

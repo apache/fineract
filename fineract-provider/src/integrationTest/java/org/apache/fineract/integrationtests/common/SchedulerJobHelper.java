@@ -22,10 +22,10 @@ import static java.time.Instant.now;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -175,11 +175,11 @@ public class SchedulerJobHelper {
         LOG.error("Lsat Job failure error log (only relevent if the job fails: {}",
                 jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorLog"));
 
-        assertFalse("Job History is empty :(  Was it too slow? Failures in background job?", jobHistoryData.isEmpty());
+        assertFalse(jobHistoryData.isEmpty(), "Job History is empty :(  Was it too slow? Failures in background job?");
 
         // Verifying the Status of the Recently executed Scheduler Job
-        assertEquals("Verifying Last Scheduler Job Status", "success",
-                jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
+        assertEquals("success", jobHistoryData.get(jobHistoryData.size() - 1).get("status"),
+            "Verifying Last Scheduler Job Status");
     }
 
     /**

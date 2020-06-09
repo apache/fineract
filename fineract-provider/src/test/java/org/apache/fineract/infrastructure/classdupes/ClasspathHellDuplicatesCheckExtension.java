@@ -20,10 +20,9 @@ package org.apache.fineract.infrastructure.classdupes;
 
 import java.util.List;
 import java.util.Map;
-import junit.framework.AssertionFailedError;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.opentest4j.AssertionFailedError;
 
 /**
  * JUnit Rule to run detect duplicate entries on the classpath. Usage:
@@ -39,22 +38,21 @@ import org.junit.runners.model.Statement;
  *
  * @author Michael Vorburger.ch
  */
-public class ClasspathHellDuplicatesCheckRule implements TestRule {
+public class ClasspathHellDuplicatesCheckExtension implements AfterEachCallback {
 
     private final ClasspathHellDuplicatesChecker checker;
 
-    public ClasspathHellDuplicatesCheckRule(ClasspathHellDuplicatesChecker checker) {
+    public ClasspathHellDuplicatesCheckExtension(ClasspathHellDuplicatesChecker checker) {
         this.checker = checker;
     }
 
-    public ClasspathHellDuplicatesCheckRule() {
+    public ClasspathHellDuplicatesCheckExtension() {
         this(ClasspathHellDuplicatesChecker.INSTANCE);
     }
 
     @Override
-    public Statement apply(Statement base, Description description) {
+    public void afterEach(ExtensionContext context) throws Exception {
         checkClasspath();
-        return base;
     }
 
     protected void checkClasspath() {

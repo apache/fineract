@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.core.boot.tests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.fineract.infrastructure.core.boot.EmbeddedTomcatWithSSLConfiguration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 

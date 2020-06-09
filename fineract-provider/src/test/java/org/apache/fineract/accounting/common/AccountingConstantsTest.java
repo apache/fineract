@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.common;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
 
 public class AccountingConstantsTest {

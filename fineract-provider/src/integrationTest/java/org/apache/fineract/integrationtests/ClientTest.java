@@ -26,9 +26,9 @@ import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ClientTest {
 
@@ -36,7 +36,7 @@ public class ClientTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -49,7 +49,7 @@ public class ClientTest {
     public void testClientStatus() {
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -82,7 +82,7 @@ public class ClientTest {
 
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
@@ -115,7 +115,7 @@ public class ClientTest {
 
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);

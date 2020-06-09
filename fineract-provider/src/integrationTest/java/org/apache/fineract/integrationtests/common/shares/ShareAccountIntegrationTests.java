@@ -37,9 +37,9 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class ShareAccountIntegrationTests {
     private ResponseSpecification responseSpec;
     private ShareProductHelper shareProductHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -64,13 +64,13 @@ public class ShareAccountIntegrationTests {
         LOG.info("------------------------------CREATING NEW SHARE PRODUCT ---------------------------------------");
         shareProductHelper = new ShareProductHelper();
         final Integer shareProductId = createShareProduct();
-        Assert.assertNotNull(shareProductId);
+        Assertions.assertNotNull(shareProductId);
         LOG.info("------------------------------CREATING SHARE PRODUCT COMPLETE---------------------------------------");
 
         LOG.info("------------------------------RETRIEVING SHARE PRODUCT---------------------------------------");
         Map<String, Object> shareProductData = ShareProductTransactionHelper
                 .retrieveShareProduct(shareProductId, requestSpec, responseSpec);
-        Assert.assertNotNull(shareProductData);
+        Assertions.assertNotNull(shareProductData);
         shareProductHelper.verifyShareProduct(shareProductData);
 
         LOG.info("------------------------------RETRIEVING SHARE PRODUCT COMPLETE---------------------------------------");
@@ -85,13 +85,13 @@ public class ShareAccountIntegrationTests {
         String updateShareProductJsonString = new Gson().toJson(shareProductDataForUpdate);
         Integer updatedProductId = ShareProductTransactionHelper.updateShareProduct(shareProductId, updateShareProductJsonString,
                 requestSpec, responseSpec);
-        Assert.assertNotNull(updatedProductId);
+        Assertions.assertNotNull(updatedProductId);
         Map<String, Object> updatedShareProductData = ShareProductTransactionHelper.retrieveShareProduct(updatedProductId, requestSpec,
                 responseSpec);
         String updatedTotalShares = String.valueOf(updatedShareProductData.get("totalShares"));
         String updatedSharesIssued = String.valueOf(updatedShareProductData.get("totalSharesIssued"));
-        Assert.assertEquals("2000", updatedTotalShares);
-        Assert.assertEquals("2000", updatedSharesIssued);
+        Assertions.assertEquals("2000", updatedTotalShares);
+        Assertions.assertEquals("2000", updatedSharesIssued);
         LOG.info("------------------------------UPDATING SHARE PRODUCT COMPLETE---------------------------------------");
 
     }
@@ -101,16 +101,16 @@ public class ShareAccountIntegrationTests {
     public void testCreateShareAccount() {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
-        Assert.assertNotNull(productId);
+        Assertions.assertNotNull(productId);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
-        Assert.assertNotNull(savingsAccountId);
+        Assertions.assertNotNull(savingsAccountId);
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId);
-        Assert.assertNotNull(shareAccountId);
+        Assertions.assertNotNull(shareAccountId);
         Map<String, Object> shareProductData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-        Assert.assertNotNull(shareProductData);
+        Assertions.assertNotNull(shareProductData);
 
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
         shareAccountDataForUpdate.put("requestedShares", 30);
@@ -121,18 +121,18 @@ public class ShareAccountIntegrationTests {
         ShareAccountTransactionHelper.updateShareAccount(shareAccountId, updateShareAccountJsonString, requestSpec, responseSpec);
         shareProductData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareProductData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(1, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(1, transactions.size());
         Map<String, Object> transaction = transactions.get(0);
-        Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-        Assert.assertEquals("60.0", String.valueOf(transaction.get("amount")));
-        Assert.assertEquals("60.0", String.valueOf(transaction.get("amountPaid")));
+        Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+        Assertions.assertEquals("60.0", String.valueOf(transaction.get("amount")));
+        Assertions.assertEquals("60.0", String.valueOf(transaction.get("amountPaid")));
         List<Integer> dateList = (List<Integer>) transaction.get("purchasedDate");
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date date = cal.getTime();
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
-        Assert.assertEquals("02 Mar 2016", simple.format(date));
+        Assertions.assertEquals("02 Mar 2016", simple.format(date));
     }
 
     @Test
@@ -141,11 +141,11 @@ public class ShareAccountIntegrationTests {
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
-        Assert.assertNotNull(productId);
+        Assertions.assertNotNull(productId);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
-        Assert.assertNotNull(savingsAccountId);
+        Assertions.assertNotNull(savingsAccountId);
         String activationCharge = ChargesHelper.getShareAccountActivationChargeJson();
         Integer activationChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, activationCharge);
         String purchaseCharge = ChargesHelper.getShareAccountPurchaseChargeJson();
@@ -157,10 +157,10 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(purchaseChargeId, "2"));
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
-        Assert.assertNotNull(shareAccountId);
+        Assertions.assertNotNull(shareAccountId);
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-        Assert.assertNotNull(shareAccountData);
+        Assertions.assertNotNull(shareAccountData);
 
      // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
@@ -173,16 +173,16 @@ public class ShareAccountIntegrationTests {
         shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
         List<Integer> dateList = (List<Integer>) timelineMap.get("approvedDate");
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date approvedDate = cal.getTime();
-        Assert.assertEquals("01 Jan 2016", simple.format(approvedDate));
+        Assertions.assertEquals("01 Jan 2016", simple.format(approvedDate));
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(2, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(2, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -192,22 +192,22 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
-                Assert.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("52.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("52.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assert.assertEquals("01 Jan 2016", simple.format(date));
+                Assertions.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("52.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("52.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("01 Jan 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(date));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(date));
             }
         }
 
         Map<String, Object> summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("25", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("25", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
 
     @Test
@@ -215,11 +215,11 @@ public class ShareAccountIntegrationTests {
     public void rejectShareAccount() {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
-        Assert.assertNotNull(productId);
+        Assertions.assertNotNull(productId);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
-        Assert.assertNotNull(savingsAccountId);
+        Assertions.assertNotNull(savingsAccountId);
         String activationCharge = ChargesHelper.getShareAccountActivationChargeJson();
         Integer activationChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, activationCharge);
         String purchaseCharge = ChargesHelper.getShareAccountPurchaseChargeJson();
@@ -231,10 +231,10 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(purchaseChargeId, "2"));
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
-        Assert.assertNotNull(shareAccountId);
+        Assertions.assertNotNull(shareAccountId);
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-        Assert.assertNotNull(shareAccountData);
+        Assertions.assertNotNull(shareAccountData);
 
         // Reject share Account
         Map<String, Object> rejectMap = new HashMap<>();
@@ -245,17 +245,17 @@ public class ShareAccountIntegrationTests {
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.rejected", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.rejected", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
         List<Integer> dateList = (List<Integer>) timelineMap.get("rejectedDate");
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date rejectedDate = cal.getTime();
-        Assert.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(rejectedDate));
+        Assertions.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(rejectedDate));
 
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(2, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(2, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -265,23 +265,23 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
-                Assert.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("50.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("50.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assert.assertEquals("01 Jan 2016", simple.format(date));
+                Assertions.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("50.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("50.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("01 Jan 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
                 Date transactionDate = DateUtils.getDateOfTenant() ;
-                Assert.assertEquals(simple.format(transactionDate), simple.format(date));
+                Assertions.assertEquals(simple.format(transactionDate), simple.format(date));
             }
         }
 
         Map<String, Object> summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
 
     @Test
@@ -290,11 +290,11 @@ public class ShareAccountIntegrationTests {
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
-        Assert.assertNotNull(productId);
+        Assertions.assertNotNull(productId);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
-        Assert.assertNotNull(savingsAccountId);
+        Assertions.assertNotNull(savingsAccountId);
         String activationCharge = ChargesHelper.getShareAccountActivationChargeJson();
         Integer activationChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, activationCharge);
         String purchaseCharge = ChargesHelper.getShareAccountPurchaseChargeJson();
@@ -306,10 +306,10 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(purchaseChargeId, "2"));
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
-        Assert.assertNotNull(shareAccountId);
+        Assertions.assertNotNull(shareAccountId);
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-        Assert.assertNotNull(shareAccountData);
+        Assertions.assertNotNull(shareAccountData);
 
      // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
@@ -322,13 +322,13 @@ public class ShareAccountIntegrationTests {
         shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
         List<Integer> dateList = (List<Integer>) timelineMap.get("approvedDate");
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date approvedDate = cal.getTime();
-        Assert.assertEquals("01 Jan 2016", simple.format(approvedDate));
+        Assertions.assertEquals("01 Jan 2016", simple.format(approvedDate));
 
         // Undo Approval share Account
         Map<String, Object> undoApprovalMap = new HashMap<>();
@@ -339,11 +339,11 @@ public class ShareAccountIntegrationTests {
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
 
         statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.submitted.and.pending.approval", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.submitted.and.pending.approval", String.valueOf(statusMap.get("code")));
 
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(2, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(2, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -353,22 +353,22 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
-                Assert.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("52.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assert.assertEquals("01 Jan 2016", simple.format(date));
+                Assertions.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("52.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("01 Jan 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(date));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals(simple.format(Utils.getLocalDateOfTenant().toDate()), simple.format(date));
             }
         }
 
         Map<String, Object> summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("25", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("25", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
 
     @SuppressWarnings("unchecked")
@@ -376,11 +376,11 @@ public class ShareAccountIntegrationTests {
     public void testCreateShareAccountWithCharges() {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
-        Assert.assertNotNull(productId);
+        Assertions.assertNotNull(productId);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
-        Assert.assertNotNull(savingsAccountId);
+        Assertions.assertNotNull(savingsAccountId);
         String activationCharge = ChargesHelper.getShareAccountActivationChargeJson();
         Integer activationChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, activationCharge);
         String purchaseCharge = ChargesHelper.getShareAccountPurchaseChargeJson();
@@ -392,10 +392,10 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(purchaseChargeId, "2"));
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
-        Assert.assertNotNull(shareAccountId);
+        Assertions.assertNotNull(shareAccountId);
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-        Assert.assertNotNull(shareAccountData);
+        Assertions.assertNotNull(shareAccountData);
 
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
         shareAccountDataForUpdate.put("requestedShares", 30);
@@ -408,8 +408,8 @@ public class ShareAccountIntegrationTests {
         ShareAccountTransactionHelper.updateShareAccount(shareAccountId, updateShareAccountJsonString, requestSpec, responseSpec);
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(2, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(2, transactions.size());
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
@@ -420,16 +420,16 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("60.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assert.assertEquals("02 Mar 2016", simple.format(date));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("60.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("02 Mar 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
             }
         }
 
@@ -439,20 +439,20 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
@@ -467,13 +467,13 @@ public class ShareAccountIntegrationTests {
         shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
         List<Integer> dateList = (List<Integer>) timelineMap.get("approvedDate");
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date approvedDate = cal.getTime();
-        Assert.assertEquals("01 Jan 2016", simple.format(approvedDate));
+        Assertions.assertEquals("01 Jan 2016", simple.format(approvedDate));
 
         //charges verification
         chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
@@ -481,20 +481,20 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
@@ -506,17 +506,17 @@ public class ShareAccountIntegrationTests {
         ShareAccountTransactionHelper.postCommand("activate", shareAccountId, activateJson, requestSpec, responseSpec);
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.active", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.active", String.valueOf(statusMap.get("code")));
         timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
         dateList = (List<Integer>) timelineMap.get("activatedDate");
         cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date activatedDate = cal.getTime();
-        Assert.assertEquals("01 Jan 2016", simple.format(activatedDate));
+        Assertions.assertEquals("01 Jan 2016", simple.format(activatedDate));
 
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(2, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(2, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -526,17 +526,17 @@ public class ShareAccountIntegrationTests {
             Date date = cal.getTime();
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
-                Assert.assertEquals("02 Mar 2016", simple.format(date));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("02 Mar 2016", simple.format(date));
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("01 Jan 2016", simple.format(date));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("01 Jan 2016", simple.format(date));
             }
         }
 
@@ -546,26 +546,26 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
         Map<String, Object> summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
         // apply additional shares
         Map<String, Object> additionalSharesRequestMap = new HashMap<>();
@@ -578,8 +578,8 @@ public class ShareAccountIntegrationTests {
                 responseSpec);
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(3, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(3, transactions.size());
         String addtionalSharesRequestId = null;
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
@@ -591,26 +591,26 @@ public class ShareAccountIntegrationTests {
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
             if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
             } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
                 addtionalSharesRequestId = String.valueOf(transaction.get("id"));
-                Assert.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("30.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("30.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.applied", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.applied", String.valueOf(transactionstatusMap.get("code")));
 
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("01 Jan 2016", transactionDate);
             }
         }
 
@@ -620,26 +620,26 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("4.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("15", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("15", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
         // Approve additional Shares request
         Map<String, List<Map<String, Object>>> approveadditionalsharesMap = new HashMap<>();
@@ -654,8 +654,8 @@ public class ShareAccountIntegrationTests {
 
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(3, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(3, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -666,25 +666,25 @@ public class ShareAccountIntegrationTests {
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
             if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
             } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
-                Assert.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
 
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("01 Jan 2016", transactionDate);
             }
         }
 
@@ -694,26 +694,26 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("4.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("4.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
         // apply aditional shres and reject it
         additionalSharesRequestMap = new HashMap<>();
@@ -726,8 +726,8 @@ public class ShareAccountIntegrationTests {
                 responseSpec);
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(4, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(4, transactions.size());
         addtionalSharesRequestId = null;
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
@@ -740,13 +740,13 @@ public class ShareAccountIntegrationTests {
             String transactionDate = simple.format(date);
             if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 May 2016")) {
                 addtionalSharesRequestId = String.valueOf(transaction.get("id"));
-                Assert.assertEquals("20", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("42.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("40.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("20", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("42.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("40.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.applied", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.applied", String.valueOf(transactionstatusMap.get("code")));
             }
         }
 
@@ -756,26 +756,26 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("4.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("20", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("20", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
         // rejectadditionalshares
         Map<String, List<Map<String, Object>>> rejectadditionalsharesMap = new HashMap<>();
@@ -789,8 +789,8 @@ public class ShareAccountIntegrationTests {
                 responseSpec);
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(4, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(4, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -802,13 +802,13 @@ public class ShareAccountIntegrationTests {
             String transactionDate = simple.format(date);
             if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 May 2016")) {
                 addtionalSharesRequestId = String.valueOf(transaction.get("id"));
-                Assert.assertEquals("20", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("40.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("40.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("20", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("40.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("40.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.rejected", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.rejected", String.valueOf(transactionstatusMap.get("code")));
             }
         }
 
@@ -818,26 +818,26 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
 
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
         // redeem shares
         Map<String, Object> redeemRequestMap = new HashMap<>();
@@ -849,8 +849,8 @@ public class ShareAccountIntegrationTests {
         ShareAccountTransactionHelper.postCommand("redeemshares", shareAccountId, redeemRequestJson, requestSpec, responseSpec);
         shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(5, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(5, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -861,31 +861,31 @@ public class ShareAccountIntegrationTests {
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
             if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
             } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
-                Assert.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
             } else if (transactionType.equals("purchasedSharesType.redeemed") && transactionDate.equals("05 May 2016")) {
-                Assert.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("29.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("29.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("29.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("29.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
             } else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("01 Jan 2016", transactionDate);
             }
         }
 
@@ -895,25 +895,25 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
         //Close Share Account
         Map<String, Object> closeAccountMap = new HashMap<>();
@@ -926,10 +926,10 @@ public class ShareAccountIntegrationTests {
         shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         statusMap = (Map<String, Object>) shareAccountData.get("status");
-        Assert.assertEquals("shareAccountStatusType.closed", String.valueOf(statusMap.get("code")));
+        Assertions.assertEquals("shareAccountStatusType.closed", String.valueOf(statusMap.get("code")));
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
-        Assert.assertNotNull(transactions);
-        Assert.assertEquals(6, transactions.size());
+        Assertions.assertNotNull(transactions);
+        Assertions.assertEquals(6, transactions.size());
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -940,38 +940,38 @@ public class ShareAccountIntegrationTests {
             String transactionType = (String) transactionTypeMap.get("code");
             String transactionDate = simple.format(date);
             if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("02 Mar 2016")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("62.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
             } else if (transactionType.equals("purchasedSharesType.purchased") && transactionDate.equals("01 Apr 2016")) {
-                Assert.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
+                Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("32.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
             } else if (transactionType.equals("purchasedSharesType.redeemed") && transactionDate.equals("05 May 2016")) {
-                Assert.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("29.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("29.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("15", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("29.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("29.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
             }else if (transactionType.equals("purchasedSharesType.redeemed") && transactionDate.equals("10 May 2016")) {
-                Assert.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("59.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("59.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
+                Assertions.assertEquals("59.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("59.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
-                Assert.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
+                Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
             }else if (transactionType.equals("charge.payment")) {
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amount")));
-                Assert.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
-                Assert.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
-                Assert.assertEquals("01 Jan 2016", transactionDate);
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
+                Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
+                Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
+                Assertions.assertEquals("01 Jan 2016", transactionDate);
             }
         }
       //charges verification
@@ -980,25 +980,25 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
             String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
             if(chargeTimeType.equals("chargeTimeType.activation")) {
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
             }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
-                Assert.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
-                Assert.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
-                Assert.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
+                Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
+                Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
+                Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
             }else {
-                Assert.fail("Other Charge defintion found");
+                Assertions.fail("Other Charge defintion found");
             }
         }
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
-        Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
+        Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
 
     private Integer createShareProduct() {

@@ -23,7 +23,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,20 +81,20 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 27 global configurations.
-        Assert.assertEquals(28, expectedGlobalConfigurations.size());
-        Assert.assertEquals(28, actualGlobalConfigurations.size());
+        Assertions.assertEquals(28, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(28, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
             HashMap expectedGlobalConfiguration = expectedGlobalConfigurations.get(i);
             HashMap actualGlobalConfiguration = actualGlobalConfigurations.get(i);
 
-            Assert.assertEquals(expectedGlobalConfiguration.get("id"), actualGlobalConfiguration.get("id"));
+            Assertions.assertEquals(expectedGlobalConfiguration.get("id"), actualGlobalConfiguration.get("id"));
             final String assertionFailedMessage = "Assertion failed for configID:<" + expectedGlobalConfiguration.get("id") + ">";
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("name"), actualGlobalConfiguration.get("name"));
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("value"), actualGlobalConfiguration.get("value"));
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("enabled"), actualGlobalConfiguration.get("enabled"));
-            Assert.assertEquals(assertionFailedMessage, expectedGlobalConfiguration.get("trapDoor"), actualGlobalConfiguration.get("trapDoor"));
+            Assertions.assertEquals(expectedGlobalConfiguration.get("name"), actualGlobalConfiguration.get("name"), assertionFailedMessage);
+            Assertions.assertEquals(expectedGlobalConfiguration.get("value"), actualGlobalConfiguration.get("value"), assertionFailedMessage);
+            Assertions.assertEquals(expectedGlobalConfiguration.get("enabled"), actualGlobalConfiguration.get("enabled"), assertionFailedMessage);
+            Assertions.assertEquals(expectedGlobalConfiguration.get("trapDoor"), actualGlobalConfiguration.get("trapDoor"), assertionFailedMessage);
         }
     }
 

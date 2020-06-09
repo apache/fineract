@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -31,9 +31,9 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class RolesTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -56,7 +56,7 @@ public class RolesTest {
 
         LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(roleId);
+        Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
@@ -70,7 +70,7 @@ public class RolesTest {
 
         LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(roleId);
+        Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
@@ -91,7 +91,7 @@ public class RolesTest {
 
         LOG.info("---------------------------------CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(roleId);
+        Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
@@ -119,7 +119,7 @@ public class RolesTest {
 
         LOG.info("-------------------------------- CREATING A ROLE---------------------------------------------");
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(roleId);
+        Assertions.assertNotNull(roleId);
 
         LOG.info("--------------------------------- Getting ROLE -------------------------------");
         HashMap<String, Object> role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
@@ -133,16 +133,16 @@ public class RolesTest {
     @Test
     public void testRoleShouldGetDeletedIfNoActiveUserExists() {
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(roleId);
+        Assertions.assertNotNull(roleId);
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(staffId);
+        Assertions.assertNotNull(staffId);
 
         final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
-        Assert.assertNotNull(userId);
+        Assertions.assertNotNull(userId);
 
         final Integer deletedUserId = UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
-        Assert.assertEquals(deletedUserId, userId);
+        Assertions.assertEquals(deletedUserId, userId);
 
         final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(deletedRoleId, roleId);
@@ -151,13 +151,13 @@ public class RolesTest {
     @Test
     public void testRoleShouldNotGetDeletedIfActiveUserExists() {
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(roleId);
+        Assertions.assertNotNull(roleId);
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(staffId);
+        Assertions.assertNotNull(staffId);
 
         final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
-        Assert.assertNotNull(userId);
+        Assertions.assertNotNull(userId);
 
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
         final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);

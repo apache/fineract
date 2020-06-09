@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -35,10 +35,10 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -67,7 +67,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         // client activation, savings activation and 1st transaction date
         final String startDate = "01 December 2013";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
 
         // Configuring global config flags
         configureInterestPosting(true, 4);
@@ -97,10 +97,10 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
     private Integer createSavingsAccount(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProduct();
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
                 ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
         HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
         savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
@@ -110,15 +110,15 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
     private void configureInterestPosting(final Boolean periodEndEnable, final Integer financialYearBeginningMonth) {
         final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(globalConfig);
+        Assertions.assertNotNull(globalConfig);
 
         // Updating flag for interest posting at period end
         Integer periodEndConfigId = (Integer) globalConfig.get(10).get("id");
-        Assert.assertNotNull(periodEndConfigId);
+        Assertions.assertNotNull(periodEndConfigId);
 
         HashMap periodEndConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
                 periodEndConfigId.toString());
-        Assert.assertNotNull(periodEndConfigData);
+        Assertions.assertNotNull(periodEndConfigData);
 
         Boolean enabled = (Boolean) globalConfig.get(10).get("enabled");
 
@@ -129,15 +129,15 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
         // Updating value for financial year beginning month
         Integer financialYearBeginningConfigId = (Integer) globalConfig.get(11).get("id");
-        Assert.assertNotNull(financialYearBeginningConfigId);
+        Assertions.assertNotNull(financialYearBeginningConfigId);
 
         HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec,
                 this.responseSpec, financialYearBeginningConfigId.toString());
-        Assert.assertNotNull(financialYearBeginningConfigData);
+        Assertions.assertNotNull(financialYearBeginningConfigData);
 
         financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
                 financialYearBeginningConfigId.toString(), financialYearBeginningMonth.toString());
-        Assert.assertNotNull(financialYearBeginningConfigId);
+        Assertions.assertNotNull(financialYearBeginningConfigId);
     }
 
     private Integer createSavingsProduct() {
@@ -147,7 +147,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     }
 
     // Reset configuration fields
-    @After
+    @AfterEach
     public void tearDown() {
         GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
         GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);

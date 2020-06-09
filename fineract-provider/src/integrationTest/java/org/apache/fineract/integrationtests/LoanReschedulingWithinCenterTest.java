@@ -19,7 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
@@ -49,9 +49,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +63,7 @@ public class LoanReschedulingWithinCenterTest {
     private ResponseSpecification generalResponseSpec;
     private LoanApplicationApprovalTest loanApplicationApprovalTest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -90,9 +90,9 @@ public class LoanReschedulingWithinCenterTest {
                 responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
         Integer groupId = groupMembers[0];
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getStaffId() == staffId);
-        Assert.assertTrue(center.isActive() == true);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getStaffId() == staffId);
+        Assertions.assertTrue(center.isActive() == true);
 
         Integer calendarId = createCalendarMeeting(centerId);
 
@@ -122,7 +122,7 @@ public class LoanReschedulingWithinCenterTest {
                 recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0), null);
 
         // Test for loan account is created
-        Assert.assertNotNull(loanId);
+        Assertions.assertNotNull(loanId);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
 
         // Test for loan account is created, can be approved
@@ -201,9 +201,9 @@ public class LoanReschedulingWithinCenterTest {
                 responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
         Integer groupId = groupMembers[0];
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getStaffId() == staffId);
-        Assert.assertTrue(center.isActive() == true);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getStaffId() == staffId);
+        Assertions.assertTrue(center.isActive() == true);
 
         Integer calendarId = createCalendarMeeting(centerId);
 

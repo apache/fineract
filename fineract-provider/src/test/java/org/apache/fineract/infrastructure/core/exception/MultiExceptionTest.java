@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -52,9 +52,9 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class ClientSavingsIntegrationTest {
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -88,21 +88,21 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -120,7 +120,7 @@ public class ClientSavingsIntegrationTest {
 
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Assert.assertFalse(summaryBefore.equals(summary));
+        Assertions.assertFalse(summaryBefore.equals(summary));
 
         final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
         // verifySavingsInterest(savingsInterest);
@@ -131,21 +131,21 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = "5000";
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -166,7 +166,7 @@ public class ClientSavingsIntegrationTest {
         assertEquals(summaryBefore, summary);
 
         final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
-        Assert.assertNull(savingsInterest);
+        Assertions.assertNull(savingsInterest);
 
     }
 
@@ -178,17 +178,17 @@ public class ClientSavingsIntegrationTest {
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1000.0";
         final String enforceMinRequiredBalance = "true";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -221,7 +221,7 @@ public class ClientSavingsIntegrationTest {
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1500.0";
         final String openningBalance = "1600";
@@ -229,17 +229,17 @@ public class ClientSavingsIntegrationTest {
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, openningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
 
         final Integer savingsActivationChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsActivationFeeJSON());
-        Assert.assertNotNull(savingsActivationChargeId);
+        Assertions.assertNotNull(savingsActivationChargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, savingsActivationChargeId, true);
 
@@ -253,7 +253,7 @@ public class ClientSavingsIntegrationTest {
         Float balance = Float.valueOf(openningBalance);
         Float chargeAmt = 100f;
         balance -= chargeAmt;
-        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         Calendar todaysDate = Calendar.getInstance();
@@ -268,15 +268,15 @@ public class ClientSavingsIntegrationTest {
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, withdrawAmt,
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(withdrawAmt);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(withdrawAmt), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(withdrawAmt), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
     }
 
     @SuppressWarnings("unchecked")
@@ -288,17 +288,17 @@ public class ClientSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -331,17 +331,17 @@ public class ClientSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -376,17 +376,17 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -404,17 +404,17 @@ public class ClientSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -437,39 +437,39 @@ public class ClientSavingsIntegrationTest {
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         Float balance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance");
 
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         Integer newWithdrawTransactionId = this.savingsAccountHelper.updateSavingsAccountTransaction(savingsId, withdrawTransactionId,
                 WITHDRAW_AMOUNT_ADJUSTED);
         HashMap newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, newWithdrawTransactionId);
         balance = balance + Float.valueOf(WITHDRAW_AMOUNT) - Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
-        assertEquals("Verifying adjusted Amount", Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after adjust", balance, newWithdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED), newWithdrawTransaction.get("amount"), "Verifying adjusted Amount");
+        assertEquals(balance, newWithdrawTransaction.get("runningBalance"), "Verifying Balance after adjust");
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        assertEquals("Verifying Adjusted Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Adjusted Balance");
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        Assert.assertTrue((Boolean) withdrawTransaction.get("reversed"));
+        Assertions.assertTrue((Boolean) withdrawTransaction.get("reversed"));
 
         this.savingsAccountHelper.undoSavingsAccountTransaction(savingsId, newWithdrawTransactionId);
         newWithdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
-        Assert.assertTrue((Boolean) newWithdrawTransaction.get("reversed"));
+        Assertions.assertTrue((Boolean) newWithdrawTransaction.get("reversed"));
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         balance += Float.valueOf(WITHDRAW_AMOUNT_ADJUSTED);
-        assertEquals("Verifying Balance After Undo Transaction", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying Balance After Undo Transaction");
 
         error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "5000",
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
@@ -505,16 +505,16 @@ public class ClientSavingsIntegrationTest {
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, erroResponseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
@@ -522,21 +522,21 @@ public class ClientSavingsIntegrationTest {
 
         final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
-        Assert.assertNotNull(withdrawalChargeId);
+        Assertions.assertNotNull(withdrawalChargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(1, chargesPendingState.size());
+        Assertions.assertEquals(1, chargesPendingState.size());
 
         Integer savingsChargeId = (Integer) chargesPendingState.get(0).get("id");
         HashMap chargeChanges = this.savingsAccountHelper.updateCharges(savingsChargeId, savingsId);
-        Assert.assertTrue(chargeChanges.containsKey("amount"));
+        Assertions.assertTrue(chargeChanges.containsKey("amount"));
 
         Integer deletedChargeId = this.savingsAccountHelper.deleteCharge(savingsChargeId, savingsId);
         assertEquals(savingsChargeId, deletedChargeId);
 
         chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertTrue(chargesPendingState == null || chargesPendingState.size() == 0);
+        Assertions.assertTrue(chargesPendingState == null || chargesPendingState.size() == 0);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
@@ -545,14 +545,14 @@ public class ClientSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsAnnualFeeJSON());
-        Assert.assertNotNull(chargeId);
+        Assertions.assertNotNull(chargeId);
 
         ArrayList<HashMap> charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertTrue(charges == null || charges.size() == 0);
+        Assertions.assertTrue(charges == null || charges.size() == 0);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, chargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(1, charges.size());
+        Assertions.assertEquals(1, charges.size());
 
         HashMap savingsChargeForPay = charges.get(0);
         Integer annualSavingsChargeId = (Integer) savingsChargeForPay.get("id");
@@ -589,15 +589,15 @@ public class ClientSavingsIntegrationTest {
 
         Integer inactivatedChargeId = (Integer) this.savingsAccountHelper.inactivateCharge(annualSavingsChargeId, savingsId,
                 CommonConstants.RESPONSE_RESOURCE_ID);
-        assertEquals("Inactivated Savings Charges Id", annualSavingsChargeId, inactivatedChargeId);
+        assertEquals(annualSavingsChargeId, inactivatedChargeId, "Inactivated Savings Charges Id");
 
         final Integer monthlyFeechargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsMonthlyFeeJSON());
-        Assert.assertNotNull(monthlyFeechargeId);
+        Assertions.assertNotNull(monthlyFeechargeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, monthlyFeechargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(2, charges.size());
+        Assertions.assertEquals(2, charges.size());
 
         HashMap savingsChargeForWaive = charges.get(1);
         final Integer monthlySavingsCharge = (Integer) savingsChargeForWaive.get("id");
@@ -619,11 +619,11 @@ public class ClientSavingsIntegrationTest {
 
         final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsWeeklyFeeJSON());
-        Assert.assertNotNull(weeklyFeeId);
+        Assertions.assertNotNull(weeklyFeeId);
 
         this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assert.assertEquals(3, charges.size());
+        Assertions.assertEquals(3, charges.size());
 
         savingsChargeForPay = charges.get(2);
         final Integer weeklySavingsFeeId = (Integer) savingsChargeForPay.get("id");
@@ -642,7 +642,7 @@ public class ClientSavingsIntegrationTest {
         // Depositing huge amount as scheduler job deducts the fee amount
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100000",
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(depositTransactionId);
+        Assertions.assertNotNull(depositTransactionId);
 
         this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
                 ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
@@ -671,7 +671,7 @@ public class ClientSavingsIntegrationTest {
          * Create a client to apply for savings account (overdraft account).
          */
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
 
         /***
@@ -684,17 +684,17 @@ public class ClientSavingsIntegrationTest {
         final boolean allowOverdraft = true;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, zeroOpeningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         /***
          * Apply for Savings account
          */
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -742,8 +742,8 @@ public class ClientSavingsIntegrationTest {
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         /***
          * Perform Deposit transaction on last day of month and verify account
@@ -756,8 +756,8 @@ public class ClientSavingsIntegrationTest {
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         /***
          * Perform Post interest transaction and verify the posted amount
@@ -788,7 +788,7 @@ public class ClientSavingsIntegrationTest {
         decimalFormat.applyPattern("#.###");
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
+        assertEquals(interestPosted, actualInterestPosted, "Verifying interest posted");
 
         todaysDate = Calendar.getInstance();
         final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
@@ -810,7 +810,7 @@ public class ClientSavingsIntegrationTest {
          */
         final Integer clientID = ClientHelper.createClient(this.requestSpec,
                 this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
 
         /***
@@ -825,7 +825,7 @@ public class ClientSavingsIntegrationTest {
                 this.responseSpec, zeroOpeningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance,
                 enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         /***
          * Apply for Savings account
@@ -833,11 +833,11 @@ public class ClientSavingsIntegrationTest {
         final Integer savingsId = this.savingsAccountHelper
                 .applyForSavingsApplication(clientID, savingsProductID,
                         ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(
                 clientID, savingsProductID, savingsId, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(
                 this.requestSpec, this.responseSpec, savingsId);
@@ -899,10 +899,10 @@ public class ClientSavingsIntegrationTest {
         HashMap depositTransaction = this.savingsAccountHelper
                 .getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT),
-                depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance,
-                depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"),
+                "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"),
+                "Verifying Balance after Deposit");
 
         /***
          * Calculate expected interest to be posted, interest should be posted
@@ -937,8 +937,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
 
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
                 TRANSACTION_DATE);
@@ -969,8 +969,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
         transactionDate.set(Calendar.DAY_OF_MONTH, 3);
@@ -1005,8 +1005,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked-------");
 
         //DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
@@ -1044,8 +1044,8 @@ public class ClientSavingsIntegrationTest {
             interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
             accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
-            assertEquals("Verifying interest posted", interestPosted,
-                    accountDetailsPostInterestPosted);
+            assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                        "Verifying interest posted");
             LOG.info("-----Post Interest As on Successfully Worked----------");
         }
         DateFormat lastTransactionDateFormat = new SimpleDateFormat(
@@ -1087,8 +1087,8 @@ public class ClientSavingsIntegrationTest {
             interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
             accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
-            assertEquals("Verifying interest posted", interestPosted,
-                    accountDetailsPostInterestPosted);
+            assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                        "Verifying interest posted");
             LOG.info("-----Post Interest As on Successfully Worked----------");
 
         }
@@ -1123,8 +1123,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
     }
@@ -1140,7 +1140,7 @@ public class ClientSavingsIntegrationTest {
          */
         final Integer clientID = ClientHelper.createClient(this.requestSpec,
                 this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
 
         /***
@@ -1155,7 +1155,7 @@ public class ClientSavingsIntegrationTest {
                 this.responseSpec, zeroOpeningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance,
                 enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         /***
          * Apply for Savings account
@@ -1163,11 +1163,11 @@ public class ClientSavingsIntegrationTest {
         final Integer savingsId = this.savingsAccountHelper
                 .applyForSavingsApplication(clientID, savingsProductID,
                         ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(
                 clientID, savingsProductID, savingsId, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(
                 this.requestSpec, this.responseSpec, savingsId);
@@ -1225,8 +1225,8 @@ public class ClientSavingsIntegrationTest {
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         /***
          * Perform Deposit transaction on last day of month and verify account
@@ -1239,8 +1239,8 @@ public class ClientSavingsIntegrationTest {
                 WITHDRAWAL_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         /***
          * Calculate expected interest to be posted, interest should be posted
@@ -1275,8 +1275,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
 
         this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
                 TRANSACTION_DATE);
@@ -1307,8 +1307,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
 
         transactionDate.set(Calendar.DAY_OF_MONTH, 3);
@@ -1343,8 +1343,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked-------");
 
         //DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
@@ -1382,8 +1382,8 @@ public class ClientSavingsIntegrationTest {
             interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
             accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
-            assertEquals("Verifying interest posted", interestPosted,
-                    accountDetailsPostInterestPosted);
+            assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                "Verifying interest posted");
             LOG.info("-----Post Interest As on Successfully Worked----------");
         }
         DateFormat lastTransactionDateFormat = new SimpleDateFormat(
@@ -1425,8 +1425,8 @@ public class ClientSavingsIntegrationTest {
             interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
             accountDetailsPostInterestPosted = Float.valueOf(
                     decimalFormat.format(accountDetailsPostInterestPosted));
-            assertEquals("Verifying interest posted", interestPosted,
-                    accountDetailsPostInterestPosted);
+            assertEquals(interestPosted, accountDetailsPostInterestPosted,
+                    "Verifying interest posted");
             LOG.info("-----Post Interest As on Successfully Worked----------");
 
         }
@@ -1461,8 +1461,8 @@ public class ClientSavingsIntegrationTest {
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         accountDetailsPostInterestPosted = Float.valueOf(
                 decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted,
-                accountDetailsPostInterestPosted);
+        assertEquals(interestPosted,accountDetailsPostInterestPosted,
+                "Verifying interest posted");
         LOG.info("-----Post Interest As on Successfully Worked----------");
     }
 
@@ -1476,7 +1476,7 @@ public class ClientSavingsIntegrationTest {
          * Create a client to apply for savings account (overdraft account).
          */
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
 
         /***
@@ -1489,17 +1489,17 @@ public class ClientSavingsIntegrationTest {
         final boolean allowOverdraft = true;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, zeroOpeningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         /***
          * Apply for Savings account
          */
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -1552,8 +1552,8 @@ public class ClientSavingsIntegrationTest {
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals( balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         /***
          * Perform Deposit transaction on last day of month and verify account
@@ -1566,8 +1566,8 @@ public class ClientSavingsIntegrationTest {
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         /***
          * Perform Post interest transaction and verify the posted amount
@@ -1609,7 +1609,7 @@ public class ClientSavingsIntegrationTest {
         decimalFormat.applyPattern("#.###");
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         //actualInterestPosted = Float.valueOf(decimalFormat.format(accountDetailsPostInterestPosted));
-        assertEquals("Verifying interest posted", interestPosted, accountDetailsPostInterestPosted);
+        assertEquals(interestPosted, accountDetailsPostInterestPosted, "Verifying interest posted");
         LOG.info("------Post Interest As On After doing a post interest Successfully worked--------");
 
         todaysDate = Calendar.getInstance();
@@ -1648,7 +1648,7 @@ public class ClientSavingsIntegrationTest {
          * Create a client to apply for savings account (overdraft account).
          */
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
 
         /***
@@ -1661,17 +1661,17 @@ public class ClientSavingsIntegrationTest {
         final boolean allowOverdraft = true;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, zeroOpeningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         /***
          * Apply for Savings account
          */
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -1729,8 +1729,8 @@ public class ClientSavingsIntegrationTest {
                 ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
-        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
+        assertEquals(balance, withdrawTransaction.get("runningBalance"), "Verifying Balance after Withdrawal");
 
         /***
          * Perform Deposit transaction on last day of month and verify account
@@ -1743,8 +1743,8 @@ public class ClientSavingsIntegrationTest {
                 TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
-        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
+        assertEquals(balance, depositTransaction.get("runningBalance"), "Verifying Balance after Deposit");
 
         /***
          * Perform Post interest transaction and verify the posted amount
@@ -1776,7 +1776,7 @@ public class ClientSavingsIntegrationTest {
         decimalFormat.applyPattern("#.###");
         interestPosted = Float.valueOf(decimalFormat.format(interestPosted));
         actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
-       assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
+       assertEquals(interestPosted, actualInterestPosted, "Verifying interest posted");
        LOG.info("------Post Interest As On Successful Worked--------");
 
        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_LAST_TRANSACTION_DATE);
@@ -1796,7 +1796,7 @@ public class ClientSavingsIntegrationTest {
        decimalLastFormat.applyPattern("#.###");
        interestLastPosted = Float.valueOf(decimalLastFormat.format(interestLastPosted));
        actualInterestPosted = Float.valueOf(decimalFormat.format(actualInterestPosted));
-      assertEquals("Verifying interest posted", interestLastPosted, actualInterestPosted);
+      assertEquals(interestLastPosted, actualInterestPosted, "Verifying interest posted");
       LOG.info("------Post Interest As On Successful Worked--------");
 
     }
@@ -1808,7 +1808,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
@@ -1817,14 +1817,14 @@ public class ClientSavingsIntegrationTest {
         final Integer taxGroupId = createTaxGroup(percentage);
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft, String.valueOf(taxGroupId), false);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -1842,12 +1842,12 @@ public class ClientSavingsIntegrationTest {
 
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Assert.assertFalse(summaryBefore.equals(summary));
-        Assert.assertNotNull(summary.get("totalWithholdTax"));
+        Assertions.assertFalse(summaryBefore.equals(summary));
+        Assertions.assertNotNull(summary.get("totalWithholdTax"));
         Float expected = (Float) summary.get("totalDeposits") + (Float) summary.get("totalInterestPosted")
                 - (Float) summary.get("totalWithholdTax");
         Float actual = (Float) summary.get("accountBalance");
-        Assert.assertEquals(expected, actual, 1);
+        Assertions.assertEquals(expected, actual, 1);
 
     }
 
@@ -1856,7 +1856,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
@@ -1865,14 +1865,14 @@ public class ClientSavingsIntegrationTest {
         final Integer taxGroupId = createTaxGroup(percentage);
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft, String.valueOf(taxGroupId), false);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -1889,15 +1889,15 @@ public class ClientSavingsIntegrationTest {
         assertEquals(summaryBefore, summary);
 
         final HashMap changes = this.savingsAccountHelper.updateSavingsAccountWithHoldTaxStatus(savingsId, false);
-        Assert.assertTrue(changes.containsKey("withHoldTax"));
+        Assertions.assertTrue(changes.containsKey("withHoldTax"));
 
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Assert.assertFalse(summaryBefore.equals(summary));
-        Assert.assertNull(summary.get("totalWithholdTax"));
+        Assertions.assertFalse(summaryBefore.equals(summary));
+        Assertions.assertNull(summary.get("totalWithholdTax"));
         Float expected = (Float) summary.get("totalDeposits") + (Float) summary.get("totalInterestPosted");
         Float actual = (Float) summary.get("accountBalance");
-        Assert.assertEquals(expected, actual, 1);
+        Assertions.assertEquals(expected, actual, 1);
 
     }
 
@@ -1906,7 +1906,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
@@ -1915,21 +1915,21 @@ public class ClientSavingsIntegrationTest {
         final Integer taxGroupId = createTaxGroup(percentage);
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft, String.valueOf(taxGroupId), true);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsNoActivityFeeJSON());
-        Assert.assertNotNull(savingsChargeId);
+        Assertions.assertNotNull(savingsChargeId);
 
         ArrayList<Integer> savingsList = new ArrayList<>();
 
         for(int i=0; i< 5; i++){
             final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-            Assert.assertNotNull(savingsProductID);
+            Assertions.assertNotNull(savingsProductID);
 
             HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                     ACCOUNT_TYPE_INDIVIDUAL);
-            Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+            Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
             this.savingsAccountHelper.addChargesForSavings(savingsId, savingsChargeId, false);
 
@@ -1945,11 +1945,11 @@ public class ClientSavingsIntegrationTest {
         }
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
                 ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modifications.containsKey("submittedOnDate"));
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -1977,7 +1977,7 @@ public class ClientSavingsIntegrationTest {
         Float balance = 3000f;
         Float chargeAmt = 0f;
         balance -= chargeAmt;
-        assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
 
         //VERIFY INACTIVE
@@ -1989,7 +1989,7 @@ public class ClientSavingsIntegrationTest {
         balance = 3000f;
         chargeAmt = 100f;
         balance -= chargeAmt;
-        assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
         String TRANSACTION_DATE = formatter.print(new LocalDate());
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
@@ -2008,7 +2008,7 @@ public class ClientSavingsIntegrationTest {
         balance = 3000f;
         chargeAmt = 100f;
         balance -= chargeAmt;
-        assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
         TRANSACTION_DATE = formatter.print(new LocalDate());
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
@@ -2024,7 +2024,7 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(3));
         SavingsStatusChecker.verifySavingsSubStatusEscheat(savingsStatusHashMap);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(3));
-        assertEquals("Verifying account Balance", 2900f, summary.get("accountBalance"));
+        assertEquals(2900f, summary.get("accountBalance"), "Verifying account Balance");
 
         //VERIFY ESCHEAT DUE NO TRANSACTION FROM ACTIVATION
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(4));
@@ -2032,7 +2032,7 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(4));
         SavingsStatusChecker.verifySavingsSubStatusEscheat(savingsStatusHashMap);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(4));
-        assertEquals("Verifying account Balance", 900f, summary.get("accountBalance"));
+        assertEquals(900f, summary.get("accountBalance"), "Verifying account Balance");
 
         //VERIFY NON ACTIVE ACCOUNTS ARE NOT AFFECTED
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(5));
@@ -2110,17 +2110,17 @@ public class ClientSavingsIntegrationTest {
                 new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
         final String enforceMinRequiredBalance = "false";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -2153,7 +2153,7 @@ public class ClientSavingsIntegrationTest {
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
 
         savingsStatusHashMap = this.savingsAccountHelper.blockDebit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsDebitBlocked(savingsStatusHashMap);
@@ -2166,7 +2166,7 @@ public class ClientSavingsIntegrationTest {
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
 
         savingsStatusHashMap = this.savingsAccountHelper.unblockDebit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
@@ -2174,7 +2174,7 @@ public class ClientSavingsIntegrationTest {
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
 
         savingsStatusHashMap = this.savingsAccountHelper.blockCredit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsCreditBlocked(savingsStatusHashMap);
@@ -2187,7 +2187,7 @@ public class ClientSavingsIntegrationTest {
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf(WITHDRAW_AMOUNT);
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        assertEquals(Float.valueOf(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
 
         savingsStatusHashMap = this.savingsAccountHelper.unblockCredit(savingsId);
         SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
@@ -2195,7 +2195,7 @@ public class ClientSavingsIntegrationTest {
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
         balance += Float.valueOf(DEPOSIT_AMOUNT);
-        assertEquals("Verifying Deposit Amount", Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals(Float.valueOf(DEPOSIT_AMOUNT), depositTransaction.get("amount"), "Verifying Deposit Amount");
 
         Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, String.valueOf(balance - 100),
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
@@ -2213,7 +2213,7 @@ public class ClientSavingsIntegrationTest {
                 CommonConstants.RESPONSE_RESOURCE_ID);
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= Float.valueOf("300");
-        assertEquals("Verifying Withdrawal Amount", Float.valueOf("300"), withdrawTransaction.get("amount"));
+        assertEquals(Float.valueOf("300"), withdrawTransaction.get("amount"), "Verifying Withdrawal Amount");
 
     }
 
@@ -2228,7 +2228,7 @@ public class ClientSavingsIntegrationTest {
         //SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientID);
+        Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "500";
         final String enforceMinRequiredBalance = "false";
@@ -2237,11 +2237,11 @@ public class ClientSavingsIntegrationTest {
 
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsId);
+        Assertions.assertNotNull(savingsId);
 
 
         HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
@@ -2261,7 +2261,7 @@ public class ClientSavingsIntegrationTest {
         final Integer savingsChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
                 ChargesHelper.getSavingsJSON(chargeAmount, chargeCurrency, ChargeTimeType.SPECIFIED_DUE_DATE));
 
-        Assert.assertNotNull(savingsChargeId);
+        Assertions.assertNotNull(savingsChargeId);
 
         Integer amount = 300;
 
@@ -2269,20 +2269,20 @@ public class ClientSavingsIntegrationTest {
         final Integer chargeId = this.savingsAccountHelper.addChargesForSavingsWithDueDate(savingsId, savingsChargeId, SavingsAccountHelper.TRANSACTION_DATE,
                 amount);
 
-        Assert.assertNotNull(chargeId);
+        Assertions.assertNotNull(chargeId);
 
         final Integer payChargeId = this.savingsAccountHelper.payCharge(chargeId, savingsId, chargeAmount, SavingsAccountHelper.TRANSACTION_DATE);
 
 
         final Integer undoSavingsTransaction = this.savingsAccountHelper.undoSavingsAccountTransaction(savingsId, depositTransactionId);
         HashMap reversedDepositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
-        Assert.assertTrue((Boolean) reversedDepositTransaction.get("reversed"));
+        Assertions.assertTrue((Boolean) reversedDepositTransaction.get("reversed"));
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
         Float balance = Float.valueOf("-300");
 
-        assertEquals("Verifying opening Balance is -300", balance, summary.get("accountBalance"));
+        assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance is -300");
 
     }
 }

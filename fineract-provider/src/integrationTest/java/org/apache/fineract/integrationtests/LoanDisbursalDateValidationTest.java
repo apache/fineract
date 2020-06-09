@@ -32,9 +32,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class LoanDisbursalDateValidationTest {
     private LoanTransactionHelper loanTransactionHelper;
     private ResponseSpecification responseForbiddenError;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -94,8 +94,8 @@ public class LoanDisbursalDateValidationTest {
         @SuppressWarnings("unchecked")
         List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID, this.responseForbiddenError);
 
-        Assert.assertEquals("error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date",
-            disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        Assertions.assertEquals(disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),
+                "error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date");
 
     }
 
