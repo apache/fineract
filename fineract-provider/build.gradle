@@ -95,7 +95,7 @@ dependencyManagement {
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.779'
         dependency 'net.sf.ehcache:ehcache:2.10.6' // TODO FINERACT-1018
-        dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
+        dependency 'com.github.spullara.mustache.java:compiler:0.9.6'
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
         dependency 'org.apache.httpcomponents:httpclient:4.5.12'
