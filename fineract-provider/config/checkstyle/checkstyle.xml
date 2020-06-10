@@ -204,11 +204,6 @@
             <message key="name.invalidPattern"
              value="Class type name ''{0}'' must match pattern ''{1}''."/>
         </module>
-        <module name="MethodName">
-            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
-            <message key="name.invalidPattern"
-             value="Method name ''{0}'' must match pattern ''{1}''."/>
-        </module>
     
         <module name="ConstantName" />
         <module name="NoFinalizer"/>
