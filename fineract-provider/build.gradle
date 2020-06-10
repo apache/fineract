@@ -93,7 +93,7 @@ dependencyManagement {
         dependency 'org.mnode.ical4j:ical4j:3.0.18'
         dependency 'org.flywaydb:flyway-core:6.4.1'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.779'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.11.800'
         dependency 'net.sf.ehcache:ehcache:2.10.6' // TODO FINERACT-1018
         dependency 'com.github.spullara.mustache.java:compiler:0.8.12'
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
