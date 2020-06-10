@@ -231,7 +231,7 @@ public final class Client extends AbstractPersistableCustom {
     private AppUser reopenedBy;
 
     @Column(name = "proposed_transfer_date", nullable = true)
-     @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.DATE)
      private Date proposedTransferDate;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
