@@ -438,19 +438,14 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
             while (rs.next()) {
                 Long loanId = rs.getLong("loanId");
-                List<LoanSchedulePeriodData> periodDatas = new ArrayList<>();
-                LoanSchedulePeriodData loanSchedulePeriodData = fetchLoanSchedulePeriodData(rs);
-                periodDatas.add(loanSchedulePeriodData);
-                while (rs.next()) {
-                    Long tempLoanId = rs.getLong("loanId");
-                    if (loanId.equals(tempLoanId)) {
-                        periodDatas.add(fetchLoanSchedulePeriodData(rs));
-                    } else {
-                        rs.previous();
-                        break;
-                    }
+
+                List<LoanSchedulePeriodData> periodDatas = scheduleDate.get(loanId);
+                if (periodDatas == null) {
+                    periodDatas = new ArrayList<>();
+                    scheduleDate.put(loanId, periodDatas);
                 }
-                scheduleDate.put(loanId, periodDatas);
+
+                periodDatas.add(fetchLoanSchedulePeriodData(rs));
             }
 
             return scheduleDate;
