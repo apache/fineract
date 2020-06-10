@@ -460,6 +460,7 @@ tasks.withType(JavaCompile) {
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
                 "DoubleBraceInitialization",
+                "UnnecessaryDefaultInEnumSwitch",
                 "InconsistentCapitalization",
                 "MissingOverride",
 //                "InvalidBlockTag",

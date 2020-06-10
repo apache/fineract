@@ -47,6 +47,7 @@ public class ContentRepositoryUtils {
             return this.value;
         }
 
+        @SuppressWarnings("UnnecessaryDefaultInEnumSwitch")
         public static ImageMIMEtype fromFileExtension(ImageFileExtension fileExtension) {
             switch (fileExtension) {
                 case GIF:

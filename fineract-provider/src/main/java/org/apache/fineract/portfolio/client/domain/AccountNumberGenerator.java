@@ -103,9 +103,6 @@ public class AccountNumberGenerator {
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
                 break;
 
-                default:
-                break;
-
             }
 
             // FINERACT-590
