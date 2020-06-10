@@ -87,8 +87,8 @@ public class EntityFieldConfigurationApiResources {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-       @ApiOperation(httpMethod = "GET", value = "Retrieves the Entity Field Configuration", notes = "It retrieves all the Entity Field Configuration")
-       @ApiResponses({@ApiResponse(code = 200, message = "OK", response = EntityFieldConfigurationApiResourcesSwagger.GetFieldConfigurationEntityResponse.class, responseContainer = "List")})
+    @ApiOperation(httpMethod = "GET", value = "Retrieves the Entity Field Configuration", notes = "It retrieves all the Entity Field Configuration")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = EntityFieldConfigurationApiResourcesSwagger.GetFieldConfigurationEntityResponse.class, responseContainer = "List")})
     public String getAddresses(@PathParam("entity") @ApiParam(value = "entity") final String entityname, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 

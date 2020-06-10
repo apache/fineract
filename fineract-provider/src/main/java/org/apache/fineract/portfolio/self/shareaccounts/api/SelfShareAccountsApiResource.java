@@ -110,11 +110,11 @@ public class SelfShareAccountsApiResource {
  @Path("template")
  @Consumes({ MediaType.APPLICATION_JSON })
  @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Share Account Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" +
+ @ApiOperation(value = "Retrieve Share Account Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" +
             "Field Defaults\n" + "\n"+
             "Allowed Value Lists\n" + "\n"+ "\n"+ "Arguments\n"+ "\n"+ "clientId:Integer mandatory\n"+ "productId:Integer optionalIf entered, productId, productName and selectedProduct fields are returned.\n"+ "Example Requests:\n" + "\n" + "self/shareaccounts/template?clientId=14\n" + "\n" +
             "self/shareaccounts/template?clientId=14&productId=3\n")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class)})
+ @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class)})
  public String template(@QueryParam("clientId") @ApiParam("clientId") final Long clientId, @QueryParam("productId") @ApiParam("productId") final Long productId,
    @Context final UriInfo uriInfo) {
 
@@ -140,8 +140,8 @@ public class SelfShareAccountsApiResource {
  @POST
  @Consumes({ MediaType.APPLICATION_JSON })
  @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Submit new share application", httpMethod = "POST", notes = "Mandatory fields:\n" + "\n" + "clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate\n" + "\n" + "\n" +  "Optional Fields\n" + "\n" + "accountNo, externalId\n" + "\n" + "\n" + "Inherited from Product (if not provided)\n" +  "\n" +  "minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType.")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.PostNewShareApplicationResponse.class)})
+ @ApiOperation(value = "Submit new share application", httpMethod = "POST", notes = "Mandatory fields:\n" + "\n" + "clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate\n" + "\n" + "\n" +  "Optional Fields\n" + "\n" + "accountNo, externalId\n" + "\n" + "\n" + "Inherited from Product (if not provided)\n" +  "\n" +  "minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType.")
+ @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.PostNewShareApplicationResponse.class)})
  public String createAccount(final String apiRequestBodyAsJson) {
   HashMap<String, Object> attr = this.selfShareAccountsDataValidator
     .validateShareAccountApplication(apiRequestBodyAsJson);
@@ -155,7 +155,7 @@ public class SelfShareAccountsApiResource {
  @Path("{accountId}")
  @Consumes({ MediaType.APPLICATION_JSON })
  @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a share application/account", httpMethod = "GET", notes = "\n" +
+ @ApiOperation(value = "Retrieve a share application/account", httpMethod = "GET", notes = "\n" +
             "\n" + "\n" + "Example Requests:\n" + "\n" + "self/shareaccounts/12\n")
  // TODO actually write SelfShareAccountsApiResourceSwagger.GetShareAccountResponse (it currently does not exist)
     // @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountResponse.class)})
