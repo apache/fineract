@@ -407,8 +407,6 @@ public class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.INCOME_POSTING.getValue().longValue(),
                         LoanTransactionType.INCOME_POSTING.getCode(), "Income Posting");
             break;
-            default:
-            break;
         }
         return optionData;
     }
@@ -472,8 +470,6 @@ public class LoanEnumerations {
             case TRANSFER_ON_HOLD:
                 optionData = new LoanStatusEnumData(LoanStatus.TRANSFER_ON_HOLD.getValue().longValue(),
                         LoanStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
-            break;
-            default:
             break;
         }
 
@@ -737,8 +733,6 @@ public class LoanEnumerations {
                         LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getCode(), "Till rest Frequency Date");
             break;
             case NONE:
-            break;
-            default:
             break;
         }
         return optionData;

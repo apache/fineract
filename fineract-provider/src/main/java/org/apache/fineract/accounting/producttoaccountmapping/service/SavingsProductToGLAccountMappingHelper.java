@@ -172,8 +172,6 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
             break;
             case ACCRUAL_UPFRONT:
             break;
-            default:
-            break;
         }
         return changes;
     }
@@ -236,8 +234,6 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
             case ACCRUAL_PERIODIC:
             break;
             case ACCRUAL_UPFRONT:
-            break;
-            default:
             break;
         }
     }

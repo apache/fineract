@@ -149,8 +149,6 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             break;
             case ACCRUAL_UPFRONT:
             break;
-            default:
-            break;
         }
         return changes;
     }
@@ -191,8 +189,6 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             case ACCRUAL_PERIODIC:
             break;
             case ACCRUAL_UPFRONT:
-            break;
-            default:
             break;
         }
     }
