@@ -65,6 +65,12 @@
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
+        <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
+            <property name="packageNameRegexp" value=".*" />
+            <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
+            <property name="forbiddenImportsExcludesRegexp" value="" />
+            <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
+        </module>
            <module name="OneStatementPerLine"/>
            <module name="EmptyStatement"/>
              <module name="RegexpSinglelineJava">
@@ -123,13 +129,8 @@
         <module name="MutableException"/>
         <module name="com.github.sevntu.checkstyle.checks.coding.AvoidHidingCauseExceptionCheck" />
 
-        < ! - - Checks for API conventions and the like - - >
-        <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
-            <property name="packageNameRegexp" value=".*" />
-            <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
-            <property name="forbiddenImportsExcludesRegexp" value="" />
-            <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
-        </module>
+      
+     
       
 
         <module name="OuterTypeFilename"/>
