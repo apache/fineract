@@ -45,9 +45,9 @@ public class StaffData implements Serializable {
     private String dateFormat;
     private String locale;
 
-    public static StaffData importInstance(String externalId, String firstName, String lastName, String mobileNo, Long officeId, Boolean isLoanOfficer,
+    public static StaffData importInstance(String externalId, String firstname, String lastname, String mobileNo, Long officeId, Boolean isLoanOfficer,
             Boolean isActive, LocalDate joinedOnDate, Integer rowIndex,String locale, String dateFormat){
-        return  new StaffData(externalId,firstName,lastName,mobileNo,officeId,isLoanOfficer,isActive,
+        return  new StaffData(externalId,firstname,lastname,mobileNo,officeId,isLoanOfficer,isActive,
                 joinedOnDate,rowIndex,locale,dateFormat);
 
     }

@@ -48,11 +48,11 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
     @Autowired
     public CreditBureauLoanProductMappingWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final CreditBureauLoanProductMappingRepository creditbureauLoanProductMappingRepository,
+            final CreditBureauLoanProductMappingRepository creditBureauLoanProductMappingRepository,
             final OrganisationCreditBureauRepository organisationCreditBureauRepository, LoanProductRepository loanProductRepository,
             final CreditBureauLoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
-        this.creditBureauLoanProductMappingRepository = creditbureauLoanProductMappingRepository;
+        this.creditBureauLoanProductMappingRepository = creditBureauLoanProductMappingRepository;
         this.organisationCreditBureauRepository = organisationCreditBureauRepository;
         this.loanProductRepository = loanProductRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;

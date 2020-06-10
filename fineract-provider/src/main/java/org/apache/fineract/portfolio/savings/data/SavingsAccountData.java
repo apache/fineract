@@ -644,7 +644,7 @@ public class SavingsAccountData implements Serializable {
 
     private SavingsAccountData(final Long id, final String accountNo, final EnumOptionData depositType, final String externalId,
             final Long groupId, final String groupName, final Long clientId, final String clientName, final Long productId,
-            final String productName, final Long fieldofficerId, final String fieldofficerName, final SavingsAccountStatusEnumData status,
+            final String productName, final Long fieldOfficerId, final String fieldOfficerName, final SavingsAccountStatusEnumData status,
             final SavingsAccountSubStatusEnumData subStatus, final SavingsAccountApplicationTimelineData timeline, final CurrencyData currency,
             final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
@@ -674,8 +674,8 @@ public class SavingsAccountData implements Serializable {
         this.clientName = clientName;
         this.savingsProductId = productId;
         this.savingsProductName = productName;
-        this.fieldOfficerId = fieldofficerId;
-        this.fieldOfficerName = fieldofficerName;
+        this.fieldOfficerId = fieldOfficerId;
+        this.fieldOfficerName = fieldOfficerName;
         this.status = status;
         this.subStatus = subStatus;
         this.timeline = timeline;

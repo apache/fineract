@@ -41,8 +41,8 @@ public class LoanTrancheDisbursementCharge extends AbstractPersistableCustom {
 
     }
 
-    public LoanTrancheDisbursementCharge(final LoanCharge loanCharge, final LoanDisbursementDetails loanDisbursementDetails){
-        this.loancharge = loanCharge;
+    public LoanTrancheDisbursementCharge(final LoanCharge loancharge, final LoanDisbursementDetails loanDisbursementDetails){
+        this.loancharge = loancharge;
         this.loanDisbursementDetails = loanDisbursementDetails;
     }
 

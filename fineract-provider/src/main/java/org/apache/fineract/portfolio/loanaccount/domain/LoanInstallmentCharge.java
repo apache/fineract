@@ -73,8 +73,8 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         return this.installment.getInstallmentNumber().compareTo(o.installment.getInstallmentNumber());
     }
 
-    public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment) {
-        this.loancharge = loanCharge;
+    public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loancharge, final LoanRepaymentScheduleInstallment installment) {
+        this.loancharge = loancharge;
         this.installment = installment;
         this.amount = amount;
         this.amountOutstanding = amount;

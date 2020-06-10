@@ -135,8 +135,8 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
 
-    public void setOrganisationCreditBureauId(Long OrganisationCreditBureauId) {
-        this.organisationCreditBureauId = OrganisationCreditBureauId;
+    public void setOrganisationCreditBureauId(Long organisationCreditBureauId) {
+        this.organisationCreditBureauId = organisationCreditBureauId;
     }
 
     public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {

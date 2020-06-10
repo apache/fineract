@@ -42,7 +42,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         private final ArrayList<HashMap> groupMembers;
 
         private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-                final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
+                final String name, final String externalId, final Integer staffId, final int officeId, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
             this.accountNo = null;
@@ -54,7 +54,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
             this.name = name;
             this.externalId = externalId;
             this.staffId = staffId;
-            this.officeId = officeID;
+            this.officeId = officeId;
             this.officeName = officeName;
             this.hierarchy = hierarchy;
             this.groupMembers = groupMembers;
@@ -85,7 +85,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-            final String name, final String externalId, final Integer staffId, final Integer officeID, final String officeName,
+            final String name, final String externalId, final Integer staffId, final Integer officeId, final String officeName,
             final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
@@ -97,7 +97,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         this.name = name;
         this.externalId = externalId;
         this.staffId = staffId;
-        this.officeId = officeID;
+        this.officeId = officeId;
         this.officeName = officeName;
         this.hierarchy = hierarchy;
         this.groupMembers = groupMembers;
@@ -112,15 +112,15 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     public static Builder create(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,
-            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeID,
+            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeId,
             final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
-        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID, officeName, hierarchy,
+        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeId, officeName, hierarchy,
                 groupMembers);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static String jsonRequestToCreateCenter(Integer id, Integer statusId, String statusCode, String statusValue, Boolean active,
-            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeID,
+            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeId,
             String officeName, String hierarchy, final int[] groupMembers) {
         // String ids = String.valueOf(id);
         final HashMap map = new HashMap<>();
