@@ -232,8 +232,8 @@ public final class LoanApplicationTerms {
             final BigDecimal principalThresholdForLastInstalment, final Integer installmentAmountInMultiplesOf,
             final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy, final Calendar loanCalendar,
             BigDecimal approvedAmount, List<LoanTermVariationsData> loanTermVariations,
-            Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled, final Integer numberOfdays,
-            boolean isSkipRepaymentOnFirstDayofMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
+            Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled, final Integer numberOfDays,
+            boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod,
             final boolean isEqualAmortization) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
@@ -248,7 +248,7 @@ public final class LoanApplicationTerms {
                 interestRecalculationCompoundingMethod, restCalendarInstance, recalculationFrequencyType, compoundingCalendarInstance,
                 compoundingFrequencyType, principalThresholdForLastInstalment, installmentAmountInMultiplesOf,
                 preClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations, calendarHistoryDataWrapper,
-                isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfdays, isSkipRepaymentOnFirstDayofMonth, holidayDetailDTO,
+                isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO,
                 allowCompoundingOnEod, isEqualAmortization);
 
     }
@@ -265,7 +265,7 @@ public final class LoanApplicationTerms {
             final CalendarInstance compoundingCalendarInstance, final RecalculationFrequencyType compoundingFrequencyType,
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy,
             final LoanRescheduleStrategyMethod rescheduleStrategyMethod, BigDecimal approvedAmount, BigDecimal annualNominalInterestRate,
-            List<LoanTermVariationsData> loanTermVariations, final Integer numberOfdays, final boolean isSkipRepaymentOnFirstDayofMonth,
+            List<LoanTermVariationsData> loanTermVariations, final Integer numberOfDays, final boolean isSkipRepaymentOnFirstDayOfMonth,
             final Calendar loanCalendar, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod) {
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
 
@@ -275,7 +275,7 @@ public final class LoanApplicationTerms {
                 principalThresholdForLastInstalment, installmentAmountInMultiplesOf, recalculationFrequencyType, restCalendarInstance,
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, loanPreClosureInterestCalculationStrategy,
                 rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations,
-                calendarHistoryDataWrapper, numberOfdays, isSkipRepaymentOnFirstDayofMonth, holidayDetailDTO, allowCompoundingOnEod);
+                calendarHistoryDataWrapper, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -291,8 +291,8 @@ public final class LoanApplicationTerms {
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy,
             final LoanRescheduleStrategyMethod rescheduleStrategyMethod, final Calendar loanCalendar, BigDecimal approvedAmount,
             BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations,
-            final CalendarHistoryDataWrapper calendarHistoryDataWrapper, final Integer numberOfdays,
-            final boolean isSkipRepaymentOnFirstDayofMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod) {
+            final CalendarHistoryDataWrapper calendarHistoryDataWrapper, final Integer numberOfDays,
+            final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO, final boolean allowCompoundingOnEod) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -328,8 +328,8 @@ public final class LoanApplicationTerms {
                 isInterestRecalculationEnabled, rescheduleStrategyMethod, compoundingMethod, restCalendarInstance,
                 recalculationFrequencyType, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount,
-                loanTermVariations, calendarHistoryDataWrapper, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfdays,
-                isSkipRepaymentOnFirstDayofMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization);
+                loanTermVariations, calendarHistoryDataWrapper, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays,
+                isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO, allowCompoundingOnEod, isEqualAmortization);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -343,7 +343,7 @@ public final class LoanApplicationTerms {
             final BigDecimal principalThresholdForLastInstalment, final Integer installmentAmountInMultiplesOf,
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy, final Calendar loanCalendar,
             BigDecimal approvedAmount, final BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations,
-            Integer numberOfdays, boolean isSkipRepaymentOnFirstDayofMonth, final HolidayDetailDTO holidayDetailDTO,
+            Integer numberOfDays, boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO,
             final boolean allowCompoundingOnEod) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
@@ -387,7 +387,7 @@ public final class LoanApplicationTerms {
                 rescheduleStrategyMethod, interestRecalculationCompoundingMethod, restCalendarInstance, recalculationFrequencyType,
                 compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment, installmentAmountInMultiplesOf,
                 loanPreClosureInterestCalculationStrategy, loanCalendar, approvedAmount, loanTermVariations, calendarHistoryDataWrapper,
-                isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfdays, isSkipRepaymentOnFirstDayofMonth, holidayDetailDTO,
+                isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipRepaymentOnFirstDayOfMonth, holidayDetailDTO,
                 allowCompoundingOnEod, isEqualAmortization);
 
     }
@@ -437,7 +437,7 @@ public final class LoanApplicationTerms {
             final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy, final Calendar loanCalendar,
             BigDecimal approvedAmount, List<LoanTermVariationsData> loanTermVariations,
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper, Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled,
-            final Integer numberOfdays, final boolean isSkipRepaymentOnFirstDayofMonth, final HolidayDetailDTO holidayDetailDTO,
+            final Integer numberOfDays, final boolean isSkipRepaymentOnFirstDayOfMonth, final HolidayDetailDTO holidayDetailDTO,
             final boolean allowCompoundingOnEod, final boolean isEqualAmortization) {
 
         this.currency = currency;
@@ -487,8 +487,8 @@ public final class LoanApplicationTerms {
         this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.preClosureInterestCalculationStrategy = preClosureInterestCalculationStrategy;
-        this.isSkipRepaymentOnFirstDayOfMonth = isSkipRepaymentOnFirstDayofMonth;
-        this.numberOfDays = numberOfdays;
+        this.isSkipRepaymentOnFirstDayOfMonth = isSkipRepaymentOnFirstDayOfMonth;
+        this.numberOfDays = numberOfDays;
 
         this.loanCalendar = loanCalendar;
         this.approvedPrincipal = Money.of(principal.getCurrency(), approvedAmount);

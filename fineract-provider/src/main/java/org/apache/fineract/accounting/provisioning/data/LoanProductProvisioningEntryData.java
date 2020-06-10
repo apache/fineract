@@ -85,7 +85,7 @@ public class LoanProductProvisioningEntryData {
     }
 
     public LoanProductProvisioningEntryData(final Long historyId, final Long officeId, final String officeName, final String currencyCode, final Long productId,
-            final String productName, final Long categoryId, final String categoryName, final Long overdueInDays, final BigDecimal amountReserved,
+            final String productName, final Long categoryId, final String categoryName, final Long overdueInDays, final BigDecimal amountreserved,
             Long liablityAccount, String liabilityAccountglCode, String liabilityAccountName, Long expenseAccount, String expenseAccountglCode, String expenseAccountName, final Long criteriaId) {
         this.historyId = historyId;
         this.officeId = officeId;
@@ -100,7 +100,7 @@ public class LoanProductProvisioningEntryData {
         this.expenseAccount = expenseAccount;
         this.officeName = officeName ;
         this.productName = productName ;
-        this.amountreserved = amountReserved ;
+        this.amountreserved = amountreserved ;
         this.liabilityAccountCode = liabilityAccountglCode ;
         this.liabilityAccountName = liabilityAccountName ;
         this.expenseAccountCode = expenseAccountglCode ;

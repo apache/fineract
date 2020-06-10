@@ -56,10 +56,10 @@ public class AppUserData {
     @SuppressWarnings("unused")
     private Set<ClientData> clients;
 
-    public static AppUserData importInstance(Long officeId,Long staffId,String userName, String firstName, String lastName,
+    public static AppUserData importInstance(Long officeId,Long staffId,String username, String firstname, String lastname,
             String email,Boolean sendPasswordToEmail,Boolean passwordNeverExpires, List<Long> roleIds,
             Integer rowIndex){
-        return new AppUserData(officeId,staffId,userName,firstName,lastName,email,
+        return new AppUserData(officeId,staffId,username,firstname,lastname,email,
                 sendPasswordToEmail,passwordNeverExpires,roleIds,rowIndex);
     }
     private AppUserData(Long officeId,Long staffId,String username, String firstname, String lastname,

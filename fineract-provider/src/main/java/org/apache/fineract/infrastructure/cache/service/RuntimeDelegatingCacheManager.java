@@ -50,8 +50,8 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
     private CacheManager currentCacheManager;
 
     @Autowired
-    public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehCacheCacheManager) {
-        this.ehcacheCacheManager = ehCacheCacheManager;
+    public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehcacheCacheManager) {
+        this.ehcacheCacheManager = ehcacheCacheManager;
         this.currentCacheManager = this.noOpCacheManager;
     }
 

@@ -77,10 +77,10 @@ public class GuarantorData {
     private String dateFormat;
     private String locale;
 
-    public static GuarantorData importInstance(Integer guarantorTypeId,Integer clientRelationshipTypeId,Long entityId,String firstName,
-            String lastName,String addressLine1,String addressLine2,String city,LocalDate dob, String zip,
+    public static GuarantorData importInstance(Integer guarantorTypeId,Integer clientRelationshipTypeId,Long entityId,String firstname,
+            String lastname,String addressLine1,String addressLine2,String city,LocalDate dob, String zip,
             Integer savingsId, BigDecimal amount,Integer rowIndex,Long accountId,String locale,String dateFormat){
-        return new GuarantorData(guarantorTypeId,clientRelationshipTypeId,entityId,firstName, lastName,
+        return new GuarantorData(guarantorTypeId,clientRelationshipTypeId,entityId,firstname, lastname,
                 addressLine1, addressLine2,city,dob,zip,savingsId,amount, rowIndex, accountId,locale,dateFormat);
     }
     private GuarantorData(Integer guarantorTypeId,Integer clientRelationshipTypeId,Long entityId,String firstname,

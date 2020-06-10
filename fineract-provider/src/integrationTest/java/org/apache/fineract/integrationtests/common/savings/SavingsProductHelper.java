@@ -222,9 +222,9 @@ public class SavingsProductHelper {
         return this;
     }
 
-    public SavingsProductHelper withOverDraft(final String overDraftLimit) {
+    public SavingsProductHelper withOverDraft(final String overdraftLimit) {
         this.allowOverdraft = "true";
-        this.overdraftLimit = overDraftLimit;
+        this.overdraftLimit = overdraftLimit;
         return this;
     }
 

@@ -237,8 +237,8 @@ public class GLAccount extends AbstractPersistableCustom {
         return GLAccountUsage.DETAIL.getValue().equals(this.usage);
     }
 
-    public void updateTagId(final CodeValue tagID) {
-        this.tagId = tagID;
+    public void updateTagId(final CodeValue tagId) {
+        this.tagId = tagId;
     }
 
     public void updateParentAccount(final GLAccount parentAccount) {

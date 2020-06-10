@@ -127,12 +127,12 @@ final public class ClientData implements Comparable<ClientData>, Serializable {
                 address,clientNonPersonDetails, locale,dateFormat);
     }
 
-    public static ClientData importClientPersonInstance(Long legalFormId,Integer rowIndex,String firstName,String lastName,String middleName,
+    public static ClientData importClientPersonInstance(Long legalFormId,Integer rowIndex,String firstname,String lastname,String middlename,
             LocalDate submittedOn,LocalDate activationDate,Boolean active,String externalId,Long officeId,
             Long staffId,String mobileNo, LocalDate dob,Long clientTypeId,Long genderId,
             Long clientClassificationId, Boolean isStaff, Collection<AddressData> address,String locale,String dateFormat){
 
-        return new ClientData(legalFormId,rowIndex, null, firstName,lastName,middleName,submittedOn,activationDate,active,externalId,
+        return new ClientData(legalFormId,rowIndex, null, firstname,lastname,middlename,submittedOn,activationDate,active,externalId,
                 officeId,staffId,mobileNo,dob,clientTypeId,genderId,clientClassificationId,isStaff,address, null, locale,dateFormat);
     }
 

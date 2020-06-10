@@ -42,10 +42,10 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom {
     @OneToMany(mappedBy = "organisation_creditbureau", cascade = CascadeType.ALL)
     private List<CreditBureauLoanProductMapping> creditBureauLoanProductMapping = new ArrayList<>();
 
-    public OrganisationCreditBureau(String alias, CreditBureau creditBureau, boolean is_active,
+    public OrganisationCreditBureau(String alias, CreditBureau creditbureau, boolean is_active,
             List<CreditBureauLoanProductMapping> creditBureauLoanProductMapping) {
         this.alias = alias;
-        this.creditbureau = creditBureau;
+        this.creditbureau = creditbureau;
         this.is_active = is_active;
         this.creditBureauLoanProductMapping = creditBureauLoanProductMapping;
     }
@@ -54,11 +54,11 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom {
 
     }
 
-    public static OrganisationCreditBureau fromJson(final JsonCommand command, CreditBureau creditBureau) {
+    public static OrganisationCreditBureau fromJson(final JsonCommand command, CreditBureau creditbureau) {
         final String alias = command.stringValueOfParameterNamed("alias");
         final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
 
-        return new OrganisationCreditBureau(alias, creditBureau, is_active, null);
+        return new OrganisationCreditBureau(alias, creditbureau, is_active, null);
     }
 
     public String getAlias() {
@@ -73,8 +73,8 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom {
         return this.creditbureau;
     }
 
-    public void setCreditBureau(CreditBureau creditBureau) {
-        this.creditbureau = creditBureau;
+    public void setCreditBureau(CreditBureau creditbureau) {
+        this.creditbureau = creditbureau;
     }
 
     public boolean isActive() {

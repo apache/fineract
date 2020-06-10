@@ -71,7 +71,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
             final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper gLAccountRepository,
             final TaxGroupRepositoryWrapper taxGroupRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -80,7 +80,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.chargeRepository = chargeRepository;
         this.loanProductRepository = loanProductRepository;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-        this.gLAccountRepository = glAccountRepository;
+        this.gLAccountRepository = gLAccountRepository;
         this.taxGroupRepository = taxGroupRepository;
     }
 
