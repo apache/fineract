@@ -194,7 +194,7 @@ public class InteropApiResource {
     public String registerAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                             @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                             @ApiParam(hidden = true) String identifierJson, @Context UriInfo uriInfo)
-            throws Throwable {
+                        {
         CommandWrapper commandRequest = new InteropWrapperBuilder().registerAccountIdentifier(idType, idValue, null).withJson(identifierJson).build();
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
@@ -215,7 +215,7 @@ public class InteropApiResource {
                                             @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                             @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType,
                                             @ApiParam(hidden = true) String identifierJson, @Context UriInfo uriInfo)
-            throws Throwable {
+                         {
         CommandWrapper commandRequest = new InteropWrapperBuilder().registerAccountIdentifier(idType, idValue, subIdOrType).withJson(identifierJson).build();
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
@@ -235,7 +235,7 @@ public class InteropApiResource {
     public String deleteAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                           @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                           @Context UriInfo uriInfo)
-            throws Throwable {
+                         {
         CommandWrapper commandRequest = new InteropWrapperBuilder().deleteAccountIdentifier(idType, idValue, null).build();
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
@@ -256,7 +256,7 @@ public class InteropApiResource {
                                           @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                           @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType,
                                           @Context UriInfo uriInfo)
-            throws Throwable {
+                           {
         CommandWrapper commandRequest = new InteropWrapperBuilder().deleteAccountIdentifier(idType, idValue, subIdOrType).build();
 
         InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);

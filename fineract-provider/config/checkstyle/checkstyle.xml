@@ -57,6 +57,7 @@
         </module>
         <module name="EqualsHashCode"/>
         <module name="FallThrough"/>
+        <module name="IllegalThrows" />
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="AvoidStarImport"/>
@@ -125,7 +126,7 @@
 
         < ! - - TODO Checks for Exception Handling Anti-Patterns - - >
         <module name="IllegalCatch"/>
-        <module name="IllegalThrows" />
+
         <module name="MutableException"/>
         <module name="com.github.sevntu.checkstyle.checks.coding.AvoidHidingCauseExceptionCheck" />
 
