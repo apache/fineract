@@ -43,6 +43,7 @@ dependencies {
             'com.sun.jersey:jersey-json',
             'com.sun.jersey.contribs:jersey-spring',
             'com.sun.jersey.contribs:jersey-multipart',
+            'io.swagger:swagger-jersey-jaxrs',
 
             'joda-time:joda-time',
             'com.google.code.gson:gson',
@@ -76,9 +77,7 @@ dependencies {
 
              'com.github.spotbugs:spotbugs-annotations',
     )
-    implementation ('io.swagger:swagger-jersey-jaxrs') {
-		exclude group: 'javax.validation'
-    }
+
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
     }
