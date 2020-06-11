@@ -108,7 +108,7 @@ dependencyManagement {
         dependency 'junit:junit:4.13' // TODO FINERACT-1018??
         dependency 'org.mockito:mockito-core:3.3.3'
         dependency 'io.github.classgraph:classgraph:4.8.85'
-        dependency 'org.awaitility:awaitility:4.0.2'
+        dependency 'org.awaitility:awaitility:4.0.3'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.0.4'
 
         dependency ('org.dom4j:dom4j:2.1.3') {
