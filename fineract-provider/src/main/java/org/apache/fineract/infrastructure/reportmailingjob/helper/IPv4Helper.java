@@ -20,7 +20,8 @@ package org.apache.fineract.infrastructure.reportmailingjob.helper;
 
 import java.net.InetAddress;
 import org.apache.commons.lang3.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * This utility provides methods to either convert an IPv4 address to its long format or a 32bit dotted format.
  *
@@ -34,7 +35,8 @@ public class IPv4Helper {
      * @return the long format of <code>ipAddress</code>
      * @throws IllegalArgumentException if <code>ipAddress</code> is invalid
      */
-    public static long ipAddressToLong(String ipAddress) {
+     private final static Logger LOG = LoggerFactory.getLogger(IPv4Helper.class);
+     public static long ipAddressToLong(String ipAddress) {
         if (ipAddress == null || ipAddress.isEmpty()) {
             throw new IllegalArgumentException("ip address cannot be null or empty");
         }
@@ -126,7 +128,9 @@ public class IPv4Helper {
             }
         }
 
-        catch (Exception exception) { }
+        catch (Exception exception) {
+            LOG.error("Problem occurred in applicationIsRunningOnLocalMachine function",exception);
+         }
 
         return isRunningOnLocalMachine;
     }

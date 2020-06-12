@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.hooks.processor;
 
 import com.squareup.okhttp.OkHttpClient;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -65,7 +67,10 @@ public class ProcessorHelper {
         try {
             ctx = SSLContext.getInstance("TLS");
             ctx.init(null, certs, new SecureRandom());
-        } catch (final java.security.GeneralSecurityException ex) {
+        } catch (KeyManagementException ex) {
+            LOG.error("Problem occurred in configureClient function",ex);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("No Provider supports a TrustManagerFactorySpi implementation for the specified protocol.", e);
         }
 
         try {
@@ -79,6 +84,7 @@ public class ProcessorHelper {
             client.setHostnameVerifier(hostnameVerifier);
             client.setSslSocketFactory(ctx.getSocketFactory());
         } catch (final Exception e) {
+            LOG.error("Problem occurred in configureClient function",e);
         }
 
         return client;
