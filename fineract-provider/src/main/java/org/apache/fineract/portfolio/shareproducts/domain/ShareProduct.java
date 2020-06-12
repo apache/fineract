@@ -248,7 +248,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setUnitPrice(BigDecimal unitPrice) {
         boolean returnValue = false;
-        if (!this.unitPrice.equals(unitPrice)) {
+        if (this.unitPrice.compareTo(unitPrice) == 0 ? Boolean.FALSE:Boolean.TRUE) {
             this.unitPrice = unitPrice;
             returnValue = true;
         }
@@ -363,7 +363,7 @@ public class ShareProduct extends AbstractAuditableCustom {
 
     public boolean setshareCapitalValue(BigDecimal shareCapitalValue) {
         boolean updated = false;
-        if (this.shareCapital == null || !this.shareCapital.equals(shareCapitalValue)) {
+        if (this.shareCapital == null || this.shareCapital.compareTo(shareCapitalValue) == 0 ? Boolean.FALSE:Boolean.TRUE) {
             this.shareCapital = shareCapitalValue;
             updated = true;
         }

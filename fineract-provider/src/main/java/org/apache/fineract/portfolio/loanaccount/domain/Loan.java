@@ -2834,7 +2834,7 @@ public class Loan extends AbstractPersistableCustom {
             this.actualDisbursementDate = null;
             this.disbursedBy = null;
             boolean isDisbursedAmountChanged =
-                    !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal().getAmount());
+                    approvedPrincipal.compareTo(this.loanRepaymentScheduleDetail.getPrincipal().getAmount()) == 0 ? Boolean.FALSE:Boolean.TRUE;
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
             if (this.loanProduct.isMultiDisburseLoan()) {
                 for (final LoanDisbursementDetails details : this.disbursementDetails) {

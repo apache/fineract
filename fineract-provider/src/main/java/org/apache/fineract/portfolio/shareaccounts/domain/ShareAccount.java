@@ -518,7 +518,7 @@ public class ShareAccount extends AbstractPersistableCustom {
         for (ShareAccountTransaction tran : this.shareAccountTransactions) {
             if (tran.getPurchasedDate().equals(transaction.getPurchasedDate())
                     && tran.getTotalShares().equals(transaction.getTotalShares())
-                    && tran.getPurchasePrice().equals(transaction.getPurchasePrice())
+                    && tran.getPurchasePrice().compareTo(transaction.getPurchasePrice()) == 0 ? Boolean.TRUE:Boolean.FALSE
                     && tran.getTransactionStatus().equals(transaction.getTransactionStatus())
                     && tran.getTransactionType().equals(transaction.getTransactionType())) {
                 returnTrans = tran;

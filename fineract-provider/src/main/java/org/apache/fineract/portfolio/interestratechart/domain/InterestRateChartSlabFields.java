@@ -27,6 +27,7 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartS
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -304,7 +305,7 @@ public class InterestRateChartSlabFields {
 
     public boolean isBigDecimalSame(final BigDecimal obj1, final BigDecimal obj2) {
         if (obj1 == null || obj2 == null) {
-            if (Objects.equals(obj1, obj2)) { return true; }
+            if (Objects.compare(obj1,obj2, Comparator.nullsFirst(Comparator.naturalOrder())) == 0 ? Boolean.TRUE:Boolean.FALSE){ return true; }
             return false;
         }
         return obj1.compareTo(obj2) == 0;
