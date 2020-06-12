@@ -52,4 +52,6 @@
 		   overflowToDisk="false" timeToIdleSeconds="7200" />
 	<cache name="tfConfig" maxEntriesLocalHeap="10000" eternal="true"
 		   overflowToDisk="false" />
+	<cache name="encryptionKeys" maxEntriesLocalHeap="1000" eternal="true"
+		   overflowToDisk="false" />
 </ehcache>
