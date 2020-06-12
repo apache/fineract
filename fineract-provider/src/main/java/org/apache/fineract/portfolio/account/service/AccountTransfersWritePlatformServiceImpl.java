@@ -506,7 +506,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
         BigDecimal overpaid = this.loanReadPlatformService.retrieveTotalPaidInAdvance(fromLoanAccountId).getPaidInAdvance();
 
-        if (overpaid == null || overpaid.equals(BigDecimal.ZERO) || transactionAmount.floatValue() > overpaid.floatValue()) {
+        if (overpaid == null || overpaid.compareTo(BigDecimal.ZERO) == 0 ? Boolean.TRUE:Boolean.FALSE  || transactionAmount.floatValue() > overpaid.floatValue()) {
             if(overpaid == null) {
                 overpaid = BigDecimal.ZERO;
             }

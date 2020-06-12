@@ -2959,7 +2959,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void checkIfLoanIsPaidInAdvance(final Long loanId, final BigDecimal transactionAmount) {
         BigDecimal overpaid = this.loanReadPlatformService.retrieveTotalPaidInAdvance(loanId).getPaidInAdvance();
 
-        if (overpaid == null || overpaid.equals(new BigDecimal(0)) || transactionAmount.floatValue() > overpaid.floatValue()) {
+        if (overpaid == null || overpaid.compareTo(BigDecimal.ZERO) == 0 ? Boolean.TRUE:Boolean.FALSE || transactionAmount.floatValue() > overpaid.floatValue()) {
             if (overpaid == null) {
                 overpaid = BigDecimal.ZERO;
             }
