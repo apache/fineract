@@ -59,13 +59,15 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements ProvisioningEntriesWritePlatformService {
-
+    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService ;
     private final LoanProductRepository loanProductRepository;
@@ -160,7 +162,11 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                 //FIXME: Do we need to throw NoProvisioningCriteriaDefinitionFound()?
             }
             createProvsioningEntry(currentDate, addJournalEntries);
-        } catch (ProvisioningEntryAlreadyCreatedException peace) {} catch (DataIntegrityViolationException dive) {}
+        } catch (ProvisioningEntryAlreadyCreatedException peace) {
+            LOG.error("{}",peace.getDefaultUserMessage());
+        } catch (DataIntegrityViolationException dive) {
+            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function",dive);
+        }
     }
 
     @Override

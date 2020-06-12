@@ -28,6 +28,8 @@ import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfiguration;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailConfigurationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -35,7 +37,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
-
+    private final static Logger LOG = LoggerFactory.getLogger(EmailMessageJobEmailServiceImpl.class);
     private EmailConfigurationRepository emailConfigurationRepository;
 
     @Autowired
@@ -73,7 +75,7 @@ public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailServ
             javaMailSenderImpl.send(mimeMessage);
 
         }catch(MessagingException e){
-
+            LOG.error("Could not send emai Problem occurred in sendEmailWithAttachment function",e);
         }
 
     }

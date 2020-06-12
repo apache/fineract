@@ -184,6 +184,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 throw new GLAccountDisableException();
             }
         } catch (EmptyResultDataAccessException e) {
+            LOG.error("Problem encountered in validateForAttachedProduct()",e);
         }
     }
 
