@@ -313,7 +313,6 @@ tasks.withType(JavaCompile) {
         disable(
                 "UnusedVariable",
                 "ClassCanBeStatic",
-                "MixedMutabilityReturnType",
                 "SameNameButDifferent",
                 "StringSplitter",
                 "MissingOverride",
@@ -338,6 +337,7 @@ tasks.withType(JavaCompile) {
                 "VariableNameSameAsType",
                 "UnnecessaryParentheses",
                 "MultipleTopLevelClasses",
+                "MixedMutabilityReturnType",
                 "MultiVariableDeclaration",
                 "AssertEqualsArgumentOrderChecker",
                 "EmptySetMultibindingContributions",
