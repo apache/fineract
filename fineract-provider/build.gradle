@@ -94,7 +94,7 @@ dependencyManagement {
         dependency 'org.flywaydb:flyway-core:6.4.4'
         dependency 'org.quartz-scheduler:quartz:2.3.2'
         dependency 'com.amazonaws:aws-java-sdk-s3:1.11.800'
-        dependency 'net.sf.ehcache:ehcache:2.10.6' // TODO FINERACT-1018
+        dependency 'org.ehcache:ehcache:3.8.1'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.6'
         dependency 'com.jayway.jsonpath:json-path:2.4.0'
         dependency 'org.apache.tika:tika-core:1.24.1'
@@ -110,6 +110,7 @@ dependencyManagement {
         dependency 'io.github.classgraph:classgraph:4.8.85'
         dependency 'org.awaitility:awaitility:4.0.3'
         dependency 'com.github.spotbugs:spotbugs-annotations:4.0.4'
+        dependency 'javax.cache:cache-api:1.1.1'
 
         dependency ('org.dom4j:dom4j:2.1.3') {
             exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1

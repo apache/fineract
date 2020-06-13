@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanproduct.data;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -1160,12 +1160,12 @@ public class LoanProductData implements Serializable {
         return null;
     }
 
-    @FindBugsSuppressWarnings("NP_BOOLEAN_RETURN_NULL")
+    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     public Boolean isCompoundingToBePostedAsTransaction() {
         return isInterestRecalculationEnabled() ? this.interestRecalculationData.isCompoundingToBePostedAsTransaction() : null;
     }
 
-    @FindBugsSuppressWarnings("NP_BOOLEAN_RETURN_NULL")
+    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     public Boolean allowCompoundingOnEod() {
         return isInterestRecalculationEnabled() ? this.interestRecalculationData.allowCompoundingOnEod() : null;
     }

@@ -21,8 +21,9 @@
 -->
 
 
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+<config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.ehcache.org/v3'
+		xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.7.xsd">
+
 	<defaultCache eternal="true" maxEntriesLocalHeap="100"
 		overflowToDisk="false" />
 
@@ -52,4 +53,4 @@
 		   overflowToDisk="false" timeToIdleSeconds="7200" />
 	<cache name="tfConfig" maxEntriesLocalHeap="10000" eternal="true"
 		   overflowToDisk="false" />
-</ehcache>
+</config>
