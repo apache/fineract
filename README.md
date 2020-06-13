@@ -195,12 +195,21 @@ Instructions to run Apache RAT (Release Audit Tool)
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 
-Checkstyle
+Checkstyle and Spotless
 ============
 
-This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml).  It is configured to run automatically during the normal Gradle build, and fail if there are any style violations detected.
-We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
-File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
+This project enforces its code conventions using [checkstyle.xml](fineract-provider/config/checkstyle/checkstyle.xml) through Checkstyle and [fineract-formatting-preferences.xml](config/fineract-formatting-preferences.xml) through Spotless. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected. You can run the following command to automatically fix spotless violations: 
+
+    `./gradlew spotlessApply`
+
+Since some checks are present in both Checkstyle and Spotless, the same command can help you fix some of the Checkstyle violations (but not all, other Checkstyle violations need to fixed manually).
+
+You can also check for Spotless violations (only; but normally don't have to, because the regular build full already includes this anyway):
+
+    `./gradlew spotlessCheck`
+
+We recommend that you configure your favourite Java IDE to match those conventions. For Eclipse, you can go to 
+Window > Java > Code Style and import our [config/fineractdev-formatter.xml](config/fineractdev-formatter.xml) under formatter section and [config/fineractdev-cleanup.xml](config/fineractdev-cleanup.xml) under Clean up section. The same fineractdev-formatter.xml configuration file (that can be used in Eclipse IDE) is also used by Spotless to both check for violations and autoformat code on the CLI. 
 You could also use Checkstyle directly in your IDE (but you don't neccesarily have to, it may just be more convenient for you).  For Eclipse, use https://checkstyle.org/eclipse-cs/ and load our checkstyle.xml into it, for IntelliJ you can use [CheckStyle-IDEA](https://plugins.jetbrains.com/plugin/1065-checkstyle-idea).
 
 
