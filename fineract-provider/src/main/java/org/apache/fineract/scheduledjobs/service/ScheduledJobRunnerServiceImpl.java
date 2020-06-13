@@ -229,7 +229,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     LOG.error("Apply annual fee failed for account: {} with message {}", savingsAccountReference.getAccountNo(), error);
                 }
             } catch (final Exception ex) {
-                // need to handle this scenario
+                LOG.error("Apply annual fee failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
 
@@ -250,6 +250,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 for (final ApiParameterError error : errors) {
                     LOG.error("Apply Charges due for savings failed for account {} with message: {}", savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
                 }
+            } catch (final Exception ex) {
+                exceptions.add(ex);
+                LOG.error("Apply Charges due for savings failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
         LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
@@ -307,7 +310,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     LOG.error("Update maturity details failed for account: {} with message {}", depositAccount.accountNo(), error.getDeveloperMessage());
                 }
             } catch (final Exception ex) {
-                // need to handle this scenario
+                LOG.error("Update maturity details failed for account: {}", depositAccount.accountNo(), ex);
             }
         }
 

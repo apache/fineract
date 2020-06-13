@@ -29,7 +29,7 @@ public interface SavingsAccountChargeRepository extends JpaRepository<SavingsAcc
         JpaSpecificationExecutor<SavingsAccountCharge> {
 
     @Query("select sac from SavingsAccountCharge sac where sac.id =:id and sac.savingsAccount.id = :savingsAccountId")
-    SavingsAccountCharge findByIdAndSavingsAccountId(Long id, Long savingsAccountId);
+    SavingsAccountCharge findByIdAndSavingsAccountId(@Param("id") Long id, @Param("savingsAccountId") Long savingsAccountId);
 
     @Query("select sac from SavingsAccountCharge sac where sac.dueDate <=:transactionDate and sac.waived = 0 and sac.paid=0 order by sac.dueDate")
     List<SavingsAccountCharge> findPendingCharges(@Param("transactionDate") Date transactionDate);
