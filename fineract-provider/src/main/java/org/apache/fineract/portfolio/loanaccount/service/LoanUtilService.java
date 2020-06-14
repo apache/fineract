@@ -225,7 +225,7 @@ public class LoanUtilService {
     private LocalDate calculateRepaymentStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan, final Calendar calendar,
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         LocalDate calculatedRepaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
-        if (calendar != null) {// sync repayments
+        if (calendar != null) { // sync repayments
 
             if (calculatedRepaymentsStartingFromDate == null && !calendar.getCalendarHistory().isEmpty()
                     && calendarHistoryDataWrapper != null) {
@@ -243,8 +243,8 @@ public class LoanUtilService {
                 // need to have minimum number of days gap between disbursement
                 // and first repayment date.
                 final LoanProductRelatedDetail repaymentScheduleDetails = loan.repaymentScheduleDetail();
-                if (repaymentScheduleDetails != null) {// Not expecting to be
-                                                       // null
+                // Not expecting to be null
+                if (repaymentScheduleDetails != null) {
                     final Integer repayEvery = repaymentScheduleDetails.getRepayEvery();
                     final String frequency = CalendarUtils
                             .getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails.getRepaymentPeriodFrequencyType());

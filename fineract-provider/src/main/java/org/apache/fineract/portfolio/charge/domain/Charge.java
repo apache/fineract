@@ -393,7 +393,8 @@ public class Charge extends AbstractPersistableCustom {
             }
         }
 
-        if (isLoanCharge()) {// validate only for loan charge
+        // validate only for loan charge
+        if (isLoanCharge()) {
             final String paymentModeParamName = "chargePaymentMode";
             if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
                 final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
