@@ -198,7 +198,7 @@ jacocoTestReport{
 spotless {
   format 'misc', {
    target '**/*.md', '**/*.properties', '**/*.gradle', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-   targetExclude '**/build/**', '**/bin/**'
+   targetExclude '**/build/**', '**/bin/**', '**/.settings/**'
    indentWithSpaces(4)
    endWithNewline()
    trimTrailingWhitespace()
