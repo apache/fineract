@@ -128,6 +128,7 @@
         </module>
           <module name="UpperEll"/>
           <module name="NeedBraces"/>
+          <module name="MethodParamPad"/>
           <module name="ArrayTypeStyle"/>
           <module name="NoLineWrap"/>
          <module name="IllegalTokenText">
@@ -245,8 +246,6 @@
         </module>
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="VariableDeclarationUsageDistance"/>
-
-        <module name="MethodParamPad"/>
 
 
         <! - - Enable some JavaDoc validation (requires quite a lot of manual clean up work; not a top priority for initial Checkstyle adoption - ->
