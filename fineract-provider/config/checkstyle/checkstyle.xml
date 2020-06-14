@@ -56,6 +56,10 @@
             <property name="ignoreComments" value="false" />
         </module>
         <module name="EqualsHashCode"/>
+        <module name="SeparatorWrap">
+            <property name="tokens" value="COMMA"/>
+            <property name="option" value="EOL"/>
+        </module>
         <module name="FallThrough"/>
         <module name="IllegalThrows" />
         <module name="RedundantImport"/>
@@ -201,10 +205,7 @@
             <property name="tokens" value="DOT"/>
             <property name="option" value="nl"/>
         </module>
-        <module name="SeparatorWrap">
-            <property name="tokens" value="COMMA"/>
-            <property name="option" value="EOL"/>
-        </module>
+
         <module name="MemberName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
             <message key="name.invalidPattern"
