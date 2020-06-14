@@ -99,36 +99,36 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate +
+                + " and acc_gl_journal_entry.entry_date > " + startDate
                 // "and (acc_gl_journal_entry.office_id=${branch} or
                 // ${branch}=1) "
                 // +
-                " group by glcode " + "order by glcode) debits " + "LEFT OUTER JOIN "
+                + " group by glcode " + "order by glcode) debits " + "LEFT OUTER JOIN "
                 + "(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=1 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate +
+                + " and acc_gl_journal_entry.entry_date > " + startDate
                 // "and (acc_gl_journal_entry.office_id=${branch} or
                 // ${branch}=1) "
                 // +
-                " group by glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode " + "union "
+                + " group by glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode " + "union "
                 + "select credits.glcode as 'glcode', credits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate +
+                + " and acc_gl_journal_entry.entry_date > " + startDate
                 // "and (acc_gl_journal_entry.office_id=${branch} or
                 // ${branch}=1) "
                 // +
-                " group by glcode " + "order by glcode) debits " + "RIGHT OUTER JOIN "
+                + " group by glcode " + "order by glcode) debits " + "RIGHT OUTER JOIN "
                 + "(select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'creditamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=1 " + "and acc_gl_journal_entry.entry_date <= " + endDate
-                + " and acc_gl_journal_entry.entry_date > " + startDate +
+                + " and acc_gl_journal_entry.entry_date > " + startDate
                 // "and (acc_gl_journal_entry.office_id=${branch} or
                 // ${branch}=1) "
                 // +
-                " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
+                + " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
         return sql;
     }
 
