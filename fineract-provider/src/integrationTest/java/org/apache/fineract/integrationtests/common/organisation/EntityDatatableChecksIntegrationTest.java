@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
  * Entity Datatable Checks Integration Test for checking Creation, Deletion and
  * Retrieval of Entity-Datatable Check
  */
-
 public class EntityDatatableChecksIntegrationTest {
     private final static Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksIntegrationTest.class);
     private RequestSpecification requestSpec;
@@ -69,10 +68,6 @@ public class EntityDatatableChecksIntegrationTest {
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
-
-    public EntityDatatableChecksIntegrationTest() {
-        // TODO Auto-generated constructor stub
-    }
 
     @BeforeEach
     public void setup() {
