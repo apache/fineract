@@ -19,7 +19,6 @@
 package org.apache.fineract.common;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -75,7 +74,7 @@ public class Utils {
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        return (T) from(json).get(jsonAttributeToGetBack);
+        return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
 }
