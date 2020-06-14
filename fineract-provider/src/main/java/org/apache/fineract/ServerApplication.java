@@ -29,11 +29,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 
 /**
- * Fineract main() application which launches Fineract in an embedded Tomcat HTTP
- * (using Spring Boot).
+ * Fineract main() application which launches Fineract in an embedded Tomcat
+ * HTTP (using Spring Boot).
  *
  * The DataSource used is a to a "normal" external database (not use MariaDB4j).
- * This DataSource can be configured with parameters, see {@link DataSourceProperties}.
+ * This DataSource can be configured with parameters, see
+ * {@link DataSourceProperties}.
  *
  * You can easily launch this via Debug as Java Application in your IDE -
  * without needing command line Gradle stuff, no need to build and deploy a WAR,
@@ -48,7 +49,7 @@ public class ServerApplication extends SpringBootServletInitializer {
 
     @Import({ EmbeddedTomcatWithSSLConfiguration.class })
     @ImportResource({ "classpath*:META-INF/spring/hikariDataSource.xml" })
-    private static class Configuration extends AbstractApplicationConfiguration { }
+    private static class Configuration extends AbstractApplicationConfiguration {}
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
@@ -61,6 +62,6 @@ public class ServerApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) throws IOException {
         ConfigurableApplicationContext ctx = configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
-        //ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
+        // ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
     }
 }

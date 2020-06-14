@@ -27,7 +27,6 @@ import org.apache.fineract.portfolio.client.service.ClientFamilyMembersWritePlat
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @CommandType(entity = "FAMILYMEMBERS", action = "UPDATE")
 public class UpdateClientFamilyMemberCommandHandler implements NewCommandSourceHandler {
@@ -35,9 +34,8 @@ public class UpdateClientFamilyMemberCommandHandler implements NewCommandSourceH
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
 
     @Autowired
-    public UpdateClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
-    {
-        this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
+    public UpdateClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService) {
+        this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
     }
 
     @Override

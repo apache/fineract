@@ -94,7 +94,8 @@ public class S3ContentRepository implements ContentRepository {
     public String saveImage(final Base64EncodedImage base64EncodedImage, final Long resourceId, final String imageName) {
         final String uploadImageLocation = generateClientImageParentDirectory(resourceId);
         final String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
-        final InputStream toUploadInputStream = new ByteArrayInputStream(Base64.getMimeDecoder().decode(base64EncodedImage.getBase64EncodedString()));
+        final InputStream toUploadInputStream = new ByteArrayInputStream(
+                Base64.getMimeDecoder().decode(base64EncodedImage.getBase64EncodedString()));
 
         uploadDocument(imageName, toUploadInputStream, fileLocation);
         return fileLocation;
@@ -138,7 +139,7 @@ public class S3ContentRepository implements ContentRepository {
         try {
             final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, imageData.location()));
             imageData.updateContent(s3object.getObjectContent());
-        }catch(AmazonS3Exception e) {
+        } catch (AmazonS3Exception e) {
             LOG.error("Error occured.", e);
         }
         return imageData;

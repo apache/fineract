@@ -27,15 +27,18 @@ import org.apache.fineract.template.domain.TemplateMapper;
  * Created by sanyam on 21/8/17.
  */
 final class TemplatesApiResourcesSwagger {
+
     private TemplatesApiResourcesSwagger() {
 
     }
 
     @ApiModel(value = "GetTemplatesResponse")
     public static final class GetTemplatesResponse {
+
         private GetTemplatesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Text")
@@ -52,9 +55,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "GetTemplatesTemplateResponse")
     public static final class GetTemplatesTemplateResponse {
+
         private GetTemplatesTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Text")
@@ -71,9 +76,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "PostTemplatesRequest")
     public static final class PostTemplatesRequest {
+
         private PostTemplatesRequest() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Text")
@@ -90,9 +97,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "PostTemplatesResponse")
     public static final class PostTemplatesResponse {
+
         private PostTemplatesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
 
@@ -100,9 +109,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "GetTemplatesTemplateIdResponse")
     public static final class GetTemplatesTemplateIdResponse {
+
         private GetTemplatesTemplateIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Text")
@@ -119,9 +130,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "PutTemplatesTemplateIdRequest")
     public static final class PutTemplatesTemplateIdRequest {
+
         private PutTemplatesTemplateIdRequest() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "Text")
@@ -138,9 +151,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "PutTemplatesTemplateIdResponse")
     public static final class PutTemplatesTemplateIdResponse {
+
         private PutTemplatesTemplateIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
 
@@ -148,9 +163,11 @@ final class TemplatesApiResourcesSwagger {
 
     @ApiModel(value = "DeleteTemplatesTemplateIdResponse")
     public static final class DeleteTemplatesTemplateIdResponse {
+
         private DeleteTemplatesTemplateIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
 

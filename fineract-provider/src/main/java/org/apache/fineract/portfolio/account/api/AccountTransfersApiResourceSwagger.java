@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/16/17.
  */
 final class AccountTransfersApiResourceSwagger {
-    private AccountTransfersApiResourceSwagger() {
-    }
+
+    private AccountTransfersApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountTransfersTemplateResponse")
     public final static class GetAccountTransfersTemplateResponse {
-        private GetAccountTransfersTemplateResponse() {
-        }
+
+        private GetAccountTransfersTemplateResponse() {}
 
         final class GetAccountTransfersFromOffice {
-            private GetAccountTransfersFromOffice() {
-            }
+
+            private GetAccountTransfersFromOffice() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -54,8 +54,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersFromAccountType {
-            private GetAccountTransfersFromAccountType() {
-            }
+
+            private GetAccountTransfersFromAccountType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -66,8 +66,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersFromOfficeOptions {
-            private GetAccountTransfersFromOfficeOptions() {
-            }
+
+            private GetAccountTransfersFromOfficeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -78,8 +78,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersFromClientOptions {
-            private GetAccountTransfersFromClientOptions() {
-            }
+
+            private GetAccountTransfersFromClientOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -92,8 +92,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersFromAccountTypeOptions {
-            private GetAccountTransfersFromAccountTypeOptions() {
-            }
+
+            private GetAccountTransfersFromAccountTypeOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -104,8 +104,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersToOfficeOptions {
-            private GetAccountTransfersToOfficeOptions() {
-            }
+
+            private GetAccountTransfersToOfficeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -116,8 +116,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersToAccountTypeOptions {
-            private GetAccountTransfersToAccountTypeOptions() {
-            }
+
+            private GetAccountTransfersToAccountTypeOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -142,8 +142,8 @@ final class AccountTransfersApiResourceSwagger {
 
     @ApiModel(value = "PostAccountTransfersRequest")
     public final static class PostAccountTransfersRequest {
-        private PostAccountTransfersRequest() {
-        }
+
+        private PostAccountTransfersRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer fromOfficeId;
@@ -175,8 +175,8 @@ final class AccountTransfersApiResourceSwagger {
 
     @ApiModel(value = "PostAccountTransfersResponse")
     public final static class PostAccountTransfersResponse {
-        private PostAccountTransfersResponse() {
-        }
+
+        private PostAccountTransfersResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer savingsId;
@@ -186,16 +186,16 @@ final class AccountTransfersApiResourceSwagger {
 
     @ApiModel(value = "GetAccountTransfersResponse")
     public final static class GetAccountTransfersResponse {
-        private GetAccountTransfersResponse() {
-        }
+
+        private GetAccountTransfersResponse() {}
 
         final class GetAccountTransfersPageItems {
-            private GetAccountTransfersPageItems() {
-            }
+
+            private GetAccountTransfersPageItems() {}
 
             final class GetAccountTransfersPageItemsCurrency {
-                private GetAccountTransfersPageItemsCurrency() {
-                }
+
+                private GetAccountTransfersPageItemsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -212,8 +212,8 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             final class GetAccountTransfersPageItemsFromOffice {
-                private GetAccountTransfersPageItemsFromOffice() {
-                }
+
+                private GetAccountTransfersPageItemsFromOffice() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -222,8 +222,8 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             final class GetAccountTransfersPageItemsFromAccount {
-                private GetAccountTransfersPageItemsFromAccount() {
-                }
+
+                private GetAccountTransfersPageItemsFromAccount() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -232,8 +232,8 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             final class GetAccountTransfersPageItemsToAccountType {
-                private GetAccountTransfersPageItemsToAccountType() {
-                }
+
+                private GetAccountTransfersPageItemsToAccountType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -242,7 +242,6 @@ final class AccountTransfersApiResourceSwagger {
                 @ApiModelProperty(example = "Loan Account")
                 public String value;
             }
-
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -272,12 +271,12 @@ final class AccountTransfersApiResourceSwagger {
 
     @ApiModel(value = "GetAccountTransfersTemplateRefundByTransferResponse")
     public static final class GetAccountTransfersTemplateRefundByTransferResponse {
-        private GetAccountTransfersTemplateRefundByTransferResponse() {
-        }
+
+        private GetAccountTransfersTemplateRefundByTransferResponse() {}
 
         final class GetAccountTransfersTemplateRefundByTransferCurrency {
-            private GetAccountTransfersTemplateRefundByTransferCurrency() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -296,8 +295,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferFromOffice {
-            private GetAccountTransfersTemplateRefundByTransferFromOffice() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferFromOffice() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -314,12 +313,12 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferFromClient {
-            private GetAccountTransfersTemplateRefundByTransferFromClient() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferFromClient() {}
 
             final class GetAccountTransfersStatus {
-                private GetAccountTransfersStatus() {
-                }
+
+                private GetAccountTransfersStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -330,23 +329,23 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             final class GetAccountTransfersGender {
-                private GetAccountTransfersGender() {
-                }
+
+                private GetAccountTransfersGender() {}
             }
 
             final class GetAccountTransfersClientType {
-                private GetAccountTransfersClientType() {
-                }
+
+                private GetAccountTransfersClientType() {}
             }
 
             final class GetAccountTransfersClientClassification {
-                private GetAccountTransfersClientClassification() {
-                }
+
+                private GetAccountTransfersClientClassification() {}
             }
 
             final class GetAccountTransfersTimeline {
-                private GetAccountTransfersTimeline() {
-                }
+
+                private GetAccountTransfersTimeline() {}
 
                 @ApiModelProperty(example = "[2012, 2, 1]")
                 public LocalDate submittedOnDate;
@@ -367,8 +366,8 @@ final class AccountTransfersApiResourceSwagger {
             }
 
             final class GetAccountTransfersGroups {
-                private GetAccountTransfersGroups() {
-                }
+
+                private GetAccountTransfersGroups() {}
             }
 
             @ApiModelProperty(example = "1")
@@ -398,8 +397,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferFromAccount {
-            private GetAccountTransfersTemplateRefundByTransferFromAccount() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferFromAccount() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -421,8 +420,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferToClient {
-            private GetAccountTransfersTemplateRefundByTransferToClient() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferToClient() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -435,8 +434,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferToAccount {
-            private GetAccountTransfersTemplateRefundByTransferToAccount() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferToAccount() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -456,8 +455,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferFromOfficeOptions {
-            private GetAccountTransfersTemplateRefundByTransferFromOfficeOptions() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferFromOfficeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -468,8 +467,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferFromClientOptions {
-            private GetAccountTransfersTemplateRefundByTransferFromClientOptions() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferFromClientOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -482,8 +481,8 @@ final class AccountTransfersApiResourceSwagger {
         }
 
         final class GetAccountTransfersTemplateRefundByTransferFromAccountOptions {
-            private GetAccountTransfersTemplateRefundByTransferFromAccountOptions() {
-            }
+
+            private GetAccountTransfersTemplateRefundByTransferFromAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -527,8 +526,8 @@ final class AccountTransfersApiResourceSwagger {
 
     @ApiModel(value = "PostAccountTransfersRefundByTransferRequest")
     public static final class PostAccountTransfersRefundByTransferRequest {
-        private PostAccountTransfersRefundByTransferRequest() {
-        }
+
+        private PostAccountTransfersRefundByTransferRequest() {}
 
         @ApiModelProperty(example = "2")
         public Integer fromAccountId;
@@ -560,8 +559,8 @@ final class AccountTransfersApiResourceSwagger {
 
     @ApiModel(value = "PostAccountTransfersRefundByTransferResponse")
     public final static class PostAccountTransfersRefundByTransferResponse {
-        private PostAccountTransfersRefundByTransferResponse() {
-        }
+
+        private PostAccountTransfersRefundByTransferResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer savingsId;

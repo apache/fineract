@@ -63,7 +63,7 @@ public class InteropTest {
     private final static String MIN_REQUIRED_BALANCE = null;
     private final static String MIN_OPENING_BALANCE = "100000.0";
     private final static boolean ENFORCE_MIN_REQUIRED_BALANCE = false;
-    private final static MathContext MATHCONTEXT  = new MathContext(12, RoundingMode.HALF_EVEN);
+    private final static MathContext MATHCONTEXT = new MathContext(12, RoundingMode.HALF_EVEN);
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -121,22 +121,16 @@ public class InteropTest {
     private void createSavingsProduct() {
         LOG.debug("------------------------------ Create Interoperable Saving Product ---------------------------------------");
 
-        Account[] accounts = {accountHelper.createAssetAccount(), accountHelper.createIncomeAccount(), accountHelper.createExpenseAccount(),
-                accountHelper.createLiabilityAccount()};
+        Account[] accounts = { accountHelper.createAssetAccount(), accountHelper.createIncomeAccount(),
+                accountHelper.createExpenseAccount(), accountHelper.createLiabilityAccount() };
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper
-                .withCurrencyCode(interopHelper.getCurrency())
-                .withNominalAnnualInterestRate(BigDecimal.ZERO)
-                .withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsMonthly()
-                .withInterestCalculationPeriodTypeAsDailyBalance()
-                .withMinBalanceForInterestCalculation(MIN_INTEREST_CALCULATON_BALANCE)
-                .withMinRequiredBalance(MIN_REQUIRED_BALANCE)
+        final String savingsProductJSON = savingsProductHelper.withCurrencyCode(interopHelper.getCurrency())
+                .withNominalAnnualInterestRate(BigDecimal.ZERO).withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
+                .withMinBalanceForInterestCalculation(MIN_INTEREST_CALCULATON_BALANCE).withMinRequiredBalance(MIN_REQUIRED_BALANCE)
                 .withEnforceMinRequiredBalance(Boolean.toString(ENFORCE_MIN_REQUIRED_BALANCE))
-                .withMinimumOpenningBalance(MIN_OPENING_BALANCE)
-                .withAccountingRuleAsCashBased(accounts)
-                .build();
+                .withMinimumOpenningBalance(MIN_OPENING_BALANCE).withAccountingRuleAsCashBased(accounts).build();
         savingsProductId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
         Assertions.assertNotNull(savingsProductId);
 
@@ -151,7 +145,8 @@ public class InteropTest {
 
     private void openSavingsAccount() {
         LOG.debug("------------------------------ Create Interoperable Saving Account ---------------------------------------");
-        savingsId = savingsAccountHelper.applyForSavingsApplicationWithExternalId(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL, interopHelper.getAccountExternalId(), true);
+        savingsId = savingsAccountHelper.applyForSavingsApplicationWithExternalId(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL,
+                interopHelper.getAccountExternalId(), true);
         Assertions.assertNotNull(savingsId);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
@@ -215,7 +210,8 @@ public class InteropTest {
         Map<Object, Object> fee = json.getMap(InteropUtil.PARAM_FSP_FEE);
         Assertions.assertNotNull(fee);
         BigDecimal feeAmount = ObjectConverter.convertObjectTo(fee.get(InteropUtil.PARAM_AMOUNT), BigDecimal.class);
-        Assertions.assertTrue(MathUtil.isEqualTo(interopHelper.getFee(), feeAmount), "Quote fee expected: " + interopHelper.getFee() + ", actual: " + feeAmount);
+        Assertions.assertTrue(MathUtil.isEqualTo(interopHelper.getFee(), feeAmount),
+                "Quote fee expected: " + interopHelper.getFee() + ", actual: " + feeAmount);
         Assertions.assertEquals(interopHelper.getCurrency(), fee.get(InteropUtil.PARAM_CURRENCY));
 
         // payee
@@ -252,9 +248,11 @@ public class InteropTest {
 
         BigDecimal transferAmount = interopHelper.getTransferAmount();
         BigDecimal expectedHold = MathUtil.add(onHold, transferAmount, MATHCONTEXT);
-        Assertions.assertTrue(MathUtil.isEqualTo(expectedHold, onHold2), "On hold amount expected: " + expectedHold + ", actual: " + onHold2);
+        Assertions.assertTrue(MathUtil.isEqualTo(expectedHold, onHold2),
+                "On hold amount expected: " + expectedHold + ", actual: " + onHold2);
         BigDecimal expectedBalance = MathUtil.subtract(balance, transferAmount, MATHCONTEXT);
-        Assertions.assertTrue(MathUtil.isEqualTo(expectedBalance, balance2), "Balance amount expected: " + expectedBalance + ", actual: " + balance2);
+        Assertions.assertTrue(MathUtil.isEqualTo(expectedBalance, balance2),
+                "Balance amount expected: " + expectedBalance + ", actual: " + balance2);
 
         // payer
         response = interopHelper.createTransfer(transferCode, InteropTransactionRole.PAYER);
@@ -268,7 +266,8 @@ public class InteropTest {
         BigDecimal onHold3 = ObjectConverter.convertObjectTo(savingsJson.get(SavingsApiConstants.savingsAmountOnHold), BigDecimal.class);
         BigDecimal balance3 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
         Assertions.assertTrue(MathUtil.isEqualTo(onHold, onHold3), "On hold amount expected: " + onHold + ", actual: " + onHold3);
-        Assertions.assertTrue(MathUtil.isEqualTo(expectedBalance, balance3), "Balance amount expected: " + expectedBalance + ", actual: " + balance3);
+        Assertions.assertTrue(MathUtil.isEqualTo(expectedBalance, balance3),
+                "Balance amount expected: " + expectedBalance + ", actual: " + balance3);
 
         // payee
         response = interopHelper.createTransfer(transferCode, InteropTransactionRole.PAYEE);
@@ -283,6 +282,7 @@ public class InteropTest {
         BigDecimal balance4 = ObjectConverter.convertObjectTo(savingsJson.get(PARAM_ACCOUNT_BALANCE), BigDecimal.class);
         expectedBalance = MathUtil.subtract(balance, interopHelper.getFee(), MATHCONTEXT);
         Assertions.assertTrue(MathUtil.isEqualTo(onHold, onHold4), "On hold amount expected: " + onHold + ", actual: " + onHold4);
-        Assertions.assertTrue(MathUtil.isEqualTo(balance, balance4), "Balance amount expected: " + expectedBalance + ", actual: " + balance4);
+        Assertions.assertTrue(MathUtil.isEqualTo(balance, balance4),
+                "Balance amount expected: " + expectedBalance + ", actual: " + balance4);
     }
 }

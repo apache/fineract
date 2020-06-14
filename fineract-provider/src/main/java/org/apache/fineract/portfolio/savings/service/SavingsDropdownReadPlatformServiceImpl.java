@@ -38,7 +38,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
         final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.FLAT), //
                 SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT) //
-                );
+        );
 
         return allowedOptions;
     }
@@ -50,7 +50,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
                 SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.WEEKS), //
                 SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.MONTHS), //
                 SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.YEARS) //
-                );
+        );
 
         return allowedLockinPeriodFrequencyTypeOptions;
     }
@@ -71,7 +71,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
         // //
         // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST)
         // //
-                );
+        );
 
         return allowedOptions;
     }
@@ -83,7 +83,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
                 SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.QUATERLY), //
                 SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.BIANNUAL), //
                 SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.ANNUAL) //
-                );
+        );
 
         return allowedOptions;
     }
@@ -93,7 +93,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
         final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType.DAILY_BALANCE), //
                 SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE) //
-                );
+        );
 
         return allowedOptions;
     }
@@ -103,7 +103,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
         final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_360), //
                 SavingsEnumerations.interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_365) //
-                );
+        );
 
         return allowedOptions;
     }

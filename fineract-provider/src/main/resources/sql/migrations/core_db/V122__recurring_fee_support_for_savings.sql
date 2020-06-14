@@ -18,10 +18,10 @@
 --
 
 ALTER TABLE `m_charge`
-	ADD COLUMN `fee_on_day` SMALLINT NULL AFTER `amount`,
-	ADD COLUMN `fee_interval` SMALLINT NULL AFTER `fee_on_day`,
-	ADD COLUMN `fee_on_month` SMALLINT NULL AFTER `fee_interval`;
+    ADD COLUMN `fee_on_day` SMALLINT NULL AFTER `amount`,
+    ADD COLUMN `fee_interval` SMALLINT NULL AFTER `fee_on_day`,
+    ADD COLUMN `fee_on_month` SMALLINT NULL AFTER `fee_interval`;
 
 
 ALTER TABLE `m_savings_account_charge`
-	ADD COLUMN `fee_interval` SMALLINT NULL DEFAULT NULL AFTER `fee_on_day`;
+    ADD COLUMN `fee_interval` SMALLINT NULL DEFAULT NULL AFTER `fee_on_day`;

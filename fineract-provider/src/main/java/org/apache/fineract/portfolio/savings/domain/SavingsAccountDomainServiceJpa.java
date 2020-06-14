@@ -90,8 +90,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-        if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(
-                account.getId(), "withdraw", account.depositAccountType()); }
+        if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) {
+            throw new DepositAccountTransactionNotAllowedException(account.getId(), "withdraw", account.depositAccountType());
+        }
         final Set<Long> existingTransactionIds = new HashSet<>();
         final LocalDate postInterestOnDate = null;
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -134,7 +135,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return user;
     }
 
-
     @Transactional
     @Override
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
@@ -156,8 +156,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
-        if (isRegularTransaction && !account.allowDeposit()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
-                "deposit", account.depositAccountType()); }
+        if (isRegularTransaction && !account.allowDeposit()) {
+            throw new DepositAccountTransactionNotAllowedException(account.getId(), "deposit", account.depositAccountType());
+        }
         boolean isInterestTransfer = false;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();

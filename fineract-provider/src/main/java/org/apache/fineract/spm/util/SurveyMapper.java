@@ -36,11 +36,9 @@ public class SurveyMapper {
     }
 
     public static SurveyData map(final Survey survey) {
-        final SurveyData surveyData = new SurveyData(
-                survey.getId(), SurveyMapper.mapComponents(survey.getComponents()),
-                SurveyMapper.mapQuestions(survey.getQuestions()), survey.getKey(), survey.getName(),
-                survey.getDescription(), survey.getCountryCode(), survey.getValidFrom(), survey.getValidTo()
-        );
+        final SurveyData surveyData = new SurveyData(survey.getId(), SurveyMapper.mapComponents(survey.getComponents()),
+                SurveyMapper.mapQuestions(survey.getQuestions()), survey.getKey(), survey.getName(), survey.getDescription(),
+                survey.getCountryCode(), survey.getValidFrom(), survey.getValidTo());
         return surveyData;
     }
 
@@ -58,10 +56,8 @@ public class SurveyMapper {
         final List<ComponentData> componentDatas = new ArrayList<>();
         if (components != null) {
             for (final Component component : components) {
-                componentDatas.add(new ComponentData(
-                        component.getId(), component.getKey(), component.getText(), component.getDescription(),
-                        component.getSequenceNo()
-                ));
+                componentDatas.add(new ComponentData(component.getId(), component.getKey(), component.getText(), component.getDescription(),
+                        component.getSequenceNo()));
             }
         }
         return componentDatas;
@@ -87,10 +83,9 @@ public class SurveyMapper {
         final List<QuestionData> questionDatas = new ArrayList<>();
         if (questions != null) {
             for (final Question question : questions) {
-                questionDatas.add(new QuestionData(question.getId(),
-                        SurveyMapper.mapResponses(question.getResponses()), question.getComponentKey(), question.getKey(),
-                        question.getText(), question.getDescription(), question.getSequenceNo()
-                ));
+                questionDatas.add(
+                        new QuestionData(question.getId(), SurveyMapper.mapResponses(question.getResponses()), question.getComponentKey(),
+                                question.getKey(), question.getText(), question.getDescription(), question.getSequenceNo()));
             }
         }
         return questionDatas;
@@ -118,9 +113,7 @@ public class SurveyMapper {
         final List<ResponseData> responseDatas = new ArrayList<>();
         if (responses != null) {
             for (final Response response : responses) {
-                responseDatas.add(new ResponseData(
-                    response.getId(), response.getText(), response.getValue(), response.getSequenceNo()
-                ));
+                responseDatas.add(new ResponseData(response.getId(), response.getText(), response.getValue(), response.getSequenceNo()));
             }
         }
         return responseDatas;

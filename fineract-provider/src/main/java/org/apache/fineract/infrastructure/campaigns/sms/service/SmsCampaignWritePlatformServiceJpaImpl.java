@@ -117,7 +117,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             final SmsMessageRepository smsMessageRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
             final ReadReportingService readReportingService, final GenericDataService genericDataService,
             final FromJsonHelper fromJsonHelper, final GroupRepository groupRepository,
-            final SmsMessageScheduledJobService smsMessageScheduledJobService, final DeviceRegistrationRepositoryWrapper deviceRegistrationRepository) {
+            final SmsMessageScheduledJobService smsMessageScheduledJobService,
+            final DeviceRegistrationRepositoryWrapper deviceRegistrationRepository) {
         this.context = context;
         this.smsCampaignRepository = smsCampaignRepository;
         this.smsCampaignValidator = smsCampaignValidator;
@@ -128,7 +129,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         this.genericDataService = genericDataService;
         this.fromJsonHelper = fromJsonHelper;
         this.groupRepository = groupRepository;
-        this.smsMessageScheduledJobService = smsMessageScheduledJobService ;
+        this.smsMessageScheduledJobService = smsMessageScheduledJobService;
         this.deviceRegistrationRepository = deviceRegistrationRepository;
     }
 
@@ -139,12 +140,13 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final AppUser currentUser = this.context.authenticatedUser();
         this.smsCampaignValidator.validateCreate(command.json());
         final Long runReportId = command.longValueOfParameterNamed(SmsCampaignValidator.runReportId);
-        Report report = this.reportRepository.findById(runReportId)
-                .orElseThrow(() -> new ReportNotFoundException(runReportId));
+        Report report = this.reportRepository.findById(runReportId).orElseThrow(() -> new ReportNotFoundException(runReportId));
         SmsCampaign smsCampaign = SmsCampaign.instance(currentUser, report, command);
-        if (smsCampaign.getRecurrenceStartDate() != null && smsCampaign.getRecurrenceStartDate().isBefore(DateUtils.getLocalDateOfTenant())) { throw new GeneralPlatformDomainRuleException(
-                "error.msg.campaign.recurrenceStartDate.in.the.past", "Recurrence start date cannot be the past date.",
-                smsCampaign.getRecurrenceStartDate()); }
+        if (smsCampaign.getRecurrenceStartDate() != null
+                && smsCampaign.getRecurrenceStartDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.campaign.recurrenceStartDate.in.the.past",
+                    "Recurrence start date cannot be the past date.", smsCampaign.getRecurrenceStartDate());
+        }
         this.smsCampaignRepository.save(smsCampaign);
 
         return new CommandProcessingResultBuilder() //
@@ -168,8 +170,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 
             if (changes.containsKey(SmsCampaignValidator.runReportId)) {
                 final Long newValue = command.longValueOfParameterNamed(SmsCampaignValidator.runReportId);
-                final Report reportId = this.reportRepository.findById(newValue)
-                        .orElseThrow(() -> new ReportNotFoundException(newValue));
+                final Report reportId = this.reportRepository.findById(newValue).orElseThrow(() -> new ReportNotFoundException(newValue));
                 smsCampaign.updateBusinessRuleId(reportId);
             }
 
@@ -228,24 +229,23 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 
                     Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId.longValue());
                     if (this.smsCampaignValidator.isValidNotificationOrSms(client, smsCampaign, mobileNo)) {
-//                        String countryCode = this.smsReadPlatformService.retrieveCountryCode(client.getOffice().getId()).getCountryCode();
+                        // String countryCode =
+                        // this.smsReadPlatformService.retrieveCountryCode(client.getOffice().getId()).getCountryCode();
                         String mobileNumber = null;
-                        if(mobileNo != null){
+                        if (mobileNo != null) {
                             mobileNumber = mobileNo.toString();
                         }
-                        SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage, mobileNumber,
-                                smsCampaign, smsCampaign.isNotification());
+                        SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage, mobileNumber, smsCampaign,
+                                smsCampaign.isNotification());
                         this.smsMessageRepository.save(smsMessage);
                     }
                 }
             }
         } catch (final IOException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         }
 
     }
-
-
 
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(final Loan loan, final SmsCampaign smsCampaign) {
@@ -285,26 +285,26 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 
                         if (this.smsCampaignValidator.isValidNotificationOrSms(client, smsCampaign, mobileNo)) {
                             String mobileNumber = null;
-                            if(mobileNo != null){
+                            if (mobileNo != null) {
                                 mobileNumber = mobileNo.toString();
                             }
-                            SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage, mobileNumber,
-                                    smsCampaign, smsCampaign.isNotification());
+                            SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage, mobileNumber, smsCampaign,
+                                    smsCampaign.isNotification());
                             smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
                             this.smsMessageRepository.save(smsMessage);
-                            Collection<SmsMessage> messages = new ArrayList<>() ;
-                            messages.add(smsMessage) ;
-                            Map<SmsCampaign, Collection<SmsMessage>> smsDataMap = new HashMap<>() ;
-                            smsDataMap.put(smsCampaign, messages) ;
-                             this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
+                            Collection<SmsMessage> messages = new ArrayList<>();
+                            messages.add(smsMessage);
+                            Map<SmsCampaign, Collection<SmsMessage>> smsDataMap = new HashMap<>();
+                            smsDataMap.put(smsCampaign, messages);
+                            this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
                         }
                     }
                 }
             }
         } catch (final IOException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         } catch (final RuntimeException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         }
     }
 
@@ -320,22 +320,21 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             campaignParams.put("clientId", client.getId().toString());
             queryParamForRunReport.put("clientId", client.getId().toString());
 
-            List<HashMap<String, Object>> runReportObject = this
-                    .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
+            List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
+                    queryParamForRunReport);
 
             if (runReportObject != null && runReportObject.size() > 0) {
                 for (HashMap<String, Object> entry : runReportObject) {
-                    String textMessage = this.compileSmsTemplate(smsCampaign.getMessage(),
-                            smsCampaign.getCampaignName(), entry);
+                    String textMessage = this.compileSmsTemplate(smsCampaign.getMessage(), smsCampaign.getCampaignName(), entry);
                     Object mobileNo = entry.get("mobileNo");
 
                     if (this.smsCampaignValidator.isValidNotificationOrSms(client, smsCampaign, mobileNo)) {
                         String mobileNumber = null;
-                        if(mobileNo != null){
+                        if (mobileNo != null) {
                             mobileNumber = mobileNo.toString();
                         }
-                        SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage,
-                                mobileNumber, smsCampaign, smsCampaign.isNotification());
+                        SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage, mobileNumber, smsCampaign,
+                                smsCampaign.isNotification());
                         smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
                         this.smsMessageRepository.save(smsMessage);
                         Collection<SmsMessage> messages = new ArrayList<>();
@@ -347,9 +346,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         } catch (final RuntimeException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         }
     }
 
@@ -363,23 +362,22 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     new TypeReference<HashMap<String, String>>() {});
             queryParamForRunReport.put("savingsId", savingsAccount.getId().toString());
 
-            Client client = savingsAccount.getClient() ;
-            List<HashMap<String, Object>> runReportObject = this
-                    .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
+            Client client = savingsAccount.getClient();
+            List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
+                    queryParamForRunReport);
 
             if (runReportObject != null && runReportObject.size() > 0) {
                 for (HashMap<String, Object> entry : runReportObject) {
-                    String textMessage = this.compileSmsTemplate(smsCampaign.getMessage(),
-                            smsCampaign.getCampaignName(), entry);
+                    String textMessage = this.compileSmsTemplate(smsCampaign.getMessage(), smsCampaign.getCampaignName(), entry);
                     Object mobileNo = entry.get("mobileNo");
 
                     if (this.smsCampaignValidator.isValidNotificationOrSms(client, smsCampaign, mobileNo)) {
                         String mobileNumber = null;
-                        if(mobileNo != null){
+                        if (mobileNo != null) {
                             mobileNumber = mobileNo.toString();
                         }
-                        SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage,
-                                mobileNumber, smsCampaign, smsCampaign.isNotification());
+                        SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, textMessage, mobileNumber, smsCampaign,
+                                smsCampaign.isNotification());
                         smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
                         this.smsMessageRepository.save(smsMessage);
                         Collection<SmsMessage> messages = new ArrayList<>();
@@ -391,9 +389,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         } catch (final RuntimeException e) {
-            LOG.error("Error occured.", e) ;
+            LOG.error("Error occured.", e);
         }
     }
 
@@ -408,8 +406,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
          * next run time has to be in the future if not calculate a new future
          * date
          */
-        LocalDate nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getNextTriggerDate()
-                .toLocalDate(), nextTriggerDate.toLocalDate());
+        LocalDate nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(),
+                smsCampaign.getNextTriggerDate().toLocalDate(), nextTriggerDate.toLocalDate());
         if (nextRuntime.isBefore(DateUtils.getLocalDateOfTenant())) { // means
                                                                       // next
                                                                       // run
@@ -506,7 +504,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         smsCampaign.close(currentUser, fmt, closureDate);
 
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
-//        this.serviceui.sendMessagesToGateway();
+        // this.serviceui.sendMessagesToGateway();
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -546,8 +544,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 String key = map.getKey();
                 Object ob = map.getValue();
                 if (ob instanceof ArrayList && ((ArrayList) ob).size() == 3) {
-                    String changeArrayDateToStringDate = ((ArrayList) ob).get(2).toString() + "-" + ((ArrayList) ob).get(1).toString()
-                            + "-" + ((ArrayList) ob).get(0).toString();
+                    String changeArrayDateToStringDate = ((ArrayList) ob).get(2).toString() + "-" + ((ArrayList) ob).get(1).toString() + "-"
+                            + ((ArrayList) ob).get(0).toString();
                     entry.put(key, changeArrayDateToStringDate);
                 }
             }
@@ -563,8 +561,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         // final String smsParams =
         // this.fromJsonHelper.extractJsonObjectNamed("paramValue",
         // query.parsedJson()).getAsString();
-        final JsonElement smsParamsElement = this.fromJsonHelper
-                .extractJsonObjectNamed(SmsCampaignValidator.paramValue, query.parsedJson());
+        final JsonElement smsParamsElement = this.fromJsonHelper.extractJsonObjectNamed(SmsCampaignValidator.paramValue,
+                query.parsedJson());
         String smsParams = smsParamsElement.toString();
         final String textMessageTemplate = this.fromJsonHelper.extractStringNamed("message", query.parsedJson());
 
@@ -649,15 +647,15 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Override
     @CronTarget(jobName = JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE)
     public void storeTemplateMessageIntoSmsOutBoundTable() throws JobExecutionException {
-        final Collection<SmsCampaign> smsCampaignDataCollection = this.smsCampaignRepository.findByTriggerTypeAndStatus(
-                SmsCampaignTriggerType.SCHEDULE.getValue(), SmsCampaignStatus.ACTIVE.getValue());
+        final Collection<SmsCampaign> smsCampaignDataCollection = this.smsCampaignRepository
+                .findByTriggerTypeAndStatus(SmsCampaignTriggerType.SCHEDULE.getValue(), SmsCampaignStatus.ACTIVE.getValue());
         if (smsCampaignDataCollection != null) {
             for (SmsCampaign smsCampaign : smsCampaignDataCollection) {
                 LocalDateTime tenantDateNow = tenantDateTime();
                 LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
 
                 LOG.info("tenant time {} trigger time {} {}",
-                    new Object[] { tenantDateNow, nextTriggerDate, JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name() });
+                        new Object[] { tenantDateNow, nextTriggerDate, JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name() });
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
                     this.updateTriggerDates(smsCampaign.getId());
@@ -686,20 +684,22 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         return today;
     }
 
-//    private String formatDestinationPhoneNumber(String phoneNumber, String countryCallingCode) {
-//        StringBuilder formatedPhoneNumber = new StringBuilder("+");
-//
-//        try {
-//            Long phoneNumberToLong = Long.parseLong(phoneNumber);
-//            Long countryCallingCodeToLong = Long.parseLong(countryCallingCode);
-//            formatedPhoneNumber.append(Long.toString(countryCallingCodeToLong));
-//            formatedPhoneNumber.append(Long.toString(phoneNumberToLong));
-//        }
-//
-//        catch (Exception e) {
-//            LOG.error("Invalid phone number or country calling code, must contain only numbers", e);
-//        }
-//
-//        return formatedPhoneNumber.toString();
-//    }
+    // private String formatDestinationPhoneNumber(String phoneNumber, String
+    // countryCallingCode) {
+    // StringBuilder formatedPhoneNumber = new StringBuilder("+");
+    //
+    // try {
+    // Long phoneNumberToLong = Long.parseLong(phoneNumber);
+    // Long countryCallingCodeToLong = Long.parseLong(countryCallingCode);
+    // formatedPhoneNumber.append(Long.toString(countryCallingCodeToLong));
+    // formatedPhoneNumber.append(Long.toString(phoneNumberToLong));
+    // }
+    //
+    // catch (Exception e) {
+    // LOG.error("Invalid phone number or country calling code, must contain
+    // only numbers", e);
+    // }
+    //
+    // return formatedPhoneNumber.toString();
+    // }
 }

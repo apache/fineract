@@ -37,9 +37,10 @@ public class ReactivateEmailCampaignCommandHandler implements NewCommandSourceHa
     public ReactivateEmailCampaignCommandHandler(EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
         this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
     }
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.emailCampaignWritePlatformService.reactivateEmailCampaign(command.entityId(),command);
+        return this.emailCampaignWritePlatformService.reactivateEmailCampaign(command.entityId(), command);
     }
 }

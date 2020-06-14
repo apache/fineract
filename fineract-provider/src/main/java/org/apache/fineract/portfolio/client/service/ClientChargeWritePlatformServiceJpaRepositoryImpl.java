@@ -123,9 +123,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
             LocalDate activationDate = client.getActivationLocalDate();
             LocalDate dueDate = clientCharge.getDueLocalDate();
-            if(dueDate.isBefore(activationDate)){
+            if (dueDate.isBefore(activationDate)) {
                 baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate.toString(fmt))
-                .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
+                        .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
 
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
@@ -434,9 +434,10 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("FK_m_client_charge_paid_by_m_client_charge")) {
 
-        throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",
-                "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
-                "clientChargeId", clientChargeId); }
+            throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",
+                    "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
+                    "clientChargeId", clientChargeId);
+        }
 
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.charges.unknown.data.integrity.issue",

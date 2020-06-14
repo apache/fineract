@@ -43,7 +43,8 @@ public class ProductMixData {
         return new ProductMixData(null, null, null, null, productOptions);
     }
 
-    public static ProductMixData withTemplateOptions(final ProductMixData productMixData, final Collection<LoanProductData> productOptions) {
+    public static ProductMixData withTemplateOptions(final ProductMixData productMixData,
+            final Collection<LoanProductData> productOptions) {
         return new ProductMixData(productMixData.productId, productMixData.productName, productMixData.restrictedProducts,
                 productMixData.allowedProducts, productOptions);
     }

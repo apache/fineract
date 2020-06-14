@@ -28,21 +28,21 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/12/18.
  */
 final class ClientChargesApiResourceSwagger {
-    private ClientChargesApiResourceSwagger() {
-    }
+
+    private ClientChargesApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsClientIdChargesResponse")
     public final static class GetClientsClientIdChargesResponse {
-        private GetClientsClientIdChargesResponse() {
-        }
+
+        private GetClientsClientIdChargesResponse() {}
 
         final class GetClientsChargesPageItems {
-            private GetClientsChargesPageItems() {
-            }
+
+            private GetClientsChargesPageItems() {}
 
             final class GetClientChargeTimeType {
-                private GetClientChargeTimeType() {
-                }
+
+                private GetClientChargeTimeType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -53,8 +53,8 @@ final class ClientChargesApiResourceSwagger {
             }
 
             final class GetClientChargeCalculationType {
-                private GetClientChargeCalculationType() {
-                }
+
+                private GetClientChargeCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -65,8 +65,8 @@ final class ClientChargesApiResourceSwagger {
             }
 
             final class GetClientChargeCurrency {
-                private GetClientChargeCurrency() {
-                }
+
+                private GetClientChargeCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -122,8 +122,8 @@ final class ClientChargesApiResourceSwagger {
 
     @ApiModel(value = "PostClientsClientIdChargesRequest")
     public final static class PostClientsClientIdChargesRequest {
-        private PostClientsClientIdChargesRequest() {
-        }
+
+        private PostClientsClientIdChargesRequest() {}
 
         @ApiModelProperty(example = "100")
         public Integer amount;
@@ -139,8 +139,8 @@ final class ClientChargesApiResourceSwagger {
 
     @ApiModel(value = "PostClientsClientIdChargesResponse")
     public final static class PostClientsClientIdChargesResponse {
-        private PostClientsClientIdChargesResponse() {
-        }
+
+        private PostClientsClientIdChargesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -152,8 +152,8 @@ final class ClientChargesApiResourceSwagger {
 
     @ApiModel(value = "PostClientsClientIdChargesChargeIdRequest")
     public final static class PostClientsClientIdChargesChargeIdRequest {
-        private PostClientsClientIdChargesChargeIdRequest() {
-        }
+
+        private PostClientsClientIdChargesChargeIdRequest() {}
 
         @ApiModelProperty(example = "200")
         public Integer amount;
@@ -167,8 +167,8 @@ final class ClientChargesApiResourceSwagger {
 
     @ApiModel(value = "PostClientsClientIdChargesChargeIdResponse")
     public final static class PostClientsClientIdChargesChargeIdResponse {
-        private PostClientsClientIdChargesChargeIdResponse() {
-        }
+
+        private PostClientsClientIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -182,8 +182,8 @@ final class ClientChargesApiResourceSwagger {
 
     @ApiModel(value = "DeleteClientsClientIdChargesChargeIdResponse")
     public final static class DeleteClientsClientIdChargesChargeIdResponse {
-        private DeleteClientsClientIdChargesChargeIdResponse() {
-        }
+
+        private DeleteClientsClientIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

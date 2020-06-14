@@ -30,10 +30,11 @@ public class SavingsActivation {
 
     private final String locale;
 
-    public static SavingsActivation importInstance(LocalDate activatedOnDate, Integer rowIndex,String locale,String dateFormat){
-        return new SavingsActivation(activatedOnDate,rowIndex,locale,dateFormat);
+    public static SavingsActivation importInstance(LocalDate activatedOnDate, Integer rowIndex, String locale, String dateFormat) {
+        return new SavingsActivation(activatedOnDate, rowIndex, locale, dateFormat);
     }
-    private SavingsActivation(LocalDate activatedOnDate, Integer rowIndex,String locale,String dateFormat ) {
+
+    private SavingsActivation(LocalDate activatedOnDate, Integer rowIndex, String locale, String dateFormat) {
         this.activatedOnDate = activatedOnDate;
         this.rowIndex = rowIndex;
         this.dateFormat = dateFormat;

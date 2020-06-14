@@ -102,8 +102,8 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         } catch (final DataIntegrityViolationException dve) {
             handleReportDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleReportDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -118,8 +118,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             this.fromApiJsonDeserializer.validate(command.json());
 
-            final Report report = this.reportRepository.findById(reportId)
-                    .orElseThrow(() -> new ReportNotFoundException(reportId));
+            final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
             final Map<String, Object> changes = report.update(command, this.readReportingService.getAllowedReportTypes());
 
@@ -143,8 +142,8 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         } catch (final DataIntegrityViolationException dve) {
             handleReportDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleReportDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -154,8 +153,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     @Override
     public CommandProcessingResult deleteReport(final Long reportId) {
 
-        final Report report = this.reportRepository.findById(reportId)
-                .orElseThrow(() -> new ReportNotFoundException(reportId));
+        final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
         if (report.isCoreReport()) {
             //

@@ -25,18 +25,20 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 12/8/17.
  */
 final class SchedulerApiResourceSwagger {
-    private SchedulerApiResourceSwagger(){
+
+    private SchedulerApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetSchedulerResponse")
     public static final class GetSchedulerResponse {
+
         private GetSchedulerResponse() {
 
         }
+
         @ApiModelProperty(example = "true")
         public boolean active;
     }
-
 
 }

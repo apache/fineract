@@ -98,7 +98,7 @@ public class Guarantor extends AbstractPersistableCustom {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
 
     protected Guarantor() {
@@ -132,8 +132,7 @@ public class Guarantor extends AbstractPersistableCustom {
 
     public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType, final JsonCommand command,
             final List<GuarantorFundingDetails> fundingDetails) {
-        final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID
-                .getValue());
+        final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue());
         final Long entityId = command.longValueOfParameterNamed(GuarantorJSONinputParams.ENTITY_ID.getValue());
         final boolean active = true;
         if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
@@ -206,7 +205,7 @@ public class Guarantor extends AbstractPersistableCustom {
                 newValue = command.integerValueOfParameterNamed(paramName);
             }
             actualChanges.put(paramName, newValue);
-            //propertyToBeUpdated = newValue;
+            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.GUARANTOR_TYPE_ID.getValue())) {
@@ -220,7 +219,7 @@ public class Guarantor extends AbstractPersistableCustom {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            //propertyToBeUpdated = newValue;
+            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.FIRSTNAME.getValue())) {
@@ -254,7 +253,7 @@ public class Guarantor extends AbstractPersistableCustom {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
             final Date newValue = command.dateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            //propertyToBeUpdated = newValue;
+            // propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue())) {

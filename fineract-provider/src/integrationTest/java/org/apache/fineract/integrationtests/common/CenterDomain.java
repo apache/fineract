@@ -26,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CenterDomain implements Comparable<CenterDomain> {
+
     private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
+
     public static class Builder {
 
         private final Integer id;
@@ -84,9 +86,9 @@ public class CenterDomain implements Comparable<CenterDomain> {
         /* super(); */
     }
 
-    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
-            final String name, final String externalId, final Integer staffId, final Integer officeId, final String officeName,
-            final String hierarchy, final ArrayList<HashMap> groupMembers) {
+    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode,
+            final String statusvalue, final boolean active, final String name, final String externalId, final Integer staffId,
+            final Integer officeId, final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.accountNo = accountNo;
         this.status = new HashMap<>();
@@ -163,7 +165,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         if (groupMembers != null) {
             map.put("groupMembers", groupMembers);
         }
-        LOG.info("{}",map.toString());
+        LOG.info("{}", map.toString());
         return new Gson().toJson(map);
     }
 
@@ -211,7 +213,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return this.hierarchy;
     }
 
-    public String getAccountNo(){
+    public String getAccountNo() {
         return this.accountNo;
     }
 
@@ -256,15 +258,11 @@ public class CenterDomain implements Comparable<CenterDomain> {
     public boolean equals(Object obj) {
         if (obj == this) { return true; }
 
-        if (!(obj instanceof CenterDomain)) {
-            return false;
-        }
+        if (!(obj instanceof CenterDomain)) { return false; }
 
         CenterDomain cd = (CenterDomain) obj;
 
-        if (this.hashCode() == cd.hashCode()) {
-            return true;
-        }
+        if (this.hashCode() == cd.hashCode()) { return true; }
         return false;
     }
 

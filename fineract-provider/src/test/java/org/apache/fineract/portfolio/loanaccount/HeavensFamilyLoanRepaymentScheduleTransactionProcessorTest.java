@@ -605,7 +605,8 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     //
     // Money expectedInterestCompleted = new
     // MoneyBuilder().with(currency).with(interest).build();
-    // assertThat("interest completed not as expected: ",installment.getInterestCompleted(currency).toString(),
+    // assertThat("interest completed not as expected:
+    // ",installment.getInterestCompleted(currency).toString(),
     // is(expectedInterestCompleted.toString()));
     //
     // Money expectedInterestWaived = new

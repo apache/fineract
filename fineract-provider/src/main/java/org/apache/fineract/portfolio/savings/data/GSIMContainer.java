@@ -38,8 +38,7 @@ public class GSIMContainer {
     private final String savingsStatus;
 
     public GSIMContainer(final BigDecimal gsimId, final BigDecimal groupId, final String accountNumber,
-            final List<SavingsSummaryCustom> childGSIMAccounts, final BigDecimal parentBalance,
-            final String savingsStatus) {
+            final List<SavingsSummaryCustom> childGSIMAccounts, final BigDecimal parentBalance, final String savingsStatus) {
         this.gsimId = gsimId;
         this.groupId = groupId;
         this.accountNumber = accountNumber;

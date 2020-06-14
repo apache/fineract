@@ -261,8 +261,8 @@ public class StandingInstructionData {
                 instructionData.toOffice, instructionData.toClient, instructionData.toAccountType, instructionData.toAccount,
                 instructionData.transferType, instructionData.priority, instructionData.instructionType, instructionData.status,
                 instructionData.amount, instructionData.validFrom, instructionData.validTill, instructionData.recurrenceType,
-                instructionData.recurrenceFrequency, instructionData.recurrenceInterval, instructionData.recurrenceOnMonthDay,
-                transactions, instructionData.fromOfficeOptions, instructionData.fromClientOptions, instructionData.fromAccountTypeOptions,
+                instructionData.recurrenceFrequency, instructionData.recurrenceInterval, instructionData.recurrenceOnMonthDay, transactions,
+                instructionData.fromOfficeOptions, instructionData.fromClientOptions, instructionData.fromAccountTypeOptions,
                 instructionData.fromAccountOptions, instructionData.toOfficeOptions, instructionData.toClientOptions,
                 instructionData.toAccountTypeOptions, instructionData.toAccountOptions, instructionData.transferTypeOptions,
                 instructionData.statusOptions, instructionData.instructionTypeOptions, instructionData.priorityOptions,
@@ -379,7 +379,6 @@ public class StandingInstructionData {
     public ClientData toClient() {
         return this.toClient;
     }
-
 
     public Long getId() {
         return this.id;

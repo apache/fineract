@@ -34,7 +34,8 @@ public class UpdateProvisioningCategoryRequestCommandHandler implements NewComma
     private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
 
     @Autowired
-    public UpdateProvisioningCategoryRequestCommandHandler(ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
+    public UpdateProvisioningCategoryRequestCommandHandler(
+            ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {
         this.provisioningCategoryWritePlatformService = provisioningCategoryWritePlatformService;
     }
 

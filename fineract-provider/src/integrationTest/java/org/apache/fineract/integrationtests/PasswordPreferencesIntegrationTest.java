@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class PasswordPreferencesIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(PasswordPreferencesIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -59,7 +60,7 @@ public class PasswordPreferencesIntegrationTest {
         this.validateIfThePasswordIsUpdated(validationPolicyId);
     }
 
-    private void validateIfThePasswordIsUpdated(String validationPolicyId){
+    private void validateIfThePasswordIsUpdated(String validationPolicyId) {
         Integer id = PasswordPreferencesHelper.getActivePasswordPreference(requestSpec, responseSpec);
         assertEquals(validationPolicyId, id.toString());
         LOG.info("---------------------------------PASSWORD PREFERENCE VALIDATED SUCCESSFULLY-----------------------------------------");
@@ -69,8 +70,8 @@ public class PasswordPreferencesIntegrationTest {
     @Test
     public void updateWithInvalidPolicyId() {
         String invalidValidationPolicyId = "2000";
-        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId,
-                CommonConstants.RESPONSE_ERROR);
+        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec,
+                invalidValidationPolicyId, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.password.validation.policy.id.invalid", error.get(0).get("userMessageGlobalisationCode"),
                 "Password Validation Policy with identifier 2000 does not exist");
     }

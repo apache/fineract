@@ -23,8 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface AppUserPreviousPasswordRepository extends JpaRepository<AppUserPreviousPassword, Long>,
-        JpaSpecificationExecutor<AppUserPreviousPassword> {
+public interface AppUserPreviousPasswordRepository
+        extends JpaRepository<AppUserPreviousPassword, Long>, JpaSpecificationExecutor<AppUserPreviousPassword> {
 
     public List<AppUserPreviousPassword> findByUserId(Long userId, Pageable pageable);
 }

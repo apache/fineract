@@ -29,7 +29,8 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.meeting.domain.Meeting;
 
 @Entity
-@Table(name = "m_client_attendance", uniqueConstraints = { @UniqueConstraint(columnNames = { "client_id", "meeting_id" }, name = "unique_client_meeting_attendance") })
+@Table(name = "m_client_attendance", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "client_id", "meeting_id" }, name = "unique_client_meeting_attendance") })
 public class ClientAttendance extends AbstractPersistableCustom {
 
     @ManyToOne

@@ -33,10 +33,13 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class VariableInstallmentsDecliningBalanceHelper {
+
     private final static Logger LOG = LoggerFactory.getLogger(VariableInstallmentsDecliningBalanceHelper.class);
-    public static String createLoanProductWithoutVaribleConfig(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+
+    public static String createLoanProductWithoutVaribleConfig(final boolean multiDisburseLoan, final String accountingRule,
+            final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
@@ -49,10 +52,11 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(multiDisburseLoan) //
                 .withAccounting(accountingRule, accounts).build(null);
-       return loanProductJSON ;
+        return loanProductJSON;
     }
 
-    public static String createLoanProductWithVaribleConfig(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+    public static String createLoanProductWithVaribleConfig(final boolean multiDisburseLoan, final String accountingRule,
+            final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
@@ -67,10 +71,11 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)//
                 .withVariableInstallmentsConfig(Boolean.TRUE, Integer.valueOf(5), Integer.valueOf(90))//
                 .withAccounting(accountingRule, accounts).build(null);
-        return loanProductJSON ;
+        return loanProductJSON;
     }
 
-    public static String createLoanProductWithVaribleConfigwithEqualPrincipal(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
+    public static String createLoanProductWithVaribleConfigwithEqualPrincipal(final boolean multiDisburseLoan, final String accountingRule,
+            final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1,00,000.00") //
@@ -85,7 +90,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)//
                 .withVariableInstallmentsConfig(Boolean.TRUE, Integer.valueOf(5), Integer.valueOf(90))//
                 .withAccounting(accountingRule, accounts).build(null);
-        return loanProductJSON ;
+        return loanProductJSON;
     }
 
     public static String applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
@@ -105,11 +110,11 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return loanApplicationJSON ;
+        return loanApplicationJSON;
     }
 
-    public static String applyForLoanApplicationWithEqualPrincipal(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal) {
+    public static String applyForLoanApplicationWithEqualPrincipal(final Integer clientID, final Integer loanProductID,
+            List<HashMap> charges, final String savingsId, String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -125,7 +130,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return loanApplicationJSON ;
+        return loanApplicationJSON;
     }
 
     public static String createDeleteVariations(ArrayList<Map> deletedInstallments) {
@@ -195,7 +200,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         ArrayList dueDate = (ArrayList) firstSchedule.get("dueDate");
         Map tosend = new HashMap();
         tosend.put("dueDate", formatDate(dueDate));
-        tosend.put("installmentAmount", 30000) ;
+        tosend.put("installmentAmount", 30000);
         toReturn.add(tosend);
         return toReturn;
     }
@@ -239,10 +244,11 @@ public class VariableInstallmentsDecliningBalanceHelper {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
         tosend.put("dueDate", date);
-        tosend.put("principal", 30000) ;
+        tosend.put("principal", 30000);
         toReturn.add(tosend);
         return toReturn;
     }
+
     private static ArrayList createDeletedMap(String date) {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
@@ -255,7 +261,7 @@ public class VariableInstallmentsDecliningBalanceHelper {
         ArrayList toReturn = new ArrayList<>();
         Map tosend = new HashMap();
         tosend.put("dueDate", date);
-        tosend.put("installmentAmount", 30000) ;
+        tosend.put("installmentAmount", 30000);
         toReturn.add(tosend);
         return toReturn;
     }
@@ -273,12 +279,12 @@ public class VariableInstallmentsDecliningBalanceHelper {
 
     private static ArrayList createDateModifyMap(String[] date, String[] newdate, String[] installments) {
         ArrayList toReturn = new ArrayList<>();
-        for(int i = 0 ; i < date.length; i++) {
+        for (int i = 0; i < date.length; i++) {
             Map tosend = new HashMap();
             tosend.put("dueDate", date[i]);
-            tosend.put("modifiedDueDate", newdate[i]) ;
-            if(i < installments.length) {
-                tosend.put("installmentAmount", installments[i]) ;
+            tosend.put("modifiedDueDate", newdate[i]);
+            if (i < installments.length) {
+                tosend.put("installmentAmount", installments[i]);
             }
             toReturn.add(tosend);
         }

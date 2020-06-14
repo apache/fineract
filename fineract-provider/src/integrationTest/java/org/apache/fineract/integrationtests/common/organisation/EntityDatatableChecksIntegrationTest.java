@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * Retrieval of Entity-Datatable Check
  */
 public class EntityDatatableChecksIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

@@ -28,24 +28,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Bowpi GT
- * Created by Jose on 19/07/2017.
+ * Bowpi GT Created by Jose on 19/07/2017.
  */
 @Service
 @CommandType(entity = "RATE", action = "UPDATE")
 public class UpdateRateCommandHandler implements NewCommandSourceHandler {
 
-  private final RateWriteService writePlatformService;
+    private final RateWriteService writePlatformService;
 
-  @Autowired
-  public UpdateRateCommandHandler(final RateWriteService writePlatformService) {
-    this.writePlatformService = writePlatformService;
-  }
+    @Autowired
+    public UpdateRateCommandHandler(final RateWriteService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-  @Transactional
-  @Override
-  public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-    return this.writePlatformService.updateRate(command.entityId(), command);
-  }
+        return this.writePlatformService.updateRate(command.entityId(), command);
+    }
 }

@@ -60,8 +60,6 @@ public class TemplateMergeServiceTest {
         field.set(null, RoundingMode.HALF_EVEN);
     }
 
-
-
     @Test
     public void compileHelloTemplate() throws Exception {
         String templateText = "Hello Test for Template {{file.name}}!";
@@ -124,7 +122,7 @@ public class TemplateMergeServiceTest {
 
     protected Map<String, Object> createMapFromJSON(String jsonText) {
         Gson gson = new Gson();
-        Type ssMap = new TypeToken<Map<String, Object>>(){}.getType();
+        Type ssMap = new TypeToken<Map<String, Object>>() {}.getType();
         JsonElement json = JsonParser.parseString(jsonText);
         return gson.fromJson(json, ssMap);
     }

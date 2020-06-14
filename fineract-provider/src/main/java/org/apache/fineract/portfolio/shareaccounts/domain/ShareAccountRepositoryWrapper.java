@@ -25,22 +25,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class ShareAccountRepositoryWrapper {
 
-    private final ShareAccountRepository shareAccountRepository ;
+    private final ShareAccountRepository shareAccountRepository;
 
     @Autowired
     public ShareAccountRepositoryWrapper(final ShareAccountRepository shareAccountRepository) {
-        this.shareAccountRepository = shareAccountRepository ;
+        this.shareAccountRepository = shareAccountRepository;
     }
 
     public ShareAccount findOneWithNotFoundDetection(final Long accountId) {
-        return this.shareAccountRepository.findById(accountId)
-                .orElseThrow(() -> new ShareAccountNotFoundException(accountId));
+        return this.shareAccountRepository.findById(accountId).orElseThrow(() -> new ShareAccountNotFoundException(accountId));
     }
+
     public void save(final ShareAccount shareAccount) {
-        this.shareAccountRepository.save(shareAccount) ;
+        this.shareAccountRepository.save(shareAccount);
     }
 
     public void saveAndFlush(final ShareAccount shareAccount) {
-        this.shareAccountRepository.saveAndFlush(shareAccount) ;
+        this.shareAccountRepository.saveAndFlush(shareAccount);
     }
 }

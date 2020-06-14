@@ -48,7 +48,9 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
                 paymentTypeRepositoryWrapper);
     }
 
-    /*** Set of abstractions for saving Share Products to GL Account Mappings ***/
+    /***
+     * Set of abstractions for saving Share Products to GL Account Mappings
+     ***/
 
     public void saveSharesToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId) {
@@ -70,7 +72,9 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
         saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.LIABILITY, PortfolioProductType.SHARES);
     }
 
-    /*** Set of abstractions for merging Shares Products to GL Account Mappings ***/
+    /***
+     * Set of abstractions for merging Shares Products to GL Account Mappings
+     ***/
 
     public void mergeSharesToAssetAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
@@ -92,8 +96,8 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
 
     public void mergeSharesToLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
-        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes,
-                GLAccountType.LIABILITY, PortfolioProductType.SHARES);
+        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.LIABILITY,
+                PortfolioProductType.SHARES);
     }
 
     /*** Abstractions for payments channel related to Shares products ***/
@@ -126,12 +130,11 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
 
         final Long shareReferenceId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
                 element);
-        final Long incomeFromFeeAccountId = this.fromApiJsonHelper.extractLongNamed(
-                SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), element);
+        final Long incomeFromFeeAccountId = this.fromApiJsonHelper
+                .extractLongNamed(SharesProductAccountingParams.INCOME_FROM_FEES.getValue(), element);
         final Long shareSuspenseId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
                 element);
-        final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_EQUITY.getValue(),
-                element);
+        final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(SharesProductAccountingParams.SHARES_EQUITY.getValue(), element);
 
         switch (accountingRuleType) {
             case NONE:
@@ -168,9 +171,8 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
             break;
             case CASH_BASED:
                 // asset
-                mergeSharesToAssetAccountMappingChanges(element, SharesProductAccountingParams.SHARES_REFERENCE.getValue(),
-                        sharesProductId, CashAccountsForShares.SHARES_REFERENCE.getValue(),
-                        CashAccountsForShares.SHARES_REFERENCE.toString(), changes);
+                mergeSharesToAssetAccountMappingChanges(element, SharesProductAccountingParams.SHARES_REFERENCE.getValue(), sharesProductId,
+                        CashAccountsForShares.SHARES_REFERENCE.getValue(), CashAccountsForShares.SHARES_REFERENCE.toString(), changes);
 
                 // income
                 mergeSharesToIncomeAccountMappingChanges(element, SharesProductAccountingParams.INCOME_FROM_FEES.getValue(),
@@ -179,13 +181,12 @@ public class ShareProductToGLAccountMappingHelper extends ProductToGLAccountMapp
 
                 // liability
                 mergeSharesToLiabilityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_SUSPENSE.getValue(),
-                        sharesProductId, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
-                        CashAccountsForShares.SHARES_SUSPENSE.toString(), changes);
+                        sharesProductId, CashAccountsForShares.SHARES_SUSPENSE.getValue(), CashAccountsForShares.SHARES_SUSPENSE.toString(),
+                        changes);
 
                 // equity
-                mergeSharesToEquityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_EQUITY.getValue(),
-                        sharesProductId, CashAccountsForShares.SHARES_EQUITY.getValue(),
-                        CashAccountsForShares.SHARES_EQUITY.toString(), changes);
+                mergeSharesToEquityAccountMappingChanges(element, SharesProductAccountingParams.SHARES_EQUITY.getValue(), sharesProductId,
+                        CashAccountsForShares.SHARES_EQUITY.getValue(), CashAccountsForShares.SHARES_EQUITY.toString(), changes);
             break;
             case ACCRUAL_PERIODIC:
             break;

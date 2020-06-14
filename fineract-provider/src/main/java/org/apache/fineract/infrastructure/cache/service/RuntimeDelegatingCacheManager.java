@@ -122,7 +122,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
     private void clearEhCache() {
         javax.cache.CacheManager cacheManager = this.jcacheCacheManager.getCacheManager();
         Iterable<String> cacheNames = cacheManager.getCacheNames();
-        for (String cacheName: cacheNames) {
+        for (String cacheName : cacheNames) {
             cacheManager.getCache(cacheName).clear();
         }
     }

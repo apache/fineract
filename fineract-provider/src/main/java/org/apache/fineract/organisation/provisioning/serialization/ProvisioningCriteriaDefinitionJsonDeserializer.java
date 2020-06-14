@@ -46,19 +46,18 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
 
     private final FromJsonHelper fromApiJsonHelper;
 
-    private final static Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(JSON_LOCALE_PARAM,
+    private final static Set<String> supportedParametersForCreate = new HashSet<>(
+            Arrays.asList(JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+
+    private final static Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList(JSON_CRITERIAID_PARAM, JSON_LOCALE_PARAM,
             JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
 
-    private final static Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList(JSON_CRITERIAID_PARAM,
-            JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
-
-    private final static Set<String> loanProductSupportedParams = new HashSet<>(Arrays
-            .asList(JSON_LOAN_PRODUCT_ID_PARAM, JSON_LOAN_PRODUCTNAME_PARAM, JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM));
+    private final static Set<String> loanProductSupportedParams = new HashSet<>(
+            Arrays.asList(JSON_LOAN_PRODUCT_ID_PARAM, JSON_LOAN_PRODUCTNAME_PARAM, JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM));
 
     private final static Set<String> provisioningcriteriaSupportedParams = new HashSet<>(
-            Arrays.asList(JSON_CATEOGRYID_PARAM, JSON_CATEOGRYNAME_PARAM, JSON_MINIMUM_AGE_PARAM,
-                    JSON_MAXIMUM_AGE_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_PROVISIONING_PERCENTAGE_PARAM,
-                    JSON_EXPENSE_ACCOUNT_PARAM, JSON_LIABILITY_ACCOUNT_PARAM));
+            Arrays.asList(JSON_CATEOGRYID_PARAM, JSON_CATEOGRYNAME_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_MAXIMUM_AGE_PARAM,
+                    JSON_MINIMUM_AGE_PARAM, JSON_PROVISIONING_PERCENTAGE_PARAM, JSON_EXPENSE_ACCOUNT_PARAM, JSON_LIABILITY_ACCOUNT_PARAM));
 
     @Autowired
     public ProvisioningCriteriaDefinitionJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -66,9 +65,9 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new ProvisioningCriteriaCannotBeCreatedException(
-                "error.msg.provisioningcriteria.cannot.be.created",
-                "criterianame, loanproducts[], provisioningcriteria[] params are missing in the request");
+        if (StringUtils.isBlank(json)) {
+            throw new ProvisioningCriteriaCannotBeCreatedException("error.msg.provisioningcriteria.cannot.be.created",
+                    "criterianame, loanproducts[], provisioningcriteria[] params are missing in the request");
 
         }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -90,26 +89,27 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM).value(jsonloanProducts)
                     .jsonArrayNotEmpty();
             // check for unsupported params
-            int i = 0 ;
+            int i = 0;
             for (JsonElement obj : jsonloanProducts) {
-                this.fromApiJsonHelper.checkForUnsupportedParameters(obj.getAsJsonObject() , loanProductSupportedParams);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(obj.getAsJsonObject(), loanProductSupportedParams);
                 Long productId = this.fromApiJsonHelper.extractLongNamed("id", obj.getAsJsonObject());
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM)
-                .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LOAN_PRODUCT_ID_PARAM, i + 1).value(productId).notNull()
-                .longGreaterThanZero();
-                i++ ;
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LOAN_PRODUCT_ID_PARAM, i + 1).value(productId).notNull()
+                        .longGreaterThanZero();
+                i++;
             }
         }
 
         if (this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, element)) {
-            JsonArray jsonProvisioningCriteria = this.fromApiJsonHelper.extractJsonArrayNamed(
-                    ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, element);
+            JsonArray jsonProvisioningCriteria = this.fromApiJsonHelper
+                    .extractJsonArrayNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, element);
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
                     .value(jsonProvisioningCriteria).jsonArrayNotEmpty();
             for (int i = 0; i < jsonProvisioningCriteria.size(); i++) {
                 JsonObject jsonObject = jsonProvisioningCriteria.get(i).getAsJsonObject();
-                this.fromApiJsonHelper.checkForUnsupportedParameters(jsonObject , provisioningcriteriaSupportedParams);
-                final Long categoryId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM, jsonObject);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(jsonObject, provisioningcriteriaSupportedParams);
+                final Long categoryId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM,
+                        jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM, i + 1).value(categoryId).notNull()
                         .longGreaterThanZero();
@@ -117,43 +117,42 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
                 Long minimumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, i + 1).value(minimumAge).notNull()
-                        .longZeroOrGreater() ;
+                        .longZeroOrGreater();
 
                 Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
-                        .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i+1));
+                        .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i + 1));
 
-
-                BigDecimal provisioningpercentage = this.fromApiJsonHelper.extractBigDecimalNamed(
-                        ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
+                BigDecimal provisioningpercentage = this.fromApiJsonHelper
+                        .extractBigDecimalNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM)
-                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, i + 1).value(provisioningpercentage)
-                        .notNull().zeroOrPositiveAmount();
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, i + 1)
+                        .value(provisioningpercentage).notNull().zeroOrPositiveAmount();
 
-                Long liabilityAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM,
-                        jsonObject);
+                Long liabilityAccountId = this.fromApiJsonHelper
+                        .extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, i + 1).value(liabilityAccountId)
-                        .notNull().longGreaterThanZero() ;
+                        .notNull().longGreaterThanZero();
 
                 Long expenseAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM,
                         jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM)
-                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, i + 1).value(expenseAccountId).notNull()
-                        .longGreaterThanZero() ;
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, i + 1).value(expenseAccountId)
+                        .notNull().longGreaterThanZero();
             }
-        }else {
-            baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM).jsonArrayNotEmpty() ;
+        } else {
+            baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM).jsonArrayNotEmpty();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new ProvisioningCriteriaCannotBeCreatedException(
-                "error.msg.provisioningcriteria.cannot.be.updated",
-                "update params are missing in the request");
+        if (StringUtils.isBlank(json)) {
+            throw new ProvisioningCriteriaCannotBeCreatedException("error.msg.provisioningcriteria.cannot.be.updated",
+                    "update params are missing in the request");
 
         }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -164,12 +163,11 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
 
-        if(this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element);
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM).value(name).notBlank()
                     .notExceedingLengthOf(200);
         }
-
 
         // if the param present, then we should have the loan product ids. If
         // not we will load all loan products
@@ -179,25 +177,26 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM).value(jsonloanProducts)
                     .jsonArrayNotEmpty();
             // check for unsupported params
-            int i = 0 ;
+            int i = 0;
             for (JsonElement obj : jsonloanProducts) {
                 Long productId = this.fromApiJsonHelper.extractLongNamed("id", obj.getAsJsonObject());
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_LOANPRODUCTS_PARAM)
-                .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LOAN_PRODUCT_ID_PARAM, i + 1).value(productId).notNull()
-                .longGreaterThanZero();
-                i++ ;
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LOAN_PRODUCT_ID_PARAM, i + 1).value(productId).notNull()
+                        .longGreaterThanZero();
+                i++;
             }
         }
 
         if (this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, element)) {
-            JsonArray jsonProvisioningCriteria = this.fromApiJsonHelper.extractJsonArrayNamed(
-                    ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, element);
+            JsonArray jsonProvisioningCriteria = this.fromApiJsonHelper
+                    .extractJsonArrayNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, element);
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
                     .value(jsonProvisioningCriteria).jsonArrayNotEmpty();
             for (int i = 0; i < jsonProvisioningCriteria.size(); i++) {
                 // check for unsupported params
                 JsonObject jsonObject = jsonProvisioningCriteria.get(i).getAsJsonObject();
-                final Long categoryId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM, jsonObject);
+                final Long categoryId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM,
+                        jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_CATEOGRYID_PARAM, i + 1).value(categoryId).notNull()
                         .longGreaterThanZero();
@@ -205,30 +204,30 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
                 Long minimumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, i + 1).value(minimumAge).notNull()
-                        .longZeroOrGreater() ;
+                        .longZeroOrGreater();
 
                 Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
-                .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
-                .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i+1));
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
+                        .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i + 1));
 
-                BigDecimal provisioningpercentage = this.fromApiJsonHelper.extractBigDecimalNamed(
-                        ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
+                BigDecimal provisioningpercentage = this.fromApiJsonHelper
+                        .extractBigDecimalNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
-                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, i + 1).value(provisioningpercentage)
-                        .notNull().zeroOrPositiveAmount();
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, i + 1)
+                        .value(provisioningpercentage).notNull().zeroOrPositiveAmount();
 
-                Long liabilityAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM,
-                        jsonObject);
+                Long liabilityAccountId = this.fromApiJsonHelper
+                        .extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, i + 1).value(liabilityAccountId)
-                        .notNull().longGreaterThanZero() ;
+                        .notNull().longGreaterThanZero();
 
                 Long expenseAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM,
                         jsonObject);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
-                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, i + 1).value(expenseAccountId).notNull()
-                        .longGreaterThanZero() ;
+                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, i + 1).value(expenseAccountId)
+                        .notNull().longGreaterThanZero();
             }
         }
 

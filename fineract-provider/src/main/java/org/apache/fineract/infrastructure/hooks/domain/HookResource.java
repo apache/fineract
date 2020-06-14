@@ -43,13 +43,11 @@ public class HookResource extends AbstractPersistableCustom {
         //
     }
 
-    public static HookResource createNewWithoutHook(final String entityName,
-            final String actionName) {
+    public static HookResource createNewWithoutHook(final String entityName, final String actionName) {
         return new HookResource(null, entityName, actionName);
     }
 
-    private HookResource(final Hook hook, final String entityName,
-            final String actionName) {
+    private HookResource(final Hook hook, final String entityName, final String actionName) {
         this.hook = hook;
         this.entityName = entityName;
         this.actionName = actionName;

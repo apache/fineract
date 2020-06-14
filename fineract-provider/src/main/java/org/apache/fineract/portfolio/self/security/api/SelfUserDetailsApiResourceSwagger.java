@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class SelfUserDetailsApiResourceSwagger {
-    private SelfUserDetailsApiResourceSwagger() {
-    }
+
+    private SelfUserDetailsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfUserDetailsResponse")
     public final static class GetSelfUserDetailsResponse {
-        private GetSelfUserDetailsResponse() {
-        }
+
+        private GetSelfUserDetailsResponse() {}
 
         final class GetSelfUserDetailsOrganisationalRole {
-            private GetSelfUserDetailsOrganisationalRole() {
-            }
+
+            private GetSelfUserDetailsOrganisationalRole() {}
 
             @ApiModelProperty(example = "100")
             public Integer id;
@@ -48,8 +48,8 @@ final class SelfUserDetailsApiResourceSwagger {
         }
 
         final class GetSelfUserDetailsRoles {
-            private GetSelfUserDetailsRoles() {
-            }
+
+            private GetSelfUserDetailsRoles() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;

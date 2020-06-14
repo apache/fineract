@@ -34,12 +34,12 @@ final class StandingInstructionApiResourceSwagger {
 
     @ApiModel(value = "GetStandingInstructionsTemplateResponse")
     public static final class GetStandingInstructionsTemplateResponse {
-        private GetStandingInstructionsTemplateResponse() {
-        }
+
+        private GetStandingInstructionsTemplateResponse() {}
 
         final class GetFromOfficeResponseStandingInstructionSwagger {
-            private GetFromOfficeResponseStandingInstructionSwagger() {
-            }
+
+            private GetFromOfficeResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Long id;
@@ -56,8 +56,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetFromAccountTypeResponseStandingInstructionSwagger {
-            private GetFromAccountTypeResponseStandingInstructionSwagger() {
-            }
+
+            private GetFromAccountTypeResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "2")
             public Long id;
@@ -68,8 +68,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetFromOfficeOptionsResponseStandingInstructionSwagger {
-            private GetFromOfficeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetFromOfficeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Long id;
@@ -80,8 +80,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetFromClientOptionsResponseStandingInstructionSwagger {
-            private GetFromClientOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetFromClientOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Long id;
@@ -94,8 +94,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetFromAccountTypeOptionsResponseStandingInstructionSwagger {
-            private GetFromAccountTypeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetFromAccountTypeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "2")
             public Long id;
@@ -106,8 +106,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetToOfficeOptionsResponseStandingInstructionSwagger {
-            private GetToOfficeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetToOfficeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -118,8 +118,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetToAccountTypeOptionsResponseStandingInstructionSwagger {
-            private GetToAccountTypeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetToAccountTypeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -130,8 +130,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetTransferTypeOptionsResponseStandingInstructionSwagger {
-            private GetTransferTypeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetTransferTypeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -142,8 +142,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetStatusOptionsResponseStandingInstructionSwagger {
-            private GetStatusOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetStatusOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -154,8 +154,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetInstructionTypeOptionsResponseStandingInstructionSwagger {
-            private GetInstructionTypeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetInstructionTypeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -166,8 +166,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetPriorityOptionsResponseStandingInstructionSwagger {
-            private GetPriorityOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetPriorityOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -178,8 +178,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetRecurrenceTypeOptionsResponseStandingInstructionSwagger {
-            private GetRecurrenceTypeOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetRecurrenceTypeOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -190,8 +190,8 @@ final class StandingInstructionApiResourceSwagger {
         }
 
         final class GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger {
-            private GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger() {
-            }
+
+            private GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger() {}
 
             @ApiModelProperty(example = "0")
             public Integer id;
@@ -218,8 +218,8 @@ final class StandingInstructionApiResourceSwagger {
 
     @ApiModel(value = "PostStandingInstructionsResponse")
     public static final class PostStandingInstructionsResponse {
-        private PostStandingInstructionsResponse() {
-        }
+
+        private PostStandingInstructionsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Long clientId;
@@ -229,13 +229,14 @@ final class StandingInstructionApiResourceSwagger {
 
     @ApiModel(value = "GetStandingInstructionsResponse")
     public static final class GetStandingInstructionsResponse {
-        private GetStandingInstructionsResponse() {
-        }
+
+        private GetStandingInstructionsResponse() {}
 
         final class GetPageItemsStandingInstructionSwagger {
+
             final class GetFromOfficeStandingInstructionSwagger {
-                private GetFromOfficeStandingInstructionSwagger() {
-                }
+
+                private GetFromOfficeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -244,8 +245,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetFromClientStandingInstructionSwagger {
-                private GetFromClientStandingInstructionSwagger() {
-                }
+
+                private GetFromClientStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -258,8 +259,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetFromAccountTypeStandingInstructionSwagger {
-                private GetFromAccountTypeStandingInstructionSwagger() {
-                }
+
+                private GetFromAccountTypeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -270,8 +271,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetFromAccountStandingInstructionSwagger {
-                private GetFromAccountStandingInstructionSwagger() {
-                }
+
+                private GetFromAccountStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "14")
                 public Long id;
@@ -284,8 +285,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetToOfficeStandingInstructionSwagger {
-                private GetToOfficeStandingInstructionSwagger() {
-                }
+
+                private GetToOfficeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -294,8 +295,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetToClientStandingInstructionSwagger {
-                private GetToClientStandingInstructionSwagger() {
-                }
+
+                private GetToClientStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -308,8 +309,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetToAccountTypeStandingInstructionSwagger {
-                private GetToAccountTypeStandingInstructionSwagger() {
-                }
+
+                private GetToAccountTypeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -320,8 +321,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetToAccountStandingInstructionSwagger {
-                private GetToAccountStandingInstructionSwagger() {
-                }
+
+                private GetToAccountStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "3")
                 public Long id;
@@ -334,8 +335,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetTransferTypeStandingInstructionSwagger {
-                private GetTransferTypeStandingInstructionSwagger() {
-                }
+
+                private GetTransferTypeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -346,8 +347,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetPriorityStandingInstructionSwagger {
-                private GetPriorityStandingInstructionSwagger() {
-                }
+
+                private GetPriorityStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "3")
                 public Integer id;
@@ -358,8 +359,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetInstructionTypeStandingInstructionSwagger {
-                private GetInstructionTypeStandingInstructionSwagger() {
-                }
+
+                private GetInstructionTypeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -370,8 +371,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetStatusStandingInstructionSwagger {
-                private GetStatusStandingInstructionSwagger() {
-                }
+
+                private GetStatusStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -382,8 +383,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetRecurrenceTypeStandingInstructionSwagger {
-                private GetRecurrenceTypeStandingInstructionSwagger() {
-                }
+
+                private GetRecurrenceTypeStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -394,8 +395,8 @@ final class StandingInstructionApiResourceSwagger {
             }
 
             final class GetRecurrenceFrequencyStandingInstructionSwagger {
-                private GetRecurrenceFrequencyStandingInstructionSwagger() {
-                }
+
+                private GetRecurrenceFrequencyStandingInstructionSwagger() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -442,8 +443,8 @@ final class StandingInstructionApiResourceSwagger {
 
     @ApiModel(value = "PostStandingInstructionsRequest")
     public static final class PostStandingInstructionsRequest {
-        private PostStandingInstructionsRequest() {
-        }
+
+        private PostStandingInstructionsRequest() {}
 
         @ApiModelProperty(example = "1")
         public Long fromOfficeId;
@@ -493,8 +494,8 @@ final class StandingInstructionApiResourceSwagger {
 
     @ApiModel(value = "GetStandingInstructionsStandingInstructionIdResponse")
     public static final class GetStandingInstructionsStandingInstructionIdResponse {
-        private GetStandingInstructionsStandingInstructionIdResponse() {
-        }
+
+        private GetStandingInstructionsStandingInstructionIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Long id;
@@ -528,20 +529,25 @@ final class StandingInstructionApiResourceSwagger {
 
     @ApiModel(value = "PutStandingInstructionsStandingInstructionIdResponse")
     public static final class PutStandingInstructionsStandingInstructionIdResponse {
-        private PutStandingInstructionsStandingInstructionIdResponse() {
-        }
-        final class PutUpdateStandingInstructionChanges{
+
+        private PutStandingInstructionsStandingInstructionIdResponse() {}
+
+        final class PutUpdateStandingInstructionChanges {
+
             @ApiModelProperty(example = "2")
             public Integer recurrenceInterval;
         }
+
         @ApiModelProperty(example = "20")
         public Integer resourceId;
         public PutUpdateStandingInstructionChanges changes;
     }
 
     @ApiModel(value = "PutStandingInstructionsStandingInstructionIdRequest")
-    public static final class PutStandingInstructionsStandingInstructionIdRequest{
-        private PutStandingInstructionsStandingInstructionIdRequest(){}
+    public static final class PutStandingInstructionsStandingInstructionIdRequest {
+
+        private PutStandingInstructionsStandingInstructionIdRequest() {}
+
         @ApiModelProperty(example = "2")
         public Integer recurrenceInterval;
     }

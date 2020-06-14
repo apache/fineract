@@ -154,8 +154,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         final Long reportId = command.longValueOfParameterNamed(EmailCampaignValidator.stretchyReportId);
 
-        final Report report = this.reportRepository.findById(reportId)
-                .orElseThrow(() -> new ReportNotFoundException(reportId));
+        final Report report = this.reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException(reportId));
 
         // find all report parameters and store them as json string
         final Set<ReportParameterUsage> reportParameterUsages = report.getReportParameterUsages();
@@ -192,8 +191,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
             if (changes.containsKey(EmailCampaignValidator.businessRuleId)) {
                 final Long newValue = command.longValueOfParameterNamed(EmailCampaignValidator.businessRuleId);
-                final Report reportId = this.reportRepository.findById(newValue)
-                        .orElseThrow(() -> new ReportNotFoundException(newValue));
+                final Report reportId = this.reportRepository.findById(newValue).orElseThrow(() -> new ReportNotFoundException(newValue));
                 emailCampaign.updateBusinessRuleId(reportId);
 
             }
@@ -579,7 +577,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
                 if (isValidEmail(emailMessage.getEmailAddress())) {
 
-                    final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(emailMessage.getEmailCampaign().getId()).orElse(null); //
+                    final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(emailMessage.getEmailCampaign().getId())
+                            .orElse(null); //
 
                     final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat
                             .instance(emailCampaign.getEmailAttachmentFileFormat());

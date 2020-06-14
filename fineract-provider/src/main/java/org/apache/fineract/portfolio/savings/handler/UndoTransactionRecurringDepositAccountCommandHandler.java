@@ -34,7 +34,8 @@ public class UndoTransactionRecurringDepositAccountCommandHandler implements New
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public UndoTransactionRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    public UndoTransactionRecurringDepositAccountCommandHandler(
+            final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 

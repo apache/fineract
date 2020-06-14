@@ -23,6 +23,5 @@ package org.apache.fineract.infrastructure.survey.api;
  */
 public class SurveyApiConstants {
 
-
-    final static String SURVEY_RESOURCE_NAME ="Survey";
+    final static String SURVEY_RESOURCE_NAME = "Survey";
 }

@@ -24,11 +24,10 @@ import org.apache.fineract.portfolio.client.exception.ClientNonPersonNotFoundExc
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 /**
  * <p>
- * Wrapper for {@link ClientNonPersonRepository} that adds NULL checking and Error
- * handling capabilities
+ * Wrapper for {@link ClientNonPersonRepository} that adds NULL checking and
+ * Error handling capabilities
  * </p>
  */
 @Service
@@ -44,8 +43,7 @@ public class ClientNonPersonRepositoryWrapper {
     }
 
     public ClientNonPerson findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new ClientNonPersonNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new ClientNonPersonNotFoundException(id));
     }
 
     public ClientNonPerson findOneByClientId(final Long clientId) {

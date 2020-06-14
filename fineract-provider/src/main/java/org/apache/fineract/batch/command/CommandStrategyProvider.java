@@ -66,12 +66,14 @@ public class CommandStrategyProvider {
      */
     public CommandStrategy getCommandStrategy(final CommandContext commandContext) {
 
-        if (this.commandStrategies.containsKey(commandContext)) { return (CommandStrategy) this.applicationContext
-                .getBean(this.commandStrategies.get(commandContext)); }
+        if (this.commandStrategies.containsKey(commandContext)) {
+            return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(commandContext));
+        }
 
         for (ConcurrentHashMap.Entry<CommandContext, String> entry : this.commandStrategies.entrySet()) {
-            if (commandContext.matcher(entry.getKey())) { return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies
-                    .get(entry.getKey())); }
+            if (commandContext.matcher(entry.getKey())) {
+                return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(entry.getKey()));
+            }
         }
 
         return new UnknownCommandStrategy();
@@ -89,10 +91,10 @@ public class CommandStrategyProvider {
         this.commandStrategies.put(CommandContext.resource("loans").method("POST").build(), "applyLoanCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("savingsaccounts").method("POST").build(), "applySavingsCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("POST").build(), "createChargeCommandStrategy");
-        this.commandStrategies
-                .put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(), "collectChargesCommandStrategy");
-        this.commandStrategies
-                .put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(), "repayLoanCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(),
+                "collectChargesCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(),
+                "repayLoanCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
                 "activateClientCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=approve").method("POST").build(),

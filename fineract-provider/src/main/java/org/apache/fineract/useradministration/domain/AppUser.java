@@ -118,8 +118,8 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     @Column(name = "is_self_service_user", nullable = false)
     private boolean isSelfServiceUser;
 
-    @OneToMany(cascade = CascadeType.ALL,  orphanRemoval = true, fetch=FetchType.EAGER)
-    @JoinColumn(name = "appuser_id", referencedColumnName= "id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "appuser_id", referencedColumnName = "id", nullable = false)
     private Set<AppUserClientMapping> appUserClientMappings = new HashSet<>();
 
     public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
@@ -156,8 +156,8 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
-        return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire,
-                isSelfServiceUser, clients);
+        return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, isSelfServiceUser,
+                clients);
     }
 
     protected AppUser() {
@@ -167,8 +167,8 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
-            final String lastname, final Staff staff, final boolean passwordNeverExpire,
-            final boolean isSelfServiceUser, final Collection<Client> clients) {
+            final String lastname, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
+            final Collection<Client> clients) {
         this.office = office;
         this.email = email.trim();
         this.username = user.getUsername().trim();
@@ -300,26 +300,26 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
             }
         }
 
-        if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
-            if (command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)){
+        if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)) {
+            if (command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)) {
                 final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
                 actualChanges.put(AppUserConstants.IS_SELF_SERVICE_USER, newValue);
                 this.isSelfServiceUser = newValue;
             }
         }
 
-        if(this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)){
+        if (this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
             actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
             Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients);
-            if(this.appUserClientMappings == null){
+            if (this.appUserClientMappings == null) {
                 this.appUserClientMappings = new HashSet<>();
-            }else{
+            } else {
                 this.appUserClientMappings.retainAll(newClients);
             }
             this.appUserClientMappings.addAll(newClients);
-        }else if(!this.isSelfServiceUser && actualChanges.containsKey(AppUserConstants.IS_SELF_SERVICE_USER)){
+        } else if (!this.isSelfServiceUser && actualChanges.containsKey(AppUserConstants.IS_SELF_SERVICE_USER)) {
             actualChanges.put(AppUserConstants.CLIENTS, new ArrayList<>());
-            if(this.appUserClientMappings != null){
+            if (this.appUserClientMappings != null) {
                 this.appUserClientMappings.clear();
             }
         }
@@ -492,13 +492,14 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     /**
      * Checks whether the user has a given permission explicitly.
      *
-     * @param permissionCode the permission code to check for.
+     * @param permissionCode
+     *            the permission code to check for.
      * @return whether the user has the specified permission
      */
     public boolean hasSpecificPermissionTo(final String permissionCode) {
         boolean hasPermission = false;
         for (final Role role : this.roles) {
-            if(role.hasPermissionTo(permissionCode)) {
+            if (role.hasPermissionTo(permissionCode)) {
                 hasPermission = true;
                 break;
             }
@@ -598,8 +599,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public void validateHasDatatableReadPermission(final String datatable) {
-        if (hasNotPermissionForDatatable(datatable, "READ")) { throw new NoAuthorizationException("Not authorised to read datatable: "
-                + datatable); }
+        if (hasNotPermissionForDatatable(datatable, "READ")) {
+            throw new NoAuthorizationException("Not authorised to read datatable: " + datatable);
+        }
     }
 
     public Long getStaffId() {
@@ -654,9 +656,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     private Set<AppUserClientMapping> createAppUserClientMappings(Collection<Client> clients) {
         Set<AppUserClientMapping> newAppUserClientMappings = null;
-        if(clients != null && clients.size() > 0){
+        if (clients != null && clients.size() > 0) {
             newAppUserClientMappings = new HashSet<>();
-            for(Client client : clients){
+            for (Client client : clients) {
                 newAppUserClientMappings.add(new AppUserClientMapping(client));
             }
         }

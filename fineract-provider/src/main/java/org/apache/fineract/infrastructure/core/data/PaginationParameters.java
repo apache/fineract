@@ -126,7 +126,7 @@ public class PaginationParameters {
         return sql.toString();
     }
 
-    public String paginationSql(){
+    public String paginationSql() {
         final StringBuilder sqlBuilder = new StringBuilder(50);
         if (this.isOrderByRequested()) {
             sqlBuilder.append(' ').append(this.orderBySql());

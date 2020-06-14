@@ -39,8 +39,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #notifyBusinessEventToBeExecuted
      * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants
-     * .BusinessEvents,
-     * org.springframework.data.jpa.domain.AbstractPersistable)
+     * .BusinessEvents, org.springframework.data.jpa.domain.AbstractPersistable)
      */
     @Override
     public void notifyBusinessEventToBeExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity) {
@@ -59,8 +58,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #notifyBusinessEventWasExecuted
      * (org.apache.fineract.portfolio.common.BusinessEventNotificationConstants
-     * .BusinessEvents,
-     * org.springframework.data.jpa.domain.AbstractPersistable)
+     * .BusinessEvents, org.springframework.data.jpa.domain.AbstractPersistable)
      */
     @Override
     public void notifyBusinessEventWasExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity) {

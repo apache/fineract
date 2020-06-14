@@ -42,8 +42,7 @@ public class GroupRepositoryWrapper {
     }
 
     public Group findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new GroupNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new GroupNotFoundException(id));
     }
 
     public Group findByOfficeWithNotFoundDetection(final Long id, final Office office) {
@@ -70,9 +69,7 @@ public class GroupRepositoryWrapper {
 
     public LocalDate retrieveSubmittedOndate(final Long groupId) {
         Date submittedOnDate = this.repository.retrieveGroupTypeSubmitteOndDate(groupId);
-        if (submittedOnDate != null) {
-            return new LocalDate(submittedOnDate);
-        }
+        if (submittedOnDate != null) { return new LocalDate(submittedOnDate); }
         return null;
     }
 }

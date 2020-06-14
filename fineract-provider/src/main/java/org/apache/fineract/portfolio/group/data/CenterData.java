@@ -68,49 +68,48 @@ public class CenterData implements Serializable {
 
     private List<DatatableData> datatables = null;
 
-    //import fields
+    // import fields
     private transient Integer rowIndex;
     private String dateFormat;
     private String locale;
     private LocalDate submittedOnDate;
 
-    public static CenterData importInstance(String name,List<GroupGeneralData> groupMembers,LocalDate activationDate,
-            boolean active ,LocalDate submittedOnDate,String externalId, Long officeId,
-            Long staffId,Integer rowIndex,String dateFormat,String locale){
+    public static CenterData importInstance(String name, List<GroupGeneralData> groupMembers, LocalDate activationDate, boolean active,
+            LocalDate submittedOnDate, String externalId, Long officeId, Long staffId, Integer rowIndex, String dateFormat, String locale) {
 
-        return new CenterData(name,groupMembers,activationDate, active,submittedOnDate, externalId, officeId, staffId, rowIndex,dateFormat,locale);
+        return new CenterData(name, groupMembers, activationDate, active, submittedOnDate, externalId, officeId, staffId, rowIndex,
+                dateFormat, locale);
     }
 
-    private CenterData(String name,List<GroupGeneralData> groupMembers,LocalDate activationDate,
-            boolean active ,LocalDate submittedOnDate,String externalId, Long officeId,
-            Long staffId,Integer rowIndex,String dateFormat,String locale) {
+    private CenterData(String name, List<GroupGeneralData> groupMembers, LocalDate activationDate, boolean active,
+            LocalDate submittedOnDate, String externalId, Long officeId, Long staffId, Integer rowIndex, String dateFormat, String locale) {
         this.name = name;
-        this.groupMembers=groupMembers;
+        this.groupMembers = groupMembers;
         this.externalId = externalId;
         this.officeId = officeId;
         this.staffId = staffId;
         this.active = active;
         this.activationDate = activationDate;
-        this.submittedOnDate=submittedOnDate;
+        this.submittedOnDate = submittedOnDate;
         this.rowIndex = rowIndex;
-        this.dateFormat= dateFormat;
-        this.locale=locale;
-        this.status=null;
-        this.id=null;
+        this.dateFormat = dateFormat;
+        this.locale = locale;
+        this.status = null;
+        this.id = null;
         this.accountNo = null;
         this.staffName = null;
         this.hierarchy = null;
         this.timeline = null;
         this.groupMembersOptions = null;
         this.collectionMeetingCalendar = null;
-        this.closureReasons =null;
+        this.closureReasons = null;
         this.officeOptions = null;
         this.staffOptions = null;
-        this.totalCollected =null;
+        this.totalCollected = null;
         this.totalOverdue = null;
         this.totaldue = null;
         this.installmentDue = null;
-        this.officeName=null;
+        this.officeName = null;
     }
 
     public Integer getRowIndex() {
@@ -243,7 +242,7 @@ public class CenterData implements Serializable {
         return this.id;
     }
 
-    public String getAccountNo(){
+    public String getAccountNo() {
         return this.accountNo;
     }
 
@@ -269,45 +268,30 @@ public class CenterData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof CenterData)) {
-            return false;
-        }
+        if (this == o) { return true; }
+        if (!(o instanceof CenterData)) { return false; }
         CenterData that = (CenterData) o;
-        return Objects.equals(active, that.active) &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(accountNo, that.accountNo) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(externalId, that.externalId) &&
-                Objects.equals(officeId, that.officeId) &&
-                Objects.equals(officeName, that.officeName) &&
-                Objects.equals(staffId, that.staffId) &&
-                Objects.equals(staffName, that.staffName) &&
-                Objects.equals(hierarchy, that.hierarchy) &&
-                Objects.equals(status, that.status) &&
-                Objects.equals(activationDate, that.activationDate) &&
-                Objects.equals(timeline, that.timeline) &&
-                Objects.equals(groupMembers, that.groupMembers) &&
-                Objects.equals(groupMembersOptions, that.groupMembersOptions) &&
-                Objects.equals(collectionMeetingCalendar, that.collectionMeetingCalendar) &&
-                Objects.equals(closureReasons, that.closureReasons) &&
-                Objects.equals(officeOptions, that.officeOptions) &&
-                Objects.equals(staffOptions, that.staffOptions) &&
-                Objects.equals(totalCollected, that.totalCollected) &&
-                Objects.equals(totalOverdue, that.totalOverdue) &&
-                Objects.equals(totaldue, that.totaldue) &&
-                Objects.equals(installmentDue, that.installmentDue) &&
-                Objects.equals(datatables, that.datatables) &&
-                Objects.equals(rowIndex, that.rowIndex) &&
-                Objects.equals(dateFormat, that.dateFormat) &&
-                Objects.equals(locale, that.locale) &&
-                Objects.equals(submittedOnDate, that.submittedOnDate);
+        return Objects.equals(active, that.active) && Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo)
+                && Objects.equals(name, that.name) && Objects.equals(externalId, that.externalId) && Objects.equals(officeId, that.officeId)
+                && Objects.equals(officeName, that.officeName) && Objects.equals(staffId, that.staffId)
+                && Objects.equals(staffName, that.staffName) && Objects.equals(hierarchy, that.hierarchy)
+                && Objects.equals(status, that.status) && Objects.equals(activationDate, that.activationDate)
+                && Objects.equals(timeline, that.timeline) && Objects.equals(groupMembers, that.groupMembers)
+                && Objects.equals(groupMembersOptions, that.groupMembersOptions)
+                && Objects.equals(collectionMeetingCalendar, that.collectionMeetingCalendar)
+                && Objects.equals(closureReasons, that.closureReasons) && Objects.equals(officeOptions, that.officeOptions)
+                && Objects.equals(staffOptions, that.staffOptions) && Objects.equals(totalCollected, that.totalCollected)
+                && Objects.equals(totalOverdue, that.totalOverdue) && Objects.equals(totaldue, that.totaldue)
+                && Objects.equals(installmentDue, that.installmentDue) && Objects.equals(datatables, that.datatables)
+                && Objects.equals(rowIndex, that.rowIndex) && Objects.equals(dateFormat, that.dateFormat)
+                && Objects.equals(locale, that.locale) && Objects.equals(submittedOnDate, that.submittedOnDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, accountNo, name, externalId, officeId, officeName, staffId, staffName, hierarchy, status, active, activationDate, timeline, groupMembers, groupMembersOptions, collectionMeetingCalendar, closureReasons, officeOptions, staffOptions, totalCollected, totalOverdue, totaldue, installmentDue, datatables, rowIndex, dateFormat, locale, submittedOnDate);
+        return Objects.hash(id, accountNo, name, externalId, officeId, officeName, staffId, staffName, hierarchy, status, active,
+                activationDate, timeline, groupMembers, groupMembersOptions, collectionMeetingCalendar, closureReasons, officeOptions,
+                staffOptions, totalCollected, totalOverdue, totaldue, installmentDue, datatables, rowIndex, dateFormat, locale,
+                submittedOnDate);
     }
 }

@@ -31,8 +31,9 @@ public class FinancialActivityAccountNotFoundException extends AbstractPlatformR
     }
 
     public FinancialActivityAccountNotFoundException(final Integer financialActivityType) {
-        super("error.msg.financialActivityAccount.not.found", "Financial Activity account with for the financial Activity with Id "
-                + financialActivityType + " does not exist", financialActivityType);
+        super("error.msg.financialActivityAccount.not.found",
+                "Financial Activity account with for the financial Activity with Id " + financialActivityType + " does not exist",
+                financialActivityType);
     }
 
 }

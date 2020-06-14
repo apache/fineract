@@ -60,8 +60,10 @@ public class JournalEntryDataValidator {
             baseDataValidator.reset().parameter(JournalEntryJsonInputParams.OFFICE_ID.getValue()).value(officeId).ignoreIfNull()
                     .longGreaterThanZero();
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
 }

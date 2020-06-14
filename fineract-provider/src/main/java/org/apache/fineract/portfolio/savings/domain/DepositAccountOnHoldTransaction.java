@@ -113,7 +113,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistableCustom {
 
     public LocalDate getTransactionDate() {
         LocalDate transactionDate = null;
-        if(this.transactionDate !=null){
+        if (this.transactionDate != null) {
             transactionDate = LocalDate.fromDateFields(this.transactionDate);
         }
         return transactionDate;

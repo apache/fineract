@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import org.joda.time.LocalDate;
 
 public class SavingsApproval {
+
     private final transient Integer rowIndex;
 
     private final LocalDate approvedOnDate;
@@ -31,11 +32,11 @@ public class SavingsApproval {
 
     private final String note;
 
-    public static SavingsApproval importInstance(LocalDate approvedOnDate, Integer rowIndex,String locale,String dateFormat){
-        return new SavingsApproval(approvedOnDate, rowIndex,locale,dateFormat);
+    public static SavingsApproval importInstance(LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
+        return new SavingsApproval(approvedOnDate, rowIndex, locale, dateFormat);
     }
 
-    private SavingsApproval(LocalDate approvedOnDate, Integer rowIndex,String locale,String dateFormat ) {
+    private SavingsApproval(LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
         this.approvedOnDate = approvedOnDate;
         this.rowIndex = rowIndex;
         this.dateFormat = dateFormat;

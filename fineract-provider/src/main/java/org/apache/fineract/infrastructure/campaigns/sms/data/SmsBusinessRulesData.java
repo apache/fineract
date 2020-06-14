@@ -75,18 +75,12 @@ public class SmsBusinessRulesData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !(o instanceof SmsBusinessRulesData)) {
-            return false;
-        }
+        if (this == o) { return true; }
+        if (o == null || !(o instanceof SmsBusinessRulesData)) { return false; }
 
         SmsBusinessRulesData that = (SmsBusinessRulesData) o;
 
-        if (reportId != null ? !reportId.equals(that.reportId) : that.reportId != null) {
-            return false;
-        }
+        if (reportId != null ? !reportId.equals(that.reportId) : that.reportId != null) { return false; }
 
         return true;
     }

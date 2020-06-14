@@ -36,4 +36,3 @@ CREATE TABLE `m_savings_officer_assignment_history` (
 
 insert into m_permission (`grouping`,code,entity_name,action_name) values ('portfolio','REMOVESAVINGSOFFICER_SAVINGSACCOUNT','SAVINGSACCOUNT','REMOVESAVINGSOFFICER');
 insert into m_permission (`grouping`,code,entity_name,action_name) values ('portfolio','UPDATESAVINGSOFFICER_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATESAVINGSOFFICER');
-

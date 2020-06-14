@@ -30,8 +30,7 @@ public class ComponentData {
         super();
     }
 
-    public ComponentData(final Long id, final String key, final String text,
-                         final String description, final Integer sequenceNo) {
+    public ComponentData(final Long id, final String key, final String text, final String description, final Integer sequenceNo) {
         super();
         this.id = id;
         this.key = key;

@@ -53,8 +53,8 @@ public class JpaUserDomainService implements UserDomainService {
         this.userRepository.saveAndFlush(appUser);
 
         if (sendPasswordToEmail.booleanValue()) {
-            this.emailService.sendToUserAccount(appUser.getOffice().getName(),
-                    appUser.getFirstname(), appUser.getEmail(), appUser.getUsername(), unencodedPassword);
+            this.emailService.sendToUserAccount(appUser.getOffice().getName(), appUser.getFirstname(), appUser.getEmail(),
+                    appUser.getUsername(), unencodedPassword);
         }
     }
 

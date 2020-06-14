@@ -46,8 +46,9 @@ public class SQLBuilderTest {
         sqlBuilder.addCriteria("hobby LIKE ", "Mifos/Apache Fineract");
         sqlBuilder.addCriteria("age <  ", 123);
         assertEquals(" WHERE  name = ?  AND  hobby LIKE ?  AND  age < ?", sqlBuilder.getSQLTemplate());
-        assertArrayEquals(new Object[] { "Michael", "Mifos/Apache Fineract", 123}, sqlBuilder.getArguments());
-        assertEquals("SQLBuilder{WHERE  name = ['Michael']  AND  hobby LIKE ['Mifos/Apache Fineract']  AND  age < [123]}", sqlBuilder.toString());
+        assertArrayEquals(new Object[] { "Michael", "Mifos/Apache Fineract", 123 }, sqlBuilder.getArguments());
+        assertEquals("SQLBuilder{WHERE  name = ['Michael']  AND  hobby LIKE ['Mifos/Apache Fineract']  AND  age < [123]}",
+                sqlBuilder.toString());
     }
 
     @Test
@@ -68,15 +69,15 @@ public class SQLBuilderTest {
 
     @Test
     public void testAddIllegalArguments() throws Exception {
-        assertThrows(IllegalArgumentException.class, ()-> {
+        assertThrows(IllegalArgumentException.class, () -> {
             new SQLBuilder().addCriteria("age<", 123);
-        }, "space between column and operator" );
+        }, "space between column and operator");
         assertThrows(IllegalArgumentException.class, () -> {
             new SQLBuilder().addCriteria(null, "argument");
         }, "null Criteria Fragment");
         assertThrows(IllegalArgumentException.class, () -> {
             new SQLBuilder().addCriteria("", "argument");
-        }, "empty Criteria Fragment" );
+        }, "empty Criteria Fragment");
         assertThrows(IllegalArgumentException.class, () -> {
             new SQLBuilder().addCriteria(" ", "argument");
         }, "space only Criteria Fragment");

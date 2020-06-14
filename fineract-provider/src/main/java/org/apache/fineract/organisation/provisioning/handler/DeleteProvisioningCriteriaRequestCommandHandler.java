@@ -34,14 +34,15 @@ public class DeleteProvisioningCriteriaRequestCommandHandler implements NewComma
     private final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService;
 
     @Autowired
-    public DeleteProvisioningCriteriaRequestCommandHandler(final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
+    public DeleteProvisioningCriteriaRequestCommandHandler(
+            final ProvisioningCriteriaWritePlatformService provisioningCriteriaWritePlatformService) {
         this.provisioningCriteriaWritePlatformService = provisioningCriteriaWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningCriteriaWritePlatformService.deleteProvisioningCriteria(jsonCommand.entityId()) ;
+        return this.provisioningCriteriaWritePlatformService.deleteProvisioningCriteria(jsonCommand.entityId());
     }
 
 }

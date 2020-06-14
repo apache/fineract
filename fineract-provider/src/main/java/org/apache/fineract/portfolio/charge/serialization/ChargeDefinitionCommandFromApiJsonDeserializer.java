@@ -133,8 +133,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
             if (ctt.isWeeklyFee()) {
                 final String monthDay = this.fromApiJsonHelper.extractStringNamed("feeOnMonthDay", element);
-                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay)
-                        .mustBeBlankWhenParameterProvidedIs("chargeTimeType", chargeTimeType);
+                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).mustBeBlankWhenParameterProvidedIs("chargeTimeType",
+                        chargeTimeType);
             }
 
             if (ctt.isMonthlyFee()) {
@@ -174,7 +174,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .longGreaterThanZero();
             }
 
-        }else if(appliesTo.isSharesCharge()) {
+        } else if (appliesTo.isSharesCharge()) {
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
             if (chargeTimeType != null) {
@@ -187,10 +187,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForShares());
             }
 
-            if(chargeTimeType != null && chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
-                if(chargeCalculationType != null) {
+            if (chargeTimeType != null && chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
+                if (chargeCalculationType != null) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
-                    .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
+                            .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
                 }
             }
         }
@@ -280,11 +280,11 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Collection<Object> validLoanValues = Arrays.asList(ChargeTimeType.validLoanValues());
             final Collection<Object> validSavingsValues = Arrays.asList(ChargeTimeType.validSavingsValues());
             final Collection<Object> validClientValues = Arrays.asList(ChargeTimeType.validClientValues());
-            final Collection<Object> validShareValues = Arrays.asList(ChargeTimeType.validShareValues()) ;
+            final Collection<Object> validShareValues = Arrays.asList(ChargeTimeType.validShareValues());
             final Collection<Object> allValidValues = new ArrayList<>(validLoanValues);
             allValidValues.addAll(validSavingsValues);
             allValidValues.addAll(validClientValues);
-            allValidValues.addAll(validShareValues) ;
+            allValidValues.addAll(validShareValues);
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()
                     .isOneOfTheseValues(allValidValues.toArray(new Object[allValidValues.size()]));
         }
@@ -355,9 +355,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
     private void performChargeTimeNCalculationTypeValidation(DataValidatorBuilder baseDataValidator, final Integer chargeTimeType,
             final Integer chargeCalculationType) {
-        if(chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())){
+        if (chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
-            .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
+                    .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
         }
 
         if (chargeTimeType.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {

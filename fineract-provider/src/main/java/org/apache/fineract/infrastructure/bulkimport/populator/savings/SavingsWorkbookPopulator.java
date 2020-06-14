@@ -49,30 +49,29 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
     private PersonnelSheetPopulator personnelSheetPopulator;
     private SavingsProductSheetPopulator productSheetPopulator;
 
-
-
     public SavingsWorkbookPopulator(OfficeSheetPopulator officeSheetPopulator, ClientSheetPopulator clientSheetPopulator,
             GroupSheetPopulator groupSheetPopulator, PersonnelSheetPopulator personnelSheetPopulator,
             SavingsProductSheetPopulator savingsProductSheetPopulator) {
-        this.officeSheetPopulator=officeSheetPopulator;
-        this.clientSheetPopulator=clientSheetPopulator;
-        this.groupSheetPopulator=groupSheetPopulator;
-        this.personnelSheetPopulator=personnelSheetPopulator;
-        this.productSheetPopulator=savingsProductSheetPopulator;
+        this.officeSheetPopulator = officeSheetPopulator;
+        this.clientSheetPopulator = clientSheetPopulator;
+        this.groupSheetPopulator = groupSheetPopulator;
+        this.personnelSheetPopulator = personnelSheetPopulator;
+        this.productSheetPopulator = savingsProductSheetPopulator;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         Sheet savingsSheet = workbook.createSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
-        officeSheetPopulator.populate(workbook,dateFormat);
-        clientSheetPopulator.populate(workbook,dateFormat);
-        groupSheetPopulator.populate(workbook,dateFormat);
-        personnelSheetPopulator.populate(workbook,dateFormat);
-        productSheetPopulator.populate(workbook,dateFormat);
-        setRules(savingsSheet,dateFormat);
-        setDefaults(savingsSheet,dateFormat);
+        officeSheetPopulator.populate(workbook, dateFormat);
+        clientSheetPopulator.populate(workbook, dateFormat);
+        groupSheetPopulator.populate(workbook, dateFormat);
+        personnelSheetPopulator.populate(workbook, dateFormat);
+        productSheetPopulator.populate(workbook, dateFormat);
+        setRules(savingsSheet, dateFormat);
+        setDefaults(savingsSheet, dateFormat);
         setClientAndGroupDateLookupTable(savingsSheet, clientSheetPopulator.getClients(), groupSheetPopulator.getGroups(),
-                SavingsConstants.LOOKUP_CLIENT_NAME_COL, SavingsConstants.LOOKUP_ACTIVATION_DATE_COL,!TemplatePopulateImportConstants.CONTAINS_CLIENT_EXTERNAL_ID,dateFormat);
+                SavingsConstants.LOOKUP_CLIENT_NAME_COL, SavingsConstants.LOOKUP_ACTIVATION_DATE_COL,
+                !TemplatePopulateImportConstants.CONTAINS_CLIENT_EXTERNAL_ID, dateFormat);
         setLayout(savingsSheet);
     }
 
@@ -140,56 +139,57 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(SavingsConstants.EXTERNAL_ID_COL, rowHeader, "External Id");
 
         writeString(SavingsConstants.ALLOW_OVER_DRAFT_COL, rowHeader, "Is Overdraft Allowed ");
-        writeString(SavingsConstants.OVER_DRAFT_LIMIT_COL, rowHeader,"  Maximum Overdraft Amount Limit ");
+        writeString(SavingsConstants.OVER_DRAFT_LIMIT_COL, rowHeader, "  Maximum Overdraft Amount Limit ");
 
-        writeString(SavingsConstants.CHARGE_ID_1,rowHeader,"Charge Id");
+        writeString(SavingsConstants.CHARGE_ID_1, rowHeader, "Charge Id");
         writeString(SavingsConstants.CHARGE_AMOUNT_1, rowHeader, "Charged Amount");
         writeString(SavingsConstants.CHARGE_DUE_DATE_1, rowHeader, "Charged On Date");
-        writeString(SavingsConstants.CHARGE_ID_2,rowHeader,"Charge Id");
+        writeString(SavingsConstants.CHARGE_ID_2, rowHeader, "Charge Id");
         writeString(SavingsConstants.CHARGE_AMOUNT_2, rowHeader, "Charged Amount");
         writeString(SavingsConstants.CHARGE_DUE_DATE_2, rowHeader, "Charged On Date");
 
     }
 
-    private void setDefaults(Sheet worksheet,String dateFormat) {
+    private void setDefaults(Sheet worksheet, String dateFormat) {
         Workbook workbook = worksheet.getWorkbook();
         CellStyle dateCellStyle = workbook.createCellStyle();
         short df = workbook.createDataFormat().getFormat(dateFormat);
         dateCellStyle.setDataFormat(df);
-            for (Integer rowNo = 1; rowNo < 1000; rowNo++) {
-                Row row = worksheet.createRow(rowNo);
-                writeFormula(SavingsConstants.CURRENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Currency_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Currency_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.DECIMAL_PLACES_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Decimal_Places_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Decimal_Places_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.IN_MULTIPLES_OF_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"In_Multiples_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"In_Multiples_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Rate_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Rate_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Compouding_\",$D"
-                        + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Compouding_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.INTEREST_POSTING_PERIOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Posting_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Posting_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.INTEREST_CALCULATION_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Calculation_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Calculation_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Days_In_Year_\",$D"
-                        + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Days_In_Year_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.MIN_OPENING_BALANCE_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Min_Balance_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Min_Balance_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.LOCKIN_PERIOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Lockin_Period_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Lockin_Period_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Lockin_Frequency_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Lockin_Frequency_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Withdrawal_Fee_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Withdrawal_Fee_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.ALLOW_OVER_DRAFT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Overdraft_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Overdraft_\",$D" + (rowNo + 1) + ")))");
-                writeFormula(SavingsConstants.OVER_DRAFT_LIMIT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Overdraft_Limit_\",$D" + (rowNo + 1)
-                        + "))),\"\",INDIRECT(CONCATENATE(\"Overdraft_Limit_\",$D" + (rowNo + 1) + ")))");
-            }
+        for (Integer rowNo = 1; rowNo < 1000; rowNo++) {
+            Row row = worksheet.createRow(rowNo);
+            writeFormula(SavingsConstants.CURRENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Currency_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"Currency_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.DECIMAL_PLACES_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Decimal_Places_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"Decimal_Places_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.IN_MULTIPLES_OF_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"In_Multiples_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"In_Multiples_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Rate_\",$D"
+                    + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Rate_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL, row,
+                    "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Compouding_\",$D" + (rowNo + 1)
+                            + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Compouding_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.INTEREST_POSTING_PERIOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Posting_\",$D"
+                    + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Posting_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.INTEREST_CALCULATION_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Interest_Calculation_\",$D"
+                    + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Interest_Calculation_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Days_In_Year_\",$D"
+                    + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Days_In_Year_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.MIN_OPENING_BALANCE_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Min_Balance_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"Min_Balance_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.LOCKIN_PERIOD_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Lockin_Period_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"Lockin_Period_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Lockin_Frequency_\",$D"
+                    + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Lockin_Frequency_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Withdrawal_Fee_\",$D"
+                    + (rowNo + 1) + "))),\"\",INDIRECT(CONCATENATE(\"Withdrawal_Fee_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.ALLOW_OVER_DRAFT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Overdraft_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"Overdraft_\",$D" + (rowNo + 1) + ")))");
+            writeFormula(SavingsConstants.OVER_DRAFT_LIMIT_COL, row, "IF(ISERROR(INDIRECT(CONCATENATE(\"Overdraft_Limit_\",$D" + (rowNo + 1)
+                    + "))),\"\",INDIRECT(CONCATENATE(\"Overdraft_Limit_\",$D" + (rowNo + 1) + ")))");
         }
+    }
 
-    private void setRules(Sheet worksheet,String dateFormat) {
+    private void setRules(Sheet worksheet, String dateFormat) {
         CellRangeAddressList officeNameRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 SavingsConstants.OFFICE_NAME_COL, SavingsConstants.OFFICE_NAME_COL);
         CellRangeAddressList savingsTypeRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
@@ -212,63 +212,57 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
                 SavingsConstants.INTEREST_POSTING_PERIOD_COL, SavingsConstants.INTEREST_POSTING_PERIOD_COL);
         CellRangeAddressList interestCalculationRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 SavingsConstants.INTEREST_CALCULATION_COL, SavingsConstants.INTEREST_CALCULATION_COL);
-        CellRangeAddressList interestCalculationDaysInYearRange = new CellRangeAddressList(1,
-                SpreadsheetVersion.EXCEL97.getLastRowIndex(), SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL,
-                SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL);
+        CellRangeAddressList interestCalculationDaysInYearRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL);
         CellRangeAddressList lockinPeriodFrequencyRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL);
-        CellRangeAddressList applyWithdrawalFeeForTransfersRange = new CellRangeAddressList(1,
-                SpreadsheetVersion.EXCEL97.getLastRowIndex(), SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS);
-        CellRangeAddressList allowOverdraftRange = new CellRangeAddressList(1,SpreadsheetVersion.EXCEL97.getLastRowIndex(),SavingsConstants.ALLOW_OVER_DRAFT_COL,SavingsConstants.ALLOW_OVER_DRAFT_COL);
-
-
+        CellRangeAddressList applyWithdrawalFeeForTransfersRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS);
+        CellRangeAddressList allowOverdraftRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                SavingsConstants.ALLOW_OVER_DRAFT_COL, SavingsConstants.ALLOW_OVER_DRAFT_COL);
 
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) worksheet);
 
         setNames(worksheet);
 
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
-        DataValidationConstraint savingsTypeConstraint = validationHelper.createExplicitListConstraint(new String[] { "Individual",
-                "Group" });
-        DataValidationConstraint clientNameConstraint = validationHelper
-                .createFormulaListConstraint("IF($B1=\"Individual\",INDIRECT(CONCATENATE(\"Client_\",$A1)),INDIRECT(CONCATENATE(\"Group_\",$A1)))");
+        DataValidationConstraint savingsTypeConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { "Individual", "Group" });
+        DataValidationConstraint clientNameConstraint = validationHelper.createFormulaListConstraint(
+                "IF($B1=\"Individual\",INDIRECT(CONCATENATE(\"Client_\",$A1)),INDIRECT(CONCATENATE(\"Group_\",$A1)))");
         DataValidationConstraint productNameConstraint = validationHelper.createFormulaListConstraint("Products");
         DataValidationConstraint fieldOfficerNameConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$A1))");
         DataValidationConstraint submittedDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($C1,$AF$2:$AG$"
-                        + (clientSheetPopulator.getClientsSize() + groupSheetPopulator.getGroupsSize() + 1) + ",2,FALSE)", "=TODAY()",
-                dateFormat);
-        DataValidationConstraint approvalDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=$F1", "=TODAY()", dateFormat);
-        DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=$G1", "=TODAY()", dateFormat);
-        DataValidationConstraint interestCompudingPeriodConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_DAILY ,
-                TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_MONTHLY,
-                TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_QUARTERLY,
-                TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_SEMI_ANNUALLY,
-                TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY });
-        DataValidationConstraint interestPostingPeriodConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY ,
-                TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_QUARTERLY,
-                TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_BIANUALLY,
-                TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_ANNUALLY  });
+                DataValidationConstraint.OperatorType.BETWEEN,
+                "=VLOOKUP($C1,$AF$2:$AG$" + (clientSheetPopulator.getClientsSize() + groupSheetPopulator.getGroupsSize() + 1) + ",2,FALSE)",
+                "=TODAY()", dateFormat);
+        DataValidationConstraint approvalDateConstraint = validationHelper
+                .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$F1", "=TODAY()", dateFormat);
+        DataValidationConstraint activationDateConstraint = validationHelper
+                .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$G1", "=TODAY()", dateFormat);
+        DataValidationConstraint interestCompudingPeriodConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_DAILY,
+                        TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_MONTHLY,
+                        TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_QUARTERLY,
+                        TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_SEMI_ANNUALLY,
+                        TemplatePopulateImportConstants.INTEREST_COMPOUNDING_PERIOD_ANNUALLY });
+        DataValidationConstraint interestPostingPeriodConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY,
+                        TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_QUARTERLY,
+                        TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_BIANUALLY,
+                        TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_ANNUALLY });
         DataValidationConstraint interestCalculationConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                TemplatePopulateImportConstants.INTEREST_CAL_DAILY_BALANCE,
-                TemplatePopulateImportConstants.INTEREST_CAL_AVG_BALANCE });
-        DataValidationConstraint interestCalculationDaysInYearConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_360,
-                TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_365 });
-        DataValidationConstraint lockinPeriodFrequencyConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                TemplatePopulateImportConstants.FREQUENCY_DAYS,
-                TemplatePopulateImportConstants.FREQUENCY_WEEKS,
-                TemplatePopulateImportConstants.FREQUENCY_MONTHS,
-                TemplatePopulateImportConstants.FREQUENCY_YEARS });
-        DataValidationConstraint applyWithdrawalFeeForTransferConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                "True", "False" });
-        DataValidationConstraint allowOverdraftConstraint = validationHelper.createExplicitListConstraint(new String[] {
-                "True", "False" });
+                TemplatePopulateImportConstants.INTEREST_CAL_DAILY_BALANCE, TemplatePopulateImportConstants.INTEREST_CAL_AVG_BALANCE });
+        DataValidationConstraint interestCalculationDaysInYearConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_360,
+                        TemplatePopulateImportConstants.INTEREST_CAL_DAYS_IN_YEAR_365 });
+        DataValidationConstraint lockinPeriodFrequencyConstraint = validationHelper.createExplicitListConstraint(
+                new String[] { TemplatePopulateImportConstants.FREQUENCY_DAYS, TemplatePopulateImportConstants.FREQUENCY_WEEKS,
+                        TemplatePopulateImportConstants.FREQUENCY_MONTHS, TemplatePopulateImportConstants.FREQUENCY_YEARS });
+        DataValidationConstraint applyWithdrawalFeeForTransferConstraint = validationHelper
+                .createExplicitListConstraint(new String[] { "True", "False" });
+        DataValidationConstraint allowOverdraftConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation savingsTypeValidation = validationHelper.createValidation(savingsTypeConstraint, savingsTypeRange);
@@ -281,17 +275,16 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
                 interestPostingPeriodRange);
         DataValidation interestCalculationValidation = validationHelper.createValidation(interestCalculationConstraint,
                 interestCalculationRange);
-        DataValidation interestCalculationDaysInYearValidation = validationHelper.createValidation(
-                interestCalculationDaysInYearConstraint, interestCalculationDaysInYearRange);
+        DataValidation interestCalculationDaysInYearValidation = validationHelper.createValidation(interestCalculationDaysInYearConstraint,
+                interestCalculationDaysInYearRange);
         DataValidation lockinPeriodFrequencyValidation = validationHelper.createValidation(lockinPeriodFrequencyConstraint,
                 lockinPeriodFrequencyRange);
-        DataValidation applyWithdrawalFeeForTransferValidation = validationHelper.createValidation(
-                applyWithdrawalFeeForTransferConstraint, applyWithdrawalFeeForTransfersRange);
+        DataValidation applyWithdrawalFeeForTransferValidation = validationHelper.createValidation(applyWithdrawalFeeForTransferConstraint,
+                applyWithdrawalFeeForTransfersRange);
         DataValidation submittedDateValidation = validationHelper.createValidation(submittedDateConstraint, submittedDateRange);
         DataValidation approvalDateValidation = validationHelper.createValidation(approvalDateConstraint, approvedDateRange);
         DataValidation activationDateValidation = validationHelper.createValidation(activationDateConstraint, activationDateRange);
-        DataValidation allowOverdraftValidation = validationHelper.createValidation(
-                allowOverdraftConstraint, allowOverdraftRange);
+        DataValidation allowOverdraftValidation = validationHelper.createValidation(allowOverdraftConstraint, allowOverdraftRange);
 
         worksheet.addValidationData(officeValidation);
         worksheet.addValidationData(savingsTypeValidation);
@@ -318,7 +311,7 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         // Office Names
         Name officeGroup = savingsWorkbook.createName();
         officeGroup.setNameName("Office");
-        officeGroup.setRefersToFormula(TemplatePopulateImportConstants.OFFICE_SHEET_NAME+"!$B$2:$B$" + (officeNames.size() + 1));
+        officeGroup.setRefersToFormula(TemplatePopulateImportConstants.OFFICE_SHEET_NAME + "!$B$2:$B$" + (officeNames.size() + 1));
 
         // Client and Loan Officer Names for each office
         for (Integer i = 0; i < officeNames.size(); i++) {
@@ -330,25 +323,26 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             Name groupName = savingsWorkbook.createName();
             if (officeNameToBeginEndIndexesOfStaff != null) {
                 fieldOfficerName.setNameName("Staff_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
-                fieldOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME+"!$B$" + officeNameToBeginEndIndexesOfStaff[0] + ":$B$"
-                        + officeNameToBeginEndIndexesOfStaff[1]);
+                fieldOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
+                        + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
             if (officeNameToBeginEndIndexesOfClients != null) {
                 clientName.setNameName("Client_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
-                clientName.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME+"!$B$" + officeNameToBeginEndIndexesOfClients[0] + ":$B$"
-                        + officeNameToBeginEndIndexesOfClients[1]);
+                clientName.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$"
+                        + officeNameToBeginEndIndexesOfClients[0] + ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
             if (officeNameToBeginEndIndexesOfGroups != null) {
                 groupName.setNameName("Group_" + officeNames.get(i).trim().replaceAll("[ )(]", "_"));
-                groupName.setRefersToFormula(TemplatePopulateImportConstants.GROUP_SHEET_NAME+"!$B$" + officeNameToBeginEndIndexesOfGroups[0] + ":$B$"
-                        + officeNameToBeginEndIndexesOfGroups[1]);
+                groupName.setRefersToFormula(TemplatePopulateImportConstants.GROUP_SHEET_NAME + "!$B$"
+                        + officeNameToBeginEndIndexesOfGroups[0] + ":$B$" + officeNameToBeginEndIndexesOfGroups[1]);
             }
         }
 
         // Product Name
         Name productGroup = savingsWorkbook.createName();
         productGroup.setNameName("Products");
-        productGroup.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$B$2:$B$" + (productSheetPopulator.getProductsSize() + 1));
+        productGroup.setRefersToFormula(
+                TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$B$2:$B$" + (productSheetPopulator.getProductsSize() + 1));
 
         // Default Interest Rate, Interest Compounding Period, Interest Posting
         // Period, Interest Calculation, Interest Calculation Days In Year,
@@ -386,37 +380,35 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             withdrawalFeeName.setNameName("Withdrawal_Fee_" + productName);
             allowOverdraftName.setNameName("Overdraft_" + productName);
 
-            interestCompoundingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$D$" + (i + 2));
-            interestPostingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$E$" + (i + 2));
-            interestCalculationName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$F$" + (i + 2));
-            daysInYearName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$G$" + (i + 2));
-            currencyName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$K$" + (i + 2));
-            decimalPlacesName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$L$" + (i + 2));
-            withdrawalFeeName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$N$" + (i + 2));
-            allowOverdraftName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$O$" + (i + 2));
+            interestCompoundingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$D$" + (i + 2));
+            interestPostingPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$E$" + (i + 2));
+            interestCalculationName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$F$" + (i + 2));
+            daysInYearName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$G$" + (i + 2));
+            currencyName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$K$" + (i + 2));
+            decimalPlacesName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$L$" + (i + 2));
+            withdrawalFeeName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$N$" + (i + 2));
+            allowOverdraftName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$O$" + (i + 2));
             if (product.getOverdraftLimit() != null) {
                 overdraftLimitName.setNameName("Overdraft_Limit_" + productName);
-                overdraftLimitName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$P$" + (i + 2));
+                overdraftLimitName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$P$" + (i + 2));
             }
             if (product.getMinRequiredOpeningBalance() != null) {
                 minOpeningBalanceName.setNameName("Min_Balance_" + productName);
-                minOpeningBalanceName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$H$" + (i + 2));
+                minOpeningBalanceName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$H$" + (i + 2));
             }
             if (product.getLockinPeriodFrequency() != null) {
                 lockinPeriodName.setNameName("Lockin_Period_" + productName);
-                lockinPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$I$" + (i + 2));
+                lockinPeriodName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$I$" + (i + 2));
             }
             if (product.getLockinPeriodFrequencyType() != null) {
                 lockinPeriodFrequencyName.setNameName("Lockin_Frequency_" + productName);
-                lockinPeriodFrequencyName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$J$" + (i + 2));
+                lockinPeriodFrequencyName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$J$" + (i + 2));
             }
             if (product.getCurrency().currencyInMultiplesOf() != null) {
                 inMultiplesOfName.setNameName("In_Multiples_" + productName);
-                inMultiplesOfName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME+"!$M$" + (i + 2));
+                inMultiplesOfName.setRefersToFormula(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME + "!$M$" + (i + 2));
             }
         }
     }
 
 }
-
-

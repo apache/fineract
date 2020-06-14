@@ -93,10 +93,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final ChargeRepositoryWrapper chargeRepository, final RateRepositoryWrapper rateRepository,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final FineractEntityAccessUtil fineractEntityAccessUtil,
-            final FloatingRateRepositoryWrapper floatingRateRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final FloatingRateRepositoryWrapper floatingRateRepository,
+            final LoanRepositoryWrapper loanRepositoryWrapper, final BusinessEventNotifierService businessEventNotifierService) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -126,14 +124,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
 
             final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
-            final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+            final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(
+                    transactionProcessingStrategyId);
 
             final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
             final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
             final List<Rate> rates = assembleListOfProductRates(command);
 
             FloatingRate floatingRate = null;
-            if(command.parameterExists("floatingRatesId")){
+            if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
@@ -145,11 +144,11 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
-            // check if the office specific products are enabled. If yes, then save this savings product against a specific office
+            // check if the office specific products are enabled. If yes, then
+            // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-                    FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS,
-                    loanproduct.getId());
+                    FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanproduct.getId());
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_PRODUCT_CREATE,
                     constructEntityMap(BusinessEntity.LOAN_PRODUCT, loanproduct));
@@ -165,10 +164,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch(final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
 
     }
@@ -185,8 +184,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private Fund findFundByIdIfProvided(final Long fundId) {
         Fund fund = null;
         if (fundId != null) {
-            fund = this.fundRepository.findById(fundId)
-                    .orElseThrow(() -> new FundNotFoundException(fundId));
+            fund = this.fundRepository.findById(fundId).orElseThrow(() -> new FundNotFoundException(fundId));
         }
         return fund;
     }
@@ -204,13 +202,13 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), product);
             validateInputDates(command);
 
-            if(anyChangeInCriticalFloatingRateLinkedParams(command, product)
-                    && this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForProduct(product.getId())){
+            if (anyChangeInCriticalFloatingRateLinkedParams(command, product)
+                    && this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForProduct(product.getId())) {
                 throw new LoanProductCannotBeModifiedDueToNonClosedLoansException(product.getId());
             }
 
             FloatingRate floatingRate = null;
-            if(command.parameterExists("floatingRatesId")){
+            if (command.parameterExists("floatingRatesId")) {
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
@@ -225,7 +223,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             if (changes.containsKey("transactionProcessingStrategyId")) {
                 final Long transactionProcessingStrategyId = (Long) changes.get("transactionProcessingStrategyId");
-                final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+                final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(
+                        transactionProcessingStrategyId);
                 product.update(loanTransactionProcessingStrategy);
             }
 
@@ -264,19 +263,21 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
-        }catch(final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
 
     }
 
     private boolean anyChangeInCriticalFloatingRateLinkedParams(JsonCommand command, LoanProduct product) {
-        final boolean isChangeFromFloatingToFlatOrViceVersa = command.isChangeInBooleanParameterNamed("isLinkedToFloatingInterestRates", product.isLinkedToFloatingInterestRate());
+        final boolean isChangeFromFloatingToFlatOrViceVersa = command.isChangeInBooleanParameterNamed("isLinkedToFloatingInterestRates",
+                product.isLinkedToFloatingInterestRate());
         final boolean isChangeInCriticalFloatingRateParams = product.getFloatingRates() != null
                 && (command.isChangeInLongParameterNamed("floatingRatesId", product.getFloatingRates().getFloatingRate().getId())
-                        || command.isChangeInBigDecimalParameterNamed("interestRateDifferential", product.getFloatingRates().getInterestRateDifferential()));
+                        || command.isChangeInBigDecimalParameterNamed("interestRateDifferential",
+                                product.getFloatingRates().getInterestRateDifferential()));
         return isChangeFromFloatingToFlatOrViceVersa || isChangeInCriticalFloatingRateParams;
     }
 
@@ -344,18 +345,18 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         if (realCause.getMessage().contains("'external_id'")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
-            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId", "Loan Product with externalId `"
-                    + externalId + "` already exists", "externalId", externalId);
+            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId",
+                    "Loan Product with externalId `" + externalId + "` already exists", "externalId", externalId);
         } else if (realCause.getMessage().contains("'unq_name'")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name", "Loan product with name `" + name
-                    + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name",
+                    "Loan product with name `" + name + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("'unq_short_name'")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name", "Loan product with short name `"
-                    + shortName + "` already exists", "shortName", shortName);
+            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name",
+                    "Loan product with short name `" + shortName + "` already exists", "shortName", shortName);
         } else if (realCause.getMessage().contains("Duplicate entry")) {
             final Object[] args = null;
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.charge",
@@ -380,7 +381,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         LOG.error("Error occured.", dve);
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
+            final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
         Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;

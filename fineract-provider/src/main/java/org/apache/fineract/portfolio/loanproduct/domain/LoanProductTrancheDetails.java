@@ -41,7 +41,8 @@ public class LoanProductTrancheDetails {
         // TODO Auto-generated constructor stub
     }
 
-    public LoanProductTrancheDetails(final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance) {
+    public LoanProductTrancheDetails(final boolean multiDisburseLoan, final Integer maxTrancheCount,
+            final BigDecimal outstandingLoanBalance) {
         this.multiDisburseLoan = multiDisburseLoan;
         this.maxTrancheCount = maxTrancheCount;
         this.outstandingLoanBalance = outstandingLoanBalance;

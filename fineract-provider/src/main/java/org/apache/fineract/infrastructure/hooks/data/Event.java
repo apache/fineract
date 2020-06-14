@@ -25,8 +25,7 @@ public class Event implements Serializable {
     private final String actionName;
     private final String entityName;
 
-    public static Event instance(final String actionName,
-            final String entityName) {
+    public static Event instance(final String actionName, final String entityName) {
         return new Event(actionName, entityName);
     }
 

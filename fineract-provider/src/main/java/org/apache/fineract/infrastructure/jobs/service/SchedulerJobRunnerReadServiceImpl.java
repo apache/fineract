@@ -46,8 +46,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     private final PaginationHelper<JobDetailHistoryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+    public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }
@@ -115,14 +114,14 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     private boolean isJobExist(final Long jobId) {
         boolean isJobPresent = false;
-        try{
+        try {
             final String sql = "select count(*) from job job where job.id= ?";
             final int count = this.jdbcTemplate.queryForObject(sql, Integer.class, new Object[] { jobId });
             if (count == 1) {
                 isJobPresent = true;
             }
             return isJobPresent;
-        }catch(EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return isJobPresent;
         }
 
@@ -130,8 +129,8 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     private static final class JobDetailMapper implements RowMapper<JobDetailData> {
 
-        private final StringBuilder sqlBuilder = new StringBuilder("select")
-                .append(" job.id,job.display_name as displayName,job.next_run_time as nextRunTime,job.initializing_errorlog as initializingError,job.cron_expression as cronExpression,job.is_active as active,job.currently_running as currentlyRunning,")
+        private final StringBuilder sqlBuilder = new StringBuilder("select").append(
+                " job.id,job.display_name as displayName,job.next_run_time as nextRunTime,job.initializing_errorlog as initializingError,job.cron_expression as cronExpression,job.is_active as active,job.currently_running as currentlyRunning,")
                 .append(" runHistory.version,runHistory.start_time as lastRunStartTime,runHistory.end_time as lastRunEndTime,runHistory.`status`,runHistory.error_message as jobRunErrorMessage,runHistory.trigger_type as triggerType,runHistory.error_log as jobRunErrorLog ")
                 .append(" from job job  left join job_run_history runHistory ON job.id=runHistory.job_id and job.previous_run_start_time=runHistory.start_time ");
 
@@ -171,8 +170,8 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     private static final class JobHistoryMapper implements RowMapper<JobDetailHistoryData> {
 
-        private final StringBuilder sqlBuilder = new StringBuilder(200)
-                .append(" runHistory.version,runHistory.start_time as runStartTime,runHistory.end_time as runEndTime,runHistory.`status`,runHistory.error_message as jobRunErrorMessage,runHistory.trigger_type as triggerType,runHistory.error_log as jobRunErrorLog ")
+        private final StringBuilder sqlBuilder = new StringBuilder(200).append(
+                " runHistory.version,runHistory.start_time as runStartTime,runHistory.end_time as runEndTime,runHistory.`status`,runHistory.error_message as jobRunErrorMessage,runHistory.trigger_type as triggerType,runHistory.error_log as jobRunErrorLog ")
                 .append(" from job job join job_run_history runHistory ON job.id=runHistory.job_id");
 
         public String schema() {

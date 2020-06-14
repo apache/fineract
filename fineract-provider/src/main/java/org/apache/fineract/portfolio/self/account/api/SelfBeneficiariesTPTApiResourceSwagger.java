@@ -26,17 +26,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/22/17.
  */
 final class SelfBeneficiariesTPTApiResourceSwagger {
-    private SelfBeneficiariesTPTApiResourceSwagger() {
-    }
+
+    private SelfBeneficiariesTPTApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfBeneficiariesTPTTemplateResponse")
     public final static class GetSelfBeneficiariesTPTTemplateResponse {
-        private GetSelfBeneficiariesTPTTemplateResponse() {
-        }
+
+        private GetSelfBeneficiariesTPTTemplateResponse() {}
 
         final class GetSelfBeneficiariesAccountOptions {
-            private GetSelfBeneficiariesAccountOptions() {
-            }
+
+            private GetSelfBeneficiariesAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -51,8 +51,8 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
     @ApiModel(value = "PostSelfBeneficiariesTPTRequest")
     public final static class PostSelfBeneficiariesTPTRequest {
-        private PostSelfBeneficiariesTPTRequest() {
-        }
+
+        private PostSelfBeneficiariesTPTRequest() {}
 
         @ApiModelProperty(example = "en_GB")
         public String locale;
@@ -70,8 +70,8 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
     @ApiModel(value = "PostSelfBeneficiariesTPTResponse")
     public final static class PostSelfBeneficiariesTPTResponse {
-        private PostSelfBeneficiariesTPTResponse() {
-        }
+
+        private PostSelfBeneficiariesTPTResponse() {}
 
         @ApiModelProperty(example = "5")
         public Integer resourceId;
@@ -79,8 +79,8 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
     @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdRequest")
     public final static class PutSelfBeneficiariesTPTBeneficiaryIdRequest {
-        private PutSelfBeneficiariesTPTBeneficiaryIdRequest() {
-        }
+
+        private PutSelfBeneficiariesTPTBeneficiaryIdRequest() {}
 
         @ApiModelProperty(example = "beneficiary nick name")
         public String name;
@@ -90,12 +90,12 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
     @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdResponse")
     public final static class PutSelfBeneficiariesTPTBeneficiaryIdResponse {
-        private PutSelfBeneficiariesTPTBeneficiaryIdResponse() {
-        }
+
+        private PutSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
         final class PutSelfBeneficiariesChanges {
-            private PutSelfBeneficiariesChanges() {
-            }
+
+            private PutSelfBeneficiariesChanges() {}
 
             @ApiModelProperty(example = "1000")
             public Integer transferLimit;
@@ -110,8 +110,8 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
     @ApiModel(value = "DeleteSelfBeneficiariesTPTBeneficiaryIdResponse")
     public final static class DeleteSelfBeneficiariesTPTBeneficiaryIdResponse {
-        private DeleteSelfBeneficiariesTPTBeneficiaryIdResponse() {
-        }
+
+        private DeleteSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
         @ApiModelProperty(example = "5")
         public Integer resourceId;
@@ -119,9 +119,8 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
 
     @ApiModel(value = "GetSelfBeneficiariesTPTResponse")
     public final static class GetSelfBeneficiariesTPTResponse {
-        private GetSelfBeneficiariesTPTResponse() {
-        }
 
+        private GetSelfBeneficiariesTPTResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;

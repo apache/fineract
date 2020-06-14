@@ -30,20 +30,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "APPROVE")
-public class GSIMApplicationApprovalCommandHandler implements NewCommandSourceHandler
-{
+public class GSIMApplicationApprovalCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public GSIMApplicationApprovalCommandHandler(
-            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    public GSIMApplicationApprovalCommandHandler(final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingAccountWritePlatformService.approveGSIMApplication(command.getSavingsId(),command);
+        return this.savingAccountWritePlatformService.approveGSIMApplication(command.getSavingsId(), command);
     }
 }

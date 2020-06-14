@@ -78,20 +78,21 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
             final String query = rs.getString("query");
-            final String tableName=rs.getString("tableName");
-            final String tableFields=rs.getString("tableField");
+            final String tableName = rs.getString("tableName");
+            final String tableFields = rs.getString("tableField");
             final Boolean isActive = rs.getBoolean("isActive");
             final DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
             final Long createdById = JdbcSupport.getLong(rs, "createdById");
-            final Long updatedById=JdbcSupport.getLong(rs, "updatedById");
-            final DateTime updatedOn=JdbcSupport.getDateTime(rs, "updatedOn");
-            final String createdByUsername=rs.getString("createdBy");
-            final String email=rs.getString("email");
-            final Long reportRunFrequency=JdbcSupport.getLong(rs, "report_run_frequency_code");
-            final Long reportRunEvery=JdbcSupport.getLong(rs, "report_run_every");
+            final Long updatedById = JdbcSupport.getLong(rs, "updatedById");
+            final DateTime updatedOn = JdbcSupport.getDateTime(rs, "updatedOn");
+            final String createdByUsername = rs.getString("createdBy");
+            final String email = rs.getString("email");
+            final Long reportRunFrequency = JdbcSupport.getLong(rs, "report_run_frequency_code");
+            final Long reportRunEvery = JdbcSupport.getLong(rs, "report_run_every");
             final DateTime lastRun = JdbcSupport.getDateTime(rs, "last_run");
 
-            return new AdHocData(id,name,query, tableName,tableFields,isActive,createdDate,createdById,updatedById,updatedOn,createdByUsername,email, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery, lastRun);
+            return new AdHocData(id, name, query, tableName, tableFields, isActive, createdDate, createdById, updatedById, updatedOn,
+                    createdByUsername, email, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery, lastRun);
         }
 
         public String schema() {
@@ -105,8 +106,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
     @Override
     public AdHocData retrieveNewAdHocDetails() {
-         return AdHocData.template();
+        return AdHocData.template();
     }
-
 
 }

@@ -44,8 +44,8 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResult build() {
         return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
-                this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.transactionId, this.changes, this.productId,  this.rollbackTransaction,
-                this.subEntityId);
+                this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.transactionId, this.changes, this.productId,
+                this.rollbackTransaction, this.subEntityId);
     }
 
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {

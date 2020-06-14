@@ -47,15 +47,16 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDropdownReadPlatformService {
+
     private final static Logger LOG = LoggerFactory.getLogger(SmsCampaignDropdownReadPlatformServiceImpl.class);
     private final RestTemplate restTemplate;
 
-    private final SmsConfigUtils smsConfigUtils ;
+    private final SmsConfigUtils smsConfigUtils;
 
     @Autowired
     public SmsCampaignDropdownReadPlatformServiceImpl(final SmsConfigUtils smsConfigUtils) {
         this.restTemplate = new RestTemplate();
-        this.smsConfigUtils = smsConfigUtils ;
+        this.smsConfigUtils = smsConfigUtils;
     }
 
     @Override
@@ -64,7 +65,7 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
                 SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.DIRECT), //
                 SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.SCHEDULE), //
                 SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.TRIGGERED) //
-                );
+        );
 
         return triggerTypeCodeValues;
     }
@@ -72,26 +73,26 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
     @Override
     public Collection<SmsProviderData> retrieveSmsProviders() {
         Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
-        String hostName = "" ;
-            Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
-            URI uri = (URI) hostConfig.get("uri");
-            hostName = uri.getHost() ;
-            HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
-            ResponseEntity<Collection<SmsProviderData>> responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
-                    new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
-             if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
-                throw new PlatformDataIntegrityException("error.msg.mobile.service.provider.not.available",
-                "Mobile service provider not available.");
-             }
-            smsProviderOptions = responseOne.getBody();
-            return smsProviderOptions;
+        String hostName = "";
+        Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
+        URI uri = (URI) hostConfig.get("uri");
+        hostName = uri.getHost();
+        HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
+        ResponseEntity<Collection<SmsProviderData>> responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
+                new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
+        if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
+            throw new PlatformDataIntegrityException("error.msg.mobile.service.provider.not.available",
+                    "Mobile service provider not available.");
+        }
+        smsProviderOptions = responseOne.getBody();
+        return smsProviderOptions;
     }
 
     @Override
     public Collection<EnumOptionData> retrieveCampaignTypes() {
         final List<EnumOptionData> campaignTypeCodeValues = Arrays.asList( //
                 SmsCampaignEnumerations.smscampaignType(CampaignType.SMS)//
-                );
+        );
         return campaignTypeCodeValues;
     }
 

@@ -159,8 +159,7 @@ public final class Result implements Serializable {
             builder.append(" messageId=").append(messageId);
         }
         if (canonicalRegistrationId != null) {
-            builder.append(" canonicalRegistrationId=").append(
-                    canonicalRegistrationId);
+            builder.append(" canonicalRegistrationId=").append(canonicalRegistrationId);
         }
         if (errorCode != null) {
             builder.append(" errorCode=").append(errorCode);
@@ -172,8 +171,7 @@ public final class Result implements Serializable {
             builder.append(" groupFailure=").append(failure);
         }
         if (failedRegistrationIds != null) {
-            builder.append(" failedRegistrationIds=").append(
-                    failedRegistrationIds);
+            builder.append(" failedRegistrationIds=").append(failedRegistrationIds);
         }
         return builder.append(" ]").toString();
     }
@@ -181,7 +179,5 @@ public final class Result implements Serializable {
     public int getStatus() {
         return this.status;
     }
-
-
 
 }

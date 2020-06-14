@@ -36,7 +36,8 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
-@Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
+@Table(name = "acc_gl_closure", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
 public class GLClosure extends AbstractAuditableCustom {
 
     @ManyToOne

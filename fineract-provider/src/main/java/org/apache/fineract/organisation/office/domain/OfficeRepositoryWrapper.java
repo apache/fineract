@@ -40,18 +40,17 @@ public class OfficeRepositoryWrapper {
     }
 
     public Office findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new OfficeNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new OfficeNotFoundException(id));
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Office findOfficeHierarchy(final Long id) {
-        final Office office = this.repository.findById(id)
-                .orElseThrow(() -> new OfficeNotFoundException(id));
+        final Office office = this.repository.findById(id).orElseThrow(() -> new OfficeNotFoundException(id));
         office.loadLazyCollections();
-        return office ;
+        return office;
 
     }
+
     public Office save(final Office entity) {
         return this.repository.save(entity);
     }

@@ -30,12 +30,14 @@ import org.apache.fineract.organisation.office.data.OfficeData;
  * Created by sanyam on 26/7/17.
  */
 final class AccountingRuleApiResourceSwagger {
+
     private AccountingRuleApiResourceSwagger() {
         // For Swagger Documentation
     }
 
     @ApiModel(value = "GetAccountRulesResponse")
     public static final class GetAccountRulesResponse {
+
         private GetAccountRulesResponse() {
 
         }
@@ -54,6 +56,7 @@ final class AccountingRuleApiResourceSwagger {
 
     @ApiModel(value = "GetAccountRulesTemplateResponse")
     public static final class GetAccountRulesTemplateResponse {
+
         private GetAccountRulesTemplateResponse() {
 
         }
@@ -66,6 +69,7 @@ final class AccountingRuleApiResourceSwagger {
 
     @ApiModel(value = "PostAccountingRulesRequest")
     public static final class PostAccountingRulesRequest {
+
         private PostAccountingRulesRequest() {
 
         }
@@ -84,9 +88,11 @@ final class AccountingRuleApiResourceSwagger {
 
     @ApiModel(value = "PostAccountingRulesResponse")
     public static final class PostAccountingRulesResponse {
+
         private PostAccountingRulesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "1")
@@ -95,24 +101,30 @@ final class AccountingRuleApiResourceSwagger {
 
     @ApiModel(value = "PutAccountingRulesRequest")
     public static final class PutAccountingRulesRequest {
+
         private PutAccountingRulesRequest() {
 
         }
+
         @ApiModelProperty(example = "Employee Salary posting rule")
         public String name;
     }
 
     @ApiModel(value = "PutAccountingRulesResponse")
     public static final class PutAccountingRulesResponse {
-        private PutAccountingRulesResponse () {
+
+        private PutAccountingRulesResponse() {
 
         }
 
         public class PutAccountingRulesResponsechangesSwagger {
-            public PutAccountingRulesResponsechangesSwagger(){}
+
+            public PutAccountingRulesResponsechangesSwagger() {}
+
             @ApiModelProperty(example = "Employee Salary posting rule")
             public String name;
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         public PutAccountingRulesResponsechangesSwagger changes;
@@ -120,9 +132,11 @@ final class AccountingRuleApiResourceSwagger {
 
     @ApiModel(value = "DeleteAccountingRulesResponse")
     public static final class DeleteAccountingRulesResponse {
+
         private DeleteAccountingRulesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

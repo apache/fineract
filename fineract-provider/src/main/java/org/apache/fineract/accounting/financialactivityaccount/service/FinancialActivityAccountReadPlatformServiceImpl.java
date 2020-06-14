@@ -91,7 +91,8 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
 
         public FinancialActivityAccountMapper() {
             StringBuilder sb = new StringBuilder(300);
-            sb.append(" faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");
+            sb.append(
+                    " faa.id as id, faa.financial_activity_type as financialActivityId, glaccount.id as glAccountId,glaccount.name as glAccountName,glaccount.gl_code as glCode  ");
             sb.append(" from acc_gl_financial_activity_account faa ");
             sb.append(" join acc_gl_account glaccount on glaccount.id = faa.gl_account_id");
             sql = sb.toString();

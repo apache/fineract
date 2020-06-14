@@ -46,7 +46,7 @@ public class PlatformCacheConfiguration implements CachingConfigurer {
 
     @Override
     public CacheResolver cacheResolver() {
-        //TODO https://issues.apache.org/jira/browse/FINERACT-705
+        // TODO https://issues.apache.org/jira/browse/FINERACT-705
         return null;
     }
 
@@ -57,7 +57,7 @@ public class PlatformCacheConfiguration implements CachingConfigurer {
 
     @Override
     public CacheErrorHandler errorHandler() {
-        //TODO https://issues.apache.org/jira/browse/FINERACT-705
+        // TODO https://issues.apache.org/jira/browse/FINERACT-705
         return null;
     }
 }

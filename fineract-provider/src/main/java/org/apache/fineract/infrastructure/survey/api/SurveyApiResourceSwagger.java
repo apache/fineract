@@ -28,25 +28,31 @@ import org.joda.time.DateTime;
  * Created by sanyam on 13/8/17.
  */
 final class SurveyApiResourceSwagger {
-    private SurveyApiResourceSwagger(){
+
+    private SurveyApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetSurveyResponse")
     public static final class GetSurveyResponse {
-        private GetSurveyResponse(){
+
+        private GetSurveyResponse() {
 
         }
+
         final class GetSurveyResponseDatatableData {
+
             private GetSurveyResponseDatatableData() {
 
             }
+
             @ApiModelProperty(example = "m_client")
             public String applicationTableName;
             @ApiModelProperty(example = "ppi_kenya_2005")
             public String registeredTableName;
             public List<ResultsetColumnHeaderData> columnHeaderData;
         }
+
         public GetSurveyResponseDatatableData datatableData;
         @ApiModelProperty(example = "false")
         public boolean enabled;
@@ -54,9 +60,11 @@ final class SurveyApiResourceSwagger {
 
     @ApiModel(value = "PostSurveySurveyNameApptableIdRequest")
     public static final class PostSurveySurveyNameApptableIdRequest {
+
         private PostSurveySurveyNameApptableIdRequest() {
 
         }
+
         @ApiModelProperty(example = "167")
         public Long ppi_household_members_cd_q1_householdmembers;
         @ApiModelProperty(example = "174")
@@ -85,12 +93,13 @@ final class SurveyApiResourceSwagger {
         public String locale;
     }
 
-
     @ApiModel(value = "PostSurveySurveyNameApptableIdResponse")
     public static final class PostSurveySurveyNameApptableIdResponse {
+
         private PostSurveySurveyNameApptableIdResponse() {
 
         }
+
         @ApiModelProperty(example = "2")
         public Long officeId;
         @ApiModelProperty(example = "87")

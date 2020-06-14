@@ -41,7 +41,7 @@ public class UpdateTwoFactorConfigCommandHandler implements NewCommandSourceHand
 
     @Autowired
     public UpdateTwoFactorConfigCommandHandler(TwoFactorConfigurationService configurationService,
-                                               TwoFactorConfigurationValidator dataValidator) {
+            TwoFactorConfigurationValidator dataValidator) {
         this.configurationService = configurationService;
         this.dataValidator = dataValidator;
     }
@@ -51,9 +51,6 @@ public class UpdateTwoFactorConfigCommandHandler implements NewCommandSourceHand
     public CommandProcessingResult processCommand(final JsonCommand command) {
         this.dataValidator.validateForUpdate(command.json());
         final Map<String, Object> changes = configurationService.update(command);
-        return new CommandProcessingResultBuilder()
-                .withCommandId(command.commandId())
-                .with(changes)
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
     }
 }

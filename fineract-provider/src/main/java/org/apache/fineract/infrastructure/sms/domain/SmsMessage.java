@@ -70,11 +70,11 @@ public class SmsMessage extends AbstractPersistableCustom {
     @Column(name = "message", nullable = false)
     private String message;
 
-//    @Column(name = "provider_id", nullable = true)
-//    private Long providerId;
-//
-//    @Column(name = "campaign_name", nullable = true)
-//    private String campaignName;
+    // @Column(name = "provider_id", nullable = true)
+    // private Long providerId;
+    //
+    // @Column(name = "campaign_name", nullable = true)
+    // private String campaignName;
 
     @Column(name = "submittedon_date", nullable = true)
     @Temporal(TemporalType.DATE)
@@ -89,16 +89,19 @@ public class SmsMessage extends AbstractPersistableCustom {
 
     public static SmsMessage pendingSms(final String externalId, final Group group, final Client client, final Staff staff,
             final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
-        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.PENDING, message, mobileNo, smsCampaign, isNotification);
+        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.PENDING, message, mobileNo, smsCampaign,
+                isNotification);
     }
 
     public static SmsMessage sentSms(final String externalId, final Group group, final Client client, final Staff staff,
             final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
-        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT, message, mobileNo, smsCampaign, isNotification);
+        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT, message, mobileNo,
+                smsCampaign, isNotification);
     }
 
     public static SmsMessage instance(String externalId, final Group group, final Client client, final Staff staff,
-            final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign, final boolean isNotification) {
+            final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign,
+            final boolean isNotification) {
 
         return new SmsMessage(externalId, group, client, staff, statusType, message, mobileNo, smsCampaign, isNotification);
     }
@@ -193,6 +196,5 @@ public class SmsMessage extends AbstractPersistableCustom {
     public void setNotification(boolean isNotification) {
         this.isNotification = isNotification;
     }
-
 
 }

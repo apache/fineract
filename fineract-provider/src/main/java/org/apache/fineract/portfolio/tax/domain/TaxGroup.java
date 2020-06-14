@@ -44,7 +44,7 @@ public class TaxGroup extends AbstractAuditableCustom {
     @Column(name = "name", length = 100)
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "tax_group_id", referencedColumnName = "id", nullable = false)
     private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 

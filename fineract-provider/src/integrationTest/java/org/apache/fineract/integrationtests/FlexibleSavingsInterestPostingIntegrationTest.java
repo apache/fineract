@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
 public class FlexibleSavingsInterestPostingIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
@@ -74,8 +75,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
         final Integer savingsId = createSavingsAccount(clientID, startDate);
 
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate,
-                CommonConstants.RESPONSE_RESOURCE_ID);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
         /***
          * Perform Post interest transaction and verify the posted transaction
@@ -85,8 +85,9 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
-        for (Entry<String, Object> entry : interestPostingTransaction.entrySet())
-        {LOG.info("{} - {}",entry.getKey(), entry.getValue().toString());}
+        for (Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+        }
         // 1st Dec 13 to 31st March 14 - 365 days, daily compounding using daily
         // balance
         // 33.7016 obtained from formula in excel provided by Subramanya
@@ -123,16 +124,16 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         Boolean enabled = (Boolean) globalConfig.get(10).get("enabled");
 
         if (!enabled.equals(periodEndEnable)) {
-            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
-                    this.responseSpec, periodEndConfigId.toString(), periodEndEnable);
+            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                    periodEndConfigId.toString(), periodEndEnable);
         }
 
         // Updating value for financial year beginning month
         Integer financialYearBeginningConfigId = (Integer) globalConfig.get(11).get("id");
         Assertions.assertNotNull(financialYearBeginningConfigId);
 
-        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec,
-                this.responseSpec, financialYearBeginningConfigId.toString());
+        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                financialYearBeginningConfigId.toString());
         Assertions.assertNotNull(financialYearBeginningConfigData);
 
         financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,

@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UserAdministrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(UserAdministrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -59,7 +60,7 @@ public class UserAdministrationTest {
 
     @AfterEach
     public void tearDown() {
-        for(Integer userId : this.transientUsers) {
+        for (Integer userId : this.transientUsers) {
             UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
         }
         this.transientUsers.clear();
@@ -74,14 +75,15 @@ public class UserAdministrationTest {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet", "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
+                "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
         final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
         Map reason = (Map) errors.get(0);
-        LOG.info("Reason: {}" , reason.get("defaultUserMessage"));
-        LOG.info("Code: {}" , reason.get("userMessageGlobalisationCode"));
+        LOG.info("Reason: {}", reason.get("defaultUserMessage"));
+        LOG.info("Code: {}", reason.get("userMessageGlobalisationCode"));
         Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
         Assertions.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
     }
@@ -94,7 +96,8 @@ public class UserAdministrationTest {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet", "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
+                "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
@@ -113,11 +116,13 @@ public class UserAdministrationTest {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet", "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
+                "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "bilingual", "resourceId");
+        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "bilingual",
+                "resourceId");
         Assertions.assertNotNull(userId2);
         this.transientUsers.add(userId2);
 
@@ -126,6 +131,7 @@ public class UserAdministrationTest {
         Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
         Assertions.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
     }
+
     @Test
     public void testCreateNewUserBlocksDuplicateClientId() {
         final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
@@ -137,13 +143,16 @@ public class UserAdministrationTest {
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
 
-        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId, "resourceId");
+        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId,
+                "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId, "errors");
+        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId,
+                "errors");
         Map reason = (Map) errors.get(0);
-        Assertions.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.", reason.get("defaultUserMessage"));
+        Assertions.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.",
+                reason.get("defaultUserMessage"));
     }
 
 }

@@ -63,8 +63,8 @@ public final class GLAccountCommandFromApiJsonDeserializer extends AbstractFromA
         final Long parentId = this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.PARENT_ID.getValue(), element);
         final String glCode = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.GL_CODE.getValue(), element);
         final Boolean disabled = this.fromApiJsonHelper.extractBooleanNamed(GLAccountJsonInputParams.DISABLED.getValue(), element);
-        final Boolean manualEntriesAllowed = this.fromApiJsonHelper.extractBooleanNamed(
-                GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue(), element);
+        final Boolean manualEntriesAllowed = this.fromApiJsonHelper
+                .extractBooleanNamed(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue(), element);
         final Integer type = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.TYPE.getValue(), element);
         final Integer usage = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.USAGE.getValue(), element);
         final String description = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.DESCRIPTION.getValue(), element);

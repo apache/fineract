@@ -46,8 +46,8 @@ import org.joda.time.LocalDate;
  * @since 2.0.0
  */
 @Entity
-@Table(name = "m_cashiers", uniqueConstraints = { @UniqueConstraint(name = "ux_cashiers_staff_teller", columnNames = { "staff_id",
-        "teller_id" }) })
+@Table(name = "m_cashiers", uniqueConstraints = {
+        @UniqueConstraint(name = "ux_cashiers_staff_teller", columnNames = { "staff_id", "teller_id" }) })
 public class Cashier extends AbstractPersistableCustom {
 
     // ManyToOne(fetch = FetchType.LAZY)
@@ -107,8 +107,8 @@ public class Cashier extends AbstractPersistableCustom {
         return new Cashier(cashierOffice, teller, staff, description, startDate, endDate, isFullDay, startTime, endTime);
     }
 
-    public Cashier(Office office, Teller teller, Staff staff, String description, LocalDate startDate, LocalDate endDate,
-            Boolean isFullDay, String startTime, String endTime) {
+    public Cashier(Office office, Teller teller, Staff staff, String description, LocalDate startDate, LocalDate endDate, Boolean isFullDay,
+            String startTime, String endTime) {
         this.office = office;
         this.teller = teller;
         this.staff = staff;
@@ -180,13 +180,13 @@ public class Cashier extends AbstractPersistableCustom {
             if (command.isChangeInLongParameterNamed(hourStartTimeParamName, this.getHourFromStartTime())
                     || command.isChangeInLongParameterNamed(minStartTimeParamName, this.getMinFromStartTime())) {
                 newStartHour = command.stringValueOfParameterNamed(hourStartTimeParamName);
-                if(newEndHour.equalsIgnoreCase("0")){
-                    newEndHour= newEndHour + "0";
+                if (newEndHour.equalsIgnoreCase("0")) {
+                    newEndHour = newEndHour + "0";
                 }
                 actualChanges.put(hourStartTimeParamName, newStartHour);
                 newStartMin = command.stringValueOfParameterNamed(minStartTimeParamName);
-                if(newStartMin.equalsIgnoreCase("0")){
-                    newStartMin= newStartMin + "0";
+                if (newStartMin.equalsIgnoreCase("0")) {
+                    newStartMin = newStartMin + "0";
                 }
                 actualChanges.put(minStartTimeParamName, newStartMin);
                 this.startTime = newStartHour + ":" + newStartMin;
@@ -195,13 +195,13 @@ public class Cashier extends AbstractPersistableCustom {
             if (command.isChangeInLongParameterNamed(hourEndTimeParamName, this.getHourFromEndTime())
                     || command.isChangeInLongParameterNamed(minEndTimeParamName, this.getMinFromEndTime())) {
                 newEndHour = command.stringValueOfParameterNamed(hourEndTimeParamName);
-                if(newEndHour.equalsIgnoreCase("0")){
-                    newEndHour= newEndHour + "0";
+                if (newEndHour.equalsIgnoreCase("0")) {
+                    newEndHour = newEndHour + "0";
                 }
                 actualChanges.put(hourEndTimeParamName, newEndHour);
                 newEndMin = command.stringValueOfParameterNamed(minEndTimeParamName);
-                if(newEndMin.equalsIgnoreCase("0")){
-                    newEndMin= newEndMin + "0";
+                if (newEndMin.equalsIgnoreCase("0")) {
+                    newEndMin = newEndMin + "0";
                 }
                 actualChanges.put(minEndTimeParamName, newEndMin);
                 this.endTime = newEndHour + ":" + newEndMin;
@@ -360,8 +360,8 @@ public class Cashier extends AbstractPersistableCustom {
      * cashier is assignable to a teller.
      * </p>
      *
-     * @param  startDate validFrom
-     *            the valid from date of this cashier
+     * @param startDate
+     *            validFrom the valid from date of this cashier
      */
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
@@ -397,8 +397,8 @@ public class Cashier extends AbstractPersistableCustom {
      * cashier is assignable to a teller.
      * </p>
      *
-     * @param endDate validTo
-     *            the valid to date of this cashier
+     * @param endDate
+     *            validTo the valid to date of this cashier
      */
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
@@ -417,8 +417,8 @@ public class Cashier extends AbstractPersistableCustom {
     /**
      * Sets the part time flag of this cashier.
      *
-     * @param isFullDay partTime
-     *            the part time flag of this cashier
+     * @param isFullDay
+     *            partTime the part time flag of this cashier
      */
     public void setFullDay(Boolean isFullDay) {
         this.isFullDay = isFullDay;

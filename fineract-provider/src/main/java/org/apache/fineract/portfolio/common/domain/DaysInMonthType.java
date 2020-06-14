@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.apache.fineract.portfolio.common.domain;
+
 import java.util.ArrayList;
 import java.util.List;
 

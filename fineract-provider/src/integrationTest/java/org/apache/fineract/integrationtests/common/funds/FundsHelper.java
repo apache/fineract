@@ -50,8 +50,7 @@ public class FundsHelper {
         super();
     }
 
-    private FundsHelper(final String name,
-                        final String externalId) {
+    private FundsHelper(final String name, final String externalId) {
         super();
         this.name = name;
         this.externalId = externalId;
@@ -83,27 +82,19 @@ public class FundsHelper {
 
     @Override
     public int hashCode() {
-        if (this.name != null) {
-            return this.name.hashCode();
-        }
+        if (this.name != null) { return this.name.hashCode(); }
         return super.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
+        if (o == this) { return true; }
 
-        if (!(o instanceof FundsHelper)) {
-            return false;
-        }
+        if (!(o instanceof FundsHelper)) { return false; }
 
-        FundsHelper fh = (FundsHelper)o;
+        FundsHelper fh = (FundsHelper) o;
 
-        if (this.name.equals(fh.name)) {
-            return true;
-        }
+        if (this.name.equals(fh.name)) { return true; }
 
         return false;
     }

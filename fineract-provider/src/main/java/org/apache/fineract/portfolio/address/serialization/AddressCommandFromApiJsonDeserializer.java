@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AddressCommandFromApiJsonDeserializer {
+
     private final FromJsonHelper fromApiJsonHelper;
     private final FieldConfigurationReadPlatformService readservice;
 
@@ -60,22 +61,17 @@ public class AddressCommandFromApiJsonDeserializer {
     }
 
     public void validate(final String json, final boolean fromNewClient) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("Address");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("Address");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         Set<String> supportedParameters = new HashSet<>();
 
-        final List<FieldConfigurationData> configurationData = new ArrayList<>(
-                this.readservice.retrieveFieldConfigurationList("ADDRESS"));
+        final List<FieldConfigurationData> configurationData = new ArrayList<>(this.readservice.retrieveFieldConfigurationList("ADDRESS"));
         final List<String> enabledFieldList = new ArrayList<>();
 
         final Map<String, Boolean> madatoryFieldsMap = new HashMap<String, Boolean>();
@@ -123,8 +119,7 @@ public class AddressCommandFromApiJsonDeserializer {
 
             }
             if (!regexFieldsMap.get("street").isEmpty()) {
-                baseDataValidator.reset().parameter("street").value(street)
-                        .matchesRegularExpression(regexFieldsMap.get("street"));
+                baseDataValidator.reset().parameter("street").value(street).matchesRegularExpression(regexFieldsMap.get("street"));
             }
 
         }
@@ -176,8 +171,7 @@ public class AddressCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter("city").value(city).notBlank();
             }
             if (!regexFieldsMap.get("city").isEmpty()) {
-                baseDataValidator.reset().parameter("city").value(city)
-                        .matchesRegularExpression(regexFieldsMap.get("city"));
+                baseDataValidator.reset().parameter("city").value(city).matchesRegularExpression(regexFieldsMap.get("city"));
             }
         }
         final String countyDistrict = this.fromApiJsonHelper.extractStringNamed("countyDistrict", element);
@@ -261,8 +255,8 @@ public class AddressCommandFromApiJsonDeserializer {
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                    "Validation errors exist.", dataValidationErrors);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
         }
     }
 

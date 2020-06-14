@@ -35,8 +35,8 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
     public static DailyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances,
             final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval,
-                allEndOfDayBalances, upToInterestCalculationDate);
+        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval, allEndOfDayBalances,
+                upToInterestCalculationDate);
 
         return new DailyCompoundingPeriod(periodInterval, endOfDayBalancesWithinPeriod);
     }
@@ -74,11 +74,9 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
     }
 
     @Override
-    public BigDecimal calculateInterest(
-            final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
-            final SavingsInterestCalculationType interestCalculationType,
-            final BigDecimal interestFromPreviousPostingPeriod, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final BigDecimal minBalanceForInterestCalculation,
+    public BigDecimal calculateInterest(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
+            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestFromPreviousPostingPeriod,
+            final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
             final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
         BigDecimal interestEarned = BigDecimal.ZERO;
 

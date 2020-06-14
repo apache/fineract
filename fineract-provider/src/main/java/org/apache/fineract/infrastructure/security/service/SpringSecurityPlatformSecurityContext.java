@@ -49,9 +49,8 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
     private final ConfigurationDomainService configurationDomainService;
 
-    protected static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>(List.of(
-            new CommandWrapperBuilder().updateUser(null).build())
-    );
+    protected static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>(
+            List.of(new CommandWrapperBuilder().updateUser(null).build()));
 
     @Autowired
     SpringSecurityPlatformSecurityContext(final ConfigurationDomainService configurationDomainService) {
@@ -110,8 +109,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
         if (currentUser == null) { throw new UnAuthenticatedUserException(); }
 
-        if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(
-                currentUser.getId()); }
+        if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) {
+            throw new ResetPasswordException(currentUser.getId());
+        }
 
         return currentUser;
 
@@ -123,8 +123,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
         final AppUser user = authenticatedUser();
         final String userOfficeHierarchy = user.getOffice().getHierarchy();
 
-        if (!resourceOfficeHierarchy.startsWith(userOfficeHierarchy)) { throw new NoAuthorizationException(
-                "The user doesn't have enough permissions to access the resource."); }
+        if (!resourceOfficeHierarchy.startsWith(userOfficeHierarchy)) {
+            throw new NoAuthorizationException("The user doesn't have enough permissions to access the resource.");
+        }
 
     }
 
@@ -156,7 +157,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
         for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
             if (commandItem.actionName().equals(commandWrapper.actionName())
-                    && commandItem.getEntityName().equals(commandWrapper.getEntityName())) { return false; }
+                    && commandItem.getEntityName().equals(commandWrapper.getEntityName())) {
+                return false;
+            }
         }
         return true;
     }

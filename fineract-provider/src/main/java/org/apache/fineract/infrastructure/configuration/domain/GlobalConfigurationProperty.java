@@ -61,8 +61,8 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         this.isTrapDoor = false;
     }
 
-    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final Date dateValue ,final String description,
-            final boolean isTrapDoor) {
+    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final Date dateValue,
+            final String description, final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
@@ -79,10 +79,9 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         return this.value;
     }
 
-    public Date getDateValue(){
+    public Date getDateValue() {
         return this.dateValue;
     }
-
 
     public Map<String, Object> update(final JsonCommand command) {
 
@@ -106,7 +105,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         }
 
         final String dateValueParamName = "dateValue";
-        if(command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)){
+        if (command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)) {
             final Date newDateValue = command.dateValueOfParameterNamed(dateValueParamName);
             actualChanges.put(dateValueParamName, newDateValue);
             this.dateValue = newDateValue;
@@ -114,8 +113,10 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
 
         final String passwordPropertyName = "force-password-reset-days";
         if (this.name.equalsIgnoreCase(passwordPropertyName)) {
-            if ((this.enabled == true && command.hasParameter(valueParamName) && (this.value == 0)) || (this.enabled == true
-                    && !command.hasParameter(valueParamName) && (previousValue == 0))) { throw new ForcePasswordResetException(); }
+            if ((this.enabled == true && command.hasParameter(valueParamName) && (this.value == 0))
+                    || (this.enabled == true && !command.hasParameter(valueParamName) && (previousValue == 0))) {
+                throw new ForcePasswordResetException();
+            }
         }
 
         return actualChanges;

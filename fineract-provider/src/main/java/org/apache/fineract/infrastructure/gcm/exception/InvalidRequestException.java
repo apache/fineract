@@ -41,8 +41,7 @@ public final class InvalidRequestException extends IOException {
     }
 
     private static String getMessage(int status, String description) {
-        StringBuilder base = new StringBuilder("HTTP Status Code: ")
-                .append(status);
+        StringBuilder base = new StringBuilder("HTTP Status Code: ").append(status);
         if (description != null) {
             base.append("(").append(description).append(")");
         }

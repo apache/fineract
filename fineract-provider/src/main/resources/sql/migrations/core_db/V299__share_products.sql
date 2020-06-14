@@ -113,30 +113,30 @@ CONSTRAINT `m_share_account_ibfk_9` FOREIGN KEY (`client_id`) REFERENCES `m_clie
 ) ;
 
 CREATE TABLE `m_share_account_charge` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`account_id` BIGINT NOT NULL,
-	`charge_id` BIGINT NOT NULL,
-	`charge_time_enum` SMALLINT NOT NULL,
-	`charge_calculation_enum` SMALLINT NOT NULL,
-	`charge_payment_mode_enum` SMALLINT NOT NULL DEFAULT '0',
-	`calculation_percentage` DECIMAL(19,6) NULL DEFAULT NULL,
-	`calculation_on_amount` DECIMAL(19,6) NULL DEFAULT NULL,
-	`charge_amount_or_percentage` DECIMAL(19,6) NULL DEFAULT NULL,
-	`amount` DECIMAL(19,6) NOT NULL,
-	`amount_paid_derived` DECIMAL(19,6) NULL DEFAULT NULL,
-	`amount_waived_derived` DECIMAL(19,6) NULL DEFAULT NULL,
-	`amount_writtenoff_derived` DECIMAL(19,6) NULL DEFAULT NULL,
-	`amount_outstanding_derived` DECIMAL(19,6) NOT NULL DEFAULT '0.000000',
-	`is_paid_derived` tinyint NOT NULL DEFAULT '0',
-	`waived` tinyint NOT NULL DEFAULT '0',
-	`min_cap` DECIMAL(19,6) NULL DEFAULT NULL,
-	`max_cap` DECIMAL(19,6) NULL DEFAULT NULL,
-	`is_active` tinyint NOT NULL DEFAULT '1',
-	PRIMARY KEY (`id`),
-	INDEX `charge_id` (`charge_id`),
-	INDEX `m_share_account_charge_ibfk_2` (`account_id`),
-	CONSTRAINT `m_share_account_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
-	CONSTRAINT `m_share_account_charge_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `account_id` BIGINT NOT NULL,
+    `charge_id` BIGINT NOT NULL,
+    `charge_time_enum` SMALLINT NOT NULL,
+    `charge_calculation_enum` SMALLINT NOT NULL,
+    `charge_payment_mode_enum` SMALLINT NOT NULL DEFAULT '0',
+    `calculation_percentage` DECIMAL(19,6) NULL DEFAULT NULL,
+    `calculation_on_amount` DECIMAL(19,6) NULL DEFAULT NULL,
+    `charge_amount_or_percentage` DECIMAL(19,6) NULL DEFAULT NULL,
+    `amount` DECIMAL(19,6) NOT NULL,
+    `amount_paid_derived` DECIMAL(19,6) NULL DEFAULT NULL,
+    `amount_waived_derived` DECIMAL(19,6) NULL DEFAULT NULL,
+    `amount_writtenoff_derived` DECIMAL(19,6) NULL DEFAULT NULL,
+    `amount_outstanding_derived` DECIMAL(19,6) NOT NULL DEFAULT '0.000000',
+    `is_paid_derived` tinyint NOT NULL DEFAULT '0',
+    `waived` tinyint NOT NULL DEFAULT '0',
+    `min_cap` DECIMAL(19,6) NULL DEFAULT NULL,
+    `max_cap` DECIMAL(19,6) NULL DEFAULT NULL,
+    `is_active` tinyint NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    INDEX `charge_id` (`charge_id`),
+    INDEX `m_share_account_charge_ibfk_2` (`account_id`),
+    CONSTRAINT `m_share_account_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+    CONSTRAINT `m_share_account_charge_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
 );
 
 
@@ -167,38 +167,38 @@ CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk2` FOREIGN KEY (`cha
 ) ;
 
 CREATE TABLE `m_share_product_dividend_pay_out` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`product_id` BIGINT NOT NULL,
-	`amount` DECIMAL(19,6) NOT NULL,
-	`dividend_period_start_date` DATE NOT NULL,
-	`dividend_period_end_date` DATE NOT NULL,
-	`status` SMALLINT NOT NULL,
-	`createdby_id` BIGINT NULL DEFAULT NULL,
-	`created_date` DATETIME NULL DEFAULT NULL,
-	`lastmodifiedby_id` BIGINT NULL DEFAULT NULL,
-	`lastmodified_date` DATETIME NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `FK_m_share_product_dividend_pay_out_product_id` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`),
-	CONSTRAINT `FK_m_share_product_dividend_pay_out_createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-	CONSTRAINT `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `product_id` BIGINT NOT NULL,
+    `amount` DECIMAL(19,6) NOT NULL,
+    `dividend_period_start_date` DATE NOT NULL,
+    `dividend_period_end_date` DATE NOT NULL,
+    `status` SMALLINT NOT NULL,
+    `createdby_id` BIGINT NULL DEFAULT NULL,
+    `created_date` DATETIME NULL DEFAULT NULL,
+    `lastmodifiedby_id` BIGINT NULL DEFAULT NULL,
+    `lastmodified_date` DATETIME NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `FK_m_share_product_dividend_pay_out_product_id` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`),
+    CONSTRAINT `FK_m_share_product_dividend_pay_out_createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+    CONSTRAINT `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 );
 
 CREATE TABLE `m_share_account_dividend_details` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`dividend_pay_out_id` BIGINT NOT NULL,
-	`account_id` BIGINT NOT NULL,
-	`amount` DECIMAL(19,6) NOT NULL,
-	`status` SMALLINT NOT NULL,
-	`savings_transaction_id` BIGINT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `FK_m_share_account_dividend_details_dividend_pay_out_id` FOREIGN KEY (`dividend_pay_out_id`) REFERENCES `m_share_product_dividend_pay_out` (`id`),
-	CONSTRAINT `FK_m_share_account_dividend_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `dividend_pay_out_id` BIGINT NOT NULL,
+    `account_id` BIGINT NOT NULL,
+    `amount` DECIMAL(19,6) NOT NULL,
+    `status` SMALLINT NOT NULL,
+    `savings_transaction_id` BIGINT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `FK_m_share_account_dividend_details_dividend_pay_out_id` FOREIGN KEY (`dividend_pay_out_id`) REFERENCES `m_share_product_dividend_pay_out` (`id`),
+    CONSTRAINT `FK_m_share_account_dividend_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
 );
 
 ALTER TABLE `acc_gl_journal_entry`
 ADD COLUMN `share_transaction_id` BIGINT NULL AFTER `payment_details_id`,
 ADD CONSTRAINT `FK_acc_gl_journal_entry_m_share_account_transaction` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`);
-	
+
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('SHAREPRODUCT', 'CREATE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE_DIVIDEND', 0), ('SHAREPRODUCT', 'CREATE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'CREATE_DIVIDEND_CHECKER', 0),('SHAREPRODUCT', 'APPROVE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'APPROVE_DIVIDEND', 0), ('SHAREPRODUCT', 'APPROVE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'APPROVE_DIVIDEND_CHECKER', 0),('SHAREPRODUCT', 'DELETE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'DELETE_DIVIDEND', 0), ('SHAREPRODUCT', 'DELETE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'DELETE_DIVIDEND_CHECKER', 0),('SHAREPRODUCT', 'READ_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'READ_DIVIDEND', 0),('SHAREACCOUNT', 'APPROVE_SHAREACCOUNT', 'SHAREACCOUNT', 'APPROVE', 0),
 ('SHAREACCOUNT', 'ACTIVATE_SHAREACCOUNT', 'SHAREACCOUNT', 'ACTIVATE', 0),
 ('SHAREACCOUNT', 'UNDOAPPROVAL_SHAREACCOUNT', 'SHAREACCOUNT', 'UNDOAPPROVAL', 0),
@@ -211,5 +211,3 @@ INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `c
 ;
 
 INSERT INTO `job` (`name`, `display_name`, `cron_expression`, `create_time`) VALUES ('Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', now());
-
-

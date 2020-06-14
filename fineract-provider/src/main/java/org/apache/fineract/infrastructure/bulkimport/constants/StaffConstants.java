@@ -20,13 +20,13 @@ package org.apache.fineract.infrastructure.bulkimport.constants;
 
 public class StaffConstants {
 
-    public static final int OFFICE_NAME_COL = 0;//A
-    public static final int FIRST_NAME_COL = 1;//B
-    public static final int LAST_NAME_COL = 2;//C
-    public static final int IS_LOAN_OFFICER = 3;//D
-    public static final int MOBILE_NO_COL=4;//E
-    public static final int JOINED_ON_COL =5;//F
-    public static final int EXTERNAL_ID_COL =6;//G
-    public static final int IS_ACTIVE_COL =7;//h
-    public static final int STATUS_COL=8;//H
+    public static final int OFFICE_NAME_COL = 0;// A
+    public static final int FIRST_NAME_COL = 1;// B
+    public static final int LAST_NAME_COL = 2;// C
+    public static final int IS_LOAN_OFFICER = 3;// D
+    public static final int MOBILE_NO_COL = 4;// E
+    public static final int JOINED_ON_COL = 5;// F
+    public static final int EXTERNAL_ID_COL = 6;// G
+    public static final int IS_ACTIVE_COL = 7;// h
+    public static final int STATUS_COL = 8;// H
 }

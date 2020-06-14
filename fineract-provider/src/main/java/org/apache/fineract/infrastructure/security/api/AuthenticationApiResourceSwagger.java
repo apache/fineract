@@ -28,15 +28,18 @@ import org.apache.fineract.useradministration.data.RoleData;
  * Created by sanyam on 13/8/17.
  */
 final class AuthenticationApiResourceSwagger {
-    private AuthenticationApiResourceSwagger(){
+
+    private AuthenticationApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "PostAuthenticationResponse")
     public static final class PostAuthenticationResponse {
+
         private PostAuthenticationResponse() {
 
         }
+
         @ApiModelProperty(example = "mifos")
         public String username;
         @ApiModelProperty(example = "1")

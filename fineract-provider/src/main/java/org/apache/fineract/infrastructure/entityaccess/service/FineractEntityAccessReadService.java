@@ -25,11 +25,11 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType
 
 public interface FineractEntityAccessReadService {
 
-    Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType,
-                       final Long relId, final  Long fromEntityId,boolean includeAllSubOffices);
+    Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType, final Long relId,
+            final Long fromEntityId, boolean includeAllSubOffices);
 
-    String getSQLQueryInClause_WithListOfIDsForEntityAccess( FineractEntityType firstEntityType,
-                         final Long relId,final Long fromEntityId ,boolean includeAllOffices);
+    String getSQLQueryInClause_WithListOfIDsForEntityAccess(FineractEntityType firstEntityType, final Long relId, final Long fromEntityId,
+            boolean includeAllOffices);
 
     String getSQLQueryInClauseIDList_ForLoanProductsForOffice(Long loanProductId, boolean includeAllOffices);
 

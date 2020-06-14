@@ -26,15 +26,18 @@ import org.joda.time.DateTime;
  * Created by sanyam on 13/8/17.
  */
 final class ReportMailingJobRunHistoryApiResourceSwagger {
-    private ReportMailingJobRunHistoryApiResourceSwagger(){
+
+    private ReportMailingJobRunHistoryApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetReportMailingJobRunHistoryResponse")
     public static final class GetReportMailingJobRunHistoryResponse {
-        private GetReportMailingJobRunHistoryResponse(){
+
+        private GetReportMailingJobRunHistoryResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "1")

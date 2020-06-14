@@ -198,7 +198,7 @@ public class ImageData {
                     try {
                         fileInputStream.close();
                     } catch (IOException e) {
-                        LOG.error("Problem occurred in available function",e);
+                        LOG.error("Problem occurred in available function", e);
                     }
                 }
             }

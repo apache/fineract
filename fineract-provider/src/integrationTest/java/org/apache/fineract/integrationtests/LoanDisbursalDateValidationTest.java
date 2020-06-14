@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class LoanDisbursalDateValidationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(LoanDisbursalDateValidationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -65,19 +66,17 @@ public class LoanDisbursalDateValidationTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}"
-                , clientID);
+        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
-        // CREATE LOAN  PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withSyncExpectedWithDisbursementDate(true).build(null));
-        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}"
-                , loanProductID);
+        // CREATE LOAN PRODUCT
+        final Integer loanProductID = this.loanTransactionHelper
+                .getLoanProductId(new LoanProductTestBuilder().withSyncExpectedWithDisbursementDate(true).build(null));
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
+                loanProductID);
 
         // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
-        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}"
-                , loanID);
+        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
@@ -92,7 +91,8 @@ public class LoanDisbursalDateValidationTest {
 
         // DISBURSE A LOAN
         @SuppressWarnings("unchecked")
-        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID, this.responseForbiddenError);
+        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID,
+                this.responseForbiddenError);
 
         Assertions.assertEquals(disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),
                 "error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date");
@@ -100,18 +100,11 @@ public class LoanDisbursalDateValidationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
-        final String loanApplication = new LoanApplicationTestBuilder()
-                .withPrincipal(proposedAmount).withLoanTermFrequency("5")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5")
-                .withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths()
-                .withInterestRatePerPeriod("2")
-                .withExpectedDisbursementDate("1 March 2014")
-                .withSubmittedOnDate("26 February 2014").
-                build(clientID.toString(), loanProductID.toString(), null);
+        final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount).withLoanTermFrequency("5")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("1 March 2014")
+                .withSubmittedOnDate("26 February 2014").build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplication);
     }
-
-
 
 }

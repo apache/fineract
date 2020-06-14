@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-
 public interface CommonConstants {
 
     public final static String LOCALE = "en";

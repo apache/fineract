@@ -155,10 +155,10 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
 
 
 ALTER TABLE `m_savings_product`
-	ADD COLUMN `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100' AFTER `description`;
+    ADD COLUMN `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100' AFTER `description`;
 
 ALTER TABLE `m_savings_account`
-	ADD COLUMN `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100' AFTER `account_type_enum`;
+    ADD COLUMN `deposit_type_enum` SMALLINT NOT NULL DEFAULT '100' AFTER `account_type_enum`;
 
 ALTER TABLE `m_client`
   ADD COLUMN `gender_cv_id` INT NULL DEFAULT NULL AFTER `mobile_no`,

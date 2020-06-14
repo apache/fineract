@@ -100,8 +100,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final PaginationParametersDataValidator paginationParametersDataValidator,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final DepositProductReadPlatformService depositProductReadPlatformService,
-            final ColumnValidator columnValidator) {
+            final DepositProductReadPlatformService depositProductReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -186,7 +185,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     @Override
     public Collection<AuditData> retrieveAuditEntries(final SQLBuilder extraCriteria, final boolean includeJson) {
-        return retrieveEntries("audit", extraCriteria, " order by aud.id DESC limit " + PaginationParameters.getCheckedLimit(null), includeJson);
+        return retrieveEntries("audit", extraCriteria, " order by aud.id DESC limit " + PaginationParameters.getCheckedLimit(null),
+                includeJson);
     }
 
     @Override
@@ -226,10 +226,13 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         return retrieveEntries("makerchecker", extraCriteria, " group by aud.id order by aud.id", includeJson);
     }
 
-    private Collection<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL, final boolean includeJson) {
+    private Collection<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL,
+            final boolean includeJson) {
 
-        if ((!useType.equals("audit") && !useType.equals("makerchecker"))) { throw new PlatformDataIntegrityException(
-                "error.msg.invalid.auditSearchTemplate.useType", "Invalid Audit Search Template UseType: " + useType); }
+        if ((!useType.equals("audit") && !useType.equals("makerchecker"))) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
+                    "Invalid Audit Search Template UseType: " + useType);
+        }
 
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -427,8 +430,10 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     @Override
     public AuditSearchData retrieveSearchTemplate(final String useType) {
 
-        if (!(useType.equals("audit") || useType.equals("makerchecker"))) { throw new PlatformDataIntegrityException(
-                "error.msg.invalid.auditSearchTemplate.useType", "Invalid Audit Search Template UseType: " + useType); }
+        if (!(useType.equals("audit") || useType.equals("makerchecker"))) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
+                    "Invalid Audit Search Template UseType: " + useType);
+        }
 
         final AppUser currentUser = this.context.authenticatedUser();
 

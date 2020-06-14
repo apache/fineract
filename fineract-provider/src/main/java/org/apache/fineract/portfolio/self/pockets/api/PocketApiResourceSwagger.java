@@ -27,41 +27,44 @@ import java.util.Set;
  */
 
 final class PocketApiResourceSwagger {
-    private PocketApiResourceSwagger() {
-    }
+
+    private PocketApiResourceSwagger() {}
 
     @ApiModel(value = "PostLinkDelinkAccountsToFromPocketRequest")
     public final static class PostLinkDelinkAccountsToFromPocketRequest {
-        private PostLinkDelinkAccountsToFromPocketRequest() {
-    }
+
+        private PostLinkDelinkAccountsToFromPocketRequest() {}
+
         final class GetPocketAccountDetail {
-            private GetPocketAccountDetail() {
-            }
+
+            private GetPocketAccountDetail() {}
 
             @ApiModelProperty(example = "11")
             public Integer accountId;
             @ApiModelProperty(example = "LOAN")
             public String accountType;
         }
+
         public Set<GetPocketAccountDetail> accountDetail;
     }
 
     @ApiModel(value = "PostLinkDelinkAccountsToFromPocketResponse")
     public final static class PostLinkDelinkAccountsToFromPocketResponse {
-        private PostLinkDelinkAccountsToFromPocketResponse() {
-    }
+
+        private PostLinkDelinkAccountsToFromPocketResponse() {}
+
         @ApiModelProperty(example = "6")
         public Integer resourceId;
     }
 
     @ApiModel(value = "GetAccountsLinkedToPocketResponse")
     public final static class GetAccountsLinkedToPocketResponse {
-        private GetAccountsLinkedToPocketResponse() {
-        }
+
+        private GetAccountsLinkedToPocketResponse() {}
 
         final class GetPocketLoanAccounts {
-            private GetPocketLoanAccounts() {
-            }
+
+            private GetPocketLoanAccounts() {}
 
             @ApiModelProperty(example = "6")
             public Integer pocketId;
@@ -76,8 +79,8 @@ final class PocketApiResourceSwagger {
         }
 
         final class GetPocketSavingAccounts {
-            private GetPocketSavingAccounts() {
-            }
+
+            private GetPocketSavingAccounts() {}
 
             @ApiModelProperty(example = "6")
             public Integer pocketId;
@@ -92,8 +95,8 @@ final class PocketApiResourceSwagger {
         }
 
         final class GetPocketShareAccounts {
-            private GetPocketShareAccounts() {
-            }
+
+            private GetPocketShareAccounts() {}
 
         }
 
@@ -102,4 +105,3 @@ final class PocketApiResourceSwagger {
         public Set<GetPocketShareAccounts> shareAccounts;
     }
 }
-

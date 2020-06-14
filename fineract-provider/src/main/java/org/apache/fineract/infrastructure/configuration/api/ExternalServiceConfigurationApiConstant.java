@@ -28,6 +28,5 @@ public class ExternalServiceConfigurationApiConstant {
     public static final String VALUE = "value";
     public static final String EXTERNAL_SERVICE_RESOURCE_NAME = "externalServiceConfiguration";
 
-    protected static final Set<String> EXTERNAL_SERVICE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(Arrays.asList
-            (NAME, VALUE));
+    protected static final Set<String> EXTERNAL_SERVICE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(Arrays.asList(NAME, VALUE));
 }

@@ -27,14 +27,19 @@ import org.opentest4j.AssertionFailedError;
 /**
  * JUnit Rule to run detect duplicate entries on the classpath. Usage:
  *
- * <pre>public static {@literal @}ClassRule ClasspathHellDuplicatesCheckRule
- *     dupes = new ClasspathHellDuplicatesCheckRule();</pre>
+ * <pre>
+ * public static {@literal @}ClassRule ClasspathHellDuplicatesCheckRule
+ *     dupes = new ClasspathHellDuplicatesCheckRule();
+ * </pre>
  *
- * <p>NB that the basepom/duplicate-finder-maven-plugin already runs as part of odlparent.
- * It has a similar purpose, but covers build time instead of runtime testing.  This JUnit Rule class is
- * thus recommended to be used in particular in tests which previously ran into JAR Hell issues, and for
- * which non-regression with a clear failure message in case of future similar problems is important.
- * (This provides more details at runtime than duplicate-finder-maven-plugin does at build time.)
+ * <p>
+ * NB that the basepom/duplicate-finder-maven-plugin already runs as part of
+ * odlparent. It has a similar purpose, but covers build time instead of runtime
+ * testing. This JUnit Rule class is thus recommended to be used in particular
+ * in tests which previously ran into JAR Hell issues, and for which
+ * non-regression with a clear failure message in case of future similar
+ * problems is important. (This provides more details at runtime than
+ * duplicate-finder-maven-plugin does at build time.)
  *
  * @author Michael Vorburger.ch
  */
@@ -62,4 +67,3 @@ public class ClasspathHellDuplicatesCheckExtension implements AfterEachCallback 
         }
     }
 }
-

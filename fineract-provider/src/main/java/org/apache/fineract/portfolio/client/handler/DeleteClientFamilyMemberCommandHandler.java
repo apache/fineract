@@ -31,12 +31,11 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "FAMILYMEMBERS", action = "DELETE")
 public class DeleteClientFamilyMemberCommandHandler implements NewCommandSourceHandler {
 
-private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
+    private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
 
     @Autowired
-    public DeleteClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
-    {
-        this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
+    public DeleteClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService) {
+        this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
     }
 
     @Override

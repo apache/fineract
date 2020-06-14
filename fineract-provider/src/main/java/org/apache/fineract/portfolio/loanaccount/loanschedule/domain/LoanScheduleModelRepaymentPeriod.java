@@ -157,6 +157,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         this.interestDue = this.interestDue.plus(interestDue);
         this.totalDue = this.totalDue.plus(principalDue);
     }
+
     @Override
     public Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
         return this.loanCompoundingDetails;

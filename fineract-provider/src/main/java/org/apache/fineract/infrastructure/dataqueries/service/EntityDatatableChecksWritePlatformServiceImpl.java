@@ -116,7 +116,9 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             if (productId == null) {
                 entityDatatableCheck = this.entityDatatableChecksRepository.findByEntityStatusAndDatatableIdAndNoProduct(entity, status,
                         datatableName);
-                if (!entityDatatableCheck.isEmpty()) { throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName); }
+                if (!entityDatatableCheck.isEmpty()) {
+                    throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName);
+                }
             } else {
                 if (entity.equals("m_loan")) {
                     // if invalid loan product id, throws exception
@@ -129,8 +131,9 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 }
                 entityDatatableCheck = this.entityDatatableChecksRepository.findByEntityStatusAndDatatableIdAndProductId(entity, status,
                         datatableName, productId);
-                if (!entityDatatableCheck.isEmpty()) { throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName,
-                        productId); }
+                if (!entityDatatableCheck.isEmpty()) {
+                    throw new EntityDatatableCheckAlreadyExistsException(entity, status, datatableName, productId);
+                }
             }
 
             final EntityDatatableChecks check = EntityDatatableChecks.fromJson(command);
@@ -153,8 +156,8 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
 
     @Override
     public void runTheCheck(final Long entityId, final String entityName, final Long statusCode, String foreignKeyColumn) {
-        final List<EntityDatatableChecks> tableRequiredBeforeClientActivation = entityDatatableChecksRepository.findByEntityAndStatus(
-                entityName, statusCode);
+        final List<EntityDatatableChecks> tableRequiredBeforeClientActivation = entityDatatableChecksRepository
+                .findByEntityAndStatus(entityName, statusCode);
 
         if (tableRequiredBeforeClientActivation != null) {
             List<String> reqDatatables = new ArrayList<>();
@@ -277,8 +280,8 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
 
         if (realCause.getMessage().contains("FOREIGN KEY (`x_registered_table_name`)")) {
             final String datatableName = command.stringValueOfParameterNamed("datatableName");
-            throw new PlatformDataIntegrityException("error.msg.entityDatatableCheck.foreign.key.constraint", "datatable with name '"
-                    + datatableName + "' do not exist", "datatableName", datatableName);
+            throw new PlatformDataIntegrityException("error.msg.entityDatatableCheck.foreign.key.constraint",
+                    "datatable with name '" + datatableName + "' do not exist", "datatableName", datatableName);
         }
 
         if (realCause.getMessage().contains("unique_entity_check")) {

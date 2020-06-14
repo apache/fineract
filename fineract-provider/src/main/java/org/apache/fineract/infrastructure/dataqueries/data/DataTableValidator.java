@@ -53,7 +53,8 @@ public class DataTableValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REGISTER_PARAMS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(DataTableApiConstant.DATATABLE_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(DataTableApiConstant.DATATABLE_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         if (this.fromApiJsonHelper.parameterExists(DataTableApiConstant.categoryParamName, element)) {

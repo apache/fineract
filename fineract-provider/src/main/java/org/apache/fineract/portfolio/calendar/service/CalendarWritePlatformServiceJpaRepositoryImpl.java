@@ -73,8 +73,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
     @Autowired
     public CalendarWritePlatformServiceJpaRepositoryImpl(final CalendarRepository calendarRepository,
-            final CalendarHistoryRepository calendarHistoryRepository,
-            final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final CalendarHistoryRepository calendarHistoryRepository, final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService,
             final ConfigurationDomainService configurationDomainService, final GroupRepositoryWrapper groupRepository,
             final LoanRepositoryWrapper loanRepositoryWrapper, final ClientRepositoryWrapper clientRepository) {
@@ -167,42 +166,37 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
     }
 
-
     public void validateIsEditMeetingAllowed(Long groupId) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
-                dataValidationErrors).resource("calendar");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
         Group centerOrGroup = null;
 
         if (groupId != null) {
-            centerOrGroup = this.groupRepository
-                    .findOneWithNotFoundDetection(groupId);
+            centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(groupId);
             final Group parent = centerOrGroup.getParent();
             /* Check if it is a Group and belongs to a center */
             if (centerOrGroup.isGroup() && parent != null) {
 
-                Integer centerEntityTypeId = CalendarEntityType.CENTERS
-                        .getValue();
+                Integer centerEntityTypeId = CalendarEntityType.CENTERS.getValue();
                 /* Check if calendar is created at center */
                 final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
-                        .findByEntityIdAndEntityTypeIdAndCalendarTypeId(
-                                parent.getId(), centerEntityTypeId,
+                        .findByEntityIdAndEntityTypeIdAndCalendarTypeId(parent.getId(), centerEntityTypeId,
                                 CalendarType.COLLECTION.getValue());
-                /* If calendar is created by parent group, then it cannot be edited by the child group */
+                /*
+                 * If calendar is created by parent group, then it cannot be
+                 * edited by the child group
+                 */
                 if (collectionCalendarInstance != null) {
                     final String errorMessage = "meeting.created.at.center.cannot.be.edited.at.group.level";
-                    baseDataValidator.reset()
-                            .failWithCodeNoParameterAddedToErrorCode(
-                                    errorMessage);
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
                 }
             }
 
         }
         if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(
-                    "validation.msg.validation.errors.exist",
-                    "Validation errors exist.", dataValidationErrors);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
         }
 
     }
@@ -223,18 +217,17 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
 
-        final Integer numberOfActiveLoansSyncedWithThisCalendar = this.calendarInstanceRepository.countOfLoansSyncedWithCalendar(
-                calendarId, loanStatuses);
+        final Integer numberOfActiveLoansSyncedWithThisCalendar = this.calendarInstanceRepository.countOfLoansSyncedWithCalendar(calendarId,
+                loanStatuses);
 
         /*
          * areActiveEntitiesSynced is set to true, if there are any active loans
          * synced to this calendar.
          */
 
-        if(numberOfActiveLoansSyncedWithThisCalendar > 0){
+        if (numberOfActiveLoansSyncedWithThisCalendar > 0) {
             areActiveEntitiesSynced = true;
         }
-
 
         final Calendar calendarForUpdate = this.calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
@@ -251,18 +244,19 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         /*
          * System allows to change the meeting date by two means,
          *
-         * Option 1: reschedulebasedOnMeetingDates = false or reschedulebasedOnMeetingDates is not passed
-         * By directly editing the recurring day with effective from
-         * date and system decides the next meeting date based on some sensible
-         * logic (i.e., number of minimum days between two repayments)
+         * Option 1: reschedulebasedOnMeetingDates = false or
+         * reschedulebasedOnMeetingDates is not passed By directly editing the
+         * recurring day with effective from date and system decides the next
+         * meeting date based on some sensible logic (i.e., number of minimum
+         * days between two repayments)
          *
          *
-         * Option 2: reschedulebasedOnMeetingDates = true
-         * By providing alternative meeting date for one of future
-         * meeting date and derive the day of recurrence from the new meeting
-         * date. Ex: User proposes new meeting date say "14/Nov/2014" for
-         * present meeting date "12/Nov/2014", based on this input other values
-         * re derived and loans are rescheduled
+         * Option 2: reschedulebasedOnMeetingDates = true By providing
+         * alternative meeting date for one of future meeting date and derive
+         * the day of recurrence from the new meeting date. Ex: User proposes
+         * new meeting date say "14/Nov/2014" for present meeting date
+         * "12/Nov/2014", based on this input other values re derived and loans
+         * are rescheduled
          *
          */
 
@@ -288,8 +282,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (!changes.isEmpty()) {
             // update calendar history table only if there is a change in
             // calendar start date.
-            if (reschedulebasedOnMeetingDates == null){
-            presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
+            if (reschedulebasedOnMeetingDates == null) {
+                presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
             }
             if (null != newMeetingDate) {
                 final Date endDate = presentMeetingDate.minusDays(1).toDate();
@@ -304,8 +298,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             if (this.configurationDomainService.isRescheduleFutureRepaymentsEnabled() && calendarForUpdate.isRepeating()) {
                 // fetch all loan calendar instances associated with modifying
                 // calendar.
-                final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository.findByCalendarIdAndEntityTypeId(
-                        calendarId, CalendarEntityType.LOANS.getValue());
+                final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository
+                        .findByCalendarIdAndEntityTypeId(calendarId, CalendarEntityType.LOANS.getValue());
 
                 if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
                     // update all loans associated with modifying calendar
@@ -316,10 +310,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             }
         }
 
-        return new CommandProcessingResultBuilder()
-                .withCommandId(command.commandId())
-                .withEntityId(calendarForUpdate.getId())
-                .with(changes)
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(calendarForUpdate.getId()).with(changes)
                 .build();
     }
 
@@ -329,10 +320,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
         this.calendarRepository.delete(calendarForDelete);
-        return new CommandProcessingResultBuilder()
-                .withCommandId(null)
-                .withEntityId(calendarId)
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(null).withEntityId(calendarId).build();
     }
 
     @Override
@@ -343,10 +331,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final CalendarInstance newCalendarInstance = new CalendarInstance(calendarForUpdate, entityId, entityTypeId);
         this.calendarInstanceRepository.save(newCalendarInstance);
 
-        return new CommandProcessingResultBuilder()
-                .withCommandId(null)
-                .withEntityId(calendarForUpdate.getId())
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(null).withEntityId(calendarForUpdate.getId()).build();
     }
 
     @Override
@@ -354,12 +339,9 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final Calendar calendarForUpdate = this.calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
-        final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(
-                calendarId, entityId, entityTypeId);
+        final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository
+                .findByCalendarIdAndEntityIdAndEntityTypeId(calendarId, entityId, entityTypeId);
         this.calendarInstanceRepository.saveAndFlush(calendarInstanceForUpdate);
-        return new CommandProcessingResultBuilder()
-                .withCommandId(null)
-                .withEntityId(calendarForUpdate.getId())
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(null).withEntityId(calendarForUpdate.getId()).build();
     }
 }

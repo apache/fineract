@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class GlAccountSheetPopulator extends AbstractWorkbookPopulator {
+
     private List<GLAccountData> allGlAccounts;
 
     private static final int ID_COL = 0;
@@ -36,7 +37,7 @@ public class GlAccountSheetPopulator extends AbstractWorkbookPopulator {
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         int rowIndex = 1;
         Sheet glAccountSheet = workbook.createSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME);
         setLayout(glAccountSheet);

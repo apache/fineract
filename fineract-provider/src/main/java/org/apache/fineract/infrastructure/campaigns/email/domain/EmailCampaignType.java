@@ -19,8 +19,8 @@
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
 public enum EmailCampaignType {
-    DIRECT(1,"emailCampaignStatusType.direct"),
-    SCHEDULE(2,"emailCampaignStatusType.schedule");
+
+    DIRECT(1, "emailCampaignStatusType.direct"), SCHEDULE(2, "emailCampaignStatusType.schedule");
 
     private final Integer value;
     private final String code;
@@ -43,19 +43,19 @@ public enum EmailCampaignType {
         switch (typeValue) {
             case 1:
                 type = DIRECT;
-                break;
+            break;
             case 2:
                 type = SCHEDULE;
-                break;
+            break;
         }
         return type;
     }
 
-    public boolean isDirect(){
+    public boolean isDirect() {
         return this.value.equals(EmailCampaignType.DIRECT.getValue());
     }
 
-    public boolean isSchedule(){
+    public boolean isSchedule() {
         return this.value.equals(EmailCampaignType.SCHEDULE.getValue());
     }
 }

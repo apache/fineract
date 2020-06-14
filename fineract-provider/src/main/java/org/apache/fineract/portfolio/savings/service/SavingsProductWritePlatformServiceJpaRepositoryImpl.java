@@ -90,13 +90,13 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name", "Savings product with name `" + name
-                    + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name",
+                    "Savings product with name `" + name + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("sp_unq_short_name")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name", "Savings product with short name `"
-                    + shortName + "` already exists", "shortName", shortName);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name",
+                    "Savings product with short name `" + shortName + "` already exists", "shortName", shortName);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dae);
@@ -135,8 +135,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
         } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -156,8 +156,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command, product
-                        .currency().getCode());
+                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command,
+                        product.currency().getCode());
                 final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
@@ -194,8 +194,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
         } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }

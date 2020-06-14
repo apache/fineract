@@ -28,13 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "CLOSE")
-public class CloseGSIMCommandHandler  implements NewCommandSourceHandler
-{
-
+public class CloseGSIMCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsAccountWritePlatformService writePlatformService;
 

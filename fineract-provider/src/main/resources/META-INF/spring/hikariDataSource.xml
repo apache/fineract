@@ -22,13 +22,13 @@
 
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-	xmlns:jee="http://www.springframework.org/schema/jee"
-	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
-    	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-    	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xmlns:jee="http://www.springframework.org/schema/jee"
+    xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
-	<!-- HikariCP Database bean -->
+    <!-- HikariCP Database bean -->
     <bean id="hikariTenantDataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
         <constructor-arg ref="hikariConfig" />
     </bean>
@@ -47,7 +47,7 @@
         <!-- These are the properties for the all Tenants DB; the same configuration is also (hard-coded) in the TomcatJdbcDataSourcePerTenantService class -->
         <property name="dataSourceProperties">
             <props>
-		        <!-- https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration -->
+                <!-- https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration -->
                 <prop key="cachePrepStmts">true</prop>
                 <prop key="prepStmtCacheSize">250</prop>
                 <prop key="prepStmtCacheSqlLimit">2048</prop>

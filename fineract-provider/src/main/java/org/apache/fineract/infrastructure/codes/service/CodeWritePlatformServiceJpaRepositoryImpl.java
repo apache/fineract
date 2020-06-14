@@ -73,8 +73,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         } catch (final DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleCodeDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -105,8 +105,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         } catch (final DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleCodeDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -133,8 +133,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     }
 
     private Code retrieveCodeBy(final Long codeId) {
-        return this.codeRepository.findById(codeId)
-                .orElseThrow(() -> new CodeNotFoundException(codeId.toString()));
+        return this.codeRepository.findById(codeId).orElseThrow(() -> new CodeNotFoundException(codeId.toString()));
     }
 
     /*

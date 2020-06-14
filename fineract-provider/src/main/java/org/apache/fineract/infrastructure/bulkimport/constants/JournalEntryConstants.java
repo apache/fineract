@@ -45,5 +45,5 @@ public class JournalEntryConstants {
     public static final int ROUTING_CODE_COL = 12;
     public static final int RECEIPT_NO_COL = 13;
     public static final int BANK_NO_COL = 14;
-    public static final int COMMENTS_COL=15;
+    public static final int COMMENTS_COL = 15;
 }

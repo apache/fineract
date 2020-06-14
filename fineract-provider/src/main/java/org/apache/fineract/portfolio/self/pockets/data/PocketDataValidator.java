@@ -42,9 +42,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PocketDataValidator {
-    private final Set<String> linkingAccountsSupportedParameters = new HashSet<>(
-            Arrays.asList(PocketApiConstants.accountIdParamName, PocketApiConstants.accountTypeParamName,
-                    PocketApiConstants.accountsDetail));
+
+    private final Set<String> linkingAccountsSupportedParameters = new HashSet<>(Arrays.asList(PocketApiConstants.accountIdParamName,
+            PocketApiConstants.accountTypeParamName, PocketApiConstants.accountsDetail));
 
     private final Set<String> delinkingAccountsSupportedParameters = new HashSet<>(
             Arrays.asList(PocketApiConstants.pocketAccountMappingList));
@@ -57,12 +57,9 @@ public class PocketDataValidator {
     }
 
     public void validateForLinkingAccounts(final String json) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.linkingAccountsSupportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -71,22 +68,18 @@ public class PocketDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        JsonArray accountsDetail = this.fromApiJsonHelper.extractJsonArrayNamed(PocketApiConstants.accountsDetail,
-                element);
-        baseDataValidator.reset().parameter(PocketApiConstants.accountsDetail).value(accountsDetail).notNull()
-                .jsonArrayNotEmpty();
+        JsonArray accountsDetail = this.fromApiJsonHelper.extractJsonArrayNamed(PocketApiConstants.accountsDetail, element);
+        baseDataValidator.reset().parameter(PocketApiConstants.accountsDetail).value(accountsDetail).notNull().jsonArrayNotEmpty();
 
         final List<String> valueList = Arrays.asList(EntityAccountType.LOAN.name().toLowerCase(),
                 EntityAccountType.SAVINGS.name().toLowerCase(), EntityAccountType.SHARES.name().toLowerCase());
 
         for (JsonElement accountDetails : accountsDetail) {
 
-            final Long accountId = this.fromApiJsonHelper.extractLongNamed(PocketApiConstants.accountIdParamName,
-                    accountDetails);
+            final Long accountId = this.fromApiJsonHelper.extractLongNamed(PocketApiConstants.accountIdParamName, accountDetails);
             baseDataValidator.reset().parameter(PocketApiConstants.accountIdParamName).value(accountId).notBlank();
 
-            final String accountType = this.fromApiJsonHelper
-                    .extractStringNamed(PocketApiConstants.accountTypeParamName, accountDetails);
+            final String accountType = this.fromApiJsonHelper.extractStringNamed(PocketApiConstants.accountTypeParamName, accountDetails);
             baseDataValidator.reset().parameter(PocketApiConstants.accountTypeParamName).value(accountType).notBlank()
                     .isOneOfTheseStringValues(valueList);
 
@@ -97,14 +90,10 @@ public class PocketDataValidator {
     }
 
     public void validateForDeLinkingAccounts(final String json) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                this.delinkingAccountsSupportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.delinkingAccountsSupportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -112,10 +101,10 @@ public class PocketDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        JsonArray pocketAccountMappingList = this.fromApiJsonHelper
-                .extractJsonArrayNamed(PocketApiConstants.pocketAccountMappingList, element);
-        baseDataValidator.reset().parameter(PocketApiConstants.pocketAccountMappingList).value(pocketAccountMappingList)
-                .notNull().jsonArrayNotEmpty();
+        JsonArray pocketAccountMappingList = this.fromApiJsonHelper.extractJsonArrayNamed(PocketApiConstants.pocketAccountMappingList,
+                element);
+        baseDataValidator.reset().parameter(PocketApiConstants.pocketAccountMappingList).value(pocketAccountMappingList).notNull()
+                .jsonArrayNotEmpty();
 
         for (JsonElement pocketAccountMapping : pocketAccountMappingList) {
 

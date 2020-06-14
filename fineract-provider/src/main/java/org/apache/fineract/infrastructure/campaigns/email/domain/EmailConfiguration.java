@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "scheduled_email_configuration")
 public class EmailConfiguration extends AbstractPersistableCustom {
+
     @Column(name = "name", nullable = false)
     private String name;
 

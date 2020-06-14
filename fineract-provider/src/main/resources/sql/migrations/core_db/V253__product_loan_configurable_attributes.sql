@@ -34,7 +34,7 @@ CREATE TABLE `m_product_loan_configurable_attributes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
- INSERT into `m_product_loan_configurable_attributes` 
+ INSERT into `m_product_loan_configurable_attributes`
 (loan_product_id,amortization_method_enum,interest_method_enum,loan_transaction_strategy_id,
 interest_calculated_in_period_enum,arrearstolerance_amount,repay_every,moratorium,grace_on_arrears_ageing)
 (select pl.id,'1','1','1','1','1','1','1','1' from `m_product_loan` pl );

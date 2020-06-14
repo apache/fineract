@@ -163,8 +163,8 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment
-                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate,
+                    loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {

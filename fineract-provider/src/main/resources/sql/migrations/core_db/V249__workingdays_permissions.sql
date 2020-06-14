@@ -50,6 +50,3 @@ INSERT INTO  `m_permission` (
 VALUES (
  'organisation',  'UPDATE_WORKINGDAYS_CHECKER',  'WORKINGDAYS',  'UPDATE_CHECKER',  '0'
 );
-
-
-

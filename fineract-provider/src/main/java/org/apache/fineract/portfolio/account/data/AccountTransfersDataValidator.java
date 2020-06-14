@@ -46,15 +46,13 @@ public class AccountTransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
-            AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
-            AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
-            AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
-            AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
-            AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName,
-            AccountTransfersApiConstants.transferDescriptionParamName));
-
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.localeParamName,
+            AccountDetailConstants.dateFormatParamName, AccountDetailConstants.fromOfficeIdParamName,
+            AccountDetailConstants.fromClientIdParamName, AccountDetailConstants.fromAccountTypeParamName,
+            AccountDetailConstants.fromAccountIdParamName, AccountDetailConstants.toOfficeIdParamName,
+            AccountDetailConstants.toClientIdParamName, AccountDetailConstants.toAccountTypeParamName,
+            AccountDetailConstants.toAccountIdParamName, AccountTransfersApiConstants.transferDateParamName,
+            AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.transferDescriptionParamName));
 
     @Autowired
     public AccountTransfersDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -80,21 +78,19 @@ public class AccountTransfersDataValidator {
 
         this.accountTransfersDetailDataValidator.validate(command, baseDataValidator);
 
-        final LocalDate transactionDate = this.fromApiJsonHelper
-                .extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName, element);
-        baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDateParamName).value
-                (transactionDate).notNull();
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName,
+                element);
+        baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDateParamName).value(transactionDate).notNull();
 
-        final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
-                (AccountTransfersApiConstants.transferAmountParamName, element);
-        baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferAmountParamName).value
-                (transactionAmount).notNull().positiveAmount();
+        final BigDecimal transactionAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(AccountTransfersApiConstants.transferAmountParamName, element);
+        baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferAmountParamName).value(transactionAmount).notNull()
+                .positiveAmount();
 
-        final String transactionDescription = this.fromApiJsonHelper.extractStringNamed(AccountTransfersApiConstants
-                .transferDescriptionParamName, element);
-        baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDescriptionParamName).value
-                (transactionDescription).notBlank()
-                .notExceedingLengthOf(200);
+        final String transactionDescription = this.fromApiJsonHelper
+                .extractStringNamed(AccountTransfersApiConstants.transferDescriptionParamName, element);
+        baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDescriptionParamName).value(transactionDescription)
+                .notBlank().notExceedingLengthOf(200);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

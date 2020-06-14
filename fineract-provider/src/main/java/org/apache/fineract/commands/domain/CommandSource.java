@@ -94,10 +94,10 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "transaction_id", length = 100)
     private String transactionId;
 
-    @Column(name="creditbureau_id")
+    @Column(name = "creditbureau_id")
     private Long creditBureauId;
 
-    @Column(name="organisation_creditbureau_id")
+    @Column(name = "organisation_creditbureau_id")
     private Long organisationCreditBureauId;
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
@@ -120,20 +120,19 @@ public class CommandSource extends AbstractPersistableCustom {
         this.maker = maker;
         this.madeOnDate = madeOnDateTime.toDate();
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
-    } public Long getCreditBureauId() {
-        return this.creditBureauId;
     }
 
+    public Long getCreditBureauId() {
+        return this.creditBureauId;
+    }
 
     public void setCreditBureauId(Long creditBureauId) {
         this.creditBureauId = creditBureauId;
     }
 
-
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }
-
 
     public void setOrganisationCreditBureauId(Long organisationCreditBureauId) {
         this.organisationCreditBureauId = organisationCreditBureauId;
@@ -145,7 +144,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
-    public void markAsRejected(final AppUser checker, final DateTime checkedOnDate){
+    public void markAsRejected(final AppUser checker, final DateTime checkedOnDate) {
         this.checker = checker;
         this.checkedOnDate = checkedOnDate.toDate();
         this.processingResult = CommandProcessingResultType.REJECTED.getValue();

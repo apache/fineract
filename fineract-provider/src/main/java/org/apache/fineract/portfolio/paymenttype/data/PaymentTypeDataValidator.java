@@ -74,13 +74,15 @@ public class PaymentTypeDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.DESCRIPTION, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.DESCRIPTION, element);
-            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.DESCRIPTION).value(description).ignoreIfNull().notExceedingLengthOf(500);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.DESCRIPTION).value(description).ignoreIfNull()
+                    .notExceedingLengthOf(500);
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.ISCASHPAYMENT, element)) {
-            final Boolean isCashPayment = this.fromApiJsonHelper
-                    .extractBooleanNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT, element);
-            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.ISCASHPAYMENT).value(isCashPayment).validateForBooleanValue();
+            final Boolean isCashPayment = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT,
+                    element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.ISCASHPAYMENT).value(isCashPayment)
+                    .validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.POSITION, element)) {
@@ -103,8 +105,7 @@ public class PaymentTypeDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                UPDATE_PAYMENT_TYPE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_PAYMENT_TYPE_REQUEST_DATA_PARAMETERS);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -120,13 +121,15 @@ public class PaymentTypeDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.DESCRIPTION, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.DESCRIPTION, element);
-            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.DESCRIPTION).value(description).ignoreIfNull().notExceedingLengthOf(500);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.DESCRIPTION).value(description).ignoreIfNull()
+                    .notExceedingLengthOf(500);
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.ISCASHPAYMENT, element)) {
-            final Boolean isCashPayment = this.fromApiJsonHelper
-                    .extractBooleanNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT, element);
-            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.ISCASHPAYMENT).value(isCashPayment).validateForBooleanValue();
+            final Boolean isCashPayment = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT,
+                    element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.ISCASHPAYMENT).value(isCashPayment)
+                    .validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.POSITION, element)) {

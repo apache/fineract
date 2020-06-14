@@ -89,8 +89,7 @@ public class Sender {
     protected static final int MAX_BACKOFF_DELAY = 1024000;
 
     protected final Random random = new Random();
-    protected static final Logger LOG = Logger.getLogger(Sender.class
-            .getName());
+    protected static final Logger LOG = Logger.getLogger(Sender.class.getName());
 
     private final String key;
 
@@ -125,9 +124,7 @@ public class Sender {
      * @see java.net.URLConnection#setConnectTimeout(int)
      */
     public final void setConnectTimeout(int connectTimeout) {
-        if (connectTimeout < 0) {
-            throw new IllegalArgumentException("timeout can not be negative");
-        }
+        if (connectTimeout < 0) { throw new IllegalArgumentException("timeout can not be negative"); }
         this.connectTimeout = connectTimeout;
     }
 
@@ -140,9 +137,7 @@ public class Sender {
      * @see java.net.URLConnection#setReadTimeout(int)
      */
     public final void setReadTimeout(int readTimeout) {
-        if (readTimeout < 0) {
-            throw new IllegalArgumentException("timeout can not be negative");
-        }
+        if (readTimeout < 0) { throw new IllegalArgumentException("timeout can not be negative"); }
         this.readTimeout = readTimeout;
     }
 
@@ -171,8 +166,7 @@ public class Sender {
      * @throws IOException
      *             if message could not be sent.
      */
-    public Result send(Message message, String to, int retries)
-            throws IOException {
+    public Result send(Message message, String to, int retries) throws IOException {
         int attempt = 0;
         Result result;
         int backoff = BACKOFF_INITIAL_DELAY;
@@ -180,8 +174,7 @@ public class Sender {
         do {
             attempt++;
             if (LOG.isLoggable(Level.FINE)) {
-                LOG.fine("Attempt #" + attempt + " to send message "
-                        + message + " to regIds " + to);
+                LOG.fine("Attempt #" + attempt + " to send message " + message + " to regIds " + to);
             }
             result = sendNoRetry(message, to);
             tryAgain = result == null && attempt <= retries;
@@ -193,10 +186,7 @@ public class Sender {
                 }
             }
         } while (tryAgain);
-        if (result == null) {
-            throw new IOException("Could not send message after " + attempt
-                    + " attempts");
-        }
+        if (result == null) { throw new IOException("Could not send message after " + attempt + " attempts"); }
         return result;
     }
 
@@ -218,16 +208,14 @@ public class Sender {
         Map<Object, Object> jsonRequest = new HashMap<>();
         messageToMap(message, jsonRequest);
         jsonRequest.put(JSON_TO, to);
-        Map<String , Object> responseMap = makeGcmHttpRequest(jsonRequest);
+        Map<String, Object> responseMap = makeGcmHttpRequest(jsonRequest);
         String responseBody = null;
         if (responseMap.get("responseBody") != null) {
             responseBody = (String) responseMap.get("responseBody");
         }
         int status = (int) responseMap.get("status");
-        //responseBody
-        if (responseBody == null) {
-            return null;
-        }
+        // responseBody
+        if (responseBody == null) { return null; }
         JsonObject jsonResponse;
         try {
             jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
@@ -240,34 +228,27 @@ public class Sender {
                     String messageId = null;
                     String canonicalRegId = null;
                     String error = null;
-                    if(jsonResult.has(JSON_MESSAGE_ID)){
+                    if (jsonResult.has(JSON_MESSAGE_ID)) {
                         messageId = jsonResult.get(JSON_MESSAGE_ID).getAsString();
                     }
-                    if(jsonResult.has(TOKEN_CANONICAL_REG_ID)){
-                        canonicalRegId = jsonResult
-                                .get(TOKEN_CANONICAL_REG_ID).getAsString();
+                    if (jsonResult.has(TOKEN_CANONICAL_REG_ID)) {
+                        canonicalRegId = jsonResult.get(TOKEN_CANONICAL_REG_ID).getAsString();
                     }
-                    if(jsonResult.has(JSON_ERROR)){
+                    if (jsonResult.has(JSON_ERROR)) {
                         error = jsonResult.get(JSON_ERROR).getAsString();
                     }
                     int success = 0;
                     int failure = 0;
-                    if(jsonResponse.get("success") != null){
+                    if (jsonResponse.get("success") != null) {
                         success = Integer.parseInt(jsonResponse.get("success").toString());
                     }
-                    if(jsonResponse.get("failure") != null){
+                    if (jsonResponse.get("failure") != null) {
                         failure = Integer.parseInt(jsonResponse.get("failure").toString());
                     }
-                    resultBuilder.messageId(messageId)
-                            .canonicalRegistrationId(canonicalRegId)
-                            .success(success)
-                            .failure(failure)
-                            .status(status)
-                            .errorCode(error);
+                    resultBuilder.messageId(messageId).canonicalRegistrationId(canonicalRegId).success(success).failure(failure)
+                            .status(status).errorCode(error);
                 } else {
-                    LOG.log(Level.WARNING,
-                            "Found null or " + jsonResults.size()
-                                    + " results, expected one");
+                    LOG.log(Level.WARNING, "Found null or " + jsonResults.size() + " results, expected one");
                     return null;
                 }
             } else if (to.startsWith(TOPIC_PREFIX)) {
@@ -280,31 +261,26 @@ public class Sender {
                     String error = jsonResponse.get(JSON_ERROR).getAsString();
                     resultBuilder.errorCode(error);
                 } else {
-                    LOG.log(Level.WARNING, "Expected " + JSON_MESSAGE_ID
-                            + " or " + JSON_ERROR + " found: " + responseBody);
+                    LOG.log(Level.WARNING, "Expected " + JSON_MESSAGE_ID + " or " + JSON_ERROR + " found: " + responseBody);
                     return null;
                 }
-            } else if (jsonResponse.has(JSON_SUCCESS)
-                    && jsonResponse.has(JSON_FAILURE)) {
+            } else if (jsonResponse.has(JSON_SUCCESS) && jsonResponse.has(JSON_FAILURE)) {
                 // success and failure are expected when response is from group
                 // message.
                 int success = getNumber(responseMap, JSON_SUCCESS).intValue();
                 int failure = getNumber(responseMap, JSON_FAILURE).intValue();
                 List<String> failedIds = null;
                 if (jsonResponse.has("failed_registration_ids")) {
-                    JsonArray jFailedIds = jsonResponse
-                            .get("failed_registration_ids").getAsJsonArray();
+                    JsonArray jFailedIds = jsonResponse.get("failed_registration_ids").getAsJsonArray();
                     failedIds = new ArrayList<>();
                     for (int i = 0; i < jFailedIds.size(); i++) {
                         failedIds.add(jFailedIds.get(i).getAsString());
                     }
                 }
-                resultBuilder.success(success).failure(failure)
-                        .failedRegistrationIds(failedIds);
+                resultBuilder.success(success).failure(failure).failedRegistrationIds(failedIds);
             } else {
                 LOG.warning("Unrecognized response: " + responseBody);
-                throw newIoException(responseBody, new Exception(
-                        "Unrecognized response."));
+                throw newIoException(responseBody, new Exception("Unrecognized response."));
             }
             return resultBuilder.build();
         } catch (CustomParserException e) {
@@ -336,8 +312,7 @@ public class Sender {
      * @throws IOException
      *             if message could not be sent.
      */
-    public MulticastResult send(Message message, List<String> regIds,
-            int retries) throws IOException {
+    public MulticastResult send(Message message, List<String> regIds, int retries) throws IOException {
         int attempt = 0;
         MulticastResult multicastResult;
         int backoff = BACKOFF_INITIAL_DELAY;
@@ -352,8 +327,7 @@ public class Sender {
             multicastResult = null;
             attempt++;
             if (LOG.isLoggable(Level.FINE)) {
-                LOG.fine("Attempt #" + attempt + " to send message "
-                        + message + " to regIds " + unsentRegIds);
+                LOG.fine("Attempt #" + attempt + " to send message " + message + " to regIds " + unsentRegIds);
             }
             try {
                 multicastResult = sendNoRetry(message, unsentRegIds);
@@ -363,11 +337,9 @@ public class Sender {
             }
             if (multicastResult != null) {
                 long multicastId = multicastResult.getMulticastId();
-                LOG.fine("multicast_id on attempt # " + attempt + ": "
-                        + multicastId);
+                LOG.fine("multicast_id on attempt # " + attempt + ": " + multicastId);
                 multicastIds.add(multicastId);
-                unsentRegIds = updateStatus(unsentRegIds, results,
-                        multicastResult);
+                unsentRegIds = updateStatus(unsentRegIds, results, multicastResult);
                 tryAgain = !unsentRegIds.isEmpty() && attempt <= retries;
             } else {
                 tryAgain = attempt <= retries;
@@ -382,8 +354,7 @@ public class Sender {
         } while (tryAgain);
         if (multicastIds.isEmpty()) {
             // all JSON posts failed due to GCM unavailability
-            throw new IOException("Could not post JSON requests to GCM after "
-                    + attempt + " attempts");
+            throw new IOException("Could not post JSON requests to GCM after " + attempt + " attempts");
         }
         // calculate summary
         int success = 0;
@@ -401,8 +372,7 @@ public class Sender {
         }
         // build a new object with the overall result
         long multicastId = multicastIds.remove(0);
-        MulticastResult.Builder builder = new MulticastResult.Builder(success,
-                failure, canonicalIds, multicastId)
+        MulticastResult.Builder builder = new MulticastResult.Builder(success, failure, canonicalIds, multicastId)
                 .retryMulticastIds(multicastIds);
         // add results, in the same order as the input
         for (String regId : regIds) {
@@ -425,14 +395,12 @@ public class Sender {
      *
      * @return updated version of devices that should be retried.
      */
-    private List<String> updateStatus(List<String> unsentRegIds,
-            Map<String, Result> allResults, MulticastResult multicastResult) {
+    private List<String> updateStatus(List<String> unsentRegIds, Map<String, Result> allResults, MulticastResult multicastResult) {
         List<Result> results = multicastResult.getResults();
         if (results.size() != unsentRegIds.size()) {
             // should never happen, unless there is a flaw in the algorithm
-            throw new RuntimeException("Internal error: sizes do not match. "
-                    + "currentResults: " + results + "; unsentRegIds: "
-                    + unsentRegIds);
+            throw new RuntimeException(
+                    "Internal error: sizes do not match. " + "currentResults: " + results + "; unsentRegIds: " + unsentRegIds);
         }
         List<String> newUnsentRegIds = new ArrayList<>();
         for (int i = 0; i < unsentRegIds.size(); i++) {
@@ -440,9 +408,7 @@ public class Sender {
             Result result = results.get(i);
             allResults.put(regId, result);
             String error = result.getErrorCodeName();
-            if (error != null
-                    && (error.equals(GcmConstants.ERROR_UNAVAILABLE) || error
-                            .equals(GcmConstants.ERROR_INTERNAL_SERVER_ERROR))) {
+            if (error != null && (error.equals(GcmConstants.ERROR_UNAVAILABLE) || error.equals(GcmConstants.ERROR_INTERNAL_SERVER_ERROR))) {
                 newUnsentRegIds.add(regId);
             }
         }
@@ -463,47 +429,35 @@ public class Sender {
      * @throws IOException
      *             if there was a JSON parsing error
      */
-    public MulticastResult sendNoRetry(Message message,
-            List<String> registrationIds) throws IOException {
-        if (nonNull(registrationIds).isEmpty()) {
-            throw new IllegalArgumentException(
-                    "registrationIds cannot be empty");
-        }
+    public MulticastResult sendNoRetry(Message message, List<String> registrationIds) throws IOException {
+        if (nonNull(registrationIds).isEmpty()) { throw new IllegalArgumentException("registrationIds cannot be empty"); }
         Map<Object, Object> jsonRequest = new HashMap<>();
         messageToMap(message, jsonRequest);
         jsonRequest.put(JSON_REGISTRATION_IDS, registrationIds);
-        Map<String , Object> responseMap = makeGcmHttpRequest(jsonRequest);
+        Map<String, Object> responseMap = makeGcmHttpRequest(jsonRequest);
         String responseBody = null;
         if (responseMap.get("responseBody") != null) {
             responseBody = (String) responseMap.get("responseBody");
         }
-        if (responseBody == null) {
-            return null;
-        }
+        if (responseBody == null) { return null; }
 
         JsonObject jsonResponse;
         try {
             jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
             int success = getNumber(responseMap, JSON_SUCCESS).intValue();
             int failure = getNumber(responseMap, JSON_FAILURE).intValue();
-            int canonicalIds = getNumber(responseMap, JSON_CANONICAL_IDS)
-                    .intValue();
-            long multicastId = getNumber(responseMap, JSON_MULTICAST_ID)
-                    .longValue();
-            MulticastResult.Builder builder = new MulticastResult.Builder(
-                    success, failure, canonicalIds, multicastId);
+            int canonicalIds = getNumber(responseMap, JSON_CANONICAL_IDS).intValue();
+            long multicastId = getNumber(responseMap, JSON_MULTICAST_ID).longValue();
+            MulticastResult.Builder builder = new MulticastResult.Builder(success, failure, canonicalIds, multicastId);
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> results = (List<Map<String, Object>>) jsonResponse
-                    .get(JSON_RESULTS);
+            List<Map<String, Object>> results = (List<Map<String, Object>>) jsonResponse.get(JSON_RESULTS);
             if (results != null) {
                 for (Map<String, Object> jsonResult : results) {
                     String messageId = (String) jsonResult.get(JSON_MESSAGE_ID);
-                    String canonicalRegId = (String) jsonResult
-                            .get(TOKEN_CANONICAL_REG_ID);
+                    String canonicalRegId = (String) jsonResult.get(TOKEN_CANONICAL_REG_ID);
                     String error = (String) jsonResult.get(JSON_ERROR);
-                    Result result = new Result.Builder().messageId(messageId)
-                            .canonicalRegistrationId(canonicalRegId)
-                            .errorCode(error).build();
+                    Result result = new Result.Builder().messageId(messageId).canonicalRegistrationId(canonicalRegId).errorCode(error)
+                            .build();
                     builder.addResult(result);
                 }
             }
@@ -513,8 +467,7 @@ public class Sender {
         }
     }
 
-    private Map<String , Object> makeGcmHttpRequest(Map<Object, Object> jsonRequest)
-            throws InvalidRequestException {
+    private Map<String, Object> makeGcmHttpRequest(Map<Object, Object> jsonRequest) throws InvalidRequestException {
         String requestBody = new Gson().toJson(jsonRequest);
         LOG.finest("JSON request: " + requestBody);
         HttpURLConnection conn;
@@ -547,7 +500,7 @@ public class Sender {
             return null;
         }
         LOG.finest("JSON response: " + responseBody);
-        Map<String , Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("responseBody", responseBody);
         map.put("status", status);
 
@@ -563,18 +516,13 @@ public class Sender {
      *            Map populated by Message.
      */
     private void messageToMap(Message message, Map<Object, Object> mapRequest) {
-        if (message == null || mapRequest == null) {
-            return;
-        }
+        if (message == null || mapRequest == null) { return; }
         setJsonField(mapRequest, PARAM_PRIORITY, message.getPriority());
-        setJsonField(mapRequest, PARAM_CONTENT_AVAILABLE,
-                message.getContentAvailable());
+        setJsonField(mapRequest, PARAM_CONTENT_AVAILABLE, message.getContentAvailable());
         setJsonField(mapRequest, PARAM_TIME_TO_LIVE, message.getTimeToLive());
         setJsonField(mapRequest, PARAM_COLLAPSE_KEY, message.getCollapseKey());
-        setJsonField(mapRequest, PARAM_RESTRICTED_PACKAGE_NAME,
-                message.getRestrictedPackageName());
-        setJsonField(mapRequest, PARAM_DELAY_WHILE_IDLE,
-                message.isDelayWhileIdle());
+        setJsonField(mapRequest, PARAM_RESTRICTED_PACKAGE_NAME, message.getRestrictedPackageName());
+        setJsonField(mapRequest, PARAM_DELAY_WHILE_IDLE, message.isDelayWhileIdle());
         setJsonField(mapRequest, PARAM_DRY_RUN, message.isDryRun());
         Map<String, String> payload = message.getData();
         if (!payload.isEmpty()) {
@@ -584,25 +532,19 @@ public class Sender {
             Notification notification = message.getNotification();
             Map<Object, Object> nMap = new HashMap<>();
             if (notification.getBadge() != null) {
-                setJsonField(nMap, JSON_NOTIFICATION_BADGE, notification
-                        .getBadge().toString());
+                setJsonField(nMap, JSON_NOTIFICATION_BADGE, notification.getBadge().toString());
             }
             setJsonField(nMap, JSON_NOTIFICATION_BODY, notification.getBody());
-            setJsonField(nMap, JSON_NOTIFICATION_BODY_LOC_ARGS,
-                    notification.getBodyLocArgs());
-            setJsonField(nMap, JSON_NOTIFICATION_BODY_LOC_KEY,
-                    notification.getBodyLocKey());
-            setJsonField(nMap, JSON_NOTIFICATION_CLICK_ACTION,
-                    notification.getClickAction());
+            setJsonField(nMap, JSON_NOTIFICATION_BODY_LOC_ARGS, notification.getBodyLocArgs());
+            setJsonField(nMap, JSON_NOTIFICATION_BODY_LOC_KEY, notification.getBodyLocKey());
+            setJsonField(nMap, JSON_NOTIFICATION_CLICK_ACTION, notification.getClickAction());
             setJsonField(nMap, JSON_NOTIFICATION_COLOR, notification.getColor());
             setJsonField(nMap, JSON_NOTIFICATION_ICON, notification.getIcon());
             setJsonField(nMap, JSON_NOTIFICATION_SOUND, notification.getSound());
             setJsonField(nMap, JSON_NOTIFICATION_TAG, notification.getTag());
             setJsonField(nMap, JSON_NOTIFICATION_TITLE, notification.getTitle());
-            setJsonField(nMap, JSON_NOTIFICATION_TITLE_LOC_ARGS,
-                    notification.getTitleLocArgs());
-            setJsonField(nMap, JSON_NOTIFICATION_TITLE_LOC_KEY,
-                    notification.getTitleLocKey());
+            setJsonField(nMap, JSON_NOTIFICATION_TITLE_LOC_ARGS, notification.getTitleLocArgs());
+            setJsonField(nMap, JSON_NOTIFICATION_TITLE_LOC_KEY, notification.getTitleLocKey());
             mapRequest.put(JSON_NOTIFICATION, nMap);
         }
     }
@@ -630,8 +572,7 @@ public class Sender {
     /**
      * Sets a JSON field, but only if the value is not {@literal null}.
      */
-    private void setJsonField(Map<Object, Object> json, String field,
-            Object value) {
+    private void setJsonField(Map<Object, Object> json, String field, Object value) {
         if (value != null) {
             json.put(field, value);
         }
@@ -639,17 +580,13 @@ public class Sender {
 
     private Number getNumber(Map<?, ?> json, String field) {
         Object value = json.get(field);
-        if (value == null) {
-            throw new CustomParserException("Missing field: " + field);
-        }
-        if (!(value instanceof Number)) {
-            throw new CustomParserException("Field " + field
-                    + " does not contain a number: " + value);
-        }
+        if (value == null) { throw new CustomParserException("Missing field: " + field); }
+        if (!(value instanceof Number)) { throw new CustomParserException("Field " + field + " does not contain a number: " + value); }
         return (Number) value;
     }
 
     class CustomParserException extends RuntimeException {
+
         CustomParserException(String message) {
             super(message);
         }
@@ -660,10 +597,8 @@ public class Sender {
      *
      * @return HTTP response.
      */
-    protected HttpURLConnection post(String url, String body)
-            throws IOException {
-        return post(url, "application/x-www-form-urlencoded;charset=UTF-8",
-                body);
+    protected HttpURLConnection post(String url, String body) throws IOException {
+        return post(url, "application/x-www-form-urlencoded;charset=UTF-8", body);
     }
 
     /**
@@ -686,11 +621,8 @@ public class Sender {
      * @throws IOException
      *             propagated from underlying methods.
      */
-    protected HttpURLConnection post(String url, String contentType, String body)
-            throws IOException {
-        if (url == null || contentType == null || body == null) {
-            throw new IllegalArgumentException("arguments cannot be null");
-        }
+    protected HttpURLConnection post(String url, String contentType, String body) throws IOException {
+        if (url == null || contentType == null || body == null) { throw new IllegalArgumentException("arguments cannot be null"); }
         if (!url.startsWith("https://")) {
             LOG.warning("URL does not use https: " + url);
         }
@@ -716,8 +648,7 @@ public class Sender {
     /**
      * Creates a map with just one key-value pair.
      */
-    protected static final Map<String, String> newKeyValues(String key,
-            String value) {
+    protected static final Map<String, String> newKeyValues(String key, String value) {
         Map<String, String> keyValues = new HashMap<>(1);
         keyValues.put(nonNull(key), nonNull(value));
         return keyValues;
@@ -733,8 +664,7 @@ public class Sender {
      * @return StringBuilder to be used an HTTP POST body.
      */
     protected static StringBuilder newBody(String name, String value) {
-        return new StringBuilder(nonNull(name)).append('=').append(
-                nonNull(value));
+        return new StringBuilder(nonNull(name)).append('=').append(nonNull(value));
     }
 
     /**
@@ -747,18 +677,15 @@ public class Sender {
      * @param value
      *            parameter's value.
      */
-    protected static void addParameter(StringBuilder body, String name,
-            String value) {
-        nonNull(body).append('&').append(nonNull(name)).append('=')
-                .append(nonNull(value));
+    protected static void addParameter(StringBuilder body, String name, String value) {
+        nonNull(body).append('&').append(nonNull(name)).append('=').append(nonNull(value));
     }
 
     /**
      * Gets an {@link HttpURLConnection} given an URL.
      */
     protected HttpURLConnection getConnection(String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url)
-                .openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setConnectTimeout(connectTimeout);
         conn.setReadTimeout(readTimeout);
         return conn;
@@ -772,11 +699,8 @@ public class Sender {
      * If the stream is {@literal null}, returns an empty string.
      */
     protected static String getString(InputStream stream) throws IOException {
-        if (stream == null) {
-            return "";
-        }
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(stream, StandardCharsets.UTF_8));
+        if (stream == null) { return ""; }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         StringBuilder content = new StringBuilder();
         String newLine;
         do {
@@ -803,9 +727,7 @@ public class Sender {
     }
 
     static <T> T nonNull(T argument) {
-        if (argument == null) {
-            throw new IllegalArgumentException("argument cannot be null");
-        }
+        if (argument == null) { throw new IllegalArgumentException("argument cannot be null"); }
         return argument;
     }
 

@@ -18,36 +18,36 @@
 --
 
 CREATE TABLE `scheduled_jobs` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`job_name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`job_display_name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`cron_expression` VARCHAR(20) NOT NULL COLLATE 'latin1_swedish_ci',
-	`create_time` DATETIME NOT NULL,
-	`task_priority` SMALLINT NOT NULL DEFAULT '5',
-	`group_name` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`previous_run_start_time` DATETIME NULL DEFAULT NULL,
-	`next_run_time` DATETIME NULL DEFAULT NULL,
-	`trigger_key` VARCHAR(500) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`job_initializing_errorlog` TEXT NULL COLLATE 'latin1_swedish_ci',
-	`is_active` tinyint NOT NULL DEFAULT '1',
-	PRIMARY KEY (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `job_name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+    `job_display_name` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+    `cron_expression` VARCHAR(20) NOT NULL COLLATE 'latin1_swedish_ci',
+    `create_time` DATETIME NOT NULL,
+    `task_priority` SMALLINT NOT NULL DEFAULT '5',
+    `group_name` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `previous_run_start_time` DATETIME NULL DEFAULT NULL,
+    `next_run_time` DATETIME NULL DEFAULT NULL,
+    `trigger_key` VARCHAR(500) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `job_initializing_errorlog` TEXT NULL COLLATE 'latin1_swedish_ci',
+    `is_active` tinyint NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `scheduled_job_runhistory` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`job_id` BIGINT NOT NULL,
-	`version` BIGINT NOT NULL,
-	`start_time` DATETIME NOT NULL,
-	`end_time` DATETIME NOT NULL,
-	`status` VARCHAR(10) NOT NULL COLLATE 'latin1_swedish_ci',
-	`errormessage` VARCHAR(500) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-	`triggertype` VARCHAR(25) NOT NULL COLLATE 'latin1_swedish_ci',
-	`errorlog` TEXT NULL COLLATE 'latin1_swedish_ci',
-	PRIMARY KEY (`id`),
-	INDEX `scheduledjobsFK` (`job_id`),
-	CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `scheduled_jobs` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `job_id` BIGINT NOT NULL,
+    `version` BIGINT NOT NULL,
+    `start_time` DATETIME NOT NULL,
+    `end_time` DATETIME NOT NULL,
+    `status` VARCHAR(10) NOT NULL COLLATE 'latin1_swedish_ci',
+    `errormessage` VARCHAR(500) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+    `triggertype` VARCHAR(25) NOT NULL COLLATE 'latin1_swedish_ci',
+    `errorlog` TEXT NULL COLLATE 'latin1_swedish_ci',
+    PRIMARY KEY (`id`),
+    INDEX `scheduledjobsFK` (`job_id`),
+    CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `scheduled_jobs` (`id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

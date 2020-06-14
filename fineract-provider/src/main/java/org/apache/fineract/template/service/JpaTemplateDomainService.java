@@ -54,8 +54,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
     @Override
     public Template findOneById(final Long id) {
-        return this.templateRepository.findById(id)
-                .orElseThrow(() -> new TemplateNotFoundException(id));
+        return this.templateRepository.findById(id).orElseThrow(() -> new TemplateNotFoundException(id));
     }
 
     @Transactional
@@ -68,14 +67,12 @@ public class JpaTemplateDomainService implements TemplateDomainService {
         final Template template = Template.fromJson(command);
 
         this.templateRepository.saveAndFlush(template);
-        return new CommandProcessingResultBuilder().withEntityId(
-                template.getId()).build();
+        return new CommandProcessingResultBuilder().withEntityId(template.getId()).build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult updateTemplate(final Long templateId,
-            final JsonCommand command) {
+    public CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command) {
         // FIXME - no validation here of the data in the command object, is
         // name, text populated etc
         // FIXME - handle cases where data integrity constraints are fired from
@@ -84,36 +81,31 @@ public class JpaTemplateDomainService implements TemplateDomainService {
         final Template template = findOneById(templateId);
         template.setName(command.stringValueOfParameterNamed(PROPERTY_NAME));
         template.setText(command.stringValueOfParameterNamed(PROPERTY_TEXT));
-        template.setEntity(TemplateEntity.values()[command
-                .integerValueSansLocaleOfParameterNamed(PROPERTY_ENTITY)]);
-        final int templateTypeId = command
-                .integerValueSansLocaleOfParameterNamed(PROPERTY_TYPE);
+        template.setEntity(TemplateEntity.values()[command.integerValueSansLocaleOfParameterNamed(PROPERTY_ENTITY)]);
+        final int templateTypeId = command.integerValueSansLocaleOfParameterNamed(PROPERTY_TYPE);
         TemplateType type = null;
         switch (templateTypeId) {
-            case 0 :
+            case 0:
                 type = TemplateType.DOCUMENT;
-                break;
-            case 2 :
+            break;
+            case 2:
                 type = TemplateType.SMS;
-                break;
+            break;
         }
         template.setType(type);
 
         final JsonArray array = command.arrayOfParameterNamed("mappers");
         final List<TemplateMapper> mappersList = new ArrayList<>();
         for (final JsonElement element : array) {
-            mappersList.add(new TemplateMapper(element.getAsJsonObject()
-                    .get("mappersorder").getAsInt(), element.getAsJsonObject()
-                    .get("mapperskey").getAsString(), element.getAsJsonObject()
-                    .get("mappersvalue").getAsString()));
+            mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(),
+                    element.getAsJsonObject().get("mapperskey").getAsString(),
+                    element.getAsJsonObject().get("mappersvalue").getAsString()));
         }
         template.setMappers(mappersList);
 
         this.templateRepository.saveAndFlush(template);
 
-        return new CommandProcessingResultBuilder()
-                .withCommandId(command.commandId())
-                .withEntityId(template.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(template.getId()).build();
     }
 
     @Transactional
@@ -123,8 +115,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
         this.templateRepository.delete(template);
 
-        return new CommandProcessingResultBuilder().withEntityId(templateId)
-                .build();
+        return new CommandProcessingResultBuilder().withEntityId(templateId).build();
     }
 
     @Transactional
@@ -134,8 +125,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     }
 
     @Override
-    public List<Template> getAllByEntityAndType(final TemplateEntity entity,
-            final TemplateType type) {
+    public List<Template> getAllByEntityAndType(final TemplateEntity entity, final TemplateType type) {
 
         return this.templateRepository.findByEntityAndType(entity, type);
     }

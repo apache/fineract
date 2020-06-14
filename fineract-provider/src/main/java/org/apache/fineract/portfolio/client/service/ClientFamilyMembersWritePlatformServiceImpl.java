@@ -43,88 +43,79 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamilyMembersWritePlatformService
-{
+public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamilyMembersWritePlatformService {
+
     private final static Logger LOG = LoggerFactory.getLogger(ClientFamilyMembersWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final CodeValueRepository codeValueRepository;
     private final ClientFamilyMembersRepository clientFamilyRepository;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final ClientFamilyMemberCommandFromApiJsonDeserializer  apiJsonDeserializer;
-
+    private final ClientFamilyMemberCommandFromApiJsonDeserializer apiJsonDeserializer;
 
     @Autowired
-    public ClientFamilyMembersWritePlatformServiceImpl(final PlatformSecurityContext context,final CodeValueRepository codeValueRepository,
-            final ClientFamilyMembersRepository clientFamilyRepository,final ClientRepositoryWrapper clientRepositoryWrapper,final ClientFamilyMemberCommandFromApiJsonDeserializer  apiJsonDeserializer
-            )
-    {
-        this.context=context;
-        this.codeValueRepository=codeValueRepository;
-        this.clientFamilyRepository=clientFamilyRepository;
-        this.clientRepositoryWrapper=clientRepositoryWrapper;
-        this.apiJsonDeserializer=apiJsonDeserializer;
+    public ClientFamilyMembersWritePlatformServiceImpl(final PlatformSecurityContext context, final CodeValueRepository codeValueRepository,
+            final ClientFamilyMembersRepository clientFamilyRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
+            final ClientFamilyMemberCommandFromApiJsonDeserializer apiJsonDeserializer) {
+        this.context = context;
+        this.codeValueRepository = codeValueRepository;
+        this.clientFamilyRepository = clientFamilyRepository;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
+        this.apiJsonDeserializer = apiJsonDeserializer;
 
     }
 
-
-
     @Override
-    public CommandProcessingResult addFamilyMember(final long clientId,final JsonCommand command)
-    {
+    public CommandProcessingResult addFamilyMember(final long clientId, final JsonCommand command) {
 
-        Long relationshipId=null;
-        CodeValue relationship=null;
-        CodeValue maritalStatus=null;
-        Long maritalStatusId=null;
-        Long genderId=null;
-        CodeValue gender=null;
-        Long professionId=null;
-        CodeValue profession=null;
-        String firstName="";
-        String middleName="";
-        String lastName="";
-        String qualification="";
-        String mobileNumber="";
-        Long age=null;
-        Boolean isDependent=false;
-        Date dateOfBirth=null;
-
+        Long relationshipId = null;
+        CodeValue relationship = null;
+        CodeValue maritalStatus = null;
+        Long maritalStatusId = null;
+        Long genderId = null;
+        CodeValue gender = null;
+        Long professionId = null;
+        CodeValue profession = null;
+        String firstName = "";
+        String middleName = "";
+        String lastName = "";
+        String qualification = "";
+        String mobileNumber = "";
+        Long age = null;
+        Boolean isDependent = false;
+        Date dateOfBirth = null;
 
         this.context.authenticatedUser();
         apiJsonDeserializer.validateForCreate(clientId, command.json());
 
-
-        Client client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
         if (command.stringValueOfParameterNamed("firstName") != null) {
             firstName = command.stringValueOfParameterNamed("firstName");
-            }
+        }
 
         if (command.stringValueOfParameterNamed("middleName") != null) {
             middleName = command.stringValueOfParameterNamed("middleName");
-            }
+        }
 
         if (command.stringValueOfParameterNamed("lastName") != null) {
             lastName = command.stringValueOfParameterNamed("lastName");
-            }
-
+        }
 
         if (command.stringValueOfParameterNamed("qualification") != null) {
             qualification = command.stringValueOfParameterNamed("qualification");
-            }
+        }
 
         if (command.stringValueOfParameterNamed("mobileNumber") != null) {
             mobileNumber = command.stringValueOfParameterNamed("mobileNumber");
-            }
-
+        }
 
         if (command.longValueOfParameterNamed("age") != null) {
             age = command.longValueOfParameterNamed("age");
-            }
+        }
 
         if (command.booleanObjectValueOfParameterNamed("isDependent") != null) {
             isDependent = command.booleanObjectValueOfParameterNamed("isDependent");
-            }
+        }
 
         if (command.longValueOfParameterNamed("relationshipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationshipId");
@@ -146,96 +137,84 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             profession = this.codeValueRepository.getOne(professionId);
         }
 
-        if(command.dateValueOfParameterNamed("dateOfBirth")!=null)
-        {
-            dateOfBirth=command.dateValueOfParameterNamed("dateOfBirth");
+        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
+            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
 
         }
 
-        ClientFamilyMembers clientFamilyMembers=ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,mobileNumber,age,isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
+        ClientFamilyMembers clientFamilyMembers = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,
+                mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
 
         this.clientFamilyRepository.save(clientFamilyMembers);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientFamilyMembers.getId()).build();
-
-
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMembers.getId()).build();
 
     }
 
     @Override
-    public CommandProcessingResult addClientFamilyMember(final Client client,final JsonCommand command)
-    {
+    public CommandProcessingResult addClientFamilyMember(final Client client, final JsonCommand command) {
 
-        Long relationshipId=null;
-        CodeValue relationship=null;
-        CodeValue maritalStatus=null;
-        Long maritalStatusId=null;
-        Long genderId=null;
-        CodeValue gender=null;
-        Long professionId=null;
-        CodeValue profession=null;
-        String firstName="";
-        String middleName="";
-        String lastName="";
-        String qualification="";
-        Date dateOfBirth=null;
-        String mobileNumber="";
-        Long age=null;
-        Boolean isDependent=false;
-
-
-
+        Long relationshipId = null;
+        CodeValue relationship = null;
+        CodeValue maritalStatus = null;
+        Long maritalStatusId = null;
+        Long genderId = null;
+        CodeValue gender = null;
+        Long professionId = null;
+        CodeValue profession = null;
+        String firstName = "";
+        String middleName = "";
+        String lastName = "";
+        String qualification = "";
+        Date dateOfBirth = null;
+        String mobileNumber = "";
+        Long age = null;
+        Boolean isDependent = false;
 
         this.context.authenticatedUser();
 
+        // Client
+        // client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
-        //Client client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        ClientFamilyMembers familyMember = new ClientFamilyMembers();
 
-        ClientFamilyMembers familyMember=new ClientFamilyMembers();
+        // apiJsonDeserializer.validateForCreate(command.json());
 
-        //apiJsonDeserializer.validateForCreate(command.json());
+        JsonArray familyMembers = command.arrayOfParameterNamed("familyMembers");
 
-
-        JsonArray familyMembers=command.arrayOfParameterNamed("familyMembers");
-
-        for(JsonElement members :familyMembers)
-        {
+        for (JsonElement members : familyMembers) {
 
             apiJsonDeserializer.validateForCreate(members.toString());
 
-            JsonObject member=members.getAsJsonObject();
-
+            JsonObject member = members.getAsJsonObject();
 
             if (member.get("firstName") != null) {
                 firstName = member.get("firstName").getAsString();
-                }
+            }
 
             if (member.get("middleName") != null) {
                 middleName = member.get("middleName").getAsString();
-                }
+            }
 
             if (member.get("lastName") != null) {
                 lastName = member.get("lastName").getAsString();
-                }
-
+            }
 
             if (member.get("qualification") != null) {
                 qualification = member.get("qualification").getAsString();
-                }
+            }
 
             if (member.get("mobileNumber") != null) {
                 mobileNumber = member.get("mobileNumber").getAsString();
-                }
-
+            }
 
             if (member.get("age") != null) {
                 age = member.get("age").getAsLong();
-                }
+            }
 
             if (member.get("isDependent") != null) {
                 isDependent = member.get("isDependent").getAsBoolean();
-                }
+            }
 
             if (member.get("relationshipId") != null) {
                 relationshipId = member.get("relationshipId").getAsLong();
@@ -257,115 +236,106 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
                 profession = this.codeValueRepository.getOne(professionId);
             }
 
-            if(member.get("dateOfBirth")!=null)
-            {
+            if (member.get("dateOfBirth") != null) {
 
                 DateFormat format = new SimpleDateFormat(member.get("dateFormat").getAsString());
                 Date date;
                 try {
                     date = format.parse(member.get("dateOfBirth").getAsString());
-                    dateOfBirth=date;
+                    dateOfBirth = date;
                 } catch (ParseException e) {
                     // TODO Auto-generated catch block
-                    LOG.error("Problem occurred in addClientFamilyMember function",e);
+                    LOG.error("Problem occurred in addClientFamilyMember function", e);
                 }
 
-
-
-        /*    this.fromApiJsonHelper.extractDateFormatParameter(member.get("dateOfBirth").getAsJsonObject());*/
-
+                /*
+                 * this.fromApiJsonHelper.extractDateFormatParameter(member.get(
+                 * "dateOfBirth").getAsJsonObject());
+                 */
 
             }
 
-            familyMember=ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,mobileNumber,age,isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
+            familyMember = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification, mobileNumber, age,
+                    isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
 
             this.clientFamilyRepository.save(familyMember);
 
         }
 
-
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(familyMember.getId()).build();
-
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(familyMember.getId()).build();
 
     }
-
-
 
     @Override
     public CommandProcessingResult updateFamilyMember(Long familyMemberId, JsonCommand command) {
 
-
-        Long relationshipId=null;
-        CodeValue relationship=null;
-        CodeValue maritalStatus=null;
-        Long maritalStatusId=null;
-        Long genderId=null;
-        CodeValue gender=null;
-        Long professionId=null;
-        CodeValue profession=null;
-        String firstName="";
-        String middleName="";
-        String lastName="";
-        String qualification="";
-        Date dateOfBirth=null;
-        String mobileNumber="";
-        Long age=null;
-        Boolean isDependent=false;
-        //long clientFamilyMemberId=0;
-
+        Long relationshipId = null;
+        CodeValue relationship = null;
+        CodeValue maritalStatus = null;
+        Long maritalStatusId = null;
+        Long genderId = null;
+        CodeValue gender = null;
+        Long professionId = null;
+        CodeValue profession = null;
+        String firstName = "";
+        String middleName = "";
+        String lastName = "";
+        String qualification = "";
+        Date dateOfBirth = null;
+        String mobileNumber = "";
+        Long age = null;
+        Boolean isDependent = false;
+        // long clientFamilyMemberId=0;
 
         this.context.authenticatedUser();
 
         apiJsonDeserializer.validateForUpdate(familyMemberId, command.json());
 
-        /*if (command.stringValueOfParameterNamed("clientFamilyMemberId") != null) {
-            clientFamilyMemberId = command.longValueOfParameterNamed("clientFamilyMemberId");
-            }*/
+        /*
+         * if (command.stringValueOfParameterNamed("clientFamilyMemberId") !=
+         * null) { clientFamilyMemberId =
+         * command.longValueOfParameterNamed("clientFamilyMemberId"); }
+         */
 
+        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getOne(familyMemberId);
 
-        ClientFamilyMembers clientFamilyMember=clientFamilyRepository.getOne(familyMemberId);
-
-        //Client client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        // Client
+        // client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
         if (command.stringValueOfParameterNamed("firstName") != null) {
             firstName = command.stringValueOfParameterNamed("firstName");
             clientFamilyMember.setFirstName(firstName);
-            }
+        }
 
         if (command.stringValueOfParameterNamed("middleName") != null) {
             middleName = command.stringValueOfParameterNamed("middleName");
             clientFamilyMember.setMiddleName(middleName);
-            }
+        }
 
         if (command.stringValueOfParameterNamed("lastName") != null) {
             lastName = command.stringValueOfParameterNamed("lastName");
             clientFamilyMember.setLastName(lastName);
-            }
-
+        }
 
         if (command.stringValueOfParameterNamed("qualification") != null) {
             qualification = command.stringValueOfParameterNamed("qualification");
             clientFamilyMember.setQualification(qualification);
-            }
-
+        }
 
         if (command.stringValueOfParameterNamed("mobileNumber") != null) {
             mobileNumber = command.stringValueOfParameterNamed("mobileNumber");
             clientFamilyMember.setMobileNumber(mobileNumber);
-            }
-
+        }
 
         if (command.longValueOfParameterNamed("age") != null) {
             age = command.longValueOfParameterNamed("age");
             clientFamilyMember.setAge(age);
-            }
+        }
 
         if (command.booleanObjectValueOfParameterNamed("isDependent") != null) {
             isDependent = command.booleanObjectValueOfParameterNamed("isDependent");
             clientFamilyMember.setIsDependent(isDependent);
-            }
+        }
 
         if (command.longValueOfParameterNamed("relationShipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationShipId");
@@ -391,23 +361,21 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             clientFamilyMember.setProfession(profession);
         }
 
-        if(command.dateValueOfParameterNamed("dateOfBirth")!=null)
-        {
-            dateOfBirth=command.dateValueOfParameterNamed("dateOfBirth");
+        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
+            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
             clientFamilyMember.setDateOfBirth(dateOfBirth);
-
 
         }
 
-        //ClientFamilyMembers clientFamilyMembers=ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification, relationship, maritalStatus, gender, dateOfBirth, profession);
+        // ClientFamilyMembers
+        // clientFamilyMembers=ClientFamilyMembers.fromJson(client, firstName,
+        // middleName, lastName, qualification, relationship, maritalStatus,
+        // gender, dateOfBirth, profession);
 
         this.clientFamilyRepository.save(clientFamilyMember);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientFamilyMember.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
     }
-
-
 
     @Override
     public CommandProcessingResult deleteFamilyMember(Long clientFamilyMemberId, JsonCommand command) {
@@ -417,32 +385,21 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         apiJsonDeserializer.validateForDelete(clientFamilyMemberId);
 
-        ClientFamilyMembers clientFamilyMember=null;
+        ClientFamilyMembers clientFamilyMember = null;
 
-
-
-        if(clientFamilyMemberId!=null)
-        {
-             clientFamilyMember=clientFamilyRepository.getOne(clientFamilyMemberId);
+        if (clientFamilyMemberId != null) {
+            clientFamilyMember = clientFamilyRepository.getOne(clientFamilyMemberId);
             clientFamilyRepository.delete(clientFamilyMember);
 
         }
 
-
-        if(clientFamilyMember!=null)
-        {
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                    .withEntityId(clientFamilyMember.getId()).build();
-        }
-        else
-        {
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                    .withEntityId(Long.valueOf(clientFamilyMemberId)).build();
+        if (clientFamilyMember != null) {
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientFamilyMember.getId()).build();
+        } else {
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(Long.valueOf(clientFamilyMemberId))
+                    .build();
         }
 
     }
-
-
-
 
 }

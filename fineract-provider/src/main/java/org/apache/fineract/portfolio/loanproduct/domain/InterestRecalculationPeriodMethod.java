@@ -35,6 +35,7 @@ import java.util.Map;
  */
 
 public enum InterestRecalculationPeriodMethod {
+
     INVALID(0, "interestRecalculationPeriodMethod.invalid"), //
     DAILY(1, "interestRecalculationPeriodMethod.daily"), //
     WEEKLY(2, "interestRecalculationPeriodMethod.weekly"), //

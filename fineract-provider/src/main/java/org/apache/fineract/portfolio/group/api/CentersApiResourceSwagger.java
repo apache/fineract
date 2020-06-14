@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/18/17.
  */
 final class CentersApiResourceSwagger {
-    private CentersApiResourceSwagger() {
-    }
+
+    private CentersApiResourceSwagger() {}
 
     @ApiModel(value = "GetCentersTemplateResponse")
     public final static class GetCentersTemplateResponse {
-        private GetCentersTemplateResponse() {
-        }
+
+        private GetCentersTemplateResponse() {}
 
         final class GetCentersOfficeOptions {
-            private GetCentersOfficeOptions() {
-            }
+
+            private GetCentersOfficeOptions() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -48,15 +48,14 @@ final class CentersApiResourceSwagger {
         }
 
         final class GetCentersStaffOptions {
-            private GetCentersStaffOptions() {
-            }
+
+            private GetCentersStaffOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
             @ApiModelProperty(example = "D, Mary")
             public String displayName;
         }
-
 
         @ApiModelProperty(example = "false")
         public Boolean active;
@@ -70,16 +69,16 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "GetCentersResponse")
     public final static class GetCentersResponse {
-        private GetCentersResponse() {
-        }
+
+        private GetCentersResponse() {}
 
         final class GetCentersPageItems {
-            private GetCentersPageItems() {
-            }
+
+            private GetCentersPageItems() {}
 
             final class GetCentersStatus {
-                private GetCentersStatus() {
-                }
+
+                private GetCentersStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -111,8 +110,8 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "GetCentersCenterIdResponse")
     public final static class GetCentersCenterIdResponse {
-        private GetCentersCenterIdResponse() {
-        }
+
+        private GetCentersCenterIdResponse() {}
 
         @ApiModelProperty(example = "8")
         public Integer id;
@@ -131,8 +130,8 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "PostCentersRequest")
     public final static class PostCentersRequest {
-        private PostCentersRequest() {
-        }
+
+        private PostCentersRequest() {}
 
         @ApiModelProperty(example = "First Center (No groups)")
         public String name;
@@ -144,8 +143,8 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "PostCentersResponse")
     public final static class PostCentersResponse {
-        private PostCentersResponse() {
-        }
+
+        private PostCentersResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -157,8 +156,8 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "PutCentersCenterIdRequest")
     public final static class PutCentersCenterIdRequest {
-        private PutCentersCenterIdRequest() {
-        }
+
+        private PutCentersCenterIdRequest() {}
 
         @ApiModelProperty(example = "First Center (No groups)")
         public String name;
@@ -166,12 +165,12 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "PutCentersCenterIdResponse")
     public final static class PutCentersCenterIdResponse {
-        private PutCentersCenterIdResponse() {
-        }
+
+        private PutCentersCenterIdResponse() {}
 
         final class PutCentersChanges {
-            private PutCentersChanges() {
-            }
+
+            private PutCentersChanges() {}
 
             @ApiModelProperty(example = "First Center (No groups) - modified")
             public String name;
@@ -188,12 +187,12 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "DeleteCentersCenterIdResponse")
     public final static class DeleteCentersCenterIdResponse {
-        private DeleteCentersCenterIdResponse() {
-        }
+
+        private DeleteCentersCenterIdResponse() {}
 
         final class DeleteCentersChanges {
-            private DeleteCentersChanges() {
-            }
+
+            private DeleteCentersChanges() {}
         }
 
         @ApiModelProperty(example = "1")
@@ -203,8 +202,8 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "PostCentersCenterIdRequest")
     public final static class PostCentersCenterIdRequest {
-        private PostCentersCenterIdRequest() {
-        }
+
+        private PostCentersCenterIdRequest() {}
 
         @ApiModelProperty(example = "32")
         public Integer closureReasonId;
@@ -218,8 +217,8 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "PostCentersCenterIdResponse")
     public final static class PostCentersCenterIdResponse {
-        private PostCentersCenterIdResponse() {
-        }
+
+        private PostCentersCenterIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -227,16 +226,16 @@ final class CentersApiResourceSwagger {
 
     @ApiModel(value = "GetCentersCenterIdAccountsResponse")
     public final static class GetCentersCenterIdAccountsResponse {
-        private GetCentersCenterIdAccountsResponse() {
-        }
+
+        private GetCentersCenterIdAccountsResponse() {}
 
         final class GetCentersSavingsAccounts {
-            private GetCentersSavingsAccounts() {
-            }
+
+            private GetCentersSavingsAccounts() {}
 
             final class GetCentersCenterIdStatus {
-                private GetCentersCenterIdStatus() {
-                }
+
+                private GetCentersCenterIdStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -265,8 +264,8 @@ final class CentersApiResourceSwagger {
             }
 
             final class GetCentersCenterIdCurrency {
-                private GetCentersCenterIdCurrency() {
-                }
+
+                private GetCentersCenterIdCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -285,8 +284,8 @@ final class CentersApiResourceSwagger {
             }
 
             final class GetCentersAccountType {
-                private GetCentersAccountType() {
-                }
+
+                private GetCentersAccountType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -297,8 +296,8 @@ final class CentersApiResourceSwagger {
             }
 
             final class GetCentersTimeline {
-                private GetCentersTimeline() {
-                }
+
+                private GetCentersTimeline() {}
 
                 @ApiModelProperty(example = "[2014, 5, 1]")
                 public LocalDate submittedOnDate;
@@ -311,8 +310,8 @@ final class CentersApiResourceSwagger {
             }
 
             final class GetCentersDepositType {
-                private GetCentersDepositType() {
-                }
+
+                private GetCentersDepositType() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;

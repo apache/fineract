@@ -41,6 +41,6 @@ public class UpdatePaymentTypeCommandHandler implements NewCommandSourceHandler 
     @Override
     @Transactional
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.paymentTypeWriteService.updatePaymentType(command.entityId(),command);
+        return this.paymentTypeWriteService.updatePaymentType(command.entityId(), command);
     }
 }

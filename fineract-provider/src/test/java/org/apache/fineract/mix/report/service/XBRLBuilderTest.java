@@ -50,6 +50,7 @@ import org.xml.sax.SAXException;
 
 @ExtendWith(MockitoExtension.class)
 public class XBRLBuilderTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(XBRLBuilderTest.class);
     @Mock
     private NamespaceReadPlatformServiceImpl readNamespaceService;
@@ -70,12 +71,10 @@ public class XBRLBuilderTest {
         final MixTaxonomyData data1 = Mockito.mock(MixTaxonomyData.class);
         when(data1.getName()).thenReturn("Assets");
         map.put(data1, new BigDecimal(10000));
-        final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"),
-                "USD");
+        final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
         LOG.info("{}", result);
         NodeList nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                .parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8)))
-                .getElementsByTagName("Assets");
+                .parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8))).getElementsByTagName("Assets");
         assertNotNull(nodes);
         assertNotNull(nodes.item(0));
         assertEquals("Assets", nodes.item(0).getNodeName());

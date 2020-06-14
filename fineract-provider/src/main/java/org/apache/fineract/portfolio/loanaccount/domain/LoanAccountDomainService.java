@@ -29,7 +29,8 @@ public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
-            final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidatDetailDto, Boolean isHolidayValidationDone);
+            final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidatDetailDto,
+            Boolean isHolidayValidationDone);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
@@ -68,7 +69,8 @@ public interface LoanAccountDomainService {
     /**
      * Disables all standing instructions linked to a closed loan
      *
-     * @param loan {@link Loan} object
+     * @param loan
+     *            {@link Loan} object
      */
     void disableStandingInstructionsLinkedToClosedLoan(Loan loan);
 

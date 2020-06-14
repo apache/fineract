@@ -72,8 +72,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final Long codeId = command.entityId();
-            final Code code = this.codeRepository.findById(codeId)
-                    .orElseThrow(() -> new CodeNotFoundException(codeId));
+            final Code code = this.codeRepository.findById(codeId).orElseThrow(() -> new CodeNotFoundException(codeId));
             final CodeValue codeValue = CodeValue.fromJson(code, command);
             this.codeValueRepository.save(codeValue);
 
@@ -98,8 +97,8 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("code_value")) {
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label", "A code value with lable '" + name
-                    + "' already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label",
+                    "A code value with lable '" + name + "' already exists", "name", name);
         }
 
         LOG.error("Error occured.", dve);
@@ -146,8 +145,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
         try {
             this.context.authenticatedUser();
 
-            final Code code = this.codeRepository.findById(codeId)
-                    .orElseThrow(() -> new CodeNotFoundException(codeId));
+            final Code code = this.codeRepository.findById(codeId).orElseThrow(() -> new CodeNotFoundException(codeId));
 
             final CodeValue codeValueToDelete = this.codeValueRepositoryWrapper.findOneWithNotFoundDetection(codeValueId);
 
@@ -163,8 +161,9 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
         } catch (final DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
             final Throwable realCause = dve.getMostSpecificCause();
-            if (realCause.getMessage().contains("code_value")) { throw new PlatformDataIntegrityException("error.msg.codeValue.in.use",
-                    "This code value is in use", codeValueId); }
+            if (realCause.getMessage().contains("code_value")) {
+                throw new PlatformDataIntegrityException("error.msg.codeValue.in.use", "This code value is in use", codeValueId);
+            }
             throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
         }

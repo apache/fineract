@@ -35,32 +35,28 @@ public class SQLInjectionValidator {
     public final static void validateSQLInput(final String sqlSearch) {
         String lowerCaseSQL = sqlSearch.toLowerCase();
         for (String ddl : DDL_COMMANDS) {
-            if (lowerCaseSQL.contains(ddl)) {
-                throw new SQLInjectionException();
-            }
+            if (lowerCaseSQL.contains(ddl)) { throw new SQLInjectionException(); }
         }
 
         for (String dml : DML_COMMANDS) {
-            if (lowerCaseSQL.contains(dml)) {
-                throw new SQLInjectionException();
-            }
+            if (lowerCaseSQL.contains(dml)) { throw new SQLInjectionException(); }
         }
 
         for (String comments : COMMENTS) {
-            if (lowerCaseSQL.contains(comments)) {
-                throw new SQLInjectionException();
-            }
+            if (lowerCaseSQL.contains(comments)) { throw new SQLInjectionException(); }
         }
 
-        //Removing the space before and after '=' operator
-        //String s = "          \"              OR 1    =    1"; For the cases like this
+        // Removing the space before and after '=' operator
+        // String s = " \" OR 1 = 1"; For the cases like this
         boolean injectionFound = false;
         String inputSqlString = lowerCaseSQL;
-        while (inputSqlString.indexOf(" =") > 0) { //Don't remove space before = operator
+        while (inputSqlString.indexOf(" =") > 0) { // Don't remove space before
+                                                   // = operator
             inputSqlString = inputSqlString.replaceAll(" =", "=");
         }
 
-        while (inputSqlString.indexOf("= ") > 0) { //Don't remove space after = operator
+        while (inputSqlString.indexOf("= ") > 0) { // Don't remove space after =
+                                                   // operator
             inputSqlString = inputSqlString.replaceAll("= ", "=");
         }
 
@@ -76,7 +72,7 @@ public class SQLInjectionValidator {
                     }
                 } else {
                     injectionFound = true;
-                    break ;
+                    break;
                 }
             }
             if (token.equals("\"")) {
@@ -88,7 +84,7 @@ public class SQLInjectionValidator {
                     }
                 } else {
                     injectionFound = true;
-                    break ;
+                    break;
                 }
             } else if (token.indexOf('=') > 0) {
                 StringTokenizer operatorToken = new StringTokenizer(token, "=");
@@ -104,40 +100,34 @@ public class SQLInjectionValidator {
                 }
             }
         }
-        if (injectionFound) {
-            throw new SQLInjectionException();
-        }
+        if (injectionFound) { throw new SQLInjectionException(); }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);
         Matcher matcher = pattern.matcher(sqlSearch);
-        if (!matcher.matches()) {
-            throw new SQLInjectionException();
-        }
+        if (!matcher.matches()) { throw new SQLInjectionException(); }
     }
+
     public final static void validateAdhocQuery(final String sqlSearch) {
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
         for (String ddl : DDL_COMMANDS) {
-            if (lowerCaseSQL.startsWith(ddl)) {
-                throw new SQLInjectionException();
-            }
+            if (lowerCaseSQL.startsWith(ddl)) { throw new SQLInjectionException(); }
         }
-
 
         for (String comments : COMMENTS) {
-            if (lowerCaseSQL.contains(comments)) {
-                throw new SQLInjectionException();
-            }
+            if (lowerCaseSQL.contains(comments)) { throw new SQLInjectionException(); }
         }
 
-        //Removing the space before and after '=' operator
-        //String s = "          \"              OR 1    =    1"; For the cases like this
+        // Removing the space before and after '=' operator
+        // String s = " \" OR 1 = 1"; For the cases like this
         boolean injectionFound = false;
         String inputSqlString = lowerCaseSQL;
-        while (inputSqlString.indexOf(" =") > 0) { //Don't remove space before = operator
+        while (inputSqlString.indexOf(" =") > 0) { // Don't remove space before
+                                                   // = operator
             inputSqlString = inputSqlString.replaceAll(" =", "=");
         }
 
-        while (inputSqlString.indexOf("= ") > 0) { //Don't remove space after = operator
+        while (inputSqlString.indexOf("= ") > 0) { // Don't remove space after =
+                                                   // operator
             inputSqlString = inputSqlString.replaceAll("= ", "=");
         }
 
@@ -153,7 +143,7 @@ public class SQLInjectionValidator {
                     }
                 } else {
                     injectionFound = true;
-                    break ;
+                    break;
                 }
             }
             if (token.equals("\"")) {
@@ -165,7 +155,7 @@ public class SQLInjectionValidator {
                     }
                 } else {
                     injectionFound = true;
-                    break ;
+                    break;
                 }
             } else if (token.indexOf('=') > 0) {
                 StringTokenizer operatorToken = new StringTokenizer(token, "=");
@@ -181,14 +171,10 @@ public class SQLInjectionValidator {
                 }
             }
         }
-        if (injectionFound) {
-            throw new SQLInjectionException();
-        }
+        if (injectionFound) { throw new SQLInjectionException(); }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);
         Matcher matcher = pattern.matcher(sqlSearch);
-        if (!matcher.matches()) {
-            throw new SQLInjectionException();
-        }
+        if (!matcher.matches()) { throw new SQLInjectionException(); }
     }
 }

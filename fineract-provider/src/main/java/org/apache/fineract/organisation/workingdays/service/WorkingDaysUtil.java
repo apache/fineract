@@ -58,7 +58,8 @@ public class WorkingDaysUtil {
         return !isWorkingDay(workingDays, date);
     }
 
-    public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO, final WorkingDays workingDays) {
+    public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO,
+            final WorkingDays workingDays) {
         final LocalDate changedScheduleDate = getOffSetDateIfNonWorkingDay(adjustedDateDetailsDTO.getChangedScheduleDate(),
                 adjustedDateDetailsDTO.getNextRepaymentPeriodDueDate(), workingDays);
         adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);

@@ -77,11 +77,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final CenterReadPlatformService centerReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator,
-            final ColumnValidator columnValidator) {
+            final CenterReadPlatformService centerReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
+            final PaginationParametersDataValidator paginationParametersDataValidator, final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.centerReadPlatformService = centerReadPlatformService;
@@ -151,8 +149,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.allGroupTypesDataMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-        List<Object> paramList = new ArrayList<>(
-                Arrays.asList(hierarchySearchString));
+        List<Object> paramList = new ArrayList<>(Arrays.asList(hierarchySearchString));
         final String extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), paramList, searchParameters);
         this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
@@ -173,8 +170,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                paramList.toArray(), this.allGroupTypesDataMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
+                this.allGroupTypesDataMapper);
     }
 
     @Override
@@ -187,16 +184,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         sqlBuilder.append("select ");
         sqlBuilder.append(this.allGroupTypesDataMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-        List<Object> paramList = new ArrayList<>(
-                Arrays.asList(hierarchySearchString));
-        if (searchParameters!=null) {
+        List<Object> paramList = new ArrayList<>(Arrays.asList(hierarchySearchString));
+        if (searchParameters != null) {
             final String extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), paramList, searchParameters);
 
             if (StringUtils.isNotBlank(extraCriteria)) {
                 sqlBuilder.append(" and (").append(extraCriteria).append(")");
             }
         }
-        if (parameters!=null) {
+        if (parameters != null) {
             if (parameters.isOrderByRequested()) {
                 sqlBuilder.append(parameters.orderBySql());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.orderBySql());
@@ -217,26 +213,26 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         StringBuilder extraCriteria = new StringBuilder(200);
         extraCriteria.append(" and g.level_Id = ").append(GroupTypes.GROUP.getId());
-            String sqlSearch = searchCriteria.getSqlSearch();
-            if (sqlSearch != null) {
-                SQLInjectionValidator.validateSQLInput(sqlSearch);
-                sqlSearch = sqlSearch.replace(" display_name ", " g.display_name ");
-                sqlSearch = sqlSearch.replace("display_name ", "g.display_name ");
-                extraCriteria.append(" and ( ").append(sqlSearch).append(") ");
-                this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
-            }
+        String sqlSearch = searchCriteria.getSqlSearch();
+        if (sqlSearch != null) {
+            SQLInjectionValidator.validateSQLInput(sqlSearch);
+            sqlSearch = sqlSearch.replace(" display_name ", " g.display_name ");
+            sqlSearch = sqlSearch.replace("display_name ", "g.display_name ");
+            extraCriteria.append(" and ( ").append(sqlSearch).append(") ");
+            this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
+        }
 
-            final Long officeId = searchCriteria.getOfficeId();
-            if (officeId != null) {
-                paramList.add(officeId);
-                extraCriteria.append(" and g.office_id = ? ");
-            }
+        final Long officeId = searchCriteria.getOfficeId();
+        if (officeId != null) {
+            paramList.add(officeId);
+            extraCriteria.append(" and g.office_id = ? ");
+        }
 
-            final String externalId = searchCriteria.getExternalId();
-            if (externalId != null) {
-                paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
-                extraCriteria.append(" and g.external_id = ? ");
-            }
+        final String externalId = searchCriteria.getExternalId();
+        if (externalId != null) {
+            paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
+            extraCriteria.append(" and g.external_id = ? ");
+        }
 
         final String name = searchCriteria.getName();
         if (name != null) {
@@ -244,30 +240,30 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             extraCriteria.append(" and g.display_name like ? ");
         }
 
-            final String hierarchy = searchCriteria.getHierarchy();
-            if (hierarchy != null) {
-                paramList.add(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
-                extraCriteria.append(" and o.hierarchy like ? ");
-            }
+        final String hierarchy = searchCriteria.getHierarchy();
+        if (hierarchy != null) {
+            paramList.add(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
+            extraCriteria.append(" and o.hierarchy like ? ");
+        }
 
-            if (searchCriteria.isStaffIdPassed()) {
-                paramList.add(searchCriteria.getStaffId());
-                extraCriteria.append(" and g.staff_id = ? ");
-            }
+        if (searchCriteria.isStaffIdPassed()) {
+            paramList.add(searchCriteria.getStaffId());
+            extraCriteria.append(" and g.staff_id = ? ");
+        }
 
-            if (StringUtils.isNotBlank(extraCriteria.toString())) {
-                extraCriteria.delete(0, 4);
-            }
+        if (StringUtils.isNotBlank(extraCriteria.toString())) {
+            extraCriteria.delete(0, 4);
+        }
 
-            final Long staffId = searchCriteria.getStaffId();
-            if (staffId != null) {
-                paramList.add(staffId);
-                extraCriteria.append(" and g.staff_id = ? ");
-            }
+        final Long staffId = searchCriteria.getStaffId();
+        if (staffId != null) {
+            paramList.add(staffId);
+            extraCriteria.append(" and g.staff_id = ? ");
+        }
 
-            if (searchCriteria.isOrphansOnly()) {
-                extraCriteria.append(" and g.parent_id IS NULL");
-            }
+        if (searchCriteria.isOrphansOnly()) {
+            extraCriteria.append(" and g.parent_id IS NULL");
+        }
         return extraCriteria.toString();
     }
 

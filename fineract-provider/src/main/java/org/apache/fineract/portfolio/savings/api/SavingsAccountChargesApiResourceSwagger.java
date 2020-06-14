@@ -26,15 +26,16 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/30/17.
  */
 final class SavingsAccountChargesApiResourceSwagger {
-    private SavingsAccountChargesApiResourceSwagger() {
-    }
+
+    private SavingsAccountChargesApiResourceSwagger() {}
 
     @ApiModel(value = "GetSavingsAccountsSavingsAccountIdChargesResponse")
     public final static class GetSavingsAccountsSavingsAccountIdChargesResponse {
-        private GetSavingsAccountsSavingsAccountIdChargesResponse() {
-        }
+
+        private GetSavingsAccountsSavingsAccountIdChargesResponse() {}
 
         final class GetChargesCurrencyResponse {
+
             @ApiModelProperty(example = "USD")
             public String code;
             @ApiModelProperty(example = "US Dollar")
@@ -50,8 +51,8 @@ final class SavingsAccountChargesApiResourceSwagger {
         }
 
         final class GetChargesChargeCalculationType {
-            private GetChargesChargeCalculationType() {
-            }
+
+            private GetChargesChargeCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -62,8 +63,8 @@ final class SavingsAccountChargesApiResourceSwagger {
         }
 
         final class GetChargesChargeTimeType {
-            private GetChargesChargeTimeType() {
-            }
+
+            private GetChargesChargeTimeType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -106,16 +107,16 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "GetSavingsAccountsSavingsAccountIdChargesTemplateResponse")
     public final static class GetSavingsAccountsSavingsAccountIdChargesTemplateResponse {
-        private GetSavingsAccountsSavingsAccountIdChargesTemplateResponse() {
-        }
+
+        private GetSavingsAccountsSavingsAccountIdChargesTemplateResponse() {}
 
         final class GetSavingsChargesOptions {
-            private GetSavingsChargesOptions() {
-            }
+
+            private GetSavingsChargesOptions() {}
 
             final class GetSavingsChargesChargeTimeType {
-                private GetSavingsChargesChargeTimeType() {
-                }
+
+                private GetSavingsChargesChargeTimeType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -126,8 +127,8 @@ final class SavingsAccountChargesApiResourceSwagger {
             }
 
             final class GetChargesAppliesTo {
-                private GetChargesAppliesTo() {
-                }
+
+                private GetChargesAppliesTo() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -166,8 +167,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public final static class GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
-        private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
-        }
+
+        private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;
@@ -200,8 +201,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesRequest")
     public final static class PostSavingsAccountsSavingsAccountIdChargesRequest {
-        private PostSavingsAccountsSavingsAccountIdChargesRequest() {
-        }
+
+        private PostSavingsAccountsSavingsAccountIdChargesRequest() {}
 
         @ApiModelProperty(example = "2")
         public Integer chargeId;
@@ -217,8 +218,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesResponse")
     public final static class PostSavingsAccountsSavingsAccountIdChargesResponse {
-        private PostSavingsAccountsSavingsAccountIdChargesResponse() {
-        }
+
+        private PostSavingsAccountsSavingsAccountIdChargesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -232,8 +233,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
     public final static class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
-        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {
-        }
+
+        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {}
 
         @ApiModelProperty(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -247,12 +248,12 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public final static class PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
-        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
-        }
+
+        private PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         final class PutSavingsChanges {
-            private PutSavingsChanges() {
-            }
+
+            private PutSavingsChanges() {}
 
             @ApiModelProperty(example = "27 March 2013")
             public String dueDate;
@@ -277,8 +278,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest")
     public final static class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest {
-        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {
-        }
+
+        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest() {}
 
         @ApiModelProperty(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -292,8 +293,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public final static class PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
-        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
-        }
+
+        private PostSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -307,8 +308,8 @@ final class SavingsAccountChargesApiResourceSwagger {
 
     @ApiModel(value = "DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse")
     public final static class DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse {
-        private DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {
-        }
+
+        private DeleteSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

@@ -32,13 +32,15 @@ import org.joda.time.LocalDate;
  */
 
 final class HookApiResourceSwagger {
+
     private HookApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "PostHookRequest")
     public static final class PostHookRequest {
-        private PostHookRequest () {
+
+        private PostHookRequest() {
 
         }
 
@@ -56,15 +58,18 @@ final class HookApiResourceSwagger {
 
     @ApiModel(value = "PostHookResponse")
     public static final class PostHookResponse {
+
         private PostHookResponse() {
 
         }
+
         @ApiModelProperty(example = "4")
         public Long resourceId;
     }
 
     @ApiModel(value = "GetHookResponse")
     public static final class GetHookResponse {
+
         private GetHookResponse() {
 
         }
@@ -91,6 +96,7 @@ final class HookApiResourceSwagger {
 
     @ApiModel(value = "GetHookTemplateResponse")
     public static final class GetHookTemplateResponse {
+
         private GetHookTemplateResponse() {
 
         }
@@ -101,16 +107,19 @@ final class HookApiResourceSwagger {
 
     @ApiModel(value = "DeleteHookResponse")
     public static final class DeleteHookResponse {
+
         private DeleteHookResponse() {
 
         }
+
         @ApiModelProperty(example = "4")
         public Long resourceId;
     }
 
     @ApiModel(value = "PutHookRequest")
     public static final class PutHookRequest {
-        private PutHookRequest () {
+
+        private PutHookRequest() {
 
         }
 
@@ -128,17 +137,22 @@ final class HookApiResourceSwagger {
 
     @ApiModel(value = "PutHookResponse")
     public static final class PutHookResponse {
-        private PutHookResponse () {
+
+        private PutHookResponse() {
 
         }
+
         final class PutHookResponseChangesSwagger {
+
             private PutHookResponseChangesSwagger() {}
-                @ApiModelProperty(example = "Kremlin")
-                public String displayName;
-                @ApiModelProperty(example = "1")
-                public List<Event> events;
-                public List<Field> config;
+
+            @ApiModelProperty(example = "Kremlin")
+            public String displayName;
+            @ApiModelProperty(example = "1")
+            public List<Event> events;
+            public List<Field> config;
         }
+
         @ApiModelProperty(example = "4")
         public Long resourceId;
         public PutHookResponseChangesSwagger changes;

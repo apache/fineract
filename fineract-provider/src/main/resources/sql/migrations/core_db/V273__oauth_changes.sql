@@ -59,4 +59,3 @@ CREATE TABLE `oauth_refresh_token` (
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;
-	

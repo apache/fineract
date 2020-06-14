@@ -45,7 +45,7 @@ public class AccountNumberGenerator {
     private final static String OFFICE_NAME = "officeName";
     private final static String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
     private final static String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
-    private final static String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName" ;
+    private final static String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
@@ -78,7 +78,7 @@ public class AccountNumberGenerator {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, shareaccount.getId().toString());
         propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
-        return generateAccountNumber(propertyMap, accountNumberFormat) ;
+        return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
     private String generateAccountNumber(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat) {
@@ -109,7 +109,8 @@ public class AccountNumberGenerator {
             }
 
             // FINERACT-590
-            // Because account_no is limited to 20 chars, we can only use the first 10 chars of prefix - trim if necessary
+            // Because account_no is limited to 20 chars, we can only use the
+            // first 10 chars of prefix - trim if necessary
             if (prefix != null) {
                 prefix = prefix.substring(0, Math.min(prefix.length(), 10));
             }
@@ -132,6 +133,5 @@ public class AccountNumberGenerator {
         propertyMap.put(OFFICE_NAME, group.getOffice().getName());
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
-
 
 }

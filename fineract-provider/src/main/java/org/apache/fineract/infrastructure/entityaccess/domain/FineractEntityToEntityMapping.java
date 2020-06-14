@@ -70,7 +70,8 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
         //
     }
 
-    public static FineractEntityToEntityMapping newMap(FineractEntityRelation relationId, Long fromId, Long toId, Date startDate, Date endDate) {
+    public static FineractEntityToEntityMapping newMap(FineractEntityRelation relationId, Long fromId, Long toId, Date startDate,
+            Date endDate) {
 
         return new FineractEntityToEntityMapping(relationId, fromId, toId, startDate, endDate);
 
@@ -106,7 +107,9 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
             this.endDate = endDate;
         }
         if (startDate != null && endDate != null) {
-            if (endDate.before(startDate)) { throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
+            if (endDate.before(startDate)) {
+                throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
+            }
         }
 
         return actualChanges;

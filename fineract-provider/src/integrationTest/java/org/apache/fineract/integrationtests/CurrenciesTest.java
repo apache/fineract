@@ -73,7 +73,6 @@ public class CurrenciesTest {
         currenciestoUpdate.add("USD");
         currenciestoUpdate.add("INR");
 
-
         ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec, this.responseSpec,
                 currenciestoUpdate);
         Assertions.assertNotNull(currenciesOutput);

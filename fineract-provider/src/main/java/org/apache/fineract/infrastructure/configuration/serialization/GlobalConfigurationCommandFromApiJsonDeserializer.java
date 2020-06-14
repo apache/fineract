@@ -38,8 +38,8 @@ import org.springframework.stereotype.Component;
  * {@link UpdateGlobalConfigurationCommand}'s.
  */
 @Component
-public final class GlobalConfigurationCommandFromApiJsonDeserializer extends
-        AbstractFromApiJsonDeserializer<UpdateGlobalConfigurationCommand> {
+public final class GlobalConfigurationCommandFromApiJsonDeserializer
+        extends AbstractFromApiJsonDeserializer<UpdateGlobalConfigurationCommand> {
 
     /**
      * The parameters supported for this command.

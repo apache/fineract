@@ -39,24 +39,25 @@ public class OfficeData implements Serializable {
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedParents;
 
-    //import fields
+    // import fields
     private transient Integer rowIndex;
     private String locale;
     private String dateFormat;
 
-    public static OfficeData importInstance(final String name, final Long parentId, final LocalDate openingDate,final String externalId) {
+    public static OfficeData importInstance(final String name, final Long parentId, final LocalDate openingDate, final String externalId) {
         return new OfficeData(null, name, null, externalId, openingDate, null, parentId, null, null);
     }
+
     public void setImportFields(final Integer rowIndex, final String locale, final String dateFormat) {
         this.rowIndex = rowIndex;
         this.locale = locale;
         this.dateFormat = dateFormat;
     }
-    public static OfficeData testInstance(final Long id,final String name){
-        return new OfficeData(id,name,null,null,
-                null,null,null,null,
-                null);
+
+    public static OfficeData testInstance(final Long id, final String name) {
+        return new OfficeData(id, name, null, null, null, null, null, null, null);
     }
+
     public LocalDate getOpeningDate() {
         return openingDate;
     }

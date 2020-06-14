@@ -84,7 +84,7 @@ public class StaffTest {
         /** Long lastname test */
         map.put("lastname", Utils.randomNameGenerator("Doe_", 47));
         StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
-        map.put("lastname", Utils.randomNameGenerator("Doe_",4));
+        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
 
         /** Long mobileNo test */
         map.put("mobileNo", Utils.randomNameGenerator("num_", 47));
@@ -136,7 +136,7 @@ public class StaffTest {
     @Test
     public void testStaffListStatusActive() {
         List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
-        for(final Map<String, Object> staff : responseActive) {
+        for (final Map<String, Object> staff : responseActive) {
             Assertions.assertNotNull(staff.get("id"));
             Assertions.assertEquals(true, staff.get("isActive"));
         }
@@ -145,7 +145,7 @@ public class StaffTest {
     @Test
     public void testStaffListStatusInactive() {
         List<Map<String, Object>> responseInactive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
-        for(final Map<String, Object> staff : responseInactive) {
+        for (final Map<String, Object> staff : responseInactive) {
             Assertions.assertNotNull(staff.get("id"));
             Assertions.assertEquals(false, staff.get("isActive"));
         }

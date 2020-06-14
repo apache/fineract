@@ -32,18 +32,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "GLIMLOAN", action = "APPROVE")
 public class GLIMLoanApplicationApprovalCommandHandler implements NewCommandSourceHandler {
 
-     private final LoanApplicationWritePlatformService writePlatformService;
+    private final LoanApplicationWritePlatformService writePlatformService;
 
-        @Autowired
-        public GLIMLoanApplicationApprovalCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
-            this.writePlatformService = writePlatformService;
-        }
+    @Autowired
+    public GLIMLoanApplicationApprovalCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-        @Transactional
-        @Override
-        public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-            return this.writePlatformService.approveGLIMLoanAppication(command.entityId(), command);
-        }
+        return this.writePlatformService.approveGLIMLoanAppication(command.entityId(), command);
+    }
 
 }

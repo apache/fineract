@@ -26,21 +26,21 @@ import java.util.Set;
  * Created by Chirag Gupta on 08/12/17.
  */
 final class InterestRateChartSlabsApiResourceSwagger {
-    private InterestRateChartSlabsApiResourceSwagger() {
-    }
+
+    private InterestRateChartSlabsApiResourceSwagger() {}
 
     @ApiModel(value = "GetInterestRateChartsChartIdChartSlabsResponse")
     public final static class GetInterestRateChartsChartIdChartSlabsResponse {
-        private GetInterestRateChartsChartIdChartSlabsResponse() {
-        }
+
+        private GetInterestRateChartsChartIdChartSlabsResponse() {}
 
         final class GetInterestRateChartsChartIdChartSlabsIncentives {
-            private GetInterestRateChartsChartIdChartSlabsIncentives() {
-            }
+
+            private GetInterestRateChartsChartIdChartSlabsIncentives() {}
 
             final class GetInterestRateChartsChartIdChartSlabsEntityType {
-                private GetInterestRateChartsChartIdChartSlabsEntityType() {
-                }
+
+                private GetInterestRateChartsChartIdChartSlabsEntityType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -51,8 +51,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
             }
 
             final class GetInterestRateChartsChartIdChartSlabsAttributeName {
-                private GetInterestRateChartsChartIdChartSlabsAttributeName() {
-                }
+
+                private GetInterestRateChartsChartIdChartSlabsAttributeName() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -63,8 +63,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
             }
 
             final class GetInterestRateChartsChartIdChartSlabsConditionType {
-                private GetInterestRateChartsChartIdChartSlabsConditionType() {
-                }
+
+                private GetInterestRateChartsChartIdChartSlabsConditionType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -75,8 +75,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
             }
 
             final class GetInterestRateChartsChartIdChartSlabsIncentiveType {
-                private GetInterestRateChartsChartIdChartSlabsIncentiveType() {
-                }
+
+                private GetInterestRateChartsChartIdChartSlabsIncentiveType() {}
 
                 @ApiModelProperty(example = "3")
                 public Integer id;
@@ -117,12 +117,12 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
     @ApiModel(value = "PostInterestRateChartsChartIdChartSlabsRequest")
     public static final class PostInterestRateChartsChartIdChartSlabsRequest {
-        private PostInterestRateChartsChartIdChartSlabsRequest() {
-        }
+
+        private PostInterestRateChartsChartIdChartSlabsRequest() {}
 
         final class PostInterestRateChartsChartIdChartSlabsIncentives {
-            private PostInterestRateChartsChartIdChartSlabsIncentives() {
-            }
+
+            private PostInterestRateChartsChartIdChartSlabsIncentives() {}
 
             @ApiModelProperty(example = "2")
             public Integer entityType;
@@ -155,8 +155,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
     @ApiModel(value = "PostInterestRateChartsChartIdChartSlabsResponse")
     public final static class PostInterestRateChartsChartIdChartSlabsResponse {
-        private PostInterestRateChartsChartIdChartSlabsResponse() {
-        }
+
+        private PostInterestRateChartsChartIdChartSlabsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -164,8 +164,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
     @ApiModel(value = "PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest")
     public static final class PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest {
-        private PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest() {
-        }
+
+        private PutInterestRateChartsChartIdChartSlabsChartSlabIdRequest() {}
 
         @ApiModelProperty(example = "6")
         public Double annualInterestRate;
@@ -175,8 +175,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
     @ApiModel(value = "PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse")
     public static final class PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse {
-        private PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse() {
-        }
+
+        private PutInterestRateChartsChartIdChartSlabsChartSlabIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -185,8 +185,8 @@ final class InterestRateChartSlabsApiResourceSwagger {
 
     @ApiModel(value = "DeleteInterestRateChartsChartIdChartSlabsResponse")
     public final static class DeleteInterestRateChartsChartIdChartSlabsResponse {
-        private DeleteInterestRateChartsChartIdChartSlabsResponse() {
-        }
+
+        private DeleteInterestRateChartsChartIdChartSlabsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;

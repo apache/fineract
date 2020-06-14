@@ -110,9 +110,12 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,
-            final Boolean manualTransactionsAllowed, final Boolean disabled, JournalEntryAssociationParametersData associationParametersData) {
+            final Boolean manualTransactionsAllowed, final Boolean disabled,
+            JournalEntryAssociationParametersData associationParametersData) {
         if (accountClassification != null) {
-            if (!checkValidGLAccountType(accountClassification)) { throw new GLAccountInvalidClassificationException(accountClassification); }
+            if (!checkValidGLAccountType(accountClassification)) {
+                throw new GLAccountInvalidClassificationException(accountClassification);
+            }
         }
 
         if (usage != null) {
@@ -122,7 +125,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         final GLAccountMapper rm = new GLAccountMapper(associationParametersData);
         String sql = "select " + rm.schema();
         // append SQL statement for fetching account totals
-        if (associationParametersData!=null) {
+        if (associationParametersData != null) {
             if (associationParametersData.isRunningBalanceRequired()) {
                 sql = sql + " and gl_j.id in (select t1.id from (select t2.account_id, max(t2.id) as id from "
                         + "(select id, max(entry_date) as entry_date, account_id from acc_gl_journal_entry where is_running_balance_calculated = 1 "
@@ -133,8 +136,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         final Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
-        if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null)
-                || (manualTransactionsAllowed != null) || (disabled != null)) {
+        if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null) || (manualTransactionsAllowed != null)
+                || (disabled != null)) {
             filtersPresent = true;
             sql += " where";
         }
@@ -195,7 +198,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             }
         }
 
-        sql+=" ORDER BY gl_code ASC";
+        sql += " ORDER BY gl_code ASC";
 
         final Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
@@ -231,7 +234,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     @Override
     public List<GLAccountData> retrieveAllEnabledDetailGLAccounts() {
-        return retrieveAllGLAccounts(null, null, GLAccountUsage.DETAIL.getValue(), null, false, new JournalEntryAssociationParametersData());
+        return retrieveAllGLAccounts(null, null, GLAccountUsage.DETAIL.getValue(), null, false,
+                new JournalEntryAssociationParametersData());
     }
 
     private static boolean checkValidGLAccountType(final int type) {

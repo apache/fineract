@@ -31,7 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "PROVISIONJOURNALENTRIES", action = "CREATE")
 public class CreateProvisioningJournalEntriesRequestCommandHandler implements NewCommandSourceHandler {
 
-    private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService ;
+    private final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService;
+
     @Autowired
     public CreateProvisioningJournalEntriesRequestCommandHandler(
             final ProvisioningEntriesWritePlatformService provisioningEntriesWritePlatformService) {
@@ -41,7 +42,7 @@ public class CreateProvisioningJournalEntriesRequestCommandHandler implements Ne
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand jsonCommand) {
-        return this.provisioningEntriesWritePlatformService.createProvisioningJournalEntries(jsonCommand.entityId(), jsonCommand) ;
+        return this.provisioningEntriesWritePlatformService.createProvisioningJournalEntries(jsonCommand.entityId(), jsonCommand);
     }
 
 }

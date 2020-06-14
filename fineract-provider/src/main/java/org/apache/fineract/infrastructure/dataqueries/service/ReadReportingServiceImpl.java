@@ -91,8 +91,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public StreamingOutput retrieveReportCSV(final String name, final String type,
-            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+    public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
+            final boolean isSelfServiceUserReport) {
 
         return new StreamingOutput() {
 
@@ -173,8 +173,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public GenericResultsetData retrieveGenericResultset(final String name, final String type,
-            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+    public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams,
+            final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
         LOG.info("STARTING REPORT: {}   Type: {}", name, type);
@@ -208,8 +208,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
 
-        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
-                Integer.toString(isSelfServiceUserReport ? 1 : 0));
+        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}", Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
         sql = this.genericDataService.wrapSQL(sql);
 
@@ -234,13 +233,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
 
-        final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "' and self_service_user_report = ?";
+        final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName
+                + "' and self_service_user_report = ?";
         validateReportName(reportName);
         this.columnValidator.validateSqlInjection(sql, reportName);
 
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object [] {isSelfServiceUserReport});
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object[] { isSelfServiceUserReport });
 
         if (rs.next()) { return rs.getString("report_type"); }
         throw new ReportNotFoundException(reportName);
@@ -360,8 +360,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 if (reportParameters == null) {
                     reportParameters = new ArrayList<>();
                 }
-                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
-                        .getReportParameterName(), rpJoin.getParameterName()));
+                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(),
+                        rpJoin.getReportParameterName(), rpJoin.getParameterName()));
 
             } else {
                 if (firstReport) {
@@ -387,8 +387,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 if (rpJoin.getReportParameterId() != null) {
                     // report has at least one parameter
                     reportParameters = new ArrayList<>();
-                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
-                            .getReportParameterName(), rpJoin.getParameterName()));
+                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(),
+                            rpJoin.getReportParameterName(), rpJoin.getParameterName()));
                 } else {
                     reportParameters = null;
                 }
@@ -536,89 +536,85 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public ByteArrayOutputStream generatePentahoReportAsOutputStream(final String reportName, final String outputTypeParam, final Map<String, String> queryParams,
-            final Locale locale, final AppUser runReportAsUser, final StringBuilder errorLog) {
-        //This complete implementation should be moved to Pentaho Report Service
+    public ByteArrayOutputStream generatePentahoReportAsOutputStream(final String reportName, final String outputTypeParam,
+            final Map<String, String> queryParams, final Locale locale, final AppUser runReportAsUser, final StringBuilder errorLog) {
+        // This complete implementation should be moved to Pentaho Report
+        // Service
         /*
-        String outputType = "HTML";
-        if (StringUtils.isNotBlank(outputTypeParam)) {
-            outputType = outputTypeParam;
-        }
-
-        if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") || outputType.equalsIgnoreCase("XLS") || outputType
-                .equalsIgnoreCase("CSV"))) { throw new PlatformDataIntegrityException("error.msg.invalid.outputType",
-                "No matching Output Type: " + outputType); }
-
-        if (this.noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
-                "Pentaho is not enabled"); }
-
-        final String reportPath = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "pentahoReports" + File.separator
-                + reportName + ".prpt";
-        LOG.info("Report path: {}", reportPath);
-
-        // load report definition
-        final ResourceManager manager = new ResourceManager();
-        manager.registerDefaults();
-        Resource res;
-
-        try {
-            res = manager.createDirectly(reportPath, MasterReport.class);
-            final MasterReport masterReport = (MasterReport) res.getResource();
-            final DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
-
-            if (locale != null) {
-                reportEnvironment.setLocale(locale);
-            }
-            addParametersToReport(masterReport, queryParams, runReportAsUser, errorLog);
-
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            if ("PDF".equalsIgnoreCase(outputType)) {
-                PdfReportUtil.createPDF(masterReport, baos);
-                return baos;
-            }
-
-            if ("XLS".equalsIgnoreCase(outputType)) {
-                ExcelReportUtil.createXLS(masterReport, baos);
-                return baos;
-            }
-
-            if ("CSV".equalsIgnoreCase(outputType)) {
-                CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
-                return baos;
-            }
-
-            if ("HTML".equalsIgnoreCase(outputType)) {
-                HtmlReportUtil.createStreamHTML(masterReport, baos);
-                return baos;
-            }
-
-        } catch (final ResourceException e) {
-            errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ResourceException "
-                    + "exception: " + e.getMessage() + " ---------- ");
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        } catch (final ReportProcessingException e) {
-            errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ReportProcessingException "
-                    + "exception: " + e.getMessage() + " ---------- ");
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        } catch (final IOException e) {
-            errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw an IOException "
-                    + "exception: " + e.getMessage() + " ---------- ");
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        }
-
-        errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a PlatformDataIntegrityException "
-                + "exception: No matching Output Type: " + outputType + " ---------- ");
-        throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
-
-    */
-        return null ;
+         * String outputType = "HTML"; if
+         * (StringUtils.isNotBlank(outputTypeParam)) { outputType =
+         * outputTypeParam; }
+         *
+         * if (!(outputType.equalsIgnoreCase("HTML") ||
+         * outputType.equalsIgnoreCase("PDF") ||
+         * outputType.equalsIgnoreCase("XLS") || outputType
+         * .equalsIgnoreCase("CSV"))) { throw new
+         * PlatformDataIntegrityException("error.msg.invalid.outputType",
+         * "No matching Output Type: " + outputType); }
+         *
+         * if (this.noPentaho) { throw new
+         * PlatformDataIntegrityException("error.msg.no.pentaho",
+         * "Pentaho is not enabled", "Pentaho is not enabled"); }
+         *
+         * final String reportPath =
+         * FileSystemContentRepository.FINERACT_BASE_DIR + File.separator +
+         * "pentahoReports" + File.separator + reportName + ".prpt";
+         * LOG.info("Report path: {}", reportPath);
+         *
+         * // load report definition final ResourceManager manager = new
+         * ResourceManager(); manager.registerDefaults(); Resource res;
+         *
+         * try { res = manager.createDirectly(reportPath, MasterReport.class);
+         * final MasterReport masterReport = (MasterReport) res.getResource();
+         * final DefaultReportEnvironment reportEnvironment =
+         * (DefaultReportEnvironment) masterReport.getReportEnvironment();
+         *
+         * if (locale != null) { reportEnvironment.setLocale(locale); }
+         * addParametersToReport(masterReport, queryParams, runReportAsUser,
+         * errorLog);
+         *
+         * final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         *
+         * if ("PDF".equalsIgnoreCase(outputType)) {
+         * PdfReportUtil.createPDF(masterReport, baos); return baos; }
+         *
+         * if ("XLS".equalsIgnoreCase(outputType)) {
+         * ExcelReportUtil.createXLS(masterReport, baos); return baos; }
+         *
+         * if ("CSV".equalsIgnoreCase(outputType)) {
+         * CSVReportUtil.createCSV(masterReport, baos, "UTF-8"); return baos; }
+         *
+         * if ("HTML".equalsIgnoreCase(outputType)) {
+         * HtmlReportUtil.createStreamHTML(masterReport, baos); return baos; }
+         *
+         * } catch (final ResourceException e) { errorLog.
+         * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ResourceException "
+         * + "exception: " + e.getMessage() + " ---------- "); throw new
+         * PlatformDataIntegrityException("error.msg.reporting.error",
+         * e.getMessage()); } catch (final ReportProcessingException e) {
+         * errorLog.
+         * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ReportProcessingException "
+         * + "exception: " + e.getMessage() + " ---------- "); throw new
+         * PlatformDataIntegrityException("error.msg.reporting.error",
+         * e.getMessage()); } catch (final IOException e) { errorLog.
+         * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw an IOException "
+         * + "exception: " + e.getMessage() + " ---------- "); throw new
+         * PlatformDataIntegrityException("error.msg.reporting.error",
+         * e.getMessage()); }
+         *
+         * errorLog.
+         * append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a PlatformDataIntegrityException "
+         * + "exception: No matching Output Type: " + outputType +
+         * " ---------- "); throw new
+         * PlatformDataIntegrityException("error.msg.invalid.outputType",
+         * "No matching Output Type: " + outputType);
+         *
+         */
+        return null;
     }
 
     private void validateReportName(final String name) {
 
-        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
-            throw new SQLInjectionException();
-        }
+        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) { throw new SQLInjectionException(); }
     }
 }

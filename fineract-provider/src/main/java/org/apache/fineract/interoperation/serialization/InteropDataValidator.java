@@ -47,11 +47,12 @@ public class InteropDataValidator {
     }
 
     public InteropIdentifierRequestData validateAndParseCreateIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                                          String subIdOrType, JsonCommand command) {
+            String subIdOrType, JsonCommand command) {
         final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("interoperation.identifier");
         JsonObject element = extractJsonObject(command);
 
-        InteropIdentifierRequestData result = InteropIdentifierRequestData.validateAndParse(dataValidator, idType, idValue, subIdOrType, element, jsonHelper);
+        InteropIdentifierRequestData result = InteropIdentifierRequestData.validateAndParse(dataValidator, idType, idValue, subIdOrType,
+                element, jsonHelper);
         throwExceptionIfValidationWarningsExist(dataValidator);
 
         return result;
@@ -93,9 +94,7 @@ public class InteropDataValidator {
 
     private JsonObject extractJsonObject(JsonCommand command) {
         String json = command.json();
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final JsonElement element = jsonHelper.parse(json);
         return element.getAsJsonObject();
@@ -103,8 +102,8 @@ public class InteropDataValidator {
 
     private void throwExceptionIfValidationWarningsExist(DataValidatorBuilder dataValidator) {
         if (dataValidator.hasError()) {
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                    "Validation errors exist.", dataValidator.getDataValidationErrors());
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidator.getDataValidationErrors());
         }
     }
 }

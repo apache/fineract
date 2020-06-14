@@ -27,18 +27,17 @@ import java.util.Set;
  */
 
 final class SelfAccountTransferApiResourceSwagger {
-    private SelfAccountTransferApiResourceSwagger() {
-    }
 
+    private SelfAccountTransferApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountTransferTemplateResponse")
     public final static class GetAccountTransferTemplateResponse {
-        private GetAccountTransferTemplateResponse() {
-        }
+
+        private GetAccountTransferTemplateResponse() {}
 
         final class GetAccountOptions {
-            private GetAccountOptions() {
-            }
+
+            private GetAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -51,8 +50,8 @@ final class SelfAccountTransferApiResourceSwagger {
         public Set<GetAccountOptions> accountTypeOptions;
 
         final class GetFromAccountOptions {
-            private GetFromAccountOptions() {
-            }
+
+            private GetFromAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer accountId;
@@ -73,8 +72,8 @@ final class SelfAccountTransferApiResourceSwagger {
         public Set<GetFromAccountOptions> fromAccountTypeOptions;
 
         final class GetToAccountOptions {
-            private GetToAccountOptions() {
-            }
+
+            private GetToAccountOptions() {}
 
             @ApiModelProperty(example = "2")
             public Integer accountId;
@@ -97,8 +96,8 @@ final class SelfAccountTransferApiResourceSwagger {
 
     @ApiModel(value = "PostNewTransferRequest")
     public final static class PostNewTransferRequest {
-        private PostNewTransferRequest() {
-        }
+
+        private PostNewTransferRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer fromOfficeId;
@@ -131,8 +130,8 @@ final class SelfAccountTransferApiResourceSwagger {
 
     @ApiModel(value = "PostNewTransferResponse")
     public final static class PostNewTransferResponse {
-        private PostNewTransferResponse() {
-        }
+
+        private PostNewTransferResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer savingsId;

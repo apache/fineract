@@ -74,7 +74,7 @@ public class AccountTransferDetails extends AbstractPersistableCustom {
     @Column(name = "transfer_type")
     private Integer transferType;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountTransferDetails", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountTransferDetails", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<AccountTransferTransaction> accountTransferTransactions = new ArrayList<>();
 
     @OneToOne(mappedBy = "accountTransferDetails", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -95,9 +95,8 @@ public class AccountTransferDetails extends AbstractPersistableCustom {
                 transferType, null);
     }
 
-    public static AccountTransferDetails loanTosavingsTransfer(final Office fromOffice, final Client fromClient,
-            final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
-            Integer transferType) {
+    public static AccountTransferDetails loanTosavingsTransfer(final Office fromOffice, final Client fromClient, final Loan fromLoanAccount,
+            final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount, Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, toSavingsAccount, null,
                 transferType, null);
     }
@@ -154,8 +153,8 @@ public class AccountTransferDetails extends AbstractPersistableCustom {
         return AccountTransferType.fromInt(this.transferType);
     }
 
-    public static AccountTransferDetails loanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice, Client toClient,
-            Loan toLoanAccount, Integer transferType) {
+    public static AccountTransferDetails loanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice,
+            Client toClient, Loan toLoanAccount, Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
                 transferType, null);
     }

@@ -73,8 +73,9 @@ public final class GoogleGsonSerializerHelper {
             final Set<String> differentParametersDetectedSet = new HashSet<>(responseParameters);
             differentParametersDetectedSet.removeAll(supportedParameters);
 
-            if (!differentParametersDetectedSet.isEmpty()) { throw new UnsupportedParameterException(new ArrayList<>(
-                    differentParametersDetectedSet)); }
+            if (!differentParametersDetectedSet.isEmpty()) {
+                throw new UnsupportedParameterException(new ArrayList<>(differentParametersDetectedSet));
+            }
 
             parameterNamesToSkip.addAll(supportedParameters);
             parameterNamesToSkip.removeAll(responseParameters);

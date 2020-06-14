@@ -49,80 +49,80 @@ public class LoanWorkbookPopulatorTest {
     private RequestSpecification requestSpec;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
+
     @Test
     public void testLoanWorkbookPopulate() throws IOException {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
+        // in order to populate helper sheets
+        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
-        //in order to populate helper sheets
-        ClientHelper clientHelper=new ClientHelper(requestSpec,responseSpec);
-        Integer outcome_client_creation=clientHelper.createClient(requestSpec,responseSpec);
+        // in order to populate helper sheets
+        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+        Integer outcome_client_creation = clientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
-        //in order to populate helper sheets
-        GroupHelper groupHelper=new GroupHelper(requestSpec,responseSpec);
-        Integer outcome_group_creation=groupHelper.createGroup(requestSpec,responseSpec,true);
+        // in order to populate helper sheets
+        GroupHelper groupHelper = new GroupHelper(requestSpec, responseSpec);
+        Integer outcome_group_creation = groupHelper.createGroup(requestSpec, responseSpec, true);
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
-        //in order to populate helper sheets
-        StaffHelper staffHelper=new StaffHelper();
-        Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
+        // in order to populate helper sheets
+        StaffHelper staffHelper = new StaffHelper();
+        Integer outcome_staff_creation = staffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
-        LoanTransactionHelper loanTransactionHelper=new LoanTransactionHelper(requestSpec,responseSpec);
-        LoanProductTestBuilder loanProductTestBuilder=new LoanProductTestBuilder();
-        String jsonLoanProduct=loanProductTestBuilder.build(null);
-        Integer outcome_lp_creaion=loanTransactionHelper.getLoanProductId(jsonLoanProduct);
+        LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder();
+        String jsonLoanProduct = loanProductTestBuilder.build(null);
+        Integer outcome_lp_creaion = loanTransactionHelper.getLoanProductId(jsonLoanProduct);
         Assertions.assertNotNull(outcome_lp_creaion, "Could not create Loan Product");
 
-        FundsResourceHandler fundsResourceHandler=new FundsResourceHandler();
-        String jsonFund="{\n" +
-                "\t\"name\": \""+Utils.randomNameGenerator("Fund_Name",9)+"\"\n" +
-                "}";
-        Integer outcome_fund_creation=fundsResourceHandler.createFund(jsonFund,requestSpec,responseSpec);
+        FundsResourceHandler fundsResourceHandler = new FundsResourceHandler();
+        String jsonFund = "{\n" + "\t\"name\": \"" + Utils.randomNameGenerator("Fund_Name", 9) + "\"\n" + "}";
+        Integer outcome_fund_creation = fundsResourceHandler.createFund(jsonFund, requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
-        PaymentTypeHelper paymentTypeHelper=new PaymentTypeHelper();
+        PaymentTypeHelper paymentTypeHelper = new PaymentTypeHelper();
         String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
         Boolean isCashPayment = true;
         Integer position = 1;
-        Integer outcome_payment_creation= paymentTypeHelper.createPaymentType(requestSpec, responseSpec,name,description,isCashPayment,position);
+        Integer outcome_payment_creation = paymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment,
+                position);
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
-        Workbook workbook=loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
+        Workbook workbook = loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
 
-        Sheet officeSheet=workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Row firstOfficeRow=officeSheet.getRow(1);
+        Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+        Row firstOfficeRow = officeSheet.getRow(1);
         Assertions.assertNotNull(firstOfficeRow.getCell(1), "No offices found ");
 
-        Sheet clientSheet=workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
-        Row firstClientRow=clientSheet.getRow(1);
+        Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
+        Row firstClientRow = clientSheet.getRow(1);
         Assertions.assertNotNull(firstClientRow.getCell(1), "No clients found ");
 
-        Sheet groupSheet=workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
-        Row firstGroupRow=groupSheet.getRow(1);
+        Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
+        Row firstGroupRow = groupSheet.getRow(1);
         Assertions.assertNotNull(firstGroupRow.getCell(1), "No groups found ");
 
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
-        Row firstStaffRow=staffSheet.getRow(1);
+        Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
+        Row firstStaffRow = staffSheet.getRow(1);
         Assertions.assertNotNull(firstStaffRow.getCell(1), "No staff found ");
 
-        Sheet productSheet=workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
-        Row firstProductRow=productSheet.getRow(1);
+        Sheet productSheet = workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
+        Row firstProductRow = productSheet.getRow(1);
         Assertions.assertNotNull(firstProductRow.getCell(1), "No products found ");
 
-        Sheet extrasSheet=workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME);
-        Row firstExtrasRow=extrasSheet.getRow(1);
+        Sheet extrasSheet = workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME);
+        Row firstExtrasRow = extrasSheet.getRow(1);
         Assertions.assertNotNull(firstExtrasRow.getCell(1), "No Extras found ");
     }
 }

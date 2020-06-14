@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class ExternalServicesConfigurationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(ExternalServicesConfigurationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -65,11 +66,11 @@ public class ExternalServicesConfigurationTest {
             String value = null;
             if (name.equals(configName)) {
                 value = (String) externalServicesConfig.get(configIndex).get("value");
-                if(value == null){
+                if (value == null) {
                     value = "testnull";
                 }
                 String newValue = "test";
-                LOG.info( "{} : {}",name, value);
+                LOG.info("{} : {}", name, value);
                 HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "S3", name, newValue);
                 Assertions.assertNotNull(arrayListValue.get("value"));
@@ -93,11 +94,11 @@ public class ExternalServicesConfigurationTest {
             String value = null;
             if (name.equals(configName)) {
                 value = (String) externalServicesConfig.get(configIndex).get("value");
-                if(value == null){
+                if (value == null) {
                     value = "testnull";
                 }
                 String newValue = "test";
-                LOG.info("{} : {}",name,value);
+                LOG.info("{} : {}", name, value);
                 HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
                         responseSpec, "SMTP", name, newValue);
                 Assertions.assertNotNull(arrayListValue.get("value"));

@@ -46,7 +46,7 @@ public class NotificationGeneratorReadRepositoryWrapperImpl implements Notificat
 
     @Override
     public void delete(Long id) {
-       this.notificationRepository.deleteById(id);
+        this.notificationRepository.deleteById(id);
     }
 
 }

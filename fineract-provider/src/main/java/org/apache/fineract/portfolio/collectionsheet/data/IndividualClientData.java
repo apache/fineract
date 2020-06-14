@@ -98,9 +98,7 @@ public class IndividualClientData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof IndividualClientData)) {
-            return false;
-        }
+        if (!(obj instanceof IndividualClientData)) { return false; }
         final IndividualClientData clientData = (IndividualClientData) obj;
         return clientData.clientId.compareTo(this.clientId) == 0;
     }

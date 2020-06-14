@@ -24,15 +24,20 @@ public class CollateralCannotBeUpdatedException extends AbstractPlatformDomainRu
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
     public static enum LoanCollateralCannotBeUpdatedReason {
+
         LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { return "This collateral cannot be updated as the loan it is associated with is not in submitted and pending approval stage"; }
+            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+                return "This collateral cannot be updated as the loan it is associated with is not in submitted and pending approval stage";
+            }
             return name().toString();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { return "error.msg.loan.collateral.associated.loan.not.in.submitted.and.pending.approval.stage"; }
+            if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+                return "error.msg.loan.collateral.associated.loan.not.in.submitted.and.pending.approval.stage";
+            }
             return name().toString();
         }
     }

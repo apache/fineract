@@ -48,18 +48,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TemplateMergeService {
-    private final static Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
 
+    private final static Logger LOG = LoggerFactory.getLogger(TemplateMergeService.class);
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
     private String authToken;
 
-
     public void setAuthToken(final String authToken) {
-        this.authToken =  authToken;
+        this.authToken = authToken;
     }
-
 
     public String compile(final Template template, final Map<String, Object> scopes) throws IOException {
         this.scopes = scopes;
@@ -122,6 +120,7 @@ public class TemplateMergeService {
             final String password = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
 
             Authenticator.setDefault(new Authenticator() {
+
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(name, password.toCharArray());
@@ -166,7 +165,7 @@ public class TemplateMergeService {
                 try {
                     br.close();
                 } catch (final IOException e) {
-                    LOG.error("Problem occurred in getStringFromInputStream function",e);
+                    LOG.error("Problem occurred in getStringFromInputStream function", e);
                 }
             }
         }
@@ -178,13 +177,14 @@ public class TemplateMergeService {
     private void expandMapArrays(Object value) {
         if (value instanceof Map) {
             Map<String, Object> valueAsMap = (Map<String, Object>) value;
-            //Map<String, Object> newValue = null;
-            Map<String,Object> valueAsMap_second = new HashMap<>();
+            // Map<String, Object> newValue = null;
+            Map<String, Object> valueAsMap_second = new HashMap<>();
             for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
                 Object valueAsMapEntryValue = valueAsMapEntry.getValue();
                 if (valueAsMapEntryValue instanceof Map) { // JSON Object
                     expandMapArrays(valueAsMapEntryValue);
-                } else if (valueAsMapEntryValue instanceof Iterable) { // JSON Array
+                } else if (valueAsMapEntryValue instanceof Iterable) { // JSON
+                                                                       // Array
                     Iterable<Object> valueAsMapEntryValueIterable = (Iterable<Object>) valueAsMapEntryValue;
                     String valueAsMapEntryKey = valueAsMapEntry.getKey();
                     int i = 0;

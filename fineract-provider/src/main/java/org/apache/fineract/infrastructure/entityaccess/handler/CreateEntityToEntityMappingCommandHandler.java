@@ -41,7 +41,7 @@ public class CreateEntityToEntityMappingCommandHandler implements NewCommandSour
     @Override
     @Transactional
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.fineractEntityAccessWriteService.createEntityToEntityMapping(command.entityId(),command);
+        return this.fineractEntityAccessWriteService.createEntityToEntityMapping(command.entityId(), command);
     }
 
 }

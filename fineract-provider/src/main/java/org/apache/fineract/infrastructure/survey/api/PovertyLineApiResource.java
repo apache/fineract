@@ -49,7 +49,8 @@ public class PovertyLineApiResource {
 
     @Autowired
     PovertyLineApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer,
-            final PovertyLineService readService, final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer) {
+            final PovertyLineService readService,
+            final DefaultToApiJsonSerializer<LikeliHoodPovertyLineData> likelihoodToApiJsonSerializer) {
 
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;

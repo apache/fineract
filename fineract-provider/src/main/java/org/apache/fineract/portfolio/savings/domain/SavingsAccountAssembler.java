@@ -129,7 +129,6 @@ public class SavingsAccountAssembler {
         Staff fieldOfficer = null;
         AccountType accountType = AccountType.INVALID;
 
-
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
@@ -152,13 +151,11 @@ public class SavingsAccountAssembler {
             accountType = AccountType.JLG;
         }
 
-        if((Boolean)command.booleanPrimitiveValueOfParameterNamed("isGSIM")!=null)
-        {
-             LOG.info("setting system to gsim");
-             if(command.booleanPrimitiveValueOfParameterNamed("isGSIM"))
-             {
-                  accountType = AccountType.GSIM;
-             }
+        if ((Boolean) command.booleanPrimitiveValueOfParameterNamed("isGSIM") != null) {
+            LOG.info("setting system to gsim");
+            if (command.booleanPrimitiveValueOfParameterNamed("isGSIM")) {
+                accountType = AccountType.GSIM;
+            }
         }
 
         final Long fieldOfficerId = this.fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
@@ -286,7 +283,7 @@ public class SavingsAccountAssembler {
         boolean withHoldTax = product.withHoldTax();
         if (command.parameterExists(withHoldTaxParamName)) {
             withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
-            if(withHoldTax && product.getTaxGroup()  == null){
+            if (withHoldTax && product.getTaxGroup() == null) {
                 throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
             }
         }
@@ -311,7 +308,6 @@ public class SavingsAccountAssembler {
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         return account;
     }
-
 
     public void setHelpers(final SavingsAccount account) {
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);

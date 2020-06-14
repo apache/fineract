@@ -67,8 +67,7 @@ public final class CollateralCommandFromApiJsonDeserializer extends AbstractFrom
         final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed(CollateralJSONinputParams.COLLATERAL_TYPE_ID.getValue(),
                 element);
         final String description = this.fromApiJsonHelper.extractStringNamed(CollateralJSONinputParams.DESCRIPTION.getValue(), element);
-        final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed(CollateralJSONinputParams.VALUE.getValue(), element,
-                locale);
+        final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed(CollateralJSONinputParams.VALUE.getValue(), element, locale);
 
         return new CollateralCommand(collateralTypeId, value, description);
     }

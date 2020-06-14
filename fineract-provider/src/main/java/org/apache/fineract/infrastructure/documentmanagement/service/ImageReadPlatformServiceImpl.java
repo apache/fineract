@@ -63,7 +63,8 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
         }
 
         public String schema(String entityType) {
-            StringBuilder builder = new StringBuilder("image.id as id, image.location as location, image.storage_type_enum as storageType ");
+            StringBuilder builder = new StringBuilder(
+                    "image.id as id, image.location as location, image.storage_type_enum as storageType ");
             if (EntityTypeForImages.CLIENTS.toString().equalsIgnoreCase(entityType)) {
                 builder.append(" from m_image image , m_client client " + " where client.image_id = image.id and client.id=?");
             } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
@@ -102,8 +103,10 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
             final ImageData result = contentRepository.fetchImage(imageData);
 
-          //Once we read content EofSensorInputStream, the wrappedStream object is becoming null. So further image source is becoming null
-            //For Amazon S3. If file is not present, already S3ContentRepository would have thrown this exception.
+            // Once we read content EofSensorInputStream, the wrappedStream
+            // object is becoming null. So further image source is becoming null
+            // For Amazon S3. If file is not present, already
+            // S3ContentRepository would have thrown this exception.
             if (!result.available()) { throw new ImageNotFoundException(entityType, entityId); }
 
             return result;

@@ -34,7 +34,7 @@ public interface ScheduledDateGenerator {
 
     LocalDate generateNextRepaymentDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms, boolean isFirstRepayment);
 
-    AdjustedDateDetailsDTO  adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms,
+    AdjustedDateDetailsDTO adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms,
             final HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);

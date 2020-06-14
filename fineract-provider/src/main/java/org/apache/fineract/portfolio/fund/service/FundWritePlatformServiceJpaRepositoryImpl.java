@@ -73,10 +73,10 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
         } catch (final DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleFundDataIntegrityIssues(command, throwable, dve);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -90,8 +90,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final Fund fund = this.fundRepository.findById(fundId)
-                    .orElseThrow(() -> new FundNotFoundException(fundId));
+            final Fund fund = this.fundRepository.findById(fundId).orElseThrow(() -> new FundNotFoundException(fundId));
 
             final Map<String, Object> changes = fund.update(command);
             if (!changes.isEmpty()) {
@@ -102,10 +101,10 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
         } catch (final DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleFundDataIntegrityIssues(command, throwable, dve);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -113,11 +112,11 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleFundDataIntegrityIssues(final JsonCommand command,  final Throwable realCause, final Exception dve) {
+    private void handleFundDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("fund_externalid_org")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
-            throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '" + externalId
-                    + "' already exists", "externalId", externalId);
+            throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId",
+                    "A fund with external id '" + externalId + "' already exists", "externalId", externalId);
         } else if (realCause.getMessage().contains("fund_name_org")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.name", "A fund with name '" + name + "' already exists",

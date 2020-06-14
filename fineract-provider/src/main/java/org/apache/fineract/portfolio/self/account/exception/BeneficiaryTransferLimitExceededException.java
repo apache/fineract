@@ -23,8 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class BeneficiaryTransferLimitExceededException extends AbstractPlatformDomainRuleException {
 
     public BeneficiaryTransferLimitExceededException() {
-        super("error.msg.beneficiary.transfer.amount.limit.for.beneficiary.exceeded",
-                "Transfer amount limit for beneficiary exceeded");
+        super("error.msg.beneficiary.transfer.amount.limit.for.beneficiary.exceeded", "Transfer amount limit for beneficiary exceeded");
     }
 
 }

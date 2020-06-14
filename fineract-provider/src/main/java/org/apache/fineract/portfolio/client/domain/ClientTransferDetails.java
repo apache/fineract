@@ -55,12 +55,10 @@ public class ClientTransferDetails extends AbstractPersistableCustom {
     @Column(name = "submitted_by", nullable = false)
     private Long submittedBy;
 
-    protected ClientTransferDetails() {
-    }
+    protected ClientTransferDetails() {}
 
-    private ClientTransferDetails(final Long clientId, final Long fromOfficeId, final Long toOfficeId,
-            final Date proposedTransferDate, final Integer transferEventType, final Date submittedOn,
-            final Long submittedBy) {
+    private ClientTransferDetails(final Long clientId, final Long fromOfficeId, final Long toOfficeId, final Date proposedTransferDate,
+            final Integer transferEventType, final Date submittedOn, final Long submittedBy) {
         this.clientId = clientId;
         this.fromOfficeId = fromOfficeId;
         this.toOfficeId = toOfficeId;
@@ -71,10 +69,9 @@ public class ClientTransferDetails extends AbstractPersistableCustom {
     }
 
     public static ClientTransferDetails instance(final Long clientId, final Long fromOfficeId, final Long toOfficeId,
-            final Date proposedTransferDate, final Integer transferEventType, final Date submittedOn,
-            final Long submittedBy) {
-        return new ClientTransferDetails(clientId, fromOfficeId, toOfficeId, proposedTransferDate, transferEventType,
-                submittedOn, submittedBy);
+            final Date proposedTransferDate, final Integer transferEventType, final Date submittedOn, final Long submittedBy) {
+        return new ClientTransferDetails(clientId, fromOfficeId, toOfficeId, proposedTransferDate, transferEventType, submittedOn,
+                submittedBy);
 
     }
 

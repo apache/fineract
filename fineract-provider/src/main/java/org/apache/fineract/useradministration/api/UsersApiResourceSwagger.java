@@ -29,15 +29,18 @@ import org.apache.fineract.useradministration.data.RoleData;
  * Created by sanyam on 23/8/17.
  */
 final class UsersApiResourceSwagger {
+
     private UsersApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetUsersResponse")
     public static final class GetUsersResponse {
+
         private GetUsersResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "mifos")
@@ -61,9 +64,11 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "GetUsersUserIdResponse")
     public static final class GetUsersUserIdResponse {
+
         private GetUsersUserIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "mifos")
@@ -88,9 +93,11 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "GetUsersTemplateResponse")
     public static final class GetUsersTemplateResponse {
+
         private GetUsersTemplateResponse() {
 
         }
+
         public Collection<OfficeData> allowedOffices;
         public Collection<RoleData> availableRoles;
         public Collection<RoleData> selfServiceRoles;
@@ -98,9 +105,11 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "PostUsersRequest")
     public static final class PostUsersRequest {
+
         private PostUsersRequest() {
 
         }
+
         @ApiModelProperty(example = "newuser")
         public String username;
         @ApiModelProperty(example = "Test")
@@ -123,9 +132,11 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "PostUsersResponse")
     public static final class PostUsersResponse {
+
         private PostUsersResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "11")
@@ -134,9 +145,11 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "PutUsersUserIdRequest")
     public static final class PutUsersUserIdRequest {
+
         private PutUsersUserIdRequest() {
 
         }
+
         @ApiModelProperty(example = "Test")
         public String firstname;
         @ApiModelProperty(example = "window75")
@@ -147,18 +160,23 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "PutUsersUserIdResponse")
     public static final class PutUsersUserIdResponse {
+
         private PutUsersUserIdResponse() {
 
         }
+
         final class PutUsersUserIdResponseChanges {
+
             private PutUsersUserIdResponseChanges() {
 
             }
+
             @ApiModelProperty(example = "Test")
             public String firstname;
             @ApiModelProperty(example = "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51")
             public String passwordEncoded;
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "11")
@@ -168,14 +186,18 @@ final class UsersApiResourceSwagger {
 
     @ApiModel(value = "DeleteUsersUserIdResponse")
     public static final class DeleteUsersUserIdResponse {
+
         private DeleteUsersUserIdResponse() {
 
         }
+
         final class DeleteUsersUserIdResponseChanges {
+
             private DeleteUsersUserIdResponseChanges() {
 
             }
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "11")

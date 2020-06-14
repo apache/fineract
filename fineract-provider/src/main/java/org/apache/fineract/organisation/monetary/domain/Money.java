@@ -240,11 +240,13 @@ public class Money implements Comparable<Money> {
         final BigDecimal newAmount = this.amount.multiply(percentage).divide(BigDecimal.valueOf(100), roundingMode);
         return Money.of(monetaryCurrency(), newAmount);
     }
+
     @Override
     public int compareTo(final Money other) {
         final Money otherMoney = other;
-        if (this.currencyCode
-                .equals(otherMoney.currencyCode) == false) { throw new UnsupportedOperationException("currencies arent different"); }
+        if (this.currencyCode.equals(otherMoney.currencyCode) == false) {
+            throw new UnsupportedOperationException("currencies arent different");
+        }
         return this.amount.compareTo(otherMoney.amount);
     }
 

@@ -35,16 +35,22 @@ public class EmailMessageWithAttachmentData {
         this.attachments = attachments;
     }
 
-
-    public static EmailMessageWithAttachmentData createNew (final String to, final String text, final String subject, final List<File> attachments){
-        return new EmailMessageWithAttachmentData(to,text,subject,attachments);
+    public static EmailMessageWithAttachmentData createNew(final String to, final String text, final String subject,
+            final List<File> attachments) {
+        return new EmailMessageWithAttachmentData(to, text, subject, attachments);
     }
 
-    public String getTo() {return this.to;}
+    public String getTo() {
+        return this.to;
+    }
 
-    public String getText() {return this.text;}
+    public String getText() {
+        return this.text;
+    }
 
-    public String getSubject() {return this.subject;}
+    public String getSubject() {
+        return this.subject;
+    }
 
     public List<File> getAttachments() {
         return this.attachments;

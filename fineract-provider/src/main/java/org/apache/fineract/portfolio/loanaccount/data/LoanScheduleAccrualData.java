@@ -174,20 +174,16 @@ public class LoanScheduleAccrualData {
         this.dueDatePenaltyIncome = dueDatePenaltyIncome;
     }
 
-
     public BigDecimal getWaivedInterestIncome() {
         return this.waivedInterestIncome;
     }
 
-
-    public BigDecimal getAccruableIncome () {
+    public BigDecimal getAccruableIncome() {
         return this.accruableIncome;
     }
 
-
-    public void updateAccruableIncome (BigDecimal accruableIncome ) {
-        this.accruableIncome = accruableIncome ;
+    public void updateAccruableIncome(BigDecimal accruableIncome) {
+        this.accruableIncome = accruableIncome;
     }
-
 
 }

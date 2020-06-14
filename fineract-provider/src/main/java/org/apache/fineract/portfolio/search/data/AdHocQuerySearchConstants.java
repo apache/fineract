@@ -46,12 +46,12 @@ public interface AdHocQuerySearchConstants {
     public static final String createDateOption = "createdDate";
     public static final String disbursalDateOption = "disbursalDate";
 
-    public static final String allLoanStatusOption= "all";
-    public static final String activeLoanStatusOption= "active";
-    public static final String overpaidLoanStatusOption= "overpaid";
-    public static final String arrearsLoanStatusOption= "arrears";
-    public static final String closedLoanStatusOption= "closed";
-    public static final String writeoffLoanStatusOption= "writeoff";
+    public static final String allLoanStatusOption = "all";
+    public static final String activeLoanStatusOption = "active";
+    public static final String overpaidLoanStatusOption = "overpaid";
+    public static final String arrearsLoanStatusOption = "arrears";
+    public static final String closedLoanStatusOption = "closed";
+    public static final String writeoffLoanStatusOption = "writeoff";
 
     public static final Object[] entityTypeOptions = { "clients", "groups", "loans", "clientIdentifiers" };
 

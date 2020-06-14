@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HookIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(HookIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -78,8 +79,8 @@ public class HookIntegrationTest {
                     final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
                     final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
                     Assertions.assertEquals(createdOfficeID, notificationOfficeId,
-                        "Equality check for created officeId and hook received payload officeId");
-                    LOG.info("Notification Office Id - {}" , notificationOfficeId);
+                            "Equality check for created officeId and hook received payload officeId");
+                    LOG.info("Notification Office Id - {}", notificationOfficeId);
                     i = 6;
                 } catch (Exception e) {
                     TimeUnit.SECONDS.sleep(3);
@@ -97,20 +98,20 @@ public class HookIntegrationTest {
     }
 
     @Test
-    public void createUpdateAndDeleteHook(){
+    public void createUpdateAndDeleteHook() {
         final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
         final String updateURL = "http://localhost";
 
         Long hookId = this.hookHelper.createHook(payloadURL).longValue();
         Assertions.assertNotNull(hookId);
         this.hookHelper.verifyHookCreatedOnServer(hookId);
-        LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}",hookId);
+        LOG.info("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK------------------------- {}", hookId);
         this.hookHelper.updateHook(updateURL, hookId);
         this.hookHelper.verifyUpdateHook(updateURL, hookId);
-        LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}",hookId);
+        LOG.info("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK------------------------- {}", hookId);
         this.hookHelper.deleteHook(hookId);
         this.hookHelper.verifyDeleteHook(hookId);
-        LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}",hookId);
+        LOG.info("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK------------------------- {}", hookId);
 
     }
 }

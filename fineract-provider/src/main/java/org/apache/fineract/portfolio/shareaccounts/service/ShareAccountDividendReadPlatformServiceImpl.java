@@ -48,8 +48,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
     private final PaginationHelper<ShareAccountDividendData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public ShareAccountDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+    public ShareAccountDividendReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }

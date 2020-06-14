@@ -56,8 +56,7 @@ public class SelfShareProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveProduct(@QueryParam(ShareAccountApiConstants.clientid_paramname) final Long clientId,
-            @PathParam("productId") final Long productId, @PathParam("type") final String productType,
-            @Context final UriInfo uriInfo) {
+            @PathParam("productId") final Long productId, @PathParam("type") final String productType, @Context final UriInfo uriInfo) {
         this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
         return this.productsApiResource.retrieveProduct(productId, ShareAccountApiConstants.shareEntityType, uriInfo);
 
@@ -67,11 +66,9 @@ public class SelfShareProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllProducts(@QueryParam(ShareAccountApiConstants.clientid_paramname) final Long clientId,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit, @Context final UriInfo uriInfo) {
         this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
-        return this.productsApiResource.retrieveAllProducts(ShareAccountApiConstants.shareEntityType, offset, limit,
-                uriInfo);
+        return this.productsApiResource.retrieveAllProducts(ShareAccountApiConstants.shareEntityType, offset, limit, uriInfo);
 
     }
 

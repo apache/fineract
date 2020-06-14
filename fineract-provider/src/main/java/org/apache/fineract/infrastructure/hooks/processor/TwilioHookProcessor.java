@@ -43,58 +43,46 @@ import retrofit.Callback;
 
 @Service
 public class TwilioHookProcessor implements HookProcessor {
+
     private final static Logger LOG = LoggerFactory.getLogger(TwilioHookProcessor.class);
     private final HookConfigurationRepository hookConfigurationRepository;
     private final TemplateMergeService templateMergeService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
 
     @Autowired
-    public TwilioHookProcessor(
-            final HookConfigurationRepository hookConfigurationRepository,
-            final TemplateMergeService templateMergeService,
-            final ClientRepositoryWrapper clientRepositoryWrapper) {
+    public TwilioHookProcessor(final HookConfigurationRepository hookConfigurationRepository,
+            final TemplateMergeService templateMergeService, final ClientRepositoryWrapper clientRepositoryWrapper) {
         this.hookConfigurationRepository = hookConfigurationRepository;
         this.templateMergeService = templateMergeService;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
     }
 
     @Override
-    public void process(final Hook hook,
-            @SuppressWarnings("unused") final AppUser appUser,
-            final String payload, final String entityName,
-            final String actionName, final String tenantIdentifier,
-            final String authToken) {
+    public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,
+            final String actionName, final String tenantIdentifier, final String authToken) {
 
-        final SmsProviderData smsProviderData = new SmsProviderData(
-                hook.getHookConfig());
+        final SmsProviderData smsProviderData = new SmsProviderData(hook.getHookConfig());
 
-        sendRequest(smsProviderData, payload, entityName, actionName,
-                tenantIdentifier, authToken, hook);
+        sendRequest(smsProviderData, payload, entityName, actionName, tenantIdentifier, authToken, hook);
     }
 
     @SuppressWarnings("unchecked")
-    private void sendRequest(final SmsProviderData smsProviderData,
-            final String payload, String entityName, String actionName,
-            final String tenantIdentifier, final String authToken,
-            final Hook hook) {
+    private void sendRequest(final SmsProviderData smsProviderData, final String payload, String entityName, String actionName,
+            final String tenantIdentifier, final String authToken, final Hook hook) {
 
-        final WebHookService service = ProcessorHelper
-                .createWebHookService(smsProviderData.getUrl());
+        final WebHookService service = ProcessorHelper.createWebHookService(smsProviderData.getUrl());
 
         @SuppressWarnings("rawtypes")
-        final Callback callback = ProcessorHelper
-                .createCallback(smsProviderData.getUrl());
+        final Callback callback = ProcessorHelper.createCallback(smsProviderData.getUrl());
 
-        String apiKey = this.hookConfigurationRepository
-                .findOneByHookIdAndFieldName(hook.getId(), apiKeyName);
+        String apiKey = this.hookConfigurationRepository.findOneByHookIdAndFieldName(hook.getId(), apiKeyName);
         if (apiKey == null) {
             smsProviderData.setUrl(null);
             smsProviderData.setEndpoint(System.getProperty("baseUrl"));
             smsProviderData.setTenantId(tenantIdentifier);
             smsProviderData.setMifosToken(authToken);
             apiKey = service.sendSmsBridgeConfigRequest(smsProviderData);
-            final HookConfiguration apiKeyEntry = HookConfiguration.createNew(
-                    hook, "string", apiKeyName, apiKey);
+            final HookConfiguration apiKeyEntry = HookConfiguration.createNew(hook, "string", apiKeyName, apiKey);
             this.hookConfigurationRepository.save(apiKeyEntry);
         }
 
@@ -104,36 +92,29 @@ public class TwilioHookProcessor implements HookProcessor {
                 entityName = "sms";
                 actionName = "send";
                 json = processUgdTemplate(payload, hook, authToken);
-                if (json == null) {
-                    return;
-                }
+                if (json == null) { return; }
             } else {
                 json = JsonParser.parseString(payload).getAsJsonObject();
             }
-            service.sendSmsBridgeRequest(entityName, actionName,
-                    tenantIdentifier, apiKey, json, callback);
+            service.sendSmsBridgeRequest(entityName, actionName, tenantIdentifier, apiKey, json, callback);
         }
 
     }
 
-    private JsonObject processUgdTemplate(final String payload,
-            final Hook hook, final String authToken) {
+    private JsonObject processUgdTemplate(final String payload, final Hook hook, final String authToken) {
         JsonObject json = null;
         try {
             @SuppressWarnings("unchecked")
-            final HashMap<String, Object> map = new ObjectMapper().readValue(
-                    payload, HashMap.class);
+            final HashMap<String, Object> map = new ObjectMapper().readValue(payload, HashMap.class);
             map.put("BASE_URI", System.getProperty("baseUrl"));
             if (map.containsKey("clientId")) {
-                final Long clientId = Long.valueOf(Integer.toString((int) map
-                        .get("clientId")));
+                final Long clientId = Long.valueOf(Integer.toString((int) map.get("clientId")));
                 final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
                 final String mobileNo = client.mobileNo();
                 if (mobileNo != null && !mobileNo.isEmpty()) {
                     this.templateMergeService.setAuthToken(authToken);
-                    final String compiledMessage = this.templateMergeService
-                            .compile(hook.getUgdTemplate(), map)
-                            .replace("<p>", "").replace("</p>", "");
+                    final String compiledMessage = this.templateMergeService.compile(hook.getUgdTemplate(), map).replace("<p>", "")
+                            .replace("</p>", "");
                     final Map<String, String> jsonMap = new HashMap<>();
                     jsonMap.put("mobileNo", mobileNo);
                     jsonMap.put("message", compiledMessage);
@@ -142,7 +123,7 @@ public class TwilioHookProcessor implements HookProcessor {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Problem occurred in processUgdTemplate function",e);
+            LOG.error("Problem occurred in processUgdTemplate function", e);
         }
         return json;
     }

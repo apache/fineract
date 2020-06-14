@@ -65,8 +65,8 @@ public class LoanScheduleTestDataHelper {
      * (principal paid, interest paid) 02 August 2011 1,000 200 0 false 02
      * September 2011 1,000 200 0 false
      */
-    public static List<LoanRepaymentScheduleInstallment> createSimpleLoanScheduleWithFirstInstallmentFullyPaid(
-            final LocalDate firstDueDate, final MonetaryCurrency currency) {
+    public static List<LoanRepaymentScheduleInstallment> createSimpleLoanScheduleWithFirstInstallmentFullyPaid(final LocalDate firstDueDate,
+            final MonetaryCurrency currency) {
 
         final LoanRepaymentScheduleInstallment firstInstallment = new LoanRepaymentScheduleInstallmentBuilder(currency)
                 .withInstallmentNumber(1).withDueDate(firstDueDate).withPrincipal("1000.00").withInterest("200.00").completed().build();

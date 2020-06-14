@@ -23,11 +23,11 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDat
 
 public interface InterestRateChartReadPlatformService {
 
-    //Collection<InterestRateChartData> retrieveAll(Long savingsProductId);
+    // Collection<InterestRateChartData> retrieveAll(Long savingsProductId);
 
     InterestRateChartData retrieveOne(Long interestChartId);
 
-    //Collection<InterestRateChartData> retrieveAllWithSlabs();
+    // Collection<InterestRateChartData> retrieveAllWithSlabs();
 
     Collection<InterestRateChartData> retrieveAllWithSlabs(Long savingsProductId);
 

@@ -61,15 +61,13 @@ import org.springframework.stereotype.Component;
 @Path("/{resourceType}/{resourceId}/notes")
 @Component
 @Scope("singleton")
-@Api(tags = {"Notes"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.")
-})
+@Api(tags = { "Notes" })
+@SwaggerDefinition(tags = { @Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.") })
 public class NotesApiResource {
 
-    private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanId",
-            "loanTransactionId", "depositAccountId", "savingAccountId", "noteType", "note", "createdById", "createdByUsername",
-            "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
+    private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("id", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId", "noteType",
+                    "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
 
     private final PlatformSecurityContext context;
     private final NoteReadPlatformService readPlatformService;
@@ -91,8 +89,11 @@ public class NotesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Resource's Notes", httpMethod = "GET", notes = "Retrieves a Resource's Notes\n\n" + "Note: Notes are returned in descending createOn order.\n" + "\n" + "Example Requests:\n" + "\n" + "clients/2/notes\n" + "\n" + "\n" + "groups/2/notes?fields=note,createdOn,createdByUsername")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse.class)})
+    @ApiOperation(value = "Retrieve a Resource's Notes", httpMethod = "GET", notes = "Retrieves a Resource's Notes\n\n"
+            + "Note: Notes are returned in descending createOn order.\n" + "\n" + "Example Requests:\n" + "\n" + "clients/2/notes\n" + "\n"
+            + "\n" + "groups/2/notes?fields=note,createdOn,createdByUsername")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", responseContainer = "List", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse.class) })
     public String retrieveNotesByResource(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
             @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
 
@@ -114,9 +115,14 @@ public class NotesApiResource {
     @Path("{noteId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Resource Note", httpMethod = "GET", notes = "Retrieves a Resource Note\n\n" + "Example Requests:\n" + "\n" + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n" + "clients/1/notes/76?fields=note,createdOn,createdByUsername\n" + "\n" + "\n" + "groups/1/notes/20?fields=note,createdOn,createdByUsername")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesNoteIdResponse.class)})
-    public String retrieveNote(@PathParam("resourceType") @ApiParam(value = "resourceType")final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId")final Long resourceId,
+    @ApiOperation(value = "Retrieve a Resource Note", httpMethod = "GET", notes = "Retrieves a Resource Note\n\n" + "Example Requests:\n"
+            + "\n" + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n"
+            + "clients/1/notes/76?fields=note,createdOn,createdByUsername\n" + "\n" + "\n"
+            + "groups/1/notes/20?fields=note,createdOn,createdByUsername")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesNoteIdResponse.class) })
+    public String retrieveNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
+            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
             @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
@@ -136,10 +142,14 @@ public class NotesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Add a Resource Note", httpMethod = "POST", notes = "Adds a new note to a supported resource.\n\n" + "Example Requests:\n" + "\n" + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class)})
-    public String addNewNote(@PathParam("resourceType") @ApiParam(value = "resourceType")final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId")final Long resourceId,
+    @ApiOperation(value = "Add a Resource Note", httpMethod = "POST", notes = "Adds a new note to a supported resource.\n\n"
+            + "Example Requests:\n" + "\n" + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class) })
+    public String addNewNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
+            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
             @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
@@ -160,10 +170,14 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Resource Note", httpMethod = "PUT", notes = "Updates a Resource Note")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class)})
-    public String updateNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
-            @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class) })
+    public String updateNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
+            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
+            @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -184,9 +198,11 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Resource Note", httpMethod = "DELETE", notes = "Deletes a Resource Note")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class)})
-    public String deleteNote(@PathParam("resourceType") @ApiParam(value = "resourceType")final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId")final Long resourceId,
-            @PathParam("noteId") @ApiParam(value = "noteId")final Long noteId) {
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class) })
+    public String deleteNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
+            @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
+            @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId) {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
@@ -216,7 +232,8 @@ public class NotesApiResource {
             break;
             case LOAN_TRANSACTION:
                 resourceNameForPermissions = "LOANTRANSACTIONNOTE";
-                // updating loanId, to distinguish saving transaction note and loan transaction note as we are using subEntityId for both.
+                // updating loanId, to distinguish saving transaction note and
+                // loan transaction note as we are using subEntityId for both.
                 resourceDetails.withLoanId(resourceId);
                 resourceDetails.withSubEntityId(resourceId);
             break;

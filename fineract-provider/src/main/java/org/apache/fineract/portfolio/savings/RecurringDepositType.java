@@ -25,6 +25,7 @@ import java.util.List;
  * An enumeration of supported calendar periods used in savings.
  */
 public enum RecurringDepositType {
+
     INVALID(0, "recurringDepositType.invalid"), VOLUNTARY(1, "recurringDepositType.voluntary"), //
     MANDATORY(2, "recurringDepositType.mandatory"); //
 

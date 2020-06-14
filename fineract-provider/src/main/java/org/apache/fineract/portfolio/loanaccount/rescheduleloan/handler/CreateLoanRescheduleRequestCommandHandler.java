@@ -34,8 +34,7 @@ public class CreateLoanRescheduleRequestCommandHandler implements NewCommandSour
     private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
 
     @Autowired
-    public CreateLoanRescheduleRequestCommandHandler(
-            LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
+    public CreateLoanRescheduleRequestCommandHandler(LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
         this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
     }
 

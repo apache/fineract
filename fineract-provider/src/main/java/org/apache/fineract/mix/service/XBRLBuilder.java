@@ -89,8 +89,9 @@ public class XBRLBuilder {
     Element addTaxonomy(final Element rootElement, final MixTaxonomyData taxonomy, final BigDecimal value) {
 
         // throw an error is start / endate is null
-        if (this.startDate == null || this.endDate == null) { throw new XBRLMappingInvalidException(
-                "start date and end date should not be null"); }
+        if (this.startDate == null || this.endDate == null) {
+            throw new XBRLMappingInvalidException("start date and end date should not be null");
+        }
 
         final String prefix = taxonomy.getNamespace();
         String qname = taxonomy.getName();

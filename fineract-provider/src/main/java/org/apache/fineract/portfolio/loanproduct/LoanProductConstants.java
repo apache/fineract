@@ -111,7 +111,7 @@ public interface LoanProductConstants {
     public static final String canDefineEmiAmountParamName = "canDefineInstallmentAmount";
     public static final String installmentAmountInMultiplesOfParamName = "installmentAmountInMultiplesOf";
 
-    //Loan Configurable Attributes
+    // Loan Configurable Attributes
     public static final String allowAttributeOverridesParamName = "allowAttributeOverrides";
     public static final String amortizationTypeParamName = "amortizationType";
     public static final String interestTypeParamName = "interestType";
@@ -122,11 +122,10 @@ public interface LoanProductConstants {
     public static final String graceOnPrincipalAndInterestPaymentParamName = "graceOnPrincipalAndInterestPayment";
     public static final String allowCompoundingOnEodParamName = "allowCompoundingOnEod";
 
-    //Variable Installments Settings
-    public static final String allowVariableInstallmentsParamName = "allowVariableInstallments" ;
-    public static final String minimumGapBetweenInstallments = "minimumGap" ;
-    public static final String maximumGapBetweenInstallments = "maximumGap" ;
-
+    // Variable Installments Settings
+    public static final String allowVariableInstallmentsParamName = "allowVariableInstallments";
+    public static final String minimumGapBetweenInstallments = "minimumGap";
+    public static final String maximumGapBetweenInstallments = "maximumGap";
 
     public static final String ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME = "allowPartialPeriodInterestCalcualtion";
 

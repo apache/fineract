@@ -67,9 +67,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements ProvisioningEntriesWritePlatformService {
+
     private final static Logger LOG = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
-    private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService ;
+    private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     private final LoanProductRepository loanProductRepository;
     private final GLAccountRepository glAccountRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
@@ -90,7 +91,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper) {
         this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService;
-        this.provisioningCriteriaReadPlatformService = provisioningCriteriaReadPlatformService ;
+        this.provisioningCriteriaReadPlatformService = provisioningCriteriaReadPlatformService;
         this.loanProductRepository = loanProductRepository;
         this.glAccountRepository = glAccountRepository;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
@@ -119,9 +120,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             this.journalEntryWritePlatformService.revertProvisioningJournalEntries(requestedEntry.getCreatedDate(),
                     existingEntryData.getId(), PortfolioProductType.PROVISIONING.getValue());
         }
-        if(requestedEntry.getLoanProductProvisioningEntries() == null || requestedEntry.getLoanProductProvisioningEntries().size() == 0) {
+        if (requestedEntry.getLoanProductProvisioningEntries() == null || requestedEntry.getLoanProductProvisioningEntries().size() == 0) {
             requestedEntry.setJournalEntryCreated(Boolean.FALSE);
-        }else {
+        } else {
             requestedEntry.setJournalEntryCreated(Boolean.TRUE);
         }
 
@@ -132,8 +133,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private void validateForCreateJournalEntry(ProvisioningEntryData existingEntry, ProvisioningEntry requested) {
         Date existingDate = existingEntry.getCreatedDate();
         Date requestedDate = requested.getCreatedDate();
-        if (existingDate.after(requestedDate) || existingDate.equals(requestedDate)) { throw new ProvisioningJournalEntriesCannotbeCreatedException(
-                existingEntry.getCreatedDate(), requestedDate); }
+        if (existingDate.after(requestedDate) || existingDate.equals(requestedDate)) {
+            throw new ProvisioningJournalEntriesCannotbeCreatedException(existingEntry.getCreatedDate(), requestedDate);
+        }
     }
 
     private boolean isJournalEntriesRequired(JsonCommand command) {
@@ -153,19 +155,21 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     @Override
     @CronTarget(jobName = JobName.GENERATE_LOANLOSS_PROVISIONING)
     public void generateLoanLossProvisioningAmount() {
-        Date currentDate  = DateUtils.getLocalDateOfTenant().toDate() ;
+        Date currentDate = DateUtils.getLocalDateOfTenant().toDate();
         boolean addJournalEntries = true;
         try {
-            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ;
-            if(criteriaCollection == null || criteriaCollection.size() == 0){
-                return ;
-                //FIXME: Do we need to throw NoProvisioningCriteriaDefinitionFound()?
+            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService
+                    .retrieveAllProvisioningCriterias();
+            if (criteriaCollection == null || criteriaCollection.size() == 0) {
+                return;
+                // FIXME: Do we need to throw
+                // NoProvisioningCriteriaDefinitionFound()?
             }
             createProvsioningEntry(currentDate, addJournalEntries);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {
-            LOG.error("{}",peace.getDefaultUserMessage());
+            LOG.error("{}", peace.getDefaultUserMessage());
         } catch (DataIntegrityViolationException dive) {
-            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function",dive);
+            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dive);
         }
     }
 
@@ -175,10 +179,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Date createdDate = parseDate(command);
         boolean addJournalEntries = isJournalEntriesRequired(command);
         try {
-            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ;
-            if(criteriaCollection == null || criteriaCollection.size() == 0){
-                throw new NoProvisioningCriteriaDefinitionFound() ;
-            }
+            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService
+                    .retrieveAllProvisioningCriterias();
+            if (criteriaCollection == null || criteriaCollection.size() == 0) { throw new NoProvisioningCriteriaDefinitionFound(); }
             ProvisioningEntry requestedEntry = createProvsioningEntry(createdDate, addJournalEntries);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
         } catch (DataIntegrityViolationException dve) {
@@ -188,8 +191,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
 
     private ProvisioningEntry createProvsioningEntry(Date date, boolean addJournalEntries) {
         ProvisioningEntry existingEntry = this.provisioningEntryRepository.findByProvisioningEntryDate(date);
-        if (existingEntry != null) { throw new ProvisioningEntryAlreadyCreatedException(existingEntry.getId(),
-                existingEntry.getCreatedDate()); }
+        if (existingEntry != null) {
+            throw new ProvisioningEntryAlreadyCreatedException(existingEntry.getId(), existingEntry.getCreatedDate());
+        }
         AppUser currentUser = this.platformSecurityContext.authenticatedUser();
         AppUser lastModifiedBy = null;
         Date lastModifiedDate = null;
@@ -234,7 +238,8 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());
             Long criteraId = data.getCriteriaId();
             LoanProductProvisioningEntry entry = new LoanProductProvisioningEntry(loanProduct, office, data.getCurrencyCode(),
-                    provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount, criteraId);
+                    provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount,
+                    criteraId);
             entry.setProvisioningEntry(parent);
             if (!provisioningEntries.containsKey(entry)) {
                 provisioningEntries.put(entry, entry);

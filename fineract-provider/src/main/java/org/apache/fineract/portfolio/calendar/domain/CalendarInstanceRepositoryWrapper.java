@@ -46,8 +46,7 @@ public class CalendarInstanceRepositoryWrapper {
     }
 
     public CalendarInstance findOneWithNotFoundDetection(final Long CalendarInstanceId) {
-        return this.repository.findById(CalendarInstanceId)
-                .orElseThrow(() -> new CalendarInstanceNotFoundException(CalendarInstanceId));
+        return this.repository.findById(CalendarInstanceId).orElseThrow(() -> new CalendarInstanceNotFoundException(CalendarInstanceId));
     }
 
     public void save(final CalendarInstance calendatInstance) {

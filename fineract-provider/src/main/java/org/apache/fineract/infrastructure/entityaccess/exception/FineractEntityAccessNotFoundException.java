@@ -30,6 +30,6 @@ public class FineractEntityAccessNotFoundException extends AbstractPlatformResou
     }
 
     public FineractEntityAccessNotFoundException(final String codeName) {
-               super("error.msg.entityaccess.id.invalid", "FineractEntityAccess with identifier " + codeName + " does not exist");
-            }
+        super("error.msg.entityaccess.id.invalid", "FineractEntityAccess with identifier " + codeName + " does not exist");
+    }
 }

@@ -41,10 +41,8 @@ import org.springframework.stereotype.Component;
 @Path("cashiersjournal")
 @Component
 @Scope("singleton")
-@Api(tags = {"Cashier Journals"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Cashier Journals", description = "")
-})
+@Api(tags = { "Cashier Journals" })
+@SwaggerDefinition(tags = { @Tag(name = "Cashier Journals", description = "") })
 public class TellerJournalApiResource {
 
     private final PlatformSecurityContext securityContext;

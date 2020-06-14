@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ColumnValidator {
+
     private final static Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
     private final JdbcTemplate jdbcTemplate;
 
@@ -48,34 +49,27 @@ public class ColumnValidator {
     }
 
     private void validateColumn(Map<String, Set<String>> tableColumnMap) {
-        Connection connection = null ;
+        Connection connection = null;
         try {
-            connection = this.jdbcTemplate.getDataSource()
-                    .getConnection() ;
+            connection = this.jdbcTemplate.getDataSource().getConnection();
             DatabaseMetaData dbMetaData = connection.getMetaData();
             ResultSet resultSet = null;
-            for (HashMap.Entry<String, Set<String>> entry : tableColumnMap
-                    .entrySet()) {
+            for (HashMap.Entry<String, Set<String>> entry : tableColumnMap.entrySet()) {
                 Set<String> columns = entry.getValue();
-                resultSet = dbMetaData.getColumns(null, null, entry.getKey(),
-                        null);
+                resultSet = dbMetaData.getColumns(null, null, entry.getKey(), null);
                 Set<String> tableColumns = getTableColumns(resultSet);
-                if (columns.size() > 0 && tableColumns.size() == 0) {
-                    throw new SQLInjectionException();
-                }
+                if (columns.size() > 0 && tableColumns.size() == 0) { throw new SQLInjectionException(); }
                 for (String requestedColumn : columns) {
-                    if (!tableColumns.contains(requestedColumn)) {
-                        throw new SQLInjectionException();
-                    }
+                    if (!tableColumns.contains(requestedColumn)) { throw new SQLInjectionException(); }
                 }
             }
         } catch (SQLException e) {
             throw new SQLInjectionException();
-        }finally {
-            if(connection != null) {
+        } finally {
+            if (connection != null) {
                 DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
             }
-            connection = null ;
+            connection = null;
         }
     }
 
@@ -86,43 +80,37 @@ public class ColumnValidator {
                 columns.add(rs.getString("column_name"));
             }
         } catch (SQLException e) {
-            LOG.error("Problem occurred in getTableColumns function",e);
+            LOG.error("Problem occurred in getTableColumns function", e);
         }
         return columns;
     }
 
     public void validateSqlInjection(String schema, String... conditions) {
-        for(String condition: conditions) {
+        for (String condition : conditions) {
             SQLInjectionValidator.validateSQLInput(condition);
-            List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<",
-                    "> =", "< =", "! =", "!=", ">=", "<="));
-            condition = condition.trim().replace("( ", "(").replace(" )", ")")
-                    .toLowerCase();
+            List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<", "> =", "< =", "! =", "!=", ">=", "<="));
+            condition = condition.trim().replace("( ", "(").replace(" )", ")").toLowerCase();
             for (String op : operator) {
                 condition = replaceAll(condition, op).replaceAll(" +", " ");
             }
             Set<String> operands = getOperand(condition);
             schema = schema.trim().replaceAll(" +", " ").toLowerCase();
             Map<String, Set<String>> tableColumnAliasMap = getTableColumnAliasMap(operands);
-            Map<String, Set<String>> tableColumnMap = getTableColumnMap(schema,
-                    tableColumnAliasMap);
+            Map<String, Set<String>> tableColumnMap = getTableColumnMap(schema, tableColumnAliasMap);
             validateColumn(tableColumnMap);
         }
     }
 
-    private static Map<String, Set<String>> getTableColumnMap(String schema,
-            Map<String, Set<String>> tableColumnAliasMap) {
+    private static Map<String, Set<String>> getTableColumnMap(String schema, Map<String, Set<String>> tableColumnAliasMap) {
         Map<String, Set<String>> tableColumnMap = new HashMap<>();
         schema = schema.substring(schema.indexOf("from"));
         for (String alias : tableColumnAliasMap.keySet()) {
             int index = schema.indexOf(" " + alias + " ");
             if (index > -1) {
                 int startPos = 0;
-                startPos = schema.substring(0, index - 1).lastIndexOf(' ',
-                        index);
+                startPos = schema.substring(0, index - 1).lastIndexOf(' ', index);
                 Set<String> columns = tableColumnAliasMap.get(alias);
-                tableColumnMap.put(schema.substring(startPos, index).trim(),
-                        columns);
+                tableColumnMap.put(schema.substring(startPos, index).trim(), columns);
             } else {
                 throw new SQLInjectionException();
             }
@@ -130,8 +118,7 @@ public class ColumnValidator {
         return tableColumnMap;
     }
 
-    private static Map<String, Set<String>> getTableColumnAliasMap(
-            Set<String> operands) {
+    private static Map<String, Set<String>> getTableColumnAliasMap(Set<String> operands) {
         Map<String, Set<String>> tableColumnMap = new HashMap<>();
         for (String operand : operands) {
             String[] tableColumn = operand.split("\\.");
@@ -153,9 +140,8 @@ public class ColumnValidator {
 
     private static Set<String> getOperand(String condition) {
         Set<String> operandList = new HashSet<>();
-        List<String> operatorList = new ArrayList<>(Arrays.asList("!=", "=",
-                ">", "<", " like ", " between ", " in ", " in(", " is ",
-                " is not ", " equals ", " not equals "));
+        List<String> operatorList = new ArrayList<>(
+                Arrays.asList("!=", "=", ">", "<", " like ", " between ", " in ", " in(", " is ", " is not ", " equals ", " not equals "));
         for (String op : operatorList) {
             int startIndex = 0;
             do {
@@ -163,15 +149,11 @@ public class ColumnValidator {
                 if (index > -1) {
                     char currentChar = condition.charAt(index - 1);
                     if (op.equals("=")) {
-                        if (!((currentChar + "").equals("!")
-                                || (currentChar + "").equals(">") || (currentChar + "")
-                                .equals("<"))) {
-                            operandList.add(getOperand(condition, index,
-                                    currentChar));
+                        if (!((currentChar + "").equals("!") || (currentChar + "").equals(">") || (currentChar + "").equals("<"))) {
+                            operandList.add(getOperand(condition, index, currentChar));
                         }
                     } else {
-                        operandList.add(getOperand(condition, index,
-                                currentChar));
+                        operandList.add(getOperand(condition, index, currentChar));
                     }
 
                     startIndex = index + op.length();
@@ -182,12 +164,10 @@ public class ColumnValidator {
         return operandList;
     }
 
-    private static String getOperand(String condition, int index,
-            char currentChar) {
+    private static String getOperand(String condition, int index, char currentChar) {
         int startPos = 0;
         if ((currentChar + "").equals(" ")) {
-            startPos = condition.substring(0, index - 1)
-                    .lastIndexOf(' ', index);
+            startPos = condition.substring(0, index - 1).lastIndexOf(' ', index);
         } else {
             startPos = condition.substring(0, index).lastIndexOf(' ', index);
         }
@@ -201,16 +181,14 @@ public class ColumnValidator {
             int index = condition.indexOf(op, startIndex);
             if (index > -1) {
                 if (op.equals("=")) {
-                    if (!((condition.charAt(index - 1) + "").equals("!")
-                            || (condition.charAt(index - 1) + "").equals(">") || (condition
-                            .charAt(index - 1) + "").equals("<"))) {
+                    if (!((condition.charAt(index - 1) + "").equals("!") || (condition.charAt(index - 1) + "").equals(">")
+                            || (condition.charAt(index - 1) + "").equals("<"))) {
                         condition = condition.replace(op, " " + op + " ");
                         return condition;
                     }
                     startIndex = index + 2 + op.length();
 
-                } else if (op.equals("< =") || op.equals("> =")
-                        || op.equals("! =")) {
+                } else if (op.equals("< =") || op.equals("> =") || op.equals("! =")) {
                     condition = condition.replace(op, op.replace(" ", ""));
                     return condition;
                 } else {

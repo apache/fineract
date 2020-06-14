@@ -80,9 +80,9 @@ public class LoanImportHandlerTest {
     public void testLoanImport() throws InterruptedException, IOException, ParseException {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
-        //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
+        // in order to populate helper sheets
+        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
@@ -102,55 +102,57 @@ public class LoanImportHandlerTest {
         clientMap.put("active", "true");
         clientMap.put("activationDate", "04 March 2011");
 
-        Integer outcome_client_creation= Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+        Integer outcome_client_creation = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 new Gson().toJson(clientMap), "clientId");
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
-        //in order to populate helper sheets
-        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec,responseSpec,true);
+        // in order to populate helper sheets
+        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
-        //in order to populate helper sheets
-        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec,responseSpec);
+        // in order to populate helper sheets
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         Map<String, Object> staffMap = StaffHelper.getStaff(requestSpec, responseSpec, outcome_staff_creation);
         Assertions.assertNotNull(staffMap, "Could not retrieve created staff");
 
-        LoanTransactionHelper ltHelper=new LoanTransactionHelper(requestSpec,responseSpec);
-        LoanProductTestBuilder loanProductTestBuilder=new LoanProductTestBuilder();
-        String jsonLoanProduct=loanProductTestBuilder.build(null);
-        Integer outcome_lp_creation=ltHelper.getLoanProductId(jsonLoanProduct);
+        LoanTransactionHelper ltHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder();
+        String jsonLoanProduct = loanProductTestBuilder.build(null);
+        Integer outcome_lp_creation = ltHelper.getLoanProductId(jsonLoanProduct);
         Assertions.assertNotNull(outcome_lp_creation, "Could not create Loan Product");
 
         String loanProductStr = ltHelper.getLoanProductDetails(requestSpec, responseSpec, outcome_lp_creation);
-        Assertions.assertNotNull("Could not get created Loan Product" , loanProductStr);
+        Assertions.assertNotNull("Could not get created Loan Product", loanProductStr);
         JsonPath loanProductJson = JsonPath.from(loanProductStr);
 
-        String fundName = Utils.randomNameGenerator("",9);
+        String fundName = Utils.randomNameGenerator("", 9);
         FundsHelper fh = FundsHelper.create(fundName).externalId("fund-" + fundName).build();
-        Integer outcome_fund_creation= FundsResourceHandler.createFund(new Gson().toJson(fh),requestSpec,responseSpec);
+        Integer outcome_fund_creation = FundsResourceHandler.createFund(new Gson().toJson(fh), requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_fund_creation, "Could not create Fund");
 
         String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
         String paymentTypeDescription = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
-        Integer outcome_payment_creation= PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName, paymentTypeDescription, true,1);
+        Integer outcome_payment_creation = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, paymentTypeName,
+                paymentTypeDescription, true, 1);
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
-        LoanTransactionHelper loanTransactionHelper=new LoanTransactionHelper(requestSpec,responseSpec);
-        Workbook workbook=loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
+        LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        Workbook workbook = loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
 
-        //insert dummy data into loan Sheet
+        // insert dummy data into loan Sheet
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
-        Row firstLoanRow=loanSheet.getRow(1);
+        Row firstLoanRow = loanSheet.getRow(1);
         firstLoanRow.createCell(LoanConstants.OFFICE_NAME_COL).setCellValue(office.getName());
         firstLoanRow.createCell(LoanConstants.LOAN_TYPE_COL).setCellValue("Individual");
-        firstLoanRow.createCell(LoanConstants.CLIENT_NAME_COL).setCellValue(firstName + " " + lastName + "(" + outcome_client_creation + ")");
+        firstLoanRow.createCell(LoanConstants.CLIENT_NAME_COL)
+                .setCellValue(firstName + " " + lastName + "(" + outcome_client_creation + ")");
         firstLoanRow.createCell(LoanConstants.CLIENT_EXTERNAL_ID).setCellValue(externalId);
         firstLoanRow.createCell(LoanConstants.PRODUCT_COL).setCellValue(loanProductJson.getString("name"));
         firstLoanRow.createCell(LoanConstants.LOAN_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("dd MMMM yyyy");
-        Date date=simpleDateFormat.parse("13 May 2017");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Date date = simpleDateFormat.parse("13 May 2017");
         firstLoanRow.createCell(LoanConstants.SUBMITTED_ON_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.APPROVED_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.DISBURSED_DATE_COL).setCellValue(date);
@@ -159,16 +161,22 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.PRINCIPAL_COL).setCellValue(loanProductJson.getFloat("principal"));
         firstLoanRow.createCell(LoanConstants.NO_OF_REPAYMENTS_COL).setCellValue(loanProductJson.getInt("numberOfRepayments"));
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_COL).setCellValue(loanProductJson.getInt("repaymentEvery"));
-        firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL).setCellValue(loanProductJson.getString("repaymentFrequencyType.value"));
-        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue(loanProductJson.getInt("repaymentEvery") * loanProductJson.getInt("numberOfRepayments"));
-        firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL).setCellValue(loanProductJson.getString("repaymentFrequencyType.value"));
+        firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL)
+                .setCellValue(loanProductJson.getString("repaymentFrequencyType.value"));
+        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL)
+                .setCellValue(loanProductJson.getInt("repaymentEvery") * loanProductJson.getInt("numberOfRepayments"));
+        firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL)
+                .setCellValue(loanProductJson.getString("repaymentFrequencyType.value"));
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_COL).setCellValue(loanProductJson.getDouble("interestRatePerPeriod"));
-        firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL).setCellValue(loanProductJson.getString("interestRateFrequencyType.value"));
+        firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL)
+                .setCellValue(loanProductJson.getString("interestRateFrequencyType.value"));
         firstLoanRow.createCell(LoanConstants.AMORTIZATION_COL).setCellValue(loanProductJson.getString("amortizationType.value"));
         firstLoanRow.createCell(LoanConstants.INTEREST_METHOD_COL).setCellValue(loanProductJson.getString("interestType.value"));
-        firstLoanRow.createCell(LoanConstants.INTEREST_CALCULATION_PERIOD_COL).setCellValue(loanProductJson.getString("interestCalculationPeriodType.value"));
+        firstLoanRow.createCell(LoanConstants.INTEREST_CALCULATION_PERIOD_COL)
+                .setCellValue(loanProductJson.getString("interestCalculationPeriodType.value"));
         firstLoanRow.createCell(LoanConstants.ARREARS_TOLERANCE_COL).setCellValue(0);
-        firstLoanRow.createCell(LoanConstants.REPAYMENT_STRATEGY_COL).setCellValue(loanProductJson.getString("transactionProcessingStrategyName"));
+        firstLoanRow.createCell(LoanConstants.REPAYMENT_STRATEGY_COL)
+                .setCellValue(loanProductJson.getString("transactionProcessingStrategyName"));
         firstLoanRow.createCell(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL).setCellValue(0);
         firstLoanRow.createCell(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL).setCellValue(0);
         firstLoanRow.createCell(LoanConstants.GRACE_ON_INTEREST_CHARGED_COL).setCellValue(0);
@@ -178,34 +186,34 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.REPAYMENT_TYPE_COL).setCellValue(paymentTypeName);
 
         String currentdirectory = new File("").getAbsolutePath();
-        File directory=new File(currentdirectory+File.separator+"src"+File.separator+"integrationTest"+File.separator+
-                "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"loan") ;
+        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
+                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "loan");
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        File file= new File(directory+File.separator+"Loan.xls");
-        OutputStream outputStream=new FileOutputStream(file);
+        File file = new File(directory + File.separator + "Loan.xls");
+        OutputStream outputStream = new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();
 
-        String importDocumentId=loanTransactionHelper.importLoanTemplate(file);
+        String importDocumentId = loanTransactionHelper.importLoanTemplate(file);
         file.delete();
         Assertions.assertNotNull(importDocumentId);
 
-        //Wait for the creation of output excel
+        // Wait for the creation of output excel
         Thread.sleep(10000);
 
-        //check status column of output excel
-        String location=loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
+        // check status column of output excel
+        String location = loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
         FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook outputworkbook=new HSSFWorkbook(fileInputStream);
+        Workbook outputworkbook = new HSSFWorkbook(fileInputStream);
         Sheet outputLoanSheet = outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
-        Row row= outputLoanSheet.getRow(1);
+        Row row = outputLoanSheet.getRow(1);
 
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(LoanConstants.FAILURE_REPORT_COL).getStringCellValue());
 
-        Assertions.assertEquals("Imported",row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported", row.getCell(LoanConstants.STATUS_COL).getStringCellValue());
         outputworkbook.close();
     }
 }

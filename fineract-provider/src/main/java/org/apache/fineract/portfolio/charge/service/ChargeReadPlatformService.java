@@ -121,5 +121,5 @@ public interface ChargeReadPlatformService {
      */
     Collection<ChargeData> retrieveSharesApplicableCharges();
 
-    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) ;
+    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId);
 }

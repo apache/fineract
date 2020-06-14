@@ -67,12 +67,12 @@ public class SchedulerJobsTest {
 
     @Test // FINERACT-926
     public void testDateFormat() {
-        // must start scheduler and make job active to have nextRunTime (which is a
+        // must start scheduler and make job active to have nextRunTime (which
+        // is a
         // java.util.Date)
         schedulerJobHelper.updateSchedulerStatus(true);
         schedulerJobHelper.updateSchedulerJob(1, true);
-        String nextRunTimeText = await().until(
-                () -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
+        String nextRunTimeText = await().until(() -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
                 nextRunTime -> nextRunTime != null);
         DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
     }
@@ -102,7 +102,8 @@ public class SchedulerJobsTest {
 
     @Test
     public void testFlippingJobsActiveStatus() throws InterruptedException {
-        // Stop the Scheduler while we test flapping jobs' active on/off, to avoid side
+        // Stop the Scheduler while we test flapping jobs' active on/off, to
+        // avoid side
         // effects
         schedulerJobHelper.updateSchedulerStatus(false);
 

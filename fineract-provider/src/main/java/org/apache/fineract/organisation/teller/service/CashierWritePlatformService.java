@@ -33,8 +33,7 @@ public class CashierWritePlatformService {
         return null;
     }
 
-    public CommandProcessingResult modifyCashier(Long entityId,
-            JsonCommand command) {
+    public CommandProcessingResult modifyCashier(Long entityId, JsonCommand command) {
         // TODO Auto-generated method stub
         return null;
     }

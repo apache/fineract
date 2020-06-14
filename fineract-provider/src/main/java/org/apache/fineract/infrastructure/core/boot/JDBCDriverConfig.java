@@ -35,7 +35,8 @@ public class JDBCDriverConfig {
     private String protocol;
     private String subProtocol;
 
-    @Autowired ApplicationContext context;
+    @Autowired
+    ApplicationContext context;
 
     @PostConstruct
     protected void init() {
@@ -50,8 +51,8 @@ public class JDBCDriverConfig {
     }
 
     public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {
-        final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':').append(schemaServerPort)
-                .append('/').append(schemaName).toString();
+        final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':')
+                .append(schemaServerPort).append('/').append(schemaName).toString();
         return url;
     }
 }

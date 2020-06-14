@@ -26,7 +26,7 @@ public interface FineractEntityAccessWriteService {
 
     CommandProcessingResult createEntityAccess(final JsonCommand command);
 
-    CommandProcessingResult createEntityToEntityMapping(final Long relId,final JsonCommand command);
+    CommandProcessingResult createEntityToEntityMapping(final Long relId, final JsonCommand command);
 
     CommandProcessingResult updateEntityToEntityMapping(final Long mapId, final JsonCommand command);
 

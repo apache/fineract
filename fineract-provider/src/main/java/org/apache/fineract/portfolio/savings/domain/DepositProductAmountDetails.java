@@ -51,7 +51,8 @@ public class DepositProductAmountDetails {
         //
     }
 
-    public DepositProductAmountDetails(final BigDecimal minDepositAmount, final BigDecimal depositAmount, final BigDecimal maxDepositAmount) {
+    public DepositProductAmountDetails(final BigDecimal minDepositAmount, final BigDecimal depositAmount,
+            final BigDecimal maxDepositAmount) {
         this.minDepositAmount = minDepositAmount;
         this.depositAmount = depositAmount;
         this.maxDepositAmount = maxDepositAmount;

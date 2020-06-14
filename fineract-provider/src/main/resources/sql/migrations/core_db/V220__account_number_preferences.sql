@@ -18,11 +18,11 @@
 --
 
 CREATE TABLE `c_account_number_format` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`account_type_enum` SMALLINT NOT NULL,
-	`prefix_type_enum` SMALLINT NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	UNIQUE INDEX `account_type_enum` (`account_type_enum`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `account_type_enum` SMALLINT NOT NULL,
+    `prefix_type_enum` SMALLINT NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `account_type_enum` (`account_type_enum`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB

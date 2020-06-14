@@ -120,11 +120,14 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command,
+            final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
 
-        if (realCause.getMessage().contains("email_address")) { throw new PlatformDataIntegrityException("error.msg.email.no.email.address.exists",
-                "The group, client or staff provided has no email address.", "id"); }
+        if (realCause.getMessage().contains("email_address")) {
+            throw new PlatformDataIntegrityException("error.msg.email.no.email.address.exists",
+                    "The group, client or staff provided has no email address.", "id");
+        }
 
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.email.unknown.data.integrity.issue",

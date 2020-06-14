@@ -70,7 +70,8 @@ public class InterestRateChart extends AbstractPersistableCustom {
         //
     }
 
-    public static InterestRateChart createNew(InterestRateChartFields chartFields, Collection<InterestRateChartSlab> interestRateChartSlabs) {
+    public static InterestRateChart createNew(InterestRateChartFields chartFields,
+            Collection<InterestRateChartSlab> interestRateChartSlabs) {
 
         return new InterestRateChart(chartFields, new HashSet<>(interestRateChartSlabs));
     }
@@ -122,8 +123,8 @@ public class InterestRateChart extends AbstractPersistableCustom {
             if (i == 0) {
                 tmpPeriodType = iSlabs.slabFields().periodType();
                 if (iSlabs.slabFields().isNotProperChartStart()) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.start.incorrect", iSlabs.slabFields()
-                            .fromPeriod(), iSlabs.slabFields().getAmountRangeFrom());
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.start.incorrect",
+                            iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().getAmountRangeFrom());
                 }
                 isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
                 isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
@@ -136,15 +137,17 @@ public class InterestRateChart extends AbstractPersistableCustom {
                 if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
                         && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
                     if (iSlabs.slabFields().isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping", iSlabs.slabFields()
-                                .fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields()
-                                .toPeriod(), iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(), nextSlabs
-                                .slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping",
+                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
+                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
+                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
+                                nextSlabs.slabFields().getAmountRangeTo());
                     } else if (iSlabs.slabFields().isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap", iSlabs.slabFields()
-                                .fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields()
-                                .toPeriod(), iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(), nextSlabs
-                                .slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap",
+                                iSlabs.slabFields().fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(),
+                                nextSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeFrom(),
+                                iSlabs.slabFields().getAmountRangeTo(), nextSlabs.slabFields().getAmountRangeFrom(),
+                                nextSlabs.slabFields().getAmountRangeTo());
                     }
                     if (isPrimaryGroupingByAmount) {
                         if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {
@@ -153,26 +156,26 @@ public class InterestRateChart extends AbstractPersistableCustom {
                                         nextSlabs.slabFields().toPeriod());
                             }
                             if (iSlabs.slabFields().toPeriod() != null) {
-                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.end.incorrect", iSlabs
-                                        .slabFields().toPeriod());
+                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.end.incorrect",
+                                        iSlabs.slabFields().toPeriod());
                             }
 
                         }
                     } else if (!iSlabs.slabFields().isPeriodsSame(nextSlabs.slabFields())) {
                         if (InterestRateChartSlabFields.isNotProperAmountStart(nextSlabs.slabFields())) {
-                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.start.incorrect", nextSlabs
-                                    .slabFields().getAmountRangeFrom());
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.start.incorrect",
+                                    nextSlabs.slabFields().getAmountRangeFrom());
                         }
                         if (iSlabs.slabFields().getAmountRangeTo() != null) {
-                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.end.incorrect", iSlabs
-                                    .slabFields().getAmountRangeTo());
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.end.incorrect",
+                                    iSlabs.slabFields().getAmountRangeTo());
                         }
 
                     }
                 }
             } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
-                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect",
-                        iSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeTo());
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect", iSlabs.slabFields().toPeriod(),
+                        iSlabs.slabFields().getAmountRangeTo());
             }
         }
     }
@@ -234,8 +237,8 @@ public class InterestRateChart extends AbstractPersistableCustom {
         }
     }
 
-    public void updateChartSlabs(JsonCommand command, final Map<String, Object> actualChanges,
-            final DataValidatorBuilder baseDataValidator, String currencyCode) {
+    public void updateChartSlabs(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
+            String currencyCode) {
 
         final Map<String, Object> deleteChartSlabs = new HashMap<>();
         final Map<String, Object> chartSlabsChanges = new HashMap<>();
@@ -272,12 +275,12 @@ public class InterestRateChart extends AbstractPersistableCustom {
                         final BigDecimal amountRangeFrom = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName,
                                 locale);
                         final BigDecimal amountRangeTo = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeToParamName, locale);
-                        final BigDecimal annualInterestRate = chartSlabsCommand.bigDecimalValueOfParameterNamed(
-                                annualInterestRateParamName, locale);
+                        final BigDecimal annualInterestRate = chartSlabsCommand.bigDecimalValueOfParameterNamed(annualInterestRateParamName,
+                                locale);
 
-                        final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields
-                                .createNew(description, periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
-                                        annualInterestRate, currencyCode);
+                        final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields.createNew(description,
+                                periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo, annualInterestRate,
+                                currencyCode);
                         final InterestRateChartSlab chartSlab = InterestRateChartSlab.createNew(slabFields, this);
                         chartSlab.slabFields().validateChartSlabPlatformRules(chartSlabsCommand, baseDataValidator, locale);
                         chartSlab.updateIncentives(chartSlabsCommand, actualChanges, baseDataValidator, chartSlab, locale);

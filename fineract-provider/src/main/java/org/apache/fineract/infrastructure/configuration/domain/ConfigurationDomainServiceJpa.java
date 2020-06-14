@@ -168,9 +168,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public Integer retrieveFinancialYearBeginningMonth() {
         final String propertyName = "financial-year-beginning-month";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
-        if (property.isEnabled()) {
-            return property.getValue().intValue();
-        }
+        if (property.isEnabled()) { return property.getValue().intValue(); }
         return 1;
     }
 
@@ -204,9 +202,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         if (property.isEnabled()) {
             int value = property.getValue().intValue();
-            if (value < 0 || value > 6) {
-                return defaultValue;
-            }
+            if (value < 0 || value > 6) { return defaultValue; }
             return value;
         }
         return defaultValue;
@@ -308,9 +304,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         int defaultValue = 6;
         int value = property.getValue().intValue();
-        if(value < 1) {
-            return defaultValue;
-        }
+        if (value < 1) { return defaultValue; }
         return value;
     }
 
@@ -320,9 +314,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         int defaultValue = 300;
         int value = property.getValue().intValue();
-        if(value < 1) {
-            return defaultValue;
-        }
+        if (value < 1) { return defaultValue; }
         return value;
     }
 
@@ -339,9 +331,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public boolean isSubRatesEnabled() {
         GlobalConfigurationPropertyData configuration = getGlobalConfigurationPropertyData("sub-rates");
-        if (configuration==null){
+        if (configuration == null) {
             return false;
-        }else{
+        } else {
             return configuration.isEnabled();
         }
     }

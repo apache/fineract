@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,8 +114,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     @Autowired
-    public  void setJobParameterRepository(JobParameterRepository jobParameterRepository){
-        this.jobParameterRepository=jobParameterRepository;
+    public void setJobParameterRepository(JobParameterRepository jobParameterRepository) {
+        this.jobParameterRepository = jobParameterRepository;
     }
 
     @PostConstruct
@@ -348,9 +347,11 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         final ClassMethodNamesPair jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
-        if (jobDetails == null) { throw new IllegalArgumentException(
-                "Code has no @CronTarget with this job name (@see JobName); seems like DB/code are not in line: "
-                        + scheduledJobDetail.getJobName()); }
+        if (jobDetails == null) {
+            throw new IllegalArgumentException(
+                    "Code has no @CronTarget with this job name (@see JobName); seems like DB/code are not in line: "
+                            + scheduledJobDetail.getJobName());
+        }
         final Object targetObject = getBeanObject(Class.forName(jobDetails.className));
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());
@@ -362,14 +363,15 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         return jobDetailFactoryBean.getObject();
     }
 
-    public Map<String,String> getJobParameter(ScheduledJobDetail scheduledJobDetail){
-        List<JobParameter> jobParameterList= jobParameterRepository.findJobParametersByJobId(scheduledJobDetail.getId());
-        Map<String,String> jobParameterMap=new HashMap<>();
-        for (JobParameter jobparameter:jobParameterList) {
-            jobParameterMap.put(jobparameter.getParameterName(),jobparameter.getParameterValue());
+    public Map<String, String> getJobParameter(ScheduledJobDetail scheduledJobDetail) {
+        List<JobParameter> jobParameterList = jobParameterRepository.findJobParametersByJobId(scheduledJobDetail.getId());
+        Map<String, String> jobParameterMap = new HashMap<>();
+        for (JobParameter jobparameter : jobParameterList) {
+            jobParameterMap.put(jobparameter.getParameterName(), jobparameter.getParameterValue());
         }
-        return  jobParameterMap;
+        return jobParameterMap;
     }
+
     private Object getBeanObject(final Class<?> classType) throws ClassNotFoundException {
         final List<Class<?>> typesList = new ArrayList<>();
         final Class<?>[] interfaceType = classType.getInterfaces();

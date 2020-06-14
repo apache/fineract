@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PocketRepositoryWrapper {
+
     private final PocketRepository pocketRepository;
 
     @Autowired
@@ -42,9 +43,7 @@ public class PocketRepositoryWrapper {
 
     public Long findByAppUserIdWithNotFoundDetection(final Long appUserId) {
         final Long pocketId = this.pocketRepository.findByAppUserId(appUserId);
-        if (pocketId == null) {
-            throw new PocketNotFoundException();
-        }
+        if (pocketId == null) { throw new PocketNotFoundException(); }
         return pocketId;
     }
 

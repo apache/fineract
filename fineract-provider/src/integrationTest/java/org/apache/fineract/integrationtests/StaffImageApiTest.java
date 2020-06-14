@@ -53,7 +53,7 @@ public class StaffImageApiTest {
     }
 
     @Test
-    public void getStaffImage(){
+    public void getStaffImage() {
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
         assertNotNull(imageId, "Image id should not be null");
@@ -63,7 +63,7 @@ public class StaffImageApiTest {
     }
 
     @Test
-    public void getStaffImageAsBinary(){
+    public void getStaffImageAsBinary() {
         Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         Integer imageId = ImageHelper.createImageForStaff(this.requestSpec, this.responseSpec, staffId);
         assertNotNull(imageId, "Image id should not be null");

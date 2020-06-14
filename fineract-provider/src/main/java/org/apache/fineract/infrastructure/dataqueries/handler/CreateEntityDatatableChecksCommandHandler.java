@@ -34,8 +34,7 @@ public class CreateEntityDatatableChecksCommandHandler implements NewCommandSour
     private final EntityDatatableChecksWritePlatformService writePlatformService;
 
     @Autowired
-    public CreateEntityDatatableChecksCommandHandler(
-            final EntityDatatableChecksWritePlatformService writePlatformService) {
+    public CreateEntityDatatableChecksCommandHandler(final EntityDatatableChecksWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

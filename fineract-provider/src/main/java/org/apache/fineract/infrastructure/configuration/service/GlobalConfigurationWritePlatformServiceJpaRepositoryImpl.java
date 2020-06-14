@@ -85,20 +85,15 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 
     @Transactional
     @Override
-    public void addSurveyConfig(final String name)
-    {
-        try{
+    public void addSurveyConfig(final String name) {
+        try {
             final GlobalConfigurationProperty ppi = GlobalConfigurationProperty.newSurveyConfiguration(name);
             this.repository.save(ppi);
-        }
-        catch (final DataIntegrityViolationException dve)
-        {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(dve);
         }
 
     }
-
-
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue

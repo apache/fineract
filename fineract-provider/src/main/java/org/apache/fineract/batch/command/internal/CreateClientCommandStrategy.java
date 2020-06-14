@@ -29,8 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle
- * creation of a new client. It passes the contents of the body from the
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to
+ * handle creation of a new client. It passes the contents of the body from the
  * BatchRequest to
  * {@link org.apache.fineract.portfolio.client.api.ClientsApiResource} and gets
  * back the response. This class will also catch any errors raised by

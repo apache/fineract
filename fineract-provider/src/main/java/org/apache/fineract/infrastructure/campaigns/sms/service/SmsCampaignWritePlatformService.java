@@ -51,8 +51,8 @@ public interface SmsCampaignWritePlatformService {
 
     public void storeTemplateMessageIntoSmsOutBoundTable() throws JobExecutionException;
 
-    public void insertDirectCampaignIntoSmsOutboundTable(final Client client, final SmsCampaign smsCampaign) ;
+    public void insertDirectCampaignIntoSmsOutboundTable(final Client client, final SmsCampaign smsCampaign);
 
-    public void insertDirectCampaignIntoSmsOutboundTable(final SavingsAccount savingsAccount, final SmsCampaign smsCampaign) ;
+    public void insertDirectCampaignIntoSmsOutboundTable(final SavingsAccount savingsAccount, final SmsCampaign smsCampaign);
 
 }

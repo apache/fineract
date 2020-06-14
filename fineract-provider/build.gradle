@@ -119,7 +119,7 @@ dependencyManagement {
             // FINERACT-940 && FINERACT-966 https://github.com/spotbugs/spotbugs/issues/1128
             exclude 'xpp3:xpp3'
             exclude 'pull-parser:pull-parser'
-	    }
+        }
 
         dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
             entry 'jersey-core'
@@ -156,8 +156,8 @@ project.ext.mysqlPassword='mysql'
 group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
 repositories {
-	jcenter()
-	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
+    jcenter()
+    // mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
@@ -167,7 +167,7 @@ if (project.hasProperty('env') && project.getProperty('env') == 'eclipse')
     sourceSets.main.java.outputDir = new File(rootProject.projectDir, "bin/main")
 }
 
-eclipse 
+eclipse
 {
     project {
         buildCommand([ LaunchConfigHandle: "<project>/.externalToolBuilders/OpenJPA Enhance Builder.launch" ],  'org.eclipse.ui.externaltools.ExternalToolBuilder')
@@ -206,12 +206,12 @@ spotless {
 
   java {
     importOrder() //sort imports alphabetically
-    removeUnusedImports() 
+    removeUnusedImports()
     eclipse().configFile '../config/fineractdev-formatter.xml'
     endWithNewline()
     trimTrailingWhitespace()
   }
-  
+
   lineEndings 'UNIX'
 }
 
@@ -299,25 +299,25 @@ rat {
 }
 
 configurations {
-	providedRuntime // needed for Spring Boot executable WAR
+    providedRuntime // needed for Spring Boot executable WAR
     providedCompile
-	compile() {
-		exclude module: 'hibernate-entitymanager'
-		exclude module: 'hibernate-validator'
-		exclude module: 'activation'
-		exclude module: 'bcmail-jdk14'
-		exclude module: 'bcprov-jdk14'
-		exclude module: 'bctsp-jdk14'
-		exclude module: 'c3p0'
-		exclude module: 'stax-api'
-		exclude module: 'jaxb-api'
-		exclude module: 'jaxb-impl'
-		exclude module: 'jboss-logging'
-		exclude module: 'itext-rtf'
-		exclude module: 'classworlds'
-	}
-	runtime
-	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
+    compile() {
+        exclude module: 'hibernate-entitymanager'
+        exclude module: 'hibernate-validator'
+        exclude module: 'activation'
+        exclude module: 'bcmail-jdk14'
+        exclude module: 'bcprov-jdk14'
+        exclude module: 'bctsp-jdk14'
+        exclude module: 'c3p0'
+        exclude module: 'stax-api'
+        exclude module: 'jaxb-api'
+        exclude module: 'jaxb-impl'
+        exclude module: 'jboss-logging'
+        exclude module: 'itext-rtf'
+        exclude module: 'classworlds'
+    }
+    runtime
+    all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
 
 tasks.withType(JavaCompile) {
@@ -489,21 +489,21 @@ pmd {
 */
 
 war {
-	from('../licenses/binary/') { // notice the parens
-		into "WEB-INF/licenses/binary/" // no leading slash
-	}
-	from('../LICENSE_RELEASE') { // notice the parens
-		into "WEB-INF/" // no leading slash
-	}
-	from('../NOTICE_RELEASE') { // notice the parens
-		into "WEB-INF/" // no leading slash
-	}
-	rename ('LICENSE_RELEASE', 'LICENSE')
-	rename ('NOTICE_RELEASE', 'NOTICE')
+    from('../licenses/binary/') { // notice the parens
+        into "WEB-INF/licenses/binary/" // no leading slash
+    }
+    from('../LICENSE_RELEASE') { // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    from('../NOTICE_RELEASE') { // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    rename ('LICENSE_RELEASE', 'LICENSE')
+    rename ('NOTICE_RELEASE', 'NOTICE')
 
-	from('../DISCLAIMER') { // notice the parens
-		into "WEB-INF/" // no leading slash
-	}
+    from('../DISCLAIMER') { // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
     war.finalizedBy(bootWar)
 }
 
@@ -588,7 +588,7 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 
 sourceSets {
  integrationTest {
-    	compileClasspath += main.output + test.output
+        compileClasspath += main.output + test.output
         runtimeClasspath += main.output + test.output
     }
 }
@@ -608,20 +608,20 @@ task integrationTest(type:Test) {
 }
 
 integrationTest {
-	useJUnitPlatform()
-	testLogging { // FINERACT-927
-		events "skipped", "failed"
-		showStandardStreams = false
-		exceptionFormat "full"
-	}
+    useJUnitPlatform()
+    testLogging { // FINERACT-927
+        events "skipped", "failed"
+        showStandardStreams = false
+        exceptionFormat "full"
+    }
 }
 test {
-	useJUnitPlatform()
-	testLogging { // FINERACT-927
-		events "skipped", "failed"
-		showStandardStreams = false
-		exceptionFormat "full"
-	}
+    useJUnitPlatform()
+    testLogging { // FINERACT-927
+        events "skipped", "failed"
+        showStandardStreams = false
+        exceptionFormat "full"
+    }
 }
 
 

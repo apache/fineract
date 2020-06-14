@@ -49,8 +49,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     private final ContentRepositoryFactory contentRepositoryFactory;
 
     @Autowired
-    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final DocumentRepository documentRepository, final ContentRepositoryFactory documentStoreFactory) {
+    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository,
+            final ContentRepositoryFactory documentStoreFactory) {
         this.context = context;
         this.documentRepository = documentRepository;
         this.contentRepositoryFactory = documentStoreFactory;
@@ -88,13 +88,11 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     @Transactional
     @Override
-    public Long createInternalDocument(final String entityType, final Long entityId,
-            final Long fileSize, final InputStream inputStream, final String mimeType,
-            final String name, final String description, final String fileName) {
+    public Long createInternalDocument(final String entityType, final Long entityId, final Long fileSize, final InputStream inputStream,
+            final String mimeType, final String name, final String description, final String fileName) {
 
-
-        final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName,
-                fileSize, mimeType, description, null);
+        final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName, fileSize, mimeType,
+                description, null);
 
         final Long documentId = createDocument(documentCommand, inputStream);
 
@@ -153,8 +151,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         validateParentEntityType(documentCommand);
         // TODO: Check document is present under this entity Id
         final Document document = this.documentRepository.findById(documentCommand.getId())
-                .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(),
-                        documentCommand.getParentEntityId(), documentCommand.getId()));
+                .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
+                        documentCommand.getId()));
         this.documentRepository.delete(document);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
@@ -163,8 +161,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     }
 
     private void validateParentEntityType(final DocumentCommand documentCommand) {
-        if (!checkValidEntityType(documentCommand.getParentEntityType())) { throw new InvalidEntityTypeForDocumentManagementException(
-                documentCommand.getParentEntityType()); }
+        if (!checkValidEntityType(documentCommand.getParentEntityType())) {
+            throw new InvalidEntityTypeForDocumentManagementException(documentCommand.getParentEntityType());
+        }
     }
 
     private static boolean checkValidEntityType(final String entityType) {
@@ -176,7 +175,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     /*** Entities for document Management **/
     public static enum DocumentManagementEntity {
-        CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS,IMPORT;
+
+        CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS, IMPORT;
 
         @Override
         public String toString() {

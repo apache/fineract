@@ -83,8 +83,8 @@ public class ApiGlobalErrorResponse {
     public static ApiGlobalErrorResponse unAuthorized(final String defaultUserMessage) {
         final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("403");
-        globalErrorResponse
-                .setDeveloperMessage("The user associated with credentials passed on this request does not have sufficient privileges to perform this action.");
+        globalErrorResponse.setDeveloperMessage(
+                "The user associated with credentials passed on this request does not have sufficient privileges to perform this action.");
         globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authorized");
         globalErrorResponse.setDefaultUserMessage("Insufficient privileges to perform this action.");
 

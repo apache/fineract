@@ -186,8 +186,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         private InterestRateChartExtractor() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
-            sqlBuilder
-                    .append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
+            sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
                     .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
                     .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount, ")
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
@@ -198,8 +197,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
                     .append("sp.id as savingsProductId, sp.name as savingsProductName, ").append("iri.id as iriId, ")
                     .append(" iri.entiry_type as entityType, iri.attribute_name as attributeName ,")
                     .append(" iri.condition_type as conditionType, iri.attribute_value as attributeValue, ")
-                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ")
-                    .append("code.code_value as attributeValueDesc ").append("from ")
+                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
+                    .append("from ")
                     .append("m_interest_rate_chart irc left join m_interest_rate_slab ircd on irc.id=ircd.interest_rate_chart_id ")
                     .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
                     .append(" left join m_code_value code on code.id = iri.attribute_value ")
@@ -271,7 +270,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final Long savingsProductId = JdbcSupport.getLongDefaultToNullIfZero(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
 
-            return InterestRateChartData.instance(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId, savingsProductName);
+            return InterestRateChartData.instance(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId,
+                    savingsProductName);
         }
 
     }
@@ -287,16 +287,15 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         private InterestRateChartSlabsMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
-            sqlBuilder
-                    .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
-                    .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
+            sqlBuilder.append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ").append(
+                    "ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
                     .append("iri.id as iriId, ").append(" iri.entiry_type as entityType, iri.attribute_name as attributeName ,")
                     .append(" iri.condition_type as conditionType, iri.attribute_value as attributeValue, ")
-                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ")
-                    .append("code.code_value as attributeValueDesc ").append("from ").append("m_interest_rate_slab ircd ")
+                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
+                    .append("from ").append("m_interest_rate_slab ircd ")
                     .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
                     .append(" left join m_code_value code on code.id = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ");
@@ -330,8 +329,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             // currency
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             return InterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
                     annualInterestRate, currency);

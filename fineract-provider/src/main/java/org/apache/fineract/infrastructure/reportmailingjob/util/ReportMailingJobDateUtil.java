@@ -24,6 +24,7 @@ import java.util.Date;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobStretchyReportParamDateOption;
 
 public class ReportMailingJobDateUtil {
+
     public static final String MYSQL_DATE_FORMAT = "yyyy-MM-dd";
 
     /**
@@ -36,7 +37,8 @@ public class ReportMailingJobDateUtil {
         // get a date to represent "today"
         Date today = calendar.getTime();
 
-        // get a SimpleDateFormat instance, passing the mysql date format as parameter
+        // get a SimpleDateFormat instance, passing the mysql date format as
+        // parameter
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MYSQL_DATE_FORMAT);
 
         // return date as string
@@ -56,7 +58,8 @@ public class ReportMailingJobDateUtil {
         // now get "yesterday"
         Date yesterday = calendar.getTime();
 
-        // get a SimpleDateFormat instance, passing the mysql date format as parameter
+        // get a SimpleDateFormat instance, passing the mysql date format as
+        // parameter
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MYSQL_DATE_FORMAT);
 
         // return date as string
@@ -76,7 +79,8 @@ public class ReportMailingJobDateUtil {
         // now get "tomorrow"
         Date tomorrow = calendar.getTime();
 
-        // get a SimpleDateFormat instance, passing the mysql date format as parameter
+        // get a SimpleDateFormat instance, passing the mysql date format as
+        // parameter
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MYSQL_DATE_FORMAT);
 
         // return date as string
@@ -84,28 +88,31 @@ public class ReportMailingJobDateUtil {
     }
 
     /**
-     * get date as string based on the value of the {@link ReportMailingJobStretchyReportParamDateOption} object
+     * get date as string based on the value of the
+     * {@link ReportMailingJobStretchyReportParamDateOption} object
      *
-     * @param reportMailingJobStretchyReportParamDateOption {@link ReportMailingJobStretchyReportParamDateOption} Enum
+     * @param reportMailingJobStretchyReportParamDateOption
+     *            {@link ReportMailingJobStretchyReportParamDateOption} Enum
      **/
-    public static String getDateAsString(final ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption) {
+    public static String getDateAsString(
+            final ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption) {
         String dateAsString = null;
 
         switch (reportMailingJobStretchyReportParamDateOption) {
             case TODAY:
                 dateAsString = getTodayDateAsString();
-                break;
+            break;
 
             case YESTERDAY:
                 dateAsString = getYesterdayDateAsString();
-                break;
+            break;
 
             case TOMORROW:
                 dateAsString = getTomorrowDateAsString();
-                break;
+            break;
 
             default:
-                break;
+            break;
         }
 
         return dateAsString;

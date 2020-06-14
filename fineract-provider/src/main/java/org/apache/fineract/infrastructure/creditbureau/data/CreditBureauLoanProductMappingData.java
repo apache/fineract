@@ -40,10 +40,9 @@ public class CreditBureauLoanProductMappingData {
 
     private final boolean is_active;
 
-    private CreditBureauLoanProductMappingData(final long creditbureauLoanProductMappingId,
-            final long organisationCreditBureauId, final String alias, final String creditbureauSummary,
-            final String loanProductName, final long loanProductId, final boolean isCreditCheckMandatory,
-            final boolean skipCrediCheckInFailure, final long stalePeriod, final boolean is_active) {
+    private CreditBureauLoanProductMappingData(final long creditbureauLoanProductMappingId, final long organisationCreditBureauId,
+            final String alias, final String creditbureauSummary, final String loanProductName, final long loanProductId,
+            final boolean isCreditCheckMandatory, final boolean skipCrediCheckInFailure, final long stalePeriod, final boolean is_active) {
         this.creditbureauLoanProductMappingId = creditbureauLoanProductMappingId;
         this.organisationCreditBureauId = organisationCreditBureauId;
         this.alias = alias;
@@ -57,12 +56,12 @@ public class CreditBureauLoanProductMappingData {
     }
 
     public static CreditBureauLoanProductMappingData instance(final long creditbureauLoanProductMappingId,
-            final long organisationCreditBureauId, final String alias, final String creditbureauSummary,
-            final String loanProductName, final long loanProductId, final boolean isCreditCheckMandatory,
-            final boolean skipCrediCheckInFailure, final long stalePeriod, final boolean is_active) {
+            final long organisationCreditBureauId, final String alias, final String creditbureauSummary, final String loanProductName,
+            final long loanProductId, final boolean isCreditCheckMandatory, final boolean skipCrediCheckInFailure, final long stalePeriod,
+            final boolean is_active) {
         return new CreditBureauLoanProductMappingData(creditbureauLoanProductMappingId, organisationCreditBureauId, alias,
-                creditbureauSummary, loanProductName, loanProductId, isCreditCheckMandatory, skipCrediCheckInFailure,
-                stalePeriod, is_active);
+                creditbureauSummary, loanProductName, loanProductId, isCreditCheckMandatory, skipCrediCheckInFailure, stalePeriod,
+                is_active);
     }
 
     public static CreditBureauLoanProductMappingData instance1(final String loanProductName, final long loanProductId) {

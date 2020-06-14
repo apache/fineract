@@ -23,6 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class SavingsOfficerUnassignmentException extends AbstractPlatformDomainRuleException {
 
     public SavingsOfficerUnassignmentException(final Long accountId) {
-        super("error.msg.savings.account.not.assigned.to.savings.officer", "Savings Account Identifier" + accountId + " is not assigned to any savings officer.");
+        super("error.msg.savings.account.not.assigned.to.savings.officer",
+                "Savings Account Identifier" + accountId + " is not assigned to any savings officer.");
     }
 }

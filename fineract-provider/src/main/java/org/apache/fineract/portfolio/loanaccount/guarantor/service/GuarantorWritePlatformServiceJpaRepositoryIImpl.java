@@ -111,15 +111,15 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             AccountAssociations accountAssociations = null;
             if (guarantorCommand.getSavingsId() != null) {
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(guarantorCommand.getSavingsId());
-                validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(loan,savingsAccount);
+                validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(loan, savingsAccount);
                 accountAssociations = AccountAssociations.associateSavingsAccount(loan, savingsAccount,
                         AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), true);
 
                 GuarantorFundingDetails fundingDetails = new GuarantorFundingDetails(accountAssociations,
                         GuarantorFundStatusType.ACTIVE.getValue(), guarantorCommand.getAmount());
                 guarantorFundingDetails.add(fundingDetails);
-                if (loan.isDisbursed() || (loan.isApproved()
-                        && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled()))) {
+                if (loan.isDisbursed()
+                        || (loan.isApproved() && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled()))) {
                     this.guarantorDomainService.assignGuarantor(fundingDetails, LocalDate.now());
                     loan.updateGuaranteeAmount(fundingDetails.getAmount());
                 }
@@ -180,12 +180,15 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         }
     }
 
-    private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan, final SavingsAccount savingsAccount) {
-        if (loan.getSubmittedOnDate().isBefore(savingsAccount.getActivationLocalDate())) { throw new GeneralPlatformDomainRuleException(
-                "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
-                "Guarantor saving account activation date [" + savingsAccount.getActivationLocalDate()
-                        + "] is on or before the loan submitted on date [" + loan.getSubmittedOnDate() + "]",
-                savingsAccount.getActivationLocalDate(), loan.getSubmittedOnDate()); }
+    private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan,
+            final SavingsAccount savingsAccount) {
+        if (loan.getSubmittedOnDate().isBefore(savingsAccount.getActivationLocalDate())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
+                    "Guarantor saving account activation date [" + savingsAccount.getActivationLocalDate()
+                            + "] is on or before the loan submitted on date [" + loan.getSubmittedOnDate() + "]",
+                    savingsAccount.getActivationLocalDate(), loan.getSubmittedOnDate());
+        }
     }
 
     @Override
@@ -251,8 +254,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         validateLoanStatus(loan);
         final Guarantor guarantorForDelete = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
-        if (guarantorForDelete == null || (guarantorFundingId == null && !guarantorForDelete.getGuarantorFundDetails().isEmpty())) { throw new GuarantorNotFoundException(
-                loanId, guarantorId, guarantorFundingId); }
+        if (guarantorForDelete == null || (guarantorFundingId == null && !guarantorForDelete.getGuarantorFundDetails().isEmpty())) {
+            throw new GuarantorNotFoundException(loanId, guarantorId, guarantorFundingId);
+        }
         CommandProcessingResult commandProcessingResult = removeGuarantor(guarantorForDelete, loanId, guarantorFundingId);
         if (loan.isApproved() || loan.isDisbursed()) {
             this.guarantorDomainService.validateGuarantorBusinessRules(loan);
@@ -271,13 +275,16 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             guarantorForDelete.updateStatus(false);
         } else {
             GuarantorFundingDetails guarantorFundingDetails = guarantorForDelete.getGuarantorFundingDetail(guarantorFundingId);
-            if (guarantorFundingDetails == null) { throw new GuarantorNotFoundException(loanId, guarantorForDelete.getId(),
-                    guarantorFundingId); }
+            if (guarantorFundingDetails == null) {
+                throw new GuarantorNotFoundException(loanId, guarantorForDelete.getId(), guarantorFundingId);
+            }
             removeguarantorFundDetails(guarantorForDelete, baseDataValidator, guarantorFundingDetails);
 
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
         this.guarantorRepository.saveAndFlush(guarantorForDelete);
         CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder()
                 .withEntityId(guarantorForDelete.getId()).withLoanId(guarantorForDelete.getLoanId())

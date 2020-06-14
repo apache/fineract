@@ -28,21 +28,21 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/13/18.
  */
 final class ClientTransactionsApiResourceSwagger {
-    private ClientTransactionsApiResourceSwagger() {
-    }
+
+    private ClientTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsClientIdTransactionsResponse")
     public final static class GetClientsClientIdTransactionsResponse {
-        private GetClientsClientIdTransactionsResponse() {
-        }
+
+        private GetClientsClientIdTransactionsResponse() {}
 
         final class GetClientsPageItems {
-            private GetClientsPageItems() {
-            }
+
+            private GetClientsPageItems() {}
 
             final class GetClientsClientIdTransactionsType {
-                private GetClientsClientIdTransactionsType() {
-                }
+
+                private GetClientsClientIdTransactionsType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -53,8 +53,8 @@ final class ClientTransactionsApiResourceSwagger {
             }
 
             final class GetClientTransactionsCurrency {
-                private GetClientTransactionsCurrency() {
-                }
+
+                private GetClientTransactionsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -95,8 +95,8 @@ final class ClientTransactionsApiResourceSwagger {
 
     @ApiModel(value = "GetClientsClientIdTransactionsTransactionIdResponse")
     public final static class GetClientsClientIdTransactionsTransactionIdResponse {
-        private GetClientsClientIdTransactionsTransactionIdResponse() {
-        }
+
+        private GetClientsClientIdTransactionsTransactionIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;
@@ -116,11 +116,10 @@ final class ClientTransactionsApiResourceSwagger {
         public Boolean reversed;
     }
 
-
     @ApiModel(value = "PostClientsClientIdTransactionsTransactionIdResponse")
     public final static class PostClientsClientIdTransactionsTransactionIdResponse {
-        private PostClientsClientIdTransactionsTransactionIdResponse() {
-        }
+
+        private PostClientsClientIdTransactionsTransactionIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

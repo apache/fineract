@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SpringEventPublisher {
+
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 

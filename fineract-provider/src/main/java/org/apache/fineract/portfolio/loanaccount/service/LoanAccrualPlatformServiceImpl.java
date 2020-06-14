@@ -93,7 +93,8 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     }
 
     @Override
-    public void addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws JobExecutionException {
+    public void addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas)
+            throws JobExecutionException {
         Map<Long, Collection<LoanScheduleAccrualData>> loanDataMap = new HashMap<>();
         for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
             if (loanDataMap.containsKey(accrualData.getLoanId())) {
@@ -121,7 +122,7 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     @CronTarget(jobName = JobName.ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS)
     public void addPeriodicAccrualsForLoansWithIncomePostedAsTransactions() throws JobExecutionException {
         Collection<Long> loanIds = this.loanReadPlatformService.retrieveLoanIdsWithPendingIncomePostingTransactions();
-        if(loanIds != null && loanIds.size() > 0){
+        if (loanIds != null && loanIds.size() > 0) {
             List<Throwable> errors = new ArrayList<>();
             for (Long loanId : loanIds) {
                 try {

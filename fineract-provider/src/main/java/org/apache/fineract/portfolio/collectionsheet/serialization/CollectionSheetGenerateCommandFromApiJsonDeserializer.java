@@ -53,8 +53,8 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
     final Set<String> supportedParameters = new HashSet<>(
             Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
 
-    private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(Arrays.asList(
-            transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
+    private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(
+            Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -86,8 +86,10 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
         final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParamName, element);
         baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     public void validateForGenerateCollectionSheetOfIndividuals(final String json) {
@@ -116,8 +118,10 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParamName, element);
         baseDataValidator.reset().parameter(staffIdParamName).value(staffId).longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
 }

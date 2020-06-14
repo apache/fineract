@@ -32,7 +32,9 @@ class MultiExceptionTest {
 
     @Test()
     void testEmpty() throws MultiException {
-        assertThrows(IllegalArgumentException.class, () -> { throw new MultiException(Collections.emptyList()); });
+        assertThrows(IllegalArgumentException.class, () -> {
+            throw new MultiException(Collections.emptyList());
+        });
     }
 
     @Test()

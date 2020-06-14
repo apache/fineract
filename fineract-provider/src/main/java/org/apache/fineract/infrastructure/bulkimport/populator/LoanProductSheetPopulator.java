@@ -26,7 +26,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-
 public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
 
     private List<LoanProductData> products;
@@ -57,14 +56,12 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
     private static final int START_DATE_COL = 23;
     private static final int CLOSE_DATE_COL = 24;
 
-
-
     public LoanProductSheetPopulator(List<LoanProductData> products) {
         this.products = products;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         int rowIndex = 1;
         Sheet productSheet = workbook.createSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
         setLayout(productSheet);
@@ -116,8 +113,7 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
             writeString(INTEREST_RATE_FREQUENCY_COL, row, product.getInterestRateFrequencyType().getValue());
             writeString(AMORTIZATION_TYPE_COL, row, product.getAmortizationType().getValue());
             writeString(INTEREST_TYPE_COL, row, product.getInterestType().getValue());
-            writeString(INTEREST_CALCULATION_PERIOD_TYPE_COL, row,
-                    product.getInterestCalculationPeriodType().getValue());
+            writeString(INTEREST_CALCULATION_PERIOD_TYPE_COL, row, product.getInterestCalculationPeriodType().getValue());
             if (product.getInArrearsTolerance() != null) {
                 writeBigDecimal(IN_ARREARS_TOLERANCE_COL, row, product.getInArrearsTolerance());
             }
@@ -168,8 +164,8 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
         worksheet.setColumnWidth(IN_ARREARS_TOLERANCE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(TRANSACTION_PROCESSING_STRATEGY_NAME_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(GRACE_ON_PRINCIPAL_PAYMENT_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        worksheet.setColumnWidth(GRACE_ON_INTEREST_PAYMENT_COL,  TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
-        worksheet.setColumnWidth(GRACE_ON_INTEREST_CHARGED_COL,  TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        worksheet.setColumnWidth(GRACE_ON_INTEREST_PAYMENT_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
+        worksheet.setColumnWidth(GRACE_ON_INTEREST_CHARGED_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(START_DATE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(CLOSE_DATE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
 
@@ -201,10 +197,12 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
         writeString(START_DATE_COL, rowHeader, "Start Date");
         writeString(CLOSE_DATE_COL, rowHeader, "End Date");
     }
-    public List<LoanProductData> getProducts(){
+
+    public List<LoanProductData> getProducts() {
         return products;
 
     }
+
     public Integer getProductsSize() {
         return products.size();
     }

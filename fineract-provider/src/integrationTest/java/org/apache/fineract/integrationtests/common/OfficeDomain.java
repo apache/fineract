@@ -32,9 +32,8 @@ public class OfficeDomain {
         private String[] openingDate;
         private String hierarchy;
 
-        private Builder(final int id, final String name,
-                final String nameDecorated, final String externalId,
-                final String[] openingDate, final String hierarchy) {
+        private Builder(final int id, final String name, final String nameDecorated, final String externalId, final String[] openingDate,
+                final String hierarchy) {
             this.id = id;
             this.name = name;
             this.nameDecorated = nameDecorated;
@@ -44,8 +43,7 @@ public class OfficeDomain {
         }
 
         public OfficeDomain build() {
-            return new OfficeDomain(this.id, this.name, this.nameDecorated,
-                    this.externalId, this.openingDate, this.hierarchy);
+            return new OfficeDomain(this.id, this.name, this.nameDecorated, this.externalId, this.openingDate, this.hierarchy);
         }
     }
 
@@ -60,9 +58,8 @@ public class OfficeDomain {
         super();
     }
 
-    private OfficeDomain(final int id, final String name,
-            final String nameDecorated, final String externalId,
-            final String[] openingDate, final String hierarchy) {
+    private OfficeDomain(final int id, final String name, final String nameDecorated, final String externalId, final String[] openingDate,
+            final String hierarchy) {
         super();
         this.id = id;
         this.name = name;
@@ -80,11 +77,9 @@ public class OfficeDomain {
         return new Gson().fromJson(jsonData, OfficeDomain.class);
     }
 
-    public static Builder create(final int id, final String name,
-            final String nameDecorated, final String externalId,
+    public static Builder create(final int id, final String name, final String nameDecorated, final String externalId,
             final String[] openingDate, final String hierarchy) {
-        return new Builder(id, name, nameDecorated, externalId, openingDate,
-                hierarchy);
+        return new Builder(id, name, nameDecorated, externalId, openingDate, hierarchy);
     }
 
     public int getId() {
@@ -139,20 +134,14 @@ public class OfficeDomain {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
+        if (obj == this) { return true; }
 
-        if (!(obj instanceof OfficeDomain)) {
-            return false;
-        }
+        if (!(obj instanceof OfficeDomain)) { return false; }
 
         OfficeDomain od = (OfficeDomain) obj;
 
-        if (this.id == od.getId() && this.name.equals(od.getName())
-                && this.nameDecorated.equals(od.getName())
-                && this.externalId.equals(od.getExternalId())
-                && Arrays.equals(this.openingDate, od.getOpeningDate())
+        if (this.id == od.getId() && this.name.equals(od.getName()) && this.nameDecorated.equals(od.getName())
+                && this.externalId.equals(od.getExternalId()) && Arrays.equals(this.openingDate, od.getOpeningDate())
                 && this.hierarchy.equals(od.getHierarchy())) {
             return true;
         }

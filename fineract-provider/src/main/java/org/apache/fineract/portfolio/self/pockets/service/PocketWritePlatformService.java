@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.fineract.portfolio.self.pockets.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

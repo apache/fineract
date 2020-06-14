@@ -35,7 +35,7 @@ public class LoanChargePaidBy extends AbstractPersistableCustom {
     @JoinColumn(name = "loan_transaction_id", nullable = false)
     private LoanTransaction loanTransaction;
 
-    @ManyToOne(cascade= CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "loan_charge_id", nullable = false)
     private LoanCharge loanCharge;
 
@@ -80,7 +80,6 @@ public class LoanChargePaidBy extends AbstractPersistableCustom {
     public void setAmount(final BigDecimal amount) {
         this.amount = amount;
     }
-
 
     public Integer getInstallmentNumber() {
         return this.installmentNumber;

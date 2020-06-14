@@ -95,8 +95,9 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
                 // Check if it's safe to remove this currency.
                 if (!loanProductService.retrieveAllLoanProductsForCurrency(priorCurrency.getCode()).isEmpty()
                         || !savingsProductService.retrieveAllForCurrency(priorCurrency.getCode()).isEmpty()
-                        || !chargeService.retrieveAllChargesForCurrency(priorCurrency.getCode()).isEmpty()) { throw new CurrencyInUseException(
-                        priorCurrency.getCode()); }
+                        || !chargeService.retrieveAllChargesForCurrency(priorCurrency.getCode()).isEmpty()) {
+                    throw new CurrencyInUseException(priorCurrency.getCode());
+                }
             }
         }
 

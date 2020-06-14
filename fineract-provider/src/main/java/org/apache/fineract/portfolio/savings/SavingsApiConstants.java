@@ -57,7 +57,7 @@ public class SavingsApiConstants {
     public static final String COMMAND_INACTIVATE_CHARGE = "inactivate";
     public static final String COMMAND_HOLD_AMOUNT = "holdAmount";
     public static final String COMMAND_RELEASE_AMOUNT = "releaseAmount";
-    public static final String COMMAND_UNBLOCK_ACCOUNT= "unblock";
+    public static final String COMMAND_UNBLOCK_ACCOUNT = "unblock";
     public static final String COMMAND_BLOCK_ACCOUNT = "block";
     public static final String COMMAND_BLOCK_CREDIT = "blockCredit";
     public static final String COMMAND_BLOCK_DEBIT = "blockDebit";
@@ -72,19 +72,19 @@ public class SavingsApiConstants {
 
     // savings product and account parameters
     public static final String idParamName = "id";
-    public static final String isGSIM="isGSIM";
-    public static final String isParentAccount="isParentAccount";
+    public static final String isGSIM = "isGSIM";
+    public static final String isParentAccount = "isParentAccount";
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
     public static final String statusParamName = "status";
     public static final String subStatusParamName = "subStatus";
     public static final String clientIdParamName = "clientId";
     public static final String isRetailAccountParamName = "isRetailAccount";
-    public static final String autogenerateTransactionIdParamName="autogenerateTransactionId";
-    public static final String transactionUpperLimitParamName="transactionUpperLimit";
-    public static final String transactionLowerLimitParamName="transactionLowerLimit";
-    public static final String retailEntriesParamName="retailEntries";
-    public static final String childAccountIdParamName="childAccountId";
+    public static final String autogenerateTransactionIdParamName = "autogenerateTransactionId";
+    public static final String transactionUpperLimitParamName = "transactionUpperLimit";
+    public static final String transactionLowerLimitParamName = "transactionLowerLimit";
+    public static final String retailEntriesParamName = "retailEntries";
+    public static final String childAccountIdParamName = "childAccountId";
 
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";

@@ -34,11 +34,11 @@ public class AppUserClientMapping extends AbstractPersistableCustom {
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    public AppUserClientMapping(){
+    public AppUserClientMapping() {
 
     }
 
-    public AppUserClientMapping(Client client){
+    public AppUserClientMapping(Client client) {
         this.client = client;
     }
 
@@ -49,17 +49,11 @@ public class AppUserClientMapping extends AbstractPersistableCustom {
     @Override
     public boolean equals(Object obj) {
 
-        if (null == obj) {
-            return false;
-        }
+        if (null == obj) { return false; }
 
-        if (this == obj) {
-            return true;
-        }
+        if (this == obj) { return true; }
 
-        if (!(obj instanceof AppUserClientMapping)) {
-            return false;
-        }
+        if (!(obj instanceof AppUserClientMapping)) { return false; }
 
         AppUserClientMapping that = (AppUserClientMapping) obj;
 

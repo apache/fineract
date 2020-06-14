@@ -44,9 +44,7 @@ public class SelfShareAccountsDataValidator {
     }
 
     public HashMap<String, Object> validateShareAccountApplication(final String json) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -54,14 +52,10 @@ public class SelfShareAccountsDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String clientId = this.fromApiJsonHelper.extractStringNamed(ShareAccountApiConstants.clientid_paramname,
-                element);
-        baseDataValidator.reset().parameter(ShareAccountApiConstants.clientid_paramname).value(clientId).notNull()
-                .longGreaterThanZero();
+        final String clientId = this.fromApiJsonHelper.extractStringNamed(ShareAccountApiConstants.clientid_paramname, element);
+        baseDataValidator.reset().parameter(ShareAccountApiConstants.clientid_paramname).value(clientId).notNull().longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         HashMap<String, Object> retAttr = new HashMap<>();
         retAttr.put(ShareAccountApiConstants.clientid_paramname, Long.parseLong(clientId));

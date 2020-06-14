@@ -18,14 +18,14 @@
 --
 
 ALTER TABLE `job`
-	ADD COLUMN `is_misfired` tinyint NOT NULL DEFAULT '0' AFTER `scheduler_group`;
+    ADD COLUMN `is_misfired` tinyint NOT NULL DEFAULT '0' AFTER `scheduler_group`;
 
 CREATE TABLE `scheduler_detail` (
-	`id` SMALLINT NOT NULL AUTO_INCREMENT,
-	`is_suspended` tinyint NOT NULL DEFAULT '0',
-	`execute_misfired_jobs` tinyint NOT NULL DEFAULT '1',
-	`reset_scheduler_on_bootup` tinyint NOT NULL DEFAULT '1',
-	PRIMARY KEY (`id`)
+    `id` SMALLINT NOT NULL AUTO_INCREMENT,
+    `is_suspended` tinyint NOT NULL DEFAULT '0',
+    `execute_misfired_jobs` tinyint NOT NULL DEFAULT '1',
+    `reset_scheduler_on_bootup` tinyint NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

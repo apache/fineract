@@ -36,7 +36,6 @@ public class AccountEntityServiceForShareAccountsImpl implements AccountEntitySe
     private final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService;
     private final ShareAccountReadPlatformService shareAccountReadPlatformService;
 
-
     @Autowired
     public AccountEntityServiceForShareAccountsImpl(final PlatformSecurityContext context,
             final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService,

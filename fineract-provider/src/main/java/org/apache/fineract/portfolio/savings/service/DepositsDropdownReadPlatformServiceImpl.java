@@ -50,14 +50,12 @@ public class DepositsDropdownReadPlatformServiceImpl implements DepositsDropdown
      * .recurringDepositFrequencyType(SavingsPeriodFrequencyType.values()); }
      */
 
-
     @Override
     public Collection<EnumOptionData> maturityInstructionOptions() {
-        return  Arrays.asList(
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.WITHDRAW_DEPOSIT),
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS),
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST),
-            SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY));
+        return Arrays.asList(SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.WITHDRAW_DEPOSIT),
+                SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS),
+                SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_AND_INTEREST),
+                SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType.REINVEST_PRINCIPAL_ONLY));
 
     }
 }

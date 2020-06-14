@@ -37,20 +37,20 @@ public class InterestRateChartEnumerations {
             case INVALID:
             break;
             case DAYS:
-                optionData = new EnumOptionData(PeriodFrequencyType.DAYS.getValue().longValue(),
-                        PeriodFrequencyType.DAYS.getCode(), "Days");
+                optionData = new EnumOptionData(PeriodFrequencyType.DAYS.getValue().longValue(), PeriodFrequencyType.DAYS.getCode(),
+                        "Days");
             break;
             case WEEKS:
-                optionData = new EnumOptionData(PeriodFrequencyType.WEEKS.getValue().longValue(),
-                        PeriodFrequencyType.WEEKS.getCode(), "Weeks");
+                optionData = new EnumOptionData(PeriodFrequencyType.WEEKS.getValue().longValue(), PeriodFrequencyType.WEEKS.getCode(),
+                        "Weeks");
             break;
             case MONTHS:
-                optionData = new EnumOptionData(PeriodFrequencyType.MONTHS.getValue().longValue(),
-                        PeriodFrequencyType.MONTHS.getCode(), "Months");
+                optionData = new EnumOptionData(PeriodFrequencyType.MONTHS.getValue().longValue(), PeriodFrequencyType.MONTHS.getCode(),
+                        "Months");
             break;
             case YEARS:
-                optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
-                        PeriodFrequencyType.YEARS.getCode(), "Years");
+                optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(), PeriodFrequencyType.YEARS.getCode(),
+                        "Years");
             break;
             default:
         }

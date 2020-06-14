@@ -26,17 +26,17 @@ import java.util.List;
  * Created by Chirag Gupta on 12/17/17.
  */
 final class CollectionSheetApiResourceSwagger {
-    private CollectionSheetApiResourceSwagger() {
-    }
+
+    private CollectionSheetApiResourceSwagger() {}
 
     @ApiModel(value = "PostCollectionSheetRequest")
     public final static class PostCollectionSheetRequest {
-        private PostCollectionSheetRequest() {
-        }
+
+        private PostCollectionSheetRequest() {}
 
         final class PostCollectionSheetBulkRepaymentTransactions {
-            private PostCollectionSheetBulkRepaymentTransactions() {
-            }
+
+            private PostCollectionSheetBulkRepaymentTransactions() {}
 
             @ApiModelProperty(example = "10")
             public Integer loanId;
@@ -63,12 +63,12 @@ final class CollectionSheetApiResourceSwagger {
 
     @ApiModel(value = "PostCollectionSheetResponse")
     public final static class PostCollectionSheetResponse {
-        private PostCollectionSheetResponse() {
-        }
+
+        private PostCollectionSheetResponse() {}
 
         final class PostCollectionSheetChanges {
-            private PostCollectionSheetChanges() {
-            }
+
+            private PostCollectionSheetChanges() {}
 
             @ApiModelProperty(example = "en")
             public String locale;

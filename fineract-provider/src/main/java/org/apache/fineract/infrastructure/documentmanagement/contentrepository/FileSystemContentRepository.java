@@ -169,7 +169,8 @@ public class FileSystemContentRepository implements ContentRepository {
             out.flush();
             out.close();
         } catch (final IOException ioException) {
-            LOG.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)", ioException);
+            LOG.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)",
+                    ioException);
             throw new ContentManagementException(fileName, ioException.getMessage());
         }
     }

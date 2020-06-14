@@ -37,10 +37,8 @@ import org.springframework.stereotype.Component;
 @Path("/mixreport")
 @Component
 @Scope("singleton")
-@Api(tags = {"Mix Report"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Mix Report", description = "")
-})
+@Api(tags = { "Mix Report" })
+@SwaggerDefinition(tags = { @Tag(name = "Mix Report", description = "") })
 public class MixReportApiResource {
 
     private final XBRLResultService xbrlResultService;

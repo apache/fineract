@@ -49,9 +49,8 @@ public class VariableLoanScheduleFromApiJsonValidator {
 
     final Set<String> variableSchedulesupportedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.exceptionParamName,
             LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
-    final Set<String> variableSchedulesupportedArrayParameters = new HashSet<>(Arrays.asList(
-            LoanApiConstants.modifiedinstallmentsParamName, LoanApiConstants.newinstallmentsParamName,
-            LoanApiConstants.deletedinstallmentsParamName));
+    final Set<String> variableSchedulesupportedArrayParameters = new HashSet<>(Arrays.asList(LoanApiConstants.modifiedinstallmentsParamName,
+            LoanApiConstants.newinstallmentsParamName, LoanApiConstants.deletedinstallmentsParamName));
     final Set<String> variableScheduleModifiedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
             LoanApiConstants.modifiedDueDateParamName, LoanApiConstants.principalParamName, LoanApiConstants.installmentAmountParamName));
     final Set<String> variableScheduleNewInstallmentParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
@@ -135,9 +134,8 @@ public class VariableLoanScheduleFromApiJsonValidator {
                 List<String> unsupportedParams = new ArrayList<>(1);
                 unsupportedParams.add(LoanApiConstants.principalParamName);
                 throw new UnsupportedParameterException(unsupportedParams);
-            } else if ((!loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce() || loan.getLoanProductRelatedDetail()
-                    .getAmortizationMethod().isEqualPrincipal())
-                    && installmentAmount != null) {
+            } else if ((!loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce()
+                    || loan.getLoanProductRelatedDetail().getAmortizationMethod().isEqualPrincipal()) && installmentAmount != null) {
                 List<String> unsupportedParams = new ArrayList<>(1);
                 unsupportedParams.add(LoanApiConstants.installmentAmountParamName);
                 throw new UnsupportedParameterException(unsupportedParams);

@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * Updating & Deletion
  */
 public class GroupTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(GroupTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -109,11 +110,11 @@ public class GroupTest {
 
         // create staff
         Integer createStaffId1 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}" , createStaffId1);
+        LOG.info("--------------creating first staff with id------------- {}", createStaffId1);
         Assertions.assertNotNull(createStaffId1);
 
         Integer createStaffId2 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating second staff with id------------- {}" , createStaffId2);
+        LOG.info("--------------creating second staff with id------------- {}", createStaffId2);
         Assertions.assertNotNull(createStaffId2);
 
         // assign staff "createStaffId1" to group

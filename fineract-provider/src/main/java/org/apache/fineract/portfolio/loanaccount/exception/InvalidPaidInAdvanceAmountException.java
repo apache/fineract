@@ -27,8 +27,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class InvalidPaidInAdvanceAmountException extends AbstractPlatformDomainRuleException {
 
     public InvalidPaidInAdvanceAmountException(final String refundAmountString) {
-        super("error.msg.loan.refund.amount.invalid", "The refund amount `" + refundAmountString + "`"
-                + "` is invalid or loan is not paid in advance.", new Object[] { refundAmountString});
+        super("error.msg.loan.refund.amount.invalid",
+                "The refund amount `" + refundAmountString + "`" + "` is invalid or loan is not paid in advance.",
+                new Object[] { refundAmountString });
     }
 
 }

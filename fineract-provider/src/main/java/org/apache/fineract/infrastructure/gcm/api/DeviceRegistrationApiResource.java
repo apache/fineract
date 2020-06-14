@@ -148,7 +148,7 @@ public class DeviceRegistrationApiResource {
 
     }
 
-    public String responseMap(Long id){
+    public String responseMap(Long id) {
         HashMap<String, Object> responseMap = new HashMap<>();
         responseMap.put("resource", id);
         return new Gson().toJson(responseMap);

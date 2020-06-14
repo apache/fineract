@@ -95,13 +95,12 @@ public class Holiday extends AbstractPersistableCustom {
         final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDateParamName);
         final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDateParamName);
         Integer reschedulingType = null;
-        if(command.parameterExists(HolidayApiConstants.reschedulingType)){
+        if (command.parameterExists(HolidayApiConstants.reschedulingType)) {
             reschedulingType = command.integerValueOfParameterNamed(HolidayApiConstants.reschedulingType);
         }
         LocalDate repaymentsRescheduledTo = null;
-        if(reschedulingType == null || reschedulingType.equals(RescheduleType.RESCHEDULETOSPECIFICDATE.getValue())){
-            repaymentsRescheduledTo = command
-                    .localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
+        if (reschedulingType == null || reschedulingType.equals(RescheduleType.RESCHEDULETOSPECIFICDATE.getValue())) {
+            repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
         }
         final Integer status = HolidayStatusType.PENDING_FOR_ACTIVATION.getValue();
         final boolean processed = false;// default it to false. Only batch job
@@ -134,12 +133,11 @@ public class Holiday extends AbstractPersistableCustom {
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-
-        if (command.isChangeInIntegerParameterNamed(HolidayApiConstants.reschedulingType,this.reschedulingType)) {
-            final Integer newValue =command.integerValueOfParameterNamed(HolidayApiConstants.reschedulingType);
+        if (command.isChangeInIntegerParameterNamed(HolidayApiConstants.reschedulingType, this.reschedulingType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(HolidayApiConstants.reschedulingType);
             actualChanges.put(HolidayApiConstants.reschedulingType, newValue);
             this.reschedulingType = RescheduleType.fromInt(newValue).getValue();
-            if(newValue.equals(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE.getValue())){
+            if (newValue.equals(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE.getValue())) {
                 this.repaymentsRescheduledTo = null;
             }
         }
@@ -223,7 +221,8 @@ public class Holiday extends AbstractPersistableCustom {
     }
 
     private Holiday(final String name, final LocalDate fromDate, final LocalDate toDate, final LocalDate repaymentsRescheduledTo,
-            final Integer status, final boolean processed, final String description, final Set<Office> offices, final int reschedulingType) {
+            final Integer status, final boolean processed, final String description, final Set<Office> offices,
+            final int reschedulingType) {
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         }

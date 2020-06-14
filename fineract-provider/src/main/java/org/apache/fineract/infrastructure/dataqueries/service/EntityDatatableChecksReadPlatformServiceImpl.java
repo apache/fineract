@@ -108,7 +108,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             }
         }
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(),paramList.toArray(),
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
                 entityDataTableChecksMapper);
 
     }

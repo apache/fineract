@@ -52,7 +52,8 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     @Autowired
     public FinancialActivityAccountWritePlatformServiceImpl(
             final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
-            final FinancialActivityAccountDataValidator fromApiJsonDeserializer, final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
+            final FinancialActivityAccountDataValidator fromApiJsonDeserializer,
+            final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
         this.financialActivityAccountRepository = financialActivityAccountRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
@@ -77,10 +78,11 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                     .withEntityId(financialActivityAccount.getId()) //
                     .build();
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
+            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(),
+                    dataIntegrityViolationException);
             return CommandProcessingResult.empty();
-        }catch(final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -93,8 +95,9 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     private void validateFinancialActivityAndAccountMapping(FinancialActivityAccount financialActivityAccount) {
         FinancialActivity financialActivity = FinancialActivity.fromInt(financialActivityAccount.getFinancialActivityType());
         GLAccount glAccount = financialActivityAccount.getGlAccount();
-        if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) { throw new FinancialActivityAccountInvalidException(
-                financialActivity, glAccount); }
+        if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) {
+            throw new FinancialActivityAccountInvalidException(financialActivity, glAccount);
+        }
     }
 
     @Override
@@ -127,10 +130,11 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dataIntegrityViolationException) {
-            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
+            handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(),
+                    dataIntegrityViolationException);
             return CommandProcessingResult.empty();
-        }catch(final PersistenceException ee) {
-            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        } catch (final PersistenceException ee) {
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause());
             handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
@@ -147,7 +151,8 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
                 .build();
     }
 
-    private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+    private void handleFinancialActivityAccountDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final Exception dve) {
         if (realCause.getMessage().contains("financial_activity_type")) {
             final Integer financialActivityId = command
                     .integerValueSansLocaleOfParameterNamed(FinancialActivityAccountsJsonInputParams.FINANCIAL_ACTIVITY_ID.getValue());

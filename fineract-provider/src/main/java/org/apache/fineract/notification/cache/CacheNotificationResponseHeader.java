@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.notification.cache;
 
-
 public class CacheNotificationResponseHeader {
 
     private boolean hasNotifications;
     private Long lastFetch;
 
-    public CacheNotificationResponseHeader() {
-    }
+    public CacheNotificationResponseHeader() {}
 
     public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
         this.hasNotifications = hasNotifications;

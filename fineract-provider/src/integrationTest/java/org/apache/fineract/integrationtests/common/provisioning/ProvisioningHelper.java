@@ -37,11 +37,11 @@ public class ProvisioningHelper {
         map.put("definitions", addProvisioningCategories(categories, liability, expense));
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
         String formattedString = simple.format(Utils.getLocalDateOfTenant().toDate());
-        Random rand = new Random() ;
-        String criteriaName = "General Provisioning Criteria" + formattedString+rand.nextLong();
+        Random rand = new Random();
+        String criteriaName = "General Provisioning Criteria" + formattedString + rand.nextLong();
         map.put("criteriaName", criteriaName);
         map.put("locale", "en");
-       return map ;
+        return map;
     }
 
     public final static String createProvisioningEntryJson() {
@@ -90,9 +90,9 @@ public class ProvisioningHelper {
             if (i == categories.size() - 1) {
                 map.put("maxAge", 90000);
             } else {
-                map.put("maxAge", (i+1) * 30);
+                map.put("maxAge", (i + 1) * 30);
             }
-            map.put("provisioningPercentage", Float.valueOf((float)((i + 1) * 5.5)));
+            map.put("provisioningPercentage", Float.valueOf((float) ((i + 1) * 5.5)));
             map.put("liabilityAccount", liability.getAccountID());
             map.put("expenseAccount", expense.getAccountID());
             list.add(map);

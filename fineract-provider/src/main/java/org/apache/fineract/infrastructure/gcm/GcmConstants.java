@@ -23,7 +23,6 @@ package org.apache.fineract.infrastructure.gcm;
  */
 public final class GcmConstants {
 
-
     /**
      * Title for notification
      */
@@ -33,7 +32,6 @@ public final class GcmConstants {
      * icon for notification.
      */
     public static final String defaultIcon = "default";
-
 
     /**
      * Parameter for to field.
@@ -48,7 +46,7 @@ public final class GcmConstants {
     /**
      * HTTP parameter for registration id.
      */
-    //public static final String PARAM_REGISTRATION_ID = "registration_id";
+    // public static final String PARAM_REGISTRATION_ID = "registration_id";
 
     /**
      * HTTP parameter for collapse key.

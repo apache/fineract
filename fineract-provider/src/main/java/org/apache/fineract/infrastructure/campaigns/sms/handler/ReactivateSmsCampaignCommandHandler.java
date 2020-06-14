@@ -37,9 +37,10 @@ public class ReactivateSmsCampaignCommandHandler implements NewCommandSourceHand
     public ReactivateSmsCampaignCommandHandler(SmsCampaignWritePlatformService smsCampaignWritePlatformService) {
         this.smsCampaignWritePlatformService = smsCampaignWritePlatformService;
     }
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.smsCampaignWritePlatformService.reactivateSmsCampaign(command.entityId(),command);
+        return this.smsCampaignWritePlatformService.reactivateSmsCampaign(command.entityId(), command);
     }
 }

@@ -107,7 +107,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});
+        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode });
     }
 
     @Override
@@ -119,7 +119,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
             sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-            sql = sql + " ;" ;
+            sql = sql + " ;";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId });
         } catch (final EmptyResultDataAccessException e) {
             throw new ChargeNotFoundException(chargeId);

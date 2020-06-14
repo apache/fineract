@@ -49,10 +49,8 @@ import org.springframework.stereotype.Component;
 @Path("/mixmapping")
 @Component
 @Scope("singleton")
-@Api(tags = {"Mix Mapping "})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Mix Mapping", description = "")
-})
+@Api(tags = { "Mix Mapping " })
+@SwaggerDefinition(tags = { @Tag(name = "Mix Mapping", description = "") })
 public class MixTaxonomyMappingApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("identifier", "config"));

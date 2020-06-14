@@ -50,6 +50,7 @@ public class ExternalServicesProperties {
         this.value = value;
 
     }
+
     public static ExternalServicesProperties fromJson(final ExternalService externalService, final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed(ExternalservicePropertiesJSONinputParams.NAME.getValue());
         final String value = command.stringValueOfParameterNamed(ExternalservicePropertiesJSONinputParams.VALUE.getValue());

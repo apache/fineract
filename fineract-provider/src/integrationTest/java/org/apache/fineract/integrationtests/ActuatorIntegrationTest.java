@@ -33,9 +33,8 @@ public class ActuatorIntegrationTest {
 
     @Test
     public void testActuatorGitBuildInfo() {
-        Response response = RestAssured.given()
-            .headers("Content-Type", ContentType.JSON, "Accept", ContentType.JSON).when()
-            .get(INFO_URL).then().contentType(ContentType.JSON).extract().response();
+        Response response = RestAssured.given().headers("Content-Type", ContentType.JSON, "Accept", ContentType.JSON).when().get(INFO_URL)
+                .then().contentType(ContentType.JSON).extract().response();
 
         Map<String, String> gitBuildInfo = response.jsonPath().getMap("git");
 

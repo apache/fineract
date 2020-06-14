@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ShareAccountIntegrationTests {
+
     private final static Logger LOG = LoggerFactory.getLogger(ShareAccountIntegrationTests.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -68,8 +69,8 @@ public class ShareAccountIntegrationTests {
         LOG.info("------------------------------CREATING SHARE PRODUCT COMPLETE---------------------------------------");
 
         LOG.info("------------------------------RETRIEVING SHARE PRODUCT---------------------------------------");
-        Map<String, Object> shareProductData = ShareProductTransactionHelper
-                .retrieveShareProduct(shareProductId, requestSpec, responseSpec);
+        Map<String, Object> shareProductData = ShareProductTransactionHelper.retrieveShareProduct(shareProductId, requestSpec,
+                responseSpec);
         Assertions.assertNotNull(shareProductData);
         shareProductHelper.verifyShareProduct(shareProductData);
 
@@ -108,8 +109,8 @@ public class ShareAccountIntegrationTests {
         Assertions.assertNotNull(savingsAccountId);
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId);
         Assertions.assertNotNull(shareAccountId);
-        Map<String, Object> shareProductData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> shareProductData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
         Assertions.assertNotNull(shareProductData);
 
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
@@ -158,11 +159,11 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
         Assertions.assertNotNull(shareAccountId);
-        Map<String, Object> shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
         Assertions.assertNotNull(shareAccountData);
 
-     // Approve share Account
+        // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
         approveMap.put("dateFormat", "dd MMMM yyyy");
@@ -170,8 +171,7 @@ public class ShareAccountIntegrationTests {
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
         ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
-        shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assertions.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
@@ -232,8 +232,8 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
         Assertions.assertNotNull(shareAccountId);
-        Map<String, Object> shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
         Assertions.assertNotNull(shareAccountData);
 
         // Reject share Account
@@ -241,8 +241,7 @@ public class ShareAccountIntegrationTests {
         rejectMap.put("note", "Share Account Rejection Note");
         String rejectJson = new Gson().toJson(rejectMap);
         ShareAccountTransactionHelper.postCommand("reject", shareAccountId, rejectJson, requestSpec, responseSpec);
-        shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         DateFormat simple = new SimpleDateFormat("dd MMM yyyy");
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assertions.assertEquals("shareAccountStatusType.rejected", String.valueOf(statusMap.get("code")));
@@ -274,7 +273,7 @@ public class ShareAccountIntegrationTests {
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Date transactionDate = DateUtils.getDateOfTenant() ;
+                Date transactionDate = DateUtils.getDateOfTenant();
                 Assertions.assertEquals(simple.format(transactionDate), simple.format(date));
             }
         }
@@ -307,11 +306,11 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
         Assertions.assertNotNull(shareAccountId);
-        Map<String, Object> shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
         Assertions.assertNotNull(shareAccountData);
 
-     // Approve share Account
+        // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
         approveMap.put("dateFormat", "dd MMMM yyyy");
@@ -319,8 +318,7 @@ public class ShareAccountIntegrationTests {
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
         ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
-        shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assertions.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
@@ -335,8 +333,7 @@ public class ShareAccountIntegrationTests {
         String undoApprovalJson = new Gson().toJson(undoApprovalMap);
         ShareAccountTransactionHelper.postCommand("undoapproval", shareAccountId, undoApprovalJson, requestSpec, responseSpec);
 
-        shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
 
         statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assertions.assertEquals("shareAccountStatusType.submitted.and.pending.approval", String.valueOf(statusMap.get("code")));
@@ -393,8 +390,8 @@ public class ShareAccountIntegrationTests {
         charges.add(createCharge(redeemChargeId, "1"));
         final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, charges);
         Assertions.assertNotNull(shareAccountId);
-        Map<String, Object> shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        Map<String, Object> shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec,
+                responseSpec);
         Assertions.assertNotNull(shareAccountData);
 
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
@@ -433,25 +430,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-        //charges verification
-        List<Map<String, Object>> chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        List<Map<String, Object>> chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -464,8 +461,7 @@ public class ShareAccountIntegrationTests {
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
         ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
-        shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Map<String, Object> statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assertions.assertEquals("shareAccountStatusType.approved", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
@@ -475,25 +471,25 @@ public class ShareAccountIntegrationTests {
         Date approvedDate = cal.getTime();
         Assertions.assertEquals("01 Jan 2016", simple.format(approvedDate));
 
-        //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -540,25 +536,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -614,25 +610,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -688,25 +684,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -750,25 +746,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("4.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -812,25 +808,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -889,25 +885,25 @@ public class ShareAccountIntegrationTests {
             }
         }
 
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }
@@ -915,7 +911,7 @@ public class ShareAccountIntegrationTests {
         Assertions.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assertions.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
 
-        //Close Share Account
+        // Close Share Account
         Map<String, Object> closeAccountMap = new HashMap<>();
         closeAccountMap.put("note", "Share Account Close Note");
         closeAccountMap.put("dateFormat", "dd MMMM yyyy");
@@ -923,8 +919,7 @@ public class ShareAccountIntegrationTests {
         closeAccountMap.put("locale", "en");
         String closeJson = new Gson().toJson(closeAccountMap);
         ShareAccountTransactionHelper.postCommand("close", shareAccountId, closeJson, requestSpec, responseSpec);
-        shareAccountData = ShareAccountTransactionHelper
-                .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
+        shareAccountData = ShareAccountTransactionHelper.retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assertions.assertEquals("shareAccountStatusType.closed", String.valueOf(statusMap.get("code")));
         transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
@@ -960,39 +955,39 @@ public class ShareAccountIntegrationTests {
                 Assertions.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
                 Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
-            }else if (transactionType.equals("purchasedSharesType.redeemed") && transactionDate.equals("10 May 2016")) {
+            } else if (transactionType.equals("purchasedSharesType.redeemed") && transactionDate.equals("10 May 2016")) {
                 Assertions.assertEquals("30", String.valueOf(transaction.get("numberOfShares")));
                 Assertions.assertEquals("59.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("59.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("1.0", String.valueOf(transaction.get("chargeAmount")));
                 Map<String, Object> transactionstatusMap = (Map<String, Object>) transaction.get("status");
                 Assertions.assertEquals("purchasedSharesStatusType.approved", String.valueOf(transactionstatusMap.get("code")));
-            }else if (transactionType.equals("charge.payment")) {
+            } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amountPaid")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("chargeAmount")));
                 Assertions.assertEquals("01 Jan 2016", transactionDate);
             }
         }
-      //charges verification
-        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges") ;
-        for(Map<String, Object> chargeDef: chargesList) {
-            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType") ;
-            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code")) ;
-            if(chargeTimeType.equals("chargeTimeType.activation")) {
+        // charges verification
+        chargesList = (List<Map<String, Object>>) shareAccountData.get("charges");
+        for (Map<String, Object> chargeDef : chargesList) {
+            Map<String, Object> chargeTimeTypeMap = (Map<String, Object>) chargeDef.get("chargeTimeType");
+            String chargeTimeType = String.valueOf(chargeTimeTypeMap.get("code"));
+            if (chargeTimeType.equals("chargeTimeType.activation")) {
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharespurchase")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharespurchase")) {
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("6.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else if(chargeTimeType.equals("chargeTimeType.sharesredeem")) {
+            } else if (chargeTimeType.equals("chargeTimeType.sharesredeem")) {
                 Assertions.assertEquals("1.0", String.valueOf(chargeDef.get("amountOrPercentage")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amount")));
                 Assertions.assertEquals("0.0", String.valueOf(chargeDef.get("amountOutstanding")));
                 Assertions.assertEquals("2.0", String.valueOf(chargeDef.get("amountPaid")));
-            }else {
+            } else {
                 Assertions.fail("Other Charge defintion found");
             }
         }

@@ -37,9 +37,7 @@ public interface GSIMReadPlatformService {
 
     Collection<GSIMContainer> findGsimAccountContainerbyGsimAccountNumber(String accountNumber);
 
-
-    Collection<GroupSavingsIndividualMonitoringAccountData> findGsimAccountByGroupIdandAccountNo(String groupId,
-            String accountNo);
+    Collection<GroupSavingsIndividualMonitoringAccountData> findGsimAccountByGroupIdandAccountNo(String groupId, String accountNo);
 
     List<GSIMContainer> findGsimAccountContainerbyGsimAccountId(Long parentAccountId);
 

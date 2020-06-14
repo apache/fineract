@@ -34,6 +34,7 @@ public class ContentRepositoryUtils {
     private static final Random random = new Random();
 
     public static enum ImageMIMEtype {
+
         GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
 
         private final String value;
@@ -62,6 +63,7 @@ public class ContentRepositoryUtils {
     }
 
     public static enum ImageFileExtension {
+
         GIF(".gif"), JPEG(".jpeg"), JPG(".jpg"), PNG(".png");
 
         private final String value;
@@ -93,6 +95,7 @@ public class ContentRepositoryUtils {
     }
 
     public static enum ImageDataURIsuffix {
+
         GIF("data:" + ImageMIMEtype.GIF.getValue() + ";base64,"), JPEG("data:" + ImageMIMEtype.JPEG.getValue() + ";base64,"), PNG(
                 "data:" + ImageMIMEtype.PNG.getValue() + ";base64,");
 
@@ -113,14 +116,17 @@ public class ContentRepositoryUtils {
      * @param mimeType
      */
     public static void validateImageMimeType(final String mimeType) {
-        if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue()) || mimeType
-                .equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) { throw new ImageUploadException(); }
+        if (!(mimeType.equalsIgnoreCase(ImageMIMEtype.GIF.getValue()) || mimeType.equalsIgnoreCase(ImageMIMEtype.JPEG.getValue())
+                || mimeType.equalsIgnoreCase(ImageMIMEtype.PNG.getValue()))) {
+            throw new ImageUploadException();
+        }
     }
 
     /**
      * Extracts Image from a Data URL
      *
-     * @param dataURL mimeType
+     * @param dataURL
+     *            mimeType
      */
     public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
         String fileExtension = "";
@@ -148,8 +154,9 @@ public class ContentRepositoryUtils {
          * content i.e name and description while compared to the uploaded file
          * size is negligible
          **/
-        if (fileSize != null && ((fileSize / (1024 * 1024)) > ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB)) { throw new ContentManagementException(
-                name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB); }
+        if (fileSize != null && ((fileSize / (1024 * 1024)) > ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB)) {
+            throw new ContentManagementException(name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB);
+        }
     }
 
     public static void validateClientImageNotEmpty(final String imageFileName) {
