@@ -69,6 +69,10 @@
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
         </module>
+        <module name="OperatorWrap">
+            <property name="option" value="NL"/>
+            <property name="tokens" value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR "/>
+        </module>
         <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
             <property name="packageNameRegexp" value=".*" />
             <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
@@ -242,10 +246,7 @@
         <module name="VariableDeclarationUsageDistance"/>
 
         <module name="MethodParamPad"/>
-        <module name="OperatorWrap">
-            <property name="option" value="NL"/>
-            <property name="tokens" value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR "/>
-        </module>
+
 
         <! - - Enable some JavaDoc validation (requires quite a lot of manual clean up work; not a top priority for initial Checkstyle adoption - ->
         <module name="JavadocTagContinuationIndentation"/>
