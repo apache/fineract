@@ -55,20 +55,20 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.loanTermFrequencyTypeParameterName, LoanApiConstants.repaymentFrequencyTypeParameterName,
             LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.interestTypeParameterName,
             LoanApiConstants.interestCalculationPeriodTypeParameterName,
-            LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME, LoanApiConstants.interestRateFrequencyTypeParameterName,
-            LoanApiConstants.disbursementDateParameterName, LoanApiConstants.repaymentsStartingFromDateParameterName,
-            LoanApiConstants.graceOnPrincipalPaymentParameterName, LoanApiConstants.graceOnInterestPaymentParameterName,
-            LoanApiConstants.graceOnInterestChargedParameterName, LoanApiConstants.interestChargedFromDateParameterName,
-            LoanApiConstants.submittedOnDateParameterName, LoanApiConstants.submittedOnNoteParameterName,
-            LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName, LoanApiConstants.chargesParameterName,
-            LoanApiConstants.collateralParameterName, LoanApiConstants.syncDisbursementWithMeetingParameterName,
-            LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
-            LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
-            LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
-            LoanApiConstants.isFloatingInterestRateParameterName, LoanApiConstants.interestRateDifferentialParameterName,
-            LoanApiConstants.repaymentFrequencyNthDayTypeParameterName, LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam,
-            LoanProductConstants.RATES_PARAM_NAME));
+            LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
+            LoanApiConstants.interestRateFrequencyTypeParameterName, LoanApiConstants.disbursementDateParameterName,
+            LoanApiConstants.repaymentsStartingFromDateParameterName, LoanApiConstants.graceOnPrincipalPaymentParameterName,
+            LoanApiConstants.graceOnInterestPaymentParameterName, LoanApiConstants.graceOnInterestChargedParameterName,
+            LoanApiConstants.interestChargedFromDateParameterName, LoanApiConstants.submittedOnDateParameterName,
+            LoanApiConstants.submittedOnNoteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName,
+            LoanApiConstants.chargesParameterName, LoanApiConstants.collateralParameterName,
+            LoanApiConstants.syncDisbursementWithMeetingParameterName, LoanApiConstants.linkAccountIdParameterName,
+            LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
+            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME,
+            LoanApiConstants.createStandingInstructionAtDisbursementParameterName, LoanApiConstants.isFloatingInterestRateParameterName,
+            LoanApiConstants.interestRateDifferentialParameterName, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
+            LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
+            LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam, LoanProductConstants.RATES_PARAM_NAME));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -123,9 +123,10 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
                 repaymentsStartingFromDate);
 
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 
     public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors,
@@ -141,21 +142,19 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             if (loanTermFrequency != null && repaymentEvery != null && numberOfRepayments != null) {
                 final int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
                 if (loanTermFrequency.intValue() < suggestsedLoanTerm) {
-                    final ApiParameterError error = ApiParameterError
-                            .parameterError(
-                                    "validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests",
-                                    "The parameter loanTermFrequency is less than the suggest loan term as indicated by numberOfRepayments and repaymentEvery.",
-                                    "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
+                    final ApiParameterError error = ApiParameterError.parameterError(
+                            "validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests",
+                            "The parameter loanTermFrequency is less than the suggest loan term as indicated by numberOfRepayments and repaymentEvery.",
+                            "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
                     dataValidationErrors.add(error);
                 } else {
-                        if (loanTermFrequency.intValue() > suggestsedLoanTerm) {
-                            final ApiParameterError error = ApiParameterError
-                                    .parameterError(
-                                            "validation.msg.loan.loanTermFrequency.greater.than.repayment.structure.suggests",
-                                            "The parameter loanTermFrequency is greater than the suggested loan term as indicated by numberOfRepayments and repaymentEvery.",
-                                            "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
-                            dataValidationErrors.add(error);
-                        }
+                    if (loanTermFrequency.intValue() > suggestsedLoanTerm) {
+                        final ApiParameterError error = ApiParameterError.parameterError(
+                                "validation.msg.loan.loanTermFrequency.greater.than.repayment.structure.suggests",
+                                "The parameter loanTermFrequency is greater than the suggested loan term as indicated by numberOfRepayments and repaymentEvery.",
+                                "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
+                        dataValidationErrors.add(error);
+                    }
 
                 }
             }

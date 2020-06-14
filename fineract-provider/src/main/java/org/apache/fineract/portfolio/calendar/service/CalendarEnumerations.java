@@ -36,7 +36,8 @@ public class CalendarEnumerations {
     }
 
     public static EnumOptionData calendarEntityType(final CalendarEntityType entityType) {
-        final EnumOptionData optionData = new EnumOptionData(entityType.getValue().longValue(), entityType.getCode(), entityType.toString());
+        final EnumOptionData optionData = new EnumOptionData(entityType.getValue().longValue(), entityType.getCode(),
+                entityType.toString());
         return optionData;
     }
 
@@ -90,7 +91,7 @@ public class CalendarEnumerations {
         EnumOptionData optionData = null;
         if (!calendarFrequencyType.isInvalid()) {
             optionData = new EnumOptionData(calendarFrequencyType.getValue().longValue(), calendarFrequencyType.getCode(),
-                calendarFrequencyType.toString());
+                    calendarFrequencyType.toString());
         }
         return optionData;
     }
@@ -113,7 +114,7 @@ public class CalendarEnumerations {
         EnumOptionData optionData = null;
         if (!calendarWeekDaysType.isInvalid()) {
             optionData = new EnumOptionData(calendarWeekDaysType.getValue().longValue(), calendarWeekDaysType.getCode(),
-                calendarWeekDaysType.toString());
+                    calendarWeekDaysType.toString());
         }
         return optionData;
     }
@@ -127,14 +128,17 @@ public class CalendarEnumerations {
         }
         return optionDatas;
     }
+
     public static EnumOptionData calendarFrequencyNthDayType(final int id) {
         return calendarFrequencyNthDayType(NthDayType.fromInt(id));
     }
+
     public static EnumOptionData calendarFrequencyNthDayType(final NthDayType calendarFrequencyNthDayType) {
-        final EnumOptionData optionData = new EnumOptionData(calendarFrequencyNthDayType.getValue().longValue(), calendarFrequencyNthDayType.getCode(),
-                calendarFrequencyNthDayType.toString());
+        final EnumOptionData optionData = new EnumOptionData(calendarFrequencyNthDayType.getValue().longValue(),
+                calendarFrequencyNthDayType.getCode(), calendarFrequencyNthDayType.toString());
         return optionData;
     }
+
     public static List<EnumOptionData> calendarFrequencyNthDayType() {
         final List<EnumOptionData> optionDatas = Arrays.asList(calendarFrequencyNthDayType(NthDayType.ONE),
                 calendarFrequencyNthDayType(NthDayType.TWO), calendarFrequencyNthDayType(NthDayType.THREE),

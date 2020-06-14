@@ -19,10 +19,10 @@
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
 public enum ReportMailingJobEmailAttachmentFileFormat {
-    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.invalid", "invalid"),
-    XLS(1, "ReportMailingJobEmailAttachmentFileFormat.xls", "xls"),
-    PDF(2, "ReportMailingJobEmailAttachmentFileFormat.pdf", "pdf"),
-    CSV(3, "ReportMailingJobEmailAttachmentFileFormat.csv", "csv");
+
+    INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.invalid", "invalid"), XLS(1, "ReportMailingJobEmailAttachmentFileFormat.xls",
+            "xls"), PDF(2, "ReportMailingJobEmailAttachmentFileFormat.pdf",
+                    "pdf"), CSV(3, "ReportMailingJobEmailAttachmentFileFormat.csv", "csv");
 
     private final String code;
     private final String value;
@@ -40,18 +40,18 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
         switch (value) {
             case "xls":
                 emailAttachmentFileFormat = XLS;
-                break;
+            break;
 
             case "pdf":
                 emailAttachmentFileFormat = PDF;
-                break;
+            break;
 
             case "csv":
                 emailAttachmentFileFormat = CSV;
-                break;
+            break;
 
             default:
-                break;
+            break;
         }
 
         return emailAttachmentFileFormat;
@@ -63,18 +63,18 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
         switch (id) {
             case 1:
                 emailAttachmentFileFormat = XLS;
-                break;
+            break;
 
             case 2:
                 emailAttachmentFileFormat = PDF;
-                break;
+            break;
 
             case 3:
                 emailAttachmentFileFormat = CSV;
-                break;
+            break;
 
             default:
-                break;
+            break;
         }
 
         return emailAttachmentFileFormat;

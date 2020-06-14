@@ -27,17 +27,20 @@ import org.apache.fineract.batch.domain.Header;
  * Created by sanyam on 26/7/17.
  */
 final class BatchApiResourceSwagger {
+
     private BatchApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "PostBatchesRequest")
-    public static final class PostBatchesRequest{
+    public static final class PostBatchesRequest {
+
         private PostBatchesRequest() {
 
         }
 
-        public static final class PostBodyRequestSwagger{
+        public static final class PostBodyRequestSwagger {
+
             private PostBodyRequestSwagger() {
 
             }

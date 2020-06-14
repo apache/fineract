@@ -24,6 +24,7 @@ public class LoanChargeCannotBeWaivedException extends AbstractPlatformDomainRul
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
     public static enum LoanChargeCannotBeWaivedReason {
+
         ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, WAIVE_NOT_ALLOWED_FOR_CHARGE;
 
         public String errorMessage() {
@@ -45,7 +46,9 @@ public class LoanChargeCannotBeWaivedException extends AbstractPlatformDomainRul
                 return "error.msg.loan.charge.already.waived";
             } else if (name().toString().equalsIgnoreCase("LOAN_INACTIVE")) {
                 return "error.msg.loan.charge.associated.loan.inactive";
-            } else if (name().toString().equalsIgnoreCase("WAIVE_NOT_ALLOWED_FOR_CHARGE")) { return "error.msg.loan.charge.waive.not.allowed"; }
+            } else if (name().toString().equalsIgnoreCase("WAIVE_NOT_ALLOWED_FOR_CHARGE")) {
+                return "error.msg.loan.charge.waive.not.allowed";
+            }
             return name().toString();
         }
     }

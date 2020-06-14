@@ -76,7 +76,8 @@ public class SchedulerTriggerListener implements TriggerListener {
             try {
                 vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
                 numberOfRetries = maxNumberOfRetries + 1;
-            } catch (Exception exception) { // Adding generic exception as it depends on JPA provider
+            } catch (Exception exception) { // Adding generic exception as it
+                                            // depends on JPA provider
                 LOG.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
                         numberOfRetries, maxNumberOfRetries, jobKey, exception);
                 try {
@@ -90,8 +91,9 @@ public class SchedulerTriggerListener implements TriggerListener {
             }
         }
         if (vetoJob) {
-            LOG.warn("vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
-                    + "maxNumberOfRetries={}, tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
+            LOG.warn(
+                    "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
+                            + "maxNumberOfRetries={}, tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
                     maxNumberOfRetries, tenantIdentifier, jobKey, triggerType, trigger, context);
         }
         return vetoJob;

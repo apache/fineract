@@ -56,7 +56,7 @@ public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
     @Column(name = "status", nullable = false)
     private Integer status;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "dividend_pay_out_id", referencedColumnName = "id", nullable = false)
     private List<ShareAccountDividendDetails> accountDividendDetails = new ArrayList<>();
 

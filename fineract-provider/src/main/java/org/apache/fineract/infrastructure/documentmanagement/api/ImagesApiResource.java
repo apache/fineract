@@ -127,8 +127,9 @@ public class ImagesApiResource {
             this.context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
         }
 
-        if (output != null && (output.equals("octet") || output.equals("inline_octet"))) { return downloadClientImage(entityName, entityId,
-                maxWidth, maxHeight, output); }
+        if (output != null && (output.equals("octet") || output.equals("inline_octet"))) {
+            return downloadClientImage(entityName, entityId, maxWidth, maxHeight, output);
+        }
 
         final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
 
@@ -162,8 +163,8 @@ public class ImagesApiResource {
 
         final ResponseBuilder response = Response.ok(imageData.getContentOfSize(maxWidth, maxHeight));
         String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
-        response.header("Content-Disposition", dispositionType + "; filename=\"" + imageData.getEntityDisplayName()
-        + ImageFileExtension.JPEG + "\"");
+        response.header("Content-Disposition",
+                dispositionType + "; filename=\"" + imageData.getEntityDisplayName() + ImageFileExtension.JPEG + "\"");
 
         // TODO: Need a better way of determining image type
 
@@ -209,6 +210,7 @@ public class ImagesApiResource {
 
     /*** Entities for document Management **/
     public enum EntityTypeForImages {
+
         STAFF, CLIENTS;
 
         @Override

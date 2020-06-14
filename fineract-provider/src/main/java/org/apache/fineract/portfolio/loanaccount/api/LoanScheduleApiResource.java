@@ -55,10 +55,9 @@ import org.springframework.stereotype.Component;
 @Path("/loans/{loanId}/schedule")
 @Component
 @Scope("singleton")
-@Api(tags = {"Loan Rescheduling"})
+@Api(tags = { "Loan Rescheduling" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.")
-})
+        @Tag(name = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.") })
 public class LoanScheduleApiResource {
 
     private final String resourceNameForPermissions = "LOAN";
@@ -84,11 +83,18 @@ public class LoanScheduleApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Calculate loan repayment schedule based on Loan term variations | Updates loan repayment schedule based on Loan term variations | Updates loan repayment schedule by removing Loan term variations", httpMethod = "POST", notes = "Calculate loan repayment schedule based on Loan term variations:\n\n" + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule based on Loan term variations:\n\n" + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule by removing Loan term variations:\n\n" + "It updates the loan repayment schedule by removing Loan term variations\n\n" + "Showing request/response for 'Updates loan repayment schedule by removing Loan term variations'")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleResponse.class)})
+    @ApiOperation(value = "Calculate loan repayment schedule based on Loan term variations | Updates loan repayment schedule based on Loan term variations | Updates loan repayment schedule by removing Loan term variations", httpMethod = "POST", notes = "Calculate loan repayment schedule based on Loan term variations:\n\n"
+            + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule based on Loan term variations:\n\n"
+            + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule by removing Loan term variations:\n\n"
+            + "It updates the loan repayment schedule by removing Loan term variations\n\n"
+            + "Showing request/response for 'Updates loan repayment schedule by removing Loan term variations'")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleRequest.class) })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleResponse.class) })
     public String calculateLoanScheduleOrSubmitVariableSchedule(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
-            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @Context final UriInfo uriInfo,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         CommandWrapper commandRequest = null;
         if (is(commandParam, "calculateLoanSchedule")) {

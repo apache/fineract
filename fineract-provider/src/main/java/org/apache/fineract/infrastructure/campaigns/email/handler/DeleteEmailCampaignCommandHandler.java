@@ -37,9 +37,10 @@ public class DeleteEmailCampaignCommandHandler implements NewCommandSourceHandle
     public DeleteEmailCampaignCommandHandler(EmailCampaignWritePlatformService emailCampaignWritePlatformService) {
         this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
     }
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-       return this.emailCampaignWritePlatformService.delete(command.entityId());
+        return this.emailCampaignWritePlatformService.delete(command.entityId());
     }
 }

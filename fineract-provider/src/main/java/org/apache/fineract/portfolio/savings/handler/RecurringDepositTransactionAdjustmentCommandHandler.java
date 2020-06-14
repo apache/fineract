@@ -34,7 +34,8 @@ public class RecurringDepositTransactionAdjustmentCommandHandler implements NewC
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public RecurringDepositTransactionAdjustmentCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    public RecurringDepositTransactionAdjustmentCommandHandler(
+            final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 

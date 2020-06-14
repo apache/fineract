@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AddressWritePlatformServiceImpl implements AddressWritePlatformService {
+
     private final PlatformSecurityContext context;
     private final CodeValueRepository codeValueRepository;
     private final ClientAddressRepository clientAddressRepository;
@@ -51,10 +52,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
     private final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
-    public AddressWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final CodeValueRepository codeValueRepository, final ClientAddressRepository clientAddressRepository,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final AddressRepository addressRepository,
-            final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper,
+    public AddressWritePlatformServiceImpl(final PlatformSecurityContext context, final CodeValueRepository codeValueRepository,
+            final ClientAddressRepository clientAddressRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
+            final AddressRepository addressRepository, final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper,
             final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.codeValueRepository = codeValueRepository;
@@ -67,8 +67,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
     }
 
     @Override
-    public CommandProcessingResult addClientAddress(final Long clientId, final Long addressTypeId,
-            final JsonCommand command) {
+    public CommandProcessingResult addClientAddress(final Long clientId, final Long addressTypeId, final JsonCommand command) {
         CodeValue stateIdobj = null;
         CodeValue countryIdObj = null;
         long stateId;
@@ -102,8 +101,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         final ClientAddress clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
         this.clientAddressRepository.save(clientAddressobj);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientAddressobj.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientAddressobj.getId()).build();
     }
 
     // following method is used for adding multiple addresses while creating new
@@ -118,7 +116,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         ClientAddress clientAddressobj = new ClientAddress();
         final JsonArray addressArray = command.arrayOfParameterNamed("address");
 
-        if(addressArray != null){
+        if (addressArray != null) {
             for (int i = 0; i < addressArray.size(); i++) {
                 final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
 
@@ -145,13 +143,12 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 final Long addressid = add.getId();
                 final Address addobj = this.addressRepository.getOne(addressid);
 
-                //final boolean isActive = jsonObject.get("isActive").getAsBoolean();
-                boolean isActive=false;
-                if(jsonObject.get("isActive")!= null)
-                {
-                    isActive= jsonObject.get("isActive").getAsBoolean();
+                // final boolean isActive =
+                // jsonObject.get("isActive").getAsBoolean();
+                boolean isActive = false;
+                if (jsonObject.get("isActive") != null) {
+                    isActive = jsonObject.get("isActive").getAsBoolean();
                 }
-
 
                 clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
                 this.clientAddressRepository.save(clientAddressobj);
@@ -159,8 +156,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             }
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientAddressobj.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientAddressobj.getId()).build();
     }
 
     @Override
@@ -181,12 +177,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         final long addressId = command.longValueOfParameterNamed("addressId");
 
-        final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper
-                .findOneByClientIdAndAddressId(clientId, addressId);
+        final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper.findOneByClientIdAndAddressId(clientId, addressId);
 
-        if (clientAddressObj == null) {
-            throw new AddressNotFoundException(clientId);
-        }
+        if (clientAddressObj == null) { throw new AddressNotFoundException(clientId); }
 
         final Address addobj = this.addressRepository.getOne(addressId);
 
@@ -290,7 +283,6 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             clientAddressObj.setIs_active(active);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                .withEntityId(clientAddressObj.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientAddressObj.getId()).build();
     }
 }

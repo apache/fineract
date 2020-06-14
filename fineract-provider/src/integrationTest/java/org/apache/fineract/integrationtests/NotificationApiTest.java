@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NotificationApiTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -50,7 +51,7 @@ public class NotificationApiTest {
     public void testNotificationRetrieval() {
         HashMap<String, Object> response = (HashMap<String, Object>) NotificationHelper.getNotifications(this.requestSpec,
                 this.responseSpec, "");
-        LOG.info("Response : {}" , response.toString());
+        LOG.info("Response : {}", response.toString());
         Assertions.assertNotNull(response);
     }
 }

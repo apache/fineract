@@ -54,10 +54,10 @@ public class Hook extends AbstractAuditableCustom {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<HookResource> events = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hook", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<HookConfiguration> config = new HashSet<>();
 
     @ManyToOne(optional = true)

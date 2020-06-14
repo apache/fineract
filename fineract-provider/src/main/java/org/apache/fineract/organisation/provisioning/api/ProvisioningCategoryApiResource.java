@@ -50,10 +50,8 @@ import org.springframework.stereotype.Component;
 @Path("/provisioningcategory")
 @Component
 @Scope("singleton")
-@Api(tags = {"Provisioning Category"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Provisioning Category", description = "")
-})
+@Api(tags = { "Provisioning Category" })
+@SwaggerDefinition(tags = { @Tag(name = "Provisioning Category", description = "") })
 public class ProvisioningCategoryApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;

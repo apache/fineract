@@ -33,7 +33,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
-@Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
+@Table(name = "m_code_value", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
 public class CodeValue extends AbstractPersistableCustom {
 
     @Column(name = "code_value", length = 100)
@@ -64,8 +65,8 @@ public class CodeValue extends AbstractPersistableCustom {
         //
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description,
-            final boolean isActive, final boolean mandatory) {
+    private CodeValue(final Code code, final String label, final int position, final String description, final boolean isActive,
+            final boolean mandatory) {
         this.code = code;
         this.label = StringUtils.defaultIfEmpty(label, null);
         this.position = position;
@@ -96,8 +97,7 @@ public class CodeValue extends AbstractPersistableCustom {
             position = 0;
         }
 
-        Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(
-                CodevalueJSONinputParams.IS_MANDATORY.getValue());
+        Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(CodevalueJSONinputParams.IS_MANDATORY.getValue());
 
         return new CodeValue(code, label, position, description, isActive, mandatory);
     }

@@ -102,11 +102,12 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
 
     public static LoanProductInterestRecalculationDetails createFrom(final JsonCommand command) {
 
-        final Integer interestRecalculationCompoundingMethod = InterestRecalculationCompoundingMethod.fromInt(
-                command.integerValueOfParameterNamed(LoanProductConstants.interestRecalculationCompoundingMethodParameterName)).getValue();
+        final Integer interestRecalculationCompoundingMethod = InterestRecalculationCompoundingMethod
+                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.interestRecalculationCompoundingMethodParameterName))
+                .getValue();
 
-        final Integer loanRescheduleStrategyMethod = LoanRescheduleStrategyMethod.fromInt(
-                command.integerValueOfParameterNamed(LoanProductConstants.rescheduleStrategyMethodParameterName)).getValue();
+        final Integer loanRescheduleStrategyMethod = LoanRescheduleStrategyMethod
+                .fromInt(command.integerValueOfParameterNamed(LoanProductConstants.rescheduleStrategyMethodParameterName)).getValue();
 
         final Integer recurrenceFrequency = command
                 .integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyTypeParameterName);
@@ -148,8 +149,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             compoundingRecurrenceOnWeekday = command
                     .integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyWeekdayParamName);
             if (!compoundingFrequencyType.isDaily()) {
-                allowCompoundingOnEod = command
-                        .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowCompoundingOnEodParamName);
+                allowCompoundingOnEod = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowCompoundingOnEodParamName);
             }
         }
 
@@ -278,7 +278,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                 this.restFrequencyNthDay = null;
                 this.restFrequencyOnDay = null;
             } else if (frequencyType.isMonthly()) {
-                if(command.integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyOnDayParamName) != null) {
+                if (command.integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyOnDayParamName) != null) {
                     this.restFrequencyNthDay = null;
                     this.restFrequencyWeekday = null;
                 } else {
@@ -350,7 +350,8 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                     this.compoundingFrequencyNthDay = null;
                     this.compoundingFrequencyOnDay = null;
                 } else if (compoundingfrequencyType.isMonthly()) {
-                    if(command.integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName) != null) {
+                    if (command
+                            .integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName) != null) {
                         this.compoundingFrequencyNthDay = null;
                         this.compoundingFrequencyWeekday = null;
                     } else {

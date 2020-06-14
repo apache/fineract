@@ -45,8 +45,8 @@ public class ShareAccountTransactionHelper {
         return Utils.performServerPut(requestSpec, responseSpec, url, shareAccountJson, "resourceId");
     }
 
-    public static Integer postCommand(final String command, final Integer shareAccountId, String jsonBody, final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+    public static Integer postCommand(final String command, final Integer shareAccountId, String jsonBody,
+            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         String url = SHARE_ACCOUNT_URL + "/" + shareAccountId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, jsonBody, "resourceId");
     }

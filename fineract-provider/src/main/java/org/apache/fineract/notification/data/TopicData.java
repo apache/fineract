@@ -29,8 +29,7 @@ public class TopicData implements Serializable {
     private final String entityType;
     private final String memberType;
 
-    public TopicData(Long id, String title, boolean enabled, Long entityId, String entityType,
-            String memberType) {
+    public TopicData(Long id, String title, boolean enabled, Long entityId, String entityType, String memberType) {
         this.id = id;
         this.title = title;
         this.enabled = enabled;
@@ -39,8 +38,7 @@ public class TopicData implements Serializable {
         this.memberType = memberType;
     }
 
-    public TopicData(Long id, String title, Long entityId, String entityType,
-            String memberType) {
+    public TopicData(Long id, String title, Long entityId, String entityType, String memberType) {
         this.id = id;
         this.title = title;
         this.enabled = true;

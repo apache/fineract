@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 public class LoanRepaymentRescheduleAtDisbursementTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(LoanRepaymentRescheduleAtDisbursementTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -65,7 +66,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testLoanRepaymentRescheduleAtDisbursement(){
+    public void testLoanRepaymentRescheduleAtDisbursement() {
 
         final String approvalAmount = "10000";
         final String approveDate = "01 March 2015";
@@ -75,8 +76,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
 
         // CREATE CLIENT
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}"
-                , clientID);
+        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT WITH INTEREST RECALCULATION
         final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
@@ -116,8 +116,9 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         this.loanTransactionHelper.disburseLoanWithRepaymentReschedule(disbursementDate, loanID, adjustRepaymentDate);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
-        ArrayList<HashMap> loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanID);
-        HashMap firstInstallement  = loanRepaymnetSchedule.get(1);
+        ArrayList<HashMap> loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec,
+                loanID);
+        HashMap firstInstallement = loanRepaymnetSchedule.get(1);
         Map<String, Object> expectedvalues = new HashMap<>(3);
         Calendar date = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         date.set(2015, Calendar.MARCH, 16);
@@ -170,17 +171,10 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
             final Integer recalculationCompoundingFrequencyDayOfWeekType, final Integer recalculationRestFrequencyOnDayType,
             final Integer recalculationRestFrequencyDayOfWeekType) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        LoanProductTestBuilder builder = new LoanProductTestBuilder()
-                .withPrincipal("10000.00")
-                .withNumberOfRepayments("12")
-                .withRepaymentAfterEvery("2")
-                .withRepaymentTypeAsWeek()
-                .withinterestRatePerPeriod("2")
-                .withInterestRateFrequencyTypeAsMonths()
-                .withTranches(true)
-                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
-                .withRepaymentStrategy(repaymentStrategy)
-                .withInterestTypeAsDecliningBalance()
+        LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12")
+                .withRepaymentAfterEvery("2").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
+                .withInterestRateFrequencyTypeAsMonths().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .withRepaymentStrategy(repaymentStrategy).withInterestTypeAsDecliningBalance()
                 .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod,
                         preCloseInterestCalculationStrategy)
                 .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval,
@@ -193,7 +187,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         }
 
         if (isArrearsBasedOnOriginalSchedule) {
-                builder = builder.withArrearsConfiguration();
+            builder = builder.withArrearsConfiguration();
         }
 
         final String loanProductJSON = builder.build(chargeId);
@@ -221,8 +215,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
                 .withRepaymentFrequencyTypeAsWeeks() //
                 .withInterestRatePerPeriod("2") //
                 .withAmortizationTypeAsEqualInstallments() //
-                .withTranches(tranches)
-                .withFixedEmiAmount("") //
+                .withTranches(tranches).withFixedEmiAmount("") //
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withInterestCalculationPeriodTypeAsDays() //
@@ -240,7 +233,6 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
 
     private List getDateAsArray(Calendar date, int addvalue, int type) {
         date.add(type, addvalue);
-        return new ArrayList<>(Arrays.asList(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1,
-                date.get(Calendar.DAY_OF_MONTH)));
+        return new ArrayList<>(Arrays.asList(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)));
     }
 }

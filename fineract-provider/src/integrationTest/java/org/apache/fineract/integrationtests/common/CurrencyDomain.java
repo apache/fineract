@@ -57,8 +57,8 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
         super();
     }
 
-    private CurrencyDomain(final String code, final String name, final int decimalPlaces, final String displaySymbol,
-            final String nameCode, final String displayLabel) {
+    private CurrencyDomain(final String code, final String name, final int decimalPlaces, final String displaySymbol, final String nameCode,
+            final String displayLabel) {
         super();
         this.code = code;
         this.name = name;
@@ -135,9 +135,7 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
     public boolean equals(Object obj) {
         if (obj == this) { return true; }
 
-        if (!(obj instanceof CurrencyDomain)) {
-            return false;
-        }
+        if (!(obj instanceof CurrencyDomain)) { return false; }
 
         CurrencyDomain cd = (CurrencyDomain) obj;
 

@@ -39,11 +39,11 @@ ifnull(laa.principal_overdue_derived, 0.0) as loanInArrearsAmount,
 if(ifnull(laa.principal_overdue_derived, 0.00) > 0, 'Yes', 'No') as inDefault,
 
 if(date_sub(curdate(), interval 28 day) > ifnull(laa.overdue_since_date_derived, curdate()),
-		l.principal_outstanding_derived,0)  as portfolioAtRisk
+        l.principal_outstanding_derived,0)  as portfolioAtRisk
 
  from m_group pgm
  join m_office o on o.id = pgm.office_id
-			and o.hierarchy like concat('${currentUserHierarchy}', '%')
+            and o.hierarchy like concat('${currentUserHierarchy}', '%')
  join m_loan l on l.group_id = pgm.id and l.client_id is not null
  left join m_currency cur on cur.code = l.currency_code
  join m_client c on c.id = l.client_id

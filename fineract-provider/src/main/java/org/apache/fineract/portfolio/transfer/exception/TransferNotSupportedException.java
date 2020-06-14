@@ -28,6 +28,7 @@ public class TransferNotSupportedException extends AbstractPlatformDomainRuleExc
 
     /*** enum of reasons for invalid Journal Entry **/
     public static enum TransferNotSupportedReason {
+
         CLIENT_DESTINATION_GROUP_NOT_SPECIFIED, CLIENT_BELONGS_TO_MULTIPLE_GROUPS, SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, ACTIVE_SAVINGS_ACCOUNT, BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, DESTINATION_GROUP_HAS_NO_MEETING;
 
         public String errorMessage() {
@@ -43,7 +44,9 @@ public class TransferNotSupportedException extends AbstractPlatformDomainRuleExc
                 return "Cannot transfer Clients with active accounts between groups with different meeting frequency";
             } else if (name().toString().equalsIgnoreCase("SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME")) {
                 return "Source and destination groups for bulk client transfers should be different";
-            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_HAS_NO_MEETING")) { return "Cannot transfer Client with active accounts to a groups with no meeting frequency"; }
+            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_HAS_NO_MEETING")) {
+                return "Cannot transfer Client with active accounts to a groups with no meeting frequency";
+            }
             return name().toString();
         }
 
@@ -60,7 +63,9 @@ public class TransferNotSupportedException extends AbstractPlatformDomainRuleExc
                 return "error.msg.client.transfers.with.active.accounts.between.groups.with.different.meeting.frequency";
             } else if (name().toString().equalsIgnoreCase("SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME")) {
                 return "error.msg.groups.bulk.client.transfers.to.same.group";
-            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_HAS_NO_MEETING")) { return "error.msg.client.transfers.with.active.accounts.to.group.with.no.meeting.frequencys"; }
+            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_HAS_NO_MEETING")) {
+                return "error.msg.client.transfers.with.active.accounts.to.group.with.no.meeting.frequencys";
+            }
             return name().toString();
         }
     }

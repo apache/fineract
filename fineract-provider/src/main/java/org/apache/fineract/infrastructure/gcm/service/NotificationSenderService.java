@@ -50,9 +50,9 @@ public class NotificationSenderService {
     private ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService;
 
     @Autowired
-    public NotificationSenderService(
-            final DeviceRegistrationRepositoryWrapper deviceRegistrationRepositoryWrapper,
-            final SmsMessageRepository smsMessageRepository, final ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService) {
+    public NotificationSenderService(final DeviceRegistrationRepositoryWrapper deviceRegistrationRepositoryWrapper,
+            final SmsMessageRepository smsMessageRepository,
+            final ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService) {
         this.deviceRegistrationRepositoryWrapper = deviceRegistrationRepositoryWrapper;
         this.smsMessageRepository = smsMessageRepository;
         this.propertiesReadPlatformService = propertiesReadPlatformService;
@@ -60,14 +60,12 @@ public class NotificationSenderService {
 
     public void sendNotification(List<SmsMessage> smsMessages) {
         Map<Long, List<SmsMessage>> notificationByEachClient = getNotificationListByClient(smsMessages);
-        for (Map.Entry<Long, List<SmsMessage>> entry : notificationByEachClient
-                .entrySet()) {
+        for (Map.Entry<Long, List<SmsMessage>> entry : notificationByEachClient.entrySet()) {
             this.sendNotifiaction(entry.getKey(), entry.getValue());
         }
     }
 
-    public Map<Long, List<SmsMessage>> getNotificationListByClient(
-            List<SmsMessage> smsMessages) {
+    public Map<Long, List<SmsMessage>> getNotificationListByClient(List<SmsMessage> smsMessages) {
         Map<Long, List<SmsMessage>> notificationByEachClient = new HashMap<>();
         for (SmsMessage smsMessage : smsMessages) {
             if (smsMessage.getClient() != null) {
@@ -75,8 +73,7 @@ public class NotificationSenderService {
                 if (notificationByEachClient.containsKey(clientId)) {
                     notificationByEachClient.get(clientId).add(smsMessage);
                 } else {
-                    List<SmsMessage> msgList = new ArrayList<>(
-                            Arrays.asList(smsMessage));
+                    List<SmsMessage> msgList = new ArrayList<>(Arrays.asList(smsMessage));
                     notificationByEachClient.put(clientId, msgList);
                 }
 
@@ -87,8 +84,7 @@ public class NotificationSenderService {
 
     public void sendNotifiaction(Long clientId, List<SmsMessage> smsList) {
 
-        DeviceRegistration deviceRegistration = this.deviceRegistrationRepositoryWrapper
-                .findDeviceRegistrationByClientId(clientId);
+        DeviceRegistration deviceRegistration = this.deviceRegistrationRepositoryWrapper.findDeviceRegistrationByClientId(clientId);
         NotificationConfigurationData notificationConfigurationData = this.propertiesReadPlatformService.getNotificationConfiguration();
         String registrationId = null;
         if (deviceRegistration != null) {
@@ -96,8 +92,7 @@ public class NotificationSenderService {
         }
         for (SmsMessage smsMessage : smsList) {
             try {
-                Notification notification = new Notification.Builder(
-                        GcmConstants.defaultIcon).title(GcmConstants.title)
+                Notification notification = new Notification.Builder(GcmConstants.defaultIcon).title(GcmConstants.title)
                         .body(smsMessage.getMessage()).build();
                 Builder b = new Builder();
                 b.notification(notification);
@@ -107,21 +102,18 @@ public class NotificationSenderService {
                 b.priority(Priority.HIGH);
                 b.delayWhileIdle(true);
                 Message msg = b.build();
-                Sender s = new Sender(notificationConfigurationData.getServerKey(),notificationConfigurationData.getFcmEndPoint());
+                Sender s = new Sender(notificationConfigurationData.getServerKey(), notificationConfigurationData.getFcmEndPoint());
                 Result res;
 
                 res = s.send(msg, registrationId, 3);
-                if (res.getSuccess() != null && res.getSuccess()>0) {
-                    smsMessage.setStatusType(SmsMessageStatusType.SENT
-                            .getValue());
+                if (res.getSuccess() != null && res.getSuccess() > 0) {
+                    smsMessage.setStatusType(SmsMessageStatusType.SENT.getValue());
                     smsMessage.setDeliveredOnDate(DateUtils.getLocalDateOfTenant().toDate());
-                } else if (res.getFailure() != null && res.getFailure()>0) {
-                    smsMessage.setStatusType(SmsMessageStatusType.FAILED
-                            .getValue());
+                } else if (res.getFailure() != null && res.getFailure() > 0) {
+                    smsMessage.setStatusType(SmsMessageStatusType.FAILED.getValue());
                 }
             } catch (IOException e) {
-                smsMessage
-                        .setStatusType(SmsMessageStatusType.FAILED.getValue());
+                smsMessage.setStatusType(SmsMessageStatusType.FAILED.getValue());
             }
         }
 

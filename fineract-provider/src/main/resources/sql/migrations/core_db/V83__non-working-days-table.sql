@@ -18,10 +18,10 @@
 --
 
 CREATE TABLE `m_working_days` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`recurrence` VARCHAR(100) NULL DEFAULT NULL,
-	`repayment_rescheduling_enum` SMALLINT NULL DEFAULT NULL,
-	PRIMARY KEY (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `recurrence` VARCHAR(100) NULL DEFAULT NULL,
+    `repayment_rescheduling_enum` SMALLINT NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB

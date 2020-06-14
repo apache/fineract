@@ -32,7 +32,8 @@ public interface ReadReportingService {
 
     StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
 
-    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
+    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams,
+            boolean isSelfServiceUserReport);
 
     String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
 
@@ -46,11 +47,12 @@ public interface ReadReportingService {
 
     Collection<String> getAllowedReportTypes();
 
-  //needed for smsCampaign and emailCampaign jobs where securityContext is null
+    // needed for smsCampaign and emailCampaign jobs where securityContext is
+    // null
     GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> extractedQueryParams);
 
-    String  sqlToRunForSmsEmailCampaign(String name, String type, Map<String, String> queryParams);
+    String sqlToRunForSmsEmailCampaign(String name, String type, Map<String, String> queryParams);
 
-    ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
-            Map<String, String> queryParams, Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
+    ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam, Map<String, String> queryParams,
+            Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
 }

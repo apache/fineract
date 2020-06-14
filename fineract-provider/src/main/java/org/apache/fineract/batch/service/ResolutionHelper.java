@@ -159,7 +159,7 @@ public class ResolutionHelper {
         if (relativeUrl.contains("$.")) {
 
             String queryParams = "";
-            if(relativeUrl.contains("?")) {
+            if (relativeUrl.contains("?")) {
                 queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
                 relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
             }
@@ -170,7 +170,7 @@ public class ResolutionHelper {
                 if (parameter.contains("$.")) {
                     final String resParamValue = responseCtx.read(parameter).toString();
                     relativeUrl = relativeUrl.replace(parameter, resParamValue);
-                    br.setRelativeUrl(relativeUrl+queryParams);
+                    br.setRelativeUrl(relativeUrl + queryParams);
                 }
             }
         }

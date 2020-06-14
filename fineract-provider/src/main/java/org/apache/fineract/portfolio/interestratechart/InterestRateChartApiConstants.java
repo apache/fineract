@@ -43,15 +43,19 @@ public class InterestRateChartApiConstants {
     public static final String isPrimaryGroupingByAmountParamName = "isPrimaryGroupingByAmount";
 
     // interest rate chart Slabs parameters
-//    public static final String periodTypeParamName = "periodType";
-//    public static final String fromPeriodParamName = "fromPeriod";
-//    public static final String toPeriodParamName = "toPeriod";
-//    public static final String amountRangeFromParamName = "amountRangeFrom";
-//    public static final String amountRangeToParamName = "amountRangeTo";
-//    public static final String annualInterestRateParamName = "annualInterestRate";
-//    public static final String interestRateForFemaleParamName = "interestRateForFemale";
-//    public static final String interestRateForChildrenParamName = "interestRateForChildren";
-//    public static final String interestRateForSeniorCitizenParamName = "interestRateForSeniorCitizen";
+    // public static final String periodTypeParamName = "periodType";
+    // public static final String fromPeriodParamName = "fromPeriod";
+    // public static final String toPeriodParamName = "toPeriod";
+    // public static final String amountRangeFromParamName = "amountRangeFrom";
+    // public static final String amountRangeToParamName = "amountRangeTo";
+    // public static final String annualInterestRateParamName =
+    // "annualInterestRate";
+    // public static final String interestRateForFemaleParamName =
+    // "interestRateForFemale";
+    // public static final String interestRateForChildrenParamName =
+    // "interestRateForChildren";
+    // public static final String interestRateForSeniorCitizenParamName =
+    // "interestRateForSeniorCitizen";
 
     // associations
     public static final String chartSlabs = "chartSlabs";

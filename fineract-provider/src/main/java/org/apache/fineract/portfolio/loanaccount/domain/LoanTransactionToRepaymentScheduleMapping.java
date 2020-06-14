@@ -56,9 +56,9 @@ public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistab
 
     }
 
-    private LoanTransactionToRepaymentScheduleMapping(final LoanRepaymentScheduleInstallment installment,
-            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final BigDecimal amount) {
+    private LoanTransactionToRepaymentScheduleMapping(final LoanRepaymentScheduleInstallment installment, final BigDecimal principalPortion,
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
+            final BigDecimal amount) {
         this.installment = installment;
         this.principalPortion = principalPortion;
         this.interestPortion = interestPortion;

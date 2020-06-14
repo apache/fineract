@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class FixedDepositProductHelper {
+
     private final static Logger LOG = LoggerFactory.getLogger(FixedDepositProductHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -69,7 +70,6 @@ public class FixedDepositProductHelper {
     private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
-
 
     private String name = Utils.randomNameGenerator("FIXED_DEPOSIT_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
@@ -142,14 +142,12 @@ public class FixedDepositProductHelper {
             map.put("taxGroupId", taxGroupId);
         }
 
-
-
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
         }
 
         String FixedDepositProductCreateJson = new Gson().toJson(map);
-        LOG.info("{}",FixedDepositProductCreateJson);
+        LOG.info("{}", FixedDepositProductCreateJson);
         return FixedDepositProductCreateJson;
     }
 
@@ -393,7 +391,6 @@ public class FixedDepositProductHelper {
         return this;
     }
 
-
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
@@ -428,10 +425,11 @@ public class FixedDepositProductHelper {
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
-    public static ArrayList retrieveAllFixedDepositProducts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static ArrayList retrieveAllFixedDepositProducts(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         LOG.info("-------------------- RETRIEVING ALL FIXED DEPOSIT PRODUCTS ---------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, FIXED_DEPOSIT_PRODUCT_URL + "?"
-                + Utils.TENANT_IDENTIFIER, "");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec,
+                FIXED_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER, "");
         return response;
     }
 

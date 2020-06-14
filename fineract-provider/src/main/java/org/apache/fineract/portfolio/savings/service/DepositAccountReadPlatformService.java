@@ -29,7 +29,8 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 
 public interface DepositAccountReadPlatformService {
 
-    Collection<DepositAccountData> retrieveAll(final DepositAccountType depositAccountType, final PaginationParameters paginationParameters);
+    Collection<DepositAccountData> retrieveAll(final DepositAccountType depositAccountType,
+            final PaginationParameters paginationParameters);
 
     Page<DepositAccountData> retrieveAllPaged(final DepositAccountType depositAccountType, final PaginationParameters paginationParameters);
 

@@ -120,13 +120,13 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final GroupRepositoryWrapper groupRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final StaffRepositoryWrapper staffRepository, final NoteRepository noteRepository,
-            final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
-            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final StaffRepositoryWrapper staffRepository,
+            final NoteRepository noteRepository, final GroupLevelRepository groupLevelRepository,
+            final GroupingTypesDataValidator fromApiJsonDeserializer, final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final LoanRepositoryWrapper loanRepositoryWrapper,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
+            final LoanRepositoryWrapper loanRepositoryWrapper, final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
+            final AccountNumberGenerator accountNumberGenerator,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService) {
         this.context = context;
@@ -254,31 +254,30 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         } catch (final DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
-    private void generateAccountNumberIfRequired(Group newGroup){
+    private void generateAccountNumberIfRequired(Group newGroup) {
         if (newGroup.isAccountNumberRequiresAutoGeneration()) {
             EntityAccountType entityAccountType = null;
             AccountNumberFormat accountNumberFormat = null;
-            if(newGroup.isCenter()){
+            if (newGroup.isCenter()) {
                 entityAccountType = EntityAccountType.CENTER;
-                accountNumberFormat = this.accountNumberFormatRepository
-                        .findByAccountType(entityAccountType);
+                accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-            }else {
+            } else {
                 entityAccountType = EntityAccountType.GROUP;
-                accountNumberFormat = this.accountNumberFormatRepository
-                        .findByAccountType(entityAccountType);
+                accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
             }
 
         }
     }
+
     @Transactional
     @Override
     public CommandProcessingResult createCenter(final JsonCommand command) {
@@ -345,10 +344,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         } catch (final DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, GroupTypes.GROUP);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleGroupDataIntegrityIssues(command, throwable, dve, GroupTypes.GROUP);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -485,10 +484,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         } catch (final DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -618,8 +617,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         final AppUser currentUser = this.context.authenticatedUser();
 
-        final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
+        final CodeValue closureReason = this.codeValueRepository
+                .findOneByCodeNameAndIdWithNotFoundDetection(GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
 
         if (group.hasActiveClients()) {
             final String errorMessage = group.getGroupLevel().getLevelName()
@@ -630,8 +629,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
-        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(),
-                StatusEnum.CLOSE.getCode().longValue(),EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getCode().longValue(),
+                EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
 
         group.close(currentUser, closureReason, closureDate);
 
@@ -691,8 +690,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final LocalDate closureDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.closureDateParamName);
         final Long closureReasonId = command.longValueOfParameterNamed(GroupingTypesApiConstants.closureReasonIdParamName);
 
-        final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                GroupingTypesApiConstants.CENTER_CLOSURE_REASON, closureReasonId);
+        final CodeValue closureReason = this.codeValueRepository
+                .findOneByCodeNameAndIdWithNotFoundDetection(GroupingTypesApiConstants.CENTER_CLOSURE_REASON, closureReasonId);
 
         final AppUser currentUser = this.context.authenticatedUser();
 
@@ -707,7 +706,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(),
                 StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
-
 
         center.close(currentUser, closureReason, closureDate);
 
@@ -930,7 +928,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Transactional
     private void validateForJLGSavings(final Long groupId, final Set<Client> clientMembers) {
         for (final Client client : clientMembers) {
-            final Collection<SavingsAccount> savings = this.savingsAccountRepositoryWrapper.findByClientIdAndGroupId(client.getId(), groupId);
+            final Collection<SavingsAccount> savings = this.savingsAccountRepositoryWrapper.findByClientIdAndGroupId(client.getId(),
+                    groupId);
             if (!CollectionUtils.isEmpty(savings)) {
                 final String defaultUserMessage = "Client with identifier " + client.getId()
                         + " cannot be disassociated it has group savings.";
@@ -944,8 +943,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final LocalDate activationDate) {
         if (activationDate != null && groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
             final String levelName = groupLevel.getLevelName();
-            final String errorMessage = levelName
-                    + " activation date should be greater than or equal to the parent Office's creation date " + activationDate.toString();
+            final String errorMessage = levelName + " activation date should be greater than or equal to the parent Office's creation date "
+                    + activationDate.toString();
             throw new InvalidGroupStateTransitionException(levelName.toLowerCase(), "activate.date",
                     "cannot.be.before.office.activation.date", errorMessage, activationDate, groupOffice.getOpeningLocalDate());
         }
@@ -980,8 +979,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
              */
             if (ceneterCalendar == null && groupCalendar != null) {
                 throw new GeneralPlatformDomainRuleException(
-                        "error.msg.center.associating.group.not.allowed.with.meeting.attached.to.group", "Group with id " + group.getId()
-                                + " is already associated with meeting", group.getId());
+                        "error.msg.center.associating.group.not.allowed.with.meeting.attached.to.group",
+                        "Group with id " + group.getId() + " is already associated with meeting", group.getId());
             }
             /**
              * Group meeting recurrence should match with center meeting
@@ -989,14 +988,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
              */
             else if (ceneterCalendar != null && groupCalendar != null) {
 
-                if (!ceneterCalendar.getRecurrence().equalsIgnoreCase(groupCalendar.getRecurrence())) { throw new GeneralPlatformDomainRuleException(
-                        "error.msg.center.associating.group.not.allowed.with.different.meeting", "Group with id " + group.getId()
-                                + " meeting recurrence doesnot matched with center meeting recurrence", group.getId()); }
+                if (!ceneterCalendar.getRecurrence().equalsIgnoreCase(groupCalendar.getRecurrence())) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.center.associating.group.not.allowed.with.different.meeting",
+                            "Group with id " + group.getId() + " meeting recurrence doesnot matched with center meeting recurrence",
+                            group.getId());
+                }
             }
         }
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent,
+            Object entity) {
         Map<BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;

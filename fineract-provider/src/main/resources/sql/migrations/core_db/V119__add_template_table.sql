@@ -48,6 +48,6 @@ CREATE TABLE `m_template_m_templatemappers` (
 
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`)
 VALUES ('organistion', 'DELETE_TEMPLATE', 'TEMPLATE', 'DELETE', 0),
-	   ('organistion', 'CREATE_TEMPLATE', 'TEMPLATE', 'CREATE', 0),
-	   ('organistion', 'UPDATE_TEMPLATE', 'TEMPLATE', 'UPDATE', 0),
-	   ('organistion', 'READ_TEMPLATE', 'TEMPLATE', 'READ', 0);
+       ('organistion', 'CREATE_TEMPLATE', 'TEMPLATE', 'CREATE', 0),
+       ('organistion', 'UPDATE_TEMPLATE', 'TEMPLATE', 'UPDATE', 0),
+       ('organistion', 'READ_TEMPLATE', 'TEMPLATE', 'READ', 0);

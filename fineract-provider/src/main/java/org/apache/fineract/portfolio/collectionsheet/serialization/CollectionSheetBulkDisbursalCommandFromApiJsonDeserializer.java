@@ -39,8 +39,8 @@ import org.springframework.stereotype.Component;
  * {@link CollectionSheetBulkDisbursalCommand}'s.
  */
 @Component
-public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer extends
-        AbstractFromApiJsonDeserializer<CollectionSheetBulkDisbursalCommand> {
+public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer
+        extends AbstractFromApiJsonDeserializer<CollectionSheetBulkDisbursalCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
 

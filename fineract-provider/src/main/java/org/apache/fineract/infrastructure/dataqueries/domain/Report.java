@@ -70,7 +70,7 @@ public final class Report extends AbstractPersistableCustom {
     @Column(name = "report_sql")
     private String reportSql;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
 
     @Column(name = "self_service_user_report")
@@ -188,9 +188,10 @@ public final class Report extends AbstractPersistableCustom {
         if (!actualChanges.isEmpty()) {
             if (isCoreReport()) {
                 for (final String key : actualChanges.keySet()) {
-                    if (!key.equals("useReport")) { throw new PlatformDataIntegrityException(
-                            "error.msg.only.use.report.can.be.updated.for.core.report",
-                            "Only the Use Report field can be updated for Core Reports", key); }
+                    if (!key.equals("useReport")) {
+                        throw new PlatformDataIntegrityException("error.msg.only.use.report.can.be.updated.for.core.report",
+                                "Only the Use Report field can be updated for Core Reports", key);
+                    }
                 }
             }
         }
@@ -239,11 +240,11 @@ public final class Report extends AbstractPersistableCustom {
 
         if (StringUtils.isNotBlank(this.reportType)) {
             if (this.reportType.equals("Table") || this.reportType.equals("Chart")) {
-                baseDataValidator.reset().parameter("reportSql").value(this.reportSql)
-                        .cantBeBlankWhenParameterProvidedIs("reportType", this.reportType);
+                baseDataValidator.reset().parameter("reportSql").value(this.reportSql).cantBeBlankWhenParameterProvidedIs("reportType",
+                        this.reportType);
             } else {
-                baseDataValidator.reset().parameter("reportSql").value(this.reportSql)
-                        .mustBeBlankWhenParameterProvidedIs("reportType", this.reportType);
+                baseDataValidator.reset().parameter("reportSql").value(this.reportSql).mustBeBlankWhenParameterProvidedIs("reportType",
+                        this.reportType);
             }
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

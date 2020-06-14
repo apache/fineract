@@ -53,11 +53,11 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "createdby_id", nullable = false)
     private AppUser createdBy;
 
-    @ManyToOne(optional = true, fetch=FetchType.LAZY)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "lastmodifiedby_id", nullable = false)
     private AppUser modifiedBy;
 
@@ -71,10 +71,8 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
 
     }
 
-    public FloatingRatePeriod(Date fromDate, BigDecimal interestRate,
-            boolean isDifferentialToBaseLendingRate, boolean isActive,
-            AppUser createdBy, AppUser modifiedBy, Date createdOn,
-            Date modifiedOn) {
+    public FloatingRatePeriod(Date fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate, boolean isActive,
+            AppUser createdBy, AppUser modifiedBy, Date createdOn, Date modifiedOn) {
         this.fromDate = fromDate;
         this.interestRate = interestRate;
         this.isDifferentialToBaseLendingRate = isDifferentialToBaseLendingRate;
@@ -143,21 +141,17 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
 
     public FloatingRatePeriodData toData(final FloatingRateDTO floatingRateDTO) {
 
-        BigDecimal interest = getInterestRate().add(
-                floatingRateDTO.getInterestRateDiff());
+        BigDecimal interest = getInterestRate().add(floatingRateDTO.getInterestRateDiff());
         if (isDifferentialToBaseLendingRate()) {
-            interest = interest.add(floatingRateDTO
-                    .fetchBaseRate(fetchFromDate()));
+            interest = interest.add(floatingRateDTO.fetchBaseRate(fetchFromDate()));
         }
 
         final LocalDate fromDate = new LocalDateTime(getFromDate()).toLocalDate();
         final LocalDate createdOn = new LocalDateTime(getCreatedOn()).toLocalDate();
         final LocalDate modidiedOn = new LocalDateTime(getModifiedOn()).toLocalDate();
 
-        return new FloatingRatePeriodData(getId(), fromDate, interest,
-                isDifferentialToBaseLendingRate(), isActive(), getCreatedBy()
-                        .getUsername(), createdOn, getModifiedBy()
-                        .getUsername(), modidiedOn);
+        return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive(),
+                getCreatedBy().getUsername(), createdOn, getModifiedBy().getUsername(), modidiedOn);
     }
 
 }

@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class XBRLIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(XBRLIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

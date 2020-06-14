@@ -50,20 +50,17 @@ public class FineractEntityAccess extends AbstractPersistableCustom {
     @Column(name = "second_entity_id")
     private Long secondEntityId;
 
-    protected FineractEntityAccess () {
+    protected FineractEntityAccess() {
 
     }
 
-    public static FineractEntityAccess createNew(final String entityType, final Long entityId,
-            final CodeValue accessType,
+    public static FineractEntityAccess createNew(final String entityType, final Long entityId, final CodeValue accessType,
             final String secondEntityType, final Long secondEntityId) {
-        return new FineractEntityAccess(entityType, entityId, accessType,
-                secondEntityType, secondEntityId);
+        return new FineractEntityAccess(entityType, entityId, accessType, secondEntityType, secondEntityId);
     }
 
-    public FineractEntityAccess(final String entityType, final Long entityId,
-            final CodeValue accessType,
-            final String secondEntityType, final Long secondEntityId) {
+    public FineractEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
+            final Long secondEntityId) {
         this.entityType = entityType;
         this.entityId = entityId;
         this.accessType = accessType;
@@ -72,17 +69,16 @@ public class FineractEntityAccess extends AbstractPersistableCustom {
     }
 
     public static FineractEntityAccess fromJson(final CodeValue accessType, final JsonCommand command) {
-        final String entityType = command.stringValueOfParameterNamed(
-                FineractEntityAccessConstants.EntityAccessJSONinputParams.ENTITY_TYPE.getValue());
-        final Long entityId = command.longValueOfParameterNamed(
-                FineractEntityAccessConstants.EntityAccessJSONinputParams.ENTITY_ID.getValue());
-        final String secondEntityType = command.stringValueOfParameterNamed(
-                FineractEntityAccessConstants.EntityAccessJSONinputParams.SECOND_ENTITY_ID.getValue());
-        final Long secondEntityId = command.longValueOfParameterNamed(
-                FineractEntityAccessConstants.EntityAccessJSONinputParams.SECOND_ENTITY_ID.getValue());
+        final String entityType = command
+                .stringValueOfParameterNamed(FineractEntityAccessConstants.EntityAccessJSONinputParams.ENTITY_TYPE.getValue());
+        final Long entityId = command
+                .longValueOfParameterNamed(FineractEntityAccessConstants.EntityAccessJSONinputParams.ENTITY_ID.getValue());
+        final String secondEntityType = command
+                .stringValueOfParameterNamed(FineractEntityAccessConstants.EntityAccessJSONinputParams.SECOND_ENTITY_ID.getValue());
+        final Long secondEntityId = command
+                .longValueOfParameterNamed(FineractEntityAccessConstants.EntityAccessJSONinputParams.SECOND_ENTITY_ID.getValue());
 
-        return new FineractEntityAccess (entityType, entityId, accessType,
-                secondEntityType, secondEntityId);
+        return new FineractEntityAccess(entityType, entityId, accessType, secondEntityType, secondEntityId);
 
     }
 

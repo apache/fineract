@@ -46,8 +46,7 @@ import org.springframework.stereotype.Component;
 public class LikelihoodDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> UPDATE_LIKELIHOOD_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(LikelihoodApiConstants.ACTIVE));
+    private static final Set<String> UPDATE_LIKELIHOOD_DATA_PARAMETERS = new HashSet<>(Arrays.asList(LikelihoodApiConstants.ACTIVE));
 
     @Autowired
     public LikelihoodDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -62,7 +61,8 @@ public class LikelihoodDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_LIKELIHOOD_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LikelihoodApiConstants.LIKELIHOOD_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(LikelihoodApiConstants.LIKELIHOOD_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         if (this.fromApiJsonHelper.parameterExists(LikelihoodApiConstants.ACTIVE, element)) {

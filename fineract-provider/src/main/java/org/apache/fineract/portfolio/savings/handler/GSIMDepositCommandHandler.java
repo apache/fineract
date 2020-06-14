@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.fineract.portfolio.savings.handler;
 
 import org.apache.fineract.commands.annotation.CommandType;
@@ -28,7 +27,6 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatform
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "DEPOSIT")

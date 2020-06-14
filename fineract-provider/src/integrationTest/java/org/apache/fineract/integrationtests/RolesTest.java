@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RolesTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(RolesTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -109,7 +110,7 @@ public class RolesTest {
         assertEquals(enableRoleId, roleId);
         role = RolesHelper.getRoleDetails(requestSpec, responseSpec, roleId);
         assertEquals((Integer) role.get("id"), roleId);
-        assertEquals(false,(Boolean) role.get("disabled"));
+        assertEquals(false, (Boolean) role.get("disabled"));
 
     }
 

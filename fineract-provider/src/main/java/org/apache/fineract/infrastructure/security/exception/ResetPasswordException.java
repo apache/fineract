@@ -32,9 +32,8 @@ public class ResetPasswordException extends PlatformApiDataValidationException {
     public ResetPasswordException(final Long userId) {
 
         super("error.msg.password.outdated", "The password of the user with id " + userId + " has expired, please reset it",
-                new ArrayList<ApiParameterError> (List.of(
-                        ApiParameterError.parameterError("error.msg.password.outdated", "The password of the user with id " + userId
-                                + " has expired, please reset it", "userId", userId)))
+                new ArrayList<ApiParameterError>(List.of(ApiParameterError.parameterError("error.msg.password.outdated",
+                        "The password of the user with id " + userId + " has expired, please reset it", "userId", userId)))
 
         );
 

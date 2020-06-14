@@ -77,9 +77,9 @@ public class SavingsImportHandlerTest {
     public void testSavingsImport() throws InterruptedException, IOException, ParseException {
 
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
+        // in order to populate helper sheets
+        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         OfficeDomain office = officeHelper.retrieveOfficeByID(outcome_office_creation);
@@ -99,87 +99,98 @@ public class SavingsImportHandlerTest {
         clientMap.put("active", "true");
         clientMap.put("activationDate", "04 March 2011");
 
-        Integer outcome_client_creation= Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+        Integer outcome_client_creation = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 new Gson().toJson(clientMap), "clientId");
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
-        //in order to populate helper sheets
-        Integer outcome_group_creation=GroupHelper.createGroup(requestSpec,responseSpec,true);
+        // in order to populate helper sheets
+        Integer outcome_group_creation = GroupHelper.createGroup(requestSpec, responseSpec, true);
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
-        //in order to populate helper sheets
-        Integer outcome_staff_creation =StaffHelper.createStaff(requestSpec,responseSpec);
+        // in order to populate helper sheets
+        Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         Map<String, Object> staffMap = StaffHelper.getStaff(requestSpec, responseSpec, outcome_staff_creation);
         Assertions.assertNotNull(staffMap, "Could not retrieve created staff");
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        String jsonSavingsProduct=savingsProductHelper.build();
-        Integer outcome_sp_creaction=SavingsProductHelper.createSavingsProduct(jsonSavingsProduct,requestSpec,responseSpec);
+        String jsonSavingsProduct = savingsProductHelper.build();
+        Integer outcome_sp_creaction = SavingsProductHelper.createSavingsProduct(jsonSavingsProduct, requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_sp_creaction, "Could not create Savings product");
 
-        SavingsAccountHelper savingsAccountHelper=new SavingsAccountHelper(requestSpec,responseSpec);
-        Workbook workbook=savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
+        SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        Workbook workbook = savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
 
-        //insert dummy data into Savings sheet
+        // insert dummy data into Savings sheet
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
-        Row firstSavingsRow=savingsSheet.getRow(1);
+        Row firstSavingsRow = savingsSheet.getRow(1);
         firstSavingsRow.createCell(SavingsConstants.OFFICE_NAME_COL).setCellValue(office.getName());
         firstSavingsRow.createCell(SavingsConstants.SAVINGS_TYPE_COL).setCellValue("Individual");
-        firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL).setCellValue(firstName + " " + lastName + "(" + outcome_client_creation + ")");
-        Sheet savingsProductSheet=workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
-        firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(1).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL)
+                .setCellValue(firstName + " " + lastName + "(" + outcome_client_creation + ")");
+        Sheet savingsProductSheet = workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
+        firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(1).getStringCellValue());
         firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("dd MMMM yyyy");
-        Date date=simpleDateFormat.parse("13 May 2017");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Date date = simpleDateFormat.parse("13 May 2017");
         firstSavingsRow.createCell(SavingsConstants.SUBMITTED_ON_DATE_COL).setCellValue(date);
         firstSavingsRow.createCell(SavingsConstants.APPROVED_DATE_COL).setCellValue(date);
         firstSavingsRow.createCell(SavingsConstants.ACTIVATION_DATE_COL).setCellValue(date);
-        firstSavingsRow.createCell(SavingsConstants.CURRENCY_COL).setCellValue(savingsProductSheet.getRow(1).getCell(10).getStringCellValue());
-        firstSavingsRow.createCell(SavingsConstants.DECIMAL_PLACES_COL).setCellValue(savingsProductSheet.getRow(1).getCell(11).getNumericCellValue());
-        firstSavingsRow.createCell(SavingsConstants.IN_MULTIPLES_OF_COL).setCellValue(savingsProductSheet.getRow(1).getCell(12).getNumericCellValue());
-        firstSavingsRow.createCell(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL).setCellValue(savingsProductSheet.getRow(1).getCell(2).getNumericCellValue());
-        firstSavingsRow.createCell(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(3).getStringCellValue());
-        firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(4).getStringCellValue());
-        firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL).setCellValue(savingsProductSheet.getRow(1).getCell(5).getStringCellValue());
-        firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL).setCellValue(savingsProductSheet.getRow(1).getCell(6).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.CURRENCY_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(10).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.DECIMAL_PLACES_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(11).getNumericCellValue());
+        firstSavingsRow.createCell(SavingsConstants.IN_MULTIPLES_OF_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(12).getNumericCellValue());
+        firstSavingsRow.createCell(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(2).getNumericCellValue());
+        firstSavingsRow.createCell(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(3).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(4).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(5).getStringCellValue());
+        firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(6).getStringCellValue());
         firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(1000.0);
         firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_COL).setCellValue(1);
         firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL).setCellValue("Weeks");
         firstSavingsRow.createCell(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS).setCellValue("False");
         firstSavingsRow.createCell(SavingsConstants.ALLOW_OVER_DRAFT_COL).setCellValue("False");
-        firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
+        firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL)
+                .setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
 
         String currentdirectory = new File("").getAbsolutePath();
-        File directory=new File(currentdirectory+File.separator+"src"+File.separator+"integrationTest"+File.separator+
-                "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"savings") ;
+        File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator
+                + "resources" + File.separator + "bulkimport" + File.separator + "importhandler" + File.separator + "savings");
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        File file= new File(directory+File.separator+"Savings.xls");
-        OutputStream outputStream=new FileOutputStream(file);
+        File file = new File(directory + File.separator + "Savings.xls");
+        OutputStream outputStream = new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();
 
-        String importDocumentId=savingsAccountHelper.importSavingsTemplate(file);
+        String importDocumentId = savingsAccountHelper.importSavingsTemplate(file);
         file.delete();
         Assertions.assertNotNull(importDocumentId);
 
-        //Wait for the creation of output excel
+        // Wait for the creation of output excel
         Thread.sleep(10000);
 
-        //check status column of output excel
-        String location=savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
+        // check status column of output excel
+        String location = savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
         FileInputStream fileInputStream = new FileInputStream(location);
-        Workbook Outputworkbook=new HSSFWorkbook(fileInputStream);
+        Workbook Outputworkbook = new HSSFWorkbook(fileInputStream);
         Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
-        Row row= OutputSavingsSheet.getRow(1);
+        Row row = OutputSavingsSheet.getRow(1);
 
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
 
-        Assertions.assertEquals("Imported",row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
         Outputworkbook.close();
     }
 }

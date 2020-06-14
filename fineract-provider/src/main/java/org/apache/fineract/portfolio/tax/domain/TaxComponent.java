@@ -74,11 +74,11 @@ public class TaxComponent extends AbstractAuditableCustom {
     @Temporal(TemporalType.DATE)
     private Date startDate;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "tax_component_id", referencedColumnName = "id", nullable = false)
     private Set<TaxComponentHistory> taxComponentHistories = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.DETACH, mappedBy = "taxComponent", orphanRemoval = false, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.DETACH, mappedBy = "taxComponent", orphanRemoval = false, fetch = FetchType.EAGER)
     private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
     protected TaxComponent() {
@@ -196,21 +196,17 @@ public class TaxComponent extends AbstractAuditableCustom {
         return dates;
     }
 
-
     public Integer getDebitAccountType() {
         return this.debitAccountType;
     }
-
 
     public GLAccount getDebitAcount() {
         return this.debitAcount;
     }
 
-
     public Integer getCreditAccountType() {
         return this.creditAccountType;
     }
-
 
     public GLAccount getCreditAcount() {
         return this.creditAcount;

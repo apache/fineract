@@ -30,8 +30,8 @@ public class ClientAddressData {
 
     private final boolean isActive;
 
-    private ClientAddressData(final long clientAddressId, final long client_id, final long address_id,
-            final long address_type_id, final boolean isActive) {
+    private ClientAddressData(final long clientAddressId, final long client_id, final long address_id, final long address_type_id,
+            final boolean isActive) {
         this.clientAddressId = clientAddressId;
         this.client_id = client_id;
         this.address_id = address_id;

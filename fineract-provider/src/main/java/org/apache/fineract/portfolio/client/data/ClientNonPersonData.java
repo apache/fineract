@@ -34,27 +34,28 @@ public class ClientNonPersonData implements Serializable {
     private final CodeValueData mainBusinessLine;
     private final String remarks;
 
-    //import fields
+    // import fields
     private Long mainBusinessLineId;
     private Long constitutionId;
     private String locale;
     private String dateFormat;
 
-    public static ClientNonPersonData importInstance(String incorporationNo, LocalDate incorpValidityTillDate,
-            String remarks, Long mainBusinessLineId, Long constitutionId,String locale,String dateFormat){
-        return new ClientNonPersonData(incorporationNo,incorpValidityTillDate,remarks,
-                mainBusinessLineId,constitutionId,locale,dateFormat);
+    public static ClientNonPersonData importInstance(String incorporationNo, LocalDate incorpValidityTillDate, String remarks,
+            Long mainBusinessLineId, Long constitutionId, String locale, String dateFormat) {
+        return new ClientNonPersonData(incorporationNo, incorpValidityTillDate, remarks, mainBusinessLineId, constitutionId, locale,
+                dateFormat);
     }
-    private ClientNonPersonData(String incorpNumber, LocalDate incorpValidityTillDate,
-            String remarks, Long mainBusinessLineId, Long constitutionId,String locale,String dateFormat) {
+
+    private ClientNonPersonData(String incorpNumber, LocalDate incorpValidityTillDate, String remarks, Long mainBusinessLineId,
+            Long constitutionId, String locale, String dateFormat) {
 
         this.incorpNumber = incorpNumber;
         this.incorpValidityTillDate = incorpValidityTillDate;
         this.remarks = remarks;
         this.mainBusinessLineId = mainBusinessLineId;
         this.constitutionId = constitutionId;
-        this.dateFormat= dateFormat;
-        this.locale= locale;
+        this.dateFormat = dateFormat;
+        this.locale = locale;
         this.constitution = null;
         this.mainBusinessLine = null;
     }

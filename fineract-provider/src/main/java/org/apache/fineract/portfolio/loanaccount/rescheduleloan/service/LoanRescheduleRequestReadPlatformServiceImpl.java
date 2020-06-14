@@ -108,7 +108,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("left join m_loan ml on ml.id = lr.loan_id ");
             sqlBuilder.append("left join m_client mc on mc.id = ml.client_id ");
             sqlBuilder.append("join m_loan_reschedule_request_term_variations_mapping rrtvm on lr.id = rrtvm.loan_reschedule_request_id ");
-            sqlBuilder.append("join m_loan_term_variations tv on tv.id = rrtvm.loan_term_variations_id and tv.parent_id is null") ;
+            sqlBuilder.append("join m_loan_term_variations tv on tv.id = rrtvm.loan_term_variations_id and tv.parent_id is null");
 
             this.schema = sqlBuilder.toString();
         }
@@ -198,8 +198,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
             sqlBuilder.append("lrr.id as id, lrr.status_enum as statusEnum, lrr.reschedule_from_date as rescheduleFromDate, ");
             sqlBuilder.append("cv.id as rescheduleReasonCvId, cv.code_value as rescheduleReasonCvValue, ");
-            sqlBuilder
-                    .append(" loan.id as loanId, loan.account_no as loanAccountNumber, client.id as clientId, client.display_name as clientName ");
+            sqlBuilder.append(
+                    " loan.id as loanId, loan.account_no as loanAccountNumber, client.id as clientId, client.display_name as clientName ");
             sqlBuilder.append("from m_loan_reschedule_request lrr ");
             sqlBuilder.append("left join m_loan loan on loan.id = lrr.loan_id ");
             sqlBuilder.append("left join m_client client on client.id = loan.client_id ");

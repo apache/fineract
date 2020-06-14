@@ -138,8 +138,8 @@ public class InterestRateChartSlab extends AbstractPersistableCustom {
         return incentives.remove(incentive);
     }
 
-    public void updateIncentives(JsonCommand command, final Map<String, Object> actualChanges,
-            final DataValidatorBuilder baseDataValidator, final InterestRateChartSlab chartSlab, final Locale locale) {
+    public void updateIncentives(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
+            final InterestRateChartSlab chartSlab, final Locale locale) {
         final Map<String, Object> deleteIncentives = new HashMap<>();
         final Map<String, Object> IncentiveChanges = new HashMap<>();
         if (command.hasParameter(InterestRateChartSlabApiConstants.incentivesParamName)) {

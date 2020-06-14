@@ -47,8 +47,7 @@ public class InterestRateChartRepositoryWrapper {
     }
 
     public InterestRateChart findOneWithNotFoundDetection(final Long intrestRateChartId) {
-        return this.repository.findById(intrestRateChartId)
-                .orElseThrow(() -> new InterestRateChartNotFoundException(intrestRateChartId));
+        return this.repository.findById(intrestRateChartId).orElseThrow(() -> new InterestRateChartNotFoundException(intrestRateChartId));
     }
 
     public void save(final InterestRateChart interestRateChart) {

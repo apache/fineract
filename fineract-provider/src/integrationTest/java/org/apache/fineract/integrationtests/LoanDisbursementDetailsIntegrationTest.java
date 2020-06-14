@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class LoanDisbursementDetailsIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(LoanDisbursementDetailsIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -75,20 +76,19 @@ public class LoanDisbursementDetailsIntegrationTest {
         createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 Sep 2015", "5000"));
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------{}"
-                , clientID);
+        LOG.info("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------{}", clientID);
 
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
                 .withInterestTypeAsDecliningBalance().withMoratorium("", "").withAmortizationTypeAsEqualInstallments().withTranches(true)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
-        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}"
-                , loanProductID);
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
+                loanProductID);
 
         final Integer loanIDWithEmi = applyForLoanApplicationWithEmiAmount(clientID, loanProductID, proposedAmount, createTranches,
                 installmentAmount);
 
-        LOG.info("-----------------------------------LOAN CREATED WITH EMI LOANID------------------------------------------------- {}"
-                        , loanIDWithEmi);
+        LOG.info("-----------------------------------LOAN CREATED WITH EMI LOANID------------------------------------------------- {}",
+                loanIDWithEmi);
 
         HashMap repaymentScheduleWithEmi = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
                 loanIDWithEmi, "repaymentSchedule");
@@ -106,7 +106,8 @@ public class LoanDisbursementDetailsIntegrationTest {
                 createTranches);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        LOG.info("-----------------------------------MULTI DISBURSAL LOAN WITH EMI APPROVED SUCCESSFULLY---------------------------------------");
+        LOG.info(
+                "-----------------------------------MULTI DISBURSAL LOAN WITH EMI APPROVED SUCCESSFULLY---------------------------------------");
 
         final Integer loanIDWithoutEmi = applyForLoanApplicationWithEmiAmount(clientID, loanProductID, proposedAmount, createTranches,
                 withoutInstallmentAmount);
@@ -117,8 +118,8 @@ public class LoanDisbursementDetailsIntegrationTest {
         ArrayList<HashMap> periods1 = (ArrayList<HashMap>) repaymentScheduleWithEmi.get("periods");
         assertEquals(15, periods1.size());
 
-        LOG.info("-----------------------------------LOAN CREATED WITHOUT EMI LOANID------------------------------------------------- {}"
-                        , loanIDWithoutEmi);
+        LOG.info("-----------------------------------LOAN CREATED WITHOUT EMI LOANID------------------------------------------------- {}",
+                loanIDWithoutEmi);
 
         /* To be uncommented once issue MIFOSX-2006 is closed. */
         // this.validateRepaymentScheduleWithoutEMI(periods1);
@@ -131,7 +132,8 @@ public class LoanDisbursementDetailsIntegrationTest {
                 loanIDWithoutEmi, createTranches);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        LOG.info("-----------------------------------MULTI DISBURSAL LOAN WITHOUT EMI APPROVED SUCCESSFULLY---------------------------------------");
+        LOG.info(
+                "-----------------------------------MULTI DISBURSAL LOAN WITHOUT EMI APPROVED SUCCESSFULLY---------------------------------------");
 
     }
 
@@ -207,9 +209,9 @@ public class LoanDisbursementDetailsIntegrationTest {
 
         assertEquals(period.get("dueDate").toString(), expectedRepaymentSchedule.getDueDate());
         assertEquals(period.get("principalLoanBalanceOutstanding"), expectedRepaymentSchedule.getPrincipalLoanBalanceOutstanding());
-        LOG.info("{}",period.get("totalOriginalDueForPeriod").toString());
-        assertEquals(Float.valueOf(period.get("totalOriginalDueForPeriod").toString()), expectedRepaymentSchedule
-                .getTotalOriginalDueForPeriod().floatValue(), 0.0f);
+        LOG.info("{}", period.get("totalOriginalDueForPeriod").toString());
+        assertEquals(Float.valueOf(period.get("totalOriginalDueForPeriod").toString()),
+                expectedRepaymentSchedule.getTotalOriginalDueForPeriod().floatValue(), 0.0f);
 
         assertEquals(Float.valueOf(period.get("totalOutstandingForPeriod").toString()).floatValue(),
                 expectedRepaymentSchedule.getTotalOutstandingForPeriod(), 0.0f);
@@ -220,7 +222,8 @@ public class LoanDisbursementDetailsIntegrationTest {
                     expectedRepaymentSchedule.getInterestOutstanding(), 0.0f);
             assertEquals(Float.valueOf(period.get("principalOutstanding").toString()).floatValue(),
                     expectedRepaymentSchedule.getPrincipalOutstanding(), 0.0f);
-            assertEquals(Float.valueOf(period.get("principalDue").toString()).floatValue(), expectedRepaymentSchedule.getPrincipalDue(), 0.0f);
+            assertEquals(Float.valueOf(period.get("principalDue").toString()).floatValue(), expectedRepaymentSchedule.getPrincipalDue(),
+                    0.0f);
             assertEquals(Float.valueOf(period.get("principalOriginalDue").toString()).floatValue(),
                     expectedRepaymentSchedule.getPrincipalOriginalDue(), 0.0f);
             assertEquals(period.get("fromDate").toString(), expectedRepaymentSchedule.getFromDate());
@@ -342,7 +345,7 @@ public class LoanDisbursementDetailsIntegrationTest {
 
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
-        //
+                //
                 .withPrincipal(proposedAmount)
                 //
                 .withLoanTermFrequency("12")
@@ -364,25 +367,23 @@ public class LoanDisbursementDetailsIntegrationTest {
     }
 
     @Test
-    public void createApproveAndValidateMultiDisburseLoan() throws ParseException{
+    public void createApproveAndValidateMultiDisburseLoan() throws ParseException {
 
         List<HashMap> createTranches = new ArrayList<>();
         String id = null;
         createTranches.add(this.loanTransactionHelper.createTrancheDetail(id, "01 March 2014", "1000"));
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}"
-                , clientID);
+        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
-                .build(null));
-        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}"
-                , loanProductID);
+        final Integer loanProductID = this.loanTransactionHelper
+                .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                        .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
+        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
+                loanProductID);
 
         this.loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
-        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}"
-                , loanID);
+        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -423,7 +424,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 addTranches, "");
     }
 
-    private void deleteDisbursmentDetails() throws ParseException{
+    private void deleteDisbursmentDetails() throws ParseException {
         List<HashMap> deleteTranches = new ArrayList<>();
         ArrayList<HashMap> disbursementDetails = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanDetail(this.requestSpec,
                 this.responseSpec, this.loanID, "disbursementDetails");
@@ -440,7 +441,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 deleteTranches, "");
     }
 
-    private void editDateAndPrincipalOfExistingTranche() throws ParseException{
+    private void editDateAndPrincipalOfExistingTranche() throws ParseException {
         String updatedExpectedDisbursementDate = "01 March 2014";
         String updatedPrincipal = "900";
         /* Update */
@@ -469,7 +470,7 @@ public class LoanDisbursementDetailsIntegrationTest {
             List<HashMap> tranches) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
-        //
+                //
                 .withPrincipal(principal)
                 //
                 .withLoanTermFrequency("5")

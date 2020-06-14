@@ -29,21 +29,21 @@ import java.util.Set;
  */
 
 final class SelfClientsApiResourceSwagger {
-    private SelfClientsApiResourceSwagger() {
-    }
+
+    private SelfClientsApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfClientsResponse")
     public final static class GetSelfClientsResponse {
-        private GetSelfClientsResponse() {
-        }
+
+        private GetSelfClientsResponse() {}
 
         final class GetSelfClientsPageItems {
-            private GetSelfClientsPageItems() {
-            }
+
+            private GetSelfClientsPageItems() {}
 
             final class GetSelfClientsStatus {
-                private GetSelfClientsStatus() {
-                }
+
+                private GetSelfClientsStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -79,12 +79,12 @@ final class SelfClientsApiResourceSwagger {
 
     @ApiModel(value = "GetSelfClientsClientIdResponse")
     public final static class GetSelfClientsClientIdResponse {
-        private GetSelfClientsClientIdResponse() {
-        }
+
+        private GetSelfClientsClientIdResponse() {}
 
         final class GetSelfClientsTimeline {
-            private GetSelfClientsTimeline() {
-            }
+
+            private GetSelfClientsTimeline() {}
 
             @ApiModelProperty(example = "[2013, 1, 1]")
             public LocalDate submittedOnDate;
@@ -135,16 +135,16 @@ final class SelfClientsApiResourceSwagger {
 
     @ApiModel(value = "GetSelfClientsClientIdAccountsResponse")
     public final static class GetSelfClientsClientIdAccountsResponse {
-        private GetSelfClientsClientIdAccountsResponse() {
-        }
+
+        private GetSelfClientsClientIdAccountsResponse() {}
 
         final class GetSelfClientsLoanAccounts {
-            private GetSelfClientsLoanAccounts() {
-            }
+
+            private GetSelfClientsLoanAccounts() {}
 
             final class GetSelfClientsLoanAccountsStatus {
-                private GetSelfClientsLoanAccountsStatus() {
-                }
+
+                private GetSelfClientsLoanAccountsStatus() {}
 
                 @ApiModelProperty(example = "300")
                 public Integer id;
@@ -171,8 +171,8 @@ final class SelfClientsApiResourceSwagger {
             }
 
             final class GetSelfClientsLoanAccountsType {
-                private GetSelfClientsLoanAccountsType() {
-                }
+
+                private GetSelfClientsLoanAccountsType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -199,12 +199,12 @@ final class SelfClientsApiResourceSwagger {
         }
 
         final class GetSelfClientsSavingsAccounts {
-            private GetSelfClientsSavingsAccounts() {
-            }
+
+            private GetSelfClientsSavingsAccounts() {}
 
             final class GetSelfClientsSavingsAccountsCurrency {
-                private GetSelfClientsSavingsAccountsCurrency() {
-                }
+
+                private GetSelfClientsSavingsAccountsCurrency() {}
 
                 @ApiModelProperty(example = "USD")
                 public String code;
@@ -221,8 +221,8 @@ final class SelfClientsApiResourceSwagger {
             }
 
             final class GetSelfClientsSavingsAccountsStatus {
-                private GetSelfClientsSavingsAccountsStatus() {
-                }
+
+                private GetSelfClientsSavingsAccountsStatus() {}
 
                 @ApiModelProperty(example = "100")
                 public Integer id;
@@ -262,16 +262,16 @@ final class SelfClientsApiResourceSwagger {
 
     @ApiModel(value = "GetSelfClientsClientIdChargesResponse")
     public final static class GetSelfClientsClientIdChargesResponse {
-        private GetSelfClientsClientIdChargesResponse() {
-        }
+
+        private GetSelfClientsClientIdChargesResponse() {}
 
         final class GetSelfClientsChargesPageItems {
-            private GetSelfClientsChargesPageItems() {
-            }
+
+            private GetSelfClientsChargesPageItems() {}
 
             final class GetSelfClientsChargeTimeType {
-                private GetSelfClientsChargeTimeType() {
-                }
+
+                private GetSelfClientsChargeTimeType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -282,8 +282,8 @@ final class SelfClientsApiResourceSwagger {
             }
 
             final class GetSelfClientsChargeCalculationType {
-                private GetSelfClientsChargeCalculationType() {
-                }
+
+                private GetSelfClientsChargeCalculationType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -333,8 +333,8 @@ final class SelfClientsApiResourceSwagger {
 
     @ApiModel(value = "GetSelfClientsClientIdChargesChargeIdResponse")
     public final static class GetSelfClientsClientIdChargesChargeIdResponse {
-        private GetSelfClientsClientIdChargesChargeIdResponse() {
-        }
+
+        private GetSelfClientsClientIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "3")
         public Integer id;
@@ -371,16 +371,16 @@ final class SelfClientsApiResourceSwagger {
 
     @ApiModel(value = "GetSelfClientsClientIdTransactionsResponse")
     public final static class GetSelfClientsClientIdTransactionsResponse {
-        private GetSelfClientsClientIdTransactionsResponse() {
-        }
+
+        private GetSelfClientsClientIdTransactionsResponse() {}
 
         final class GetSelfClientsClientIdTransactionsPageItems {
-            private GetSelfClientsClientIdTransactionsPageItems() {
-            }
+
+            private GetSelfClientsClientIdTransactionsPageItems() {}
 
             final class GetSelfClientsClientIdTransactionsType {
-                private GetSelfClientsClientIdTransactionsType() {
-                }
+
+                private GetSelfClientsClientIdTransactionsType() {}
 
                 @ApiModelProperty(example = "1")
                 public Integer id;
@@ -415,8 +415,8 @@ final class SelfClientsApiResourceSwagger {
 
     @ApiModel(value = "GetSelfClientsClientIdTransactionsTransactionIdResponse")
     public final static class GetSelfClientsClientIdTransactionsTransactionIdResponse {
-        private GetSelfClientsClientIdTransactionsTransactionIdResponse() {
-        }
+
+        private GetSelfClientsClientIdTransactionsTransactionIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;

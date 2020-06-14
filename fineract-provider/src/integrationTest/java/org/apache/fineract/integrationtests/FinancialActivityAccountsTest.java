@@ -86,7 +86,8 @@ public class FinancialActivityAccountsTest {
          * Fetch Created Financial Activity to Account Mapping and validate
          * created values
          **/
-        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount);
+        assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID,
+                liabilityTransferAccount);
 
         /**
          * Update Existing Financial Activity to Account Mapping and assert
@@ -129,8 +130,8 @@ public class FinancialActivityAccountsTest {
                 invalidFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /** Should be able to delete a Financial Activity to Account Mapping **/
-        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper.deleteFinancialActivityAccount(
-                financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
+                .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
         Assertions.assertNotNull(deletedFinancialActivityAccountId);
         Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
 
@@ -138,7 +139,8 @@ public class FinancialActivityAccountsTest {
         financialActivityAccountHelper.getFinancialActivityAccount(deletedFinancialActivityAccountId, responseSpecForResourceNotFoundError);
     }
 
-    private void assertFinancialActivityAccountCreation(Integer financialActivityAccountId, Integer financialActivityId, Account glAccount) {
+    private void assertFinancialActivityAccountCreation(Integer financialActivityAccountId, Integer financialActivityId,
+            Account glAccount) {
         HashMap mappingDetails = financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId, responseSpec);
         Assertions.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assertions.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
@@ -152,8 +154,8 @@ public class FinancialActivityAccountsTest {
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         for (HashMap financialActivity : financialActivities) {
             Integer financialActivityAccountId = (Integer) financialActivity.get("id");
-            Integer deletedFinancialActivityAccountId = this.financialActivityAccountHelper.deleteFinancialActivityAccount(
-                    financialActivityAccountId, this.responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+            Integer deletedFinancialActivityAccountId = this.financialActivityAccountHelper
+                    .deleteFinancialActivityAccount(financialActivityAccountId, this.responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
             Assertions.assertNotNull(deletedFinancialActivityAccountId);
             Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
         }

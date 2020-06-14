@@ -64,9 +64,9 @@ public class DepositAccountInterestRateChartSlabData {
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> clientClassificationOptions;
 
-    public static DepositAccountInterestRateChartSlabData instance(final Long id, final String description,
-            final EnumOptionData periodType, final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom,
-            final BigDecimal amountRangeTo, final BigDecimal annualInterestRate, final CurrencyData currency) {
+    public static DepositAccountInterestRateChartSlabData instance(final Long id, final String description, final EnumOptionData periodType,
+            final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
+            final BigDecimal annualInterestRate, final CurrencyData currency) {
         final Collection<EnumOptionData> periodTypes = null;
         final Collection<EnumOptionData> entityTypeOptions = null;
         final Collection<EnumOptionData> attributeNameOptions = null;

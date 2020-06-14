@@ -18,32 +18,32 @@
 --
 
 CREATE TABLE `scheduled_email_campaign` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`campaign_name` VARCHAR(100) NOT NULL,
-	`campaign_type` INT NOT NULL,
-	`businessRule_id` INT NOT NULL,
-	`param_value` TEXT NULL,
-	`status_enum` INT NOT NULL,
-	`email_subject` VARCHAR(100) NOT NULL, 
-	`email_message` TEXT NOT NULL,
-	`email_attachment_file_format` VARCHAR(10) NOT NULL,
-	`stretchy_report_id` INT NOT NULL,
-	`stretchy_report_param_map` TEXT NULL DEFAULT NULL,
-	`closedon_date` DATE NULL DEFAULT NULL,
-	`closedon_userid` BIGINT NULL DEFAULT NULL,
-	`submittedon_date` DATE NULL DEFAULT NULL,
-	`submittedon_userid` BIGINT NULL DEFAULT NULL,
-	`approvedon_date` DATE NULL DEFAULT NULL,
-	`approvedon_userid` BIGINT NULL DEFAULT NULL,
-	`recurrence` VARCHAR(100) NULL DEFAULT NULL,
-	`next_trigger_date` DATETIME NULL DEFAULT NULL,
-	`last_trigger_date` DATETIME NULL DEFAULT NULL,
-	`recurrence_start_date` DATETIME NULL DEFAULT NULL,
-	`is_visible` tinyint NULL DEFAULT '1',
-	`previous_run_error_log` TEXT NULL DEFAULT NULL,
-	`previous_run_error_message` TEXT NULL DEFAULT NULL,
-	PRIMARY KEY (`id`),
-	CONSTRAINT `scheduled_email_campaign_ibfk_1` FOREIGN KEY (`stretchy_report_id`) REFERENCES `stretchy_report` (`id`)	
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `campaign_name` VARCHAR(100) NOT NULL,
+    `campaign_type` INT NOT NULL,
+    `businessRule_id` INT NOT NULL,
+    `param_value` TEXT NULL,
+    `status_enum` INT NOT NULL,
+    `email_subject` VARCHAR(100) NOT NULL,
+    `email_message` TEXT NOT NULL,
+    `email_attachment_file_format` VARCHAR(10) NOT NULL,
+    `stretchy_report_id` INT NOT NULL,
+    `stretchy_report_param_map` TEXT NULL DEFAULT NULL,
+    `closedon_date` DATE NULL DEFAULT NULL,
+    `closedon_userid` BIGINT NULL DEFAULT NULL,
+    `submittedon_date` DATE NULL DEFAULT NULL,
+    `submittedon_userid` BIGINT NULL DEFAULT NULL,
+    `approvedon_date` DATE NULL DEFAULT NULL,
+    `approvedon_userid` BIGINT NULL DEFAULT NULL,
+    `recurrence` VARCHAR(100) NULL DEFAULT NULL,
+    `next_trigger_date` DATETIME NULL DEFAULT NULL,
+    `last_trigger_date` DATETIME NULL DEFAULT NULL,
+    `recurrence_start_date` DATETIME NULL DEFAULT NULL,
+    `is_visible` tinyint NULL DEFAULT '1',
+    `previous_run_error_log` TEXT NULL DEFAULT NULL,
+    `previous_run_error_message` TEXT NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `scheduled_email_campaign_ibfk_1` FOREIGN KEY (`stretchy_report_id`) REFERENCES `stretchy_report` (`id`)
 );
 
 CREATE TABLE IF NOT EXISTS scheduled_email_messages_outbound (
@@ -165,4 +165,3 @@ values ('Update Email Outbound with campaign message', 'Update Email Outbound wi
 INSERT INTO `scheduled_email_configuration` (`name`)
 VALUES ('SMTP_SERVER'),
 ('SMTP_PORT'),('SMTP_USERNAME'), ('SMTP_PASSWORD');
-

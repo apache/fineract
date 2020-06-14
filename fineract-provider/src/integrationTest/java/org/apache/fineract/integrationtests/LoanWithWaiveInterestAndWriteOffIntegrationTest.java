@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings({ "rawtypes" })
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(LoanWithWaiveInterestAndWriteOffIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -101,7 +102,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DISBURSE
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
-        LOG.info("DISBURSE {}" , loanStatusHashMap.toString());
+        LOG.info("DISBURSE {}", loanStatusHashMap.toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // PERFORM REPAYMENTS AND CHECK LOAN STATUS
@@ -114,7 +115,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DIBURSE AGAIN
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
-        LOG.info("DISBURSE {}" , loanStatusHashMap);
+        LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // MAKE REPAYMENTS
@@ -160,7 +161,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DISBURSE
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.DISBURSEMENT_DATE, loanID);
-        LOG.info("DISBURSE {}" , loanStatusHashMap);
+        LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // MAKE REPAYMENTS
@@ -174,17 +175,21 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
                 "Checking for Principal paid ");
         Assertions.assertTrue(Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0,
                 "Checking for interestPaid paid ");
-        Assertions.assertTrue(Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0,
+        Assertions.assertTrue(
+                Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0,
                 "Checking for total paid ");
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
         LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("1 January 2011", loanID));
         toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-        Assertions.assertTrue(Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0,
+        Assertions.assertTrue(
+                Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0,
                 "Checking for Principal written off ");
-        Assertions.assertTrue(Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0,
+        Assertions.assertTrue(
+                Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0,
                 "Checking for interestPaid written off ");
-        Assertions.assertTrue(Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0,
+        Assertions.assertTrue(
+                Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0,
                 "Checking for total written off ");
 
     }

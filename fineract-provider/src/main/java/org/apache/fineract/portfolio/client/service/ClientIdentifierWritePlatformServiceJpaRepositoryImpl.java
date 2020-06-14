@@ -82,8 +82,8 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         try {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-            final CodeValue documentType = this.codeValueRepository.findOneWithNotFoundDetection(clientIdentifierCommand
-                    .getDocumentTypeId());
+            final CodeValue documentType = this.codeValueRepository
+                    .findOneWithNotFoundDetection(clientIdentifierCommand.getDocumentTypeId());
             documentTypeId = documentType.getId();
             documentTypeLabel = documentType.label();
 
@@ -100,10 +100,10 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         } catch (final DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch(final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -162,10 +162,10 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         } catch (final DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
-        }catch(final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
-             return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -191,8 +191,9 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             final String documentKey, final Throwable cause, final Exception dve) {
         if (cause.getMessage().contains("unique_active_client_identifier")) {
             throw new DuplicateClientIdentifierException(documentTypeLabel);
-        } else if (cause.getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
-                documentTypeId, documentTypeLabel, documentKey); }
+        } else if (cause.getMessage().contains("unique_identifier_key")) {
+            throw new DuplicateClientIdentifierException(documentTypeId, documentTypeLabel, documentKey);
+        }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.clientIdentifier.unknown.data.integrity.issue",

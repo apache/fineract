@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
 
     private ResponseSpecification responseSpec;
@@ -53,30 +52,27 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
     }
 
-    @SuppressWarnings( {"static-access", "rawtypes", "unchecked"})
+    @SuppressWarnings({ "static-access", "rawtypes", "unchecked" })
     @Test
-    public void testInterestChargedFromDateSameAsDisbursalDate(){
+    public void testInterestChargedFromDateSameAsDisbursalDate() {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
-     // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
-                        .getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        // Retrieving All Global Configuration details
+        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
+                this.responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "interest-charged-from-date-same-as-disbursal-date";
         boolean newBooleanValue = true;
 
         for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
-                if (globalConfig.get(configIndex).get("name")
-                                .equals(configName)) {
-                        String configId = globalConfig.get(configIndex).get("id")
-                                        .toString();
-                        Integer updateConfigId = this.globalConfigurationHelper
-                                        .updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                                                configId.toString(), newBooleanValue);
-                        Assertions.assertNotNull(updateConfigId);
-                        break;
-                }
+            if (globalConfig.get(configIndex).get("name").equals(configName)) {
+                String configId = globalConfig.get(configIndex).get("id").toString();
+                Integer updateConfigId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
+                        this.responseSpec, configId.toString(), newBooleanValue);
+                Assertions.assertNotNull(updateConfigId);
+                break;
+            }
         }
 
     }

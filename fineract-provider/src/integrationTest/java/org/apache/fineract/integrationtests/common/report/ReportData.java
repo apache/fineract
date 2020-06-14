@@ -44,8 +44,8 @@ public class ReportData {
         this.reportDescription = reportDescription;
     }
 
-    public static ReportData instance(final Long reportId, final String reportName, final String reportType,
-            final String reportSubType, final Map<String, Object> reportParamName, final String reportDescription) {
+    public static ReportData instance(final Long reportId, final String reportName, final String reportType, final String reportSubType,
+            final Map<String, Object> reportParamName, final String reportDescription) {
         return new ReportData(reportId, reportName, reportType, reportSubType, reportParamName, reportDescription);
     }
 

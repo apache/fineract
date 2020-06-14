@@ -35,24 +35,20 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ShareAccountChargeReadPlatformServiceImpl implements
-        ShareAccountChargeReadPlatformService {
+public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountChargeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ShareAccountChargeReadPlatformServiceImpl(
-            final RoutingDataSource dataSource) {
+    public ShareAccountChargeReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
-    public Collection<ShareAccountChargeData> retrieveAccountCharges(
-            Long accountId, String status) {
+    public Collection<ShareAccountChargeData> retrieveAccountCharges(Long accountId, String status) {
         final ShareAccountChargeMapper rm = new ShareAccountChargeMapper();
         final StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select ").append(rm.schema())
-                .append(" where sc.account_id=? ");
+        sqlBuilder.append("select ").append(rm.schema()).append(" where sc.account_id=? ");
         if (status.equalsIgnoreCase("active")) {
             sqlBuilder.append(" and sc.is_active = 1 ");
         } else if (status.equalsIgnoreCase("inactive")) {
@@ -60,18 +56,15 @@ public class ShareAccountChargeReadPlatformServiceImpl implements
         }
         sqlBuilder.append(" order by sc.charge_time_enum ASC");
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), rm,
-                new Object[] { accountId });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { accountId });
     }
 
-    private final static class ShareAccountChargeMapper implements
-            RowMapper<ShareAccountChargeData> {
+    private final static class ShareAccountChargeMapper implements RowMapper<ShareAccountChargeData> {
 
         private final String schema;
 
         public ShareAccountChargeMapper() {
-            StringBuilder buff = new StringBuilder()
-                    .append("sc.id as id, c.id as chargeId, sc.account_id as accountId, c.name as name, ")
+            StringBuilder buff = new StringBuilder().append("sc.id as id, c.id as chargeId, sc.account_id as accountId, c.name as name, ")
                     .append("sc.amount as amountDue, sc.amount_paid_derived as amountPaid, ")
                     .append("sc.amount_waived_derived as amountWaived, sc.amount_writtenoff_derived as amountWrittenOff, ")
                     .append("sc.amount_outstanding_derived as amountOutstanding, sc.calculation_percentage as percentageOf, ")
@@ -88,58 +81,42 @@ public class ShareAccountChargeReadPlatformServiceImpl implements
         }
 
         @Override
-        public ShareAccountChargeData mapRow(ResultSet rs, int rowNum)
-                throws SQLException {
+        public ShareAccountChargeData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Long chargeId = rs.getLong("chargeId");
             final Long accountId = rs.getLong("accountId");
             final String name = rs.getString("name");
             final BigDecimal amount = rs.getBigDecimal("amountDue");
-            final BigDecimal amountPaid = JdbcSupport
-                    .getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
-            final BigDecimal amountWaived = JdbcSupport
-                    .getBigDecimalDefaultToZeroIfNull(rs, "amountWaived");
-            final BigDecimal amountWrittenOff = JdbcSupport
-                    .getBigDecimalDefaultToZeroIfNull(rs, "amountWrittenOff");
-            final BigDecimal amountOutstanding = rs
-                    .getBigDecimal("amountOutstanding");
+            final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
+            final BigDecimal amountWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountWaived");
+            final BigDecimal amountWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountWrittenOff");
+            final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
 
-            final BigDecimal percentageOf = JdbcSupport
-                    .getBigDecimalDefaultToZeroIfNull(rs, "percentageOf");
-            final BigDecimal amountPercentageAppliedTo = JdbcSupport
-                    .getBigDecimalDefaultToZeroIfNull(rs,
-                            "amountPercentageAppliedTo");
+            final BigDecimal percentageOf = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "percentageOf");
+            final BigDecimal amountPercentageAppliedTo = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPercentageAppliedTo");
 
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
             final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs
-                    .getString("currencyDisplaySymbol");
-            final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs,
-                    "currencyDecimalPlaces");
-            final Integer inMultiplesOf = JdbcSupport.getInteger(rs,
-                    "inMultiplesOf");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            final CurrencyData currency = new CurrencyData(currencyCode,
-                    currencyName, currencyDecimalPlaces, inMultiplesOf,
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             final int chargeTime = rs.getInt("chargeTime");
-            final EnumOptionData chargeTimeType = ChargeEnumerations
-                    .chargeTimeType(chargeTime);
+            final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
 
             final int chargeCalculation = rs.getInt("chargeCalculation");
-            final EnumOptionData chargeCalculationType = ChargeEnumerations
-                    .chargeCalculationType(chargeCalculation);
+            final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final Boolean isActive = rs.getBoolean("isActive");
-            final BigDecimal chargeamountorpercentage = rs.getBigDecimal("charge_amount_or_percentage") ;
+            final BigDecimal chargeamountorpercentage = rs.getBigDecimal("charge_amount_or_percentage");
 
             final Collection<ChargeData> chargeOptions = null;
-            return new ShareAccountChargeData(id, chargeId, accountId, name,
-                    currency, amount, amountPaid, amountWaived,
-                    amountWrittenOff, amountOutstanding, chargeTimeType,
-                    chargeCalculationType, percentageOf,
-                    amountPercentageAppliedTo, chargeOptions, isActive, chargeamountorpercentage);
+            return new ShareAccountChargeData(id, chargeId, accountId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff,
+                    amountOutstanding, chargeTimeType, chargeCalculationType, percentageOf, amountPercentageAppliedTo, chargeOptions,
+                    isActive, chargeamountorpercentage);
         }
 
         public String schema() {

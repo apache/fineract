@@ -29,7 +29,9 @@ import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 public class DepositAccountTransactionNotAllowedException extends AbstractPlatformServiceUnavailableException {
 
     public DepositAccountTransactionNotAllowedException(final Long accountId, final String action, final DepositAccountType type) {
-        super("error.msg." + type.resourceName() + ".account.trasaction." + action + ".notallowed", SavingsEnumerations.depositType(type)
-                .getValue() + "account " + action + " transaction not allowed with account identifier " + accountId, accountId);
+        super("error.msg." + type.resourceName() + ".account.trasaction." + action + ".notallowed",
+                SavingsEnumerations.depositType(type).getValue() + "account " + action + " transaction not allowed with account identifier "
+                        + accountId,
+                accountId);
     }
 }

@@ -90,10 +90,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     public ReportMailingJobWritePlatformServiceImpl(final ReportRepositoryWrapper reportRepositoryWrapper,
             final ReportMailingJobValidator reportMailingJobValidator,
             final ReportMailingJobRepositoryWrapper reportMailingJobRepositoryWrapper,
-            final ReportMailingJobRepository reportMailingJobRepository,
-            final PlatformSecurityContext platformSecurityContext,
-            final ReportMailingJobEmailService reportMailingJobEmailService,
-            final ReadReportingService readReportingService,
+            final ReportMailingJobRepository reportMailingJobRepository, final PlatformSecurityContext platformSecurityContext,
+            final ReportMailingJobEmailService reportMailingJobEmailService, final ReadReportingService readReportingService,
             final ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository,
             final ReportingProcessServiceProvider reportingProcessServiceProvider) {
         this.reportRepositoryWrapper = reportRepositoryWrapper;
@@ -117,17 +115,18 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             final AppUser appUser = this.platformSecurityContext.authenticatedUser();
 
             // get the stretchy Report object
-            final Report stretchyReport = this.reportRepositoryWrapper.findOneThrowExceptionIfNotFound(jsonCommand.longValueOfParameterNamed(
-                    ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME));
+            final Report stretchyReport = this.reportRepositoryWrapper.findOneThrowExceptionIfNotFound(
+                    jsonCommand.longValueOfParameterNamed(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME));
 
-            // create an instance of ReportMailingJob class from the JsonCommand object
+            // create an instance of ReportMailingJob class from the JsonCommand
+            // object
             final ReportMailingJob reportMailingJob = ReportMailingJob.newInstance(jsonCommand, stretchyReport, appUser);
 
             // save entity
             this.reportMailingJobRepository.save(reportMailingJob);
 
-            return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).
-                    withEntityId(reportMailingJob.getId()).build();
+            return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
+                    .build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(jsonCommand, dve);
 
@@ -143,7 +142,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             this.reportMailingJobValidator.validateUpdateRequest(jsonCommand);
 
             // retrieve the ReportMailingJob object from the database
-            final ReportMailingJob reportMailingJob = this.reportMailingJobRepositoryWrapper.findOneThrowExceptionIfNotFound(reportMailingJobId);
+            final ReportMailingJob reportMailingJob = this.reportMailingJobRepositoryWrapper
+                    .findOneThrowExceptionIfNotFound(reportMailingJobId);
 
             final Map<String, Object> changes = reportMailingJob.update(jsonCommand);
 
@@ -184,7 +184,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     // update the next run time property
                     reportMailingJob.updateNextRunDateTime(nextRecurringDateTime);
 
-                 // check if the next run DateTime is not empty and the recurrence is empty
+                    // check if the next run DateTime is not empty and the
+                    // recurrence is empty
                 } else if (StringUtils.isBlank(recurrence) && (nextRunDateTime != null)) {
                     // the next run DateTime should be set to null
                     reportMailingJob.updateNextRunDateTime(null);
@@ -194,7 +195,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             if (changes.containsKey(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME)) {
                 final DateTime startDateTime = reportMailingJob.getStartDateTime();
 
-                // initially set the next recurring date time to the new start date time
+                // initially set the next recurring date time to the new start
+                // date time
                 DateTime nextRecurringDateTime = startDateTime;
 
                 // ensure that the recurrence pattern string is not empty
@@ -208,15 +210,13 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             }
 
             if (!changes.isEmpty()) {
-                // save and flush immediately so any data integrity exception can be handled in the "catch" block
+                // save and flush immediately so any data integrity exception
+                // can be handled in the "catch" block
                 this.reportMailingJobRepository.saveAndFlush(reportMailingJob);
             }
 
-            return new CommandProcessingResultBuilder().
-                    withCommandId(jsonCommand.commandId()).
-                    withEntityId(reportMailingJob.getId()).
-                    with(changes).
-                    build();
+            return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
+                    .with(changes).build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(jsonCommand, dve);
 
@@ -228,9 +228,11 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     @Transactional
     public CommandProcessingResult deleteReportMailingJob(Long reportMailingJobId) {
         // retrieve the ReportMailingJob object from the database
-        final ReportMailingJob reportMailingJob = this.reportMailingJobRepositoryWrapper.findOneThrowExceptionIfNotFound(reportMailingJobId);
+        final ReportMailingJob reportMailingJob = this.reportMailingJobRepositoryWrapper
+                .findOneThrowExceptionIfNotFound(reportMailingJobId);
 
-        // delete the report mailing job by setting the isDeleted property to 1 and altering the name
+        // delete the report mailing job by setting the isDeleted property to 1
+        // and altering the name
         reportMailingJob.delete();
 
         // save the report mailing job entity
@@ -242,7 +244,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     @Override
     @CronTarget(jobName = JobName.EXECUTE_REPORT_MAILING_JOBS)
     public void executeReportMailingJobs() throws JobExecutionException {
-        final Collection<ReportMailingJob> reportMailingJobCollection = this.reportMailingJobRepository.findByIsActiveTrueAndIsDeletedFalse();
+        final Collection<ReportMailingJob> reportMailingJobCollection = this.reportMailingJobRepository
+                .findByIsActiveTrueAndIsDeletedFalse();
 
         for (ReportMailingJob reportMailingJob : reportMailingJobCollection) {
             // get the tenant's date as a DateTime object
@@ -251,19 +254,20 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
             if (nextRunDateTime != null && nextRunDateTime.isBefore(localDateTimeOftenant)) {
                 // get the emailAttachmentFileFormat enum object
-                final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat.
-                        newInstance(reportMailingJob.getEmailAttachmentFileFormat());
+                final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = ReportMailingJobEmailAttachmentFileFormat
+                        .newInstance(reportMailingJob.getEmailAttachmentFileFormat());
 
                 if (emailAttachmentFileFormat != null && emailAttachmentFileFormat.isValid()) {
                     final Report stretchyReport = reportMailingJob.getStretchyReport();
                     final String reportName = (stretchyReport != null) ? stretchyReport.getReportName() : null;
                     final StringBuilder errorLog = new StringBuilder();
-                    final Map<String, String> validateStretchyReportParamMap = this.reportMailingJobValidator.
-                            validateStretchyReportParamMap(reportMailingJob.getStretchyReportParamMap());
+                    final Map<String, String> validateStretchyReportParamMap = this.reportMailingJobValidator
+                            .validateStretchyReportParamMap(reportMailingJob.getStretchyReportParamMap());
                     MultivaluedMap<String, String> reportParams = new MultivaluedMapImpl();
 
                     if (validateStretchyReportParamMap != null) {
-                        Iterator<Map.Entry<String, String>> validateStretchyReportParamMapEntries = validateStretchyReportParamMap.entrySet().iterator();
+                        Iterator<Map.Entry<String, String>> validateStretchyReportParamMapEntries = validateStretchyReportParamMap
+                                .entrySet().iterator();
 
                         while (validateStretchyReportParamMapEntries.hasNext()) {
                             Map.Entry<String, String> validateStretchyReportParamMapEntry = validateStretchyReportParamMapEntries.next();
@@ -271,8 +275,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                             String value = validateStretchyReportParamMapEntry.getValue();
 
                             if (StringUtils.containsIgnoreCase(key, "date")) {
-                                ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption =
-                                        ReportMailingJobStretchyReportParamDateOption.newInstance(value);
+                                ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption = ReportMailingJobStretchyReportParamDateOption
+                                        .newInstance(value);
 
                                 if (reportMailingJobStretchyReportParamDateOption.isValid()) {
                                     value = ReportMailingJobDateUtil.getDateAsString(reportMailingJobStretchyReportParamDateOption);
@@ -283,10 +287,12 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                         }
                     }
 
-                    // generate the report output stream, method in turn call another that sends the file to the email recipients
+                    // generate the report output stream, method in turn call
+                    // another that sends the file to the email recipients
                     this.generateReportOutputStream(reportMailingJob, emailAttachmentFileFormat, reportParams, reportName, errorLog);
 
-                    // update the previous run time, next run time, status, error log properties
+                    // update the previous run time, next run time, status,
+                    // error log properties
                     this.updateReportMailingJobAfterJobExecution(reportMailingJob, errorLog, localDateTimeOftenant);
                 }
             }
@@ -296,9 +302,12 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     /**
      * update the report mailing job entity after job execution
      *
-     * @param reportMailingJob -- the report mailing job entity
-     * @param errorLog -- StringBuilder object containing the error log if any
-     * @param jobStartDateTime -- the start DateTime of the job
+     * @param reportMailingJob
+     *            -- the report mailing job entity
+     * @param errorLog
+     *            -- StringBuilder object containing the error log if any
+     * @param jobStartDateTime
+     *            -- the start DateTime of the job
      *
      **/
     private void updateReportMailingJobAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
@@ -318,7 +327,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
         reportMailingJob.updatePreviousRunStatus(reportMailingJobPreviousRunStatus.getValue());
         reportMailingJob.updatePreviousRunDateTime(reportMailingJob.getNextRunDateTime());
 
-        // check if the job has a recurrence pattern, if not deactivate the job. The job will only run once
+        // check if the job has a recurrence pattern, if not deactivate the job.
+        // The job will only run once
         if (StringUtils.isEmpty(recurrence)) {
             // deactivate job
             reportMailingJob.deactivate();
@@ -341,7 +351,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     }
 
     /**
-     * create the next recurring DateTime from recurrence pattern, start DateTime and current DateTime
+     * create the next recurring DateTime from recurrence pattern, start
+     * DateTime and current DateTime
      *
      * @param recurrencePattern
      * @param startDateTime
@@ -355,8 +366,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             final LocalDate nextDayLocalDate = startDateTime.plus(Duration.standardDays(1)).toLocalDate();
             final LocalDate nextRecurringLocalDate = CalendarUtils.getNextRecurringDate(recurrencePattern, startDateTime.toLocalDate(),
                     nextDayLocalDate);
-            final String nextDateTimeString = nextRecurringLocalDate + " " + startDateTime.getHourOfDay() + ":" + startDateTime.getMinuteOfHour()
-                    + ":" + startDateTime.getSecondOfMinute();
+            final String nextDateTimeString = nextRecurringLocalDate + " " + startDateTime.getHourOfDay() + ":"
+                    + startDateTime.getMinuteOfHour() + ":" + startDateTime.getSecondOfMinute();
             final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(DATETIME_FORMAT);
 
             nextRecurringDateTime = DateTime.parse(nextDateTimeString, dateTimeFormatter);
@@ -368,18 +379,22 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     /**
      * create a new report mailing job run history entity after job execution
      *
-     * @param reportMailingJob -- the report mailing job entity
-     * @param errorLog -- StringBuilder object containing the error log if any
-     * @param jobStartDateTime -- the start DateTime of the job
-     * @param jobRunStatus -- the status of the job (success/error)
+     * @param reportMailingJob
+     *            -- the report mailing job entity
+     * @param errorLog
+     *            -- StringBuilder object containing the error log if any
+     * @param jobStartDateTime
+     *            -- the start DateTime of the job
+     * @param jobRunStatus
+     *            -- the status of the job (success/error)
      *
      **/
     private void createReportMailingJobRunHistroryAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
             final DateTime jobStartDateTime, final String jobRunStatus) {
         final DateTime jobEndDateTime = DateUtils.getLocalDateTimeOfTenant().toDateTime();
         final String errorLogToString = (errorLog != null) ? errorLog.toString() : null;
-        final ReportMailingJobRunHistory reportMailingJobRunHistory = ReportMailingJobRunHistory.newInstance(reportMailingJob, jobStartDateTime,
-                jobEndDateTime, jobRunStatus, null, errorLogToString);
+        final ReportMailingJobRunHistory reportMailingJobRunHistory = ReportMailingJobRunHistory.newInstance(reportMailingJob,
+                jobStartDateTime, jobEndDateTime, jobRunStatus, null, errorLogToString);
 
         this.reportMailingJobRunHistoryRepository.save(reportMailingJobRunHistory);
     }
@@ -387,8 +402,10 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     /**
      * Handle any SQL data integrity issue
      *
-     * @param jsonCommand -- JsonCommand object
-     * @param dve -- data integrity exception object
+     * @param jsonCommand
+     *            -- JsonCommand object
+     * @param dve
+     *            -- data integrity exception object
      *
      **/
     private void handleDataIntegrityIssues(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
@@ -396,8 +413,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
         if (realCause.getMessage().contains(ReportMailingJobConstants.NAME_PARAM_NAME)) {
             final String name = jsonCommand.stringValueOfParameterNamed(ReportMailingJobConstants.NAME_PARAM_NAME);
-            throw new PlatformDataIntegrityException("error.msg.report.mailing.job.duplicate.name", "Report mailing job with name `" + name + "` already exists",
-                    ReportMailingJobConstants.NAME_PARAM_NAME, name);
+            throw new PlatformDataIntegrityException("error.msg.report.mailing.job.duplicate.name",
+                    "Report mailing job with name `" + name + "` already exists", ReportMailingJobConstants.NAME_PARAM_NAME, name);
         }
 
         LOG.error("Error occured.", dve);
@@ -416,13 +433,15 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      * @param errorLog
      * @return the error log StringBuilder object
      */
-    private StringBuilder generateReportOutputStream(final ReportMailingJob reportMailingJob, final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat,
-            final MultivaluedMap<String, String> reportParams, final String reportName, final StringBuilder errorLog) {
+    private StringBuilder generateReportOutputStream(final ReportMailingJob reportMailingJob,
+            final ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat, final MultivaluedMap<String, String> reportParams,
+            final String reportName, final StringBuilder errorLog) {
 
         try {
             final boolean isSelfServiceUserReport = false;
             final String reportType = this.readReportingService.getReportType(reportName, isSelfServiceUserReport);
-            final ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
+            final ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider
+                    .findReportingProcessService(reportType);
 
             if (reportingProcessService != null) {
                 final Response processReport = reportingProcessService.processRequest(reportName, reportParams);
@@ -453,8 +472,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                 errorLog.append("ReportingProcessService object is null ---------- ");
             }
         } catch (Exception e) {
-            errorLog.append("The ReportMailingJobWritePlatformServiceImpl.generateReportOutputStream method threw an Exception: "
-                    + e + " ---------- ");
+            errorLog.append("The ReportMailingJobWritePlatformServiceImpl.generateReportOutputStream method threw an Exception: " + e
+                    + " ---------- ");
         }
 
         return errorLog;

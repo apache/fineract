@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum StorageType {
+
     FILE_SYSTEM(1), S3(2);
 
     private final Integer value;

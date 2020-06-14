@@ -26,17 +26,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 01/13/18.
  */
 final class ClientIdentifiersApiResourceSwagger {
-    private ClientIdentifiersApiResourceSwagger() {
-    }
+
+    private ClientIdentifiersApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsClientIdIdentifiersResponse")
     public final static class GetClientsClientIdIdentifiersResponse {
-        private GetClientsClientIdIdentifiersResponse() {
-        }
+
+        private GetClientsClientIdIdentifiersResponse() {}
 
         final class GetClientsDocumentType {
-            private GetClientsDocumentType() {
-            }
+
+            private GetClientsDocumentType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -57,12 +57,12 @@ final class ClientIdentifiersApiResourceSwagger {
 
     @ApiModel(value = "GetClientsClientIdIdentifiersTemplateResponse")
     public final static class GetClientsClientIdIdentifiersTemplateResponse {
-        private GetClientsClientIdIdentifiersTemplateResponse() {
-        }
+
+        private GetClientsClientIdIdentifiersTemplateResponse() {}
 
         final class GetClientsAllowedDocumentTypes {
-            private GetClientsAllowedDocumentTypes() {
-            }
+
+            private GetClientsAllowedDocumentTypes() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -77,8 +77,8 @@ final class ClientIdentifiersApiResourceSwagger {
 
     @ApiModel(value = "PostClientsClientIdIdentifiersRequest")
     public final static class PostClientsClientIdIdentifiersRequest {
-        private PostClientsClientIdIdentifiersRequest() {
-        }
+
+        private PostClientsClientIdIdentifiersRequest() {}
 
         @ApiModelProperty(example = "1")
         public Integer documentTypeId;
@@ -90,8 +90,8 @@ final class ClientIdentifiersApiResourceSwagger {
 
     @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdRequest")
     public final static class PutClientsClientIdIdentifiersIdentifierIdRequest {
-        private PutClientsClientIdIdentifiersIdentifierIdRequest() {
-        }
+
+        private PutClientsClientIdIdentifiersIdentifierIdRequest() {}
 
         @ApiModelProperty(example = "4")
         public Integer documentTypeId;
@@ -103,8 +103,8 @@ final class ClientIdentifiersApiResourceSwagger {
 
     @ApiModel(value = "PutClientsClientIdIdentifiersIdentifierIdResponse")
     public final static class PutClientsClientIdIdentifiersIdentifierIdResponse {
-        private PutClientsClientIdIdentifiersIdentifierIdResponse() {
-        }
+
+        private PutClientsClientIdIdentifiersIdentifierIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -117,8 +117,8 @@ final class ClientIdentifiersApiResourceSwagger {
 
     @ApiModel(value = "PostClientsClientIdIdentifiersResponse")
     public final static class PostClientsClientIdIdentifiersResponse {
-        private PostClientsClientIdIdentifiersResponse() {
-        }
+
+        private PostClientsClientIdIdentifiersResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;
@@ -130,8 +130,8 @@ final class ClientIdentifiersApiResourceSwagger {
 
     @ApiModel(value = "DeleteClientsClientIdIdentifiersIdentifierIdResponse")
     public final static class DeleteClientsClientIdIdentifiersIdentifierIdResponse {
-        private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {
-        }
+
+        private DeleteClientsClientIdIdentifiersIdentifierIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer officeId;

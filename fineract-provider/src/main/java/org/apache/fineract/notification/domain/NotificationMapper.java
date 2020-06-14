@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.notification.domain;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;

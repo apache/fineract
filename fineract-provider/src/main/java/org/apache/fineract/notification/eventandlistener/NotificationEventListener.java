@@ -47,8 +47,7 @@ public class NotificationEventListener implements SessionAwareMessageListener {
 
     @Autowired
     public NotificationEventListener(BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-                                     NotificationWritePlatformService notificationWritePlatformService,
-                                     AppUserRepository appUserRepository) {
+            NotificationWritePlatformService notificationWritePlatformService, AppUserRepository appUserRepository) {
         this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
         this.notificationWritePlatformService = notificationWritePlatformService;
         this.appUserRepository = appUserRepository;
@@ -59,8 +58,8 @@ public class NotificationEventListener implements SessionAwareMessageListener {
         if (message instanceof ObjectMessage) {
             NotificationData notificationData = (NotificationData) ((ObjectMessage) message).getObject();
 
-            final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService
-                    .loadTenantById(notificationData.getTenantIdentifier(), false);
+            final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(notificationData.getTenantIdentifier(),
+                    false);
             ThreadLocalContextUtil.setTenant(tenant);
 
             Long appUserId = notificationData.getActor();
@@ -81,15 +80,9 @@ public class NotificationEventListener implements SessionAwareMessageListener {
                 userIds.remove(appUserId);
             }
 
-            notificationWritePlatformService.notify(
-                    userIds,
-                    notificationData.getObjectType(),
-                    notificationData.getObjectIdentfier(),
-                    notificationData.getAction(),
-                    notificationData.getActor(),
-                    notificationData.getContent(),
-                    notificationData.isSystemGenerated()
-            );
+            notificationWritePlatformService.notify(userIds, notificationData.getObjectType(), notificationData.getObjectIdentfier(),
+                    notificationData.getAction(), notificationData.getActor(), notificationData.getContent(),
+                    notificationData.isSystemGenerated());
         }
     }
 }

@@ -97,8 +97,8 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
     @Override
     public void createAndSaveLoanScheduleArchive(List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Loan loan,
             LoanRescheduleRequest loanRescheduleRequest) {
-        List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = createLoanScheduleArchive(repaymentScheduleInstallments,
-                loan, loanRescheduleRequest);
+        List<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = createLoanScheduleArchive(repaymentScheduleInstallments, loan,
+                loanRescheduleRequest);
         this.loanRepaymentScheduleHistoryRepository.saveAll(loanRepaymentScheduleHistoryList);
 
     }

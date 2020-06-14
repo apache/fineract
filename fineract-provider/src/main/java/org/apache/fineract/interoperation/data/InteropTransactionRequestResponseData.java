@@ -29,31 +29,31 @@ public class InteropTransactionRequestResponseData extends InteropResponseData {
     @NotNull
     private final String requestCode;
 
-
     private InteropTransactionRequestResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
-                                                  @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration,
-                                                  List<ExtensionData> extensionList, @NotNull String requestCode) {
+            @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration, List<ExtensionData> extensionList,
+            @NotNull String requestCode) {
         super(resourceId, officeId, commandId, changesOnly, transactionCode, state, expiration, extensionList);
         this.requestCode = requestCode;
     }
 
-    public static InteropTransactionRequestResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                                              LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String requestCode) {
-        return new InteropTransactionRequestResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList, requestCode);
+    public static InteropTransactionRequestResponseData build(Long commandId, @NotNull String transactionCode,
+            @NotNull InteropActionState state, LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String requestCode) {
+        return new InteropTransactionRequestResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList,
+                requestCode);
     }
 
     public static InteropTransactionRequestResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
-                                                              LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String requestCode) {
+            LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String requestCode) {
         return build(null, transactionCode, state, expiration, extensionList, requestCode);
     }
 
-    public static InteropTransactionRequestResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                                              @NotNull String requestCode) {
+    public static InteropTransactionRequestResponseData build(Long commandId, @NotNull String transactionCode,
+            @NotNull InteropActionState state, @NotNull String requestCode) {
         return build(commandId, transactionCode, state, null, null, requestCode);
     }
 
     public static InteropTransactionRequestResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
-                                                              @NotNull String requestCode) {
+            @NotNull String requestCode) {
         return build(null, transactionCode, state, requestCode);
     }
 

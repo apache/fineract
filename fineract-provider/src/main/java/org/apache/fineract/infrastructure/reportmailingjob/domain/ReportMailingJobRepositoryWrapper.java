@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobRepositoryWrapper {
+
     private final ReportMailingJobRepository reportMailingJobRepository;
 
     @Autowired
@@ -32,18 +33,18 @@ public class ReportMailingJobRepositoryWrapper {
     }
 
     /**
-     * find report mailing job by ID, throw a "entity not found" exception if the job does not exist
+     * find report mailing job by ID, throw a "entity not found" exception if
+     * the job does not exist
      *
-     * @param id -- the identifier of the report mailing job to be found
+     * @param id
+     *            -- the identifier of the report mailing job to be found
      * @return ReportMailingJob object
      **/
     public ReportMailingJob findOneThrowExceptionIfNotFound(final Long id) {
         final ReportMailingJob reportMailingJob = this.reportMailingJobRepository.findById(id)
                 .orElseThrow(() -> new ReportMailingJobNotFoundException(id));
 
-        if (reportMailingJob.isDeleted()) {
-            throw new ReportMailingJobNotFoundException(id);
-        }
+        if (reportMailingJob.isDeleted()) { throw new ReportMailingJobNotFoundException(id); }
 
         return reportMailingJob;
     }

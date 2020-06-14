@@ -44,42 +44,34 @@ public class CodeHelper {
     public static final String CODE_VALUE_POSITION_ATTRIBUTE_NAME = "position";
     public static final String CODE_VALUE_URL = "/fineract-provider/api/v1/codes/[codeId]/codevalues";
 
-    public static Object createCode(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String codeName,
+    public static Object createCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String codeName,
             final String jsonAttributeToGetback) {
 
-        return Utils.performServerPost(requestSpec, responseSpec, CODE_URL
-                + "?" + Utils.TENANT_IDENTIFIER, getTestCodeAsJSON(codeName),
+        return Utils.performServerPost(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, getTestCodeAsJSON(codeName),
                 jsonAttributeToGetback);
     }
 
-    public static Object updateCode(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
+    public static Object updateCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer codeId,
             final String codeName, final String jsonAttributeToGetback) {
 
-        return Utils.performServerPut(requestSpec, responseSpec, CODE_URL + "/"
-                + codeId + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPut(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 getTestCodeAsJSON(codeName), jsonAttributeToGetback);
     }
 
-    public static Object getCodeById(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
+    public static Object getCodeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer codeId,
             final String jsonAttributeToGetback) {
 
-        return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "/"
-                + codeId + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
 
     }
 
-    public static HashMap<String, Object> getCodeByName(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String codeName) {
+    public static HashMap<String, Object> getCodeByName(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String codeName) {
 
         final HashMap<String, Object> code = new HashMap<>();
 
-        ArrayList<HashMap<String, Object>> getAllCodes = CodeHelper
-                .getAllCodes(requestSpec, responseSpec);
+        ArrayList<HashMap<String, Object>> getAllCodes = CodeHelper.getAllCodes(requestSpec, responseSpec);
         for (HashMap<String, Object> map : getAllCodes) {
             String name = (String) map.get("name");
             if (name.equals(codeName)) {
@@ -92,47 +84,36 @@ public class CodeHelper {
         return code;
     }
 
-    public static HashMap<String, Object> retrieveOrCreateCodeValue(
-            Integer codeId, final RequestSpecification requestSpec,
+    public static HashMap<String, Object> retrieveOrCreateCodeValue(Integer codeId, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         Integer codeValueId = null;
-        final List<HashMap<String, Object>> codeValuesList = CodeHelper
-                .getCodeValuesForCode(requestSpec, responseSpec, codeId, "");
+        final List<HashMap<String, Object>> codeValuesList = CodeHelper.getCodeValuesForCode(requestSpec, responseSpec, codeId, "");
         /* If Code Values doesn't exist,then create Code value */
         if (codeValuesList.size() == 0) {
             final Integer codeValuePosition = 0;
             final String codeValue = Utils.randomNameGenerator("", 3);
-            codeValueId = (Integer) CodeHelper.createCodeValue(requestSpec,
-                    responseSpec, codeId, codeValue, codeValuePosition,
+            codeValueId = (Integer) CodeHelper.createCodeValue(requestSpec, responseSpec, codeId, codeValue, codeValuePosition,
                     "subResourceId");
 
         } else {
             return codeValuesList.get(0);
         }
         return Utils.performServerGet(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/"
-                        + codeValueId.toString() + "?"
-                        + Utils.TENANT_IDENTIFIER, "");
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER, "");
 
     }
 
-    public static ArrayList<HashMap<String, Object>> getAllCodes(
-            final RequestSpecification requestSpec,
+    public static ArrayList<HashMap<String, Object>> getAllCodes(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
 
-        return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "?"
-                + Utils.TENANT_IDENTIFIER, "");
+        return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 
     }
 
-    public static Object getSystemDefinedCodes(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
+    public static Object getSystemDefinedCodes(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
 
-        final String getResponse = given().spec(requestSpec).expect()
-                .spec(responseSpec).when()
-                .get(CodeHelper.CODE_URL + "?" + Utils.TENANT_IDENTIFIER)
-                .asString();
+        final String getResponse = given().spec(requestSpec).expect().spec(responseSpec).when()
+                .get(CodeHelper.CODE_URL + "?" + Utils.TENANT_IDENTIFIER).asString();
 
         final JsonPath getResponseJsonPath = new JsonPath(getResponse);
 
@@ -147,8 +128,7 @@ public class CodeHelper {
         return new Gson().toJson(map);
     }
 
-    public static String getTestCodeValueAsJSON(final String codeValueName,
-            final String description, final Integer position) {
+    public static String getTestCodeValueAsJSON(final String codeValueName, final String description, final Integer position) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put(CODE_VALUE_NAME_ATTRIBUTE_NAME, codeValueName);
         if (description != null) {
@@ -158,94 +138,68 @@ public class CodeHelper {
         return new Gson().toJson(map);
     }
 
-    public static Object deleteCodeById(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final String jsonAttributeToGetback) {
+    public static Object deleteCodeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final String jsonAttributeToGetback) {
 
-        return Utils.performServerDelete(requestSpec, responseSpec, CODE_URL
-                + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerDelete(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
 
     }
 
-    public static Object createCodeValue(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final String codeValueName, final Integer position,
-            final String jsonAttributeToGetback) {
+    public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final String codeValueName, final Integer position, final String jsonAttributeToGetback) {
         String description = null;
-        return createCodeValue(requestSpec, responseSpec, codeId,
-                codeValueName, description, position, jsonAttributeToGetback);
+        return createCodeValue(requestSpec, responseSpec, codeId, codeValueName, description, position, jsonAttributeToGetback);
     }
 
-    public static Object createCodeValue(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final String codeValueName, final String description,
-            final Integer position, final String jsonAttributeToGetback) {
+    public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final String codeValueName, final String description, final Integer position,
+            final String jsonAttributeToGetback) {
 
         return Utils.performServerPost(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?"
-                        + Utils.TENANT_IDENTIFIER,
-                getTestCodeValueAsJSON(codeValueName, description, position),
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER,
+                getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
+    }
+
+    public static List<HashMap<String, Object>> getCodeValuesForCode(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer codeId, final String jsonAttributeToGetback) {
+
+        return Utils.performServerGet(requestSpec, responseSpec,
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
+
+    }
+
+    public static Object getCodeValueById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
+
+        return Utils.performServerGet(requestSpec, responseSpec,
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
     }
 
-    public static List<HashMap<String, Object>> getCodeValuesForCode(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final String jsonAttributeToGetback) {
-
-        return Utils.performServerGet(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?"
-                        + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
-
-    }
-
-    public static Object getCodeValueById(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final Integer codeValueId, final String jsonAttributeToGetback) {
-
-        return Utils.performServerGet(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/"
-                        + codeValueId.toString() + "?"
-                        + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
-    }
-
-    public static Object deleteCodeValueById(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final Integer codeValueId, final String jsonAttributeToGetback) {
+    public static Object deleteCodeValueById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final Integer codeValueId, final String jsonAttributeToGetback) {
 
         return Utils.performServerDelete(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/"
-                        + codeValueId.toString() + "?"
-                        + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
+                jsonAttributeToGetback);
     }
 
-    public static Object updateCodeValue(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final Integer codeValueId, final String codeValueName,
-            final Integer position, final String jsonAttributeToGetback) {
+    public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final Integer codeValueId, final String codeValueName, final Integer position,
+            final String jsonAttributeToGetback) {
         String description = null;
-        return updateCodeValue(requestSpec, responseSpec, codeId, codeValueId,
-                codeValueName, description, position, jsonAttributeToGetback);
+        return updateCodeValue(requestSpec, responseSpec, codeId, codeValueId, codeValueName, description, position,
+                jsonAttributeToGetback);
     }
 
-    public static Object updateCodeValue(
-            final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer codeId,
-            final Integer codeValueId, final String codeValueName,
-            final String description, final Integer position,
+    public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final Integer codeValueId, final String codeValueName, final String description, final Integer position,
             final String jsonAttributeToGetback) {
 
         return Utils.performServerPut(requestSpec, responseSpec,
-                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/"
-                        + codeValueId + "?" + Utils.TENANT_IDENTIFIER,
-                getTestCodeValueAsJSON(codeValueName, description, position),
-                jsonAttributeToGetback);
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId + "?" + Utils.TENANT_IDENTIFIER,
+                getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
     }
 
 }

@@ -54,23 +54,18 @@ public final class EntityDatatableChecksDataValidator {
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("entityDatatableChecks");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("entityDatatableChecks");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final String entity = this.fromApiJsonHelper.extractStringNamed("entity", element);
-        baseDataValidator.reset().parameter("entity").value(entity).notBlank()
-                .isOneOfTheseStringValues(EntityTables.getEntitiesList());
+        baseDataValidator.reset().parameter("entity").value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntitiesList());
 
         final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("status", element);
         final Object[] entityTablesStatuses = EntityTables.getStatus(entity).toArray();
@@ -94,8 +89,6 @@ public final class EntityDatatableChecksDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }

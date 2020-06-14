@@ -27,8 +27,7 @@ public class OTPMetadata {
     private final boolean extendedAccessToken;
     private final OTPDeliveryMethod deliveryMethod;
 
-    public OTPMetadata(DateTime requestTime, int tokenLiveTimeInSec,
-                       boolean extendedAccessToken, OTPDeliveryMethod deliveryMethod) {
+    public OTPMetadata(DateTime requestTime, int tokenLiveTimeInSec, boolean extendedAccessToken, OTPDeliveryMethod deliveryMethod) {
         this.requestTime = requestTime;
         this.tokenLiveTimeInSec = tokenLiveTimeInSec;
         this.extendedAccessToken = extendedAccessToken;

@@ -17,6 +17,7 @@
  * under the License.
  */
 package org.apache.fineract.infrastructure.configuration.data;
+
 import java.util.Date;
 
 /**
@@ -39,8 +40,8 @@ public class GlobalConfigurationPropertyData {
     @SuppressWarnings("unused")
     private final boolean trapDoor;
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Date dateValue, final String description,
-            final boolean trapDoor) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Date dateValue,
+            final String description, final boolean trapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
@@ -88,6 +89,5 @@ public class GlobalConfigurationPropertyData {
     public boolean isTrapDoor() {
         return this.trapDoor;
     }
-
 
 }

@@ -120,27 +120,17 @@ public class LoanCollateral extends AbstractPersistableCustom {
         this.type = type;
     }
 
-   /* @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        final LoanCollateral rhs = (LoanCollateral) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(getId(), rhs.getId()) //
-                .append(this.type.getId(), rhs.type.getId()) //
-                .append(this.description, rhs.description) //
-                .append(this.value, this.value)//
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(3, 5) //
-                .append(getId()) //
-                .append(this.type.getId()) //
-                .append(this.description) //
-                .append(this.value)//
-                .toHashCode();
-    }*/
+    /*
+     * @Override public boolean equals(final Object obj) { if (obj == null) {
+     * return false; } if (obj == this) { return true; } if (obj.getClass() !=
+     * getClass()) { return false; } final LoanCollateral rhs = (LoanCollateral)
+     * obj; return new EqualsBuilder().appendSuper(super.equals(obj)) //
+     * .append(getId(), rhs.getId()) // .append(this.type.getId(),
+     * rhs.type.getId()) // .append(this.description, rhs.description) //
+     * .append(this.value, this.value)// .isEquals(); }
+     *
+     * @Override public int hashCode() { return new HashCodeBuilder(3, 5) //
+     * .append(getId()) // .append(this.type.getId()) //
+     * .append(this.description) // .append(this.value)// .toHashCode(); }
+     */
 }

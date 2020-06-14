@@ -31,14 +31,15 @@ public class DuplicateClientIdentifierException extends AbstractPlatformDomainRu
     private final String identifierType;
 
     public DuplicateClientIdentifierException(final String identifierType) {
-        super("error.msg.clientIdentifier.type.duplicate", "Active Client identifier of type " + identifierType
-                + " is already present for this client", identifierType);
+        super("error.msg.clientIdentifier.type.duplicate",
+                "Active Client identifier of type " + identifierType + " is already present for this client", identifierType);
         this.identifierType = identifierType;
     }
 
     public DuplicateClientIdentifierException(final Long documentTypeId, final String identifierType, final String identifierKey) {
-        super("error.msg.clientIdentifier.identityKey.duplicate", "Client identifier of type " + identifierType + " with value of "
-                + identifierKey + " already exists.", identifierType, identifierKey);
+        super("error.msg.clientIdentifier.identityKey.duplicate",
+                "Client identifier of type " + identifierType + " with value of " + identifierKey + " already exists.", identifierType,
+                identifierKey);
         this.documentTypeId = documentTypeId;
         this.identifierType = identifierType;
         this.identifierKey = identifierKey;

@@ -36,15 +36,18 @@ import org.joda.time.LocalDate;
  * Created by sanyam on 20/8/17.
  */
 final class TellerApiResourceSwagger {
-    private TellerApiResourceSwagger(){
+
+    private TellerApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetTellersResponse")
     public static final class GetTellersResponse {
+
         private GetTellersResponse() {
 
         }
+
         @ApiModelProperty(example = "3")
         public Long id;
         @ApiModelProperty(example = "1")
@@ -65,9 +68,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersRequest")
     public static final class PostTellersRequest {
+
         private PostTellersRequest() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "Teller3")
@@ -87,9 +92,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersResponse")
     public static final class PostTellersResponse {
+
         private PostTellersResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "5")
@@ -98,9 +105,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PutTellersRequest")
     public static final class PutTellersRequest {
+
         private PutTellersRequest() {
 
         }
+
         @ApiModelProperty(example = "Teller3")
         public String name;
         @ApiModelProperty(example = "1")
@@ -122,11 +131,15 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PutTellersResponse")
     public static final class PutTellersResponse {
+
         private PutTellersResponse() {
 
         }
+
         final class PutTellersResponseChanges {
+
             private PutTellersResponseChanges() {}
+
             @ApiModelProperty(example = "teller cash handling")
             public String description;
             @ApiModelProperty(example = "28 February 2015")
@@ -138,6 +151,7 @@ final class TellerApiResourceSwagger {
             @ApiModelProperty(example = "dd-MM-yyyy")
             public String dateFormat;
         }
+
         @ApiModelProperty(example = "1")
         public Long officeId;
         @ApiModelProperty(example = "5")
@@ -148,9 +162,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "GetTellersTellerIdCashiersResponse")
     public static final class GetTellersTellerIdCashiersResponse {
+
         private GetTellersTellerIdCashiersResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long tellerId;
         @ApiModelProperty(example = "Teller1")
@@ -165,9 +181,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersTellerIdCashiersRequest")
     public static final class PostTellersTellerIdCashiersRequest {
+
         private PostTellersTellerIdCashiersRequest() {
 
         }
+
         @ApiModelProperty(example = "28 February 2015")
         public LocalDate endDate;
         @ApiModelProperty(example = "teller cash handling")
@@ -187,9 +205,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersTellerIdCashiersResponse")
     public static final class PostTellersTellerIdCashiersResponse {
+
         private PostTellersTellerIdCashiersResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         @ApiModelProperty(example = "2")
@@ -199,9 +219,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "GetTellersTellerIdCashiersCashierIdResponse")
     public static final class GetTellersTellerIdCashiersCashierIdResponse {
+
         private GetTellersTellerIdCashiersCashierIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long id;
         @ApiModelProperty(example = "1")
@@ -229,9 +251,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PutTellersTellerIdCashiersCashierIdRequest")
     public static final class PutTellersTellerIdCashiersCashierIdRequest {
+
         private PutTellersTellerIdCashiersCashierIdRequest() {
 
         }
+
         @ApiModelProperty(example = "25 February 2015")
         public LocalDate endDate;
         @ApiModelProperty(example = "Cashier updated.")
@@ -251,11 +275,15 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PutTellersTellerIdCashiersCashierIdResponse")
     public static final class PutTellersTellerIdCashiersCashierIdResponse {
+
         private PutTellersTellerIdCashiersCashierIdResponse() {
 
         }
+
         final class PutTellersTellerIdCashiersCashierIdResponseChanges {
+
             private PutTellersTellerIdCashiersCashierIdResponseChanges() {}
+
             @ApiModelProperty(example = "25 February 2015")
             public LocalDate endDate;
             @ApiModelProperty(example = "Cashier updated.")
@@ -265,6 +293,7 @@ final class TellerApiResourceSwagger {
             @ApiModelProperty(example = "dd-MM-yyyy")
             public String dateFormat;
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         @ApiModelProperty(example = "2")
@@ -274,18 +303,22 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "DeleteTellersTellerIdCashiersCashierIdResponse")
     public static final class DeleteTellersTellerIdCashiersCashierIdResponse {
+
         private DeleteTellersTellerIdCashiersCashierIdResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "GetTellersTellerIdCashiersTemplateResponse")
     public static final class GetTellersTellerIdCashiersTemplateResponse {
+
         private GetTellersTellerIdCashiersTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long tellerId;
         @ApiModelProperty(example = "Teller1")
@@ -299,9 +332,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdTransactionsResponse")
     public static final class GetTellersTellerIdCashiersCashiersIdTransactionsResponse {
+
         private GetTellersTellerIdCashiersCashiersIdTransactionsResponse() {
 
         }
+
         @ApiModelProperty(example = "8")
         public Long id;
         @ApiModelProperty(example = "15")
@@ -331,9 +366,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersTellerIdCashiersCashierIdAllocateRequest")
     public static final class PostTellersTellerIdCashiersCashierIdAllocateRequest {
+
         private PostTellersTellerIdCashiersCashierIdAllocateRequest() {
 
         }
+
         @ApiModelProperty(example = "USD")
         public String currencyCode;
         @ApiModelProperty(example = "5000")
@@ -350,9 +387,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersTellerIdCashiersCashierIdAllocateResponse")
     public static final class PostTellersTellerIdCashiersCashierIdAllocateResponse {
+
         private PostTellersTellerIdCashiersCashierIdAllocateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         @ApiModelProperty(example = "4")
@@ -361,9 +400,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersTellerIdCashiersCashierIdSettleRequest")
     public static final class PostTellersTellerIdCashiersCashierIdSettleRequest {
+
         private PostTellersTellerIdCashiersCashierIdSettleRequest() {
 
         }
+
         @ApiModelProperty(example = "USD")
         public String currencyCode;
         @ApiModelProperty(example = "2000")
@@ -381,9 +422,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "PostTellersTellerIdCashiersCashierIdSettleResponse")
     public static final class PostTellersTellerIdCashiersCashierIdSettleResponse {
+
         private PostTellersTellerIdCashiersCashierIdSettleResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
         @ApiModelProperty(example = "5")
@@ -392,9 +435,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse")
     public static final class GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse {
+
         private GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse() {
 
         }
+
         @ApiModelProperty(example = "7000.000000")
         public BigDecimal sumCashAllocation;
         @ApiModelProperty(example = "0")
@@ -421,9 +466,11 @@ final class TellerApiResourceSwagger {
 
     @ApiModel(value = "GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse")
     public static final class GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse {
+
         private GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long cashierId;
         @ApiModelProperty(example = "Head Office")

@@ -30,13 +30,13 @@ public class LoanChargePaidByData {
     private final String name;
 
     public LoanChargePaidByData(final Long id, final BigDecimal amount, final Integer installmentNumber, final Long chargeId,
-        final Long transactionId, String name) {
+            final Long transactionId, String name) {
         this.id = id;
         this.amount = amount;
         this.installmentNumber = installmentNumber;
         this.chargeId = chargeId;
         this.transactionId = transactionId;
-        this.name=name;
+        this.name = name;
     }
 
     public LoanChargePaidByData(final Long id, final BigDecimal amount, final Integer installmentNumber, final Long chargeId,
@@ -46,7 +46,7 @@ public class LoanChargePaidByData {
         this.installmentNumber = installmentNumber;
         this.chargeId = chargeId;
         this.transactionId = transactionId;
-        this.name=null;
+        this.name = null;
     }
 
     public Long getId() {

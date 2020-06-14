@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HookHelper {
+
     private final static Logger LOG = LoggerFactory.getLogger(HookHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -43,8 +44,7 @@ public class HookHelper {
 
     public Integer createHook(final String payloadURL) {
         LOG.info("---------------------------------CREATING A HOOK---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_HOOK_URL, getTestHookAsJson(payloadURL),
-                "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_HOOK_URL, getTestHookAsJson(payloadURL), "resourceId");
     }
 
     public String getTestHookAsJson(final String payloadURL) {
@@ -62,7 +62,7 @@ public class HookHelper {
         createOfficeEvent.put("entityName", "OFFICE");
         events.add(createOfficeEvent);
         map.put("events", events);
-        LOG.info("map :  {}" , map);
+        LOG.info("map :  {}", map);
         return new Gson().toJson(map);
     }
 
@@ -88,8 +88,9 @@ public class HookHelper {
     public void verifyUpdateHook(final String updateURL, final Long hookId) {
         LOG.info("------------------------------CHECK UPDATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
-        ArrayList<HashMap<String, String>> map = Utils.<ArrayList<HashMap<String, String>>>performServerGet(this.requestSpec, this.responseSpec, GET_URL, "config");
-        HashMap<String, String> hash =  map.get(1);
+        ArrayList<HashMap<String, String>> map = Utils.<ArrayList<HashMap<String, String>>> performServerGet(this.requestSpec,
+                this.responseSpec, GET_URL, "config");
+        HashMap<String, String> hash = map.get(1);
         assertEquals(updateURL, hash.get("fieldValue"));
     }
 
@@ -97,8 +98,9 @@ public class HookHelper {
         LOG.info("------------------------------CHECK DELETE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         ResponseSpecification responseSpec404 = new ResponseSpecBuilder().expectStatusCode(404).build();
-        ArrayList<HashMap<String, String>> array = Utils.<ArrayList<HashMap<String, String>>>performServerGet(this.requestSpec, responseSpec404, GET_URL, "errors");
+        ArrayList<HashMap<String, String>> array = Utils.<ArrayList<HashMap<String, String>>> performServerGet(this.requestSpec,
+                responseSpec404, GET_URL, "errors");
         HashMap<String, String> map = array.get(0);
-        assertEquals("error.msg.hook.identifier.not.found",map.get("userMessageGlobalisationCode"));
+        assertEquals("error.msg.hook.identifier.not.found", map.get("userMessageGlobalisationCode"));
     }
 }

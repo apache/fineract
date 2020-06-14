@@ -31,12 +31,12 @@ public class SmsMessageEnumerations {
                 SmsMessageStatusType.INVALID.getCode(), "Invalid");
         switch (status) {
             case INVALID:
-                optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(),
-                        SmsMessageStatusType.INVALID.getCode(), "Invalid");
+                optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(), SmsMessageStatusType.INVALID.getCode(),
+                        "Invalid");
             break;
             case PENDING:
-                optionData = new EnumOptionData(SmsMessageStatusType.PENDING.getValue().longValue(),
-                        SmsMessageStatusType.PENDING.getCode(), "Pending");
+                optionData = new EnumOptionData(SmsMessageStatusType.PENDING.getValue().longValue(), SmsMessageStatusType.PENDING.getCode(),
+                        "Pending");
             break;
             case WAITING_FOR_DELIVERY_REPORT:
                 optionData = new EnumOptionData(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue().longValue(),

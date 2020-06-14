@@ -28,14 +28,11 @@ public class PpiPovertyLineData {
     final String ppi;
     final List<LikeliHoodPovertyLineData> likeliHoodPovertyLineData;
 
-
-    public PpiPovertyLineData(final List<LikeliHoodPovertyLineData> likeliHoodPovertyLineData,
-                       final String ppi){
+    public PpiPovertyLineData(final List<LikeliHoodPovertyLineData> likeliHoodPovertyLineData, final String ppi) {
 
         this.likeliHoodPovertyLineData = likeliHoodPovertyLineData;
         this.ppi = ppi;
 
     }
-
 
 }

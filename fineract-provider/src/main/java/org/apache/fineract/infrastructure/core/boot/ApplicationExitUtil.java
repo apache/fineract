@@ -26,9 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 
-
 public abstract class ApplicationExitUtil {
+
     private final static Logger LOG = LoggerFactory.getLogger(ApplicationExitUtil.class);
+
     private ApplicationExitUtil() {}
 
     public static void waitForKeyPressToCleanlyExit(ConfigurableApplicationContext ctx) throws IOException {

@@ -33,10 +33,9 @@ public class InteropQuoteResponseData extends InteropResponseData {
 
     private MoneyData fspCommission;
 
-
     private InteropQuoteResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
-                                     @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration,
-                                     List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee, MoneyData fspCommission) {
+            @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration, List<ExtensionData> extensionList,
+            @NotNull String quoteCode, MoneyData fspFee, MoneyData fspCommission) {
         super(resourceId, officeId, commandId, changesOnly, transactionCode, state, expiration, extensionList);
         this.quoteCode = quoteCode;
         this.fspFee = fspFee;
@@ -44,24 +43,25 @@ public class InteropQuoteResponseData extends InteropResponseData {
     }
 
     public static InteropQuoteResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                                 LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode,
-                                                 MoneyData fspFee, MoneyData fspCommission) {
-        return new InteropQuoteResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList,
-                quoteCode, fspFee, fspCommission);
+            LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
+            MoneyData fspCommission) {
+        return new InteropQuoteResponseData(null, null, commandId, null, transactionCode, state, expiration, extensionList, quoteCode,
+                fspFee, fspCommission);
     }
 
-    public static InteropQuoteResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration,
-                                                 List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
-                                                 MoneyData fspCommission) {
+    public static InteropQuoteResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
+            LocalDateTime expiration, List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee,
+            MoneyData fspCommission) {
         return build(null, transactionCode, state, expiration, extensionList, quoteCode, fspFee, fspCommission);
     }
 
     public static InteropQuoteResponseData build(Long commandId, @NotNull String transactionCode, @NotNull InteropActionState state,
-                                                 @NotNull String quoteCode) {
+            @NotNull String quoteCode) {
         return build(commandId, transactionCode, state, null, null, quoteCode, null, null);
     }
 
-    public static InteropQuoteResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state, @NotNull String quoteCode) {
+    public static InteropQuoteResponseData build(@NotNull String transactionCode, @NotNull InteropActionState state,
+            @NotNull String quoteCode) {
         return build(null, transactionCode, state, quoteCode);
     }
 

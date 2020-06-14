@@ -25,15 +25,18 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 25/7/17.
  */
 final class ProvisioningEntriesApiResourceSwagger {
+
     private ProvisioningEntriesApiResourceSwagger() {
         // only for Swagger Documentation
     }
 
     @ApiModel(value = "PostProvisioningEntriesRequest")
     public static final class PostProvisioningEntriesRequest {
+
         private PostProvisioningEntriesRequest() {
 
         }
+
         @ApiModelProperty(example = "16 October 2015")
         public String date;
 
@@ -52,28 +55,34 @@ final class ProvisioningEntriesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostProvisioningEntriesResponse")
-    public static final class PostProvisioningEntriesResponse{
+    public static final class PostProvisioningEntriesResponse {
+
         private PostProvisioningEntriesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }
 
     @ApiModel(value = "PutProvisioningEntriesRequest")
-    public static final class PutProvisioningEntriesRequest{
+    public static final class PutProvisioningEntriesRequest {
+
         private PutProvisioningEntriesRequest() {
 
         }
+
         @ApiModelProperty(example = "recreateprovisioningentry")
         public String command;
     }
 
     @ApiModel(value = "PutProvisioningEntriesResponse")
-    public static final class PutProvisioningEntriesResponse{
+    public static final class PutProvisioningEntriesResponse {
+
         private PutProvisioningEntriesResponse() {
 
         }
+
         @ApiModelProperty(example = "1")
         public Long resourceId;
     }

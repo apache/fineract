@@ -28,6 +28,7 @@ public interface AdHocReadPlatformService {
     Collection<AdHocData> retrieveAllActiveAdHocQuery();
 
     AdHocData retrieveOne(Long adHocId);
+
     AdHocData retrieveNewAdHocDetails();
 
 }

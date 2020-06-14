@@ -46,8 +46,8 @@ public class LookupTableMapper {
                     lookupTableData.setDescription(lookupTable.getDescription());
                     lookupTableData.setEntries(new ArrayList<LookupTableEntry>());
                 }
-                lookupTableData.getEntries().add(new LookupTableEntry(lookupTable.getValueFrom(),
-                        lookupTable.getValueTo(), lookupTable.getScore()));
+                lookupTableData.getEntries()
+                        .add(new LookupTableEntry(lookupTable.getValueFrom(), lookupTable.getValueTo(), lookupTable.getScore()));
             }
             return List.copyOf(lookupTableDataMap.values());
         }

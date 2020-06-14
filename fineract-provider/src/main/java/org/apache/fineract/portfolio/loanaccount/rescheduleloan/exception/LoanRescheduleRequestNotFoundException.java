@@ -21,19 +21,21 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when loan reschedule request resources are not found.
+ * A {@link RuntimeException} thrown when loan reschedule request resources are
+ * not found.
  **/
 public class LoanRescheduleRequestNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     /**
      * LoanRescheduleRequestNotFoundException constructor
      *
-     * @param requestId the loan reschedule request identifier
+     * @param requestId
+     *            the loan reschedule request identifier
      *
      **/
     public LoanRescheduleRequestNotFoundException(final Long requestId) {
-        super("error.msg.loan.reschedule.request.id.invalid",
-                "Loan reschedule request with identifier " + requestId + " does not exist", requestId);
+        super("error.msg.loan.reschedule.request.id.invalid", "Loan reschedule request with identifier " + requestId + " does not exist",
+                requestId);
     }
 
 }

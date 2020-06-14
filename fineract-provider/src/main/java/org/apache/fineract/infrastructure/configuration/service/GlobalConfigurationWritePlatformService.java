@@ -24,5 +24,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface GlobalConfigurationWritePlatformService {
 
     CommandProcessingResult update(Long configId, JsonCommand command);
+
     void addSurveyConfig(String name);
 }

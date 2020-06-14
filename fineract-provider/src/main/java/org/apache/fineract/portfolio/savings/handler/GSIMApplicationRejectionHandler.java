@@ -28,24 +28,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @CommandType(entity = "GSIMACCOUNT", action = "REJECT")
-public class GSIMApplicationRejectionHandler implements NewCommandSourceHandler
-{
+public class GSIMApplicationRejectionHandler implements NewCommandSourceHandler {
 
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public GSIMApplicationRejectionHandler(
-            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    public GSIMApplicationRejectionHandler(final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingAccountWritePlatformService.rejectGSIMApplication(command.entityId(),command);
+        return this.savingAccountWritePlatformService.rejectGSIMApplication(command.entityId(), command);
     }
 
 }

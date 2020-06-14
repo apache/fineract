@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME, action = "UPDATE")
 public class UpdateReportMailingJobCommandHandler implements NewCommandSourceHandler {
+
     private final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService;
 
     @Autowired

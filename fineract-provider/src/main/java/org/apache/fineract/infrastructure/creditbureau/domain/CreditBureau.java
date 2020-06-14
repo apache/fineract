@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_creditbureau")
 public class CreditBureau extends AbstractPersistableCustom {
 
-
     private String name;
 
     private String product;

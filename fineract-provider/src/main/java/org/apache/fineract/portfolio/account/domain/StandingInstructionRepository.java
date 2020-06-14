@@ -26,8 +26,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface StandingInstructionRepository extends JpaRepository<AccountTransferStandingInstruction, Long>,
-        JpaSpecificationExecutor<AccountTransferStandingInstruction> {
+public interface StandingInstructionRepository
+        extends JpaRepository<AccountTransferStandingInstruction, Long>, JpaSpecificationExecutor<AccountTransferStandingInstruction> {
+
     public final static String FIND_BY_LOAN_AND_STATUS_QUERY = "select accountTransferStandingInstruction "
             + "from AccountTransferStandingInstruction accountTransferStandingInstruction "
             + "where accountTransferStandingInstruction.status = :status "
@@ -41,8 +42,10 @@ public interface StandingInstructionRepository extends JpaRepository<AccountTran
             + "or accountTransferStandingInstruction.accountTransferDetails.fromSavingsAccount = :savingsAccount)";
 
     @Query(FIND_BY_LOAN_AND_STATUS_QUERY)
-    public Collection<AccountTransferStandingInstruction> findByLoanAccountAndStatus(@Param("loan") Loan loan, @Param("status") Integer status);
+    public Collection<AccountTransferStandingInstruction> findByLoanAccountAndStatus(@Param("loan") Loan loan,
+            @Param("status") Integer status);
 
     @Query(FIND_BY_SAVINGS_AND_STATUS_QUERY)
-    public Collection<AccountTransferStandingInstruction> findBySavingsAccountAndStatus(@Param("savingsAccount") SavingsAccount savingsAccount, @Param("status") Integer status);
+    public Collection<AccountTransferStandingInstruction> findBySavingsAccountAndStatus(
+            @Param("savingsAccount") SavingsAccount savingsAccount, @Param("status") Integer status);
 }

@@ -195,12 +195,15 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                 creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
             }
 
-            if (accountToDebitId != null && debitTags != null) { throw new AccountingRuleDataException(
-                    AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(), AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue()); }
+            if (accountToDebitId != null && debitTags != null) {
+                throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
+                        AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
+            }
 
-            if (accountToCreditId != null && creditTags != null) { throw new AccountingRuleDataException(
-                    AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
-                    AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue()); }
+            if (accountToCreditId != null && creditTags != null) {
+                throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
+                        AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
+            }
 
             boolean allowMultipleCreditEntries = false;
             if (command.parameterExists(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue())) {

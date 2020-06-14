@@ -66,8 +66,8 @@ public class InteropHelper {
     private final BigDecimal amount;
     private final BigDecimal fee;
 
-    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String tenantId,
-                         String accountExternalId, String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
+    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String tenantId, String accountExternalId,
+            String transactionCode, String currency, BigDecimal amount, BigDecimal fee) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
         this.tenantId = tenantId;
@@ -78,7 +78,8 @@ public class InteropHelper {
         this.fee = fee;
     }
 
-    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId, String transactionCode) {
+    public InteropHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec, String accountExternalId,
+            String transactionCode) {
         this(requestSpec, responseSpec, Utils.DEFAULT_TENANT, accountExternalId, transactionCode, "TZS", BigDecimal.TEN, BigDecimal.ONE);
     }
 
@@ -199,7 +200,8 @@ public class InteropHelper {
     }
 
     /**
-     * @param role PAYEE role is not valid for transaction request
+     * @param role
+     *            PAYEE role is not valid for transaction request
      * @return response json
      */
     public String postTransactionRequest(String requestCode, InteropTransactionRole role) {

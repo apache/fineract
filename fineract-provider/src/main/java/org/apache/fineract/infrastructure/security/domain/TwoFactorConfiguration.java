@@ -28,8 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConfigurationConstants;
 
 @Entity
-@Table(name = "twofactor_configuration",
-        uniqueConstraints = {@UniqueConstraint(columnNames = { "name" }, name = "name_UNIQUE")})
+@Table(name = "twofactor_configuration", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_UNIQUE") })
 public class TwoFactorConfiguration extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 32)
@@ -59,12 +58,8 @@ public class TwoFactorConfiguration extends AbstractPersistableCustom {
     }
 
     public Object getObjectValue() {
-        if(TwoFactorConfigurationConstants.NUMBER_PARAMETERS.contains(name)) {
-            return getIntegerValue();
-        }
-        if(TwoFactorConfigurationConstants.BOOLEAN_PARAMETERS.contains(name)) {
-            return getBooleanValue();
-        }
+        if (TwoFactorConfigurationConstants.NUMBER_PARAMETERS.contains(name)) { return getIntegerValue(); }
+        if (TwoFactorConfigurationConstants.BOOLEAN_PARAMETERS.contains(name)) { return getBooleanValue(); }
 
         return getStringValue();
     }

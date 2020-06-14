@@ -88,8 +88,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
             } else if (isBit()) {
                 displayType = "BOOLEAN";
             } else {
-                throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type", "Invalid Lookup Type:" + this.columnType
-                        + " - Column Name: " + this.columnName);
+                throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type",
+                        "Invalid Lookup Type:" + this.columnType + " - Column Name: " + this.columnName);
             }
 
         } else {
@@ -98,8 +98,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
             } else if (isVarchar()) {
                 displayType = "CODEVALUE";
             } else {
-                throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type", "Invalid Lookup Type:" + this.columnType
-                        + " - Column Name: " + this.columnName);
+                throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type",
+                        "Invalid Lookup Type:" + this.columnType + " - Column Name: " + this.columnName);
             }
         }
 

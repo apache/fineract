@@ -19,7 +19,7 @@
 
 /**Add currency code**/
 ALTER TABLE `acc_gl_journal_entry`
-		ADD COLUMN `currency_code` VARCHAR(3) NULL DEFAULT NULL AFTER `reversal_id`;
+        ADD COLUMN `currency_code` VARCHAR(3) NULL DEFAULT NULL AFTER `reversal_id`;
 
 
 /**Update currency codes for loans**/
@@ -43,6 +43,6 @@ where acc_gl_journal_entry.currency_code is NULL;
 
 /**Make currency code not null**/
 ALTER TABLE `acc_gl_journal_entry`
-	ALTER `currency_code` DROP DEFAULT;
+    ALTER `currency_code` DROP DEFAULT;
 ALTER TABLE `acc_gl_journal_entry`
-	CHANGE COLUMN `currency_code` `currency_code` VARCHAR(3) NOT NULL AFTER `reversal_id`;
+    CHANGE COLUMN `currency_code` `currency_code` VARCHAR(3) NOT NULL AFTER `reversal_id`;

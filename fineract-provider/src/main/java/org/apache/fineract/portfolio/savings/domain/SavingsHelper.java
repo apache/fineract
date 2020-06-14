@@ -47,7 +47,7 @@ public final class SavingsHelper {
 
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
-            final Integer financialYearBeginningMonth,List<LocalDate> postInterestAsOn) {
+            final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn) {
 
         final List<LocalDateInterval> postingPeriods = new ArrayList<>();
         LocalDate periodStartDate = startInterestCalculationLocalDate;
@@ -56,7 +56,7 @@ public final class SavingsHelper {
 
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
 
-          final  LocalDate  interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
+            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
                     interestPostingUpToDate, financialYearBeginningMonth);
 
             periodEndDate = interestPostingLocalDate.minusDays(1);
@@ -64,8 +64,7 @@ public final class SavingsHelper {
             if (!postInterestAsOn.isEmpty()) {
                 for (LocalDate transactiondate : postInterestAsOn) {
                     if (periodStartDate.isBefore(transactiondate)
-                            && (periodEndDate.isAfter(transactiondate) || periodEndDate
-                                    .isEqual(transactiondate))) {
+                            && (periodEndDate.isAfter(transactiondate) || periodEndDate.isEqual(transactiondate))) {
                         periodEndDate = transactiondate.minusDays(1);
                         actualPeriodStartDate = periodEndDate;
                         break;
@@ -75,13 +74,12 @@ public final class SavingsHelper {
 
             postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
 
-            if (actualPeriodStartDate.isEqual(periodEndDate))
-            {
+            if (actualPeriodStartDate.isEqual(periodEndDate)) {
                 periodEndDate = actualPeriodStartDate.plusDays(1);
                 periodStartDate = actualPeriodStartDate.plusDays(1);
-            }else{
-            periodEndDate = interestPostingLocalDate;
-            periodStartDate = interestPostingLocalDate;
+            } else {
+                periodEndDate = interestPostingLocalDate;
+                periodStartDate = interestPostingLocalDate;
             }
         }
 
@@ -89,7 +87,7 @@ public final class SavingsHelper {
     }
 
     private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
-            final  SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
+            final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
             Integer financialYearBeginningMonth) {
 
         LocalDate periodEndDate = interestPostingUpToDate;

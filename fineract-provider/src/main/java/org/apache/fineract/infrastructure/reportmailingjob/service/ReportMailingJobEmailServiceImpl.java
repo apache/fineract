@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailService {
+
     private final static Logger LOG = LoggerFactory.getLogger(ReportMailingJobEmailServiceImpl.class);
     private final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService;
     private Collection<ReportMailingJobConfigurationData> reportMailingJobConfigurationDataCollection;
@@ -43,7 +44,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
      * ReportMailingJobEmailServiceImpl constructor
      **/
     @Autowired
-    public ReportMailingJobEmailServiceImpl(final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService) {
+    public ReportMailingJobEmailServiceImpl(
+            final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService) {
         this.reportMailingJobConfigurationReadPlatformService = reportMailingJobConfigurationReadPlatformService;
 
     }
@@ -52,8 +54,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
     public void sendEmailWithAttachment(ReportMailingJobEmailData reportMailingJobEmailData) {
         try {
             // get all ReportMailingJobConfiguration objects from the database
-            this.reportMailingJobConfigurationDataCollection = this.reportMailingJobConfigurationReadPlatformService.
-                    retrieveAllReportMailingJobConfigurations();
+            this.reportMailingJobConfigurationDataCollection = this.reportMailingJobConfigurationReadPlatformService
+                    .retrieveAllReportMailingJobConfigurations();
 
             JavaMailSenderImpl javaMailSenderImpl = new JavaMailSenderImpl();
             javaMailSenderImpl.setHost(this.getGmailSmtpServer());
@@ -72,7 +74,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
             mimeMessageHelper.setSubject(reportMailingJobEmailData.getSubject());
 
             if (reportMailingJobEmailData.getAttachment() != null) {
-                mimeMessageHelper.addAttachment(reportMailingJobEmailData.getAttachment().getName(), reportMailingJobEmailData.getAttachment());
+                mimeMessageHelper.addAttachment(reportMailingJobEmailData.getAttachment().getName(),
+                        reportMailingJobEmailData.getAttachment());
             }
 
             javaMailSenderImpl.send(mimeMessage);
@@ -80,7 +83,7 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
 
         catch (MessagingException e) {
             // handle the exception
-            LOG.error("Problem occurred in sendEmailWithAttachment function",e);
+            LOG.error("Problem occurred in sendEmailWithAttachment function", e);
         }
     }
 
@@ -98,9 +101,11 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
     }
 
     /**
-     * get a report mailing job configuration object by name from collection of objects
+     * get a report mailing job configuration object by name from collection of
+     * objects
      *
-     * @param name -- the value of the name property
+     * @param name
+     *            -- the value of the name property
      * @return ReportMailingJobConfigurationData object
      **/
     private ReportMailingJobConfigurationData getReportMailingJobConfigurationData(final String name) {
@@ -124,8 +129,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
      * @return Gmail smtp server name
      **/
     private String getGmailSmtpServer() {
-        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
-                (ReportMailingJobConstants.GMAIL_SMTP_SERVER);
+        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this
+                .getReportMailingJobConfigurationData(ReportMailingJobConstants.GMAIL_SMTP_SERVER);
 
         return (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
     }
@@ -134,8 +139,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
      * @return Gmail smtp server port number
      **/
     private Integer getGmailSmtpPort() {
-        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
-                (ReportMailingJobConstants.GMAIL_SMTP_PORT);
+        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this
+                .getReportMailingJobConfigurationData(ReportMailingJobConstants.GMAIL_SMTP_PORT);
         final String portNumber = (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
 
         return (portNumber != null) ? Integer.parseInt(portNumber) : null;
@@ -145,8 +150,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
      * @return Gmail smtp username
      **/
     private String getGmailSmtpUsername() {
-        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
-                (ReportMailingJobConstants.GMAIL_SMTP_USERNAME);
+        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this
+                .getReportMailingJobConfigurationData(ReportMailingJobConstants.GMAIL_SMTP_USERNAME);
 
         return (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
     }
@@ -155,8 +160,8 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
      * @return Gmail smtp password
      **/
     private String getGmailSmtpPassword() {
-        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this.getReportMailingJobConfigurationData
-                (ReportMailingJobConstants.GMAIL_SMTP_PASSWORD);
+        final ReportMailingJobConfigurationData reportMailingJobConfigurationData = this
+                .getReportMailingJobConfigurationData(ReportMailingJobConstants.GMAIL_SMTP_PASSWORD);
 
         return (reportMailingJobConfigurationData != null) ? reportMailingJobConfigurationData.getValue() : null;
     }

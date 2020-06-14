@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.provisioning.constants;
 
 public interface ProvisioningCriteriaConstants {
+
     public final static String JSON_LOCALE_PARAM = "locale";
     public final static String JSON_CRITERIAID_PARAM = "criteriaId";
     public final static String JSON_CRITERIANAME_PARAM = "criteriaName";

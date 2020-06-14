@@ -127,8 +127,8 @@ public class AccountTransferTest {
      */
     @AfterEach
     public void tearDown() {
-        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper.deleteFinancialActivityAccount(
-                financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
+                .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
         Assertions.assertNotNull(deletedFinancialActivityAccountId);
         Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
     }
@@ -214,10 +214,10 @@ public class AccountTransferTest {
         HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
         assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
                 "Verifying To Savings Account Balance after Account Transfer");
-        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT),
-                JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT),
-                JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] office1LiabilityEntries = {
+                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] office2LiabilityEntries = {
+                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -311,10 +311,10 @@ public class AccountTransferTest {
         assertEquals(TRANSFER_AMOUNT_ADJUST, toLoanSummaryAfter.get("totalRepayment"),
                 "Verifying To Loan Repayment Amount after Account Transfer");
 
-        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
-                JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
-                JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] office1LiabilityEntries = {
+                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] office2LiabilityEntries = {
+                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
@@ -432,10 +432,10 @@ public class AccountTransferTest {
         assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
                 "Verifying From Savings Account Balance after Account Transfer");
 
-        final JournalEntry[] office1LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
-                JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = { new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
-                JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] office1LiabilityEntries = {
+                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] office2LiabilityEntries = {
+                new JournalEntry(Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
 
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);

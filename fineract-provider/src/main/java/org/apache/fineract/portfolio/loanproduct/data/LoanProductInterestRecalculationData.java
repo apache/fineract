@@ -85,7 +85,8 @@ public class LoanProductInterestRecalculationData implements Serializable {
     public static LoanProductInterestRecalculationData sensibleDefaultsForNewLoanProductCreation() {
         final Long id = null;
         final Long productId = null;
-        final EnumOptionData interestRecalculationCompoundingType = interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.NONE);
+        final EnumOptionData interestRecalculationCompoundingType = interestRecalculationCompoundingType(
+                InterestRecalculationCompoundingMethod.NONE);
         final EnumOptionData rescheduleStrategyType = rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT);
         final EnumOptionData recalculationRestFrequencyType = null;
         final Integer recalculationRestFrequencyInterval = null;
@@ -99,7 +100,8 @@ public class LoanProductInterestRecalculationData implements Serializable {
         final Integer recalculationCompoundingFrequencyOnDay = null;
         final boolean isArrearsBasedOnOriginalSchedule = false;
         final boolean isCompoundingToBePostedAsTransaction = false;
-        final EnumOptionData preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy(LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE);
+        final EnumOptionData preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy(
+                LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE);
         final boolean allowCompoundingOnEod = false;
         return new LoanProductInterestRecalculationData(id, productId, interestRecalculationCompoundingType, rescheduleStrategyType,
                 recalculationRestFrequencyType, recalculationRestFrequencyInterval, recalculationRestFrequencyNthDay,
@@ -137,12 +139,15 @@ public class LoanProductInterestRecalculationData implements Serializable {
     public EnumOptionData getRecalculationRestFrequencyNthDay() {
         return this.recalculationRestFrequencyNthDay;
     }
+
     public EnumOptionData getRecalculationRestFrequencyWeekday() {
         return this.recalculationRestFrequencyWeekday;
     }
+
     public Integer getRecalculationRestFrequencyOnDay() {
         return this.recalculationRestFrequencyOnDay;
     }
+
     public EnumOptionData getRecalculationCompoundingFrequencyNthDay() {
         return this.recalculationCompoundingFrequencyNthDay;
     }
@@ -150,12 +155,15 @@ public class LoanProductInterestRecalculationData implements Serializable {
     public EnumOptionData getRecalculationCompoundingFrequencyWeekday() {
         return this.recalculationCompoundingFrequencyWeekday;
     }
+
     public Integer getRecalculationCompoundingFrequencyOnDay() {
         return this.recalculationCompoundingFrequencyOnDay;
     }
+
     public boolean isCompoundingToBePostedAsTransaction() {
         return this.isCompoundingToBePostedAsTransaction;
     }
+
     public boolean allowCompoundingOnEod() {
         return this.allowCompoundingOnEod;
     }

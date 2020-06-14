@@ -42,8 +42,8 @@ public class GuarantorFundingData {
     @SuppressWarnings("unused")
     private final Collection<GuarantorTransactionData> guarantorTransactions;
 
-    private GuarantorFundingData(final Long id, final EnumOptionData status, final PortfolioAccountData savingsAccount, final BigDecimal amount,
-            final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
+    private GuarantorFundingData(final Long id, final EnumOptionData status, final PortfolioAccountData savingsAccount,
+            final BigDecimal amount, final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
             final Collection<GuarantorTransactionData> guarantorTransactions) {
         this.id = id;
         this.status = status;
@@ -55,8 +55,8 @@ public class GuarantorFundingData {
         this.guarantorTransactions = guarantorTransactions;
     }
 
-    public static GuarantorFundingData instance(final Long id, final EnumOptionData status, final PortfolioAccountData savingsAccount, final BigDecimal amount,
-            final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
+    public static GuarantorFundingData instance(final Long id, final EnumOptionData status, final PortfolioAccountData savingsAccount,
+            final BigDecimal amount, final BigDecimal amountReleased, final BigDecimal amountRemaining, final BigDecimal amountTransfered,
             final Collection<GuarantorTransactionData> guarantorTransactions) {
         return new GuarantorFundingData(id, status, savingsAccount, amount, amountReleased, amountRemaining, amountTransfered,
                 guarantorTransactions);

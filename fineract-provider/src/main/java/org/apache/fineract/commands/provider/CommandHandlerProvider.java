@@ -34,11 +34,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for a given entity and action.
+ * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for
+ * a given entity and action. <br>
  * <br>
- * <br>
- * A {@link NewCommandSourceHandler} can be registered and the annotation {@link CommandType} is used to determine
- * the entity and the action the handler is capable to process.
+ * A {@link NewCommandSourceHandler} can be registered and the annotation
+ * {@link CommandType} is used to determine the entity and the action the
+ * handler is capable to process.
  *
  * @author Markus Geiss
  * @version 1.0
@@ -62,20 +63,21 @@ public class CommandHandlerProvider implements ApplicationContextAware {
     /**
      * Returns a handler for the given entity and action.<br>
      * <br>
-     * Throws an {@link UnsupportedCommandException} if no handler
-     * for the given entity, action combination can be found.
-     * @param entity the entity to lookup the handler, must be given.
-     * @param action the action to lookup the handler, must be given.
+     * Throws an {@link UnsupportedCommandException} if no handler for the given
+     * entity, action combination can be found.
+     *
+     * @param entity
+     *            the entity to lookup the handler, must be given.
+     * @param action
+     *            the action to lookup the handler, must be given.
      */
-    public NewCommandSourceHandler getHandler (final String entity, final String action) {
+    public NewCommandSourceHandler getHandler(final String entity, final String action) {
         Preconditions.checkArgument(StringUtils.isNoneEmpty(entity), "An entity must be given!");
         Preconditions.checkArgument(StringUtils.isNoneEmpty(action), "An action must be given!");
 
-        final String key =  entity + "|" + action;
-        if (!this.registeredHandlers.containsKey(key)) {
-            throw new UnsupportedCommandException(key);
-        }
-        return (NewCommandSourceHandler)this.applicationContext.getBean(this.registeredHandlers.get(key));
+        final String key = entity + "|" + action;
+        if (!this.registeredHandlers.containsKey(key)) { throw new UnsupportedCommandException(key); }
+        return (NewCommandSourceHandler) this.applicationContext.getBean(this.registeredHandlers.get(key));
     }
 
     private void initializeHandlerRegistry() {

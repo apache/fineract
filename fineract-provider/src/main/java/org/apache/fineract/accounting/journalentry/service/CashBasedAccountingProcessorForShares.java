@@ -118,12 +118,12 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
             if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) > 0) {
                 this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CashAccountsForShares.INCOME_FROM_FEES,
                         shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);
-                this.helper.createDebitJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(), shareProductId, paymentTypeId, shareAccountId,
-                        transactionId, transactionDate, amount.subtract(chargeAmount));
-                this.helper.createCreditJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId,
-                        transactionId, transactionDate, amount);
+                this.helper.createDebitJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
+                        shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount.subtract(chargeAmount));
+                this.helper.createCreditJournalEntryForShares(office, currencyCode, CashAccountsForShares.SHARES_REFERENCE.getValue(),
+                        shareProductId, paymentTypeId, shareAccountId, transactionId, transactionDate, amount);
 
-            }else{
+            } else {
                 this.helper.createJournalEntriesForShares(office, currencyCode, CashAccountsForShares.SHARES_SUSPENSE.getValue(),
                         CashAccountsForShares.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                         transactionDate, amount);

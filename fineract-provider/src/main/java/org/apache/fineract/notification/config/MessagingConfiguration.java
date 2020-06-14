@@ -42,16 +42,18 @@ public class MessagingConfiguration {
     private NotificationEventListener notificationEventListener;
 
     @Bean
-      public Logger loggerBean() { return LoggerFactory.getLogger(MessagingConfiguration.class); }
+    public Logger loggerBean() {
+        return LoggerFactory.getLogger(MessagingConfiguration.class);
+    }
 
     private static final String DEFAULT_BROKER_URL = "tcp://localhost:61616";
 
     @Bean
-    public ActiveMQConnectionFactory amqConnectionFactory(){
+    public ActiveMQConnectionFactory amqConnectionFactory() {
         ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory();
         try {
             amqConnectionFactory.setBrokerURL(DEFAULT_BROKER_URL);
-        } catch(Exception e) {
+        } catch (Exception e) {
             amqConnectionFactory.setBrokerURL(this.env.getProperty("brokerUrl"));
         }
         return amqConnectionFactory;
@@ -64,11 +66,11 @@ public class MessagingConfiguration {
     }
 
     @Bean
-    public JmsTemplate jmsTemplate(){
-        JmsTemplate jmsTemplate ;
-            jmsTemplate = new JmsTemplate(connectionFactory());
-            jmsTemplate.setConnectionFactory(connectionFactory());
-            return jmsTemplate;
+    public JmsTemplate jmsTemplate() {
+        JmsTemplate jmsTemplate;
+        jmsTemplate = new JmsTemplate(connectionFactory());
+        jmsTemplate.setConnectionFactory(connectionFactory());
+        return jmsTemplate;
     }
 
     @Bean
@@ -79,9 +81,9 @@ public class MessagingConfiguration {
         messageListenerContainer.setDestinationName("NotificationQueue");
         messageListenerContainer.setMessageListener(notificationEventListener);
         messageListenerContainer.setExceptionListener(new ExceptionListener() {
+
             @Override
-            public void onException(JMSException jmse)
-            {
+            public void onException(JMSException jmse) {
                 loggerBean().error("Network Error: ActiveMQ Broker Unavailable.");
                 messageListenerContainer.shutdown();
             }

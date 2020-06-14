@@ -52,7 +52,8 @@ public class ApproveLoanRescheduleCommandStrategy implements CommandStrategy {
         // Try-catch blocks to map exceptions to appropriate status codes
         try {
 
-            // Calls 'approve' function from 'Loans reschedule Request' to approve a
+            // Calls 'approve' function from 'Loans reschedule Request' to
+            // approve a
             // loan
             responseBody = rescheduleLoansApiResource.updateLoanRescheduleRequest(scheduleId, "approve", request.getBody());
 

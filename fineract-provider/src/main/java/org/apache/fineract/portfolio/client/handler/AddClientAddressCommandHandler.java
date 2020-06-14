@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 @Service
 @CommandType(entity = "ADDRESS", action = "CREATE")
 public class AddClientAddressCommandHandler implements NewCommandSourceHandler {
+
     private final AddressWritePlatformService writePlatformService;
 
     @Autowired

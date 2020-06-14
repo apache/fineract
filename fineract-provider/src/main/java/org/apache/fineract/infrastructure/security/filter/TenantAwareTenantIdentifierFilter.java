@@ -49,12 +49,13 @@ import org.springframework.web.filter.GenericFilterBean;
  * setting Cross-Origin details to response.
  *
  * If multi-tenant are valid, the details of the tenant are stored in
- * {@link FineractPlatformTenant} and stored in a {@link ThreadLocal} variable for
- * this request using {@link ThreadLocalContextUtil}.
+ * {@link FineractPlatformTenant} and stored in a {@link ThreadLocal} variable
+ * for this request using {@link ThreadLocalContextUtil}.
  *
  * If multi-tenant are invalid, a http error response is returned.
  *
- * Used to support Oauth2 authentication and the service is loaded only when "oauth" profile is active.
+ * Used to support Oauth2 authentication and the service is loaded only when
+ * "oauth" profile is active.
  */
 @Service(value = "tenantIdentifierProcessingFilter")
 @Profile("oauth")
@@ -83,7 +84,8 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
     }
 
     @Override
-    public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain)
+            throws IOException, ServletException {
 
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) res;
@@ -110,9 +112,10 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
                     tenantIdentifier = request.getParameter("tenantIdentifier");
                 }
 
-                if (tenantIdentifier == null && this.exceptionIfHeaderMissing) { throw new InvalidTenantIdentiferException(
-                        "No tenant identifier found: Add request header of '" + this.tenantRequestHeader
-                                + "' or add the parameter 'tenantIdentifier' to query string of request URL."); }
+                if (tenantIdentifier == null && this.exceptionIfHeaderMissing) {
+                    throw new InvalidTenantIdentiferException("No tenant identifier found: Add request header of '"
+                            + this.tenantRequestHeader + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
+                }
 
                 String pathInfo = request.getRequestURI();
                 boolean isReportRequest = false;
@@ -129,8 +132,8 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
                 }
 
                 if (!firstRequestProcessed) {
-                    final String baseUrl = request.getRequestURL().toString()
-                            .replace(request.getRequestURI(), request.getContextPath() + apiUri);
+                    final String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(),
+                            request.getContextPath() + apiUri);
                     System.setProperty("baseUrl", baseUrl);
 
                     final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();

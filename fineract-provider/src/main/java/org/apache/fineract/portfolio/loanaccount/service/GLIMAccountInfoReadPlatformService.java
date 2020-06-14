@@ -24,21 +24,21 @@ import org.apache.fineract.portfolio.loanaccount.data.GLIMContainer;
 import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.GroupLoanIndividualMonitoringAccountData;
 
-public interface GLIMAccountInfoReadPlatformService
-{
-     Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountsByGroupId(String groupId);
+public interface GLIMAccountInfoReadPlatformService {
 
-     Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByGroupId(String groupId);
+    Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountsByGroupId(String groupId);
 
-     Collection<GLIMContainer> findGlimAccount(Long groupId);
+    Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByGroupId(String groupId);
 
-     Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByGroupIdandAccountNo(String groupId, String accountNo);
+    Collection<GLIMContainer> findGlimAccount(Long groupId);
 
-     Collection<GLIMContainer> findGlimAccountbyGroupAndAccount(Long groupId, String accountNo);
+    Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByGroupIdandAccountNo(String groupId, String accountNo);
 
-     Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByParentAccountId(String parentAccountIds);
+    Collection<GLIMContainer> findGlimAccountbyGroupAndAccount(Long groupId, String accountNo);
 
-     Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountsByGLIMId(Long glimId);
+    Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByParentAccountId(String parentAccountIds);
 
-     Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(Long glimId);
+    Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountsByGLIMId(Long glimId);
+
+    Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(Long glimId);
 }

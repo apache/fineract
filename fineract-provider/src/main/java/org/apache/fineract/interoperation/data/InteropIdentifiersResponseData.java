@@ -31,7 +31,8 @@ public class InteropIdentifiersResponseData extends CommandProcessingResult {
     @NotNull
     private List<InteropIdentifierData> identifiers;
 
-    protected InteropIdentifiersResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, @NotNull List<InteropIdentifierData> identifiers) {
+    protected InteropIdentifiersResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
+            @NotNull List<InteropIdentifierData> identifiers) {
         super(resourceId, officeId, commandId, changesOnly);
         this.identifiers = identifiers;
     }

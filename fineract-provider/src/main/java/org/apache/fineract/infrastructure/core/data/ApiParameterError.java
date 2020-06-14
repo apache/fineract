@@ -82,7 +82,8 @@ public class ApiParameterError {
         //
     }
 
-    private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs) {
+    private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object[] defaultUserMessageArgs) {
         this.userMessageGlobalisationCode = globalisationMessageCode;
         this.developerMessage = defaultUserMessage;
         this.defaultUserMessage = defaultUserMessage;
@@ -90,7 +91,7 @@ public class ApiParameterError {
         final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
         if (defaultUserMessageArgs != null) {
             for (final Object object : defaultUserMessageArgs) {
-                if(object instanceof Date){
+                if (object instanceof Date) {
                     final String formattedDate = dateFormatter.format(object);
                     messageArgs.add(ApiErrorMessageArg.from(formattedDate));
                 } else {

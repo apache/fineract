@@ -22,4 +22,3 @@ ALTER TABLE `m_client_identifier`
   DROP INDEX `unique_client_identifier`,
   ADD COLUMN `active` INT NULL DEFAULT NULL AFTER `status`,
   ADD UNIQUE INDEX `unique_active_client_identifier` (`client_id`, `document_type_id`, `active` );
-  

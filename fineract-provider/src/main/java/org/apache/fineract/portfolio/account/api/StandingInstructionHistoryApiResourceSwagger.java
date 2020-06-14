@@ -27,19 +27,19 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/01/17.
  */
 final class StandingInstructionHistoryApiResourceSwagger {
-    private StandingInstructionHistoryApiResourceSwagger() {
-    }
+
+    private StandingInstructionHistoryApiResourceSwagger() {}
 
     @ApiModel(value = "GetStandingInstructionRunHistoryResponse")
     public final static class GetStandingInstructionRunHistoryResponse {
-        private GetStandingInstructionRunHistoryResponse() {
-        }
+
+        private GetStandingInstructionRunHistoryResponse() {}
 
         final class GetStandingInstructionHistoryPageItemsResponse {
 
             final class GetStandingInstructionHistoryPageItemsFromClient {
-                private GetStandingInstructionHistoryPageItemsFromClient() {
-                }
+
+                private GetStandingInstructionHistoryPageItemsFromClient() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -52,8 +52,8 @@ final class StandingInstructionHistoryApiResourceSwagger {
             }
 
             final class GetStandingInstructionHistoryFromAccount {
-                private GetStandingInstructionHistoryFromAccount() {
-                }
+
+                private GetStandingInstructionHistoryFromAccount() {}
 
                 @ApiModelProperty(example = "2")
                 public Long id;
@@ -66,8 +66,8 @@ final class StandingInstructionHistoryApiResourceSwagger {
             }
 
             final class GetStandingInstructionHistoryToAccount {
-                private GetStandingInstructionHistoryToAccount() {
-                }
+
+                private GetStandingInstructionHistoryToAccount() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;
@@ -80,8 +80,8 @@ final class StandingInstructionHistoryApiResourceSwagger {
             }
 
             final class GetStandingInstructionHistoryToClient {
-                private GetStandingInstructionHistoryToClient() {
-                }
+
+                private GetStandingInstructionHistoryToClient() {}
 
                 @ApiModelProperty(example = "1")
                 public Long id;

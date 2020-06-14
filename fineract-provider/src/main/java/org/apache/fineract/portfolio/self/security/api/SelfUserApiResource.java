@@ -47,41 +47,37 @@ import org.springframework.stereotype.Component;
 
 @Path("/self/user")
 @Component
-@Api(tags = {"Self User"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Self User", description = "")
-})
+@Api(tags = { "Self User" })
+@SwaggerDefinition(tags = { @Tag(name = "Self User", description = "") })
 public class SelfUserApiResource {
 
-        private final UsersApiResource usersApiResource;
-        private final PlatformSecurityContext context;
-        private final FromJsonHelper fromApiJsonHelper;
-        private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("password", "repeatPassword"));
+    private final UsersApiResource usersApiResource;
+    private final PlatformSecurityContext context;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("password", "repeatPassword"));
 
-        @Autowired
-        public SelfUserApiResource(final UsersApiResource usersApiResource,
-                final PlatformSecurityContext context,
-                final FromJsonHelper fromApiJsonHelper){
+    @Autowired
+    public SelfUserApiResource(final UsersApiResource usersApiResource, final PlatformSecurityContext context,
+            final FromJsonHelper fromApiJsonHelper) {
 
-                this.usersApiResource = usersApiResource;
-                this.context = context;
-                this.fromApiJsonHelper = fromApiJsonHelper;
-        }
+        this.usersApiResource = usersApiResource;
+        this.context = context;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+    }
 
-        @PUT
-        @ApiOperation(value = "Update User", httpMethod = "PUT", notes = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")
-        @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class)})
-        @ApiResponses({@ApiResponse(code = 200,message = "OK", response = SelfUserApiResourceSwagger.PutSelfUserResponse.class)})
-        public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
-                if (StringUtils.isBlank(apiRequestBodyAsJson)) { throw new InvalidJsonException(); }
+    @PUT
+    @ApiOperation(value = "Update User", httpMethod = "PUT", notes = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = SelfUserApiResourceSwagger.PutSelfUserResponse.class) })
+    public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) { throw new InvalidJsonException(); }
 
-                final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap,
-                        apiRequestBodyAsJson,
-                        this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, this.supportedParameters);
 
-                final AppUser appUser = this.context.authenticatedUser();
-                return this.usersApiResource.update(appUser.getId(), apiRequestBodyAsJson);
-        }
+        final AppUser appUser = this.context.authenticatedUser();
+        return this.usersApiResource.update(appUser.getId(), apiRequestBodyAsJson);
+    }
 
 }

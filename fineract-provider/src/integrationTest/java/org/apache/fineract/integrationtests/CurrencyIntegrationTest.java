@@ -33,7 +33,6 @@ public class CurrencyIntegrationTest {
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
 
-
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();

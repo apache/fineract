@@ -26,17 +26,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/02/17.
  */
 final class LoanChargesApiResourceSwagger {
-    private LoanChargesApiResourceSwagger() {
-    }
+
+    private LoanChargesApiResourceSwagger() {}
 
     @ApiModel(value = "GetLoansLoanIdChargesChargeIdResponse")
     public static final class GetLoansLoanIdChargesChargeIdResponse {
-        private GetLoansLoanIdChargesChargeIdResponse() {
-        }
+
+        private GetLoansLoanIdChargesChargeIdResponse() {}
 
         final class GetLoanChargeTimeType {
-            private GetLoanChargeTimeType() {
-            }
+
+            private GetLoanChargeTimeType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -47,8 +47,8 @@ final class LoanChargesApiResourceSwagger {
         }
 
         final class GetLoanChargeCalculationType {
-            private GetLoanChargeCalculationType() {
-            }
+
+            private GetLoanChargeCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -59,8 +59,8 @@ final class LoanChargesApiResourceSwagger {
         }
 
         final class GetLoanChargeCurrency {
-            private GetLoanChargeCurrency() {
-            }
+
+            private GetLoanChargeCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -107,16 +107,16 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = "GetLoansLoanIdChargesTemplateResponse")
     public static final class GetLoansLoanIdChargesTemplateResponse {
-        private GetLoansLoanIdChargesTemplateResponse() {
-        }
+
+        private GetLoansLoanIdChargesTemplateResponse() {}
 
         final class GetLoanChargeTemplateChargeOptions {
-            private GetLoanChargeTemplateChargeOptions() {
-            }
+
+            private GetLoanChargeTemplateChargeOptions() {}
 
             final class GetLoanChargeTemplateChargeTimeType {
-                private GetLoanChargeTemplateChargeTimeType() {
-                }
+
+                private GetLoanChargeTemplateChargeTimeType() {}
 
                 @ApiModelProperty(example = "2")
                 public Integer id;
@@ -127,8 +127,8 @@ final class LoanChargesApiResourceSwagger {
             }
 
             final class GetLoanChargeTemplateChargeAppliesTo {
-                private GetLoanChargeTemplateChargeAppliesTo() {
-                }
+
+                private GetLoanChargeTemplateChargeAppliesTo() {}
 
                 @ApiModelProperty(example = "1  ")
                 public Integer id;
@@ -167,8 +167,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = " PostLoansLoanIdChargesRequest")
     public static final class PostLoansLoanIdChargesRequest {
-        private PostLoansLoanIdChargesRequest() {
-        }
+
+        private PostLoansLoanIdChargesRequest() {}
 
         @ApiModelProperty(example = "2")
         public Integer chargeId;
@@ -184,8 +184,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = " PostLoansLoanIdChargesResponse")
     public static final class PostLoansLoanIdChargesResponse {
-        private PostLoansLoanIdChargesResponse() {
-        }
+
+        private PostLoansLoanIdChargesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Long officeId;
@@ -199,8 +199,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = " PutLoansLoanIdChargesChargeIdRequest")
     public static final class PutLoansLoanIdChargesChargeIdRequest {
-        private PutLoansLoanIdChargesChargeIdRequest() {
-        }
+
+        private PutLoansLoanIdChargesChargeIdRequest() {}
 
         @ApiModelProperty(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -214,8 +214,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = "PutLoansLoanIdChargesChargeIdResponse")
     public static final class PutLoansLoanIdChargesChargeIdResponse {
-        private PutLoansLoanIdChargesChargeIdResponse() {
-        }
+
+        private PutLoansLoanIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Long officeId;
@@ -230,8 +230,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = "PostLoansLoanIdChargesChargeIdRequest")
     public static final class PostLoansLoanIdChargesChargeIdRequest {
-        private PostLoansLoanIdChargesChargeIdRequest() {
-        }
+
+        private PostLoansLoanIdChargesChargeIdRequest() {}
 
         @ApiModelProperty(example = "dd MMMM yyyy")
         public String dateFormat;
@@ -243,8 +243,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = "PostLoansLoanIdChargesChargeIdResponse")
     public static final class PostLoansLoanIdChargesChargeIdResponse {
-        private PostLoansLoanIdChargesChargeIdResponse() {
-        }
+
+        private PostLoansLoanIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Long officeId;
@@ -260,8 +260,8 @@ final class LoanChargesApiResourceSwagger {
 
     @ApiModel(value = "DeleteLoansLoanIdChargesChargeIdResponse")
     public static final class DeleteLoansLoanIdChargesChargeIdResponse {
-        private DeleteLoansLoanIdChargesChargeIdResponse() {
-        }
+
+        private DeleteLoansLoanIdChargesChargeIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Long officeId;

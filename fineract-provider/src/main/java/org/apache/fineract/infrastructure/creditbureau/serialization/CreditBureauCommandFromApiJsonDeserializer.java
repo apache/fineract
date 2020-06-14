@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreditBureauCommandFromApiJsonDeserializer {
 
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "is_active","creditBureauId"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "is_active", "creditBureauId"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -49,17 +49,13 @@ public class CreditBureauCommandFromApiJsonDeserializer {
     }
 
     public void validateForCreate(final String json, final Long creditBureauId) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("CreditBureau");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("CreditBureau");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -77,24 +73,16 @@ public class CreditBureauCommandFromApiJsonDeserializer {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    public void validateForUpdate(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-
-    public void validateForUpdate(final String json)
-    {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("CreditBureau");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("CreditBureau");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-
 
         final String creditBureauIdParameter = "creditBureauId";
         if (this.fromApiJsonHelper.parameterExists(creditBureauIdParameter, element)) {
@@ -108,15 +96,14 @@ public class CreditBureauCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("is_active").value(is_active).notNull().notBlank().trueOrFalseRequired(is_active);
         }
 
-
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                    "Validation errors exist.", dataValidationErrors);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
         }
     }
 

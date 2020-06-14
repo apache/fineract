@@ -26,24 +26,29 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * Created by sanyam on 28/7/17.
  */
 final class CacheApiResourceSwagger {
+
     private CacheApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetCachesResponse")
     public static final class GetCachesResponse {
+
         private GetCachesResponse() {
 
         }
+
         public EnumOptionData cacheType;
         public boolean enabled;
     }
 
     @ApiModel(value = "PutCachesRequest")
     public static final class PutCachesRequest {
+
         private PutCachesRequest() {
 
         }
+
         @ApiModelProperty(example = "2")
         public Long cacheType;
 
@@ -51,17 +56,22 @@ final class CacheApiResourceSwagger {
 
     @ApiModel(value = "PutCachesResponse")
     public static final class PutCachesResponse {
+
         private PutCachesResponse() {
 
         }
-        public static final class PutCachechangesSwagger{
+
+        public static final class PutCachechangesSwagger {
+
             private PutCachechangesSwagger() {
 
             }
+
             @ApiModelProperty(example = "2")
             public Long cacheType;
 
         }
+
         public PutCachechangesSwagger cacheType;
 
     }

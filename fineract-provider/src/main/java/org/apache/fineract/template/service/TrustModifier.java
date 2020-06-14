@@ -42,7 +42,8 @@ public class TrustModifier {
      * Call this with any HttpURLConnection, and it will modify the trust
      * settings if it is an HTTPS connection.
      */
-    public static void relaxHostChecking(final HttpURLConnection conn) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+    public static void relaxHostChecking(final HttpURLConnection conn)
+            throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 
         if (conn instanceof HttpsURLConnection) {
             final HttpsURLConnection httpsConnection = (HttpsURLConnection) conn;
@@ -52,8 +53,8 @@ public class TrustModifier {
         }
     }
 
-    static synchronized SSLSocketFactory prepFactory(final HttpsURLConnection httpsConnection) throws NoSuchAlgorithmException,
-            KeyStoreException, KeyManagementException {
+    static synchronized SSLSocketFactory prepFactory(final HttpsURLConnection httpsConnection)
+            throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
         if (factory == null) {
             final SSLContext ctx = SSLContext.getInstance("TLS");

@@ -92,7 +92,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
         final StopWatch task = new StopWatch();
         task.start();
@@ -110,9 +111,10 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     tenantIdentifier = request.getParameter("tenantIdentifier");
                 }
 
-                if (tenantIdentifier == null && this.exceptionIfHeaderMissing) { throw new InvalidTenantIdentiferException(
-                        "No tenant identifier found: Add request header of '" + this.tenantRequestHeader
-                                + "' or add the parameter 'tenantIdentifier' to query string of request URL."); }
+                if (tenantIdentifier == null && this.exceptionIfHeaderMissing) {
+                    throw new InvalidTenantIdentiferException("No tenant identifier found: Add request header of '"
+                            + this.tenantRequestHeader + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
+                }
 
                 String pathInfo = request.getRequestURI();
                 boolean isReportRequest = false;
@@ -157,8 +159,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     }
 
     @Override
-    protected void onSuccessfulAuthentication(HttpServletRequest request,
-            HttpServletResponse response, Authentication authResult)
+    protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, Authentication authResult)
             throws IOException {
         super.onSuccessfulAuthentication(request, response, authResult);
         AppUser user = (AppUser) authResult.getPrincipal();
@@ -172,11 +173,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         String pathURL = request.getRequestURI();
         boolean isSelfServiceRequest = pathURL != null && pathURL.contains("/self/");
 
-        boolean notAllowed = (isSelfServiceRequest && !user.isSelfServiceUser())
-                || (!isSelfServiceRequest && user.isSelfServiceUser());
+        boolean notAllowed = (isSelfServiceRequest && !user.isSelfServiceUser()) || (!isSelfServiceRequest && user.isSelfServiceUser());
 
-        if(notAllowed){
-            throw new BadCredentialsException("User not authorised to use the requested resource.");
-        }
+        if (notAllowed) { throw new BadCredentialsException("User not authorised to use the requested resource."); }
     }
 }

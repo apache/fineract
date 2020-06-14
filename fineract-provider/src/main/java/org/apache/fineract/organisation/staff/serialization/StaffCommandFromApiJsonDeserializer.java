@@ -52,7 +52,6 @@ public final class StaffCommandFromApiJsonDeserializer {
 
     private final StaffReadPlatformService staffReadPlatformService;
 
-
     @Autowired
     public StaffCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
             final StaffReadPlatformService staffReadPlatformService) {
@@ -121,7 +120,7 @@ public final class StaffCommandFromApiJsonDeserializer {
         validateForUpdate(json, null);
     }
 
-    public void validateForUpdate(final String json,Long staffId) {
+    public void validateForUpdate(final String json, Long staffId) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -162,14 +161,15 @@ public final class StaffCommandFromApiJsonDeserializer {
 
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
 
-            //Need to add here check to see if any clients, group, account and loans are assigned to this staff if staff is being set to inactive --LJB
+            // Need to add here check to see if any clients, group, account and
+            // loans are assigned to this staff if staff is being set to
+            // inactive --LJB
             final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed("forceStatus", element);
-            if ((!activeFlag && forceStatus == null) ||
-                    (!activeFlag && forceStatus)) {
-                 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
+            if ((!activeFlag && forceStatus == null) || (!activeFlag && forceStatus)) {
+                Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
 
                 if (result != null && result.length > 0) {
-                    baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned",result);
+                    baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned", result);
                 }
 
             }
@@ -200,7 +200,9 @@ public final class StaffCommandFromApiJsonDeserializer {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

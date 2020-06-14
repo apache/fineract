@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
  * Immutable data object representing an Email configuration.
  */
 public class EmailConfigurationData {
+
     @SuppressWarnings("unused")
     private final Long id;
 

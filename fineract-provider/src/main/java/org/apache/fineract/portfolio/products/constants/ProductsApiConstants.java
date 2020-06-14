@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.products.constants;
 
-
 public interface ProductsApiConstants {
 
-    public final String READPLATFORM_NAME = "ReadPlatformService" ;
-    public final String PRODUCT_COMMANDSERVICE = "PRODUCT_COMMANDSERVICE" ;
+    public final String READPLATFORM_NAME = "ReadPlatformService";
+    public final String PRODUCT_COMMANDSERVICE = "PRODUCT_COMMANDSERVICE";
 
 }

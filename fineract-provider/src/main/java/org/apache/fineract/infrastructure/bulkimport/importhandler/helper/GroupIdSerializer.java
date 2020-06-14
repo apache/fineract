@@ -28,11 +28,12 @@ import java.util.Collection;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 
 public class GroupIdSerializer implements JsonSerializer<Collection<GroupGeneralData>> {
+
     @Override
     public JsonElement serialize(Collection<GroupGeneralData> src, Type typeOfSrc, JsonSerializationContext context) {
-        JsonArray groupIdJsonArray=new JsonArray();
-        for (GroupGeneralData group:src) {
-            JsonElement groupIdElement=new JsonPrimitive(group.getId().toString());
+        JsonArray groupIdJsonArray = new JsonArray();
+        for (GroupGeneralData group : src) {
+            JsonElement groupIdElement = new JsonPrimitive(group.getId().toString());
             groupIdJsonArray.add(groupIdElement);
         }
         return groupIdJsonArray;

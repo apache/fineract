@@ -23,43 +23,24 @@ import java.util.Map;
 
 public enum GlobalEntityType {
 
-
-    INVALID(0, "invalid"),
-    CLIENTS_PERSON(1, "clients.person"),
-    CLIENTS_ENTTTY(2,"clients.entity"),
-    GROUPS(3, "groups"),
-    CENTERS(4, "centers"),
-    OFFICES(5, "offices"),
-    STAFF(6, "staff"),
-    USERS(7, "users"),
-    SMS(8, "sms"),
-    DOCUMENTS(9, "documents"),
-    TEMPLATES(10, "templates"),
-    NOTES(11, "templates"),
-    CALENDAR(12, "calendar"),
-    MEETINGS(13, "meetings"),
-    HOLIDAYS(14, "holidays"),
-    LOANS(15, "loans"),
-    LOAN_PRODUCTS(16,"loancharges"),
-    LOAN_TRANSACTIONS(18, "loantransactions"),
-    GUARANTORS(19, "guarantors"),
-    COLLATERALS(20, "collaterals"),
-    FUNDS(21, "funds"),
-    CURRENCY(22, "currencies"),
-    SAVINGS_ACCOUNT(23, "savingsaccount"),
-    SAVINGS_CHARGES(24, "savingscharges"),
-    SAVINGS_TRANSACTIONS(25, "savingstransactions"),
-    SAVINGS_PRODUCTS(26, "savingsproducts"),
-    GL_JOURNAL_ENTRIES(27, "gljournalentries"),
-    CODE_VALUE(28, "codevalue"),
-    CODE(29, "code"),
-    CHART_OF_ACCOUNTS(30,"chartofaccounts"),
-    FIXED_DEPOSIT_ACCOUNTS(31,"fixeddepositaccounts"),
-    FIXED_DEPOSIT_TRANSACTIONS(32,"fixeddeposittransactions"),
-    SHARE_ACCOUNTS(33,"shareaccounts"),
-    RECURRING_DEPOSIT_ACCOUNTS(34,"recurringdeposits"),
-    RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS(35,"recurringdepositstransactions"),
-    CLIENT(36,"client");
+    INVALID(0, "invalid"), CLIENTS_PERSON(1, "clients.person"), CLIENTS_ENTTTY(2, "clients.entity"), GROUPS(3, "groups"), CENTERS(4,
+            "centers"), OFFICES(5, "offices"), STAFF(6, "staff"), USERS(7, "users"), SMS(8, "sms"), DOCUMENTS(9, "documents"), TEMPLATES(10,
+                    "templates"), NOTES(11, "templates"), CALENDAR(12, "calendar"), MEETINGS(13, "meetings"), HOLIDAYS(14,
+                            "holidays"), LOANS(15, "loans"), LOAN_PRODUCTS(16, "loancharges"), LOAN_TRANSACTIONS(18,
+                                    "loantransactions"), GUARANTORS(19, "guarantors"), COLLATERALS(20, "collaterals"), FUNDS(21,
+                                            "funds"), CURRENCY(22, "currencies"), SAVINGS_ACCOUNT(23, "savingsaccount"), SAVINGS_CHARGES(24,
+                                                    "savingscharges"), SAVINGS_TRANSACTIONS(25, "savingstransactions"), SAVINGS_PRODUCTS(26,
+                                                            "savingsproducts"), GL_JOURNAL_ENTRIES(27, "gljournalentries"), CODE_VALUE(28,
+                                                                    "codevalue"), CODE(29, "code"), CHART_OF_ACCOUNTS(30,
+                                                                            "chartofaccounts"), FIXED_DEPOSIT_ACCOUNTS(31,
+                                                                                    "fixeddepositaccounts"), FIXED_DEPOSIT_TRANSACTIONS(32,
+                                                                                            "fixeddeposittransactions"), SHARE_ACCOUNTS(33,
+                                                                                                    "shareaccounts"), RECURRING_DEPOSIT_ACCOUNTS(
+                                                                                                            34,
+                                                                                                            "recurringdeposits"), RECURRING_DEPOSIT_ACCOUNTS_TRANSACTIONS(
+                                                                                                                    35,
+                                                                                                                    "recurringdepositstransactions"), CLIENT(
+                                                                                                                            36, "client");
 
     private final Integer value;
     private final String code;

@@ -25,11 +25,9 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  * when gl account is attached with any product(loan/saving) then we can not
  * disable the gl account
  */
-public class GLAccountDisableException extends
-        AbstractPlatformDomainRuleException {
+public class GLAccountDisableException extends AbstractPlatformDomainRuleException {
 
     public GLAccountDisableException() {
-        super("error.msg.glaccount.attached.to.product",
-                "General Ledger Account is already attached to product.");
+        super("error.msg.glaccount.attached.to.product", "General Ledger Account is already attached to product.");
     }
 }

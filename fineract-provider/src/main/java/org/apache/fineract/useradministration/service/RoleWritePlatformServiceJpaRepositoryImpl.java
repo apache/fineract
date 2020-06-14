@@ -90,8 +90,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -137,7 +137,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
                 if (changes.containsKey("name")) {
-                    this.topicDomainService.updateTopic( previousRoleName, role, changes);
+                    this.topicDomainService.updateTopic(previousRoleName, role, changes);
                 }
             }
 
@@ -151,8 +151,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
-        }catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -247,7 +247,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              * Checking the role present in DB or not using role_id
              */
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
-            //if(role.isDisabled()){throw new RoleNotFoundException(roleId);}
+            // if(role.isDisabled()){throw new RoleNotFoundException(roleId);}
 
             /**
              * Roles associated with users can't be disable
@@ -278,9 +278,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             /**
              * Checking the role present in DB or not using role_id
              */
-            final Role role = this.roleRepository.findById(roleId)
-                    .orElseThrow(() -> new RoleNotFoundException(roleId));
-            //if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
+            final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
+            // if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
 
             role.enableRole();
             this.roleRepository.save(role);

@@ -60,16 +60,14 @@ public class InterestRateChartSlabDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestIncentiveDataValidator interestIncentiveDataValidator;
     private static final Set<String> INTERESTRATE_CHART_SLAB_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(InterestRateChartSlabApiConstants.localeParamName,
-                    InterestRateChartSlabApiConstants.idParamName, descriptionParamName, periodTypeParamName,
-                    fromPeriodParamName, toPeriodParamName, amountRangeFromParamName, amountRangeToParamName,
-                    annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
+            Arrays.asList(InterestRateChartSlabApiConstants.localeParamName, InterestRateChartSlabApiConstants.idParamName,
+                    descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName, amountRangeFromParamName,
+                    amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 
     private static final Set<String> INTERESTRATE_CHART_SLAB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(InterestRateChartSlabApiConstants.localeParamName,
-                    InterestRateChartSlabApiConstants.idParamName, descriptionParamName, periodTypeParamName,
-                    fromPeriodParamName, toPeriodParamName, amountRangeFromParamName, amountRangeToParamName,
-                    annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
+            Arrays.asList(InterestRateChartSlabApiConstants.localeParamName, InterestRateChartSlabApiConstants.idParamName,
+                    descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName, amountRangeFromParamName,
+                    amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 
     @Autowired
     public InterestRateChartSlabDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -270,8 +268,8 @@ public class InterestRateChartSlabDataValidator {
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject incentiveElement = array.get(i).getAsJsonObject();
                     if (this.fromApiJsonHelper.parameterExists(InterestIncentiveApiConstants.idParamName, incentiveElement)) {
-                        final Long id = this.fromApiJsonHelper
-                                .extractLongNamed(InterestIncentiveApiConstants.idParamName, incentiveElement);
+                        final Long id = this.fromApiJsonHelper.extractLongNamed(InterestIncentiveApiConstants.idParamName,
+                                incentiveElement);
                         baseDataValidator.reset().parameter(InterestIncentiveApiConstants.idParamName).value(id).notNull()
                                 .integerGreaterThanZero();
                         this.interestIncentiveDataValidator.validateIncentiveUpdate(incentiveElement, baseDataValidator, locale);

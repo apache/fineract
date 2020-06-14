@@ -73,18 +73,12 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     private static final class SavingsAccountChargeMapper implements RowMapper<SavingsAccountChargeData> {
 
         public String schema() {
-            return "sc.id as id, c.id as chargeId, sc.savings_account_id as accountId, c.name as name, "
-                    + "sc.amount as amountDue, "
-                    + "sc.amount_paid_derived as amountPaid, "
-                    + "sc.amount_waived_derived as amountWaived, "
-                    + "sc.amount_writtenoff_derived as amountWrittenOff, "
-                    + "sc.amount_outstanding_derived as amountOutstanding, "
+            return "sc.id as id, c.id as chargeId, sc.savings_account_id as accountId, c.name as name, " + "sc.amount as amountDue, "
+                    + "sc.amount_paid_derived as amountPaid, " + "sc.amount_waived_derived as amountWaived, "
+                    + "sc.amount_writtenoff_derived as amountWrittenOff, " + "sc.amount_outstanding_derived as amountOutstanding, "
                     + "sc.calculation_percentage as percentageOf, sc.calculation_on_amount as amountPercentageAppliedTo, "
-                    + "sc.charge_time_enum as chargeTime, "
-                    + "sc.is_penalty as penalty, "
-                    + "sc.charge_due_date as dueAsOfDate, "
-                    + "sc.fee_on_month as feeOnMonth, "
-                    + "sc.fee_on_day as feeOnDay, sc.fee_interval as feeInterval, "
+                    + "sc.charge_time_enum as chargeTime, " + "sc.is_penalty as penalty, " + "sc.charge_due_date as dueAsOfDate, "
+                    + "sc.fee_on_month as feeOnMonth, " + "sc.fee_on_day as feeOnDay, sc.fee_interval as feeInterval, "
                     + "sc.charge_calculation_enum as chargeCalculation, "
                     + "sc.is_active as isActive, sc.inactivated_on_date as inactivationDate, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
@@ -240,20 +234,21 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue() {
-        final String sql = "select " + this.chargeDueMapper.schema() + " where sac.charge_due_date is not null and sac.charge_time_enum = ? "
+        final String sql = "select " + this.chargeDueMapper.schema()
+                + " where sac.charge_due_date is not null and sac.charge_time_enum = ? "
                 + " and sac.charge_due_date <= NOW() and sa.status_enum = ? ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue()});
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper,
+                new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
     }
 
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue() {
-        final String sql = "select "
-                + this.chargeDueMapper.schema()
+        final String sql = "select " + this.chargeDueMapper.schema()
                 + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = 0 and sac.is_paid_derived=0 and sac.is_active=1 and sa.status_enum = ? "
                 + " order by sac.charge_due_date ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {SavingsAccountStatusType.ACTIVE.getValue()});
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() });
 
     }
 

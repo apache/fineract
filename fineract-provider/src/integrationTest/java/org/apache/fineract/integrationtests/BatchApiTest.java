@@ -58,7 +58,8 @@ public class BatchApiTest {
 
     /**
      * Sets up the essential settings for the TEST like contentType,
-     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by jUnit.
+     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by
+     * jUnit.
      */
     @BeforeEach
     public void setup() {
@@ -333,10 +334,10 @@ public class BatchApiTest {
     }
 
     /**
-     * Tests that batch repayment for loans is happening properly.
-     * Collected properly 200(OK) status was returned for successful responses.
-     * It first creates a new loan and then makes two repayments for it
-     * and then verifies that 200(OK) is returned for the repayment requests.
+     * Tests that batch repayment for loans is happening properly. Collected
+     * properly 200(OK) status was returned for successful responses. It first
+     * creates a new loan and then makes two repayments for it and then verifies
+     * that 200(OK) is returned for the repayment requests.
      *
      * @see org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy
      */
@@ -482,14 +483,15 @@ public class BatchApiTest {
     }
 
     /**
-     * Test for the successful create client, apply loan,approval and disbursal of a loan using
-     * Batch API with enclosingTransaction. A '200' status code is expected on successful activation.
+     * Test for the successful create client, apply loan,approval and disbursal
+     * of a loan using Batch API with enclosingTransaction. A '200' status code
+     * is expected on successful activation.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */
     @Test
-    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction(){
+    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction() {
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withNumberOfRepayments("24") //
@@ -515,7 +517,7 @@ public class BatchApiTest {
         // Create a disburseLoan Request
         final BatchRequest br4 = BatchHelper.disburseLoanRequest(4744L, 4743L);
 
-        final List<BatchRequest> batchRequests = Arrays.asList(br1,br2,br3,br4);
+        final List<BatchRequest> batchRequests = Arrays.asList(br1, br2, br3, br4);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 

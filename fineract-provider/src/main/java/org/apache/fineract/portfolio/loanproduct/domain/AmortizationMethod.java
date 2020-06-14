@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.domain;
 
 public enum AmortizationMethod {
+
     EQUAL_PRINCIPAL(0, "amortizationType.equal.principal"), //
     EQUAL_INSTALLMENTS(1, "amortizationType.equal.installments"), //
     INVALID(2, "amortizationType.invalid");

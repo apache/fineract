@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-
 @Path("/email/configuration")
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON })
@@ -60,10 +59,10 @@ public class EmailConfigurationApiResource {
 
     @Autowired
     public EmailConfigurationApiResource(final PlatformSecurityContext context, final EmailReadPlatformService readPlatformService,
-                            final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer,
-                            final ApiRequestParameterHelper apiRequestParameterHelper,
-                            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-                            final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
+            final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -73,7 +72,7 @@ public class EmailConfigurationApiResource {
     }
 
     @GET
-    public String retrieveAll(@Context final UriInfo uriInfo){
+    public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final Collection<EmailConfigurationData> configuration = this.emailConfigurationReadPlatformService.retrieveAll();
@@ -83,9 +82,8 @@ public class EmailConfigurationApiResource {
         return this.toApiJsonSerializer.serialize(settings, configuration);
     }
 
-
     @PUT
-    public String updateConfiguration(@Context final UriInfo uriInfo, final String apiRequestBodyAsJson){
+    public String updateConfiguration(@Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateEmailConfiguration().withJson(apiRequestBodyAsJson).build();
 

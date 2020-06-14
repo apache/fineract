@@ -30,18 +30,17 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AccountEntityServiceFactory {
 
-     private Map<String, AccountEntityService> accountEntityServiceHashMap = new HashMap<>();
+    private Map<String, AccountEntityService> accountEntityServiceHashMap = new HashMap<>();
 
-        @Autowired
-        public AccountEntityServiceFactory(final Set<AccountEntityService> accountEntityServices) {
-            for (AccountEntityService service : accountEntityServices) {
-                this.accountEntityServiceHashMap.put(service.getKey(), service);
-            }
+    @Autowired
+    public AccountEntityServiceFactory(final Set<AccountEntityService> accountEntityServices) {
+        for (AccountEntityService service : accountEntityServices) {
+            this.accountEntityServiceHashMap.put(service.getKey(), service);
         }
+    }
 
-        public AccountEntityService getAccountEntityService(final String key) {
-            return this.accountEntityServiceHashMap.get(key);
-        }
-
+    public AccountEntityService getAccountEntityService(final String key) {
+        return this.accountEntityServiceHashMap.get(key);
+    }
 
 }

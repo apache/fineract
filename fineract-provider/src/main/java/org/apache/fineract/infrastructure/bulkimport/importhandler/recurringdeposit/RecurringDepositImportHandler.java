@@ -63,19 +63,19 @@ public class RecurringDepositImportHandler implements ImportHandler {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public RecurringDepositImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+    public RecurringDepositImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 
     }
+
     @Override
     public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook=workbook;
-        savings=new ArrayList<>();
-        approvalDates=new ArrayList<>();
-        activationDates=new ArrayList<>();
-        statuses=new ArrayList<>();
-        readExcelFile(locale,dateFormat);
+        this.workbook = workbook;
+        savings = new ArrayList<>();
+        approvalDates = new ArrayList<>();
+        activationDates = new ArrayList<>();
+        statuses = new ArrayList<>();
+        readExcelFile(locale, dateFormat);
         return importEntity(dateFormat);
     }
 
@@ -84,45 +84,47 @@ public class RecurringDepositImportHandler implements ImportHandler {
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.ROWHEADER_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row = savingsSheet.getRow(rowIndex);
-                if (ImportHandlerUtils.isNotImported(row, RecurringDepositConstants.STATUS_COL)) {
-                    savings.add(readSavings(row,locale,dateFormat));
-                    approvalDates.add(readSavingsApproval(row,locale,dateFormat));
-                    activationDates.add(readSavingsActivation(row,locale,dateFormat));
-                }
+            row = savingsSheet.getRow(rowIndex);
+            if (ImportHandlerUtils.isNotImported(row, RecurringDepositConstants.STATUS_COL)) {
+                savings.add(readSavings(row, locale, dateFormat));
+                approvalDates.add(readSavingsApproval(row, locale, dateFormat));
+                activationDates.add(readSavingsActivation(row, locale, dateFormat));
+            }
         }
 
     }
 
-    private SavingsActivation readSavingsActivation(Row row,String locale, String dateFormat) {
+    private SavingsActivation readSavingsActivation(Row row, String locale, String dateFormat) {
         LocalDate activationDate = ImportHandlerUtils.readAsDate(RecurringDepositConstants.ACTIVATION_DATE_COL, row);
-        if (activationDate!=null) {
+        if (activationDate != null) {
             return SavingsActivation.importInstance(activationDate, row.getRowNum(), locale, dateFormat);
         } else {
             return null;
         }
     }
 
-    private SavingsApproval readSavingsApproval(Row row,String locale, String dateFormat) {
+    private SavingsApproval readSavingsApproval(Row row, String locale, String dateFormat) {
         LocalDate approvalDate = ImportHandlerUtils.readAsDate(RecurringDepositConstants.APPROVED_DATE_COL, row);
-        if (approvalDate!=null) {
+        if (approvalDate != null) {
             return SavingsApproval.importInstance(approvalDate, row.getRowNum(), locale, dateFormat);
         } else {
             return null;
         }
     }
 
-    private RecurringDepositAccountData readSavings(Row row,String locale, String dateFormat) {
+    private RecurringDepositAccountData readSavings(Row row, String locale, String dateFormat) {
 
         String productName = ImportHandlerUtils.readAsString(RecurringDepositConstants.PRODUCT_COL, row);
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME), productName);
         String fieldOfficerName = ImportHandlerUtils.readAsString(RecurringDepositConstants.FIELD_OFFICER_NAME_COL, row);
-        Long fieldOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), fieldOfficerName);
+        Long fieldOfficerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME),
+                fieldOfficerName);
         LocalDate submittedOnDate = ImportHandlerUtils.readAsDate(RecurringDepositConstants.SUBMITTED_ON_DATE_COL, row);
-        String interestCompoundingPeriodType = ImportHandlerUtils.readAsString(RecurringDepositConstants.INTEREST_COMPOUNDING_PERIOD_COL, row);
+        String interestCompoundingPeriodType = ImportHandlerUtils.readAsString(RecurringDepositConstants.INTEREST_COMPOUNDING_PERIOD_COL,
+                row);
         Long interestCompoundingPeriodTypeId = null;
-        EnumOptionData interestCompoundingPeriodTypeEnum=null;
-        if (interestCompoundingPeriodType!=null) {
+        EnumOptionData interestCompoundingPeriodTypeEnum = null;
+        if (interestCompoundingPeriodType != null) {
             if (interestCompoundingPeriodType.equalsIgnoreCase("Daily")) {
                 interestCompoundingPeriodTypeId = 1L;
             } else if (interestCompoundingPeriodType.equalsIgnoreCase("Monthly")) {
@@ -138,8 +140,8 @@ public class RecurringDepositImportHandler implements ImportHandler {
         }
         String interestPostingPeriodType = ImportHandlerUtils.readAsString(RecurringDepositConstants.INTEREST_POSTING_PERIOD_COL, row);
         Long interestPostingPeriodTypeId = null;
-        EnumOptionData interestPostingPeriodTypeEnum=null;
-        if (interestPostingPeriodType!=null) {
+        EnumOptionData interestPostingPeriodTypeEnum = null;
+        if (interestPostingPeriodType != null) {
             if (interestPostingPeriodType.equalsIgnoreCase("Monthly")) {
                 interestPostingPeriodTypeId = 4L;
             } else if (interestPostingPeriodType.equalsIgnoreCase("Quarterly")) {
@@ -149,36 +151,37 @@ public class RecurringDepositImportHandler implements ImportHandler {
             } else if (interestPostingPeriodType.equalsIgnoreCase("BiAnnual")) {
                 interestPostingPeriodTypeId = 6L;
             }
-                interestPostingPeriodTypeEnum = new EnumOptionData(interestPostingPeriodTypeId, null, null);
+            interestPostingPeriodTypeEnum = new EnumOptionData(interestPostingPeriodTypeId, null, null);
         }
 
         String interestCalculationType = ImportHandlerUtils.readAsString(RecurringDepositConstants.INTEREST_CALCULATION_COL, row);
         Long interestCalculationTypeId = null;
-        EnumOptionData interestCalculationTypeEnum=null;
-        if (interestCalculationType!=null) {
+        EnumOptionData interestCalculationTypeEnum = null;
+        if (interestCalculationType != null) {
             if (interestCalculationType.equalsIgnoreCase("Daily Balance")) {
                 interestCalculationTypeId = 1L;
             } else if (interestCalculationType.equalsIgnoreCase("Average Daily Balance")) {
                 interestCalculationTypeId = 2L;
             }
-             interestCalculationTypeEnum = new EnumOptionData(interestCalculationTypeId, null, null);
+            interestCalculationTypeEnum = new EnumOptionData(interestCalculationTypeId, null, null);
         }
-        String interestCalculationDaysInYearType = ImportHandlerUtils.readAsString(RecurringDepositConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row);
-        EnumOptionData interestCalculationDaysInYearTypeEnum=null;
+        String interestCalculationDaysInYearType = ImportHandlerUtils
+                .readAsString(RecurringDepositConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row);
+        EnumOptionData interestCalculationDaysInYearTypeEnum = null;
         Long interestCalculationDaysInYearTypeId = null;
-        if (interestCalculationDaysInYearType!=null) {
+        if (interestCalculationDaysInYearType != null) {
             if (interestCalculationDaysInYearType.equalsIgnoreCase("360 Days")) {
                 interestCalculationDaysInYearTypeId = 360L;
             } else if (interestCalculationDaysInYearType.equalsIgnoreCase("365 Days")) {
                 interestCalculationDaysInYearTypeId = 365L;
             }
-             interestCalculationDaysInYearTypeEnum = new EnumOptionData(interestCalculationDaysInYearTypeId, null, null);
+            interestCalculationDaysInYearTypeEnum = new EnumOptionData(interestCalculationDaysInYearTypeId, null, null);
         }
         Integer lockinPeriodFrequency = ImportHandlerUtils.readAsInt(RecurringDepositConstants.LOCKIN_PERIOD_COL, row);
         String lockinPeriodFrequencyType = ImportHandlerUtils.readAsString(RecurringDepositConstants.LOCKIN_PERIOD_FREQUENCY_COL, row);
         Long lockinPeriodFrequencyTypeId = null;
-        EnumOptionData lockinPeriodFrequencyTypeEnum=null;
-        if (lockinPeriodFrequencyType!=null) {
+        EnumOptionData lockinPeriodFrequencyTypeEnum = null;
+        if (lockinPeriodFrequencyType != null) {
             if (lockinPeriodFrequencyType.equalsIgnoreCase("Days")) {
                 lockinPeriodFrequencyTypeId = 0L;
             } else if (lockinPeriodFrequencyType.equalsIgnoreCase("Weeks")) {
@@ -188,17 +191,17 @@ public class RecurringDepositImportHandler implements ImportHandler {
             } else if (lockinPeriodFrequencyType.equalsIgnoreCase("Years")) {
                 lockinPeriodFrequencyTypeId = 3L;
             }
-             lockinPeriodFrequencyTypeEnum = new EnumOptionData(lockinPeriodFrequencyTypeId, null, null);
+            lockinPeriodFrequencyTypeEnum = new EnumOptionData(lockinPeriodFrequencyTypeId, null, null);
         }
-        BigDecimal depositAmount=null;
-        if (ImportHandlerUtils.readAsDouble(RecurringDepositConstants.RECURRING_DEPOSIT_AMOUNT_COL, row)!=null) {
-            depositAmount = BigDecimal.valueOf(
-                    ImportHandlerUtils.readAsDouble(RecurringDepositConstants.RECURRING_DEPOSIT_AMOUNT_COL, row));
+        BigDecimal depositAmount = null;
+        if (ImportHandlerUtils.readAsDouble(RecurringDepositConstants.RECURRING_DEPOSIT_AMOUNT_COL, row) != null) {
+            depositAmount = BigDecimal
+                    .valueOf(ImportHandlerUtils.readAsDouble(RecurringDepositConstants.RECURRING_DEPOSIT_AMOUNT_COL, row));
         }
         Integer depositPeriod = ImportHandlerUtils.readAsInt(RecurringDepositConstants.DEPOSIT_PERIOD_COL, row);
         String depositPeriodFrequency = ImportHandlerUtils.readAsString(RecurringDepositConstants.DEPOSIT_PERIOD_FREQUENCY_COL, row);
         Long depositPeriodFrequencyId = null;
-        if (depositPeriodFrequency!=null) {
+        if (depositPeriodFrequency != null) {
             if (depositPeriodFrequency.equalsIgnoreCase("Days")) {
                 depositPeriodFrequencyId = 0L;
             } else if (depositPeriodFrequency.equalsIgnoreCase("Weeks")) {
@@ -212,8 +215,8 @@ public class RecurringDepositImportHandler implements ImportHandler {
         Integer recurringFrequency = ImportHandlerUtils.readAsInt(RecurringDepositConstants.DEPOSIT_FREQUENCY_COL, row);
         String recurringFrequencyType = ImportHandlerUtils.readAsString(RecurringDepositConstants.DEPOSIT_FREQUENCY_TYPE_COL, row);
         Long recurringFrequencyTypeId = null;
-        EnumOptionData recurringFrequencyTypeEnum=null;
-        if (recurringFrequencyType!=null) {
+        EnumOptionData recurringFrequencyTypeEnum = null;
+        if (recurringFrequencyType != null) {
             if (recurringFrequencyType.equalsIgnoreCase("Days")) {
                 recurringFrequencyTypeId = 0L;
             } else if (recurringFrequencyType.equalsIgnoreCase("Weeks")) {
@@ -223,7 +226,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
             } else if (recurringFrequencyType.equalsIgnoreCase("Years")) {
                 recurringFrequencyTypeId = 3L;
             }
-             recurringFrequencyTypeEnum = new EnumOptionData(recurringFrequencyTypeId, null, null);
+            recurringFrequencyTypeEnum = new EnumOptionData(recurringFrequencyTypeId, null, null);
         }
         LocalDate depositStartDate = ImportHandlerUtils.readAsDate(RecurringDepositConstants.DEPOSIT_START_DATE_COL, row);
         Boolean allowWithdrawal = ImportHandlerUtils.readAsBoolean(RecurringDepositConstants.ALLOW_WITHDRAWAL_COL, row);
@@ -237,26 +240,24 @@ public class RecurringDepositImportHandler implements ImportHandler {
         String charge1 = ImportHandlerUtils.readAsString(RecurringDepositConstants.CHARGE_ID_1, row);
         String charge2 = ImportHandlerUtils.readAsString(RecurringDepositConstants.CHARGE_ID_2, row);
 
-        if (charge1!=null) {
-            if (ImportHandlerUtils.readAsDouble(RecurringDepositConstants.CHARGE_AMOUNT_1, row)!=null) {
+        if (charge1 != null) {
+            if (ImportHandlerUtils.readAsDouble(RecurringDepositConstants.CHARGE_AMOUNT_1, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(RecurringDepositConstants.CHARGE_ID_1, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(RecurringDepositConstants.CHARGE_AMOUNT_1, row)),
                         ImportHandlerUtils.readAsDate(RecurringDepositConstants.CHARGE_DUE_DATE_1, row)));
-            }else {
-                charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(RecurringDepositConstants.CHARGE_ID_1, row),
-                       null,
+            } else {
+                charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(RecurringDepositConstants.CHARGE_ID_1, row), null,
                         ImportHandlerUtils.readAsDate(RecurringDepositConstants.CHARGE_DUE_DATE_1, row)));
             }
         }
 
-        if (charge2!=null) {
-            if (ImportHandlerUtils.readAsDouble(RecurringDepositConstants.CHARGE_AMOUNT_2, row)!=null) {
+        if (charge2 != null) {
+            if (ImportHandlerUtils.readAsDouble(RecurringDepositConstants.CHARGE_AMOUNT_2, row) != null) {
                 charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(RecurringDepositConstants.CHARGE_ID_2, row),
                         BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(RecurringDepositConstants.CHARGE_AMOUNT_2, row)),
                         ImportHandlerUtils.readAsDate(RecurringDepositConstants.CHARGE_DUE_DATE_2, row)));
-            }else {
-                charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(RecurringDepositConstants.CHARGE_ID_2, row),
-                       null,
+            } else {
+                charges.add(new SavingsAccountChargeData(ImportHandlerUtils.readAsLong(RecurringDepositConstants.CHARGE_ID_2, row), null,
                         ImportHandlerUtils.readAsDate(RecurringDepositConstants.CHARGE_DUE_DATE_2, row)));
             }
         }
@@ -264,20 +265,19 @@ public class RecurringDepositImportHandler implements ImportHandler {
         statuses.add(status);
         Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
         return RecurringDepositAccountData.importInstance(clientId, productId, fieldOfficerId, submittedOnDate,
-                interestCompoundingPeriodTypeEnum,interestPostingPeriodTypeEnum,interestCalculationTypeEnum,
-                interestCalculationDaysInYearTypeEnum, lockinPeriodFrequency, lockinPeriodFrequencyTypeEnum,
-                depositAmount, depositPeriod, depositPeriodFrequencyId, depositStartDate,
-                recurringFrequency, recurringFrequencyTypeEnum, inheritCalendar, isMandatoryDeposit,
-                allowWithdrawal, adjustAdvancePayments, externalId,charges, row.getRowNum(),locale,dateFormat);
+                interestCompoundingPeriodTypeEnum, interestPostingPeriodTypeEnum, interestCalculationTypeEnum,
+                interestCalculationDaysInYearTypeEnum, lockinPeriodFrequency, lockinPeriodFrequencyTypeEnum, depositAmount, depositPeriod,
+                depositPeriodFrequencyId, depositStartDate, recurringFrequency, recurringFrequencyTypeEnum, inheritCalendar,
+                isMandatoryDeposit, allowWithdrawal, adjustAdvancePayments, externalId, charges, row.getRowNum(), locale, dateFormat);
     }
 
     public Count importEntity(String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.RECURRING_DEPOSIT_SHEET_NAME);
-        int successCount=0;
-        int errorCount=0;
+        int successCount = 0;
+        int errorCount = 0;
         int progressLevel = 0;
-        Long savingsId=null;
-        String errorMessage="";
+        Long savingsId = null;
+        String errorMessage = "";
         for (int i = 0; i < savings.size(); i++) {
             Row row = savingsSheet.getRow(savings.get(i).getRowIndex());
             Cell statusCell = row.createCell(RecurringDepositConstants.STATUS_COL);
@@ -287,7 +287,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0) {
-                    CommandProcessingResult result= importSavings(i,dateFormat);
+                    CommandProcessingResult result = importSavings(i, dateFormat);
                     savingsId = result.getSavingsId();
                     progressLevel = 1;
                 } else {
@@ -305,18 +305,19 @@ public class RecurringDepositImportHandler implements ImportHandler {
                 successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
-            }catch (RuntimeException ex){
+            } catch (RuntimeException ex) {
                 errorCount++;
-                LOG.error("Problem occurred in importEntity function",ex);
-                errorMessage=ImportHandlerUtils.getErrorMessage(ex);
-                writeRecurringDepositErrorMessage(savingsId,errorMessage,progressLevel,statusCell,errorReportCell,row);
+                LOG.error("Problem occurred in importEntity function", ex);
+                errorMessage = ImportHandlerUtils.getErrorMessage(ex);
+                writeRecurringDepositErrorMessage(savingsId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }
         }
         setReportHeaders(savingsSheet);
-        return Count.instance(successCount,errorCount);
+        return Count.instance(successCount, errorCount);
     }
 
-    private void writeRecurringDepositErrorMessage(Long savingsId,String errorMessage,int progressLevel,Cell statusCell,Cell errorReportCell,Row row){
+    private void writeRecurringDepositErrorMessage(Long savingsId, String errorMessage, int progressLevel, Cell statusCell,
+            Cell errorReportCell, Row row) {
         String status = "";
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
@@ -343,8 +344,8 @@ public class RecurringDepositImportHandler implements ImportHandler {
         ImportHandlerUtils.writeString(RecurringDepositConstants.FAILURE_REPORT_COL, rowHeader, "Report");
     }
 
-    private int importSavingsActivation(Long savingsId, int i,String dateFormat) {
-        if(activationDates.get(i)!=null) {
+    private int importSavingsActivation(Long savingsId, int i, String dateFormat) {
+        if (activationDates.get(i) != null) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             String payload = gsonBuilder.create().toJson(activationDates.get(i));
@@ -358,7 +359,7 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private int importSavingsApproval(Long savingsId, int i, String dateFormat) {
-        if(approvalDates.get(i)!=null) {
+        if (approvalDates.get(i) != null) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             String payload = gsonBuilder.create().toJson(approvalDates.get(i));
@@ -374,10 +375,10 @@ public class RecurringDepositImportHandler implements ImportHandler {
     private CommandProcessingResult importSavings(int i, String dateFormat) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-        gsonBuilder.registerTypeAdapter(EnumOptionData.class,new EnumOptionDataIdSerializer());
-        JsonObject savingsJsonob=gsonBuilder.create().toJsonTree(savings.get(i)).getAsJsonObject();
+        gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
+        JsonObject savingsJsonob = gsonBuilder.create().toJsonTree(savings.get(i)).getAsJsonObject();
         savingsJsonob.remove("withdrawalFeeForTransfers");
-        String payload=savingsJsonob.toString();
+        String payload = savingsJsonob.toString();
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createRecurringDepositAccount() //
                 .withJson(payload) //
@@ -387,15 +388,12 @@ public class RecurringDepositImportHandler implements ImportHandler {
     }
 
     private int getProgressLevel(String status) {
-        if (status==null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
+        if (status == null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
         } else if (status.equals(TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED)) {
             return 1;
-        } else if (status.equals(TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED)) {
-            return 2;
-        }
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED)) { return 2; }
         return 0;
     }
-
 
 }

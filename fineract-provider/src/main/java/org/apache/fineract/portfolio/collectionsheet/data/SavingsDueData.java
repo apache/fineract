@@ -43,7 +43,8 @@ public class SavingsDueData {
     private String depositAccountType;
 
     public static SavingsDueData instance(final Long savingsId, final String accountId, final Integer accountStatusId,
-            final String productName, final Long productId, final CurrencyData currency, final BigDecimal dueAmount, final String depositAccountType) {
+            final String productName, final Long productId, final CurrencyData currency, final BigDecimal dueAmount,
+            final String depositAccountType) {
         return new SavingsDueData(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount, depositAccountType);
     }
 

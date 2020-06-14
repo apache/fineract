@@ -27,17 +27,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/20/17.
  */
 final class TaxComponentApiResourceSwagger {
-    private TaxComponentApiResourceSwagger() {
-    }
+
+    private TaxComponentApiResourceSwagger() {}
 
     @ApiModel(value = "GetTaxesComponentsResponse")
     public final static class GetTaxesComponentsResponse {
-        private GetTaxesComponentsResponse() {
-        }
+
+        private GetTaxesComponentsResponse() {}
 
         final class GetTaxesComponentsCreditAccountType {
-            private GetTaxesComponentsCreditAccountType() {
-            }
+
+            private GetTaxesComponentsCreditAccountType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -48,8 +48,8 @@ final class TaxComponentApiResourceSwagger {
         }
 
         final class GetTaxesComponentsCreditAccount {
-            private GetTaxesComponentsCreditAccount() {
-            }
+
+            private GetTaxesComponentsCreditAccount() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -60,8 +60,8 @@ final class TaxComponentApiResourceSwagger {
         }
 
         final class GetTaxesComponentsHistories {
-            private GetTaxesComponentsHistories() {
-            }
+
+            private GetTaxesComponentsHistories() {}
         }
 
         @ApiModelProperty(example = "1")
@@ -79,8 +79,8 @@ final class TaxComponentApiResourceSwagger {
 
     @ApiModel(value = "PostTaxesComponentsRequest")
     public final static class PostTaxesComponentsRequest {
-        private PostTaxesComponentsRequest() {
-        }
+
+        private PostTaxesComponentsRequest() {}
 
         @ApiModelProperty(example = "tax component 1")
         public String name;
@@ -100,8 +100,8 @@ final class TaxComponentApiResourceSwagger {
 
     @ApiModel(value = "PostTaxesComponentsResponse")
     public final static class PostTaxesComponentsResponse {
-        private PostTaxesComponentsResponse() {
-        }
+
+        private PostTaxesComponentsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -109,8 +109,8 @@ final class TaxComponentApiResourceSwagger {
 
     @ApiModel(value = "PutTaxesComponentsTaxComponentIdRequest")
     public final static class PutTaxesComponentsTaxComponentIdRequest {
-        private PutTaxesComponentsTaxComponentIdRequest() {
-        }
+
+        private PutTaxesComponentsTaxComponentIdRequest() {}
 
         @ApiModelProperty(example = "tax component 2")
         public String name;
@@ -126,12 +126,12 @@ final class TaxComponentApiResourceSwagger {
 
     @ApiModel(value = "PutTaxesComponentsTaxComponentIdResponse")
     public final static class PutTaxesComponentsTaxComponentIdResponse {
-        private PutTaxesComponentsTaxComponentIdResponse() {
-        }
+
+        private PutTaxesComponentsTaxComponentIdResponse() {}
 
         final class PutTaxesComponentsChanges {
-            private PutTaxesComponentsChanges() {
-            }
+
+            private PutTaxesComponentsChanges() {}
 
             @ApiModelProperty(example = "15")
             public Float percentage;

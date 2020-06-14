@@ -24,6 +24,7 @@ import java.util.List;
  * Immutable data object representing an outbound SMS message API response data
  **/
 public class SmsMessageApiResponseData {
+
     private Integer httpStatusCode;
     private List<SmsMessageDeliveryReportData> data;
 

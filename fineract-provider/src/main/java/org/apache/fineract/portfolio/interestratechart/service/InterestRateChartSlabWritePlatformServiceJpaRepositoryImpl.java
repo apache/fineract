@@ -91,10 +91,9 @@ public class InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl implemen
     public CommandProcessingResult update(Long chartSlabId, Long interestRateChartId, JsonCommand command) {
         this.interestRateChartSlabDataValidator.validateUpdate(command.json());
         final Map<String, Object> changes = new LinkedHashMap<>(20);
-        final InterestRateChartSlab updateChartSlabs = this.interestRateChartSlabAssembler.assembleFrom(chartSlabId,
-                interestRateChartId);
+        final InterestRateChartSlab updateChartSlabs = this.interestRateChartSlabAssembler.assembleFrom(chartSlabId, interestRateChartId);
         final Locale locale = command.extractLocale();
-        updateChartSlabs.update(command, changes,locale);
+        updateChartSlabs.update(command, changes, locale);
 
         this.chartSlabRepository.saveAndFlush(updateChartSlabs);
 
@@ -107,8 +106,7 @@ public class InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl implemen
     @Override
     @Transactional
     public CommandProcessingResult deleteChartSlab(Long chartSlabId, Long interestRateChartId) {
-        final InterestRateChartSlab deleteChartSlabs = this.interestRateChartSlabAssembler.assembleFrom(chartSlabId,
-                interestRateChartId);
+        final InterestRateChartSlab deleteChartSlabs = this.interestRateChartSlabAssembler.assembleFrom(chartSlabId, interestRateChartId);
         this.chartSlabRepository.delete(deleteChartSlabs);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(chartSlabId) //

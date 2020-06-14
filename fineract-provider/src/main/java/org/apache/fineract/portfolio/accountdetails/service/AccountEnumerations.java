@@ -32,7 +32,8 @@ public class AccountEnumerations {
     }
 
     public static EnumOptionData loanType(final AccountType type) {
-        EnumOptionData optionData = new EnumOptionData(AccountType.INVALID.getValue().longValue(), AccountType.INVALID.getCode(), "Invalid");
+        EnumOptionData optionData = new EnumOptionData(AccountType.INVALID.getValue().longValue(), AccountType.INVALID.getCode(),
+                "Invalid");
         switch (type) {
             case INVALID:
                 optionData = new EnumOptionData(AccountType.INVALID.getValue().longValue(), AccountType.INVALID.getCode(), "Invalid");

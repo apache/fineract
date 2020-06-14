@@ -26,23 +26,23 @@ import java.util.List;
  * Created by Chirag Gupta on 12/30/17.
  */
 final class LoanScheduleApiResourceSwagger {
-    private LoanScheduleApiResourceSwagger() {
-    }
+
+    private LoanScheduleApiResourceSwagger() {}
 
     @ApiModel(value = "PostLoansLoanIdScheduleRequest")
     public final static class PostLoansLoanIdScheduleRequest {
-        private PostLoansLoanIdScheduleRequest() {
-        }
+
+        private PostLoansLoanIdScheduleRequest() {}
     }
 
     @ApiModel(value = "PostLoansLoanIdScheduleResponse")
     public final static class PostLoansLoanIdScheduleResponse {
-        private PostLoansLoanIdScheduleResponse() {
-        }
+
+        private PostLoansLoanIdScheduleResponse() {}
 
         final class PostLoanChanges {
-            private PostLoanChanges() {
-            }
+
+            private PostLoanChanges() {}
 
             @ApiModelProperty(example = "[21, 22]")
             public List<Integer> removedEntityIds;

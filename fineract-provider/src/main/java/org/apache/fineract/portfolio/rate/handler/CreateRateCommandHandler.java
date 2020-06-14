@@ -27,22 +27,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Bowpi GT
- * Created by Jose on 19/07/2017.
+ * Bowpi GT Created by Jose on 19/07/2017.
  */
 @Service
 @CommandType(entity = "RATE", action = "CREATE")
 public class CreateRateCommandHandler implements NewCommandSourceHandler {
 
-  private final RateWriteService writePlatformService;
+    private final RateWriteService writePlatformService;
 
-  @Autowired
-  public CreateRateCommandHandler(final RateWriteService writePlatformService) {
-    this.writePlatformService = writePlatformService;
-  }
+    @Autowired
+    public CreateRateCommandHandler(final RateWriteService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-  @Override
-  public CommandProcessingResult processCommand(final JsonCommand command) {
-    return this.writePlatformService.createRate(command);
-  }
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.writePlatformService.createRate(command);
+    }
 }

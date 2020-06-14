@@ -25,8 +25,8 @@ import org.springframework.util.StringUtils;
 
 public enum CalendarFrequencyType {
 
-    INVALID(0, "calendarFrequencyType.invalid"), DAILY(1, "calendarFrequencyType.daily"), WEEKLY(2, "calendarFrequencyType.weekly"), MONTHLY(
-            3, "calendarFrequencyType.monthly"), YEARLY(4, "calendarFrequencyType.yearly");
+    INVALID(0, "calendarFrequencyType.invalid"), DAILY(1, "calendarFrequencyType.daily"), WEEKLY(2,
+            "calendarFrequencyType.weekly"), MONTHLY(3, "calendarFrequencyType.monthly"), YEARLY(4, "calendarFrequencyType.yearly");
 
     private final Integer value;
     private final String code;
@@ -62,9 +62,7 @@ public enum CalendarFrequencyType {
     public static CalendarFrequencyType fromString(final String frequencyString) {
         CalendarFrequencyType frequency = CalendarFrequencyType.INVALID;
 
-        if (StringUtils.isEmpty(frequencyString)) {
-            return frequency;
-        }
+        if (StringUtils.isEmpty(frequencyString)) { return frequency; }
 
         if (frequencyString.equalsIgnoreCase(CalendarFrequencyType.DAILY.toString())) {
             frequency = CalendarFrequencyType.DAILY;
@@ -108,7 +106,8 @@ public enum CalendarFrequencyType {
      * To convert from period frequency type tp calendar frequency type. This
      * method requires code refactoring.
      *
-     * @param periodFrequencyType periodFrequencyType
+     * @param periodFrequencyType
+     *            periodFrequencyType
      * @return CalendarFrequencyType
      */
     public static CalendarFrequencyType from(final PeriodFrequencyType periodFrequencyType) {

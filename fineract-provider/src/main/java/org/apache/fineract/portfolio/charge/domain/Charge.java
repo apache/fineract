@@ -117,8 +117,8 @@ public class Charge extends AbstractPersistableCustom {
 
         final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.integerValueOfParameterNamed("chargeAppliesTo"));
         final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
-        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
-                .integerValueOfParameterNamed("chargeCalculationType"));
+        final ChargeCalculationType chargeCalculationType = ChargeCalculationType
+                .fromInt(command.integerValueOfParameterNamed("chargeCalculationType"));
         final Integer chargePaymentMode = command.integerValueOfParameterNamed("chargePaymentMode");
 
         final ChargePaymentMode paymentMode = chargePaymentMode == null ? null : ChargePaymentMode.fromInt(chargePaymentMode);
@@ -135,13 +135,12 @@ public class Charge extends AbstractPersistableCustom {
                 feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 
-    protected Charge() {
-    }
+    protected Charge() {}
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
-            final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval,
-            final BigDecimal minCap, final BigDecimal maxCap, final Integer feeFrequency, final GLAccount account, final TaxGroup taxGroup) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
+            final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
+            final BigDecimal maxCap, final Integer feeFrequency, final GLAccount account, final TaxGroup taxGroup) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -178,16 +177,19 @@ public class Charge extends AbstractPersistableCustom {
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
             }
 
-            if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee() || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
+            if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
+                    || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
                     && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
-                        .failWithCodeNoParameterAddedToErrorCode("savings.charge.calculation.type.percentage.allowed.only.for.withdrawal.or.NoActivity");
+                        .failWithCodeNoParameterAddedToErrorCode(
+                                "savings.charge.calculation.type.percentage.allowed.only.for.withdrawal.or.NoActivity");
             }
 
         } else if (isLoanCharge()) {
 
-            if (penalty && (chargeTime.isTimeOfDisbursement() || chargeTime.isTrancheDisbursement())) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
-                    name); }
+            if (penalty && (chargeTime.isTimeOfDisbursement() || chargeTime.isTrancheDisbursement())) {
+                throw new ChargeDueAtDisbursementCannotBePenaltyException(name);
+            }
             if (!penalty && chargeTime.isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
@@ -376,10 +378,12 @@ public class Charge extends AbstractPersistableCustom {
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
                 }
 
-                if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee() || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
+                if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
+                        || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
                         && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
-                            .failWithCodeNoParameterAddedToErrorCode("charge.calculation.type.percentage.allowed.only.for.withdrawal.or.noactivity");
+                            .failWithCodeNoParameterAddedToErrorCode(
+                                    "charge.calculation.type.percentage.allowed.only.for.withdrawal.or.noactivity");
                 }
             } else if (isClientCharge()) {
                 if (!isAllowedClientChargeCalculationType()) {
@@ -469,9 +473,12 @@ public class Charge extends AbstractPersistableCustom {
 
         }
 
-        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
-                this.name); }
-        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
+        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) {
+            throw new ChargeDueAtDisbursementCannotBePenaltyException(this.name);
+        }
+        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) {
+            throw new ChargeMustBePenaltyException(name);
+        }
 
         if (command.isChangeInLongParameterNamed(ChargesApiConstants.glAccountIdParamName, getIncomeAccountId())) {
             final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
@@ -481,7 +488,7 @@ public class Charge extends AbstractPersistableCustom {
         if (command.isChangeInLongParameterNamed(ChargesApiConstants.taxGroupIdParamName, getTaxGroupId())) {
             final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
             actualChanges.put(ChargesApiConstants.taxGroupIdParamName, newValue);
-            if(taxGroup != null){
+            if (taxGroup != null) {
                 baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).failWithCode("modification.not.supported");
             }
         }
@@ -598,36 +605,22 @@ public class Charge extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Charge)) {
-            return false;
-        }
-        Charge other= (Charge) o;
-        return Objects.equals(name, other.name) &&
-   Objects.equals(amount, other.amount) &&
-   Objects.equals(currencyCode, other.currencyCode) &&
-   Objects.equals(chargeAppliesTo, other.chargeAppliesTo) &&
-   Objects.equals(chargeTimeType, other.chargeTimeType) &&
-   Objects.equals(chargeCalculation, other.chargeCalculation) &&
-   Objects.equals(chargePaymentMode, other.chargePaymentMode) &&
-   Objects.equals(feeOnDay, other.feeOnDay) &&
-   Objects.equals(feeInterval, other.feeInterval) &&
-   Objects.equals(feeOnMonth, other.feeOnMonth) &&
-                penalty == other.penalty &&
-                active == other.active &&
-                deleted == other.deleted &&
-                Objects.equals(minCap, other.minCap) &&
-                Objects.equals(maxCap, other.maxCap) &&
-                Objects.equals(feeFrequency, other.feeFrequency) &&
-                Objects.equals(account, other.account) &&
-                Objects.equals(taxGroup, other.taxGroup);
+        if (this == o) { return true; }
+        if (!(o instanceof Charge)) { return false; }
+        Charge other = (Charge) o;
+        return Objects.equals(name, other.name) && Objects.equals(amount, other.amount) && Objects.equals(currencyCode, other.currencyCode)
+                && Objects.equals(chargeAppliesTo, other.chargeAppliesTo) && Objects.equals(chargeTimeType, other.chargeTimeType)
+                && Objects.equals(chargeCalculation, other.chargeCalculation) && Objects.equals(chargePaymentMode, other.chargePaymentMode)
+                && Objects.equals(feeOnDay, other.feeOnDay) && Objects.equals(feeInterval, other.feeInterval)
+                && Objects.equals(feeOnMonth, other.feeOnMonth) && penalty == other.penalty && active == other.active
+                && deleted == other.deleted && Objects.equals(minCap, other.minCap) && Objects.equals(maxCap, other.maxCap)
+                && Objects.equals(feeFrequency, other.feeFrequency) && Objects.equals(account, other.account)
+                && Objects.equals(taxGroup, other.taxGroup);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation,
-          chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
+        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay,
+                feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 }

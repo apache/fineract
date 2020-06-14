@@ -74,7 +74,6 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final Map<Long, Long> releaseLoanIds = new HashMap<>(2);
     private final SavingsAccountAssembler savingsAccountAssembler;
 
-
     @Autowired
     public GuarantorDomainServiceImpl(final GuarantorRepository guarantorRepository,
             final GuarantorFundingRepository guarantorFundingRepository,
@@ -156,8 +155,10 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         mandatoryAmount);
             }
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                    "Validation errors exist.", dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                        dataValidationErrors);
+            }
         }
 
     }

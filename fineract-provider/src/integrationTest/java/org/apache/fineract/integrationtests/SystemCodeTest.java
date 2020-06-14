@@ -90,8 +90,8 @@ public class SystemCodeTest {
         assertEquals(createResponseId, deleteResponseId, "Verify code deleted");
 
         // verify code deleted
-        final HashMap deletedCodeValues = (HashMap) CodeHelper
-                .getCodeById(this.requestSpec, this.generalResponseSpec, deleteResponseId, "");
+        final HashMap deletedCodeValues = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.generalResponseSpec, deleteResponseId,
+                "");
 
         Assertions.assertNotNull(deletedCodeValues);
         assertNull(deletedCodeValues.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), "Verify value of codeId");
@@ -132,8 +132,8 @@ public class SystemCodeTest {
         assertEquals(createResponseId, deleteResponseId, "Verify code deleted");
 
         // verify code deleted
-        final HashMap deletedCodeAttributes = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.generalResponseSpec,
-                deleteResponseId, "");
+        final HashMap deletedCodeAttributes = (HashMap) CodeHelper.getCodeById(this.requestSpec, this.generalResponseSpec, deleteResponseId,
+                "");
 
         Assertions.assertNotNull(deletedCodeAttributes);
         assertNull(deletedCodeAttributes.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME), "Verify value of codeId");
@@ -206,11 +206,10 @@ public class SystemCodeTest {
                 createCodeResponseId, createCodeValueResponseId1, "");
 
         Assertions.assertNotNull(codeValuesAttributes1);
-        assertEquals(createCodeValueResponseId1,
-                codeValuesAttributes1.get(CodeHelper.CODE_VALUE_ID_ATTRIBUTE_NAME), "Verify value of codeValueId");
+        assertEquals(createCodeValueResponseId1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_ID_ATTRIBUTE_NAME),
+                "Verify value of codeValueId");
 
-        assertEquals(codeValue1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_NAME_ATTRIBUTE_NAME),
-                "Verify value of code name");
+        assertEquals(codeValue1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_NAME_ATTRIBUTE_NAME), "Verify value of code name");
 
         assertEquals(codeDescription1, codeValuesAttributes1.get(CodeHelper.CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME),
                 "Verify value of code description");

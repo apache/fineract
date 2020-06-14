@@ -25,12 +25,14 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by sanyam on 24/7/17.
  */
 final class AccrualAccountingApiResourceSwagger {
+
     private AccrualAccountingApiResourceSwagger() {
         // don't allow to instantiate; use only for live API documentation
     }
 
     @ApiModel(value = "runaccrualsRequest")
     public static final class PostRunaccrualsRequest {
+
         private PostRunaccrualsRequest() {
             // don't allow to instantiate; use only for live API documentation
         }

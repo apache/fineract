@@ -58,7 +58,8 @@ public class BatchRequestsIntegrationTest {
 
     /**
      * Sets up the essential settings for the TEST like contentType,
-     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by jUnit.
+     * expectedStatusCode. It uses the '@BeforeEach' annotation provided by
+     * jUnit.
      */
     @BeforeEach
     public void setup() {
@@ -91,7 +92,7 @@ public class BatchRequestsIntegrationTest {
         for (Integer i = 0; i < clientsCount; i++) {
             clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
             groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
-            LOG.info("client {} has been added to the group {}",clientIDs[i] , groupID);
+            LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
         }
 
         // Generate a random count of number of new loan products to be created

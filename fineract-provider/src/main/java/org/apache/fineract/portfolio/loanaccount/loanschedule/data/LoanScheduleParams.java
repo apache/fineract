@@ -73,7 +73,6 @@ public class LoanScheduleParams {
     private Money unCompoundedAmount;
     private Money compoundedInLastInstallment;
 
-
     public Money getCompoundedInLastInstallment() {
         return this.compoundedInLastInstallment;
     }
@@ -466,6 +465,7 @@ public class LoanScheduleParams {
     public Money getUnCompoundedAmount() {
         return this.unCompoundedAmount;
     }
+
     public void addUnCompoundedAmount(Money unCompoundedAmount) {
         this.unCompoundedAmount = this.unCompoundedAmount.plus(unCompoundedAmount);
     }

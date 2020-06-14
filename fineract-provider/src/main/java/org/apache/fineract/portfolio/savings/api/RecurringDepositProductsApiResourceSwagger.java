@@ -27,21 +27,21 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/27/17.
  */
 final class RecurringDepositProductsApiResourceSwagger {
-    private RecurringDepositProductsApiResourceSwagger() {
-    }
+
+    private RecurringDepositProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostRecurringDepositProductsRequest")
     public final static class PostRecurringDepositProductsRequest {
-        private PostRecurringDepositProductsRequest() {
-        }
+
+        private PostRecurringDepositProductsRequest() {}
 
         final class PostRecurringDepositProductsCharts {
-            private PostRecurringDepositProductsCharts() {
-            }
+
+            private PostRecurringDepositProductsCharts() {}
 
             final class PostRecurringDepositProductsChartSlabs {
-                private PostRecurringDepositProductsChartSlabs() {
-                }
+
+                private PostRecurringDepositProductsChartSlabs() {}
 
                 @ApiModelProperty(example = "from 0 to 90 days")
                 public String description;
@@ -117,8 +117,8 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     @ApiModel(value = "PostRecurringDepositProductsResponse")
     public final static class PostRecurringDepositProductsResponse {
-        private PostRecurringDepositProductsResponse() {
-        }
+
+        private PostRecurringDepositProductsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -126,8 +126,8 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     @ApiModel(value = "PutRecurringDepositProductsRequest")
     public final static class PutRecurringDepositProductsRequest {
-        private PutRecurringDepositProductsRequest() {
-        }
+
+        private PutRecurringDepositProductsRequest() {}
 
         @ApiModelProperty(example = "Recurring deposit product new offerings")
         public String description;
@@ -141,12 +141,12 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     @ApiModel(value = "PutRecurringDepositProductsResponse")
     public final static class PutRecurringDepositProductsResponse {
-        private PutRecurringDepositProductsResponse() {
-        }
+
+        private PutRecurringDepositProductsResponse() {}
 
         final class PutRecurringDepositProductsChanges {
-            private PutRecurringDepositProductsChanges() {
-            }
+
+            private PutRecurringDepositProductsChanges() {}
 
             @ApiModelProperty(example = "Recurring deposit product new offerings")
             public String description;
@@ -161,12 +161,12 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     @ApiModel(value = "GetRecurringDepositProductsResponse")
     public final static class GetRecurringDepositProductsResponse {
-        private GetRecurringDepositProductsResponse() {
-        }
+
+        private GetRecurringDepositProductsResponse() {}
 
         final class GetRecurringDepositProductsCurrency {
-            private GetRecurringDepositProductsCurrency() {
-            }
+
+            private GetRecurringDepositProductsCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -185,8 +185,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsMinDepositTermType {
-            private GetRecurringDepositProductsMinDepositTermType() {
-            }
+
+            private GetRecurringDepositProductsMinDepositTermType() {}
 
             @ApiModelProperty(example = "2")
             public Integer id;
@@ -197,8 +197,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsMaxDepositTermType {
-            private GetRecurringDepositProductsMaxDepositTermType() {
-            }
+
+            private GetRecurringDepositProductsMaxDepositTermType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -209,8 +209,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsInterestCompoundingPeriodType {
-            private GetRecurringDepositProductsInterestCompoundingPeriodType() {
-            }
+
+            private GetRecurringDepositProductsInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -221,8 +221,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsInterestPostingPeriodType {
-            private GetRecurringDepositProductsInterestPostingPeriodType() {
-            }
+
+            private GetRecurringDepositProductsInterestPostingPeriodType() {}
 
             @ApiModelProperty(example = "4")
             public Integer id;
@@ -233,8 +233,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsInterestCalculationType {
-            private GetRecurringDepositProductsInterestCalculationType() {
-            }
+
+            private GetRecurringDepositProductsInterestCalculationType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -245,8 +245,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsInterestCalculationDaysInYearType {
-            private GetRecurringDepositProductsInterestCalculationDaysInYearType() {
-            }
+
+            private GetRecurringDepositProductsInterestCalculationDaysInYearType() {}
 
             @ApiModelProperty(example = "365")
             public Integer id;
@@ -257,8 +257,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsAccountingRule {
-            private GetRecurringDepositProductsAccountingRule() {
-            }
+
+            private GetRecurringDepositProductsAccountingRule() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -269,8 +269,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsRecurringDepositFrequencyType {
-            private GetRecurringDepositProductsRecurringDepositFrequencyType() {
-            }
+
+            private GetRecurringDepositProductsRecurringDepositFrequencyType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -311,12 +311,12 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     @ApiModel(value = "GetRecurringDepositProductsProductIdResponse")
     public final static class GetRecurringDepositProductsProductIdResponse {
-        private GetRecurringDepositProductsProductIdResponse() {
-        }
+
+        private GetRecurringDepositProductsProductIdResponse() {}
 
         final class GetRecurringDepositProductsProductIdCurrency {
-            private GetRecurringDepositProductsProductIdCurrency() {
-            }
+
+            private GetRecurringDepositProductsProductIdCurrency() {}
 
             @ApiModelProperty(example = "USD")
             public String code;
@@ -333,8 +333,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdInterestCompoundingPeriodType {
-            private GetRecurringDepositProductsProductIdInterestCompoundingPeriodType() {
-            }
+
+            private GetRecurringDepositProductsProductIdInterestCompoundingPeriodType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -345,12 +345,12 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdAccountingMappings {
-            private GetRecurringDepositProductsProductIdAccountingMappings() {
-            }
+
+            private GetRecurringDepositProductsProductIdAccountingMappings() {}
 
             final class GetRecurringDepositProductsProductIdSavingsReferenceAccount {
-                private GetRecurringDepositProductsProductIdSavingsReferenceAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdSavingsReferenceAccount() {}
 
                 @ApiModelProperty(example = "12")
                 public Integer id;
@@ -361,8 +361,8 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             final class GetRecurringDepositProductsProductIdIncomeFromFeeAccount {
-                private GetRecurringDepositProductsProductIdIncomeFromFeeAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdIncomeFromFeeAccount() {}
 
                 @ApiModelProperty(example = "16")
                 public Integer id;
@@ -373,8 +373,8 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             final class GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount {
-                private GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdIncomeFromPenaltyAccount() {}
 
                 @ApiModelProperty(example = "17")
                 public Integer id;
@@ -385,8 +385,8 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             final class GetRecurringDepositProductsProductIdInterestOnSavingsAccount {
-                private GetRecurringDepositProductsProductIdInterestOnSavingsAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdInterestOnSavingsAccount() {}
 
                 @ApiModelProperty(example = "15")
                 public Integer id;
@@ -397,8 +397,8 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             final class GetRecurringDepositProductsProductIdSavingsControlAccount {
-                private GetRecurringDepositProductsProductIdSavingsControlAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdSavingsControlAccount() {}
 
                 @ApiModelProperty(example = "13")
                 public Integer id;
@@ -409,8 +409,8 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             final class GetRecurringDepositProductsProductIdTransfersInSuspenseAccount {
-                private GetRecurringDepositProductsProductIdTransfersInSuspenseAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdTransfersInSuspenseAccount() {}
 
                 @ApiModelProperty(example = "14")
                 public Integer id;
@@ -429,12 +429,12 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings {
-            private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings() {
-            }
+
+            private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappings() {}
 
             final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge {
-                private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {
-                }
+
+                private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsCharge() {}
 
                 @ApiModelProperty(example = "11")
                 public Integer id;
@@ -447,8 +447,8 @@ final class RecurringDepositProductsApiResourceSwagger {
             }
 
             final class GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount {
-                private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {
-                }
+
+                private GetRecurringDepositProductsProductIdFeeToIncomeAccountMappingsIncomeAccount() {}
 
                 @ApiModelProperty(example = "16")
                 public Integer id;
@@ -463,12 +463,12 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings {
-            private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings() {
-            }
+
+            private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappings() {}
 
             final class GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge {
-                private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {
-                }
+
+                private GetRecurringDepositProductsProductIdPenaltyToIncomeAccountMappingsCharge() {}
 
                 @ApiModelProperty(example = "12")
                 public Integer id;
@@ -485,8 +485,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType {
-            private GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType() {
-            }
+
+            private GetRecurringDepositProductsProductIdPreClosurePenalInterestOnType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -497,8 +497,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdMinDepositTermType {
-            private GetRecurringDepositProductsProductIdMinDepositTermType() {
-            }
+
+            private GetRecurringDepositProductsProductIdMinDepositTermType() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -509,8 +509,8 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdMaxDepositTermType {
-            private GetRecurringDepositProductsProductIdMaxDepositTermType() {
-            }
+
+            private GetRecurringDepositProductsProductIdMaxDepositTermType() {}
 
             @ApiModelProperty(example = "3")
             public Integer id;
@@ -521,16 +521,16 @@ final class RecurringDepositProductsApiResourceSwagger {
         }
 
         final class GetRecurringDepositProductsProductIdActiveChart {
-            private GetRecurringDepositProductsProductIdActiveChart() {
-            }
+
+            private GetRecurringDepositProductsProductIdActiveChart() {}
 
             final class GetRecurringDepositProductsProductIdChartSlabs {
-                private GetRecurringDepositProductsProductIdChartSlabs() {
-                }
+
+                private GetRecurringDepositProductsProductIdChartSlabs() {}
 
                 final class GetRecurringDepositProductsProductIdPeriodType {
-                    private GetRecurringDepositProductsProductIdPeriodType() {
-                    }
+
+                    private GetRecurringDepositProductsProductIdPeriodType() {}
 
                     @ApiModelProperty(example = "1")
                     public Integer id;
@@ -601,11 +601,10 @@ final class RecurringDepositProductsApiResourceSwagger {
 
     @ApiModel(value = "DeleteRecurringDepositProductsProductIdResponse")
     public final static class DeleteRecurringDepositProductsProductIdResponse {
-        private DeleteRecurringDepositProductsProductIdResponse() {
-        }
+
+        private DeleteRecurringDepositProductsProductIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
     }
 }
-

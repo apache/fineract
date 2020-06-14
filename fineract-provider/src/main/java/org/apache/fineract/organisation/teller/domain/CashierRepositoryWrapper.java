@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CashierRepositoryWrapper {
+
     private final CashierRepository repository;
 
     @Autowired
@@ -32,7 +33,6 @@ public class CashierRepositoryWrapper {
     }
 
     public Cashier findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new TellerNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new TellerNotFoundException(id));
     }
 }

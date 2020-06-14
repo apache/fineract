@@ -33,7 +33,6 @@ public class DatatableData implements Serializable {
     @SuppressWarnings("unused")
     private final List<ResultsetColumnHeaderData> columnHeaderData;
 
-
     public static DatatableData create(final String applicationTableName, final String registeredTableName,
             final List<ResultsetColumnHeaderData> columnHeaderData) {
         return new DatatableData(applicationTableName, registeredTableName, columnHeaderData);
@@ -47,19 +46,17 @@ public class DatatableData implements Serializable {
 
     }
 
-    public boolean hasColumn(final String columnName){
+    public boolean hasColumn(final String columnName) {
 
-        for(ResultsetColumnHeaderData c : this.columnHeaderData){
+        for (ResultsetColumnHeaderData c : this.columnHeaderData) {
 
-            if(c.getColumnName().equals(columnName)) {
-                return true;
-            }
+            if (c.getColumnName().equals(columnName)) { return true; }
         }
 
         return false;
     }
 
-    public String getRegisteredTableName(){
+    public String getRegisteredTableName() {
         return registeredTableName;
     }
 

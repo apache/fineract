@@ -41,7 +41,7 @@ public class SavingsConstants {
     public static final int LOCKIN_PERIOD_FREQUENCY_COL = 18;
     public static final int APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS = 19;
     public static final int ALLOW_OVER_DRAFT_COL = 20;
-    public static final int OVER_DRAFT_LIMIT_COL= 21;
+    public static final int OVER_DRAFT_LIMIT_COL = 21;
     public static final int EXTERNAL_ID_COL = 22;
     public static final int STATUS_COL = 23;
     public static final int SAVINGS_ID_COL = 24;

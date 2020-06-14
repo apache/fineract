@@ -33,7 +33,7 @@ public class MinDaysBetweenDisbursalAndFirstRepaymentViolationException extends 
             Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
         super("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed",
                 "Number of days between loan disbursal  (" + disbursalDate + ") and first repayment (" + firstRepaymentDate
-                        + ") can't be less than (" + minimumDaysBetweenDisbursalAndFirstRepayment + ").", disbursalDate,
-                firstRepaymentDate, minimumDaysBetweenDisbursalAndFirstRepayment);
+                        + ") can't be less than (" + minimumDaysBetweenDisbursalAndFirstRepayment + ").",
+                disbursalDate, firstRepaymentDate, minimumDaysBetweenDisbursalAndFirstRepayment);
     }
 }

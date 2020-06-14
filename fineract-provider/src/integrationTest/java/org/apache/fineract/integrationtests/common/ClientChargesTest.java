@@ -96,8 +96,8 @@ public class ClientChargesTest {
          * Revert the paid client charge transaction by passing the
          * clientChargePaidTransactionId and ensure the same is reverted.
          */
-                final Integer undoTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec,
-                        clientId.toString(), clientChargePaidTransactionId);
+        final Integer undoTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
+                clientChargePaidTransactionId);
         Assertions.assertNotNull(undoTrxnId);
         isReversedTransaction(clientId.toString(), undoTrxnId.toString());
         /**

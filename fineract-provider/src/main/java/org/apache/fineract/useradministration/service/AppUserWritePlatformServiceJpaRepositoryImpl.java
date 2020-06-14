@@ -89,10 +89,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
-            final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
-            final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final TopicDomainService topicDomainService) {
+            final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper,
+            final RoleRepository roleRepository, final PlatformPasswordEncoder platformPasswordEncoder,
+            final UserDataValidator fromApiJsonDeserializer, final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository,
+            final StaffRepositoryWrapper staffRepositoryWrapper, final ClientRepositoryWrapper clientRepositoryWrapper,
+            final TopicDomainService topicDomainService) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -135,12 +136,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             }
 
             Collection<Client> clients = null;
-            if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
+            if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
                     && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-                    && command.hasParameter(AppUserConstants.CLIENTS)){
+                    && command.hasParameter(AppUserConstants.CLIENTS)) {
                 JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
                 Collection<Long> clientIds = new HashSet<>();
-                for(JsonElement clientElement : clientsArray){
+                for (JsonElement clientElement : clientsArray) {
                     clientIds.add(clientElement.getAsLong());
                 }
                 clients = this.clientRepositoryWrapper.findAll(clientIds);
@@ -162,7 +163,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -191,22 +192,20 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final AppUser userToUpdate = this.appUserRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException(userId));
+            final AppUser userToUpdate = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
 
             Collection<Client> clients = null;
             boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
-            if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
+            if (command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)) {
                 isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
             }
 
-            if(isSelfServiceUser
-                    && command.hasParameter(AppUserConstants.CLIENTS)){
+            if (isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)) {
                 JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
                 Collection<Long> clientIds = new HashSet<>();
-                for(JsonElement clientElement : clientsArray){
+                for (JsonElement clientElement : clientsArray) {
                     clientIds.add(clientElement.getAsLong());
                 }
                 clients = this.clientRepositoryWrapper.findAll(clientIds);
@@ -255,7 +254,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -279,8 +278,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
         if (passWordEncodedValue != null) {
 
-            PageRequest pageRequest = PageRequest.of(0, AppUserApiConstant.numberOfPreviousPasswords,
-                    Sort.Direction.DESC, "removalDate");
+            PageRequest pageRequest = PageRequest.of(0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC, "removalDate");
 
             final List<AppUserPreviousPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
                     pageRequest);
@@ -289,7 +287,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
                 if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
 
-                throw new PasswordPreviouslyUsedException();
+                    throw new PasswordPreviouslyUsedException();
 
                 }
             }
@@ -309,8 +307,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         if (!ObjectUtils.isEmpty(rolesArray)) {
             for (final String roleId : rolesArray) {
                 final Long id = Long.valueOf(roleId);
-                final Role role = this.roleRepository.findById(id)
-                        .orElseThrow(() -> new RoleNotFoundException(id));
+                final Role role = this.roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
                 allRoles.add(role);
             }
         }
@@ -323,8 +320,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult deleteUser(final Long userId) {
 
-        final AppUser user = this.appUserRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        final AppUser user = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (user.isDeleted()) { throw new UserNotFoundException(userId); }
 
         user.delete();
@@ -348,7 +344,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         }
 
         if (realCause.getMessage().contains("'unique_self_client'")) {
-            throw new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist", "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
+            throw new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist",
+                    "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
         }
 
         LOG.error("Error occured.", dve);

@@ -43,34 +43,28 @@ import org.springframework.stereotype.Component;
 public class AdHocQueryDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(AdHocQuerySearchConstants.entitiesParamName, AdHocQuerySearchConstants.loanStatusParamName,
-                    AdHocQuerySearchConstants.loanProductsParamName, AdHocQuerySearchConstants.officesParamName,
-                    AdHocQuerySearchConstants.loanDateOptionParamName, AdHocQuerySearchConstants.loanFromDateParamName,
-                    AdHocQuerySearchConstants.loanToDateParamName,
-                    AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName,
-                    AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName,
-                    AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName,
-                    AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName,
-                    AdHocQuerySearchConstants.outStandingAmountPercentageParamName,
-                    AdHocQuerySearchConstants.includeOutstandingAmountParamName,
-                    AdHocQuerySearchConstants.outstandingAmountConditionParamName,
-                    AdHocQuerySearchConstants.minOutstandingAmountParamName,
-                    AdHocQuerySearchConstants.maxOutstandingAmountParamName,
-                    AdHocQuerySearchConstants.outstandingAmountParamName, AdHocQuerySearchConstants.localeParamName,
-                    AdHocQuerySearchConstants.dateFormatParamName));
+    private static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            AdHocQuerySearchConstants.entitiesParamName, AdHocQuerySearchConstants.loanStatusParamName,
+            AdHocQuerySearchConstants.loanProductsParamName, AdHocQuerySearchConstants.officesParamName,
+            AdHocQuerySearchConstants.loanDateOptionParamName, AdHocQuerySearchConstants.loanFromDateParamName,
+            AdHocQuerySearchConstants.loanToDateParamName, AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName,
+            AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName,
+            AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName,
+            AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName,
+            AdHocQuerySearchConstants.outStandingAmountPercentageParamName, AdHocQuerySearchConstants.includeOutstandingAmountParamName,
+            AdHocQuerySearchConstants.outstandingAmountConditionParamName, AdHocQuerySearchConstants.minOutstandingAmountParamName,
+            AdHocQuerySearchConstants.maxOutstandingAmountParamName, AdHocQuerySearchConstants.outstandingAmountParamName,
+            AdHocQuerySearchConstants.localeParamName, AdHocQuerySearchConstants.dateFormatParamName));
 
-    private static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<>(
-            Arrays.asList("between", "<=", ">=", "<", ">", "="));
+    private static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<>(Arrays.asList("between", "<=", ">=", "<", ">", "="));
 
     private static final Object[] loanDateOptions = { AdHocQuerySearchConstants.approvalDateOption,
-            AdHocQuerySearchConstants.createDateOption,
-            AdHocQuerySearchConstants.disbursalDateOption };
+            AdHocQuerySearchConstants.createDateOption, AdHocQuerySearchConstants.disbursalDateOption };
 
-    private static final Object[] loanStatusOptions = {AdHocQuerySearchConstants.allLoanStatusOption,
+    private static final Object[] loanStatusOptions = { AdHocQuerySearchConstants.allLoanStatusOption,
             AdHocQuerySearchConstants.activeLoanStatusOption, AdHocQuerySearchConstants.overpaidLoanStatusOption,
             AdHocQuerySearchConstants.arrearsLoanStatusOption, AdHocQuerySearchConstants.closedLoanStatusOption,
-            AdHocQuerySearchConstants.writeoffLoanStatusOption};
+            AdHocQuerySearchConstants.writeoffLoanStatusOption };
 
     @Autowired
     public AdHocQueryDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -105,8 +99,8 @@ public class AdHocQueryDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanProductsParamName, element)) {
-            final String[] loanProducts = this.fromApiJsonHelper
-                    .extractArrayNamed(AdHocQuerySearchConstants.loanProductsParamName, element);
+            final String[] loanProducts = this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanProductsParamName,
+                    element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.loanProductsParamName).value(loanProducts).arrayNotEmpty();
         }
 
@@ -135,33 +129,32 @@ public class AdHocQueryDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName, element)) {
-            final boolean includeOutStandingAmountPercentage = this.fromApiJsonHelper.extractBooleanNamed(
-                    AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName, element);
+            final boolean includeOutStandingAmountPercentage = this.fromApiJsonHelper
+                    .extractBooleanNamed(AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName, element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName)
                     .value(includeOutStandingAmountPercentage).notNull();
         }
 
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element)) {
-            final String outStandingAmountPercentageCondition = this.fromApiJsonHelper.extractStringNamed(
-                    AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element);
+            final String outStandingAmountPercentageCondition = this.fromApiJsonHelper
+                    .extractStringNamed(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName)
-                    .value(outStandingAmountPercentageCondition)
-                    .isNotOneOfTheseValues(AD_HOC_SEARCH_QUERY_CONDITIONS);
+                    .value(outStandingAmountPercentageCondition).isNotOneOfTheseValues(AD_HOC_SEARCH_QUERY_CONDITIONS);
             if (outStandingAmountPercentageCondition.equals("between")) {
-                final BigDecimal minOutStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName, element);
+                final BigDecimal minOutStandingAmountPercentage = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName, element);
                 baseDataValidator.reset().parameter(AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName)
                         .value(minOutStandingAmountPercentage).notNull().notLessThanMin(BigDecimal.ZERO);
-                final BigDecimal maxOutStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName, element);
+                final BigDecimal maxOutStandingAmountPercentage = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName, element);
                 baseDataValidator.reset().parameter(AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName)
                         .value(maxOutStandingAmountPercentage).notNull().notLessThanMin(BigDecimal.ZERO);
                 baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(minOutStandingAmountPercentage,
                         maxOutStandingAmountPercentage);
             } else {
                 if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element)) {
-                    final BigDecimal outStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                            AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element);
+                    final BigDecimal outStandingAmountPercentage = this.fromApiJsonHelper
+                            .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element);
                     baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outStandingAmountPercentageParamName)
                             .value(outStandingAmountPercentage).notNull().notLessThanMin(BigDecimal.ZERO);
                 }
@@ -169,32 +162,32 @@ public class AdHocQueryDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.includeOutstandingAmountParamName, element)) {
-            final Boolean includeOutstandingAmountParamName = this.fromApiJsonHelper.extractBooleanNamed(
-                    AdHocQuerySearchConstants.includeOutstandingAmountParamName, element);
+            final Boolean includeOutstandingAmountParamName = this.fromApiJsonHelper
+                    .extractBooleanNamed(AdHocQuerySearchConstants.includeOutstandingAmountParamName, element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.includeOutstandingAmountParamName)
                     .value(includeOutstandingAmountParamName).notNull();
         }
 
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outstandingAmountConditionParamName, element)) {
-            final String outstandingAmountCondition = this.fromApiJsonHelper.extractStringNamed(
-                    AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
+            final String outstandingAmountCondition = this.fromApiJsonHelper
+                    .extractStringNamed(AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outstandingAmountConditionParamName)
                     .value(outstandingAmountCondition).isNotOneOfTheseValues(AD_HOC_SEARCH_QUERY_CONDITIONS);
             if (outstandingAmountCondition.equals("between")) {
-                final BigDecimal minOutstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        AdHocQuerySearchConstants.minOutstandingAmountParamName, element);
+                final BigDecimal minOutstandingAmount = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.minOutstandingAmountParamName, element);
                 baseDataValidator.reset().parameter(AdHocQuerySearchConstants.minOutstandingAmountParamName).value(minOutstandingAmount)
                         .notNull().notLessThanMin(BigDecimal.ZERO);
-                final BigDecimal maxOutstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        AdHocQuerySearchConstants.maxOutstandingAmountParamName, element);
+                final BigDecimal maxOutstandingAmount = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.maxOutstandingAmountParamName, element);
                 baseDataValidator.reset().parameter(AdHocQuerySearchConstants.maxOutstandingAmountParamName).value(maxOutstandingAmount)
                         .notNull().notLessThanMin(BigDecimal.ZERO);
                 baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(minOutstandingAmount, maxOutstandingAmount);
             } else {
-                final BigDecimal outstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        AdHocQuerySearchConstants.outstandingAmountParamName, element);
-                baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outstandingAmountParamName).value(outstandingAmount)
-                        .notNull().notLessThanMin(BigDecimal.ZERO);
+                final BigDecimal outstandingAmount = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.outstandingAmountParamName, element);
+                baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outstandingAmountParamName).value(outstandingAmount).notNull()
+                        .notLessThanMin(BigDecimal.ZERO);
             }
         }
 
@@ -214,20 +207,19 @@ public class AdHocQueryDataValidator {
 
         List<String> loanStatus = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanStatusParamName, element)) {
-            loanStatus = Arrays.asList(
-                    this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanStatusParamName, element));
+            loanStatus = Arrays.asList(this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanStatusParamName, element));
         }
 
         List<Long> loanProducts = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanProductsParamName, element)) {
-            loanProducts = extractLongValuesList(Arrays.asList(this.fromApiJsonHelper.extractArrayNamed(
-                    AdHocQuerySearchConstants.loanProductsParamName, element)));
+            loanProducts = extractLongValuesList(
+                    Arrays.asList(this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanProductsParamName, element)));
         }
 
         List<Long> offices = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.officesParamName, element)) {
-            offices = extractLongValuesList(Arrays.asList(this.fromApiJsonHelper.extractArrayNamed(
-                    AdHocQuerySearchConstants.officesParamName, element)));
+            offices = extractLongValuesList(
+                    Arrays.asList(this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.officesParamName, element)));
         }
 
         String loanDateOption = null;
@@ -248,64 +240,64 @@ public class AdHocQueryDataValidator {
 
         Boolean includeOutStandingAmountPercentage = false;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName, element)) {
-            includeOutStandingAmountPercentage = this.fromApiJsonHelper.extractBooleanNamed(
-                    AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName, element);
+            includeOutStandingAmountPercentage = this.fromApiJsonHelper
+                    .extractBooleanNamed(AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName, element);
         }
 
         String outStandingAmountPercentageCondition = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element)) {
-            outStandingAmountPercentageCondition = this.fromApiJsonHelper.extractStringNamed(
-                    AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element);
+            outStandingAmountPercentageCondition = this.fromApiJsonHelper
+                    .extractStringNamed(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element);
             SQLInjectionValidator.validateSQLInput(outStandingAmountPercentageCondition);
         }
 
         BigDecimal minOutStandingAmountPercentage = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName, element)) {
-            minOutStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName, element);
+            minOutStandingAmountPercentage = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName, element);
         }
 
         BigDecimal maxOutStandingAmountPercentage = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName, element)) {
-            maxOutStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName, element);
+            maxOutStandingAmountPercentage = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName, element);
         }
 
         BigDecimal outStandingAmountPercentage = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element)) {
-            outStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element);
+            outStandingAmountPercentage = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element);
         }
 
         Boolean includeOutstandingAmountParamName = false;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.includeOutstandingAmountParamName, element)) {
-            includeOutstandingAmountParamName = this.fromApiJsonHelper.extractBooleanNamed(
-                    AdHocQuerySearchConstants.includeOutstandingAmountParamName, element);
+            includeOutstandingAmountParamName = this.fromApiJsonHelper
+                    .extractBooleanNamed(AdHocQuerySearchConstants.includeOutstandingAmountParamName, element);
         }
 
         String outstandingAmountCondition = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outstandingAmountConditionParamName, element)) {
-            outstandingAmountCondition = this.fromApiJsonHelper.extractStringNamed(
-                    AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
+            outstandingAmountCondition = this.fromApiJsonHelper
+                    .extractStringNamed(AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
             SQLInjectionValidator.validateSQLInput(outstandingAmountCondition);
         }
 
         BigDecimal minOutstandingAmount = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.minOutstandingAmountParamName, element)) {
-            minOutstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    AdHocQuerySearchConstants.minOutstandingAmountParamName, element);
+            minOutstandingAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.minOutstandingAmountParamName, element);
         }
 
         BigDecimal maxOutstandingAmount = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.maxOutstandingAmountParamName, element)) {
-            maxOutstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    AdHocQuerySearchConstants.maxOutstandingAmountParamName, element);
+            maxOutstandingAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.maxOutstandingAmountParamName, element);
         }
 
         BigDecimal outstandingAmount = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outstandingAmountParamName, element)) {
-            outstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    AdHocQuerySearchConstants.outstandingAmountParamName, element);
+            outstandingAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.outstandingAmountParamName, element);
         }
 
         return AdHocQuerySearchConditions.instance(loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate,

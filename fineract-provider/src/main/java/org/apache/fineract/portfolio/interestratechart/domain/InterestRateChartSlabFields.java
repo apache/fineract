@@ -228,8 +228,8 @@ public class InterestRateChartSlabFields {
 
     public static boolean isNotProperAmountStart(final InterestRateChartSlabFields interestRateChartSlabFields) {
         return interestRateChartSlabFields.amountRangeFrom != null
-                && (interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ONE) != 0 && interestRateChartSlabFields.amountRangeFrom
-                        .compareTo(BigDecimal.ZERO) != 0);
+                && (interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ONE) != 0
+                        && interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ZERO) != 0);
     }
 
     private boolean isNotProperAmountStart(final BigDecimal amount) {
@@ -305,7 +305,9 @@ public class InterestRateChartSlabFields {
 
     public boolean isBigDecimalSame(final BigDecimal obj1, final BigDecimal obj2) {
         if (obj1 == null || obj2 == null) {
-            if (Objects.compare(obj1,obj2, Comparator.nullsFirst(Comparator.naturalOrder())) == 0 ? Boolean.TRUE:Boolean.FALSE){ return true; }
+            if (Objects.compare(obj1, obj2, Comparator.nullsFirst(Comparator.naturalOrder())) == 0 ? Boolean.TRUE : Boolean.FALSE) {
+                return true;
+            }
             return false;
         }
         return obj1.compareTo(obj2) == 0;

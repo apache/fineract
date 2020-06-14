@@ -51,10 +51,8 @@ public class RecalculateInterestPoster implements Callable<Void> {
 
     @Override
     public Void call() throws JobExecutionException {
-        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant()
-                .getConnection().getMaxRetriesOnDeadlock();
-        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant()
-                .getConnection().getMaxIntervalBetweenRetries();
+        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
+        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
 
         int i = 0;
         if (!loanIds.isEmpty()) {
@@ -66,23 +64,25 @@ public class RecalculateInterestPoster implements Callable<Void> {
                     try {
                         this.loanWritePlatformService.recalculateInterest(loanId);
                         numberOfRetries = maxNumberOfRetries + 1;
-                    } catch (CannotAcquireLockException
-                            | ObjectOptimisticLockingFailureException exception) {
+                    } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
                         LOG.info("Recalulate interest job has been retried {} time(s)", numberOfRetries);
-                        // Fail if the transaction has been retired for maxNumberOfRetries
+                        // Fail if the transaction has been retired for
+                        // maxNumberOfRetries
                         if (numberOfRetries >= maxNumberOfRetries) {
-                            LOG.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back", numberOfRetries);
+                            LOG.error("Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back",
+                                    numberOfRetries);
                             errors.add(exception);
                             break;
                         }
-                        // Else sleep for a random time (between 1 to 10 seconds) and continue
+                        // Else sleep for a random time (between 1 to 10
+                        // seconds) and continue
                         try {
                             Random random = new Random();
                             int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                             Thread.sleep(1000 + (randomNum * 1000));
                             numberOfRetries = numberOfRetries + 1;
                         } catch (InterruptedException e) {
-                            LOG.error("Interest recalculation for loans retry failed due to InterruptedException", e) ;
+                            LOG.error("Interest recalculation for loans retry failed due to InterruptedException", e);
                             errors.add(e);
                             break;
                         }

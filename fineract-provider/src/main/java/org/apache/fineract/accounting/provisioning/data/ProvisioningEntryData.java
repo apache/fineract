@@ -25,50 +25,50 @@ import java.util.Date;
 @SuppressWarnings("unused")
 public class ProvisioningEntryData {
 
-    private Long id ;
+    private Long id;
 
-    private Boolean journalEntry ;
+    private Boolean journalEntry;
 
-    private Long createdById ;
+    private Long createdById;
 
-    private String createdUser ;
+    private String createdUser;
 
-    Date createdDate ;
+    Date createdDate;
 
-    Long modifiedById ;
+    Long modifiedById;
 
-    private String modifiedUser ;
+    private String modifiedUser;
 
-    private BigDecimal reservedAmount ;
+    private BigDecimal reservedAmount;
 
-    private Collection<LoanProductProvisioningEntryData> provisioningEntries ;
+    private Collection<LoanProductProvisioningEntryData> provisioningEntries;
 
     public ProvisioningEntryData(final Long id, final Collection<LoanProductProvisioningEntryData> provisioningEntries) {
-        this.provisioningEntries = provisioningEntries ;
-        this.id = id ;
+        this.provisioningEntries = provisioningEntries;
+        this.id = id;
     }
 
-    public ProvisioningEntryData(Long id, Boolean journalEntry, Long createdById,
-            String createdUser, Date createdDate, Long modifiedById, String modifiedUser, BigDecimal totalReservedAmount) {
-        this.id = id ;
-        this.journalEntry = journalEntry ;
-        this.createdById = createdById ;
-        this.createdUser = createdUser ;
-        this.modifiedById = modifiedById ;
-        this.modifiedUser = modifiedUser ;
-        this.createdDate = createdDate ;
-        this.reservedAmount = totalReservedAmount ;
+    public ProvisioningEntryData(Long id, Boolean journalEntry, Long createdById, String createdUser, Date createdDate, Long modifiedById,
+            String modifiedUser, BigDecimal totalReservedAmount) {
+        this.id = id;
+        this.journalEntry = journalEntry;
+        this.createdById = createdById;
+        this.createdUser = createdUser;
+        this.modifiedById = modifiedById;
+        this.modifiedUser = modifiedUser;
+        this.createdDate = createdDate;
+        this.reservedAmount = totalReservedAmount;
     }
 
     public void setEntries(Collection<LoanProductProvisioningEntryData> provisioningEntries) {
-        this.provisioningEntries = provisioningEntries ;
+        this.provisioningEntries = provisioningEntries;
     }
 
     public Long getId() {
-        return this.id ;
+        return this.id;
     }
 
     public Date getCreatedDate() {
-        return this.createdDate ;
+        return this.createdDate;
     }
 }

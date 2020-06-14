@@ -40,16 +40,14 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
     private static final int CURRENCY_CODE_COL = 4;
     private static final int CURRENCY_NAME_COL = 5;
 
-
-    public ExtrasSheetPopulator(List<FundData> funds, List<PaymentTypeData> paymentTypes,
-            List<CurrencyData> currencies) {
+    public ExtrasSheetPopulator(List<FundData> funds, List<PaymentTypeData> paymentTypes, List<CurrencyData> currencies) {
         this.funds = funds;
         this.paymentTypes = paymentTypes;
         this.currencies = currencies;
     }
 
     @Override
-    public void populate(Workbook workbook,String dateFormat) {
+    public void populate(Workbook workbook, String dateFormat) {
         int fundRowIndex = 1;
         Sheet extrasSheet = workbook.createSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME);
         setLayout(extrasSheet);
@@ -101,9 +99,11 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
         writeString(CURRENCY_NAME_COL, rowHeader, "Currency Type ");
         writeString(CURRENCY_CODE_COL, rowHeader, "Currency Code ");
     }
+
     public Integer getFundsSize() {
         return funds.size();
     }
+
     public Integer getPaymentTypesSize() {
         return paymentTypes.size();
     }
@@ -111,7 +111,5 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
     public Integer getCurrenciesSize() {
         return currencies.size();
     }
-
-
 
 }

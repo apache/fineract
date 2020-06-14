@@ -21,18 +21,18 @@ ALTER TABLE m_product_loan
  ADD COLUMN `include_in_borrower_cycle` tinyint NOT NULL DEFAULT '0';
 
 CREATE TABLE `m_client_loan_counter` (
-	`id` BIGINT NOT NULL AUTO_INCREMENT,
-	`client_id` BIGINT NOT NULL,
-	`loan_product_id` BIGINT NOT NULL,
-	`loan_id` BIGINT NOT NULL,
-	`running_count` SMALLINT NOT NULL,
-	PRIMARY KEY (`id`),
-	INDEX `FK_m_client_id_loan_counter` (`client_id`),
-	INDEX `FK_m_loan_product_loan_counter` (`loan_product_id`),
-	INDEX `FK_m_client_loan_counter` (`loan_id`),
-	CONSTRAINT `FK_m_client_id_loan_counter` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
-	CONSTRAINT `FK_m_loan_product_loan_counter` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`),
-	CONSTRAINT `FK_m_client_loan_counter` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `client_id` BIGINT NOT NULL,
+    `loan_product_id` BIGINT NOT NULL,
+    `loan_id` BIGINT NOT NULL,
+    `running_count` SMALLINT NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `FK_m_client_id_loan_counter` (`client_id`),
+    INDEX `FK_m_loan_product_loan_counter` (`loan_product_id`),
+    INDEX `FK_m_client_loan_counter` (`loan_id`),
+    CONSTRAINT `FK_m_client_id_loan_counter` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+    CONSTRAINT `FK_m_loan_product_loan_counter` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`),
+    CONSTRAINT `FK_m_client_loan_counter` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB;

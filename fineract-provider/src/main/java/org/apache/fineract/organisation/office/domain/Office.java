@@ -243,6 +243,6 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     }
 
     public void loadLazyCollections() {
-        this.children.size() ;
+        this.children.size();
     }
 }

@@ -48,8 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
 
     private final CacheWritePlatformService cacheService;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants
-            .cacheTypeParameter));
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants.cacheTypeParameter));
 
     @Autowired
     public UpdateCacheCommandHandler(final CacheWritePlatformService cacheService) {

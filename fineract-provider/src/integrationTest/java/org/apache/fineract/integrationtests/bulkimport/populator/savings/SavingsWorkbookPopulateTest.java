@@ -42,11 +42,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class SavingsWorkbookPopulateTest {
+
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -56,52 +57,52 @@ public class SavingsWorkbookPopulateTest {
     @Test
     public void testSavingsWorkbookPopulate() throws IOException {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        //in order to populate helper sheets
-        OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
-        Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
+        // in order to populate helper sheets
+        OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
+        Integer outcome_office_creation = officeHelper.createOffice("02 May 2000");
         Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
-        //in order to populate helper sheets
-        ClientHelper clientHelper=new ClientHelper(requestSpec,responseSpec);
-        Integer outcome_client_creation=clientHelper.createClient(requestSpec,responseSpec);
+        // in order to populate helper sheets
+        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
+        Integer outcome_client_creation = clientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_client_creation, "Could not create client");
 
-        //in order to populate helper sheets
-        GroupHelper groupHelper=new GroupHelper(requestSpec,responseSpec);
-        Integer outcome_group_creation=groupHelper.createGroup(requestSpec,responseSpec,true);
+        // in order to populate helper sheets
+        GroupHelper groupHelper = new GroupHelper(requestSpec, responseSpec);
+        Integer outcome_group_creation = groupHelper.createGroup(requestSpec, responseSpec, true);
         Assertions.assertNotNull(outcome_group_creation, "Could not create group");
 
-        //in order to populate helper sheets
-        StaffHelper staffHelper=new StaffHelper();
-        Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
+        // in order to populate helper sheets
+        StaffHelper staffHelper = new StaffHelper();
+        Integer outcome_staff_creation = staffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
-        SavingsProductHelper savingsProductHelper=new SavingsProductHelper();
-        String jsonSavingsProduct=savingsProductHelper.build();
-        Integer outcome_sp_creaction=savingsProductHelper.createSavingsProduct(jsonSavingsProduct,requestSpec,responseSpec);
+        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        String jsonSavingsProduct = savingsProductHelper.build();
+        Integer outcome_sp_creaction = savingsProductHelper.createSavingsProduct(jsonSavingsProduct, requestSpec, responseSpec);
         Assertions.assertNotNull(outcome_sp_creaction, "Could not create Savings product");
 
-        SavingsAccountHelper savingsAccountHelper=new SavingsAccountHelper(requestSpec,responseSpec);
-        Workbook workbook=savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
+        SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        Workbook workbook = savingsAccountHelper.getSavingsWorkbook("dd MMMM yyyy");
 
-        Sheet officeSheet=workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-        Row firstOfficeRow=officeSheet.getRow(1);
+        Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
+        Row firstOfficeRow = officeSheet.getRow(1);
         Assertions.assertNotNull(firstOfficeRow.getCell(1), "No offices found ");
 
-        Sheet clientSheet=workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
-        Row firstClientRow=clientSheet.getRow(1);
+        Sheet clientSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME);
+        Row firstClientRow = clientSheet.getRow(1);
         Assertions.assertNotNull(firstClientRow.getCell(1), "No clients found ");
 
-        Sheet groupSheet=workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
-        Row firstGroupRow=groupSheet.getRow(1);
+        Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
+        Row firstGroupRow = groupSheet.getRow(1);
         Assertions.assertNotNull(firstGroupRow.getCell(1), "No groups found ");
 
-        Sheet staffSheet=workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
-        Row firstStaffRow=staffSheet.getRow(1);
+        Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
+        Row firstStaffRow = staffSheet.getRow(1);
         Assertions.assertNotNull(firstStaffRow.getCell(1), "No staff found ");
 
-        Sheet productSheet=workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
-        Row firstProductRow=productSheet.getRow(1);
+        Sheet productSheet = workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
+        Row firstProductRow = productSheet.getRow(1);
         Assertions.assertNotNull(firstProductRow.getCell(1), "No products found ");
 
     }

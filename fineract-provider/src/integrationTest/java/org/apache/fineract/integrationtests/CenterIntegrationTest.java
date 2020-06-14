@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CenterIntegrationTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(CenterIntegrationTest.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -106,8 +107,8 @@ public class CenterIntegrationTest {
 
         Assertions.assertNotNull(paginatedList);
         Assertions.assertNotNull(list);
-        Assertions.assertTrue(Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]),
-                list.toArray(new CenterDomain[list.size()])));
+        Assertions.assertTrue(
+                Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]), list.toArray(new CenterDomain[list.size()])));
     }
 
     @Test
@@ -162,7 +163,7 @@ public class CenterIntegrationTest {
         Assertions.assertNotNull(center);
         Assertions.assertEquals(newName, center.getName());
         Assertions.assertEquals(newExternalId, center.getExternalId());
-        Assertions.assertEquals((Integer)newStaffId, center.getStaffId());
+        Assertions.assertEquals((Integer) newStaffId, center.getStaffId());
         Assertions.assertArrayEquals(newGroupMembers, center.getGroupMembers());
     }
 
@@ -190,8 +191,8 @@ public class CenterIntegrationTest {
             map.put("active", "true");
             map.put("activationDate", "04 March 2011");
 
-            groupMembers[i] = Utils.performServerPost(requestSpec, responseSpec, "/fineract-provider/api/v1/groups?"
-                    + Utils.TENANT_IDENTIFIER, new Gson().toJson(map), "groupId");
+            groupMembers[i] = Utils.performServerPost(requestSpec, responseSpec,
+                    "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER, new Gson().toJson(map), "groupId");
         }
         return groupMembers;
     }
@@ -200,7 +201,7 @@ public class CenterIntegrationTest {
     public void testStaffAssignmentDuringCenterCreation() {
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}" , staffId);
+        LOG.info("--------------creating first staff with id------------- {}", staffId);
         Assertions.assertNotNull(staffId);
 
         final int centerWithStaffId = CenterHelper.createCenterWithStaffId(this.requestSpec, this.responseSpec, staffId);
@@ -214,15 +215,14 @@ public class CenterIntegrationTest {
     @Test
     public void testAssignStaffToCenter() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}" , staffId);
+        LOG.info("--------------creating first staff with id------------- {}", staffId);
         Assertions.assertNotNull(staffId);
 
         final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
         CenterHelper.verifyCenterCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
 
-        final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec,
-                this.responseSpec, groupID.toString(),
-                staffId.longValue());
+        final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec, this.responseSpec,
+                groupID.toString(), staffId.longValue());
         assertEquals(assignStaffToCenterResponseMap.get("staffId"), staffId, "Verify assigned staff id is the same as id sent");
 
         final CenterDomain center = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
@@ -235,24 +235,22 @@ public class CenterIntegrationTest {
     @Test
     public void testUnassignStaffToCenter() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}" , staffId);
+        LOG.info("--------------creating first staff with id------------- {}", staffId);
         Assertions.assertNotNull(staffId);
 
         final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
         CenterHelper.verifyCenterCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
 
-        final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec,
-                this.responseSpec, groupID.toString(),
-                staffId.longValue());
+        final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec, this.responseSpec,
+                groupID.toString(), staffId.longValue());
         assertEquals(assignStaffToCenterResponseMap.get("staffId"), staffId, "Verify assigned staff id is the same as id sent");
         final CenterDomain centerWithStaffAssigned = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
         Assertions.assertNotNull(centerWithStaffAssigned);
         Assertions.assertTrue(centerWithStaffAssigned.getId().intValue() == groupID);
         Assertions.assertTrue(centerWithStaffAssigned.getStaffId().intValue() == staffId);
 
-        final HashMap unassignStaffToCenterResponseMap = (HashMap) CenterHelper.unassignStaff(this.requestSpec,
-                this.responseSpec, groupID.toString(),
-                staffId.longValue());
+        final HashMap unassignStaffToCenterResponseMap = (HashMap) CenterHelper.unassignStaff(this.requestSpec, this.responseSpec,
+                groupID.toString(), staffId.longValue());
         assertEquals(unassignStaffToCenterResponseMap.get("staffId"), null, "Verify staffId is null after unassigning ");
         final CenterDomain centerWithStaffUnssigned = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
         Assertions.assertNotNull(centerWithStaffUnssigned);

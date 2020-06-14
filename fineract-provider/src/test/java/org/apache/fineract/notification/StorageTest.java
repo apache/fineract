@@ -63,11 +63,8 @@ public class StorageTest {
 
     @BeforeEach
     public void setUp() {
-        notificationWritePlatformServiceImpl = new NotificationWritePlatformServiceImpl(
-                notificationGeneratorWritePlatformService,
-                notificationGeneratorReadRepositoryWrapper,
-                appUserRepository,
-                notificationMapperWritePlatformService);
+        notificationWritePlatformServiceImpl = new NotificationWritePlatformServiceImpl(notificationGeneratorWritePlatformService,
+                notificationGeneratorReadRepositoryWrapper, appUserRepository, notificationMapperWritePlatformService);
     }
 
     @Test
@@ -82,27 +79,13 @@ public class StorageTest {
         boolean isSystemGenerated = false;
         String now = getCurrentDateTime();
 
-        Notification notification = new Notification(
-                objectType,
-                objectIdentifier,
-                action,
-                actor,
-                isSystemGenerated,
-                notificationContent,
-                now
-                );
+        Notification notification = new Notification(objectType, objectIdentifier, action, actor, isSystemGenerated, notificationContent,
+                now);
 
-        AppUser appUser = new AppUser(null, new User("J.J.", "", true, true,
-                true, true, Collections.emptyList()),
-                null, "user@com", "John", "", null, false,
-                false, null);
+        AppUser appUser = new AppUser(null, new User("J.J.", "", true, true, true, true, Collections.emptyList()), null, "user@com", "John",
+                "", null, false, false, null);
 
-        NotificationMapper notificationMapper = new NotificationMapper(
-                notification,
-                appUser,
-                false,
-                now
-                );
+        NotificationMapper notificationMapper = new NotificationMapper(notification, appUser, false, now);
 
         when(this.notificationGeneratorWritePlatformService.create(refEq(notification))).thenReturn(1L);
 
@@ -112,21 +95,13 @@ public class StorageTest {
 
         when(this.notificationMapperWritePlatformService.create(refEq(notificationMapper))).thenReturn(1L);
 
-        Long actualGeneratedNotificationId =
-                notificationWritePlatformServiceImpl.notify(
-                        userId,
-                        objectType,
-                        objectIdentifier,
-                        action,
-                        actor,
-                        notificationContent,
-                        isSystemGenerated
-                        );
+        Long actualGeneratedNotificationId = notificationWritePlatformServiceImpl.notify(userId, objectType, objectIdentifier, action,
+                actor, notificationContent, isSystemGenerated);
 
         verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification, "createdAt"));
         verify(this.notificationMapperWritePlatformService, times(1)).create(refEq(notificationMapper, "createdAt"));
         verify(this.notificationGeneratorReadRepositoryWrapper, times(1)).findById(1L);
-        assertEquals(Long.valueOf(1),actualGeneratedNotificationId);
+        assertEquals(Long.valueOf(1), actualGeneratedNotificationId);
     }
 
     private String getCurrentDateTime() {

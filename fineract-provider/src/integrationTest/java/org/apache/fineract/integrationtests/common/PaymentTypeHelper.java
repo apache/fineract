@@ -29,21 +29,20 @@ import java.util.HashMap;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class PaymentTypeHelper {
 
-    private static final String CREATE_PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes?"
-            + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes?" + Utils.TENANT_IDENTIFIER;
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";
 
-    public static Integer createPaymentType(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String name, final String description,
-            final Boolean isCashPayment, final Integer position) {
-        // system.out.println("---------------------------------CREATING A PAYMENT
+    public static Integer createPaymentType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String name, final String description, final Boolean isCashPayment, final Integer position) {
+        // system.out.println("---------------------------------CREATING A
+        // PAYMENT
         // TYPE---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_PAYMENTTYPE_URL,
                 getJsonToCreatePaymentType(name, description, isCashPayment, position), "resourceId");
     }
 
-    public static String getJsonToCreatePaymentType(final String name, final String description,
-            final Boolean isCashPayment, final Integer position) {
+    public static String getJsonToCreatePaymentType(final String name, final String description, final Boolean isCashPayment,
+            final Integer position) {
         HashMap hm = new HashMap();
         hm.put("name", name);
         if (description != null) {
@@ -59,14 +58,12 @@ public class PaymentTypeHelper {
         return new Gson().toJson(hm);
     }
 
-    public static void verifyPaymentTypeCreatedOnServer(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer generatedPaymentTypeID) {
+    public static void verifyPaymentTypeCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer generatedPaymentTypeID) {
         // system.out.println("------------------------------CHECK PAYMENT
         // DETAILS------------------------------------\n");
-        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + generatedPaymentTypeID + "?"
-                + Utils.TENANT_IDENTIFIER;
-        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL,
-                "id");
+        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + generatedPaymentTypeID + "?" + Utils.TENANT_IDENTIFIER;
+        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "id");
         assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
@@ -77,25 +74,26 @@ public class PaymentTypeHelper {
         // TYPE---------------------------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "");
         final String jsonData = new Gson().toJson(get);
-        return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {
-        }.getType());
+        return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());
 
     }
 
-    public static HashMap<String, String> updatePaymentType(final int id, HashMap request,
-            final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+    public static HashMap<String, String> updatePaymentType(final int id, HashMap request, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
         final String UPDATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
-        // system.out.println("---------------------------------UPDATE PAYMENT TYPE " +
+        // system.out.println("---------------------------------UPDATE PAYMENT
+        // TYPE " +
         // id + "---------------------------------------------");
-        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, UPDATE_PAYMENTTYPE_URL,
-                new Gson().toJson(request), "changes");
+        HashMap<String, String> hash = Utils.performServerPut(requestSpec, responseSpec, UPDATE_PAYMENTTYPE_URL, new Gson().toJson(request),
+                "changes");
         return hash;
     }
 
     public static Integer deletePaymentType(final int id, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
         final String DELETE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
-        // system.out.println("---------------------------------DELETING PAYMENT TYPE "
+        // system.out.println("---------------------------------DELETING PAYMENT
+        // TYPE "
         // + id + "--------------------------------------------");
         return Utils.performServerDelete(requestSpec, responseSpec, DELETE_PAYMENTTYPE_URL, "resourceId");
     }

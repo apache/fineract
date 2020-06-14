@@ -100,7 +100,8 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom {
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
-        if (command.isChangeInBigDecimalParameterNamed(mandatoryRecommendedDepositAmountParamName, this.mandatoryRecommendedDepositAmount)) {
+        if (command.isChangeInBigDecimalParameterNamed(mandatoryRecommendedDepositAmountParamName,
+                this.mandatoryRecommendedDepositAmount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
             actualChanges.put(mandatoryRecommendedDepositAmountParamName, newValue);
             this.mandatoryRecommendedDepositAmount = newValue;
@@ -119,8 +120,8 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom {
         RecurringDepositAccount depositAccount = (RecurringDepositAccount) this.account;
         if (depositAccount.isNotActive()) {
             final String defaultUserMessage = "Updates to the recommended deposit amount are allowed only when the underlying account is active.";
-            final ApiParameterError error = ApiParameterError.generalError("error.msg."
-                    + DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME + ".is.not.active", defaultUserMessage);
+            final ApiParameterError error = ApiParameterError.generalError(
+                    "error.msg." + DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME + ".is.not.active", defaultUserMessage);
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
             throw new PlatformApiDataValidationException(dataValidationErrors);

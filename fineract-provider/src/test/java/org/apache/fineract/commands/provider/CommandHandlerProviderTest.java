@@ -53,9 +53,8 @@ public class CommandHandlerProviderTest {
 
         final NewCommandSourceHandler registeredHandler = this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
 
-        final CommandProcessingResult result =
-                registeredHandler.processCommand(
-                        JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null,null,null));
+        final CommandProcessingResult result = registeredHandler
+                .processCommand(JsonCommand.fromExistingCommand(testCommandId, null, null, null, null, null, null, null, null, null, null));
         assertEquals(testCommandId, result.commandId());
     }
 

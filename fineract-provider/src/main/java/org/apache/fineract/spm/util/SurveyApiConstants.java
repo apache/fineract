@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.spm.util;
 
-
 public class SurveyApiConstants {
 
     public static final String SURVEY_RESOURCE_NAME = "survey";
@@ -33,7 +32,7 @@ public class SurveyApiConstants {
     public static final String textParamName = "text";
     public static final String lengthParamName = "length";
 
-    //to validate length/max value
+    // to validate length/max value
     public static final Integer maxCountryCodeLength = 2;
     public static final Integer maxTextLength = 255;
     public static final Integer maxNameLength = 255;

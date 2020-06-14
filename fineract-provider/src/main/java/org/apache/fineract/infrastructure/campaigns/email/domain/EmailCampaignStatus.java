@@ -39,13 +39,13 @@ public enum EmailCampaignStatus {
         switch (statusValue) {
             case 100:
                 enumeration = EmailCampaignStatus.PENDING;
-                break;
+            break;
             case 300:
                 enumeration = EmailCampaignStatus.ACTIVE;
-                break;
+            break;
             case 600:
                 enumeration = EmailCampaignStatus.CLOSED;
-                break;
+            break;
         }
         return enumeration;
     }
@@ -57,15 +57,16 @@ public enum EmailCampaignStatus {
     public String getCode() {
         return code;
     }
-    public boolean isActive(){
+
+    public boolean isActive() {
         return this.value.equals(EmailCampaignStatus.ACTIVE.getValue());
     }
 
-    public boolean isPending(){
+    public boolean isPending() {
         return this.value.equals(EmailCampaignStatus.PENDING.getValue());
     }
 
-    public boolean isClosed(){
-         return this.value.equals(EmailCampaignStatus.CLOSED.getValue());
+    public boolean isClosed() {
+        return this.value.equals(EmailCampaignStatus.CLOSED.getValue());
     }
 }

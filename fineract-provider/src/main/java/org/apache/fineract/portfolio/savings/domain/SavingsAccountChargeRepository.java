@@ -25,8 +25,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SavingsAccountChargeRepository extends JpaRepository<SavingsAccountCharge, Long>,
-        JpaSpecificationExecutor<SavingsAccountCharge> {
+public interface SavingsAccountChargeRepository
+        extends JpaRepository<SavingsAccountCharge, Long>, JpaSpecificationExecutor<SavingsAccountCharge> {
 
     @Query("select sac from SavingsAccountCharge sac where sac.id =:id and sac.savingsAccount.id = :savingsAccountId")
     SavingsAccountCharge findByIdAndSavingsAccountId(@Param("id") Long id, @Param("savingsAccountId") Long savingsAccountId);

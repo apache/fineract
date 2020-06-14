@@ -26,12 +26,14 @@ import io.swagger.annotations.ApiModelProperty;
  */
 
 final class DocumentManagementApiResourceSwagger {
+
     private DocumentManagementApiResourceSwagger() {
 
     }
 
     @ApiModel(value = "GetEntityTypeEntityIdDocumentsResponse")
     public static final class GetEntityTypeEntityIdDocumentsResponse {
+
         private GetEntityTypeEntityIdDocumentsResponse() {
 
         }
@@ -60,9 +62,11 @@ final class DocumentManagementApiResourceSwagger {
 
     @ApiModel(value = "PostEntityTypeEntityIdDocumentsResponse")
     public static final class PostEntityTypeEntityIdDocumentsResponse {
+
         private PostEntityTypeEntityIdDocumentsResponse() {
 
         }
+
         @ApiModelProperty(example = "3")
         public Long resourceId;
         @ApiModelProperty(example = "3")
@@ -71,16 +75,19 @@ final class DocumentManagementApiResourceSwagger {
 
     @ApiModel(value = "PutEntityTypeEntityIdDocumentsResponse")
     public static final class PutEntityTypeEntityIdDocumentsResponse {
+
         private PutEntityTypeEntityIdDocumentsResponse() {
 
         }
 
-        public final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger{
+        public final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
+
             private PutEntityTypeEntityIdDocumentsResponseChangesSwagger() {
 
             }
 
         }
+
         @ApiModelProperty(example = "3")
         public Long resourceId;
         public PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
@@ -90,16 +97,19 @@ final class DocumentManagementApiResourceSwagger {
 
     @ApiModel(value = "DeleteEntityTypeEntityIdDocumentsResponse")
     public static final class DeleteEntityTypeEntityIdDocumentsResponse {
+
         private DeleteEntityTypeEntityIdDocumentsResponse() {
 
         }
 
-        public final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger{
+        public final class PutEntityTypeEntityIdDocumentsResponseChangesSwagger {
+
             private PutEntityTypeEntityIdDocumentsResponseChangesSwagger() {
 
             }
 
         }
+
         @ApiModelProperty(example = "3")
         public Long resourceId;
         public PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;

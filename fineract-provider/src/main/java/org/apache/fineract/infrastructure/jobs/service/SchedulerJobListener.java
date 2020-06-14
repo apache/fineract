@@ -51,15 +51,14 @@ public class SchedulerJobListener implements JobListener {
 
     private final SchedularWritePlatformService schedularService;
 
-    private final AppUserRepositoryWrapper userRepository ;
+    private final AppUserRepositoryWrapper userRepository;
 
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Autowired
-    public SchedulerJobListener(final SchedularWritePlatformService schedularService,
-            final AppUserRepositoryWrapper userRepository) {
+    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final AppUserRepositoryWrapper userRepository) {
         this.schedularService = schedularService;
-        this.userRepository = userRepository ;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -127,11 +126,10 @@ public class SchedulerJobListener implements JobListener {
     }
 
     private Throwable getCauseFromException(final Throwable exception) {
-        if (this.stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL
-                && exception.getCause() != null
+        if (this.stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL && exception.getCause() != null
                 && (exception.getCause().toString().contains(SchedulerServiceConstants.SCHEDULER_EXCEPTION)
-                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION) || exception
-                        .getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
+                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION)
+                        || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
             this.stackTraceLevel++;
             return getCauseFromException(exception.getCause());
         } else if (exception.getCause() != null) { return exception.getCause(); }

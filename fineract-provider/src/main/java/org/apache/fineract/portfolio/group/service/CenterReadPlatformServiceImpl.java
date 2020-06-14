@@ -104,8 +104,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator, final ConfigurationDomainService configurationDomainService,
-            final CalendarReadPlatformService calendarReadPlatformService, final ColumnValidator columnValidator) {
+            final PaginationParametersDataValidator paginationParametersDataValidator,
+            final ConfigurationDomainService configurationDomainService, final CalendarReadPlatformService calendarReadPlatformService,
+            final ColumnValidator columnValidator) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -121,11 +122,11 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getCenterExtraCriteria(String schemaSl, List<Object> paramList,final SearchParameters searchCriteria) {
+    private String getCenterExtraCriteria(String schemaSl, List<Object> paramList, final SearchParameters searchCriteria) {
 
         StringBuilder extraCriteria = new StringBuilder(200);
         extraCriteria.append(" and g.level_id = " + GroupTypes.CENTER.getId());
-        if (searchCriteria!=null) {
+        if (searchCriteria != null) {
             String sqlQueryCriteria = searchCriteria.getSqlSearch();
             if (StringUtils.isNotBlank(sqlQueryCriteria)) {
                 SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
@@ -181,9 +182,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             + "g.closedon_date as closedOnDate, " + "g.submittedon_date as submittedOnDate, " + "sbu.username as submittedByUsername, "
             + "sbu.firstname as submittedByFirstname, " + "sbu.lastname as submittedByLastname, " + "clu.username as closedByUsername, "
             + "clu.firstname as closedByFirstname, " + "clu.lastname as closedByLastname, " + "acu.username as activatedByUsername, "
-            + "acu.firstname as activatedByFirstname, "
-            + "acu.lastname as activatedByLastname "
-            + "from m_group g " //
+            + "acu.firstname as activatedByFirstname, " + "acu.lastname as activatedByLastname " + "from m_group g " //
             + "join m_office o on o.id = g.office_id " + "left join m_staff s on s.id = g.staff_id "
             + "left join m_group pg on pg.id = g.parent_id " + "left join m_appuser sbu on sbu.id = g.submittedon_userid "
             + "left join m_appuser acu on acu.id = g.activatedon_userid " + "left join m_appuser clu on clu.id = g.closedon_userid ";
@@ -298,7 +297,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
             final String recurrence = rs.getString("recurrence");
-            final LocalTime meetingTime = JdbcSupport.getLocalTime(rs,"meetingTime");
+            final LocalTime meetingTime = JdbcSupport.getLocalTime(rs, "meetingTime");
             final BigDecimal totalCollected = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalCollected");
             final BigDecimal totalOverdue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalOverdue");
             final BigDecimal totaldue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totaldue");
@@ -306,8 +305,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             Integer monthOnDay = CalendarUtils.getMonthOnDay(recurrence);
 
             CalendarData calendarData = CalendarData.instance(calendarId, calendarInstanceId, entityId, entityType, title, description,
-                    location, startDate, endDate, null, null, false, recurrence, null, null, null, null, null, null, null, null, null,
-                    null, null, null, null, null, meetingTime, monthOnDay);
+                    location, startDate, endDate, null, null, false, recurrence, null, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null, meetingTime, monthOnDay);
 
             return CenterData.instance(id, accountNo, name, externalId, status, activationDate, officeId, null, staffId, staffName,
                     hierarchy, null, calendarData, totalCollected, totalOverdue, totaldue, installmentDue);
@@ -364,8 +363,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                     closedByUsername, closedByFirstname, closedByLastname);
 
-            return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, null, null, staffId,
-                    staffName, hierarchy, groupLevel, timeline);
+            return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, null, null,
+                    staffId, staffName, hierarchy, groupLevel, timeline);
         }
     }
 
@@ -381,8 +380,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-        List<Object> paramList = new ArrayList<>(
-                Arrays.asList(hierarchySearchString));
+        List<Object> paramList = new ArrayList<>(Arrays.asList(hierarchySearchString));
         final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
         this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
@@ -404,13 +402,13 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                paramList.toArray(), this.centerMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
+                this.centerMapper);
     }
 
     @Override
     public Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters) {
-        if (parameters!=null) {
+        if (parameters != null) {
             this.paginationParametersDataValidator.validateParameterValues(parameters, SUPPORTED_ORDER_BY_VALUES, "audits");
         }
         final AppUser currentUser = this.context.authenticatedUser();
@@ -421,14 +419,13 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append("select ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-        List<Object> paramList = new ArrayList<>(
-                Arrays.asList(hierarchySearchString));
-        if (searchParameters!=null) {
-        final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
-        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sqlBuilder.append(" and (").append(extraCriteria).append(")");
-        }
+        List<Object> paramList = new ArrayList<>(Arrays.asList(hierarchySearchString));
+        if (searchParameters != null) {
+            final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
+            if (StringUtils.isNotBlank(extraCriteria)) {
+                sqlBuilder.append(" and (").append(extraCriteria).append(")");
+            }
 
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
@@ -545,8 +542,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             clientOptions = null;
         }
 
-        return GroupGeneralData.template(centerOfficeId, center.getId(), center.getAccountNo(), center.getName(), staffId, staffName, centerOptions,
-                officeOptions, staffOptions, clientOptions, null);
+        return GroupGeneralData.template(centerOfficeId, center.getId(), center.getAccountNo(), center.getName(), staffId, staffName,
+                centerOptions, officeOptions, staffOptions, clientOptions, null);
     }
 
     @Override
@@ -574,11 +571,11 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
-            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] { passeddate, passeddate, passeddate, passeddate,
-                    passeddate, passeddate, officeId, staffId });
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
+                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId });
         } else {
-            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] { passeddate, passeddate, passeddate, passeddate,
-                    passeddate, passeddate, officeId });
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
+                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId });
         }
 
         Collection<StaffCenterData> staffCenterDataArray = new ArrayList<>();
@@ -589,7 +586,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
         }
         for (CenterData centerData : centerDataArray) {
-            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate), isSkipRepaymentOnFirstMonthEnabled, numberOfDays)) {
+            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate),
+                    isSkipRepaymentOnFirstMonthEnabled, numberOfDays)) {
                 if (staffCenterDataArray.size() <= 0) {
                     Collection<CenterData> meetingFallCenter = new ArrayList<>();
                     meetingFallCenter.add(centerData);
@@ -600,7 +598,6 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                         if (staffCenterData.getStaffId().equals(centerData.staffId())) {
                             staffCenterData.getMeetingFallCenters().add(centerData);
 
-
                             flag = true;
                             break;
                         }
@@ -608,8 +605,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     if (!flag) {
                         Collection<CenterData> meetingFallCenter = new ArrayList<>();
                         meetingFallCenter.add(centerData);
-                        staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(),
-                                meetingFallCenter));
+                        staffCenterDataArray
+                                .add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
                     }
                 }
 
@@ -624,8 +621,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("productivecollectionsheet");
         baseDataValidator.reset().parameter("staffId").value(staffId).notNull();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
 
     }
 }

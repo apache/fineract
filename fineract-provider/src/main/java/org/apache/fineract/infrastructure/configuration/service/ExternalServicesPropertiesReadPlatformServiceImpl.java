@@ -165,7 +165,8 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         final ResultSetExtractor<MessageGatewayConfigurationData> resultSetExtractor = new MessageGatewayDataExtractor();
         final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
                 + ExternalServicesConstants.SMS_SERVICE_NAME + "'";
-        final MessageGatewayConfigurationData messageGatewayConfigurationData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
+        final MessageGatewayConfigurationData messageGatewayConfigurationData = this.jdbcTemplate.query(sql, resultSetExtractor,
+                new Object[] {});
         return messageGatewayConfigurationData;
     }
 
@@ -207,11 +208,11 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
             String gcmEndPoint = null;
             String fcmEndPoint = null;
             while (rs.next()) {
-                if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_SERVER_KEY )) {
+                if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_SERVER_KEY)) {
                     serverKey = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_GCM_END_POINT )) {
+                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_GCM_END_POINT)) {
                     gcmEndPoint = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_FCM_END_POINT )) {
+                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_FCM_END_POINT)) {
                     fcmEndPoint = rs.getString("value");
                 }
             }
@@ -219,13 +220,13 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         }
     }
 
-
     @Override
     public NotificationConfigurationData getNotificationConfiguration() {
         final ResultSetExtractor<NotificationConfigurationData> resultSetExtractor = new NotificationDataExtractor();
         final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
                 + ExternalServicesConstants.NOTIFICATION_SERVICE_NAME + "'";
-        final NotificationConfigurationData notificationConfigurationData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
+        final NotificationConfigurationData notificationConfigurationData = this.jdbcTemplate.query(sql, resultSetExtractor,
+                new Object[] {});
         return notificationConfigurationData;
     }
 

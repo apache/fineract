@@ -30,20 +30,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @CommandType(entity = "GLIMLOAN", action = "REJECT")
-public class GLIMApplicationRejectionCommandHandler implements NewCommandSourceHandler
-{
+public class GLIMApplicationRejectionCommandHandler implements NewCommandSourceHandler {
 
-     private final LoanApplicationWritePlatformService writePlatformService;
+    private final LoanApplicationWritePlatformService writePlatformService;
 
-        @Autowired
-        public GLIMApplicationRejectionCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
-            this.writePlatformService = writePlatformService;
-        }
+    @Autowired
+    public GLIMApplicationRejectionCommandHandler(final LoanApplicationWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-        @Transactional
-        @Override
-        public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-            return this.writePlatformService.rejectGLIMApplicationApproval(command.entityId(), command);
-        }
+        return this.writePlatformService.rejectGLIMApplicationApproval(command.entityId(), command);
+    }
 }

@@ -97,8 +97,8 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
         }
         // delete image from the file system
         if (image != null) {
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
-                    .getStorageType()));
+            final ContentRepository contentRepository = this.contentRepositoryFactory
+                    .getRepository(StorageType.fromInt(image.getStorageType()));
             contentRepository.deleteImage(clientId, image.getLocation());
             this.imageRepository.delete(image);
         }
@@ -124,8 +124,8 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
             owner = staff;
         }
         if (image != null) {
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
-                    .getStorageType()));
+            final ContentRepository contentRepository = this.contentRepositoryFactory
+                    .getRepository(StorageType.fromInt(image.getStorageType()));
             contentRepository.deleteImage(entityId, image.getLocation());
         }
         return owner;

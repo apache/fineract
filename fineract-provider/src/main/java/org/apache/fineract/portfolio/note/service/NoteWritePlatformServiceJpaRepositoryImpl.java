@@ -132,8 +132,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Long resourceId = command.subentityId();
 
-        final LoanTransaction loanTransaction = this.loanTransactionRepository
-                .findById(resourceId).orElseThrow(() -> new LoanTransactionNotFoundException(resourceId));
+        final LoanTransaction loanTransaction = this.loanTransactionRepository.findById(resourceId)
+                .orElseThrow(() -> new LoanTransactionNotFoundException(resourceId));
 
         final Loan loan = loanTransaction.getLoan();
 
@@ -176,7 +176,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         this.fromApiJsonDeserializer.validateNote(command.json());
 
-        final String resourceUrl = getResourceUrlFromCommand(command); //command.getSupportedEntityType();
+        final String resourceUrl = getResourceUrlFromCommand(command); // command.getSupportedEntityType();
         final NoteType type = NoteType.fromApiUrl(resourceUrl);
         switch (type) {
             case CLIENT: {
@@ -215,7 +215,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 resourceUrl = NoteType.LOAN.getApiUrl();
             }
         } else if (command.getSavingsId() != null) {
-            //TODO: SAVING_TRANSACTION type need to be add.
+            // TODO: SAVING_TRANSACTION type need to be add.
             resourceUrl = NoteType.SAVING_ACCOUNT.getApiUrl();
         } else {
             resourceUrl = "";
@@ -258,8 +258,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final NoteType type = NoteType.GROUP;
 
-        final Group group = this.groupRepository.findById(resourceId)
-                .orElseThrow(() -> new GroupNotFoundException(resourceId));
+        final Group group = this.groupRepository.findById(resourceId).orElseThrow(() -> new GroupNotFoundException(resourceId));
 
         final Note noteForUpdate = this.noteRepository.findByGroupIdAndId(resourceId, noteId);
 
@@ -366,7 +365,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         this.fromApiJsonDeserializer.validateNote(command.json());
 
-        final String resourceUrl = getResourceUrlFromCommand(command); //command.getSupportedEntityType();
+        final String resourceUrl = getResourceUrlFromCommand(command); // command.getSupportedEntityType();
         final NoteType type = NoteType.fromApiUrl(resourceUrl);
 
         switch (type) {

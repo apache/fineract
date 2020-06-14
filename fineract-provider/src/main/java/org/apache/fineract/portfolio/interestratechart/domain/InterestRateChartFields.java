@@ -67,7 +67,8 @@ public class InterestRateChartFields {
         return new InterestRateChartFields(name, description, fromDate, toDate, isPrimaryGroupingByAmount);
     }
 
-    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate, boolean isPrimaryGroupingByAmount) {
+    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate,
+            boolean isPrimaryGroupingByAmount) {
         this.name = name;
         this.description = description;
         this.fromDate = fromDate.toDate();

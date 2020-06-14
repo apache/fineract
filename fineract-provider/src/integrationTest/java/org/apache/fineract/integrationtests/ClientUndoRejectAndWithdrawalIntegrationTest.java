@@ -53,8 +53,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
@@ -69,8 +68,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         ClientStatusChecker.verifyClientPending(status);
 
@@ -93,8 +91,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         ClientStatusChecker.verifyClientPending(status);
 
@@ -122,8 +119,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
@@ -152,8 +148,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         ClientStatusChecker.verifyClientPending(status);
 
@@ -182,8 +177,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         ClientStatusChecker.verifyClientPending(status);
 
@@ -207,8 +201,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         ClientStatusChecker.verifyClientPending(status);
 
@@ -236,8 +229,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar todaysDate = Calendar.getInstance();
@@ -265,8 +257,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         ClientStatusChecker.verifyClientPending(status);
 
@@ -297,16 +288,14 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
 
         status = this.clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(status);
         status = this.clientHelper.undoWithdrawn(clientId);
         ClientStatusChecker.verifyClientPending(status);
-        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.activateClient(clientId,
-                CommonConstants.RESPONSE_ERROR);
+        ArrayList<HashMap<String, Object>> clientErrorData = validationErrorHelper.activateClient(clientId, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.clients.submittedOnDate.after.reopened.date",
                 clientErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -315,15 +304,15 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @Test
     public void testReopenedDate() {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-        //final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        // final ClientHelper validationErrorHelper = new
+        // ClientHelper(this.requestSpec, errorResponse);
 
         // CREATE CLIENT
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
         // GET CLIENT STATUS
-        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec,
-                String.valueOf(clientId));
+        HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientPending(status);
 
         status = this.clientHelper.withdrawClient(clientId);

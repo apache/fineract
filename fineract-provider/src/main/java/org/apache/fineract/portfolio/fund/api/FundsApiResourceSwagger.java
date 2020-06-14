@@ -25,13 +25,13 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Chirag Gupta on 12/08/17.
  */
 final class FundsApiResourceSwagger {
-    private FundsApiResourceSwagger() {
-    }
+
+    private FundsApiResourceSwagger() {}
 
     @ApiModel(value = "GetFundsResponse")
     public static final class GetFundsResponse {
-        private GetFundsResponse() {
-        }
+
+        private GetFundsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;
@@ -41,8 +41,8 @@ final class FundsApiResourceSwagger {
 
     @ApiModel(value = "PostFundsRequest")
     public static final class PostFundsRequest {
-        private PostFundsRequest() {
-        }
+
+        private PostFundsRequest() {}
 
         @ApiModelProperty(example = "EU Agri Fund")
         public String name;
@@ -50,8 +50,8 @@ final class FundsApiResourceSwagger {
 
     @ApiModel(value = "PostFundsResponse")
     public static final class PostFundsResponse {
-        private PostFundsResponse() {
-        }
+
+        private PostFundsResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -59,8 +59,8 @@ final class FundsApiResourceSwagger {
 
     @ApiModel(value = "PutFundsFundIdRequest")
     public static final class PutFundsFundIdRequest {
-        private PutFundsFundIdRequest() {
-        }
+
+        private PutFundsFundIdRequest() {}
 
         @ApiModelProperty(example = "EU Agri Fund (2010-2020)")
         public String name;
@@ -68,8 +68,8 @@ final class FundsApiResourceSwagger {
 
     @ApiModel(value = "PutFundsFundIdResponse")
     public static final class PutFundsFundIdResponse {
-        private PutFundsFundIdResponse() {
-        }
+
+        private PutFundsFundIdResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;

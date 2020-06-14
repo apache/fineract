@@ -51,10 +51,9 @@ import org.springframework.stereotype.Component;
 @Path("/standinginstructionrunhistory")
 @Component
 @Scope("singleton")
-@Api(tags = {"Standing Instructions History"})
+@Api(tags = { "Standing Instructions History" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Standing Instructions History", description = "The list capability of history can support pagination and sorting.")
-})
+        @Tag(name = "Standing Instructions History", description = "The list capability of history can support pagination and sorting.") })
 public class StandingInstructionHistoryApiResource {
 
     private final PlatformSecurityContext context;
@@ -76,16 +75,27 @@ public class StandingInstructionHistoryApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Standing Instructions Logged History", httpMethod = "GET", notes = "The list capability of history can support pagination and sorting \n\n" +"Example Requests :\n" + "\n" + "standinginstructionrunhistory\n" + "\n" + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n" + "\n" + "standinginstructionrunhistory?offset=10&limit=50")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse.class)})
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
-            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
-            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
-            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder, @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType,
-            @QueryParam("clientName") @ApiParam(value = "clientName") final String clientName, @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
-            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccount, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
-            @QueryParam("locale") @ApiParam(value = "locale") final String locale, @QueryParam("dateFormat") @ApiParam(value = "dateFormat") final String dateFormat,
-            @QueryParam("fromDate") @ApiParam(value = "fromDate") final DateParam fromDateParam, @QueryParam("toDate") @ApiParam(value = "toDate") final DateParam toDateParam) {
+    @ApiOperation(value = "Standing Instructions Logged History", httpMethod = "GET", notes = "The list capability of history can support pagination and sorting \n\n"
+            + "Example Requests :\n" + "\n" + "standinginstructionrunhistory\n" + "\n"
+            + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n" + "\n" + "standinginstructionrunhistory?offset=10&limit=50")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse.class) })
+    public String retrieveAll(@Context final UriInfo uriInfo,
+            @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
+            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
+            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+            @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
+            @QueryParam("transferType") @ApiParam(value = "transferType") final Integer transferType,
+            @QueryParam("clientName") @ApiParam(value = "clientName") final String clientName,
+            @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccount,
+            @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
+            @QueryParam("locale") @ApiParam(value = "locale") final String locale,
+            @QueryParam("dateFormat") @ApiParam(value = "dateFormat") final String dateFormat,
+            @QueryParam("fromDate") @ApiParam(value = "fromDate") final DateParam fromDateParam,
+            @QueryParam("toDate") @ApiParam(value = "toDate") final DateParam toDateParam) {
 
         this.context.authenticatedUser().validateHasReadPermission(StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME);
 

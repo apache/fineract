@@ -201,7 +201,7 @@ public class FromJsonHelper {
     }
 
     public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String dateFormat,
-                                               final Locale locale) {
+            final Locale locale) {
         return this.helperDelegator.extractLocalTimeNamed(parameterName, element, dateFormat, locale, new HashSet<>());
     }
 
@@ -211,8 +211,7 @@ public class FromJsonHelper {
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale locale) {
-        return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale,
-                new HashSet<>());
+        return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale, new HashSet<>());
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,

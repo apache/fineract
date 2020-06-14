@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.address.data;
 
 public class FieldConfigurationData {
+
     private final long fieldConfigurationId;
 
     private final String entity;
@@ -33,8 +34,8 @@ public class FieldConfigurationData {
 
     private final String validation_regex;
 
-    private FieldConfigurationData(final long fieldConfigurationId, final String entity, final String subentity,
-            final String field, final boolean is_enabled, final boolean is_mandatory, final String validation_regex) {
+    private FieldConfigurationData(final long fieldConfigurationId, final String entity, final String subentity, final String field,
+            final boolean is_enabled, final boolean is_mandatory, final String validation_regex) {
         this.fieldConfigurationId = fieldConfigurationId;
         this.entity = entity;
         this.subentity = subentity;
@@ -44,11 +45,9 @@ public class FieldConfigurationData {
         this.validation_regex = validation_regex;
     }
 
-    public static FieldConfigurationData instance(final long fieldConfigurationId, final String entity,
-            final String subentity, final String field, final boolean is_enabled, final boolean is_mandatory,
-            final String validation_regex) {
-        return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory,
-                validation_regex);
+    public static FieldConfigurationData instance(final long fieldConfigurationId, final String entity, final String subentity,
+            final String field, final boolean is_enabled, final boolean is_mandatory, final String validation_regex) {
+        return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory, validation_regex);
     }
 
     public long getFieldConfigurationId() {

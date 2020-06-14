@@ -32,8 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class OrganisationCreditBureauWritePlatflormServiceImpl
-        implements OrganisationCreditBureauWritePlatflormService {
+public class OrganisationCreditBureauWritePlatflormServiceImpl implements OrganisationCreditBureauWritePlatflormService {
 
     private final PlatformSecurityContext context;
 
@@ -45,8 +44,8 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl
 
     @Autowired
     public OrganisationCreditBureauWritePlatflormServiceImpl(final PlatformSecurityContext context,
-            final OrganisationCreditBureauRepository organisationCreditBureauRepository, final CreditBureauRepository creditBureauRepository,
-            final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final OrganisationCreditBureauRepository organisationCreditBureauRepository,
+            final CreditBureauRepository creditBureauRepository, final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.organisationCreditBureauRepository = organisationCreditBureauRepository;
         this.creditBureauRepository = creditBureauRepository;
@@ -72,7 +71,7 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl
     @Transactional
     @Override
     public CommandProcessingResult updateCreditBureau(JsonCommand command) {
-         this.context.authenticatedUser();
+        this.context.authenticatedUser();
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
         final long creditbureauID = command.longValueOfParameterNamed("creditBureauId");
@@ -85,8 +84,7 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl
 
         organisationCreditBureauRepository.saveAndFlush(orgcb);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(orgcb.getId())
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(orgcb.getId()).build();
 
     }
 

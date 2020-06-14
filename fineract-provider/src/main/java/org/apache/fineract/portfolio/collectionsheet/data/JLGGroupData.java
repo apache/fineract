@@ -34,12 +34,12 @@ public class JLGGroupData {
     private final String levelName;
     private Collection<JLGClientData> clients;
 
-    public static JLGGroupData instance(final Long groupId, final String groupName, final Long staffId, final String staffName, final Long levelId,
-            final String levelName){
+    public static JLGGroupData instance(final Long groupId, final String groupName, final Long staffId, final String staffName,
+            final Long levelId, final String levelName) {
         return new JLGGroupData(groupId, groupName, staffId, staffName, levelId, levelName, null);
     }
 
-    public static JLGGroupData withClients(final JLGGroupData group, Collection<JLGClientData> clients){
+    public static JLGGroupData withClients(final JLGGroupData group, Collection<JLGClientData> clients) {
         return new JLGGroupData(group.groupId, group.groupName, group.staffId, group.staffName, group.levelId, group.levelName, clients);
     }
 
@@ -88,9 +88,7 @@ public class JLGGroupData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof JLGGroupData)) {
-            return false;
-        }
+        if (!(obj instanceof JLGGroupData)) { return false; }
         final JLGGroupData groupData = (JLGGroupData) obj;
         return groupData.groupId.compareTo(this.groupId) == 0;
     }

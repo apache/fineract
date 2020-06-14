@@ -31,7 +31,7 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
     private final String criteriaName;
     private final String createdBy;
     private final Collection<LoanProductData> loanProducts;
-    private Collection<LoanProductData> selectedLoanProducts ;
+    private Collection<LoanProductData> selectedLoanProducts;
     private final Collection<ProvisioningCriteriaDefinitionData> definitions;
     private final Collection<GLAccountData> glAccounts;
 
@@ -49,15 +49,16 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
             Collection<GLAccountData> glAccounts) {
         this.criteriaId = data.criteriaId;
         this.criteriaName = data.criteriaName;
-        this.selectedLoanProducts = data.loanProducts ;
+        this.selectedLoanProducts = data.loanProducts;
         this.loanProducts = loanProducts;
-        this.loanProducts.removeAll(selectedLoanProducts) ;
+        this.loanProducts.removeAll(selectedLoanProducts);
         this.definitions = data.definitions;
         this.glAccounts = glAccounts;
         this.createdBy = data.createdBy;
     }
-    public static ProvisioningCriteriaData toLookup(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
-            final List<ProvisioningCriteriaDefinitionData> definitions) {
+
+    public static ProvisioningCriteriaData toLookup(final Long criteriaId, final String criteriaName,
+            final Collection<LoanProductData> loanProducts, final List<ProvisioningCriteriaDefinitionData> definitions) {
         Collection<GLAccountData> glAccounts = null;
         String createdBy = null;
         return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
@@ -78,14 +79,15 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
         return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
     }
 
-    public static ProvisioningCriteriaData toTemplate(final ProvisioningCriteriaData data, final Collection<ProvisioningCriteriaDefinitionData> definitions,
-            final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts) {
+    public static ProvisioningCriteriaData toTemplate(final ProvisioningCriteriaData data,
+            final Collection<ProvisioningCriteriaDefinitionData> definitions, final Collection<LoanProductData> loanProducts,
+            final Collection<GLAccountData> glAccounts) {
         return new ProvisioningCriteriaData(data, loanProducts, glAccounts);
     }
 
     @Override
     public int compareTo(ProvisioningCriteriaData obj) {
-        if (obj == null ) { return -1; }
+        if (obj == null) { return -1; }
         return obj.criteriaId.compareTo(this.criteriaId);
     }
 }

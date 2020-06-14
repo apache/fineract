@@ -95,7 +95,6 @@ public class SavingsProductHelper {
     private Boolean withgsimID = null;
     private Integer gsimID = null;
 
-
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
 
@@ -138,7 +137,7 @@ public class SavingsProductHelper {
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
         }
-        if(this.isDormancyTrackingActive){
+        if (this.isDormancyTrackingActive) {
             map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
             map.put("daysToInactive", this.daysToInactive);
             map.put("daysToDormancy", this.daysToDormancy);
@@ -147,7 +146,7 @@ public class SavingsProductHelper {
         }
 
         String savingsProductCreateJson = new Gson().toJson(map);
-        LOG.info("{}",savingsProductCreateJson);
+        LOG.info("{}", savingsProductCreateJson);
         return savingsProductCreateJson;
     }
 
@@ -237,7 +236,7 @@ public class SavingsProductHelper {
     }
 
     public SavingsProductHelper withgsimID(final Integer gsimID) {
-        if(withgsimID !=null)   {
+        if (withgsimID != null) {
             this.gsimID = gsimID;
         }
         return this;
@@ -288,8 +287,8 @@ public class SavingsProductHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL, savingsProductJSON, "resourceId");
     }
 
-    public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final Integer generatedProductID) {
+    public static void verifySavingsProductCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer generatedProductID) {
         LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         final String GET_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "/" + generatedProductID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");

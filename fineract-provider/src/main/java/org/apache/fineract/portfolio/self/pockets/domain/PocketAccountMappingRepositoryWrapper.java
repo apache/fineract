@@ -48,11 +48,8 @@ public class PocketAccountMappingRepositoryWrapper {
     }
 
     public PocketAccountMapping findByIdAndPocketIdWithNotFoundException(final Long id, final Long pocketId) {
-        PocketAccountMapping pocketAccountMapping = this.pocketAccountMappingRepository.findByIdAndPocketId(id,
-                pocketId);
-        if (pocketAccountMapping == null) {
-            throw new MappingIdNotLinkedToPocketException(id);
-        }
+        PocketAccountMapping pocketAccountMapping = this.pocketAccountMappingRepository.findByIdAndPocketId(id, pocketId);
+        if (pocketAccountMapping == null) { throw new MappingIdNotLinkedToPocketException(id); }
         return pocketAccountMapping;
 
     }

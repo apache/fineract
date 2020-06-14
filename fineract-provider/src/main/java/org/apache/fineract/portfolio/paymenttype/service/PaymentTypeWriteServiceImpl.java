@@ -93,8 +93,10 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
         if (realCause.getMessage().contains("acc_product_mapping")) {
             throw new PlatformDataIntegrityException("error.msg.payment.type.association.exist",
                     "cannot.delete.payment.type.with.association");
-        } else if (realCause.getMessage().contains("payment_type_id")) { throw new PlatformDataIntegrityException(
-                "error.msg.payment.type.association.exist", "cannot.delete.payment.type.with.association"); }
+        } else if (realCause.getMessage().contains("payment_type_id")) {
+            throw new PlatformDataIntegrityException("error.msg.payment.type.association.exist",
+                    "cannot.delete.payment.type.with.association");
+        }
 
         throw new PlatformDataIntegrityException("error.msg.paymenttypes.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

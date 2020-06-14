@@ -27,8 +27,7 @@ public interface SelfBeneficiariesTPTReadPlatformService {
 
     Collection<SelfBeneficiariesTPTData> retrieveAll();
 
-    Collection<SelfAccountTemplateData> retrieveTPTSelfAccountTemplateData(
-            AppUser user);
+    Collection<SelfAccountTemplateData> retrieveTPTSelfAccountTemplateData(AppUser user);
 
     Long getTransferLimit(Long id, Long accountId, Integer accountType);
 

@@ -30,8 +30,7 @@ public class LookupTableData {
         super();
     }
 
-    public LookupTableData(final String key, final String description,
-                           final List<LookupTableEntry> entries) {
+    public LookupTableData(final String key, final String description, final List<LookupTableEntry> entries) {
         super();
         this.key = key;
         this.description = description;

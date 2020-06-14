@@ -51,9 +51,9 @@ public class AccountTransferDetailAssembler {
     private final LoanAssembler loanAccountAssembler;
 
     @Autowired
-    public AccountTransferDetailAssembler(final ClientRepositoryWrapper clientRepository, final OfficeRepositoryWrapper officeRepositoryWrapper,
-            final SavingsAccountAssembler savingsAccountAssembler, final FromJsonHelper fromApiJsonHelper,
-            final LoanAssembler loanAccountAssembler) {
+    public AccountTransferDetailAssembler(final ClientRepositoryWrapper clientRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
+            final FromJsonHelper fromApiJsonHelper, final LoanAssembler loanAccountAssembler) {
         this.clientRepository = clientRepository;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.savingsAccountAssembler = savingsAccountAssembler;

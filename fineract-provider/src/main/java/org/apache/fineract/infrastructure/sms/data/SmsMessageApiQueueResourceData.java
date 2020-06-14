@@ -115,6 +115,7 @@ public class SmsMessageApiQueueResourceData {
 
     /**
      * Returns the JSOPN representation of the current object.
+     *
      * @return the JSON representation of the current object
      */
     public String toJsonString() {

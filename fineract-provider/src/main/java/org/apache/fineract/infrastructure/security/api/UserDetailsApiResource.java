@@ -58,10 +58,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("oauth")
 @Scope("singleton")
-@Api(tags = {"Fetch authenticated user details"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Fetch authenticated user details", description = "")
-})
+@Api(tags = { "Fetch authenticated user details" })
+@SwaggerDefinition(tags = { @Tag(name = "Fetch authenticated user details", description = "") })
 @SuppressWarnings("deprecation") // TODO FINERACT-1012
 public class UserDetailsApiResource {
 
@@ -73,8 +71,7 @@ public class UserDetailsApiResource {
     @Autowired
     public UserDetailsApiResource(@Qualifier("tokenServices") final ResourceServerTokenServices tokenServices,
             final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext,
-            final TwoFactorUtils twoFactorUtils) {
+            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext, final TwoFactorUtils twoFactorUtils) {
         this.tokenServices = tokenServices;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
@@ -84,7 +81,7 @@ public class UserDetailsApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Fetch authenticated user details\n", notes = "checks the Authentication and returns the set roles and permissions allowed.")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class) })
     public String fetchAuthenticatedUserData(@QueryParam("access_token") @ApiParam(value = "access_token") final String accessToken) {
 
         final Authentication authentication = this.tokenServices.loadAuthentication(accessToken);
@@ -116,13 +113,12 @@ public class UserDetailsApiResource {
             final boolean requireTwoFactorAuth = twoFactorUtils.isTwoFactorAuthEnabled()
                     && !principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(),
-                        principal.getId(), accessToken, requireTwoFactorAuth);
+                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), principal.getId(), accessToken,
+                        requireTwoFactorAuth);
             } else {
 
-                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(),
-                        officeId, officeName, staffId, staffDisplayName, organisationalRole, roles,
-                        permissions, principal.getId(), accessToken, requireTwoFactorAuth);
+                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), officeId, officeName, staffId,
+                        staffDisplayName, organisationalRole, roles, permissions, principal.getId(), accessToken, requireTwoFactorAuth);
             }
             return this.apiJsonSerializerService.serialize(authenticatedUserData);
         }

@@ -39,12 +39,12 @@ public class MoneyHelper {
     private ConfigurationDomainService configurationDomainService;
 
     @PostConstruct
-    // This is a hack, but fixing this is not trivial, because some @Entity domain classes use this helper
+    // This is a hack, but fixing this is not trivial, because some @Entity
+    // domain classes use this helper
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    public void someFunction () {
+    public void someFunction() {
         staticConfigurationDomainService = configurationDomainService;
     }
-
 
     public static RoundingMode getRoundingMode() {
         if (roundingMode == null) {

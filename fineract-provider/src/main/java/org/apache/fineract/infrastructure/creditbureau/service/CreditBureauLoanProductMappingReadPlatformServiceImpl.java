@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements CreditBureauLoanProductMappingReadPlatformService {
+
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
 
@@ -66,8 +67,8 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
             final int stale_period = rs.getInt("staleperiod");
             final boolean is_active = rs.getBoolean("is_active");
 
-            return CreditBureauLoanProductMappingData.instance(mapping_id, orgcbID, alias, credit_bureau_name, loan_product_name,
-                    lpId, is_creditcheck_mandatory, skip_credit_check_in_failure, stale_period, is_active);
+            return CreditBureauLoanProductMappingData.instance(mapping_id, orgcbID, alias, credit_bureau_name, loan_product_name, lpId,
+                    is_creditcheck_mandatory, skip_credit_check_in_failure, stale_period, is_active);
         }
     }
 

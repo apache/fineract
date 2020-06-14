@@ -36,112 +36,113 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
-  private final static Logger LOG = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
-  protected void writeInt(int colIndex, Row row, int value) {
-      row.createCell(colIndex).setCellValue(value);
-  }
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractWorkbookPopulator.class);
 
-  protected void writeLong(int colIndex, Row row, long value) {
-      row.createCell(colIndex).setCellValue(value);
-  }
-
-  protected void writeString(int colIndex, Row row, String value) {
-      row.createCell(colIndex).setCellValue(value);
-  }
-
-  protected void writeBoolean(int colIndex,Row row,Boolean value){
-      row.createCell(colIndex).setCellValue(value);
-  }
-  protected void writeDouble(int colIndex, Row row, double value) {
-      row.createCell(colIndex).setCellValue(value);
-  }
-
-  protected void writeFormula(int colIndex, Row row, String formula) {
-          row.createCell(colIndex).setCellFormula(formula);
-  }
-
-  protected void writeDate(int colIndex, Row row, String value, CellStyle dateCellStyle,String dateFormat) {
-    try {
-        SimpleDateFormat formatinDB=null;
-        if (value.matches("\\d{4}-\\d{1,2}-\\d{1,2}")){
-           formatinDB=new SimpleDateFormat("yyyy-mm-dd");
-        }else if (value.matches("\\d{1,2}/\\d{1,2}/\\d{4}")){
-            formatinDB=new SimpleDateFormat("dd/mm/yyyy");
-        }else if(value.matches("\\d{1,2} \\w{3,12} \\d{4}")){
-            formatinDB=new SimpleDateFormat("dd MMMM yyyy");
-        }
-        Date date1=formatinDB.parse(value);
-        SimpleDateFormat expectedFormat=new SimpleDateFormat(dateFormat);
-        Date date2=expectedFormat.parse(expectedFormat.format(date1));
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date2);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date dateWithoutTime = cal.getTime();
-        row.createCell(colIndex).setCellValue(dateWithoutTime);
-        row.getCell(colIndex).setCellStyle(dateCellStyle);
-    } catch (ParseException pe) {
-      throw new IllegalArgumentException("ParseException");
+    protected void writeInt(int colIndex, Row row, int value) {
+        row.createCell(colIndex).setCellValue(value);
     }
-  }
 
-  protected void writeBigDecimal(int colIndex, Row row, BigDecimal value) {
+    protected void writeLong(int colIndex, Row row, long value) {
+        row.createCell(colIndex).setCellValue(value);
+    }
+
+    protected void writeString(int colIndex, Row row, String value) {
+        row.createCell(colIndex).setCellValue(value);
+    }
+
+    protected void writeBoolean(int colIndex, Row row, Boolean value) {
+        row.createCell(colIndex).setCellValue(value);
+    }
+
+    protected void writeDouble(int colIndex, Row row, double value) {
+        row.createCell(colIndex).setCellValue(value);
+    }
+
+    protected void writeFormula(int colIndex, Row row, String formula) {
+        row.createCell(colIndex).setCellFormula(formula);
+    }
+
+    protected void writeDate(int colIndex, Row row, String value, CellStyle dateCellStyle, String dateFormat) {
+        try {
+            SimpleDateFormat formatinDB = null;
+            if (value.matches("\\d{4}-\\d{1,2}-\\d{1,2}")) {
+                formatinDB = new SimpleDateFormat("yyyy-mm-dd");
+            } else if (value.matches("\\d{1,2}/\\d{1,2}/\\d{4}")) {
+                formatinDB = new SimpleDateFormat("dd/mm/yyyy");
+            } else if (value.matches("\\d{1,2} \\w{3,12} \\d{4}")) {
+                formatinDB = new SimpleDateFormat("dd MMMM yyyy");
+            }
+            Date date1 = formatinDB.parse(value);
+            SimpleDateFormat expectedFormat = new SimpleDateFormat(dateFormat);
+            Date date2 = expectedFormat.parse(expectedFormat.format(date1));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date2);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            Date dateWithoutTime = cal.getTime();
+            row.createCell(colIndex).setCellValue(dateWithoutTime);
+            row.getCell(colIndex).setCellStyle(dateCellStyle);
+        } catch (ParseException pe) {
+            throw new IllegalArgumentException("ParseException");
+        }
+    }
+
+    protected void writeBigDecimal(int colIndex, Row row, BigDecimal value) {
         row.createCell(colIndex).setCellValue(((value != null) ? value.doubleValue() : 0));
     }
 
-  protected void setOfficeDateLookupTable(Sheet sheet, List<OfficeData> offices, int officeNameCol,
-      int activationDateCol,String dateFormat) {
-      if(offices!=null){
-        Workbook workbook = sheet.getWorkbook();
-        CellStyle dateCellStyle = workbook.createCellStyle();
-        short df = workbook.createDataFormat().getFormat(dateFormat);
-        dateCellStyle.setDataFormat(df);
-        int rowIndex = 0;
-        for (OfficeData office : offices) {
-            Row row = sheet.createRow(++rowIndex);
-            writeString(officeNameCol, row, office.name().trim().replaceAll("[ )(]", "_"));
-            writeDate(activationDateCol, row,
-                    "" + office.getOpeningDate().getDayOfMonth() + "/"
-                            + office.getOpeningDate().getMonthOfYear() + "/" + office.getOpeningDate().getYear(),
-                    dateCellStyle,dateFormat);
-
-            }
-        }
-  }
-
-  protected void setClientAndGroupDateLookupTable(Sheet sheet, List<ClientData> clients,
-            List<GroupGeneralData> groups, int nameCol, int activationDateCol,boolean containsClientExtId,
-          String dateFormat) {
+    protected void setOfficeDateLookupTable(Sheet sheet, List<OfficeData> offices, int officeNameCol, int activationDateCol,
+            String dateFormat) {
+        if (offices != null) {
             Workbook workbook = sheet.getWorkbook();
             CellStyle dateCellStyle = workbook.createCellStyle();
             short df = workbook.createDataFormat().getFormat(dateFormat);
             dateCellStyle.setDataFormat(df);
             int rowIndex = 0;
-            SimpleDateFormat outputFormat = new SimpleDateFormat(dateFormat);
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = null;
-            try {
-                if (clients != null){
-                    for (ClientData client : clients) {
-                        Row row = sheet.getRow(++rowIndex);
-                        if (row == null) {
-                            row = sheet.createRow(rowIndex);
-                        }
-                        writeString(nameCol, row, client.displayName().replaceAll("[ )(] ", "_") + "(" + client.id() + ")");
+            for (OfficeData office : offices) {
+                Row row = sheet.createRow(++rowIndex);
+                writeString(officeNameCol, row, office.name().trim().replaceAll("[ )(]", "_"));
+                writeDate(
+                        activationDateCol, row, "" + office.getOpeningDate().getDayOfMonth() + "/"
+                                + office.getOpeningDate().getMonthOfYear() + "/" + office.getOpeningDate().getYear(),
+                        dateCellStyle, dateFormat);
 
-                        if (client.getActivationDate() != null) {
-                            date = inputFormat.parse(client.getActivationDate().toString());
-                            writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle,dateFormat);
-                        }
-                        if (containsClientExtId){
-                            if (client.getExternalId()!=null){
-                                writeString(nameCol+1,row,client.getExternalId());
-                            }
-                        }
+            }
+        }
+    }
 
+    protected void setClientAndGroupDateLookupTable(Sheet sheet, List<ClientData> clients, List<GroupGeneralData> groups, int nameCol,
+            int activationDateCol, boolean containsClientExtId, String dateFormat) {
+        Workbook workbook = sheet.getWorkbook();
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        short df = workbook.createDataFormat().getFormat(dateFormat);
+        dateCellStyle.setDataFormat(df);
+        int rowIndex = 0;
+        SimpleDateFormat outputFormat = new SimpleDateFormat(dateFormat);
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+        try {
+            if (clients != null) {
+                for (ClientData client : clients) {
+                    Row row = sheet.getRow(++rowIndex);
+                    if (row == null) {
+                        row = sheet.createRow(rowIndex);
                     }
+                    writeString(nameCol, row, client.displayName().replaceAll("[ )(] ", "_") + "(" + client.id() + ")");
+
+                    if (client.getActivationDate() != null) {
+                        date = inputFormat.parse(client.getActivationDate().toString());
+                        writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle, dateFormat);
+                    }
+                    if (containsClientExtId) {
+                        if (client.getExternalId() != null) {
+                            writeString(nameCol + 1, row, client.getExternalId());
+                        }
+                    }
+
+                }
             }
             if (groups != null) {
                 for (GroupGeneralData group : groups) {
@@ -158,9 +159,9 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
                 }
             }
-            } catch (ParseException e) {
-                LOG.error("Problem occurred in setClientAndGroupDateLookupTable function",e);
-            }
+        } catch (ParseException e) {
+            LOG.error("Problem occurred in setClientAndGroupDateLookupTable function", e);
+        }
     }
 
 }

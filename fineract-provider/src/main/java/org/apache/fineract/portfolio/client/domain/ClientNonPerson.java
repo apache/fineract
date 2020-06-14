@@ -67,9 +67,8 @@ public class ClientNonPerson extends AbstractPersistableCustom {
     @Column(name = "remarks", length = 150, nullable = true)
     private String remarks;
 
-
-    public static ClientNonPerson createNew(final Client client, final CodeValue constitution, final CodeValue mainBusinessLine, String incorpNumber, LocalDate incorpValidityTill, String remarks)
-    {
+    public static ClientNonPerson createNew(final Client client, final CodeValue constitution, final CodeValue mainBusinessLine,
+            String incorpNumber, LocalDate incorpValidityTill, String remarks) {
         return new ClientNonPerson(client, constitution, mainBusinessLine, incorpNumber, incorpValidityTill, remarks);
     }
 
@@ -77,17 +76,17 @@ public class ClientNonPerson extends AbstractPersistableCustom {
         //
     }
 
-    private ClientNonPerson(final Client client, final CodeValue constitution, final CodeValue mainBusinessLine, final String incorpNumber, final LocalDate incorpValidityTill, final String remarks)
-    {
-        if(client != null) {
+    private ClientNonPerson(final Client client, final CodeValue constitution, final CodeValue mainBusinessLine, final String incorpNumber,
+            final LocalDate incorpValidityTill, final String remarks) {
+        if (client != null) {
             this.client = client;
         }
 
-        if(constitution != null) {
+        if (constitution != null) {
             this.constitution = constitution;
         }
 
-        if(mainBusinessLine != null) {
+        if (mainBusinessLine != null) {
             this.mainBusinessLine = mainBusinessLine;
         }
 
@@ -119,7 +118,8 @@ public class ClientNonPerson extends AbstractPersistableCustom {
     }
 
     private void validateIncorpValidityTillDate(final Client client, final List<ApiParameterError> dataValidationErrors) {
-        if (getIncorpValidityTillLocalDate() != null && client.dateOfBirthLocalDate() != null && client.dateOfBirthLocalDate().isAfter(getIncorpValidityTillLocalDate())) {
+        if (getIncorpValidityTillLocalDate() != null && client.dateOfBirthLocalDate() != null
+                && client.dateOfBirthLocalDate().isAfter(getIncorpValidityTillLocalDate())) {
 
             final String defaultUserMessage = "incorpvaliditytill date cannot be after the incorporation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.incorpValidityTill.after.incorp.date",
@@ -200,7 +200,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.mainBusinessLineIdParamName, newValue);
         }
 
-        //validate();
+        // validate();
 
         return actualChanges;
 

@@ -24,6 +24,7 @@ import java.io.File;
  * Immutable data object representing report mailing job email data.
  **/
 public class ReportMailingJobEmailData {
+
     private final String to;
     private final String text;
     private final String subject;

@@ -52,10 +52,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/surveys")
 @Component
 @Scope("singleton")
-@Api(tags = {"Spm-Surveys"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "Spm-Surveys", description = "")
-})
+@Api(tags = { "Spm-Surveys" })
+@SwaggerDefinition(tags = { @Tag(name = "Spm-Surveys", description = "") })
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -72,14 +70,14 @@ public class SpmApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @ApiOperation(value = "List all Surveys", notes = "")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class, responseContainer = "list")})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = SurveyData.class, responseContainer = "list") })
     public List<SurveyData> fetchAllSurveys(@QueryParam("isActive") final Boolean isActive) {
         this.securityContext.authenticatedUser();
         final List<SurveyData> result = new ArrayList<>();
         List<Survey> surveys = null;
-        if(isActive != null && isActive){
+        if (isActive != null && isActive) {
             surveys = this.spmService.fetchValidSurveys();
-        }else{
+        } else {
             surveys = this.spmService.fetchAllSurveys();
         }
         if (surveys != null) {
@@ -96,7 +94,7 @@ public class SpmApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @ApiOperation(value = "Retrieve a Survey", notes = "")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "", response = SurveyData.class) })
     public SurveyData findSurvey(@PathParam("id") @ApiParam(value = "Enter id") final Long id) {
         this.securityContext.authenticatedUser();
         final Survey survey = this.spmService.findById(id);
@@ -107,8 +105,9 @@ public class SpmApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @ApiOperation(value = "Create a Survey", notes = "Adds a new survey to collect client related data.\n" + "\n" + "Mandatory Fields\n" + "\n" + "countryCode, key, name, questions, responses, sequenceNo, text, value")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
+    @ApiOperation(value = "Create a Survey", notes = "Adds a new survey to collect client related data.\n" + "\n" + "Mandatory Fields\n"
+            + "\n" + "countryCode, key, name, questions, responses, sequenceNo, text, value")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
     public String createSurvey(@ApiParam(value = "Create survey") final SurveyData surveyData) {
         this.securityContext.authenticatedUser();
         final Survey survey = SurveyMapper.map(surveyData, new Survey());
@@ -136,14 +135,14 @@ public class SpmApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @ApiOperation(value = "Deactivate Survey", notes = "")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
     public void activateOrDeactivateSurvey(@PathParam("id") final Long id, @QueryParam("command") final String command) {
         this.securityContext.authenticatedUser();
-        if(command != null && command.equalsIgnoreCase("activate")){
+        if (command != null && command.equalsIgnoreCase("activate")) {
             this.spmService.activateSurvey(id);
-        }else if(command != null && command.equalsIgnoreCase("deactivate")){
+        } else if (command != null && command.equalsIgnoreCase("deactivate")) {
             this.spmService.deactivateSurvey(id);
-        }else{
+        } else {
             throw new UnrecognizedQueryParamException("command", command);
         }
 

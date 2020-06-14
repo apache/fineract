@@ -26,17 +26,17 @@ import java.util.Set;
  * Created by Chirag Gupta on 12/17/17.
  */
 final class FloatingRatesApiResourceSwagger {
-    private FloatingRatesApiResourceSwagger() {
-    }
+
+    private FloatingRatesApiResourceSwagger() {}
 
     @ApiModel(value = "PostFloatingRatesRequest")
     public final static class PostFloatingRatesRequest {
-        private PostFloatingRatesRequest() {
-        }
+
+        private PostFloatingRatesRequest() {}
 
         final class PostFloatingRatesRatePeriods {
-            private PostFloatingRatesRatePeriods() {
-            }
+
+            private PostFloatingRatesRatePeriods() {}
 
             @ApiModelProperty(example = "19 November 2015")
             public String fromDate;
@@ -59,8 +59,8 @@ final class FloatingRatesApiResourceSwagger {
 
     @ApiModel(value = "PostFloatingRatesResponse")
     public final static class PostFloatingRatesResponse {
-        private PostFloatingRatesResponse() {
-        }
+
+        private PostFloatingRatesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer resourceId;
@@ -68,8 +68,8 @@ final class FloatingRatesApiResourceSwagger {
 
     @ApiModel(value = "GetFloatingRatesResponse")
     public final static class GetFloatingRatesResponse {
-        private GetFloatingRatesResponse() {
-        }
+
+        private GetFloatingRatesResponse() {}
 
         @ApiModelProperty(example = "1")
         public Integer id;
@@ -91,12 +91,12 @@ final class FloatingRatesApiResourceSwagger {
 
     @ApiModel(value = "GetFloatingRatesFloatingRateIdResponse")
     public final static class GetFloatingRatesFloatingRateIdResponse {
-        private GetFloatingRatesFloatingRateIdResponse() {
-        }
+
+        private GetFloatingRatesFloatingRateIdResponse() {}
 
         final class GetFloatingRatesRatePeriods {
-            private GetFloatingRatesRatePeriods() {
-            }
+
+            private GetFloatingRatesRatePeriods() {}
 
             @ApiModelProperty(example = "1")
             public Integer id;
@@ -139,8 +139,8 @@ final class FloatingRatesApiResourceSwagger {
 
     @ApiModel(value = "PutFloatingRatesFloatingRateIdRequest")
     public final static class PutFloatingRatesFloatingRateIdRequest {
-        private PutFloatingRatesFloatingRateIdRequest() {
-        }
+
+        private PutFloatingRatesFloatingRateIdRequest() {}
 
         @ApiModelProperty(example = "Floating Rate 1")
         public String name;
@@ -153,12 +153,12 @@ final class FloatingRatesApiResourceSwagger {
 
     @ApiModel(value = "PutFloatingRatesFloatingRateIdResponse")
     public final static class PutFloatingRatesFloatingRateIdResponse {
-        private PutFloatingRatesFloatingRateIdResponse() {
-        }
+
+        private PutFloatingRatesFloatingRateIdResponse() {}
 
         final class PutFloatingRatesChanges {
-            private PutFloatingRatesChanges() {
-            }
+
+            private PutFloatingRatesChanges() {}
 
             public Set<PostFloatingRatesRequest.PostFloatingRatesRatePeriods> ratePeriods;
         }

@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  **/
 @SuppressWarnings({ "rawtypes" })
 public class LoanRescheduleRequestTest {
+
     private final static Logger LOG = LoggerFactory.getLogger(LoanRescheduleRequestTest.class);
     private ResponseSpecification responseSpec;
     private ResponseSpecification generalResponseSpec;
@@ -98,15 +99,12 @@ public class LoanRescheduleRequestTest {
     private void createLoanProductEntity() {
         LOG.info("---------------------------------CREATING LOAN PRODUCT------------------------------------------");
 
-        final String loanProductJSON = new LoanProductTestBuilder()
-                .withPrincipal(loanPrincipalAmount)
-                .withNumberOfRepayments(numberOfRepayments)
-                .withinterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear()
-                .build(null);
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
+                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
+                .withInterestRateFrequencyTypeAsYear().build(null);
 
         this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-        LOG.info("Successfully created loan product  (ID:{}) " , this.loanProductId);
+        LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
     }
 
     /**
@@ -115,26 +113,16 @@ public class LoanRescheduleRequestTest {
     private void createLoanEntity() {
         LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder()
-                .withPrincipal(loanPrincipalAmount)
-                .withLoanTermFrequency(numberOfRepayments)
-                .withLoanTermFrequencyAsMonths()
-                .withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths()
-                .withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeAsDays()
-                .withInterestRatePerPeriod(interestRatePerPeriod)
-                .withLoanTermFrequencyAsMonths()
-                .withSubmittedOnDate(dateString)
-                .withExpectedDisbursementDate(dateString)
-                .withPrincipalGrace("2")
-                .withInterestGrace("2")
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
+                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments)
+                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments()
+                .withInterestCalculationPeriodTypeAsDays().withInterestRatePerPeriod(interestRatePerPeriod).withLoanTermFrequencyAsMonths()
+                .withSubmittedOnDate(dateString).withExpectedDisbursementDate(dateString).withPrincipalGrace("2").withInterestGrace("2")
                 .build(this.clientId.toString(), this.loanProductId.toString(), null);
 
         this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
-        LOG.info("Sucessfully created loan (ID: {} )" , this.loanId);
+        LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
         this.approveLoanApplication();
         this.disburseLoan();
@@ -145,9 +133,9 @@ public class LoanRescheduleRequestTest {
      **/
     private void approveLoanApplication() {
 
-        if(this.loanId != null) {
+        if (this.loanId != null) {
             this.loanTransactionHelper.approveLoan(this.dateString, this.loanId);
-            LOG.info("Successfully approved loan (ID: {} )" , this.loanId);
+            LOG.info("Successfully approved loan (ID: {} )", this.loanId);
         }
     }
 
@@ -156,9 +144,9 @@ public class LoanRescheduleRequestTest {
      **/
     private void disburseLoan() {
 
-        if(this.loanId != null) {
+        if (this.loanId != null) {
             this.loanTransactionHelper.disburseLoan(this.dateString, this.loanId);
-            LOG.info("Successfully disbursed loan (ID: {} )" , this.loanId);
+            LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
     }
 
@@ -173,7 +161,7 @@ public class LoanRescheduleRequestTest {
         this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
         this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
 
-        LOG.info("Successfully created loan reschedule request (ID: {} )" , this.loanRescheduleRequestId);
+        LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
     }
 
     @Test
@@ -191,9 +179,9 @@ public class LoanRescheduleRequestTest {
         this.loanRescheduleRequestHelper.rejectLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
 
         final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean)response.get("rejected"));
+        assertTrue((Boolean) response.get("rejected"));
 
-        LOG.info("Successfully rejected loan reschedule request (ID: {} )" , this.loanRescheduleRequestId);
+        LOG.info("Successfully rejected loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
     }
 
     @Test
@@ -206,15 +194,16 @@ public class LoanRescheduleRequestTest {
         this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, requestJSON);
 
         final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
-        assertTrue((Boolean)response.get("approved"));
+        assertTrue((Boolean) response.get("approved"));
 
-        final Integer numberOfRepayments = (Integer) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId, "numberOfRepayments");
+        final Integer numberOfRepayments = (Integer) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+                "numberOfRepayments");
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
         assertEquals(12, numberOfRepayments, "NUMBER OF REPAYMENTS is NOK");
         assertEquals(118000, totalExpectedRepayment, "TOTAL EXPECTED REPAYMENT is NOK");
 
-        LOG.info("Successfully approved loan reschedule request (ID: {})" , this.loanRescheduleRequestId);
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
     }
 }

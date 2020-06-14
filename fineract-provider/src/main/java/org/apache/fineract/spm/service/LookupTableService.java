@@ -33,8 +33,7 @@ public class LookupTableService {
     private final LookupTableRepository lookupTableRepository;
 
     @Autowired
-    public LookupTableService(final PlatformSecurityContext securityContext,
-                              final LookupTableRepository lookupTableRepository) {
+    public LookupTableService(final PlatformSecurityContext securityContext, final LookupTableRepository lookupTableRepository) {
         super();
         this.securityContext = securityContext;
         this.lookupTableRepository = lookupTableRepository;

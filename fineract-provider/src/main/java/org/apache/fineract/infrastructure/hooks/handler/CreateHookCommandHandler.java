@@ -34,8 +34,7 @@ public class CreateHookCommandHandler implements NewCommandSourceHandler {
     private final HookWritePlatformService writePlatformService;
 
     @Autowired
-    public CreateHookCommandHandler(
-            final HookWritePlatformService writePlatformService) {
+    public CreateHookCommandHandler(final HookWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

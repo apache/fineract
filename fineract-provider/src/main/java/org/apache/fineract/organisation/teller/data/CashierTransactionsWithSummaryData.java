@@ -37,19 +37,9 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
 
     private final Page<CashierTransactionData> cashierTransactions;
 
-    private CashierTransactionsWithSummaryData(
-            final Page<CashierTransactionData> cashierTransactions,
-            final BigDecimal sumCashAllocation,
-            final BigDecimal sumInwardCash,
-            final BigDecimal sumOutwardCash,
-            final BigDecimal sumCashSettlement,
-            final BigDecimal netCash,
-            final String officeName,
-            final Long tellerId,
-            final String tellerName,
-            final Long cashierId,
-            final String cashierName
-            ) {
+    private CashierTransactionsWithSummaryData(final Page<CashierTransactionData> cashierTransactions, final BigDecimal sumCashAllocation,
+            final BigDecimal sumInwardCash, final BigDecimal sumOutwardCash, final BigDecimal sumCashSettlement, final BigDecimal netCash,
+            final String officeName, final Long tellerId, final String tellerName, final Long cashierId, final String cashierName) {
         this.cashierTransactions = cashierTransactions;
         this.sumCashAllocation = sumCashAllocation;
         this.sumInwardCash = sumInwardCash;
@@ -63,30 +53,14 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
         this.cashierName = cashierName;
     }
 
-    public static CashierTransactionsWithSummaryData instance(
-            final Page<CashierTransactionData> cashierTransactions,
-            final BigDecimal sumCashAllocation,
-            final BigDecimal sumInwardCash,
-            final BigDecimal sumOutwardCash,
-            final BigDecimal sumCashSettlement,
-            final String officeName,
-            final Long tellerId,
-            final String tellerName,
-            final Long cashierId,
-            final String cashierName
-            ) {
+    public static CashierTransactionsWithSummaryData instance(final Page<CashierTransactionData> cashierTransactions,
+            final BigDecimal sumCashAllocation, final BigDecimal sumInwardCash, final BigDecimal sumOutwardCash,
+            final BigDecimal sumCashSettlement, final String officeName, final Long tellerId, final String tellerName, final Long cashierId,
+            final String cashierName) {
 
-        final BigDecimal netCash =
-                sumCashAllocation.add(sumInwardCash).
-                    subtract(sumOutwardCash).
-                    subtract(sumCashSettlement);
-        return new CashierTransactionsWithSummaryData(
-                cashierTransactions,
-                sumCashAllocation,
-                sumInwardCash,
-                sumOutwardCash,
-                sumCashSettlement, netCash,
-                officeName, tellerId, tellerName, cashierId, cashierName);
+        final BigDecimal netCash = sumCashAllocation.add(sumInwardCash).subtract(sumOutwardCash).subtract(sumCashSettlement);
+        return new CashierTransactionsWithSummaryData(cashierTransactions, sumCashAllocation, sumInwardCash, sumOutwardCash,
+                sumCashSettlement, netCash, officeName, tellerId, tellerName, cashierId, cashierName);
     }
 
     public BigDecimal getSumCashAllocation() {
@@ -128,6 +102,7 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     public String getCashierName() {
         return cashierName;
     }
+
     public Page<CashierTransactionData> getCashierTransactions() {
         return cashierTransactions;
     }

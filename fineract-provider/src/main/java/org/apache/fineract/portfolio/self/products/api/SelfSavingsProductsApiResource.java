@@ -54,8 +54,7 @@ public class SelfSavingsProductsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId,
-            @Context final UriInfo uriInfo) {
+    public String retrieveAll(@QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId, @Context final UriInfo uriInfo) {
 
         this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
         return this.savingsProductsApiResource.retrieveAll(uriInfo);

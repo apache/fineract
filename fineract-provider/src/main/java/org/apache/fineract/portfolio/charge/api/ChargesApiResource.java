@@ -59,10 +59,11 @@ import org.springframework.stereotype.Component;
 @Path("/charges")
 @Component
 @Scope("singleton")
-@Api(tags = {"Charges"})
+@Api(tags = { "Charges" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Charges", description = "Its typical for MFIs to add extra costs for their financial products. These are typically Fees or Penalties.\n" + "\n" + "A Charge on fineract platform is what we use to model both Fees and Penalties.\n" + "\n" + "At present we support defining charges for use with Client accounts and both loan and saving products.")
-})
+        @Tag(name = "Charges", description = "Its typical for MFIs to add extra costs for their financial products. These are typically Fees or Penalties.\n"
+                + "\n" + "A Charge on fineract platform is what we use to model both Fees and Penalties.\n" + "\n"
+                + "At present we support defining charges for use with Client accounts and both loan and saving products.") })
 public class ChargesApiResource {
 
     private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty", "active",
@@ -93,8 +94,10 @@ public class ChargesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Charges", httpMethod = "GET", notes = "Returns the list of defined charges.\n" + "\n" + "Example Requests:\n" + "\n" + "charges")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class, responseContainer = "List")})
+    @ApiOperation(value = "Retrieve Charges", httpMethod = "GET", notes = "Returns the list of defined charges.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "charges")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class, responseContainer = "List") })
     public String retrieveAllCharges(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -109,8 +112,9 @@ public class ChargesApiResource {
     @Path("{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve a Charge", httpMethod = "GET", notes = "Returns the details of a defined Charge.\n" + "\n" + "Example Requests:\n" + "\n" + "charges/1")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class)})
+    @ApiOperation(value = "Retrieve a Charge", httpMethod = "GET", notes = "Returns the details of a defined Charge.\n" + "\n"
+            + "Example Requests:\n" + "\n" + "charges/1")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class) })
     public String retrieveCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -130,8 +134,9 @@ public class ChargesApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Retrieve Charge Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "charges/template\n")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesTemplateResponse.class)})
+    @ApiOperation(value = "Retrieve Charge Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "charges/template\n")
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesTemplateResponse.class) })
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -146,8 +151,9 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create/Define a Charge", httpMethod = "POST", notes = "Define a new charge that can later be associated with loans and savings through their respective product definitions or directly on each account instance.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PostChargesRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PostChargesResponse.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PostChargesRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PostChargesResponse.class) })
     public String createCharge(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createCharge().withJson(apiRequestBodyAsJson).build();
@@ -162,9 +168,11 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Charge", httpMethod = "PUT", notes = "Updates the details of a Charge.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PutChargesChargeIdRequest.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PutChargesChargeIdResponse.class)})
-    public String updateCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PutChargesChargeIdRequest.class) })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PutChargesChargeIdResponse.class) })
+    public String updateCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCharge(chargeId).withJson(apiRequestBodyAsJson).build();
 
@@ -178,7 +186,7 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Charge", httpMethod = "DELETE", notes = "Deletes a Charge.")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.DeleteChargesChargeIdResponse.class)})
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.DeleteChargesChargeIdResponse.class) })
     public String deleteCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCharge(chargeId).build();

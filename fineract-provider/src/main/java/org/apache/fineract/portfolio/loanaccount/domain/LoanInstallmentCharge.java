@@ -264,7 +264,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         }
     }
 
-
     public void updateInstallment(LoanRepaymentScheduleInstallment installment) {
         this.installment = installment;
     }
@@ -275,12 +274,12 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
 
         Money amountToDeductOnThisCharge = Money.zero(incrementBy.getCurrency());
         if (incrementBy.isGreaterThanOrEqualTo(amountPaidToDate)) {
-                amountToDeductOnThisCharge = amountPaidToDate;
+            amountToDeductOnThisCharge = amountPaidToDate;
             amountPaidToDate = Money.zero(incrementBy.getCurrency());
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = this.amount;
         } else {
-                amountToDeductOnThisCharge = incrementBy;
+            amountToDeductOnThisCharge = incrementBy;
             amountPaidToDate = amountPaidToDate.minus(incrementBy);
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
@@ -294,9 +293,9 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
     public LoanCharge getLoancharge() {
         return this.loancharge;
     }
+
     public LoanRepaymentScheduleInstallment getInstallment() {
         return this.installment;
     }
-
 
 }

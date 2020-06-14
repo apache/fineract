@@ -35,8 +35,8 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 
 @Entity
-@Table(name = "twofactor_access_token",
-        uniqueConstraints = {@UniqueConstraint(columnNames = { "token", "appuser_id" }, name = "token_appuser_UNIQUE")})
+@Table(name = "twofactor_access_token", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "token", "appuser_id" }, name = "token_appuser_UNIQUE") })
 public class TFAccessToken extends AbstractPersistableCustom {
 
     @Column(name = "token", nullable = false, length = 32)
@@ -57,8 +57,7 @@ public class TFAccessToken extends AbstractPersistableCustom {
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    public TFAccessToken() {
-    }
+    public TFAccessToken() {}
 
     public static TFAccessToken create(String token, AppUser user, int tokenLiveTimeInSec) {
         DateTime validFrom = DateUtils.getLocalDateTimeOfTenant().toDateTime();
@@ -76,13 +75,11 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public boolean isValid() {
-        return this.enabled && isDateInTheFuture(getValidToDate())
-                && isDateInThePast(getValidFromDate());
+        return this.enabled && isDateInTheFuture(getValidToDate()) && isDateInThePast(getValidFromDate());
     }
 
     public AccessTokenData toTokenData() {
-        return new AccessTokenData(this.token, getValidFromDate().toDateTime(),
-                getValidToDate().toDateTime());
+        return new AccessTokenData(this.token, getValidFromDate().toDateTime(), getValidToDate().toDateTime());
     }
 
     public String getToken() {

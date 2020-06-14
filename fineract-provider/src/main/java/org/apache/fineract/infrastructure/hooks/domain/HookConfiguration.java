@@ -42,14 +42,11 @@ public class HookConfiguration extends AbstractPersistableCustom {
     @Column(name = "field_value", nullable = false, length = 100)
     private String fieldValue;
 
-    public static HookConfiguration createNewWithoutHook(
-            final String fieldType, final String fieldName,
-            final String fieldValue) {
+    public static HookConfiguration createNewWithoutHook(final String fieldType, final String fieldName, final String fieldValue) {
         return new HookConfiguration(null, fieldType, fieldName, fieldValue);
     }
 
-    public static HookConfiguration createNew(final Hook hook, final String fieldType,
-            final String fieldName, final String fieldValue) {
+    public static HookConfiguration createNew(final Hook hook, final String fieldType, final String fieldName, final String fieldValue) {
         return new HookConfiguration(hook, fieldType, fieldName, fieldValue);
     }
 
@@ -57,8 +54,7 @@ public class HookConfiguration extends AbstractPersistableCustom {
         //
     }
 
-    private HookConfiguration(final Hook hook, final String fieldType,
-            final String fieldName, final String fieldValue) {
+    private HookConfiguration(final Hook hook, final String fieldType, final String fieldName, final String fieldValue) {
         this.hook = hook;
         this.fieldType = fieldType;
         this.fieldName = fieldName;

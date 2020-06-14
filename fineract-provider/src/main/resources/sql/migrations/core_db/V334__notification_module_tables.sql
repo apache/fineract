@@ -44,5 +44,3 @@ CREATE TABLE IF NOT EXISTS `notification_mapper` (
 ALTER TABLE `notification_mapper`
   ADD CONSTRAINT `notification_mapper_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`),
   ADD CONSTRAINT `notification_mapper_ibfk_3` FOREIGN KEY (`notification_id`) REFERENCES `notification_generator` (`id`);
-
-

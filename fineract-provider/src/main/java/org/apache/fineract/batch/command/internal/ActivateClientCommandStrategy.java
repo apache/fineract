@@ -29,9 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle
- * activation of a pending client. It passes the contents of the body from the
- * BatchRequest to
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to
+ * handle activation of a pending client. It passes the contents of the body
+ * from the BatchRequest to
  * {@link org.apache.fineract.portfolio.client.api.ClientsApiResource} and gets
  * back the response. This class will also catch any errors raised by
  * {@link org.apache.fineract.portfolio.client.api.ClientsApiResource} and map
@@ -68,7 +68,8 @@ public class ActivateClientCommandStrategy implements CommandStrategy {
         // Try-catch blocks to map exceptions to appropriate status codes
         try {
 
-            // Calls 'activate' function from 'ClientsApiResource' to activate a client
+            // Calls 'activate' function from 'ClientsApiResource' to activate a
+            // client
             responseBody = clientsApiResource.activate(clientId, "activate", request.getBody());
 
             response.setStatusCode(200);

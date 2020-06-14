@@ -50,7 +50,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistableCustom {
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount account;
 
-    @OneToMany(mappedBy = "depositAccountInterestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(mappedBy = "depositAccountInterestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<DepositAccountInterestRateChartSlabs> chartSlabs = new HashSet<>();
 
     protected DepositAccountInterestRateChart() {

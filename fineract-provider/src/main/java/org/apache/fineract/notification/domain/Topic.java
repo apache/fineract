@@ -43,8 +43,7 @@ public class Topic extends AbstractPersistableCustom {
     @Column(name = "member_type")
     private String memberType;
 
-    public Topic() {
-    }
+    public Topic() {}
 
     public Topic(String title, Boolean enabled, Long entityId, String entityType, String memberType) {
         this.title = title.trim();

@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Extends
- * {@link org.apache.fineract.infrastructure.core.serialization.FromJsonHelper} to
- * de-serialize the incoming String into a JSON List of type
+ * {@link org.apache.fineract.infrastructure.core.serialization.FromJsonHelper}
+ * to de-serialize the incoming String into a JSON List of type
  * {@link org.apache.fineract.batch.domain.BatchRequest}
  *
  * @author Rishabh Shukla

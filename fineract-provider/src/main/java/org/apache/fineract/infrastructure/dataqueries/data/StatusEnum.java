@@ -31,7 +31,7 @@ public enum StatusEnum {
 
     private final Integer code;
 
-    public  Integer getCode() {
+    public Integer getCode() {
         return code;
     }
 

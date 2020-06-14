@@ -68,8 +68,8 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
                 this.repository.save(likelihood);
 
                 if (likelihood.isActivateCommand(command)) {
-                    List<Likelihood> likelihoods = this.repository
-                            .findByPpiNameAndLikeliHoodId(likelihood.getPpiName(), likelihood.getId());
+                    List<Likelihood> likelihoods = this.repository.findByPpiNameAndLikeliHoodId(likelihood.getPpiName(),
+                            likelihood.getId());
 
                     for (Likelihood aLikelihood : likelihoods) {
                         aLikelihood.disable();

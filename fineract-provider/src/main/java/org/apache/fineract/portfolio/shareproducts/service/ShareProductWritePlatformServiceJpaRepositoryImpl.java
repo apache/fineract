@@ -86,11 +86,11 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(product.getId()) //
                     .build();
-        }catch (DataIntegrityViolationException dve) {
+        } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(jsonCommand, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -117,11 +117,11 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withEntityId(productId) //
                     .with(changes) //
                     .build();
-        }catch (DataIntegrityViolationException dve) {
+        } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(jsonCommand, throwable, dve);
             return CommandProcessingResult.empty();
         }
@@ -132,19 +132,19 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
         try {
             this.serializer.validateDividendDetails(jsonCommand);
             JsonElement element = jsonCommand.parsedJson();
-            final LocalDate dividendPeriodStartDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                    ShareProductApiConstants.dividendPeriodStartDateParamName, element);
-            final LocalDate dividendPeriodEndDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                    ShareProductApiConstants.dividendPeriodEndDateParamName, element);
-            final BigDecimal dividendAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    ShareProductApiConstants.dividendAmountParamName, element);
+            final LocalDate dividendPeriodStartDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(ShareProductApiConstants.dividendPeriodStartDateParamName, element);
+            final LocalDate dividendPeriodEndDate = this.fromApiJsonHelper
+                    .extractLocalDateNamed(ShareProductApiConstants.dividendPeriodEndDateParamName, element);
+            final BigDecimal dividendAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.dividendAmountParamName, element);
 
-            final ShareProductDividendPayOutDetails dividendPayOutDetails = this.shareProductDividendAssembler.calculateDividends(
-                    productId, dividendAmount, dividendPeriodStartDate, dividendPeriodEndDate);
-            if (dividendPayOutDetails == null) { throw new DividentProcessingException("eligible.shares.not.found",
-                    "No eligible shares for creating dividends"); }
+            final ShareProductDividendPayOutDetails dividendPayOutDetails = this.shareProductDividendAssembler.calculateDividends(productId,
+                    dividendAmount, dividendPeriodStartDate, dividendPeriodEndDate);
+            if (dividendPayOutDetails == null) {
+                throw new DividentProcessingException("eligible.shares.not.found", "No eligible shares for creating dividends");
+            }
             this.shareProductDividentPayOutDetailsRepository.save(dividendPayOutDetails);
-
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SHARE_PRODUCT_DIVIDENDS_CREATE,
                     constructEntityMap(BusinessEntity.SHARE_PRODUCT, productId));
@@ -165,8 +165,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
         try {
             ShareProductDividendPayOutDetails dividendPayOutDetails = this.shareProductDividentPayOutDetailsRepository
                     .findOneWithNotFoundDetection(PayOutDetailId);
-            if (dividendPayOutDetails.getStatus().isApproved()) { throw new DividentProcessingException("alreay.approved",
-                    "Can't approve already appoved  dividends "); }
+            if (dividendPayOutDetails.getStatus().isApproved()) {
+                throw new DividentProcessingException("alreay.approved", "Can't approve already appoved  dividends ");
+            }
             dividendPayOutDetails.approveDividendPayout();
             this.shareProductDividentPayOutDetailsRepository.save(dividendPayOutDetails);
             return new CommandProcessingResultBuilder() //
@@ -183,8 +184,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
         try {
             ShareProductDividendPayOutDetails dividendPayOutDetails = this.shareProductDividentPayOutDetailsRepository
                     .findOneWithNotFoundDetection(PayOutDetailId);
-            if (dividendPayOutDetails.getStatus().isApproved()) { throw new DividentProcessingException("alreay.approved",
-                    "Can't delete already appoved  dividends "); }
+            if (dividendPayOutDetails.getStatus().isApproved()) {
+                throw new DividentProcessingException("alreay.approved", "Can't delete already appoved  dividends ");
+            }
             this.shareProductDividentPayOutDetailsRepository.delete(dividendPayOutDetails);
             return new CommandProcessingResultBuilder() //
                     .withEntityId(PayOutDetailId) //
@@ -200,20 +202,20 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                 "Unknown data integrity issue with resource.");
     }
 
-
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
         if (realCause.getMessage().contains("'name'")) {
             final String name = command.stringValueOfParameterNamed(ShareProductApiConstants.name_paramname);
-            throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name", "Share Product with name `" + name
-                    + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name",
+                    "Share Product with name `" + name + "` already exists", "name", name);
         }
 
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
+            final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
         Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;

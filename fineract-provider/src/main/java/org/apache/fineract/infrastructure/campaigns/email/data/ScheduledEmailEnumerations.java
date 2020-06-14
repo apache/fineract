@@ -23,6 +23,7 @@ import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailS
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class ScheduledEmailEnumerations {
+
     public static EnumOptionData emailAttachementFileFormat(final Integer emailAttachementFileFormatId) {
         return emailAttachementFileFormat(ScheduledEmailAttachmentFileFormat.instance(emailAttachementFileFormatId));
     }
@@ -42,8 +43,8 @@ public class ScheduledEmailEnumerations {
         return enumOptionData;
     }
 
-    public static EnumOptionData stretchyReportDateOption(final ScheduledEmailStretchyReportParamDateOption
-            reportMailingJobStretchyReportParamDateOption) {
+    public static EnumOptionData stretchyReportDateOption(
+            final ScheduledEmailStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption) {
         EnumOptionData enumOptionData = null;
 
         if (reportMailingJobStretchyReportParamDateOption != null) {

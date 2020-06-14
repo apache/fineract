@@ -21,13 +21,14 @@ package org.apache.fineract.infrastructure.reportmailingjob.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when report mailing job resources are not found.
+ * A {@link RuntimeException} thrown when report mailing job resources are not
+ * found.
  **/
 @SuppressWarnings("serial")
 public class ReportMailingJobNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public ReportMailingJobNotFoundException(final Long reportMailingJobId) {
-        super("error.msg.report.mailing.job.id.invalid", "Report mailing job with identifier " + reportMailingJobId +
-                " does not exist", reportMailingJobId);
+        super("error.msg.report.mailing.job.id.invalid", "Report mailing job with identifier " + reportMailingJobId + " does not exist",
+                reportMailingJobId);
     }
 }

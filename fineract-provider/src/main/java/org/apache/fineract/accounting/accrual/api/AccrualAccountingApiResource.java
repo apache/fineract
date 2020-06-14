@@ -32,7 +32,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-// import org.apache.fineract.accounting.accrual.swagger.runaccuralPost;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -45,10 +44,9 @@ import org.springframework.stereotype.Component;
 @Path("/runaccruals")
 @Component
 @Scope("singleton")
-@Api(tags = {"Periodic Accrual Accounting"})
+@Api(tags = { "Periodic Accrual Accounting" })
 @SwaggerDefinition(tags = {
-        @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n")
-})
+        @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n") })
 public class AccrualAccountingApiResource {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -66,9 +64,12 @@ public class AccrualAccountingApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Executes Periodic Accrual Accounting", httpMethod = "POST", notes = "Mandatory Fields\n" + "\n" + "tillDate\n")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", required = true, type = "body", dataTypeClass = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class, value = "Request Body\n" + "\n" + "Field Descriptions: \n" + "tillDate: \n" + "which specifies periodic accruals should happen till the given Date" )})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
-    public String executePeriodicAccrualAccounting( @ApiParam(hidden = true) final String jsonRequestBody) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", required = true, type = "body", dataTypeClass = AccrualAccountingApiResourceSwagger.PostRunaccrualsRequest.class, value = "Request Body\n"
+                    + "\n" + "Field Descriptions: \n" + "tillDate: \n"
+                    + "which specifies periodic accruals should happen till the given Date") })
+    @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
+    public String executePeriodicAccrualAccounting(@ApiParam(hidden = true) final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().excuteAccrualAccounting().withJson(jsonRequestBody).build();
 

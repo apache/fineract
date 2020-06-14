@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public enum RecalculationFrequencyType {
+
     INVALID(0, "interestRecalculationFrequencyType.invalid"), //
     SAME_AS_REPAYMENT_PERIOD(1, "interestRecalculationFrequencyType.same.as.repayment.period"), //
     DAILY(2, "interestRecalculationFrequencyType.daily"), //

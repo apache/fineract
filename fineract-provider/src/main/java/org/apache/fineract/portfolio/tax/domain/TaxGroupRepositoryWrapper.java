@@ -33,7 +33,6 @@ public class TaxGroupRepositoryWrapper {
     }
 
     public TaxGroup findOneWithNotFoundDetection(final Long id) {
-        return this.repository.findById(id)
-                .orElseThrow(() -> new TaxGroupNotFoundException(id));
+        return this.repository.findById(id).orElseThrow(() -> new TaxGroupNotFoundException(id));
     }
 }

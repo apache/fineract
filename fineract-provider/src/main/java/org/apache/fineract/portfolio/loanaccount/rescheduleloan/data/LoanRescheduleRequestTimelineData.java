@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the timeline events of a loan reschedule request
+ * Immutable data object represent the timeline events of a loan reschedule
+ * request
  **/
 @SuppressWarnings("unused")
 public class LoanRescheduleRequestTimelineData {
+
     private final LocalDate submittedOnDate;
     private final String submittedByUsername;
     private final String submittedByFirstname;
@@ -40,9 +42,10 @@ public class LoanRescheduleRequestTimelineData {
     private final String rejectedByFirstname;
     private final String rejectedByLastname;
 
-    public LoanRescheduleRequestTimelineData(final LocalDate submittedOnDate, final String submittedByUsername, final String submittedByFirstname,
-            final String submittedByLastname, final LocalDate approvedOnDate, final String approvedByUsername, final String approvedByFirstname,
-            final String approvedByLastname, final LocalDate rejectedOnDate, final String rejectedByUsername, final String rejectedByFirstname,
+    public LoanRescheduleRequestTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
+            final String submittedByFirstname, final String submittedByLastname, final LocalDate approvedOnDate,
+            final String approvedByUsername, final String approvedByFirstname, final String approvedByLastname,
+            final LocalDate rejectedOnDate, final String rejectedByUsername, final String rejectedByFirstname,
             final String rejectedByLastname) {
 
         this.submittedOnDate = submittedOnDate;

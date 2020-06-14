@@ -29,13 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle
- * disburse of a loan. It passes the contents of the body from the
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to
+ * handle disburse of a loan. It passes the contents of the body from the
  * BatchRequest to
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and gets
- * back the response. This class will also catch any errors raised by
- * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and map
- * those errors to appropriate status codes in BatchResponse.
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and
+ * gets back the response. This class will also catch any errors raised by
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and
+ * map those errors to appropriate status codes in BatchResponse.
  *
  * @author Rishabh Shukla
  *
@@ -68,12 +68,14 @@ public class DisburseLoanCommandStrategy implements CommandStrategy {
         // Try-catch blocks to map exceptions to appropriate status codes
         try {
 
-            // Calls 'disburse' function from 'LoansApiResource' to disburse a loan
+            // Calls 'disburse' function from 'LoansApiResource' to disburse a
+            // loan
             responseBody = loansApiResource.stateTransitions(loanId, "disburse", request.getBody());
 
             response.setStatusCode(200);
 
-            // Sets the body of the response after the successful disbursal of the loan
+            // Sets the body of the response after the successful disbursal of
+            // the loan
             response.setBody(responseBody);
 
         } catch (RuntimeException e) {

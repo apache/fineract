@@ -33,8 +33,8 @@ public class SavingsAccountDataDTO {
     private final AppUser appliedBy;
     private final DateTimeFormatter fmt;
 
-    public SavingsAccountDataDTO(final Client client, final Group group, final Long savingsProductId,
-            final LocalDate applicationDate, final AppUser appliedBy, final DateTimeFormatter fmt) {
+    public SavingsAccountDataDTO(final Client client, final Group group, final Long savingsProductId, final LocalDate applicationDate,
+            final AppUser appliedBy, final DateTimeFormatter fmt) {
         this.client = client;
         this.group = group;
         this.savingsProductId = savingsProductId;

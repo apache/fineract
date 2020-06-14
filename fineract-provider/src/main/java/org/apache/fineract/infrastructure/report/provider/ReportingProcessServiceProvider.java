@@ -47,8 +47,9 @@ public class ReportingProcessServiceProvider implements ApplicationContextAware 
     }
 
     public ReportingProcessService findReportingProcessService(final String reportType) {
-        if (this.reportingProcessServices.containsKey(reportType)) { return (ReportingProcessService) this.applicationContext
-                .getBean(this.reportingProcessServices.get(reportType)); }
+        if (this.reportingProcessServices.containsKey(reportType)) {
+            return (ReportingProcessService) this.applicationContext.getBean(this.reportingProcessServices.get(reportType));
+        }
         return null;
     }
 

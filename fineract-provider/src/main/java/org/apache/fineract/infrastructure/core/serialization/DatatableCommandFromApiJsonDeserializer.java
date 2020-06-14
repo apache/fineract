@@ -45,16 +45,16 @@ public class DatatableCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList("datatableName", "apptableName", "multiRow",
-            "columns"));
-    private final Set<String> supportedParametersForCreateColumns = new HashSet<>(Arrays.asList("name", "type", "length",
-            "mandatory", "code"));
-    private final Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList("apptableName", "changeColumns",
-            "addColumns", "dropColumns"));
-    private final Set<String> supportedParametersForAddColumns = new HashSet<>(Arrays.asList("name", "type", "length", "mandatory",
-            "after", "code"));
-    private final Set<String> supportedParametersForChangeColumns = new HashSet<>(Arrays.asList("name", "newName", "length",
-            "mandatory", "after", "code", "newCode"));
+    private final Set<String> supportedParametersForCreate = new HashSet<>(
+            Arrays.asList("datatableName", "apptableName", "multiRow", "columns"));
+    private final Set<String> supportedParametersForCreateColumns = new HashSet<>(
+            Arrays.asList("name", "type", "length", "mandatory", "code"));
+    private final Set<String> supportedParametersForUpdate = new HashSet<>(
+            Arrays.asList("apptableName", "changeColumns", "addColumns", "dropColumns"));
+    private final Set<String> supportedParametersForAddColumns = new HashSet<>(
+            Arrays.asList("name", "type", "length", "mandatory", "after", "code"));
+    private final Set<String> supportedParametersForChangeColumns = new HashSet<>(
+            Arrays.asList("name", "newName", "length", "mandatory", "after", "code", "newCode"));
     private final Set<String> supportedParametersForDropColumns = new HashSet<>(Arrays.asList("name"));
     private final Object[] supportedColumnTypes = { "string", "number", "boolean", "decimal", "date", "datetime", "text", "dropdown" };
     private final Object[] supportedApptableNames = { "m_loan", "m_savings_account", "m_client", "m_group", "m_center", "m_office",
@@ -152,8 +152,10 @@ public class DatatableCommandFromApiJsonDeserializer {
         // parameter
         // has been specified is necessary in order to avoid JSON requests with
         // no parameters
-        if (!json.matches("(?s)\\A\\{.*?(\\\".*?\\\"\\s*?:\\s*?)+.*?\\}\\z")) { throw new PlatformDataIntegrityException(
-                "error.msg.invalid.request.body.no.parameters", "Provided JSON request body does not have any parameters."); }
+        if (!json.matches("(?s)\\A\\{.*?(\\\".*?\\\"\\s*?:\\s*?)+.*?\\}\\z")) {
+            throw new PlatformDataIntegrityException("error.msg.invalid.request.body.no.parameters",
+                    "Provided JSON request body does not have any parameters.");
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParametersForUpdate);
@@ -250,7 +252,9 @@ public class DatatableCommandFromApiJsonDeserializer {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
     }
 }

@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FullFilSurveyCommandHandler implements NewCommandSourceHandler {
 
-
     private final WriteSurveyService writePlatformService;
 
     @Autowired
@@ -45,6 +44,6 @@ public class FullFilSurveyCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.fullFillSurvey (command.entityName(),command.entityId(),command);
+        return this.writePlatformService.fullFillSurvey(command.entityName(), command.entityId(), command);
     }
 }
