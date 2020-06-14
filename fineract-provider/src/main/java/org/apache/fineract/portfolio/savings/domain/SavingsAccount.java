@@ -2928,6 +2928,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         transactions.size();
         charges.size();
         savingsOfficerHistory.size();
+        if(group != null) { Office dummyOffice = group.getOffice(); } // Ensure lazy loading of group if set
     }
 
     public void updateSavingsAccountSummary(final List<SavingsAccountTransaction> transactions) {
