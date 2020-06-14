@@ -1024,6 +1024,9 @@ public class LoanProductData implements Serializable {
 
     @Override
     public boolean equals(final Object obj) {
+        if (!(obj instanceof LoanProductData)) {
+            return false;
+        }
         final LoanProductData loanProductData = (LoanProductData) obj;
         return loanProductData.id.equals(this.id);
     }
