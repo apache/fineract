@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static io.restassured.path.json.JsonPath.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class CalendarHelper {
         final String CLIENT_URL = "/fineract-provider/api/v1/groups/" + generatedGroupId + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         final String responseCalendarDetailsinJSON = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL,
                 "collectionMeetingCalendar");
-        final Integer responseCalendarId = from(responseCalendarDetailsinJSON).get("id");
+        final Integer responseCalendarId = JsonPath.from(responseCalendarDetailsinJSON).get("id");
         assertEquals(generatedCalendarId, responseCalendarId, "ERROR IN CREATING THE CALENDAR");
     }
 
