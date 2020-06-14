@@ -585,6 +585,7 @@ task integrationTest(type:Test) {
 }
 
 integrationTest {
+	useJUnitPlatform()
 	testLogging { // FINERACT-927
 		events "skipped", "failed"
 		showStandardStreams = false
@@ -592,12 +593,14 @@ integrationTest {
 	}
 }
 test {
+	useJUnitPlatform()
 	testLogging { // FINERACT-927
 		events "skipped", "failed"
 		showStandardStreams = false
 		exceptionFormat "full"
 	}
 }
+
 
 import groovy.sql.Sql
 
