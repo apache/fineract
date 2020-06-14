@@ -179,7 +179,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
         final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper.findOneByClientIdAndAddressId(clientId, addressId);
 
-        if (clientAddressObj == null) { throw new AddressNotFoundException(clientId); }
+        if (clientAddressObj == null) {
+            throw new AddressNotFoundException(clientId);
+        }
 
         final Address addobj = this.addressRepository.getOne(addressId);
 

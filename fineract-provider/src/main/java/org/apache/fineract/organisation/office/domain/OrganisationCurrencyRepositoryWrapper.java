@@ -46,7 +46,9 @@ public class OrganisationCurrencyRepositoryWrapper {
 
     public OrganisationCurrency findOneWithNotFoundDetection(final String currencyCode) {
         final OrganisationCurrency organisationCurrency = this.repository.findOneByCode(currencyCode);
-        if (organisationCurrency == null) { throw new OrganizationalCurrencyNotFoundException(currencyCode); }
+        if (organisationCurrency == null) {
+            throw new OrganizationalCurrencyNotFoundException(currencyCode);
+        }
         return organisationCurrency;
     }
 }

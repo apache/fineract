@@ -588,12 +588,16 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     private boolean determineIfFullyPaid() {
-        if (this.amount == null) { return true; }
+        if (this.amount == null) {
+            return true;
+        }
         return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
     }
 
     private BigDecimal calculateOutstanding() {
-        if (this.amount == null) { return null; }
+        if (this.amount == null) {
+            return null;
+        }
         BigDecimal amountPaidLocal = BigDecimal.ZERO;
         if (this.amountPaid != null) {
             amountPaidLocal = this.amountPaid;
@@ -851,7 +855,9 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public LoanInstallmentCharge getInstallmentLoanCharge(final LocalDate periodDueDate) {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (periodDueDate.isEqual(loanChargePerInstallment.getRepaymentInstallment().getDueDate())) { return loanChargePerInstallment; }
+            if (periodDueDate.isEqual(loanChargePerInstallment.getRepaymentInstallment().getDueDate())) {
+                return loanChargePerInstallment;
+            }
         }
         return null;
     }

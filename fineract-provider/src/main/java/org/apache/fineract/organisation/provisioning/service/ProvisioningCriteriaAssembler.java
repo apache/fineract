@@ -85,7 +85,9 @@ public class ProvisioningCriteriaAssembler {
 
         for (int i = 0; i < def.size(); i++) {
             for (int j = i + 1; j < def.size(); j++) {
-                if (def.get(i).isOverlapping(def.get(j))) { throw new ProvisioningCriteriaOverlappingDefinitionException(); }
+                if (def.get(i).isOverlapping(def.get(j))) {
+                    throw new ProvisioningCriteriaOverlappingDefinitionException();
+                }
             }
         }
     }

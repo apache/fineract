@@ -151,7 +151,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
 
         validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public Map<String, Object> update(JsonCommand command) {
@@ -235,7 +237,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             this.recurrenceInterval = newValue;
         }
         validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         return actualChanges;
     }
 

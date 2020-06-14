@@ -219,7 +219,9 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     @Override
@@ -227,7 +229,9 @@ public class FixedDepositProduct extends SavingsProduct {
         final Set<InterestRateChart> charts = setOfCharts();
 
         for (InterestRateChart chart : charts) {
-            if (chart.getId().equals(chartId)) { return chart; }
+            if (chart.getId().equals(chartId)) {
+                return chart;
+            }
         }
         return null;
     }

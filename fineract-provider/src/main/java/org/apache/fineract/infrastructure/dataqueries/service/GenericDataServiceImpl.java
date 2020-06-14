@@ -303,7 +303,9 @@ public class GenericDataServiceImpl implements GenericDataService {
                 + "'order by ORDINAL_POSITION";
 
         final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql);
-        if (columnDefinitions.next()) { return columnDefinitions; }
+        if (columnDefinitions.next()) {
+            return columnDefinitions;
+        }
 
         throw new DatatableNotFoundException(datatable);
     }

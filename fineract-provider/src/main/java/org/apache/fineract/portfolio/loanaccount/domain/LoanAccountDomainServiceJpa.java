@@ -374,11 +374,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = loan.group();
         if (group != null) {
-            if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
+            if (group.isNotActive()) {
+                throw new GroupNotActiveException(group.getId());
+            }
         }
     }
 

@@ -146,7 +146,9 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
             baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM).jsonArrayNotEmpty();
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForUpdate(final String json) {
@@ -231,7 +233,9 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 

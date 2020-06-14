@@ -102,7 +102,9 @@ public class DepositProductDataValidator {
     }
 
     public void validateForFixedDepositCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, FIXED_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
@@ -127,7 +129,9 @@ public class DepositProductDataValidator {
     }
 
     public void validateForFixedDepositUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, FIXED_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
@@ -151,7 +155,9 @@ public class DepositProductDataValidator {
     }
 
     public void validateForRecurringDepositCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
@@ -178,7 +184,9 @@ public class DepositProductDataValidator {
     }
 
     public void validateForRecurringDepositUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
@@ -602,7 +610,9 @@ public class DepositProductDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private boolean isCashBasedAccounting(final Integer accountingRuleType) {

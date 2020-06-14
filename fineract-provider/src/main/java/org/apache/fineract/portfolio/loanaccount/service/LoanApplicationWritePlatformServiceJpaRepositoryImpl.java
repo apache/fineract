@@ -307,7 +307,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
                         loanProduct);
             }
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
 
             final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
 
@@ -472,8 +474,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         }
 
                     }
-                } else // for applications other than GLIM
-                {
+                } else { // for applications other than GLIM
                     newLoanApplication.updateAccountNo(this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat));
                     this.loanRepositoryWrapper.save(newLoanApplication);
                 }
@@ -826,7 +827,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(clientIdParamName)) {
                 final Long clientId = command.longValueOfParameterNamed(clientIdParamName);
                 final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-                if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+                if (client.isNotActive()) {
+                    throw new ClientNotActiveException(clientId);
+                }
 
                 existingLoanApplication.updateClient(client);
             }
@@ -835,7 +838,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(groupIdParamName)) {
                 final Long groupId = command.longValueOfParameterNamed(groupIdParamName);
                 final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
-                if (group.isNotActive()) { throw new GroupNotActiveException(groupId); }
+                if (group.isNotActive()) {
+                    throw new GroupNotActiveException(groupId);
+                }
 
                 existingLoanApplication.updateGroup(group);
             }
@@ -869,7 +874,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     existingLoanApplication.setInterestRateDifferential(null);
                     existingLoanApplication.setIsFloatingInterestRate(null);
                 }
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
 
             existingLoanApplication.updateIsInterestRecalculationEnabled();
@@ -1281,7 +1288,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         final BigDecimal principal = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);
         fromApiJsonDeserializer.validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     @Transactional
@@ -1658,11 +1667,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = loan.group();
         if (group != null) {
-            if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
+            if (group.isNotActive()) {
+                throw new GroupNotActiveException(group.getId());
+            }
         }
     }
 
@@ -1711,7 +1724,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
             FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation,
                     productId, officeId);
-            if (officeToLoanProductMappingList == null) { throw new NotOfficeSpecificProductException(productId, officeId); }
+            if (officeToLoanProductMappingList == null) {
+                throw new NotOfficeSpecificProductException(productId, officeId);
+            }
 
         }
     }

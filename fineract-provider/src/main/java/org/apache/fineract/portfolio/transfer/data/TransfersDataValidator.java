@@ -72,12 +72,16 @@ public final class TransfersDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForClientsTransferBetweenGroups(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
@@ -110,7 +114,9 @@ public final class TransfersDataValidator {
 
     public void validateForProposeClientTransfer(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
@@ -132,7 +138,9 @@ public final class TransfersDataValidator {
     }
 
     public void validateForAcceptClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
@@ -161,7 +169,9 @@ public final class TransfersDataValidator {
     }
 
     public void validateForProposeAndAcceptClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
@@ -195,7 +205,9 @@ public final class TransfersDataValidator {
     }
 
     public void validateForRejectClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
@@ -211,7 +223,9 @@ public final class TransfersDataValidator {
     }
 
     public void validateForWithdrawClientTransfer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);

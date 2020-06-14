@@ -52,7 +52,9 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
 
     @Override
     public GuarantorCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = GuarantorJSONinputParams.getAllValues();

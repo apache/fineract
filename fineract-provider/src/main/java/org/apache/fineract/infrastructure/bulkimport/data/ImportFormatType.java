@@ -37,7 +37,9 @@ public enum ImportFormatType {
 
     public static ImportFormatType of(String name) {
         for (ImportFormatType type : ImportFormatType.values()) {
-            if (type.name().equalsIgnoreCase(name)) { return type; }
+            if (type.name().equalsIgnoreCase(name)) {
+                return type;
+            }
         }
         throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension", "Uploaded file extension is not recognized.");
     }

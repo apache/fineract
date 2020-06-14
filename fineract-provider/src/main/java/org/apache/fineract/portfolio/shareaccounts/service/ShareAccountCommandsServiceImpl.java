@@ -47,7 +47,9 @@ public class ShareAccountCommandsServiceImpl implements AccountsCommandsService 
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonBody);
         final JsonCommand jsonCommand = JsonCommand.from(jsonBody, parsedCommand, this.fromApiJsonHelper, null, null, null, null, null,
                 null, null, null, null, null, null, null);
-        if (ShareAccountApiConstants.APPROVE_COMMAND.equals(command)) { return approveShareAccount(accountId, jsonCommand); }
+        if (ShareAccountApiConstants.APPROVE_COMMAND.equals(command)) {
+            return approveShareAccount(accountId, jsonCommand);
+        }
         if (ShareAccountApiConstants.REJECT_COMMAND.equals(command)) {
             return rejectShareAccount(accountId, jsonCommand);
         } else if (ShareAccountApiConstants.APPLY_ADDITIONALSHARES_COMMAND.equals(command)) {

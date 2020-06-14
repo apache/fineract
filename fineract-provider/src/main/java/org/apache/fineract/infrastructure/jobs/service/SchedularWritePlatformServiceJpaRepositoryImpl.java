@@ -116,7 +116,9 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     public CommandProcessingResult updateJobDetail(final Long jobId, final JsonCommand command) {
         this.dataValidator.validateForUpdate(command.json());
         final ScheduledJobDetail scheduledJobDetail = findByJobId(jobId);
-        if (scheduledJobDetail == null) { throw new JobNotFoundException(String.valueOf(jobId)); }
+        if (scheduledJobDetail == null) {
+            throw new JobNotFoundException(String.valueOf(jobId));
+        }
         final Map<String, Object> changes = scheduledJobDetail.update(command);
         if (!changes.isEmpty()) {
             this.scheduledJobDetailsRepository.saveAndFlush(scheduledJobDetail);

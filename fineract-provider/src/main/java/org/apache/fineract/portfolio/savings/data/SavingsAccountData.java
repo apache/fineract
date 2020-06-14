@@ -729,14 +729,18 @@ public class SavingsAccountData implements Serializable {
 
     private SavingsAccountChargeData getWithdrawalFee() {
         for (SavingsAccountChargeData charge : this.charges()) {
-            if (charge.isWithdrawalFee()) { return charge; }
+            if (charge.isWithdrawalFee()) {
+                return charge;
+            }
         }
         return null;
     }
 
     private SavingsAccountChargeData getAnnualFee() {
         for (SavingsAccountChargeData charge : this.charges()) {
-            if (charge.isAnnualFee()) { return charge; }
+            if (charge.isAnnualFee()) {
+                return charge;
+            }
         }
         return null;
     }
@@ -764,9 +768,15 @@ public class SavingsAccountData implements Serializable {
     @Override
     public boolean equals(final Object obj) {
 
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof SavingsAccountData)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof SavingsAccountData)) {
+            return false;
+        }
         final SavingsAccountData rhs = (SavingsAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
     }

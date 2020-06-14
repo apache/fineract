@@ -423,7 +423,9 @@ public class SavingsProductData implements Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof SavingsProductData)) { return false; }
+        if (!(obj instanceof SavingsProductData)) {
+            return false;
+        }
         final SavingsProductData productData = (SavingsProductData) obj;
         return productData.id.compareTo(this.id) == 0;
     }

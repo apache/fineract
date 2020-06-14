@@ -43,18 +43,24 @@ public class IPv4Helper {
     private final static Logger LOG = LoggerFactory.getLogger(IPv4Helper.class);
 
     public static long ipAddressToLong(String ipAddress) {
-        if (ipAddress == null || ipAddress.isEmpty()) { throw new IllegalArgumentException("ip address cannot be null or empty"); }
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            throw new IllegalArgumentException("ip address cannot be null or empty");
+        }
 
         String[] octets = ipAddress.split(java.util.regex.Pattern.quote("."));
 
-        if (octets.length != 4) { throw new IllegalArgumentException("invalid ip address"); }
+        if (octets.length != 4) {
+            throw new IllegalArgumentException("invalid ip address");
+        }
 
         long ip = 0;
 
         for (int i = 3; i >= 0; i--) {
             long octet = Long.parseLong(octets[3 - i]);
 
-            if (octet > 255 || octet < 0) { throw new IllegalArgumentException("invalid ip address"); }
+            if (octet > 255 || octet < 0) {
+                throw new IllegalArgumentException("invalid ip address");
+            }
 
             ip |= octet << (i * 8);
         }
@@ -73,7 +79,9 @@ public class IPv4Helper {
      */
     public static String longToIpAddress(long ip) {
         // if ip is bigger than 255.255.255.255 or smaller than 0.0.0.0
-        if (ip > 4294967295L || ip < 0) { throw new IllegalArgumentException("invalid ip"); }
+        if (ip > 4294967295L || ip < 0) {
+            throw new IllegalArgumentException("invalid ip");
+        }
 
         StringBuilder ipAddress = new StringBuilder();
 

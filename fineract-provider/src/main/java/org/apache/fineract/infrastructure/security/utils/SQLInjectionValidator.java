@@ -35,15 +35,21 @@ public class SQLInjectionValidator {
     public final static void validateSQLInput(final String sqlSearch) {
         String lowerCaseSQL = sqlSearch.toLowerCase();
         for (String ddl : DDL_COMMANDS) {
-            if (lowerCaseSQL.contains(ddl)) { throw new SQLInjectionException(); }
+            if (lowerCaseSQL.contains(ddl)) {
+                throw new SQLInjectionException();
+            }
         }
 
         for (String dml : DML_COMMANDS) {
-            if (lowerCaseSQL.contains(dml)) { throw new SQLInjectionException(); }
+            if (lowerCaseSQL.contains(dml)) {
+                throw new SQLInjectionException();
+            }
         }
 
         for (String comments : COMMENTS) {
-            if (lowerCaseSQL.contains(comments)) { throw new SQLInjectionException(); }
+            if (lowerCaseSQL.contains(comments)) {
+                throw new SQLInjectionException();
+            }
         }
 
         // Removing the space before and after '=' operator
@@ -100,21 +106,29 @@ public class SQLInjectionValidator {
                 }
             }
         }
-        if (injectionFound) { throw new SQLInjectionException(); }
+        if (injectionFound) {
+            throw new SQLInjectionException();
+        }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);
         Matcher matcher = pattern.matcher(sqlSearch);
-        if (!matcher.matches()) { throw new SQLInjectionException(); }
+        if (!matcher.matches()) {
+            throw new SQLInjectionException();
+        }
     }
 
     public final static void validateAdhocQuery(final String sqlSearch) {
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
         for (String ddl : DDL_COMMANDS) {
-            if (lowerCaseSQL.startsWith(ddl)) { throw new SQLInjectionException(); }
+            if (lowerCaseSQL.startsWith(ddl)) {
+                throw new SQLInjectionException();
+            }
         }
 
         for (String comments : COMMENTS) {
-            if (lowerCaseSQL.contains(comments)) { throw new SQLInjectionException(); }
+            if (lowerCaseSQL.contains(comments)) {
+                throw new SQLInjectionException();
+            }
         }
 
         // Removing the space before and after '=' operator
@@ -171,10 +185,14 @@ public class SQLInjectionValidator {
                 }
             }
         }
-        if (injectionFound) { throw new SQLInjectionException(); }
+        if (injectionFound) {
+            throw new SQLInjectionException();
+        }
 
         Pattern pattern = Pattern.compile(SQL_PATTERN);
         Matcher matcher = pattern.matcher(sqlSearch);
-        if (!matcher.matches()) { throw new SQLInjectionException(); }
+        if (!matcher.matches()) {
+            throw new SQLInjectionException();
+        }
     }
 }

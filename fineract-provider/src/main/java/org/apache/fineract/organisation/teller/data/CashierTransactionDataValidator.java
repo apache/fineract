@@ -103,7 +103,9 @@ public class CashierTransactionDataValidator {
                     + "') or Time(c.end_time) BETWEEN TIME('" + startTime + "') and TIME('" + endTime + "')) ";
         }
         int count = this.jdbcTemplate.queryForObject(sql, Integer.class);
-        if (count > 0) { throw new CashierAlreadyAlloacated(); }
+        if (count > 0) {
+            throw new CashierAlreadyAlloacated();
+        }
     }
 
     public void validateOnLoanDisbursal(AppUser user, String currencyCode, BigDecimal transactionAmount) {

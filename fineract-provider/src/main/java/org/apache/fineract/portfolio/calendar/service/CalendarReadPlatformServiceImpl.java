@@ -162,7 +162,9 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final List<CalendarData> result = this.jdbcTemplate.query(sql, rm,
                 new Object[] { entityId, entityTypeId, CalendarType.COLLECTION.getValue() });
 
-        if (!result.isEmpty() && result.size() > 0) { return result.get(0); }
+        if (!result.isEmpty() && result.size() > 0) {
+            return result.get(0);
+        }
 
         return null;
     }
@@ -231,7 +233,9 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     private Collection<LocalDate> generateRecurringDate(final CalendarData calendarData, final LocalDate fromDate, final LocalDate tillDate,
             final int maxCount) {
 
-        if (!calendarData.isRepeating()) { return null; }
+        if (!calendarData.isRepeating()) {
+            return null;
+        }
         final String rrule = calendarData.getRecurrence();
         /**
          * Start date or effective from date of calendar recurrence.
@@ -264,7 +268,9 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         try {
             int calendarInstaneId = this.jdbcTemplate.queryForObject(query, new Object[] { entityId, calendarId, entityTypeId },
                     Integer.class);
-            if (calendarInstaneId > 0) { return true; }
+            if (calendarInstaneId > 0) {
+                return true;
+            }
             return false;
         } catch (final EmptyResultDataAccessException e) {
             return false;

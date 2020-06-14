@@ -55,7 +55,9 @@ public class LikelihoodDataValidator {
 
     public void validateForUpdate(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_LIKELIHOOD_DATA_PARAMETERS);
@@ -71,7 +73,9 @@ public class LikelihoodDataValidator {
             baseDataValidator.reset().parameter(LikelihoodApiConstants.ACTIVE).value(enabledBool).validateForBooleanValue();
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 }

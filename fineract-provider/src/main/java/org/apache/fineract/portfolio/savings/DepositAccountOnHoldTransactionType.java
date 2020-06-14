@@ -48,7 +48,9 @@ public enum DepositAccountOnHoldTransactionType {
 
     public static DepositAccountOnHoldTransactionType fromInt(final Integer transactionType) {
 
-        if (transactionType == null) { return DepositAccountOnHoldTransactionType.INVALID; }
+        if (transactionType == null) {
+            return DepositAccountOnHoldTransactionType.INVALID;
+        }
 
         DepositAccountOnHoldTransactionType savingsAccountTransactionType = DepositAccountOnHoldTransactionType.INVALID;
         switch (transactionType) {

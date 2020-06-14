@@ -52,9 +52,15 @@ public class ExternalServicePropertiesPK implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof ExternalServicePropertiesPK)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof ExternalServicePropertiesPK)) {
+            return false;
+        }
         final ExternalServicePropertiesPK rhs = (ExternalServicePropertiesPK) obj;
         return new EqualsBuilder() //
                 .append(this.externalServiceId, rhs.externalServiceId) //

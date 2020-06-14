@@ -166,7 +166,9 @@ public class SchedulerJobHelper {
         // jobRunStartTime >= beforeExecuteTime (or timeout)
         await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId), lastRunHistory -> {
             String jobRunStartText = lastRunHistory.get("jobRunStartTime");
-            if (jobRunStartText == null) { return false; }
+            if (jobRunStartText == null) {
+                return false;
+            }
             Instant jobRunStartTime = df.parse(jobRunStartText, Instant::from);
             return jobRunStartTime.equals(beforeExecuteTime) || jobRunStartTime.isAfter(beforeExecuteTime);
         });
@@ -176,7 +178,9 @@ public class SchedulerJobHelper {
         Map<String, String> finalLastRunHistory = await().atMost(TIMEOUT).pollInterval(PAUSE).until(jobLastRunHistorySupplier(jobId),
                 lastRunHistory -> {
                     String jobRunEndText = lastRunHistory.get("jobRunEndTime");
-                    if (jobRunEndText == null) { return false; }
+                    if (jobRunEndText == null) {
+                        return false;
+                    }
                     Instant jobRunEndTime = df.parse(jobRunEndText, Instant::from);
                     Instant jobRunStartTime = df.parse(lastRunHistory.get("jobRunStartTime"), Instant::from);
                     return jobRunEndTime.equals(jobRunStartTime) || jobRunEndTime.isAfter(jobRunStartTime);
@@ -201,7 +205,9 @@ public class SchedulerJobHelper {
     private Callable<Map<String, String>> jobLastRunHistorySupplier(int jobId) {
         return () -> {
             Map<String, Object> job = getSchedulerJobById(jobId);
-            if (job == null) { return null; }
+            if (job == null) {
+                return null;
+            }
             return (Map<String, String>) job.get("lastRunHistory");
         };
     }

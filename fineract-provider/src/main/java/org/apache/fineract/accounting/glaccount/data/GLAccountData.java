@@ -237,7 +237,9 @@ public class GLAccountData implements Serializable {
     }
 
     public Integer getTypeId() {
-        if (this.type != null) { return this.type.getId().intValue(); }
+        if (this.type != null) {
+            return this.type.getId().intValue();
+        }
         return null;
     }
 

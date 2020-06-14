@@ -113,7 +113,9 @@ public class ClientNonPerson extends AbstractPersistableCustom {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateIncorpValidityTillDate(client, dataValidationErrors);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 

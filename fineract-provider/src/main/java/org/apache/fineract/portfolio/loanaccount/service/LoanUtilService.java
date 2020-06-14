@@ -164,7 +164,9 @@ public class LoanUtilService {
             }
         }
 
-        if (entityId == null || calendar == null) { return isSkipRepaymentOnFirstMonth; }
+        if (entityId == null || calendar == null) {
+            return isSkipRepaymentOnFirstMonth;
+        }
         isSkipRepaymentOnFirstMonth = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(),
                 entityTypeId);
         return isSkipRepaymentOnFirstMonth;
@@ -217,7 +219,9 @@ public class LoanUtilService {
     public LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
             final Calendar calendar) {
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
-        if (calendar == null) { return getCalculatedRepaymentsStartingFromDate(loan); }
+        if (calendar == null) {
+            return getCalculatedRepaymentsStartingFromDate(loan);
+        }
         return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar, calendarHistoryDataWrapper);
 
     }

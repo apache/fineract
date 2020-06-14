@@ -93,7 +93,9 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
 
     @Override
     public int compareTo(final FloatingRateData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return new CompareToBuilder() //
                 .append(this.id, obj.id) //
                 .append(this.name, obj.name) //
@@ -104,9 +106,15 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof FloatingRateData)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof FloatingRateData)) {
+            return false;
+        }
         final FloatingRateData rhs = (FloatingRateData) obj;
         return new EqualsBuilder() //
                 .append(this.id, rhs.id) //

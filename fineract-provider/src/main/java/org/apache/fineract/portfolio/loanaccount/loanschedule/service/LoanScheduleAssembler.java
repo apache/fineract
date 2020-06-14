@@ -849,7 +849,9 @@ public class LoanScheduleAssembler {
                         "Loan schedule date not in sync with meeting date");
             }
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         if (loan.getExpectedFirstRepaymentOnDate() == null) {
             loan.setExpectedFirstRepaymentOnDate(loan.fetchRepaymentScheduleInstallment(1).getDueDate().toDate());
         }

@@ -48,7 +48,9 @@ public class TenantAwareJpaPlatformUserDetailsService implements PlatformUserDet
 
         final PlatformUser appUser = this.platformUserRepository.findByUsernameAndDeletedAndEnabled(username, deleted, enabled);
 
-        if (appUser == null) { throw new UsernameNotFoundException(username + ": not found"); }
+        if (appUser == null) {
+            throw new UsernameNotFoundException(username + ": not found");
+        }
 
         return appUser;
     }

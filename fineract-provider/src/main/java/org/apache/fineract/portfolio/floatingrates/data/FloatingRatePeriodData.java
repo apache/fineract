@@ -92,7 +92,9 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
 
     @Override
     public int compareTo(final FloatingRatePeriodData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return new CompareToBuilder() //
                 .append(this.id, obj.id) //
                 .append(this.fromDate, obj.fromDate) //
@@ -102,9 +104,15 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof FloatingRatePeriodData)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof FloatingRatePeriodData)) {
+            return false;
+        }
         final FloatingRatePeriodData rhs = (FloatingRatePeriodData) obj;
         return new EqualsBuilder() //
                 .append(this.id, rhs.id) //

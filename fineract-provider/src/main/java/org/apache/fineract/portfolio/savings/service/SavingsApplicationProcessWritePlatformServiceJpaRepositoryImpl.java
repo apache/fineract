@@ -289,8 +289,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                                     .resetIsAcceptingChild(gsimRepository.findOneByIsAcceptingChildAndApplicationId(true, applicationId));
                         }
                     }
-                } else // for applications other than GSIM
-                {
+                } else {
+                    // for applications other than GSIM
                     generateAccountNumber(account);
                 }
             }
@@ -370,7 +370,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
                     if (clientId != null) {
                         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-                        if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+                        if (client.isNotActive()) {
+                            throw new ClientNotActiveException(clientId);
+                        }
                         account.update(client);
                     } else {
                         final Client client = null;
@@ -383,7 +385,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     if (groupId != null) {
                         final Group group = this.groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
                         if (group.isNotActive()) {
-                            if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                            if (group.isCenter()) {
+                                throw new CenterNotActiveException(groupId);
+                            }
                             throw new GroupNotActiveException(groupId);
                         }
                         account.update(group);
@@ -457,7 +461,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final List<Note> relatedNotes = this.noteRepository.findBySavingsAccountId(savingsId);
@@ -704,12 +710,16 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private void checkClientOrGroupActive(final SavingsAccount account) {
         final Client client = account.getClient();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = account.group();
         if (group != null) {
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(group.getId()); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(group.getId());
+                }
                 throw new GroupNotActiveException(group.getId());
             }
         }

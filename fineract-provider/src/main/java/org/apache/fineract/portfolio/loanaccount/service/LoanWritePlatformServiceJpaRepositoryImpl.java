@@ -644,7 +644,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final SingleDisbursalCommand[] disbursalCommand = bulkDisbursalCommand.getDisburseTransactions();
         final Map<String, Object> changes = new LinkedHashMap<>();
-        if (disbursalCommand == null) { return changes; }
+        if (disbursalCommand == null) {
+            return changes;
+        }
 
         final LocalDate nextPossibleRepaymentDate = null;
         final Date rescheduledRepaymentDate = null;
@@ -908,7 +910,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
         final boolean isRecoveryRepayment = false;
 
-        if (repaymentCommand == null) { return changes; }
+        if (repaymentCommand == null) {
+            return changes;
+        }
         List<Long> transactionIds = new ArrayList<>();
         boolean isAccountTransfer = false;
         HolidayDetailDTO holidayDetailDTO = null;
@@ -1484,7 +1488,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Set<LoanCharge> loanCharges = new HashSet<>(1);
             loanCharges.add(loanCharge);
             this.loanApplicationCommandFromApiJsonHelper.validateLoanCharges(loanCharges, dataValidationErrors);
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
     }
@@ -1875,7 +1881,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
             }
         }
-        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
     }
 
     private void transferFeeCharge(final AccountTransferDTO accountTransferDTO, List<Throwable> errors) {
@@ -1892,7 +1900,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId)
                 .orElseThrow(() -> new LoanChargeNotFoundException(loanChargeId));
 
-        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) { throw new LoanChargeNotFoundException(loanChargeId, loanId); }
+        if (loanCharge.hasNotLoanIdentifiedBy(loanId)) {
+            throw new LoanChargeNotFoundException(loanChargeId, loanId);
+        }
         return loanCharge;
     }
 
@@ -2013,7 +2023,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_REASSIGN_OFFICER,
                 constructEntityMap(BusinessEntity.LOAN, loan));
-        if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId); }
+        if (!loan.hasLoanOfficer(fromLoanOfficer)) {
+            throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId);
+        }
 
         loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
 
@@ -2053,7 +2065,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     constructEntityMap(BusinessEntity.LOAN, loan));
             checkClientOrGroupActive(loan);
 
-            if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId); }
+            if (!loan.hasLoanOfficer(fromLoanOfficer)) {
+                throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId);
+            }
 
             loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
             saveLoanWithDataIntegrityViolationChecks(loan);
@@ -2080,7 +2094,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
-        if (loan.getLoanOfficer() == null) { throw new LoanOfficerUnassignmentException(loanId); }
+        if (loan.getLoanOfficer() == null) {
+            throw new LoanOfficerUnassignmentException(loanId);
+        }
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BusinessEvents.LOAN_REMOVE_OFFICER,
                 constructEntityMap(BusinessEntity.LOAN, loan));
 
@@ -2339,7 +2355,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
 
-        if (!isHolidayEnabled) { return; }
+        if (!isHolidayEnabled) {
+            return;
+        }
 
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
@@ -2377,11 +2395,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = loan.group();
         if (group != null) {
-            if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
+            if (group.isNotActive()) {
+                throw new GroupNotActiveException(group.getId());
+            }
         }
     }
 
@@ -2614,7 +2636,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loanApplicationCommandFromApiJsonHelper.validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate,
                 principal);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateForAddAndDeleteTranche(final Loan loan) {

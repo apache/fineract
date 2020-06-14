@@ -375,7 +375,9 @@ public final class Group extends AbstractPersistableCustom {
     public List<String> associateClients(final Set<Client> clientMembersSet) {
         final List<String> differences = new ArrayList<>();
         for (final Client client : clientMembersSet) {
-            if (hasClientAsMember(client)) { throw new ClientExistInGroupException(client.getId(), getId()); }
+            if (hasClientAsMember(client)) {
+                throw new ClientExistInGroupException(client.getId(), getId());
+            }
             this.clientMembers.add(client);
             differences.add(client.getId().toString());
         }
@@ -504,7 +506,9 @@ public final class Group extends AbstractPersistableCustom {
     public boolean isChildClient(final Long clientId) {
         if (clientId != null && this.clientMembers != null && !this.clientMembers.isEmpty()) {
             for (final Client client : this.clientMembers) {
-                if (client.getId().equals(clientId)) { return true; }
+                if (client.getId().equals(clientId)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -542,14 +546,18 @@ public final class Group extends AbstractPersistableCustom {
 
     public boolean hasActiveClients() {
         for (final Client client : this.clientMembers) {
-            if (!client.isClosed()) { return true; }
+            if (!client.isClosed()) {
+                return true;
+            }
         }
         return false;
     }
 
     public boolean hasActiveGroups() {
         for (final Group group : this.groupMembers) {
-            if (!group.isClosed()) { return true; }
+            if (!group.isClosed()) {
+                return true;
+            }
         }
         return false;
     }
@@ -559,7 +567,9 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     public boolean hasStaff() {
-        if (this.staff != null) { return true; }
+        if (this.staff != null) {
+            return true;
+        }
         return false;
     }
 
@@ -574,7 +584,9 @@ public final class Group extends AbstractPersistableCustom {
                         group.getId());
             }
 
-            if (hasGroupAsMember(group)) { throw new GroupExistsInCenterException(getId(), group.getId()); }
+            if (hasGroupAsMember(group)) {
+                throw new GroupExistsInCenterException(getId(), group.getId());
+            }
 
             if (group.isChildGroup()) {
                 final String defaultUserMessage = "Group is already associated with a center";
@@ -609,7 +621,9 @@ public final class Group extends AbstractPersistableCustom {
 
     public Boolean isGroupsClientCountWithinMinMaxRange(Integer minClients, Integer maxClients) {
 
-        if (maxClients == null && minClients == null) { return true; }
+        if (maxClients == null && minClients == null) {
+            return true;
+        }
 
         // set minClients or maxClients to 0 if null
 
@@ -623,7 +637,9 @@ public final class Group extends AbstractPersistableCustom {
 
         Set<Client> activeClientMembers = getActiveClientMembers();
 
-        if (activeClientMembers.size() >= minClients && activeClientMembers.size() <= maxClients) { return true; }
+        if (activeClientMembers.size() >= minClients && activeClientMembers.size() <= maxClients) {
+            return true;
+        }
         return false;
     }
 
@@ -701,7 +717,9 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     private void throwExceptionIfErrors(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public Set<Client> getClientMembers() {

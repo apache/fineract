@@ -87,7 +87,9 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
     }
 
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
-        if (this.endDate == null) { return target != null && target.isAfter(startDate()); }
+        if (this.endDate == null) {
+            return target != null && target.isAfter(startDate());
+        }
         return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
     }
 

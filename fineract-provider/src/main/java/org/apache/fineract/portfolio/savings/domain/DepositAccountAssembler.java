@@ -169,7 +169,9 @@ public class DepositAccountAssembler {
                     .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
         }
 
-        if (product == null) { throw new SavingsProductNotFoundException(productId); }
+        if (product == null) {
+            throw new SavingsProductNotFoundException(productId);
+        }
 
         Client client = null;
         Group group = null;
@@ -187,7 +189,9 @@ public class DepositAccountAssembler {
                                                                                                         // is
                                                                                                         // true
             accountType = AccountType.INDIVIDUAL;
-            if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(clientId);
+            }
         }
 
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
@@ -197,10 +201,14 @@ public class DepositAccountAssembler {
         }
 
         if (group != null && client != null) {
-            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(clientId, groupId);
+            }
             accountType = AccountType.JLG;
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(groupId);
+                }
                 throw new GroupNotActiveException(groupId);
             }
         }
@@ -441,7 +449,9 @@ public class DepositAccountAssembler {
             final PaymentDetail paymentDetail) {
         AppUser user = getAppUserIfPresent();
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Collection<SavingsAccountTransactionDTO> savingsAccountTransactions = new ArrayList<>();
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);

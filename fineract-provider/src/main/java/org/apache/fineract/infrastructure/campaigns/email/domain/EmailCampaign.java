@@ -365,19 +365,25 @@ public class EmailCampaign extends AbstractPersistableCustom {
     private void validate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         validateActivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateReactivate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         validateReactivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateClosureDate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         validateClosureDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {

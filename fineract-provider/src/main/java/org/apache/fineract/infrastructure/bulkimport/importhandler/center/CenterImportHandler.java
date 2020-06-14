@@ -129,7 +129,9 @@ public class CenterImportHandler implements ImportHandler {
             activationDate = submittedOn;
         }
         String centerName = ImportHandlerUtils.readAsString(CenterConstants.CENTER_NAME_COL, row);
-        if (centerName == null || centerName.equals("")) { throw new IllegalArgumentException("Name is blank"); }
+        if (centerName == null || centerName.equals("")) {
+            throw new IllegalArgumentException("Name is blank");
+        }
         List<GroupGeneralData> groupMembers = new ArrayList<GroupGeneralData>();
         for (int cellNo = CenterConstants.GROUP_NAMES_STARTING_COL; cellNo < CenterConstants.GROUP_NAMES_ENDING_COL; cellNo++) {
             String groupName = ImportHandlerUtils.readAsString(cellNo, row);
@@ -150,7 +152,9 @@ public class CenterImportHandler implements ImportHandler {
 
     private boolean containsGroupId(List<GroupGeneralData> groupMembers, Long groupId) {
         for (GroupGeneralData group : groupMembers) {
-            if (group.getId().equals(groupId)) { return true; }
+            if (group.getId().equals(groupId)) {
+                return true;
+            }
         }
         return false;
     }
@@ -218,7 +222,9 @@ public class CenterImportHandler implements ImportHandler {
 
         if (status == null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
-        } else if (status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED)) { return 1; }
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED)) {
+            return 1;
+        }
         return 0;
     }
 

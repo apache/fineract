@@ -332,7 +332,9 @@ public class ShareAccountCharge extends AbstractPersistableCustom {
     }
 
     public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
-        if (this.currencyCode() == null || matchingCurrencyCode == null) { return false; }
+        if (this.currencyCode() == null || matchingCurrencyCode == null) {
+            return false;
+        }
         return this.currencyCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 

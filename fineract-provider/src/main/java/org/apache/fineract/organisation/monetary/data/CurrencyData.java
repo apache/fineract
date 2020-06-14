@@ -92,8 +92,12 @@ public class CurrencyData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof CurrencyData)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CurrencyData)) {
+            return false;
+        }
         CurrencyData that = (CurrencyData) o;
         return Objects.equals(decimalPlaces, that.decimalPlaces) && Objects.equals(code, that.code) && Objects.equals(name, that.name)
                 && Objects.equals(inMultiplesOf, that.inMultiplesOf) && Objects.equals(displaySymbol, that.displaySymbol)

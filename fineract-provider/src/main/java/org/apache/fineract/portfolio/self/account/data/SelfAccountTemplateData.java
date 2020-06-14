@@ -58,7 +58,9 @@ public class SelfAccountTemplateData implements Comparable<SelfAccountTemplateDa
 
     @Override
     public int compareTo(final SelfAccountTemplateData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return new CompareToBuilder() //
                 .append(this.accountId, obj.accountId) //
                 .append(this.accountType.getValue(), obj.accountType.getValue()) //
@@ -69,9 +71,15 @@ public class SelfAccountTemplateData implements Comparable<SelfAccountTemplateDa
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof SelfAccountTemplateData)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof SelfAccountTemplateData)) {
+            return false;
+        }
         final SelfAccountTemplateData rhs = (SelfAccountTemplateData) obj;
         return new EqualsBuilder() //
                 .append(this.accountId, rhs.accountId) //

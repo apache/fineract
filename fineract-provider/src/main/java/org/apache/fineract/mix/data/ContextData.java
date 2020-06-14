@@ -54,19 +54,37 @@ public class ContextData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) { return true; }
-        if (obj == null) { return false; }
-        if (!(obj instanceof ContextData)) { return false; }
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof ContextData)) {
+            return false;
+        }
         final ContextData other = (ContextData) obj;
         if (this.dimension == null) {
-            if (other.dimension != null) { return false; }
-        } else if (!this.dimension.equals(other.dimension)) { return false; }
+            if (other.dimension != null) {
+                return false;
+            }
+        } else if (!this.dimension.equals(other.dimension)) {
+            return false;
+        }
         if (this.dimensionType == null) {
-            if (other.dimensionType != null) { return false; }
-        } else if (!this.dimensionType.equals(other.dimensionType)) { return false; }
+            if (other.dimensionType != null) {
+                return false;
+            }
+        } else if (!this.dimensionType.equals(other.dimensionType)) {
+            return false;
+        }
         if (this.periodType == null) {
-            if (other.periodType != null) { return false; }
-        } else if (!this.periodType.equals(other.periodType)) { return false; }
+            if (other.periodType != null) {
+                return false;
+            }
+        } else if (!this.periodType.equals(other.periodType)) {
+            return false;
+        }
         return true;
     }
 }

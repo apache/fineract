@@ -95,7 +95,9 @@ public class RecalculateInterestPoster implements Callable<Void> {
                 }
                 LOG.info("Loans count {}", i);
             }
-            if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+            if (!errors.isEmpty()) {
+                throw new JobExecutionException(errors);
+            }
         }
         return null;
     }

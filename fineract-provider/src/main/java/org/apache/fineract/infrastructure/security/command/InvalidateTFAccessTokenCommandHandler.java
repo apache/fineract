@@ -78,7 +78,9 @@ public class InvalidateTFAccessTokenCommandHandler implements NewCommandSourceHa
     }
 
     private void validateJson(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromJsonHelper.checkForUnsupportedParameters(typeOfMap, json, new HashSet<>(Collections.singletonList("token")));
@@ -91,6 +93,8 @@ public class InvalidateTFAccessTokenCommandHandler implements NewCommandSourceHa
         final String token = this.fromJsonHelper.extractStringNamed("token", element);
         baseDataValidator.reset().parameter("token").value(token).notNull().notBlank();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

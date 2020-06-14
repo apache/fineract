@@ -268,8 +268,12 @@ public class CenterData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof CenterData)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CenterData)) {
+            return false;
+        }
         CenterData that = (CenterData) o;
         return Objects.equals(active, that.active) && Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo)
                 && Objects.equals(name, that.name) && Objects.equals(externalId, that.externalId) && Objects.equals(officeId, that.officeId)

@@ -73,7 +73,9 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
                 errors.add(e);
             }
         }
-        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
     }
 
     @Override
@@ -115,7 +117,9 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
                 errors.add(e);
             }
         }
-        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
     }
 
     @Override
@@ -132,7 +136,9 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
                     errors.add(e);
                 }
             }
-            if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+            if (!errors.isEmpty()) {
+                throw new JobExecutionException(errors);
+            }
         }
     }
 }

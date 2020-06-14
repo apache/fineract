@@ -134,9 +134,13 @@ public class OfficeDomain {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) { return true; }
+        if (obj == this) {
+            return true;
+        }
 
-        if (!(obj instanceof OfficeDomain)) { return false; }
+        if (!(obj instanceof OfficeDomain)) {
+            return false;
+        }
 
         OfficeDomain od = (OfficeDomain) obj;
 

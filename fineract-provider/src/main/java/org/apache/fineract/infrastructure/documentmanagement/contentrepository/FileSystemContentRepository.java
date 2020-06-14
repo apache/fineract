@@ -104,7 +104,9 @@ public class FileSystemContentRepository implements ContentRepository {
     @Override
     public void deleteFile(final String fileName, final String documentPath) {
         final boolean fileDeleted = deleteFile(documentPath);
-        if (!fileDeleted) { throw new ContentManagementException(fileName, null); }
+        if (!fileDeleted) {
+            throw new ContentManagementException(fileName, null);
+        }
     }
 
     private boolean deleteFile(final String documentPath) {

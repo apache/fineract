@@ -68,8 +68,12 @@ public class GroupTimelineData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof GroupTimelineData)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GroupTimelineData)) {
+            return false;
+        }
         GroupTimelineData that = (GroupTimelineData) o;
         return Objects.equals(submittedOnDate, that.submittedOnDate) && Objects.equals(submittedByUsername, that.submittedByUsername)
                 && Objects.equals(submittedByFirstname, that.submittedByFirstname)

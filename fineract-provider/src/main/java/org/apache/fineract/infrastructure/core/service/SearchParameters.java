@@ -443,7 +443,9 @@ public final class SearchParameters {
     }
 
     public Boolean isOrphansOnly() {
-        if (this.orphansOnly != null) { return this.orphansOnly; }
+        if (this.orphansOnly != null) {
+            return this.orphansOnly;
+        }
         return false;
     }
 

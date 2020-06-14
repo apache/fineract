@@ -99,7 +99,9 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             String datatableName = command.stringValueOfParameterNamed("datatableName");
             DatatableData datatableData = this.readWriteNonCoreDataService.retrieveDatatable(datatableName);
 
-            if (datatableData == null) { throw new DatatableNotFoundException(datatableName); }
+            if (datatableData == null) {
+                throw new DatatableNotFoundException(datatableName);
+            }
 
             final String entity = command.stringValueOfParameterNamed("entity");
             final String foreignKeyColumnName = EntityTables.getForeignKeyColumnNameOnDatatable(entity);
@@ -107,7 +109,9 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
 
             LOG.info("{} has column {} ? {}", new Object[] { datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist });
 
-            if (!columnExist) { throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity); }
+            if (!columnExist) {
+                throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity);
+            }
 
             final Long productId = command.longValueOfParameterNamed("productId");
             final Long status = command.longValueOfParameterNamed("status");
@@ -171,7 +175,9 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                     reqDatatables.add(datatableName);
                 }
             }
-            if (reqDatatables.size() > 0) { throw new DatatableEntryRequiredException(reqDatatables.toString()); }
+            if (reqDatatables.size() > 0) {
+                throw new DatatableEntryRequiredException(reqDatatables.toString());
+            }
         }
 
     }
@@ -197,7 +203,9 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                     reqDatatables.add(datatableName);
                 }
             }
-            if (reqDatatables.size() > 0) { throw new DatatableEntryRequiredException(reqDatatables.toString()); }
+            if (reqDatatables.size() > 0) {
+                throw new DatatableEntryRequiredException(reqDatatables.toString());
+            }
         }
 
     }

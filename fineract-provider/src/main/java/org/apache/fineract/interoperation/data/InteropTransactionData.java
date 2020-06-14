@@ -94,7 +94,9 @@ public class InteropTransactionData extends CommandProcessingResult {
     }
 
     public static InteropTransactionData build(SavingsAccountTransaction transaction) {
-        if (transaction == null) { return null; }
+        if (transaction == null) {
+            return null;
+        }
 
         SavingsAccount savingsAccount = transaction.getSavingsAccount();
 

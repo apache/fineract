@@ -150,14 +150,24 @@ public class InteropIdentifier extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (o == null || !(o instanceof InteropIdentifier)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof InteropIdentifier)) {
+            return false;
+        }
 
         InteropIdentifier that = (InteropIdentifier) o;
 
-        if (!account.equals(that.account)) { return false; }
-        if (type != that.type) { return false; }
-        if (!value.equals(that.value)) { return false; }
+        if (!account.equals(that.account)) {
+            return false;
+        }
+        if (type != that.type) {
+            return false;
+        }
+        if (!value.equals(that.value)) {
+            return false;
+        }
         return subValueOrType != null ? subValueOrType.equals(that.subValueOrType) : that.subValueOrType == null;
     }
 

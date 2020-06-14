@@ -48,7 +48,9 @@ import org.springframework.format.number.NumberStyleFormatter;
 public class JsonParserHelper {
 
     public boolean parameterExists(final String parameterName, final JsonElement element) {
-        if (element == null) { return false; }
+        if (element == null) {
+            return false;
+        }
         return element.getAsJsonObject().has(parameterName);
     }
 
@@ -544,7 +546,9 @@ public class JsonParserHelper {
                 final double parsedNumberDouble = parsedNumber.doubleValue();
                 final int parsedNumberInteger = parsedNumber.intValue();
 
-                if (source.contains(Character.toString(symbols.getDecimalSeparator()))) { throw new ParseException(source, 0); }
+                if (source.contains(Character.toString(symbols.getDecimalSeparator()))) {
+                    throw new ParseException(source, 0);
+                }
 
                 if (!Double.valueOf(parsedNumberDouble).equals(Double.valueOf(Integer.valueOf(parsedNumberInteger)))) {
                     throw new ParseException(source, 0);

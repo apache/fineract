@@ -246,7 +246,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
             }
         }
-        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
     }
 
     private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId) {

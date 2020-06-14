@@ -81,7 +81,9 @@ public class BulkImportApiResource {
             }
         } else {
             final GlobalEntityType type = GlobalEntityType.fromCode(entityType);
-            if (type == null) { throw new ImportTypeNotFoundException(entityType); }
+            if (type == null) {
+                throw new ImportTypeNotFoundException(entityType);
+            }
             importData = this.bulkImportWorkbookService.getImports(type);
         }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

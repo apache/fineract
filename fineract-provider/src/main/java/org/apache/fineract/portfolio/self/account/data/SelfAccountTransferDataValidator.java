@@ -71,7 +71,9 @@ public class SelfAccountTransferDataValidator {
     }
 
     public Map<String, Object> validateCreate(String type, String apiRequestBodyAsJson) {
-        if (StringUtils.isBlank(apiRequestBodyAsJson)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) {
+            throw new InvalidJsonException();
+        }
 
         JsonElement element = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
 
@@ -181,6 +183,8 @@ public class SelfAccountTransferDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

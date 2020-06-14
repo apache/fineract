@@ -118,7 +118,9 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
         final String parentIdParamName = "parentId";
 
-        if (command.parameterExists(parentIdParamName) && this.parent == null) { throw new RootOfficeParentCannotBeUpdated(); }
+        if (command.parameterExists(parentIdParamName) && this.parent == null) {
+            throw new RootOfficeParentCannotBeUpdated();
+        }
 
         if (this.parent != null && command.isChangeInLongParameterNamed(parentIdParamName, this.parent.getId())) {
             final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
@@ -171,9 +173,13 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     public void update(final Office newParent) {
 
-        if (this.parent == null) { throw new RootOfficeParentCannotBeUpdated(); }
+        if (this.parent == null) {
+            throw new RootOfficeParentCannotBeUpdated();
+        }
 
-        if (identifiedBy(newParent.getId())) { throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(getId(), newParent.getId()); }
+        if (identifiedBy(newParent.getId())) {
+            throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(getId(), newParent.getId());
+        }
 
         this.parent = newParent;
         generateHierarchy();

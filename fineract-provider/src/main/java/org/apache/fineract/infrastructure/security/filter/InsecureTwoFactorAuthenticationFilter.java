@@ -63,7 +63,9 @@ public class InsecureTwoFactorAuthenticationFilter extends TwoFactorAuthenticati
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof AppUser) {
             AppUser user = (AppUser) authentication.getPrincipal();
 
-            if (user == null) { return; }
+            if (user == null) {
+                return;
+            }
 
             List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
             updatedAuthorities.add(new SimpleGrantedAuthority("TWOFACTOR_AUTHENTICATED"));

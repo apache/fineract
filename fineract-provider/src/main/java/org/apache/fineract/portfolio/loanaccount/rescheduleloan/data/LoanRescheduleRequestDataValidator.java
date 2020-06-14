@@ -82,7 +82,9 @@ public class LoanRescheduleRequestDataValidator {
 
         final String jsonString = jsonCommand.json();
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonString)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, CREATE_REQUEST_DATA_PARAMETERS);
@@ -184,7 +186,9 @@ public class LoanRescheduleRequestDataValidator {
                     "Loan rescheduling is not supported for the loan product with interest recalculation enabled");
         }
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
@@ -211,7 +215,9 @@ public class LoanRescheduleRequestDataValidator {
     public void validateForApproveAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         final String jsonString = jsonCommand.json();
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonString)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, APPROVE_REQUEST_DATA_PARAMETERS);
@@ -266,7 +272,9 @@ public class LoanRescheduleRequestDataValidator {
 
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     /**
@@ -279,7 +287,9 @@ public class LoanRescheduleRequestDataValidator {
     public void validateForRejectAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         final String jsonString = jsonCommand.json();
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonString)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, REJECT_REQUEST_DATA_PARAMETERS);
@@ -308,6 +318,8 @@ public class LoanRescheduleRequestDataValidator {
                             + "Loan reschedule request is not in submitted and pending approval state.");
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

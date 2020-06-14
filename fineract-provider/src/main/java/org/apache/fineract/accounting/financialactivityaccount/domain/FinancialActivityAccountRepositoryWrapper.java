@@ -45,7 +45,9 @@ public class FinancialActivityAccountRepositoryWrapper {
 
     public FinancialActivityAccount findByFinancialActivityTypeWithNotFoundDetection(final int financialActivityType) {
         FinancialActivityAccount financialActivityAccount = this.repository.findByFinancialActivityType(financialActivityType);
-        if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(financialActivityType); }
+        if (financialActivityAccount == null) {
+            throw new FinancialActivityAccountNotFoundException(financialActivityType);
+        }
         return financialActivityAccount;
     }
 

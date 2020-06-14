@@ -203,7 +203,9 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     public boolean isMarkedAsAwaitingApproval() {
-        if (this.processingResult.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue())) { return true; }
+        if (this.processingResult.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue())) {
+            return true;
+        }
 
         return false;
     }

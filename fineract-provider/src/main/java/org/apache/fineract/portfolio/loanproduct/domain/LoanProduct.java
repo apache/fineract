@@ -699,7 +699,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public boolean update(final List<Charge> newProductCharges) {
-        if (newProductCharges == null) { return false; }
+        if (newProductCharges == null) {
+            return false;
+        }
 
         boolean updated = false;
         if (this.charges != null) {
@@ -718,7 +720,9 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public boolean updateRates(final List<Rate> newProductRates) {
-        if (newProductRates == null) { return false; }
+        if (newProductRates == null) {
+            return false;
+        }
 
         boolean updated = false;
         if (this.rates != null) {

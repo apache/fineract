@@ -133,9 +133,13 @@ public class CurrencyDomain implements Comparable<CurrencyDomain> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) { return true; }
+        if (obj == this) {
+            return true;
+        }
 
-        if (!(obj instanceof CurrencyDomain)) { return false; }
+        if (!(obj instanceof CurrencyDomain)) {
+            return false;
+        }
 
         CurrencyDomain cd = (CurrencyDomain) obj;
 

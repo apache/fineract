@@ -117,7 +117,9 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         this.context.authenticatedUser();
 
         final AppUser user = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        if (user.isDeleted()) { throw new UserNotFoundException(userId); }
+        if (user.isDeleted()) {
+            throw new UserNotFoundException(userId);
+        }
 
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
@@ -219,7 +221,9 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         String sql = "select count(*) from m_appuser where username = ?";
         Object[] params = new Object[] { username };
         Integer count = this.jdbcTemplate.queryForObject(sql, params, Integer.class);
-        if (count == 0) { return false; }
+        if (count == 0) {
+            return false;
+        }
         return true;
     }
 }

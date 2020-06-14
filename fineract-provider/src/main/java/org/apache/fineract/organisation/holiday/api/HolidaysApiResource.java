@@ -134,7 +134,9 @@ public class HolidaysApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate" }); }
+        if (result == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate" });
+        }
 
         return this.toApiJsonSerializer.serialize(result);
     }

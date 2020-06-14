@@ -51,13 +51,17 @@ public class CodeValueRepositoryWrapper {
 
     public CodeValue findOneByCodeNameAndIdWithNotFoundDetection(final String codeName, final Long id) {
         final CodeValue codeValue = this.repository.findByCodeNameAndId(codeName, id);
-        if (codeValue == null) { throw new CodeValueNotFoundException(codeName, id); }
+        if (codeValue == null) {
+            throw new CodeValueNotFoundException(codeName, id);
+        }
         return codeValue;
     }
 
     public CodeValue findOneByCodeNameAndLabelWithNotFoundDetection(final String codeName, final String label) {
         final CodeValue codeValue = this.repository.findByCodeNameAndLabel(codeName, label);
-        if (codeValue == null) { throw new CodeValueNotFoundException(codeName, label); }
+        if (codeValue == null) {
+            throw new CodeValueNotFoundException(codeName, label);
+        }
         return codeValue;
     }
 

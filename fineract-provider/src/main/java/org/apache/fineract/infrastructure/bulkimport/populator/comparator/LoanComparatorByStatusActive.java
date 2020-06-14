@@ -34,11 +34,17 @@ public class LoanComparatorByStatusActive implements Comparator<LoanAccountData>
         boolean isData2StatusActive = o2.getStatusStringValue().equals("Active");
 
         // if both status active, these have the same rank
-        if (isData1StatusActive && isData2StatusActive) { return 0; }
+        if (isData1StatusActive && isData2StatusActive) {
+            return 0;
+        }
 
-        if (isData1StatusActive) { return -1; }
+        if (isData1StatusActive) {
+            return -1;
+        }
 
-        if (isData2StatusActive) { return 1; }
+        if (isData2StatusActive) {
+            return 1;
+        }
         // if no status active, these have the same rank
         return 0;
     }

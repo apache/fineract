@@ -70,7 +70,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final Long resourceId = command.getClientId();
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(resourceId);
-        if (client == null) { throw new ClientNotFoundException(resourceId); }
+        if (client == null) {
+            throw new ClientNotFoundException(resourceId);
+        }
         final Note newNote = Note.clientNoteFromJson(client, command);
 
         this.noteRepository.save(newNote);
@@ -234,7 +236,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final Client client = this.clientRepository.findOneWithNotFoundDetection(resourceId);
 
         final Note noteForUpdate = this.noteRepository.findByClientIdAndId(resourceId, noteId);
-        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+        if (noteForUpdate == null) {
+            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
+        }
 
         final Map<String, Object> changes = noteForUpdate.update(command);
 
@@ -262,7 +266,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Note noteForUpdate = this.noteRepository.findByGroupIdAndId(resourceId, noteId);
 
-        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+        if (noteForUpdate == null) {
+            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
+        }
 
         final Map<String, Object> changes = noteForUpdate.update(command);
 
@@ -287,7 +293,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Loan loan = this.loanRepository.findOneWithNotFoundDetection(resourceId);
         final Note noteForUpdate = this.noteRepository.findByLoanIdAndId(resourceId, noteId);
-        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+        if (noteForUpdate == null) {
+            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
+        }
 
         final Map<String, Object> changes = noteForUpdate.update(command);
 
@@ -312,7 +320,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Note noteForUpdate = this.noteRepository.findByLoanTransactionIdAndId(resourceId, noteId);
 
-        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+        if (noteForUpdate == null) {
+            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
+        }
 
         final Map<String, Object> changes = noteForUpdate.update(command);
 
@@ -438,7 +448,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
             break;
             default:
         }
-        if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
+        if (noteForUpdate == null) {
+            throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase());
+        }
         return noteForUpdate;
     }
 

@@ -308,7 +308,9 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
     public LoanTermVariations getDueDateTermVariationIfExists() {
         if (this.loanRescheduleRequestToTermVariationMappings != null && this.loanRescheduleRequestToTermVariationMappings.size() > 0) {
             for (LoanRescheduleRequestToTermVariationMapping mapping : this.loanRescheduleRequestToTermVariationMappings) {
-                if (mapping.getLoanTermVariations().getTermType().isDueDateVariation()) { return mapping.getLoanTermVariations(); }
+                if (mapping.getLoanTermVariations().getTermType().isDueDateVariation()) {
+                    return mapping.getLoanTermVariations();
+                }
             }
         }
         return null;

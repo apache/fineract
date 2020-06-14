@@ -69,7 +69,9 @@ public final class EmailDataValidator {
         final String jsonString = jsonCommand.json();
         final JsonElement jsonElement = jsonCommand.parsedJson();
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonString)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ScheduledEmailConstants.CREATE_REQUEST_PARAMETERS);
@@ -150,7 +152,9 @@ public final class EmailDataValidator {
         final String jsonString = jsonCommand.json();
         final JsonElement jsonElement = jsonCommand.parsedJson();
 
-        if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonString)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ScheduledEmailConstants.UPDATE_REQUEST_PARAMETERS);
@@ -245,16 +249,22 @@ public final class EmailDataValidator {
      **/
     public boolean isValidEmail(String email) {
         // this is the easiest check
-        if (email == null) { return false; }
+        if (email == null) {
+            return false;
+        }
 
         // this is another easy check
-        if (email.endsWith(".")) { return false; }
+        if (email.endsWith(".")) {
+            return false;
+        }
 
         // Check the whole email address structure
         Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
 
         // check if the Matcher matches the email pattern
-        if (!emailMatcher.matches()) { return false; }
+        if (!emailMatcher.matches()) {
+            return false;
+        }
 
         return true;
     }
@@ -309,6 +319,8 @@ public final class EmailDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

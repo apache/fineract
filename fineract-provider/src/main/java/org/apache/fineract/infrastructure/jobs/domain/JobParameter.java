@@ -75,7 +75,9 @@ public class JobParameter extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof JobParameter)) { return false; }
+        if (!(obj instanceof JobParameter)) {
+            return false;
+        }
         JobParameter jobParameter = (JobParameter) obj;
         return Objects.equals(jobParameter.getJobId(), this.getJobId())
                 && Objects.equals(jobParameter.getParameterName(), this.getParameterName())

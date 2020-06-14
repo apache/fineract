@@ -205,7 +205,9 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     public CommandProcessingResult deleteCharge(final Long chargeId) {
 
         final Charge chargeForDelete = this.chargeRepository.findById(chargeId).orElseThrow(() -> new ChargeNotFoundException(chargeId));
-        if (chargeForDelete.isDeleted()) { throw new ChargeNotFoundException(chargeId); }
+        if (chargeForDelete.isDeleted()) {
+            throw new ChargeNotFoundException(chargeId);
+        }
 
         final Collection<LoanProduct> loanProducts = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId);
         final Boolean isChargeExistWithLoans = isAnyLoansAssociateWithThisCharge(chargeId);

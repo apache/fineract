@@ -521,7 +521,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             }
 
             LocalDate today = DateUtils.getLocalDateOfTenant();
-            if (transactionDate.isAfter(today)) { throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE); }
+            if (transactionDate.isAfter(today)) {
+                throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
+            }
 
         }
         postInterest(account, postInterestAs, transactionDate);
@@ -587,7 +589,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
                 .findOneByIdAndSavingsAccountId(transactionId, savingsId);
-        if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
+        if (savingsAccountTransaction == null) {
+            throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId);
+        }
 
         if (!allowAccountTransferModification
                 && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) {
@@ -658,7 +662,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
                 .findOneByIdAndSavingsAccountId(transactionId, savingsId);
-        if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
+        if (savingsAccountTransaction == null) {
+            throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId);
+        }
 
         if (!(savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal())
                 || savingsAccountTransaction.isReversed()) {
@@ -757,11 +763,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private void checkClientOrGroupActive(final SavingsAccount account) {
         final Client client = account.getClient();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = account.group();
         if (group != null) {
-            if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
+            if (group.isNotActive()) {
+                throw new GroupNotActiveException(group.getId());
+            }
         }
     }
 
@@ -823,7 +833,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     break;
                 }
             }
-            if (postInterestOnClosingDate == false) { throw new PostInterestClosingDateException(); }
+            if (postInterestOnClosingDate == false) {
+                throw new PostInterestClosingDateException();
+            }
         }
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -1027,7 +1039,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
             }
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         savingsAccount.addCharge(fmt, savingsAccountCharge, chargeDefinition);
         this.savingsAccountChargeRepository.save(savingsAccountCharge);
@@ -1072,14 +1086,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     && this.holidayRepository.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
 
@@ -1196,14 +1214,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 && this.holidayRepository.isHoliday(savingsAccountCharge.savingsAccount().officeId(), transactionDate)) {
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.on.holiday");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                 && !this.workingDaysRepository.isWorkingDay(transactionDate)) {
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.a.nonworking.day");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.payCharge(savingsAccountCharge, transactionDate, amountPaid, fmt, user);
@@ -1316,14 +1338,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (!savingsAccountCharge.isRecurringFee()) {
             baseDataValidator.reset().parameter(null).value(savingsAccountCharge.getId())
                     .failWithCodeNoParameterAddedToErrorCode("charge.inactivation.allowed.only.for.recurring.charges");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
 
         } else {
             final LocalDate nextDueDate = savingsAccountCharge.getNextDueDateFrom(inactivationOnDate);
 
             if (savingsAccountCharge.isChargeIsDue(nextDueDate)) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("inactivation.of.charge.not.allowed.when.charge.is.due");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             } else if (savingsAccountCharge.isChargeIsOverPaid(nextDueDate)) {
 
                 final List<SavingsAccountTransaction> chargePayments = new ArrayList<>();
@@ -1357,7 +1383,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private SavingsAccountTransaction getLastChargePayment(final List<SavingsAccountTransaction> chargePayments) {
-        if (!CollectionUtils.isEmpty(chargePayments)) { return chargePayments.get(chargePayments.size() - 1); }
+        if (!CollectionUtils.isEmpty(chargePayments)) {
+            return chargePayments.get(chargePayments.size() - 1);
+        }
         return null;
     }
 
@@ -1412,7 +1440,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.fromApiJsonDeserializer.validateForUnAssignSavingsOfficer(command.json());
 
         final SavingsAccount savingsForUpdate = this.savingAccountRepositoryWrapper.findOneWithNotFoundDetection(savingsAccountId);
-        if (savingsForUpdate.getSavingsOfficer() == null) { throw new SavingsOfficerUnassignmentException(savingsAccountId); }
+        if (savingsForUpdate.getSavingsOfficer() == null) {
+            throw new SavingsOfficerUnassignmentException(savingsAccountId);
+        }
 
         final LocalDate dateOfSavingsOfficerUnassigned = command.localDateValueOfParameterNamed("unassignedDate");
 

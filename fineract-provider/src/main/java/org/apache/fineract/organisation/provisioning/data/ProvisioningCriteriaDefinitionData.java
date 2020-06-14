@@ -99,7 +99,9 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
 
     @Override
     public int compareTo(ProvisioningCriteriaDefinitionData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return obj.id.compareTo(this.id);
     }
 

@@ -489,7 +489,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     public void addIncomeAndAccrualTransactions(Long loanId) throws LoanNotFoundException {
         if (loanId != null) {
             Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-            if (loan == null) { throw new LoanNotFoundException(loanId); }
+            if (loan == null) {
+                throw new LoanNotFoundException(loanId);
+            }
             final List<Long> existingTransactionIds = new ArrayList<>();
             final List<Long> existingReversedTransactionIds = new ArrayList<>();
             existingTransactionIds.addAll(loan.findExistingTransactionIds());

@@ -65,7 +65,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         this.context.authenticatedUser();
         final DepositProductMapper depositProductMapper = this.getDepositProductMapper(depositAccountType);
-        if (depositProductMapper == null) { return null; }
+        if (depositProductMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ");
@@ -93,7 +95,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             this.context.authenticatedUser();
 
             final DepositProductMapper depositProductMapper = this.getDepositProductMapper(depositAccountType);
-            if (depositProductMapper == null) { return null; }
+            if (depositProductMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");
@@ -369,7 +373,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
     private DepositProductMapper getDepositProductMapper(final DepositAccountType depositAccountType) {
         if (depositAccountType.isFixedDeposit()) {
             return this.fixedDepositProductRowMapper;
-        } else if (depositAccountType.isRecurringDeposit()) { return this.recurringDepositProductRowMapper; }
+        } else if (depositAccountType.isRecurringDeposit()) {
+            return this.recurringDepositProductRowMapper;
+        }
         return null;
     }
 }

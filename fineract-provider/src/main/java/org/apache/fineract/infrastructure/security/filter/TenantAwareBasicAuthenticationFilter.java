@@ -175,6 +175,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
         boolean notAllowed = (isSelfServiceRequest && !user.isSelfServiceUser()) || (!isSelfServiceRequest && user.isSelfServiceUser());
 
-        if (notAllowed) { throw new BadCredentialsException("User not authorised to use the requested resource."); }
+        if (notAllowed) {
+            throw new BadCredentialsException("User not authorised to use the requested resource.");
+        }
     }
 }

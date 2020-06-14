@@ -86,7 +86,9 @@ public class SavingsAccountDataValidator {
 
     public void validateForSubmit(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -263,7 +265,9 @@ public class SavingsAccountDataValidator {
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -406,7 +410,9 @@ public class SavingsAccountDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -438,7 +444,9 @@ public class SavingsAccountDataValidator {
 
     public void validateForAssignSavingsOfficer(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> supportedParameters = new HashSet<>(
                 Arrays.asList("fromSavingsOfficerId", "toSavingsOfficerId", "assignmentDate", "locale", "dateFormat"));
@@ -470,7 +478,9 @@ public class SavingsAccountDataValidator {
     }
 
     public void validateForUnAssignSavingsOfficer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
 

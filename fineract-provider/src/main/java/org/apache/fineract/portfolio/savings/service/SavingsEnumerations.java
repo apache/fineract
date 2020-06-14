@@ -78,7 +78,9 @@ public class SavingsEnumerations {
             return preClosurePenaltyInterestOnType(id);
         } else if (typeName.equals(INTEREST_CALCULATION_DAYS_IN_YEAR)) {
             return interestCalculationDaysInYearType(id);
-        } else if (typeName.equals(RECURRING_FREQUENCY_TYPE)) { return depositPeriodFrequency(id); }
+        } else if (typeName.equals(RECURRING_FREQUENCY_TYPE)) {
+            return depositPeriodFrequency(id);
+        }
         return null;
     }
 

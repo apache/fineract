@@ -86,7 +86,9 @@ public class EmailCampaignValidator {
     }
 
     public void validateCreate(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.supportedParams);
@@ -137,7 +139,9 @@ public class EmailCampaignValidator {
     }
 
     public void validateForUpdate(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.supportedParamsForUpdate);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -177,7 +181,9 @@ public class EmailCampaignValidator {
     }
 
     public void validatePreviewMessage(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.PREVIEW_REQUEST_DATA_PARAMETERS);
 
@@ -198,7 +204,9 @@ public class EmailCampaignValidator {
     }
 
     public void validateClosedDate(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.CLOSE_REQUEST_DATA_PARAMETERS);
@@ -216,7 +224,9 @@ public class EmailCampaignValidator {
     }
 
     public void validateActivation(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.ACTIVATION_REQUEST_DATA_PARAMETERS);
@@ -235,7 +245,9 @@ public class EmailCampaignValidator {
     }
 
     public void validateClosure(String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.CLOSE_REQUEST_DATA_PARAMETERS);
@@ -253,6 +265,8 @@ public class EmailCampaignValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

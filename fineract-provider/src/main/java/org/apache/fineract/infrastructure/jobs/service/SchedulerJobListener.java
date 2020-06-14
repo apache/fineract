@@ -132,7 +132,9 @@ public class SchedulerJobListener implements JobListener {
                         || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
             this.stackTraceLevel++;
             return getCauseFromException(exception.getCause());
-        } else if (exception.getCause() != null) { return exception.getCause(); }
+        } else if (exception.getCause() != null) {
+            return exception.getCause();
+        }
         return exception;
     }
 

@@ -162,7 +162,9 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
     public CommandProcessingResult deleteCollateral(final Long loanId, final Long collateralId, final Long commandId) {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanCollateral collateral = this.collateralRepository.findByLoanIdAndId(loanId, collateralId);
-        if (collateral == null) { throw new CollateralNotFoundException(loanId, collateralId); }
+        if (collateral == null) {
+            throw new CollateralNotFoundException(loanId, collateralId);
+        }
 
         /**
          * Collaterals may be deleted only when the loan associated with them

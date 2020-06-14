@@ -87,7 +87,9 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
 
     @Override
     public int compareTo(ProvisioningCriteriaData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return obj.criteriaId.compareTo(this.criteriaId);
     }
 }

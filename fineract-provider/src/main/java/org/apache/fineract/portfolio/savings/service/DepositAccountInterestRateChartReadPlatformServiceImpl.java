@@ -104,7 +104,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         sql.append("END");
         Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { chartId });
-        if (chartDatas == null || chartDatas.isEmpty()) { throw new DepositAccountInterestRateChartNotFoundException(chartId); }
+        if (chartDatas == null || chartDatas.isEmpty()) {
+            throw new DepositAccountInterestRateChartNotFoundException(chartId);
+        }
 
         return chartDatas.iterator().next();
     }
@@ -149,7 +151,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
 
         Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { accountId });
-        if (chartDatas == null || chartDatas.isEmpty()) { throw new DepositAccountInterestRateChartNotFoundException(accountId); }
+        if (chartDatas == null || chartDatas.isEmpty()) {
+            throw new DepositAccountInterestRateChartNotFoundException(accountId);
+        }
 
         return chartDatas.iterator().next();
     }
@@ -342,7 +346,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "ircdId");
             // If there are not chart Slabs are associated then in
             // InterestRateChartExtractor the chart Slabs id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String description = rs.getString("ircdDescription");
             final Integer fromPeriod = JdbcSupport.getInteger(rs, "ircdFromPeriod");
@@ -377,7 +383,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "iriId");
             // If there are not Incentive are associated then in
             // InterestRateChartExtractor the incentive id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String attributeValue = rs.getString("attributeValue");
             String attributeValueDesc = null;

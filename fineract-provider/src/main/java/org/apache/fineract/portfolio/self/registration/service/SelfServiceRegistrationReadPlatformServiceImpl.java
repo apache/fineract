@@ -43,7 +43,9 @@ public class SelfServiceRegistrationReadPlatformServiceImpl implements SelfServi
             params = new Object[] { accountNumber, firstName, lastName, mobileNumber };
         }
         Integer count = this.jdbcTemplate.queryForObject(sql, params, Integer.class);
-        if (count == 0) { return false; }
+        if (count == 0) {
+            return false;
+        }
         return true;
     }
 

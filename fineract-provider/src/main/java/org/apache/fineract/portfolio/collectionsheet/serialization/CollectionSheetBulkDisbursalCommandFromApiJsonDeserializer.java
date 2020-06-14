@@ -51,7 +51,9 @@ public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer
 
     @Override
     public CollectionSheetBulkDisbursalCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final JsonObject topLevelJsonElement = element.getAsJsonObject();

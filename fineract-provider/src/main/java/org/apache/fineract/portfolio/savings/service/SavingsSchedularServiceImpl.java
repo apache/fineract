@@ -83,7 +83,9 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             totalPageSize = savingsAccounts.getTotalPages();
         } while (page < totalPageSize);
 
-        if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+        if (!errors.isEmpty()) {
+            throw new JobExecutionException(errors);
+        }
     }
 
     @Override

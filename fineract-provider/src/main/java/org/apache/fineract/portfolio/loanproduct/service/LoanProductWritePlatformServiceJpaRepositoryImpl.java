@@ -373,7 +373,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
 
         if (startDate != null && closeDate != null) {
-            if (closeDate.isBefore(startDate)) { throw new LoanProductDateException(startDate.toString(), closeDate.toString()); }
+            if (closeDate.isBefore(startDate)) {
+                throw new LoanProductDateException(startDate.toString(), closeDate.toString());
+            }
         }
     }
 

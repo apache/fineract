@@ -36,7 +36,9 @@ public class TwoFactorUtils {
 
     public boolean isTwoFactorAuthEnabled() {
         for (final String profile : this.environment.getActiveProfiles()) {
-            if (TWO_FACTOR_PROFILE_NAME.equals(profile)) { return true; }
+            if (TWO_FACTOR_PROFILE_NAME.equals(profile)) {
+                return true;
+            }
         }
         return false;
     }

@@ -102,7 +102,9 @@ public class JLGClientData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof JLGClientData)) { return false; }
+        if (!(obj instanceof JLGClientData)) {
+            return false;
+        }
         final JLGClientData clientData = (JLGClientData) obj;
         return clientData.clientId.compareTo(this.clientId) == 0;
     }

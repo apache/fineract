@@ -457,21 +457,27 @@ public class CalendarData implements Serializable {
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
         if (this.startDate != null && compareDate != null) {
-            if (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate)) { return true; }
+            if (this.startDate.isBefore(compareDate) || this.startDate.equals(compareDate)) {
+                return true;
+            }
         }
         return false;
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
         if (this.endDate != null && compareDate != null) {
-            if (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate)) { return true; }
+            if (this.endDate.isAfter(compareDate) || this.endDate.isEqual(compareDate)) {
+                return true;
+            }
         }
         return false;
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
         if (isStartDateBeforeOrEqual(compareDate)) {
-            if (this.endDate == null || isEndDateAfterOrEqual(compareDate)) { return true; }
+            if (this.endDate == null || isEndDateAfterOrEqual(compareDate)) {
+                return true;
+            }
         }
         return false;
     }
@@ -502,8 +508,12 @@ public class CalendarData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof CalendarData)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CalendarData)) {
+            return false;
+        }
         CalendarData that = (CalendarData) o;
         return Objects.equals(repeating, that.repeating) && Objects.equals(id, that.id)
                 && Objects.equals(calendarInstanceId, that.calendarInstanceId) && Objects.equals(entityId, that.entityId)

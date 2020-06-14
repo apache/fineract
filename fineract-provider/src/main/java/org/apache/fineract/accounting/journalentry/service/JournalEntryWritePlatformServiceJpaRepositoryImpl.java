@@ -325,7 +325,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 .findUnReversedManualJournalEntriesByTransactionId(command.getTransactionId());
         String reversalComment = command.stringValueOfParameterNamed("comments");
 
-        if (journalEntries.size() <= 1) { throw new JournalEntriesNotFoundException(command.getTransactionId()); }
+        if (journalEntries.size() <= 1) {
+            throw new JournalEntriesNotFoundException(command.getTransactionId());
+        }
         final String reversalTransactionId = revertJournalEntry(journalEntries, reversalComment);
         return new CommandProcessingResultBuilder().withTransactionId(reversalTransactionId).build();
     }
@@ -792,7 +794,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof OfficeCurrencyKey)) { return false; }
+            if (!(obj instanceof OfficeCurrencyKey)) {
+                return false;
+            }
             OfficeCurrencyKey copy = (OfficeCurrencyKey) obj;
             return Objects.equals(this.office.getId(), copy.office.getId()) && this.currency.equals(copy.currency);
         }

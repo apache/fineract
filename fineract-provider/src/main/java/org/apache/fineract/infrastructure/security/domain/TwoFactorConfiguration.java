@@ -58,8 +58,12 @@ public class TwoFactorConfiguration extends AbstractPersistableCustom {
     }
 
     public Object getObjectValue() {
-        if (TwoFactorConfigurationConstants.NUMBER_PARAMETERS.contains(name)) { return getIntegerValue(); }
-        if (TwoFactorConfigurationConstants.BOOLEAN_PARAMETERS.contains(name)) { return getBooleanValue(); }
+        if (TwoFactorConfigurationConstants.NUMBER_PARAMETERS.contains(name)) {
+            return getIntegerValue();
+        }
+        if (TwoFactorConfigurationConstants.BOOLEAN_PARAMETERS.contains(name)) {
+            return getBooleanValue();
+        }
 
         return getStringValue();
     }

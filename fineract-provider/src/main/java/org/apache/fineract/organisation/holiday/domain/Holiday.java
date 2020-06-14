@@ -195,14 +195,18 @@ public class Holiday extends AbstractPersistableCustom {
                 baseDataValidator.reset().parameter(repaymentsRescheduledToParamName).failWithCode("cannot.edit.holiday.in.active.state");
             }
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         return actualChanges;
     }
 
     public boolean update(final Set<Office> newOffices) {
-        if (newOffices == null) { return false; }
+        if (newOffices == null) {
+            return false;
+        }
 
         boolean updated = false;
         if (this.offices != null) {
@@ -299,7 +303,9 @@ public class Holiday extends AbstractPersistableCustom {
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);
         if (!currentStatus.isPendingActivation()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.pending.for.activation.state");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.status = HolidayStatusType.ACTIVE.getValue();
@@ -312,7 +318,9 @@ public class Holiday extends AbstractPersistableCustom {
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);
         if (currentStatus.isDeleted()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("already.in.deleted.state");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         this.status = HolidayStatusType.DELETED.getValue();
     }

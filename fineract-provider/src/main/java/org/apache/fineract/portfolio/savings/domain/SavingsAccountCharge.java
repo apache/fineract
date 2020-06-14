@@ -689,14 +689,20 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     }
 
     public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
-        if (this.currencyCode() == null || matchingCurrencyCode == null) { return false; }
+        if (this.currencyCode() == null || matchingCurrencyCode == null) {
+            return false;
+        }
         return this.currencyCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof SavingsAccountCharge)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SavingsAccountCharge)) {
+            return false;
+        }
         SavingsAccountCharge that = (SavingsAccountCharge) o;
         return Objects.equals(penaltyCharge, that.penaltyCharge) && Objects.equals(paid, that.paid) && Objects.equals(waived, that.waived)
                 && Objects.equals(status, that.status) && Objects.equals(savingsAccount, that.savingsAccount)

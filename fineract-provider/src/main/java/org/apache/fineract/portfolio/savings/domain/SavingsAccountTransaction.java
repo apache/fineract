@@ -721,7 +721,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     private SavingsAccountChargePaidBy getSavingsAccountChargePaidBy() {
-        if (!CollectionUtils.isEmpty(this.savingsAccountChargesPaid)) { return this.savingsAccountChargesPaid.iterator().next(); }
+        if (!CollectionUtils.isEmpty(this.savingsAccountChargesPaid)) {
+            return this.savingsAccountChargesPaid.iterator().next();
+        }
         return null;
     }
 

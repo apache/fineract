@@ -161,7 +161,9 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         }
 
         final Permission permission = this.permissionRepository.findOneByCode("READ" + "_" + report.getReportName());
-        if (permission == null) { throw new PermissionNotFoundException("READ" + "_" + report.getReportName()); }
+        if (permission == null) {
+            throw new PermissionNotFoundException("READ" + "_" + report.getReportName());
+        }
 
         this.reportRepository.delete(report);
         this.permissionRepository.delete(permission);
@@ -217,7 +219,9 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     if (id != null) {
                         // existing report parameter usage
                         reportParameterUsageItem = this.reportParameterUsageRepository.findById(id).orElse(null);
-                        if (reportParameterUsageItem == null) { throw new ReportParameterNotFoundException(id); }
+                        if (reportParameterUsageItem == null) {
+                            throw new ReportParameterNotFoundException(id);
+                        }
 
                         // check parameter
                         if (jsonObject.has("parameterId")) {

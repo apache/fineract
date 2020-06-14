@@ -65,6 +65,7 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="AvoidStarImport"/>
+        <module name="LeftCurly" />
          <module name="AnnotationLocation">
             <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF"/>
         </module>
@@ -185,7 +186,6 @@
 
 
 
-        <module name="LeftCurly" />
         <module name="RightCurly">
             <property name="option" value="alone"/>
             <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, STATIC_INIT, INSTANCE_INIT"/>

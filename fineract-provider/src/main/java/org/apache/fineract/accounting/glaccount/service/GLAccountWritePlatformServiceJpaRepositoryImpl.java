@@ -125,7 +125,9 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 validateForAttachedProduct(glAccountId);
             }
             final Long parentId = command.longValueOfParameterNamed(GLAccountJsonInputParams.PARENT_ID.getValue());
-            if (glAccountId.equals(parentId)) { throw new InvalidParentGLAccountHeadException(glAccountId, parentId); }
+            if (glAccountId.equals(parentId)) {
+                throw new InvalidParentGLAccountHeadException(glAccountId, parentId);
+            }
             // is the glAccount valid
             final GLAccount glAccount = this.glAccountRepository.findById(glAccountId)
                     .orElseThrow(() -> new GLAccountNotFoundException(glAccountId));
@@ -178,7 +180,9 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = ?";
         try {
             int count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
-            if (count > 0) { throw new GLAccountDisableException(); }
+            if (count > 0) {
+                throw new GLAccountDisableException();
+            }
         } catch (EmptyResultDataAccessException e) {
             LOG.error("Problem encountered in validateForAttachedProduct()", e);
         }
@@ -215,7 +219,9 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             parentGLAccount = this.glAccountRepository.findById(parentAccountId)
                     .orElseThrow(() -> new GLAccountNotFoundException(parentAccountId));
             // ensure parent is not a detail account
-            if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
+            if (parentGLAccount.isDetailAccount()) {
+                throw new GLAccountInvalidParentException(parentAccountId);
+            }
         }
         return parentGLAccount;
     }

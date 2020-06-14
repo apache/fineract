@@ -570,7 +570,9 @@ final public class ClientData implements Comparable<ClientData>, Serializable {
 
     @Override
     public int compareTo(final ClientData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
         return new CompareToBuilder() //
                 .append(this.id, obj.id) //
                 .append(this.displayName, obj.displayName) //
@@ -581,9 +583,15 @@ final public class ClientData implements Comparable<ClientData>, Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
         final ClientData rhs = (ClientData) obj;
         return new EqualsBuilder() //
                 .append(this.id, rhs.id) //

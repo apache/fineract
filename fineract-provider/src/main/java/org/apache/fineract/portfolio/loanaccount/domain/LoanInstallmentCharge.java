@@ -103,12 +103,16 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
     }
 
     private boolean determineIfFullyPaid() {
-        if (this.amount == null) { return true; }
+        if (this.amount == null) {
+            return true;
+        }
         return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
     }
 
     private BigDecimal calculateOutstanding() {
-        if (this.amount == null) { return null; }
+        if (this.amount == null) {
+            return null;
+        }
         BigDecimal amountPaidLocal = BigDecimal.ZERO;
         if (this.amountPaid != null) {
             amountPaidLocal = this.amountPaid;

@@ -87,7 +87,9 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
-        if (this.isTrapDoor == true) { throw new GlobalConfigurationPropertyCannotBeModfied(this.getId()); }
+        if (this.isTrapDoor == true) {
+            throw new GlobalConfigurationPropertyCannotBeModfied(this.getId());
+        }
 
         final String enabledParamName = "enabled";
         if (command.isChangeInBooleanParameterNamed(enabledParamName, this.enabled)) {

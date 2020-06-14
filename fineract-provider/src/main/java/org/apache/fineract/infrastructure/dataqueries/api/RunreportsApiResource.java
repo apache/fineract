@@ -124,7 +124,9 @@ public class RunreportsApiResource {
             parameterTypeValue = "report";
             String reportType = this.readExtraDataAndReportingService.getReportType(reportName, isSelfServiceUserReport);
             ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
-            if (reportingProcessService != null) { return reportingProcessService.processRequest(reportName, queryParams); }
+            if (reportingProcessService != null) {
+                return reportingProcessService.processRequest(reportName, queryParams);
+            }
         } else {
             parameterTypeValue = "parameter";
         }

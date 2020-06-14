@@ -392,7 +392,9 @@ public class RecurringDepositImportHandler implements ImportHandler {
             return 0;
         } else if (status.equals(TemplatePopulateImportConstants.STATUS_APPROVAL_FAILED)) {
             return 1;
-        } else if (status.equals(TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED)) { return 2; }
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_ACTIVATION_FAILED)) {
+            return 2;
+        }
         return 0;
     }
 

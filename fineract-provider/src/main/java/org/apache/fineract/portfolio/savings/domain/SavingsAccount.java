@@ -1197,7 +1197,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
                     if (!this.allowOverdraft) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
                     }
-                    if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                    if (!dataValidationErrors.isEmpty()) {
+                        throw new PlatformApiDataValidationException(dataValidationErrors);
+                    }
                 }
 
             }
@@ -1245,7 +1247,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.modifyApplicationAction);
         this.modifyApplication(command, actualChanges, baseDataValidator);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void modifyApplication(final JsonCommand command, final Map<String, Object> actualChanges,
@@ -1799,7 +1803,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 .resource(resourceName + SavingsApiConstants.summitalAction);
 
         validateLockinDetails(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         if (submittedOn.isAfter(todayDateOfTenant)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(submittedOn)
@@ -1815,7 +1821,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     protected LocalDate getSubmittedOnLocalDate() {
@@ -1859,7 +1867,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.status = SavingsAccountStatusType.APPROVED.getValue();
@@ -1884,7 +1894,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (approvedOn.isAfter(tenantsTodayDate)) {
@@ -1892,7 +1904,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_APPROVED, approvedOn);
 
@@ -1924,7 +1938,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue();
@@ -1955,7 +1971,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
         }
 
-        if (transactionToUndo == null) { throw new SavingsAccountTransactionNotFoundException(this.getId(), transactionId); }
+        if (transactionToUndo == null) {
+            throw new SavingsAccountTransactionNotFoundException(this.getId(), transactionId);
+        }
 
         validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION, transactionToUndo.transactionLocalDate());
@@ -2010,7 +2028,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.status = SavingsAccountStatusType.REJECTED.getValue();
@@ -2041,7 +2061,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (rejectedOn.isAfter(tenantsTodayDate)) {
@@ -2049,7 +2071,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(rejectedOn)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_REJECTED, rejectedOn);
 
@@ -2070,7 +2094,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.status = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue();
@@ -2100,7 +2126,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (withdrawnOn.isAfter(tenantsTodayDate)) {
@@ -2108,7 +2136,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(withdrawnOn)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_WITHDRAWAL_BY_CUSTOMER, withdrawnOn);
 
@@ -2129,7 +2159,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final Locale locale = command.extractLocale();
@@ -2161,7 +2193,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final String dateAsString = formatter.print(this.client.getActivationLocalDate());
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (this.group != null && this.group.isActivatedAfter(activationDate)) {
@@ -2169,7 +2203,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final String dateAsString = formatter.print(this.client.getActivationLocalDate());
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.group.activation.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final LocalDate approvalDate = getApprovedOnLocalDate();
@@ -2181,7 +2217,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.approval.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (activationDate.isAfter(tenantsTodayDate)) {
@@ -2189,7 +2227,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(activationDate)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_ACTIVATE, activationDate);
 
@@ -2265,7 +2305,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final Locale locale = command.extractLocale();
@@ -2275,12 +2317,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (closedDate.isBefore(getActivationLocalDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.activation.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         if (closedDate.isAfter(tenantsTodayDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("cannot.be.a.future.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
@@ -2288,12 +2334,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if (accountTransaction.isAfter(closedDate)) {
                 baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                         .failWithCode("must.be.after.last.transaction.date");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
         if (getAccountBalance().doubleValue() != 0) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.not.zero");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_CLOSE_ACCOUNT, closedDate);
         this.status = SavingsAccountStatusType.CLOSED.getValue();
@@ -2394,7 +2444,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean update(final Set<SavingsAccountCharge> newSavingsAccountCharges) {
-        if (newSavingsAccountCharges == null) { return false; }
+        if (newSavingsAccountCharges == null) {
+            return false;
+        }
 
         if (this.charges == null) {
             this.charges = new HashSet<>();
@@ -2405,7 +2457,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
-        if (this.currency == null) { return false; }
+        if (this.currency == null) {
+            return false;
+        }
         return this.currency.getCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
@@ -2416,12 +2470,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("delete.transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (isActive() || isApproved()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("delete.transaction.invalid.account.is.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.charges.remove(charge);
@@ -2435,33 +2493,45 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final SavingsAccountCharge savingsAccountCharge = getCharge(savingsAccountChargeId);
 
         if (savingsAccountCharge.isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (savingsAccountCharge.isWithdrawalFee()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.waiver.of.withdrawal.fee.not.supported");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         // validate charge is not already paid or waived
         if (savingsAccountCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         } else if (savingsAccountCharge.isPaid()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.paid");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         // waive charge
@@ -2479,13 +2549,17 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (!hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
             baseDataValidator.reset()
                     .failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.currency.and.charge.currency.not.same");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final LocalDate chargeDueDate = savingsAccountCharge.getDueLocalDate();
@@ -2545,14 +2619,18 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private boolean isWithDrawalFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee()) { return true; }
+            if (charge.isWithdrawalFee()) {
+                return true;
+            }
         }
         return false;
     }
 
     private boolean isAnnualFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isAnnualFee()) { return true; }
+            if (charge.isAnnualFee()) {
+                return true;
+            }
         }
         return false;
     }
@@ -2566,17 +2644,23 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (savingsAccountCharge.isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (getActivationLocalDate() != null && transactionDate.isBefore(getActivationLocalDate())) {
@@ -2621,16 +2705,22 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // validate charge is not already paid or waived
         if (savingsAccountCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         } else if (savingsAccountCharge.isPaid()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.paid");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final Money chargePaid = Money.of(currency, amountPaid);
         if (!savingsAccountCharge.getAmountOutstanding(getCurrency()).isGreaterThanOrEqualTo(chargePaid)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.payCharge(savingsAccountCharge, chargePaid, transactionDate, user);
@@ -2681,7 +2771,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
         }
 
-        if (charge == null) { throw new SavingsAccountChargeNotFoundException(savingsAccountChargeId, getId()); }
+        if (charge == null) {
+            throw new SavingsAccountChargeNotFoundException(savingsAccountChargeId, getId());
+        }
 
         return charge;
     }
@@ -2704,7 +2796,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public boolean allowOverdraft() {
@@ -2724,7 +2818,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean accountSubmittedAndActivationOnSameDate() {
-        if (getSubmittedOnLocalDate() == null || getActivationLocalDate() == null) { return false; }
+        if (getSubmittedOnLocalDate() == null || getActivationLocalDate() == null) {
+            return false;
+        }
         return getActivationLocalDate().isEqual(getSubmittedOnLocalDate());
 
     }
@@ -2777,16 +2873,28 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean isTransactionAllowed(SavingsAccountTransactionType transactionType, LocalDate transactionDate) {
-        if (!isTransactionsAllowed()) { return false; }
+        if (!isTransactionsAllowed()) {
+            return false;
+        }
 
         Client client = getClient();
-        if (client != null && !client.isActive()) { return false; }
+        if (client != null && !client.isActive()) {
+            return false;
+        }
         Group group = group();
-        if (group != null && !group.isActive()) { return false; }
+        if (group != null && !group.isActive()) {
+            return false;
+        }
 
-        if (transactionDate == null) { return true; }
-        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate())) { return false; }
-        if (transactionType.isCredit()) { return true; }
+        if (transactionDate == null) {
+            return true;
+        }
+        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate())) {
+            return false;
+        }
+        if (transactionType.isCredit()) {
+            return true;
+        }
         return !isAccountLocked(transactionDate);
     }
 
@@ -2801,12 +2909,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         savingsAccountCharge.inactiavateCharge(inactivationOnDate);
     }
@@ -2940,7 +3052,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.sub_status = SavingsAccountSubStatusEnum.BLOCK.getValue();
@@ -2970,7 +3084,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.blocked.state");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
         actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
         return actualChanges;
@@ -2995,7 +3111,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
                     .value(SavingsAccountSubStatusEnum.fromInt(currentSubstatus)).failWithCodeNoParameterAddedToErrorCode("currently.set");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         if (SavingsAccountSubStatusEnum.BLOCK_DEBIT.hasStateOf(SavingsAccountSubStatusEnum.fromInt(currentSubstatus))) {
             this.sub_status = SavingsAccountSubStatusEnum.BLOCK.getValue();
         } else {
@@ -3025,7 +3143,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode("credits.are.not.blocked");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
             this.sub_status = SavingsAccountSubStatusEnum.BLOCK_DEBIT.getValue();
         } else {
@@ -3054,7 +3174,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
                     .value(SavingsAccountSubStatusEnum.fromInt(currentSubstatus)).failWithCodeNoParameterAddedToErrorCode("currently.set");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         if (SavingsAccountSubStatusEnum.BLOCK_CREDIT.hasStateOf(SavingsAccountSubStatusEnum.fromInt(currentSubstatus))) {
             this.sub_status = SavingsAccountSubStatusEnum.BLOCK.getValue();
         } else {
@@ -3087,7 +3209,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
                     .failWithCodeNoParameterAddedToErrorCode("debits.are.not.blocked");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
             this.sub_status = SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue();
         } else {
@@ -3107,7 +3231,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void validateForAccountBlock() {
         final SavingsAccountSubStatusEnum currentSubStatus = SavingsAccountSubStatusEnum.fromInt(this.getSubStatus());
-        if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) { throw new SavingsAccountBlockedException(this.getId()); }
+        if (SavingsAccountSubStatusEnum.BLOCK.hasStateOf(currentSubStatus)) {
+            throw new SavingsAccountBlockedException(this.getId());
+        }
     }
 
     public void validateForDebitBlock() {

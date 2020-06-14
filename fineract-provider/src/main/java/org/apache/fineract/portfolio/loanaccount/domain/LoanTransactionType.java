@@ -72,7 +72,9 @@ public enum LoanTransactionType {
 
     public static LoanTransactionType fromInt(final Integer transactionType) {
 
-        if (transactionType == null) { return LoanTransactionType.INVALID; }
+        if (transactionType == null) {
+            return LoanTransactionType.INVALID;
+        }
 
         LoanTransactionType loanTransactionType = null;
         switch (transactionType) {

@@ -375,19 +375,25 @@ public class SmsCampaign extends AbstractPersistableCustom {
     private void validate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateActivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateReactivate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateReactivationDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateClosureDate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateClosureDate(dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {

@@ -74,6 +74,8 @@ public class ProvisioningEntriesDefinitionJsonDeserializer implements Provisioni
             Boolean bool = this.fromApiJsonHelper.extractBooleanNamed(JSON_CREATEJOURNALENTRIES_PARAM, element);
             baseDataValidator.reset().parameter(JSON_CREATEJOURNALENTRIES_PARAM).value(bool).validateForBooleanValue();
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

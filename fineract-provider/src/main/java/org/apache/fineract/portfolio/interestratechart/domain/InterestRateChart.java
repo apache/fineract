@@ -307,7 +307,9 @@ public class InterestRateChart extends AbstractPersistableCustom {
         final Set<InterestRateChartSlab> chartSlabs = setOfChartSlabs();
 
         for (InterestRateChartSlab interestRateChartSlab : chartSlabs) {
-            if (interestRateChartSlab.getId().equals(chartSlabId)) { return interestRateChartSlab; }
+            if (interestRateChartSlab.getId().equals(chartSlabId)) {
+                return interestRateChartSlab;
+            }
         }
         return null;
     }
@@ -326,7 +328,9 @@ public class InterestRateChart extends AbstractPersistableCustom {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public InterestRateChartFields chartFields() {

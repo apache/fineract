@@ -93,7 +93,9 @@ public class TwoFactorServiceImpl implements TwoFactorService {
     public OTPRequest createNewOTPToken(final AppUser user, final String deliveryMethodName, final boolean extendedAccessToken) {
         if (TwoFactorConstants.SMS_DELIVERY_METHOD_NAME.equalsIgnoreCase(deliveryMethodName)) {
             OTPDeliveryMethod smsDelivery = getSMSDeliveryMethodForUser(user);
-            if (smsDelivery == null) { throw new OTPDeliveryMethodInvalidException(); }
+            if (smsDelivery == null) {
+                throw new OTPDeliveryMethodInvalidException();
+            }
             final OTPRequest request = generateNewToken(smsDelivery, extendedAccessToken);
             final String smsText = configurationService.getFormattedSmsTextFor(user, request);
             SmsMessage smsMessage = SmsMessage.pendingSms(null, null, null, user.getStaff(), smsText, user.getStaff().mobileNo(), null,
@@ -104,7 +106,9 @@ public class TwoFactorServiceImpl implements TwoFactorService {
             return request;
         } else if (TwoFactorConstants.EMAIL_DELIVERY_METHOD_NAME.equalsIgnoreCase(deliveryMethodName)) {
             OTPDeliveryMethod emailDelivery = getEmailDeliveryMethodForUser(user);
-            if (emailDelivery == null) { throw new OTPDeliveryMethodInvalidException(); }
+            if (emailDelivery == null) {
+                throw new OTPDeliveryMethodInvalidException();
+            }
             final OTPRequest request = generateNewToken(emailDelivery, extendedAccessToken);
             final String emailSubject = configurationService.getFormattedEmailSubjectFor(user, request);
             final String emailBody = configurationService.getFormattedEmailBodyFor(user, request);
@@ -146,7 +150,9 @@ public class TwoFactorServiceImpl implements TwoFactorService {
     public void validateTwoFactorAccessToken(AppUser user, String token) {
         TFAccessToken accessToken = fetchAccessTokenForUser(user, token);
 
-        if (accessToken == null || !accessToken.isValid()) { throw new AccessTokenInvalidIException(); }
+        if (accessToken == null || !accessToken.isValid()) {
+            throw new AccessTokenInvalidIException();
+        }
     }
 
     @Override
@@ -157,7 +163,9 @@ public class TwoFactorServiceImpl implements TwoFactorService {
         final String token = command.stringValueOfParameterNamed("token");
         final TFAccessToken accessToken = fetchAccessTokenForUser(user, token);
 
-        if (accessToken == null || !accessToken.isValid()) { throw new AccessTokenInvalidIException(); }
+        if (accessToken == null || !accessToken.isValid()) {
+            throw new AccessTokenInvalidIException();
+        }
 
         accessToken.setEnabled(false);
         tfAccessTokenRepository.save(accessToken);
@@ -173,19 +181,29 @@ public class TwoFactorServiceImpl implements TwoFactorService {
     }
 
     private OTPDeliveryMethod getSMSDeliveryMethodForUser(final AppUser user) {
-        if (!configurationService.isSMSEnabled()) { return null; }
+        if (!configurationService.isSMSEnabled()) {
+            return null;
+        }
 
-        if (configurationService.getSMSProviderId() == null) { return null; }
+        if (configurationService.getSMSProviderId() == null) {
+            return null;
+        }
 
-        if (user.getStaff() == null) { return null; }
+        if (user.getStaff() == null) {
+            return null;
+        }
         String mobileNo = user.getStaff().mobileNo();
-        if (StringUtils.isBlank(mobileNo)) { return null; }
+        if (StringUtils.isBlank(mobileNo)) {
+            return null;
+        }
 
         return new OTPDeliveryMethod(TwoFactorConstants.SMS_DELIVERY_METHOD_NAME, mobileNo);
     }
 
     private OTPDeliveryMethod getEmailDeliveryMethodForUser(final AppUser user) {
-        if (!configurationService.isEmailEnabled()) { return null; }
+        if (!configurationService.isEmailEnabled()) {
+            return null;
+        }
 
         return new OTPDeliveryMethod(TwoFactorConstants.EMAIL_DELIVERY_METHOD_NAME, user.getEmail());
     }

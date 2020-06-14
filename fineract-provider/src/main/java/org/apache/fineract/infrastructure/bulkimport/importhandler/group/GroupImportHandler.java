@@ -132,7 +132,9 @@ public class GroupImportHandler implements ImportHandler {
             activationDate = submittedOnDate;
         }
         String groupName = ImportHandlerUtils.readAsString(GroupConstants.NAME_COL, row);
-        if (groupName == null || groupName.equals("")) { throw new IllegalArgumentException("Name is blank"); }
+        if (groupName == null || groupName.equals("")) {
+            throw new IllegalArgumentException("Name is blank");
+        }
         List<ClientData> clientMembers = new ArrayList<>();
         for (int cellNo = GroupConstants.CLIENT_NAMES_STARTING_COL; cellNo < GroupConstants.CLIENT_NAMES_ENDING_COL; cellNo++) {
             String clientName = ImportHandlerUtils.readAsString(cellNo, row);
@@ -153,7 +155,9 @@ public class GroupImportHandler implements ImportHandler {
 
     private boolean containsClientId(List<ClientData> clientMembers, Long clientId) {
         for (ClientData client : clientMembers) {
-            if (client.getId().equals(clientId)) { return true; }
+            if (client.getId().equals(clientId)) {
+                return true;
+            }
         }
         return false;
     }
@@ -262,7 +266,9 @@ public class GroupImportHandler implements ImportHandler {
     private int getProgressLevel(String status) {
         if (status == null || status.equals(TemplatePopulateImportConstants.STATUS_CREATION_FAILED)) {
             return 0;
-        } else if (status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED)) { return 1; }
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_MEETING_FAILED)) {
+            return 1;
+        }
         return 0;
     }
 

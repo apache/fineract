@@ -62,15 +62,21 @@ public class SQLBuilder {
      *            null value is explicitly permitted.
      */
     public void addCriteria(String criteria, Object argument) {
-        if (criteria == null || criteria.trim().isEmpty()) { throw new IllegalArgumentException("criteria cannot be null"); }
+        if (criteria == null || criteria.trim().isEmpty()) {
+            throw new IllegalArgumentException("criteria cannot be null");
+        }
         String trimmedCriteria = criteria.trim();
-        if (trimmedCriteria.isEmpty()) { throw new IllegalArgumentException("criteria cannot be null"); }
+        if (trimmedCriteria.isEmpty()) {
+            throw new IllegalArgumentException("criteria cannot be null");
+        }
         if (trimmedCriteria.contains("?")) {
             throw new IllegalArgumentException(
                     "criteria cannot contain a '?' (that is automatically added at the end): " + trimmedCriteria);
         }
         int columnOperatorIndex = trimmedCriteria.indexOf(' ');
-        if (columnOperatorIndex == -1) { throw new IllegalArgumentException("criteria missing operator: " + trimmedCriteria); }
+        if (columnOperatorIndex == -1) {
+            throw new IllegalArgumentException("criteria missing operator: " + trimmedCriteria);
+        }
         String columnName = trimmedCriteria.substring(0, columnOperatorIndex).trim().toLowerCase(Locale.ROOT);
         if (!ATOZ.matcher(columnName).matches()) {
             throw new IllegalArgumentException("criteria column name must match [a-z]: " + trimmedCriteria);
@@ -115,7 +121,9 @@ public class SQLBuilder {
      *         (unless no criteria, then empty)
      */
     public String getSQLTemplate() {
-        if (sb.length() > 0) { return " WHERE  " + sb.toString(); }
+        if (sb.length() > 0) {
+            return " WHERE  " + sb.toString();
+        }
         return "";
     }
 

@@ -398,7 +398,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private void updateCompoundingDetails(final Collection<LoanScheduleModelPeriod> periods, final LoanScheduleParams params,
             final LoanApplicationTerms loanApplicationTerms) {
         final Map<LocalDate, Map<LocalDate, Money>> compoundingDetails = params.getCompoundingDateVariations();
-        if (compoundingDetails.isEmpty()) { return; }
+        if (compoundingDetails.isEmpty()) {
+            return;
+        }
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
             if (loanScheduleModelPeriod.isRepaymentPeriod() && loanScheduleModelPeriod.getLoanCompoundingDetails().isEmpty()) {
                 Map<LocalDate, Money> periodCompoundingDetails = compoundingDetails.get(loanScheduleModelPeriod.periodFromDate());
@@ -1507,7 +1509,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // in this case emi amount will be reduced but number of
         // installments won't change
         Money principal = getPrincipalToBeScheduled(loanApplicationTerms);
-        if (!principal.minus(totalCumulativePrincipal).isGreaterThanZero()) { return; }
+        if (!principal.minus(totalCumulativePrincipal).isGreaterThanZero()) {
+            return;
+        }
         if (loanApplicationTerms.getAmortizationMethod().isEqualPrincipal()) {
             loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, principal.minus(totalCumulativePrincipal));
         } else if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
@@ -2582,7 +2586,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private LocalDate getNextCompoundScheduleDate(LocalDate startDate, LoanApplicationTerms loanApplicationTerms,
             final HolidayDetailDTO holidayDetailDTO) {
         LocalDate nextScheduleDate = null;
-        if (!loanApplicationTerms.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()) { return null; }
+        if (!loanApplicationTerms.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()) {
+            return null;
+        }
         if (loanApplicationTerms.getCompoundingFrequencyType().isSameAsRepayment()) {
             nextScheduleDate = this.scheduledDateGenerator.generateNextScheduleDateStartingFromDisburseDate(startDate, loanApplicationTerms,
                     holidayDetailDTO);

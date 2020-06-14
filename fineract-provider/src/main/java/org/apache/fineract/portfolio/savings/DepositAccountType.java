@@ -52,7 +52,9 @@ public enum DepositAccountType {
 
     public static DepositAccountType fromInt(final Integer transactionType) {
 
-        if (transactionType == null) { return DepositAccountType.INVALID; }
+        if (transactionType == null) {
+            return DepositAccountType.INVALID;
+        }
 
         DepositAccountType depositAccountType = DepositAccountType.INVALID;
         switch (transactionType) {

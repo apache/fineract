@@ -149,7 +149,9 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         this.calendarRepository.save(newCalendar);
 

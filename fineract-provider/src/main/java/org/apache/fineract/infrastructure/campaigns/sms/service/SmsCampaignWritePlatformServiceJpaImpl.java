@@ -165,7 +165,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             final SmsCampaign smsCampaign = this.smsCampaignRepository.findById(resourceId)
                     .orElseThrow(() -> new SmsCampaignNotFound(resourceId));
 
-            if (smsCampaign.isActive()) { throw new SmsCampaignMustBeClosedToEditException(smsCampaign.getId()); }
+            if (smsCampaign.isActive()) {
+                throw new SmsCampaignMustBeClosedToEditException(smsCampaign.getId());
+            }
             final Map<String, Object> changes = smsCampaign.update(command);
 
             if (changes.containsKey(SmsCampaignValidator.runReportId)) {
@@ -196,7 +198,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final SmsCampaign smsCampaign = this.smsCampaignRepository.findById(resourceId)
                 .orElseThrow(() -> new SmsCampaignNotFound(resourceId));
 
-        if (smsCampaign.isActive()) { throw new SmsCampaignMustBeClosedToBeDeletedException(smsCampaign.getId()); }
+        if (smsCampaign.isActive()) {
+            throw new SmsCampaignMustBeClosedToBeDeletedException(smsCampaign.getId());
+        }
 
         /*
          * Do not delete but set a boolean is_visible to zero
@@ -250,7 +254,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(final Loan loan, final SmsCampaign smsCampaign) {
         try {
-            if (loan.hasInvalidLoanType()) { throw new InvalidLoanTypeException("Loan Type cannot be 0 for the Triggered Sms Campaign"); }
+            if (loan.hasInvalidLoanType()) {
+                throw new InvalidLoanTypeException("Loan Type cannot be 0 for the Triggered Sms Campaign");
+            }
 
             Set<Client> clientSet = new HashSet<>();
 

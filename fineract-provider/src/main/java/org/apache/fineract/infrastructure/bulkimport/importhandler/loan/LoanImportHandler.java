@@ -132,7 +132,9 @@ public class LoanImportHandler implements ImportHandler {
 
     private LoanApprovalData readLoanApproval(Row row, String locale, String dateFormat) {
         LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row);
-        if (approvedDate != null) { return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat); }
+        if (approvedDate != null) {
+            return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat);
+        }
 
         return null;
     }
@@ -503,7 +505,9 @@ public class LoanImportHandler implements ImportHandler {
             return 1;
         } else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_FAILED)) {
             return 2;
-        } else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_REPAYMENT_FAILED)) { return 3; }
+        } else if (status.equals(TemplatePopulateImportConstants.STATUS_DISBURSAL_REPAYMENT_FAILED)) {
+            return 3;
+        }
         return 0;
     }
 

@@ -132,7 +132,9 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
     @Cacheable(value = "tfConfig", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()+'|smsProvider'")
     public Integer getSMSProviderId() {
         Integer value = getIntegerConfig(TwoFactorConfigurationConstants.SMS_PROVIDER_ID, null);
-        if (value < 1) { return null; }
+        if (value < 1) {
+            return null;
+        }
         return value;
     }
 
@@ -190,7 +192,9 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
     public Integer getOTPTokenLiveTime() {
         Integer defaultValue = 300;
         Integer value = getIntegerConfig(TwoFactorConfigurationConstants.OTP_TOKEN_LIVE_TIME, defaultValue);
-        if (value < 1) { return defaultValue; }
+        if (value < 1) {
+            return defaultValue;
+        }
         return value;
     }
 
@@ -199,7 +203,9 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
     public Integer getAccessTokenLiveTime() {
         Integer defaultValue = 86400;
         Integer value = getIntegerConfig(TwoFactorConfigurationConstants.ACCESS_TOKEN_LIVE_TIME, defaultValue);
-        if (value < 1) { return defaultValue; }
+        if (value < 1) {
+            return defaultValue;
+        }
         return value;
     }
 
@@ -208,28 +214,36 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
     public Integer getAccessTokenExtendedLiveTime() {
         Integer defaultValue = 604800;
         Integer value = getIntegerConfig(TwoFactorConfigurationConstants.ACCESS_TOKEN_LIVE_TIME_EXTENDED, defaultValue);
-        if (value < 1) { return defaultValue; }
+        if (value < 1) {
+            return defaultValue;
+        }
         return value;
     }
 
     private boolean getBooleanConfig(final String name, final boolean defaultValue) {
         final TwoFactorConfiguration configuration = configurationRepository.findByName(name);
         Boolean value = configuration.getBooleanValue();
-        if (value == null) { return defaultValue; }
+        if (value == null) {
+            return defaultValue;
+        }
         return value;
     }
 
     private String getStringConfig(final String name, final String defaultValue) {
         final TwoFactorConfiguration configuration = configurationRepository.findByName(name);
         String value = configuration.getStringValue();
-        if (value == null) { return defaultValue; }
+        if (value == null) {
+            return defaultValue;
+        }
         return value;
     }
 
     private Integer getIntegerConfig(final String name, final Integer defaultValue) {
         final TwoFactorConfiguration configuration = configurationRepository.findByName(name);
         Integer value = configuration.getIntegerValue();
-        if (value == null) { return defaultValue; }
+        if (value == null) {
+            return defaultValue;
+        }
         return value;
     }
 

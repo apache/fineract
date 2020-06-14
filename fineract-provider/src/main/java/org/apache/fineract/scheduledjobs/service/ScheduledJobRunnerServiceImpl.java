@@ -260,7 +260,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
         LOG.info("{}: Savings accounts affected by update: {}", ThreadLocalContextUtil.getTenant().getName(), chargesDueData.size());
-        if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
+        if (!exceptions.isEmpty()) {
+            throw new JobExecutionException(exceptions);
+        }
     }
 
     @Transactional
@@ -410,7 +412,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
 
-        if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
+        if (!exceptions.isEmpty()) {
+            throw new JobExecutionException(exceptions);
+        }
     }
 
     @Override

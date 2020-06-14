@@ -88,7 +88,9 @@ public final class GroupingTypesDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CENTER_REQUEST_DATA_PARAMETERS);
@@ -153,7 +155,9 @@ public final class GroupingTypesDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REQUEST_DATA_PARAMETERS);
@@ -221,7 +225,9 @@ public final class GroupingTypesDataValidator {
     public void validateForCreateGroup(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REQUEST_DATA_PARAMETERS);
@@ -286,7 +292,9 @@ public final class GroupingTypesDataValidator {
     public void validateForUpdateCenter(final JsonCommand command, final Long centerId) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CENTER_REQUEST_DATA_PARAMETERS);
@@ -334,7 +342,9 @@ public final class GroupingTypesDataValidator {
     public void validateForUpdateGroup(final JsonCommand command, final Long groupId) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REQUEST_DATA_PARAMETERS);
@@ -387,7 +397,9 @@ public final class GroupingTypesDataValidator {
     public void validateForActivation(final JsonCommand command, final String resourceName) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACTIVATION_REQUEST_DATA_PARAMETERS);
@@ -405,7 +417,9 @@ public final class GroupingTypesDataValidator {
     }
 
     public void validateForUnassignStaff(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -422,11 +436,15 @@ public final class GroupingTypesDataValidator {
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForAssignStaff(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -451,12 +469,16 @@ public final class GroupingTypesDataValidator {
         baseDataValidator.reset().parameter(inheritStaffForClientAccountsParamName).value(inheritStaffForClientAccounts).ignoreIfNull()
                 .notBlank().isOneOfTheseValues(true, false);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForAssociateClients(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -476,7 +498,9 @@ public final class GroupingTypesDataValidator {
 
     public void validateForDisassociateClients(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -497,7 +521,9 @@ public final class GroupingTypesDataValidator {
     public void validateForGroupClose(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
@@ -522,7 +548,9 @@ public final class GroupingTypesDataValidator {
     public void validateForCenterClose(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
@@ -545,7 +573,9 @@ public final class GroupingTypesDataValidator {
     }
 
     public void validateForAssociateGroups(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -566,7 +596,9 @@ public final class GroupingTypesDataValidator {
 
     public void validateForDisassociateGroups(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 

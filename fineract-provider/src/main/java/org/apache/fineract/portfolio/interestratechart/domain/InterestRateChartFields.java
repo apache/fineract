@@ -128,7 +128,9 @@ public class InterestRateChartFields {
 
     public boolean isFromDateAfter(LocalDate compare) {
         final LocalDate fromDate = getFromDateAsLocalDate();
-        if (fromDate != null && compare != null) { return fromDate.isAfter(compare); }
+        if (fromDate != null && compare != null) {
+            return fromDate.isAfter(compare);
+        }
         return false;
     }
 
@@ -159,7 +161,9 @@ public class InterestRateChartFields {
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
         final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
 
-        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) { return true; }
+        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) {
+            return true;
+        }
         return false;// no overlapping
     }
 

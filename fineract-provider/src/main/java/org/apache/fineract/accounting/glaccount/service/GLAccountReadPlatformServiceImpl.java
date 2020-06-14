@@ -119,7 +119,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         }
 
         if (usage != null) {
-            if (!checkValidGLAccountUsage(usage)) { throw new GLAccountInvalidClassificationException(accountClassification); }
+            if (!checkValidGLAccountUsage(usage)) {
+                throw new GLAccountInvalidClassificationException(accountClassification);
+            }
         }
 
         final GLAccountMapper rm = new GLAccountMapper(associationParametersData);
@@ -240,14 +242,18 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     private static boolean checkValidGLAccountType(final int type) {
         for (final GLAccountType accountType : GLAccountType.values()) {
-            if (accountType.getValue().equals(type)) { return true; }
+            if (accountType.getValue().equals(type)) {
+                return true;
+            }
         }
         return false;
     }
 
     private static boolean checkValidGLAccountUsage(final int type) {
         for (final GLAccountUsage accountUsage : GLAccountUsage.values()) {
-            if (accountUsage.getValue().equals(type)) { return true; }
+            if (accountUsage.getValue().equals(type)) {
+                return true;
+            }
         }
         return false;
     }

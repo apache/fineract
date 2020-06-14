@@ -67,7 +67,9 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof LoanDisbursementDetails)) { return false; }
+        if (!(obj instanceof LoanDisbursementDetails)) {
+            return false;
+        }
         final LoanDisbursementDetails loanDisbursementDetails = (LoanDisbursementDetails) obj;
         if (loanDisbursementDetails.principal.equals(this.principal)
                 && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)) {

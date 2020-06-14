@@ -120,7 +120,9 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         this.context.authenticatedUser();
 
         final Code code = retrieveCodeBy(codeId);
-        if (code.isSystemDefined()) { throw new SystemDefinedCodeCannotBeChangedException(); }
+        if (code.isSystemDefined()) {
+            throw new SystemDefinedCodeCannotBeChangedException();
+        }
 
         try {
             this.codeRepository.delete(code);

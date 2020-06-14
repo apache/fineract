@@ -832,7 +832,9 @@ public class Loan extends AbstractPersistableCustom {
 
     private boolean doesLoanChargePaidByContainLoanCharge(Set<LoanChargePaidBy> loanChargePaidBys, LoanCharge loanCharge) {
         for (LoanChargePaidBy loanChargePaidBy : loanChargePaidBys) {
-            if (loanChargePaidBy.getLoanCharge().equals(loanCharge)) { return true; }
+            if (loanChargePaidBy.getLoanCharge().equals(loanCharge)) {
+                return true;
+            }
         }
         return false;
     }
@@ -880,7 +882,9 @@ public class Loan extends AbstractPersistableCustom {
      */
     private BigDecimal calculateAmountPercentageAppliedTo(final LoanCharge loanCharge) {
         BigDecimal amount = BigDecimal.ZERO;
-        if (loanCharge.isOverdueInstallmentCharge()) { return loanCharge.getAmountPercentageAppliedTo(); }
+        if (loanCharge.isOverdueInstallmentCharge()) {
+            return loanCharge.getAmountPercentageAppliedTo();
+        }
         switch (loanCharge.getChargeCalculation()) {
             case PERCENT_OF_AMOUNT:
                 amount = getDerivedAmountForCharge(loanCharge);
@@ -927,7 +931,9 @@ public class Loan extends AbstractPersistableCustom {
                     totalTranchDisbursementCount++;
                 }
             }
-            if (totalTranchDisbursementCount < 2) { return true; }
+            if (totalTranchDisbursementCount < 2) {
+                return true;
+            }
         }
         return false;
     }
@@ -2648,7 +2654,9 @@ public class Loan extends AbstractPersistableCustom {
      */
     public void regenerateRepaymentSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO, final AppUser currentUser) {
         final LoanScheduleModel loanSchedule = regenerateScheduleModel(scheduleGeneratorDTO);
-        if (loanSchedule == null) { return; }
+        if (loanSchedule == null) {
+            return;
+        }
         updateLoanSchedule(loanSchedule, currentUser);
         final Set<LoanCharge> charges = this.charges();
         for (final LoanCharge loanCharge : charges) {
@@ -4593,7 +4601,9 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public Integer getLoanProductLoanCounter() {
-        if (this.loanProductCounter == null) { return 0; }
+        if (this.loanProductCounter == null) {
+            return 0;
+        }
         return this.loanProductCounter;
     }
 
@@ -4987,7 +4997,9 @@ public class Loan extends AbstractPersistableCustom {
             break;
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 
@@ -5074,7 +5086,9 @@ public class Loan extends AbstractPersistableCustom {
 
     public LoanRepaymentScheduleInstallment fetchRepaymentScheduleInstallment(final Integer installmentNumber) {
         LoanRepaymentScheduleInstallment installment = null;
-        if (installmentNumber == null) { return installment; }
+        if (installmentNumber == null) {
+            return installment;
+        }
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment scheduleInstallment : installments) {
             if (scheduleInstallment.getInstallmentNumber().equals(installmentNumber)) {
@@ -5102,7 +5116,9 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public Long loanInterestRecalculationDetailId() {
-        if (loanInterestRecalculationDetails() != null) { return this.loanInterestRecalculationDetails.getId(); }
+        if (loanInterestRecalculationDetails() != null) {
+            return this.loanInterestRecalculationDetails.getId();
+        }
         return null;
     }
 
@@ -5179,7 +5195,9 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate lastTransactionDate = getLastUserTransactionDate();
         final LoanScheduleDTO loanSchedule = getRecalculatedSchedule(generatorDTO);
-        if (loanSchedule == null) { return; }
+        if (loanSchedule == null) {
+            return;
+        }
         updateLoanSchedule(loanSchedule.getInstallments(), currentUser);
         this.interestRecalculatedOn = DateUtils.getDateOfTenant();
         LocalDate lastRepaymentDate = this.getLastRepaymentPeriodDueDate(true);
@@ -5354,7 +5372,9 @@ public class Loan extends AbstractPersistableCustom {
 
     private LoanTransaction getTransactionForDate(List<LoanTransaction> transactions, LocalDate effectiveDate) {
         for (LoanTransaction loanTransaction : transactions) {
-            if (loanTransaction.getTransactionDate().isEqual(effectiveDate)) { return loanTransaction; }
+            if (loanTransaction.getTransactionDate().isEqual(effectiveDate)) {
+                return loanTransaction;
+            }
         }
         return null;
     }
@@ -5407,7 +5427,9 @@ public class Loan extends AbstractPersistableCustom {
 
     private LoanScheduleDTO getRecalculatedSchedule(final ScheduleGeneratorDTO generatorDTO) {
 
-        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa) { return null; }
+        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa) {
+            return null;
+        }
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
         final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory().create(interestMethod);
 
@@ -6322,7 +6344,9 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     private double calculateInterestForDays(int daysInPeriod, BigDecimal interest, int days) {
-        if (interest.doubleValue() == 0) { return 0; }
+        if (interest.doubleValue() == 0) {
+            return 0;
+        }
         return interest.doubleValue() / daysInPeriod * days;
     }
 

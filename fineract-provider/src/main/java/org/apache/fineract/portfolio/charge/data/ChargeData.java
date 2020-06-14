@@ -229,7 +229,9 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof ChargeData)) { return false; }
+        if (!(obj instanceof ChargeData)) {
+            return false;
+        }
         final ChargeData chargeData = (ChargeData) obj;
         return this.id.equals(chargeData.id);
     }
@@ -241,7 +243,9 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
 
     @Override
     public int compareTo(final ChargeData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
 
         return obj.id.compareTo(this.id);
     }
