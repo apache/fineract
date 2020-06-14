@@ -45,9 +45,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class ClientEntityImportHandlerTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -71,12 +71,12 @@ public class ClientEntityImportHandlerTest {
         //in order to populate helper sheets
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Integer outcome_staff_creation = StaffHelper.createStaff(requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create staff",outcome_staff_creation);
+        Assertions.assertNotNull(outcome_staff_creation, "Could not create staff");
 
         //in order to populate helper sheets
         OfficeHelper officeHelper = new OfficeHelper(requestSpec,responseSpec);
         Integer outcome_office_creation=officeHelper.createOffice("02 May 2000");
-        Assert.assertNotNull("Could not create office" ,outcome_office_creation);
+        Assertions.assertNotNull(outcome_office_creation, "Could not create office");
 
         //in order to populate helper columns in client entity sheet
         //create constitution
@@ -131,7 +131,7 @@ public class ClientEntityImportHandlerTest {
 
         String importDocumentId=clientHelper.importClientEntityTemplate(file);
         file.delete();
-        Assert.assertNotNull(importDocumentId);
+        Assertions.assertNotNull(importDocumentId);
 
         //Wait for the creation of output excel
         Thread.sleep(10000);
@@ -146,7 +146,7 @@ public class ClientEntityImportHandlerTest {
         LOG.info("Output location: {}", location);
         LOG.info("Failure reason column: {}", row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
 
-        Assert.assertEquals("Imported",row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
+        Assertions.assertEquals("Imported",row.getCell(ClientEntityConstants.STATUS_COL).getStringCellValue());
         outputWorkbook.close();
     }
 }

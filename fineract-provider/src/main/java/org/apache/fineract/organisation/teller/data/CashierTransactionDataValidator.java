@@ -33,6 +33,8 @@ import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatf
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,6 +45,7 @@ public class CashierTransactionDataValidator {
 
     private final TellerManagementReadPlatformService tellerManagementReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
+    private final static Logger LOG = LoggerFactory.getLogger(CashierTransactionDataValidator.class);
 
     @Autowired
     public CashierTransactionDataValidator(
@@ -145,7 +148,7 @@ public class CashierTransactionDataValidator {
                 validateSettleCashAndCashOutTransactions(cashierId,
                         currencyCode, transactionAmount);
             } catch (EmptyResultDataAccessException e) {
-
+                LOG.error("Problem occurred in validateOnLoanDisbursal function",e);
             }
         }
 

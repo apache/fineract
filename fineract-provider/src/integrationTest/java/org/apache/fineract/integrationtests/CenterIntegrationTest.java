@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
@@ -35,9 +35,9 @@ import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class CenterIntegrationTest {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -62,20 +62,20 @@ public class CenterIntegrationTest {
         int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
 
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getName().equals(name));
-        Assert.assertTrue(center.getOfficeId() == officeId);
-        Assert.assertTrue(center.isActive() == false);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getName().equals(name));
+        Assertions.assertTrue(center.getOfficeId() == officeId);
+        Assertions.assertTrue(center.isActive() == false);
 
         // Test retrieval by listing all centers
         int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
-        Assert.assertTrue(id > 0);
+        Assertions.assertTrue(id > 0);
 
         CenterDomain retrievedCenter = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
-        Assert.assertNotNull(retrievedCenter);
-        Assert.assertNotNull(retrievedCenter.getName());
-        Assert.assertNotNull(retrievedCenter.getHierarchy());
-        Assert.assertNotNull(retrievedCenter.getOfficeName());
+        Assertions.assertNotNull(retrievedCenter);
+        Assertions.assertNotNull(retrievedCenter.getName());
+        Assertions.assertNotNull(retrievedCenter.getHierarchy());
+        Assertions.assertNotNull(retrievedCenter.getOfficeName());
 
     }
 
@@ -90,13 +90,13 @@ public class CenterIntegrationTest {
         int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
 
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getName().equals(name));
-        Assert.assertTrue(center.getOfficeId() == officeId);
-        Assert.assertTrue(center.getExternalId().equals(externalId));
-        Assert.assertTrue(center.getStaffId() == staffId);
-        Assert.assertTrue(center.isActive() == false);
-        Assert.assertArrayEquals(center.getGroupMembers(), groupMembers);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getName().equals(name));
+        Assertions.assertTrue(center.getOfficeId() == officeId);
+        Assertions.assertTrue(center.getExternalId().equals(externalId));
+        Assertions.assertTrue(center.getStaffId() == staffId);
+        Assertions.assertTrue(center.isActive() == false);
+        Assertions.assertArrayEquals(center.getGroupMembers(), groupMembers);
     }
 
     @Test
@@ -104,9 +104,9 @@ public class CenterIntegrationTest {
         ArrayList<CenterDomain> paginatedList = CenterHelper.paginatedListCenters(requestSpec, responseSpec);
         ArrayList<CenterDomain> list = CenterHelper.listCenters(requestSpec, responseSpec);
 
-        Assert.assertNotNull(paginatedList);
-        Assert.assertNotNull(list);
-        Assert.assertTrue(Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]),
+        Assertions.assertNotNull(paginatedList);
+        Assertions.assertNotNull(list);
+        Assertions.assertTrue(Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]),
                 list.toArray(new CenterDomain[list.size()])));
     }
 
@@ -116,7 +116,7 @@ public class CenterIntegrationTest {
         int id = arr.get(arr.size() - 1).getId() + 1;
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
+        Assertions.assertNotNull(center);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -137,7 +137,7 @@ public class CenterIntegrationTest {
         int[] associateResponse = CenterHelper.associateGroups(resourceId, associateGroupMembers, requestSpec, responseSpec);
         Arrays.sort(associateResponse);
         Arrays.sort(associateGroupMembers);
-        Assert.assertArrayEquals(associateResponse, associateGroupMembers);
+        Assertions.assertArrayEquals(associateResponse, associateGroupMembers);
 
         int[] newGroupMembers = new int[5];
         for (int i = 0; i < 5; i++) {
@@ -153,17 +153,17 @@ public class CenterIntegrationTest {
         request.put("externalId", newExternalId);
         request.put("staffId", newStaffId);
         HashMap response = CenterHelper.updateCenter(resourceId, request, requestSpec, responseSpec);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(newName, response.get("name"));
-        Assert.assertEquals(newExternalId, response.get("externalId"));
-        Assert.assertEquals(Integer.valueOf(newStaffId), Integer.valueOf(response.get("staffId").toString()));
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(newName, response.get("name"));
+        Assertions.assertEquals(newExternalId, response.get("externalId"));
+        Assertions.assertEquals(Integer.valueOf(newStaffId), Integer.valueOf(response.get("staffId").toString()));
 
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
-        Assert.assertEquals(newName, center.getName());
-        Assert.assertEquals(newExternalId, center.getExternalId());
-        Assert.assertEquals((Integer)newStaffId, center.getStaffId());
-        Assert.assertArrayEquals(newGroupMembers, center.getGroupMembers());
+        Assertions.assertNotNull(center);
+        Assertions.assertEquals(newName, center.getName());
+        Assertions.assertEquals(newExternalId, center.getExternalId());
+        Assertions.assertEquals((Integer)newStaffId, center.getStaffId());
+        Assertions.assertArrayEquals(newGroupMembers, center.getGroupMembers());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class CenterIntegrationTest {
         CenterHelper.deleteCenter(resourceId, requestSpec, responseSpec);
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
+        Assertions.assertNotNull(center);
     }
 
     private int[] generateGroupMembers(int size, int officeId) {
@@ -201,21 +201,21 @@ public class CenterIntegrationTest {
 
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         LOG.info("--------------creating first staff with id------------- {}" , staffId);
-        Assert.assertNotNull(staffId);
+        Assertions.assertNotNull(staffId);
 
         final int centerWithStaffId = CenterHelper.createCenterWithStaffId(this.requestSpec, this.responseSpec, staffId);
         final CenterDomain center = CenterHelper.retrieveByID(centerWithStaffId, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getId() == centerWithStaffId);
-        Assert.assertTrue(center.getStaffId().intValue() == staffId);
-        Assert.assertTrue(center.isActive() == true);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getId() == centerWithStaffId);
+        Assertions.assertTrue(center.getStaffId().intValue() == staffId);
+        Assertions.assertTrue(center.isActive() == true);
     }
 
     @Test
     public void testAssignStaffToCenter() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         LOG.info("--------------creating first staff with id------------- {}" , staffId);
-        Assert.assertNotNull(staffId);
+        Assertions.assertNotNull(staffId);
 
         final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
         CenterHelper.verifyCenterCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
@@ -223,12 +223,12 @@ public class CenterIntegrationTest {
         final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec,
                 this.responseSpec, groupID.toString(),
                 staffId.longValue());
-        assertEquals("Verify assigned staff id is the same as id sent", assignStaffToCenterResponseMap.get("staffId"), staffId);
+        assertEquals(assignStaffToCenterResponseMap.get("staffId"), staffId, "Verify assigned staff id is the same as id sent");
 
         final CenterDomain center = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
-        Assert.assertTrue(center.getId().intValue() == groupID);
-        Assert.assertTrue(center.getStaffId().intValue() == staffId);
+        Assertions.assertNotNull(center);
+        Assertions.assertTrue(center.getId().intValue() == groupID);
+        Assertions.assertTrue(center.getStaffId().intValue() == staffId);
 
     }
 
@@ -236,7 +236,7 @@ public class CenterIntegrationTest {
     public void testUnassignStaffToCenter() {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         LOG.info("--------------creating first staff with id------------- {}" , staffId);
-        Assert.assertNotNull(staffId);
+        Assertions.assertNotNull(staffId);
 
         final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
         CenterHelper.verifyCenterCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
@@ -244,20 +244,20 @@ public class CenterIntegrationTest {
         final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec,
                 this.responseSpec, groupID.toString(),
                 staffId.longValue());
-        assertEquals("Verify assigned staff id is the same as id sent", assignStaffToCenterResponseMap.get("staffId"), staffId);
+        assertEquals(assignStaffToCenterResponseMap.get("staffId"), staffId, "Verify assigned staff id is the same as id sent");
         final CenterDomain centerWithStaffAssigned = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
-        Assert.assertNotNull(centerWithStaffAssigned);
-        Assert.assertTrue(centerWithStaffAssigned.getId().intValue() == groupID);
-        Assert.assertTrue(centerWithStaffAssigned.getStaffId().intValue() == staffId);
+        Assertions.assertNotNull(centerWithStaffAssigned);
+        Assertions.assertTrue(centerWithStaffAssigned.getId().intValue() == groupID);
+        Assertions.assertTrue(centerWithStaffAssigned.getStaffId().intValue() == staffId);
 
         final HashMap unassignStaffToCenterResponseMap = (HashMap) CenterHelper.unassignStaff(this.requestSpec,
                 this.responseSpec, groupID.toString(),
                 staffId.longValue());
-        assertEquals("Verify staffId is null after unassigning ", unassignStaffToCenterResponseMap.get("staffId"), null);
+        assertEquals(unassignStaffToCenterResponseMap.get("staffId"), null, "Verify staffId is null after unassigning ");
         final CenterDomain centerWithStaffUnssigned = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
-        Assert.assertNotNull(centerWithStaffUnssigned);
-        Assert.assertTrue(centerWithStaffUnssigned.getId().intValue() == groupID);
-        Assert.assertTrue(centerWithStaffUnssigned.getStaffId() == null);
+        Assertions.assertNotNull(centerWithStaffUnssigned);
+        Assertions.assertTrue(centerWithStaffUnssigned.getId().intValue() == groupID);
+        Assertions.assertTrue(centerWithStaffUnssigned.getStaffId() == null);
 
     }
 

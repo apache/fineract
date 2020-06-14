@@ -19,7 +19,7 @@
 package org.apache.fineract.integrationtests.common;
 
 import static io.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
@@ -87,7 +87,7 @@ public class CalendarHelper {
         final String responseCalendarDetailsinJSON = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL,
                 "collectionMeetingCalendar");
         final Integer responseCalendarId = from(responseCalendarDetailsinJSON).get("id");
-        assertEquals("ERROR IN CREATING THE CALENDAR", generatedCalendarId, responseCalendarId);
+        assertEquals( generatedCalendarId, responseCalendarId, "ERROR IN CREATING THE CALENDAR");
     }
 
     public static Integer createMeetingForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class StaffTest {
 
@@ -40,7 +40,7 @@ public class StaffTest {
     private ResponseSpecification responseSpecForValidationError;
     private ResponseSpecification responseSpecForNotFoundError;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -54,9 +54,9 @@ public class StaffTest {
     public void testStaffCreate() {
         Map<String, Object> response = StaffHelper.createStaffMap(requestSpec, responseSpec);
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(1, response.get("officeId"));
-        Assert.assertNotNull(response.get("resourceId"));
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(1, response.get("officeId"));
+        Assertions.assertNotNull(response.get("resourceId"));
     }
 
     @Test
@@ -118,9 +118,9 @@ public class StaffTest {
     @Test
     public void testStaffFetch() {
         Map<String, Object> response = StaffHelper.getStaff(requestSpec, responseSpec, 1);
-        Assert.assertNotNull(response);
-        Assert.assertNotNull(response.get("id"));
-        Assert.assertEquals(1, response.get("id"));
+        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response.get("id"));
+        Assertions.assertEquals(1, response.get("id"));
     }
 
     @Test
@@ -137,8 +137,8 @@ public class StaffTest {
     public void testStaffListStatusActive() {
         List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "active");
         for(final Map<String, Object> staff : responseActive) {
-            Assert.assertNotNull(staff.get("id"));
-            Assert.assertEquals(true, staff.get("isActive"));
+            Assertions.assertNotNull(staff.get("id"));
+            Assertions.assertEquals(true, staff.get("isActive"));
         }
     }
 
@@ -146,14 +146,16 @@ public class StaffTest {
     public void testStaffListStatusInactive() {
         List<Map<String, Object>> responseInactive = StaffHelper.getStaffListWithState(requestSpec, responseSpec, "inactive");
         for(final Map<String, Object> staff : responseInactive) {
-            Assert.assertNotNull(staff.get("id"));
-            Assert.assertEquals(false, staff.get("isActive"));
+            Assertions.assertNotNull(staff.get("id"));
+            Assertions.assertEquals(false, staff.get("isActive"));
         }
     }
 
-    @Test(expected = ClassCastException.class) // because "xyz" will return an error, not a List
-    public void testStaffListFetchWrongState() {
-        StaffHelper.getStaffListWithState(requestSpec, responseSpecForValidationError, "xyz");
+    @Test // because "xyz" will return an error, not a List
+    public void testStaffListFetchWrongState() throws ClassCastException {
+        Assertions.assertThrows(ClassCastException.class, () -> {
+            StaffHelper.getStaffListWithState(requestSpec, responseSpecForValidationError, "xyz");
+        });
     }
 
     @Test
@@ -178,11 +180,11 @@ public class StaffTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> changes = (Map<String, Object>) response.get("changes");
 
-        Assert.assertEquals(1, response.get("resourceId"));
-        Assert.assertEquals(firstname, changes.get("firstname"));
-        Assert.assertEquals(lastname, changes.get("lastname"));
-        Assert.assertEquals(externalId, changes.get("externalId"));
-        Assert.assertEquals(mobileNo, changes.get("mobileNo"));
+        Assertions.assertEquals(1, response.get("resourceId"));
+        Assertions.assertEquals(firstname, changes.get("firstname"));
+        Assertions.assertEquals(lastname, changes.get("lastname"));
+        Assertions.assertEquals(externalId, changes.get("externalId"));
+        Assertions.assertEquals(mobileNo, changes.get("mobileNo"));
     }
 
     @Test

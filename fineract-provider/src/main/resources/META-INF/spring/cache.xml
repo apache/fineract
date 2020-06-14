@@ -30,11 +30,10 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<bean id="ehcacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager"
+	<bean id="ehcacheManager" class="org.springframework.cache.jcache.JCacheCacheManager"
 		p:cacheManager-ref="ehcacheInstance" />
 
 	<bean id="ehcacheInstance"
-		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
-		p:configLocation="classpath:/META-INF/spring/ehcache.xml" p:shared="true" />
+		class="org.springframework.cache.jcache.JCacheManagerFactoryBean"/>
 
 </beans>

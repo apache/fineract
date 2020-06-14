@@ -19,13 +19,13 @@
 package org.apache.fineract.infrastructure.core.boot.tests;
 
 import org.apache.fineract.ServerWithMariaDB4jApplication;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = ServerWithMariaDB4jApplication.Configuration.class)
 @WebAppConfiguration
 @ActiveProfiles("basicauth")

@@ -27,16 +27,16 @@ import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.PaymentTypeDomain;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class PaymentTypeIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -54,13 +54,13 @@ public class PaymentTypeIntegrationTest {
         Integer position = 1;
 
         Integer paymentTypeId = PaymentTypeHelper.createPaymentType(requestSpec, responseSpec, name, description, isCashPayment, position);
-        Assert.assertNotNull(paymentTypeId);
+        Assertions.assertNotNull(paymentTypeId);
         PaymentTypeHelper.verifyPaymentTypeCreatedOnServer(requestSpec, responseSpec, paymentTypeId);
         PaymentTypeDomain paymentTypeResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
-        Assert.assertEquals(name, paymentTypeResponse.getName());
-        Assert.assertEquals(description, paymentTypeResponse.getDescription());
-        Assert.assertEquals(isCashPayment, paymentTypeResponse.getIsCashPayment());
-        Assert.assertEquals(position, paymentTypeResponse.getPosition());
+        Assertions.assertEquals(name, paymentTypeResponse.getName());
+        Assertions.assertEquals(description, paymentTypeResponse.getDescription());
+        Assertions.assertEquals(isCashPayment, paymentTypeResponse.getIsCashPayment());
+        Assertions.assertEquals(position, paymentTypeResponse.getPosition());
 
         // Update Payment Type
         String newName = PaymentTypeHelper.randomNameGenerator("P_TU", 5);
@@ -75,14 +75,14 @@ public class PaymentTypeIntegrationTest {
         request.put("position", newPosition);
         PaymentTypeHelper.updatePaymentType(paymentTypeId, request, requestSpec, responseSpec);
         PaymentTypeDomain paymentTypeUpdatedResponse = PaymentTypeHelper.retrieveById(requestSpec, responseSpec, paymentTypeId);
-        Assert.assertEquals(newName, paymentTypeUpdatedResponse.getName());
-        Assert.assertEquals(newDescription, paymentTypeUpdatedResponse.getDescription());
-        Assert.assertEquals(isCashPaymentUpdatedValue, paymentTypeUpdatedResponse.getIsCashPayment());
-        Assert.assertEquals(newPosition, paymentTypeUpdatedResponse.getPosition());
+        Assertions.assertEquals(newName, paymentTypeUpdatedResponse.getName());
+        Assertions.assertEquals(newDescription, paymentTypeUpdatedResponse.getDescription());
+        Assertions.assertEquals(isCashPaymentUpdatedValue, paymentTypeUpdatedResponse.getIsCashPayment());
+        Assertions.assertEquals(newPosition, paymentTypeUpdatedResponse.getPosition());
 
         // Delete
         Integer deletedPaymentTypeId = PaymentTypeHelper.deletePaymentType(paymentTypeId, requestSpec, responseSpec);
-        Assert.assertEquals(paymentTypeId, deletedPaymentTypeId);
+        Assertions.assertEquals(paymentTypeId, deletedPaymentTypeId);
         ResponseSpecification responseSpecification = new ResponseSpecBuilder().expectStatusCode(404).build();
         PaymentTypeHelper.retrieveById(requestSpec, responseSpecification, paymentTypeId);
 

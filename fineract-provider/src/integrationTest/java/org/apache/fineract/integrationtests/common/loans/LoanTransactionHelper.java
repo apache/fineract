@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
@@ -669,8 +669,9 @@ public class LoanTransactionHelper {
         LOG.info("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
         final ArrayList<HashMap> repaymentPeriods = getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
-        assertEquals("Mismatch in Principal Loan Balance Outstanding ", expectedPrincipalOutstanding,
-                repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"));
+        assertEquals(expectedPrincipalOutstanding,
+                repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"),
+                "Mismatch in Principal Loan Balance Outstanding ");
     }
 
     public void checkAccrualTransactionForRepayment(final LocalDate transactionDate, final Float interestPortion,
@@ -690,17 +691,20 @@ public class LoanTransactionHelper {
 
                 if (transactionDate.equals(accrualEntryDate)) {
                     isTransactionFound = true;
-                    assertEquals("Mismatch in transaction amounts", interestPortion,
-                            Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))));
-                    assertEquals("Mismatch in transaction amounts", feePortion,
-                            Float.valueOf(String.valueOf(transactions.get(i).get("feeChargesPortion"))));
-                    assertEquals("Mismatch in transaction amounts", penaltyPortion,
-                            Float.valueOf(String.valueOf(transactions.get(i).get("penaltyChargesPortion"))));
+                    assertEquals(interestPortion,
+                            Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
+                            "Mismatch in transaction amounts");
+                    assertEquals(feePortion,
+                            Float.valueOf(String.valueOf(transactions.get(i).get("feeChargesPortion"))),
+                            "Mismatch in transaction amounts");
+                    assertEquals(penaltyPortion,
+                            Float.valueOf(String.valueOf(transactions.get(i).get("penaltyChargesPortion"))),
+                            "Mismatch in transaction amounts");
                     break;
                 }
             }
         }
-        assertTrue("No Accrual entries are posted", isTransactionFound);
+        assertTrue(isTransactionFound, "No Accrual entries are posted");
 
     }
 

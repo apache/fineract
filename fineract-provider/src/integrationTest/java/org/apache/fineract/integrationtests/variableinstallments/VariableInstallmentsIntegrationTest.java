@@ -30,9 +30,9 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class VariableInstallmentsIntegrationTest {
     private ResponseSpecification responseSpec;
     private LoanTransactionHelper loanTransactionHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -59,9 +59,9 @@ public class VariableInstallmentsIntegrationTest {
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(json);
         LOG.info("------------------------------RETRIEVING CREATED LOAN PRODUCT DETAILS ---------------------------------------");
         Map loanProduct = (Map)loanTransactionHelper.getLoanProductDetail(requestSpec, responseSpec, loanProductID, "") ;
-        Assert.assertTrue((Boolean)loanProduct.get("allowVariableInstallments")) ;
-        Assert.assertEquals(Integer.valueOf(5), loanProduct.get("minimumGap")) ;
-        Assert.assertEquals(Integer.valueOf(90), loanProduct.get("maximumGap")) ;
+        Assertions.assertTrue((Boolean)loanProduct.get("allowVariableInstallments")) ;
+        Assertions.assertEquals(Integer.valueOf(5), loanProduct.get("minimumGap")) ;
+        Assertions.assertEquals(Integer.valueOf(90), loanProduct.get("maximumGap")) ;
     }
 
 
@@ -71,7 +71,7 @@ public class VariableInstallmentsIntegrationTest {
         Integer loanProductID = this.loanTransactionHelper.getLoanProductId(josn);
         LOG.info("------------------------------RETRIEVING CREATED LOAN PRODUCT DETAILS ---------------------------------------");
         Map loanProduct = (Map)loanTransactionHelper.getLoanProductDetail(requestSpec, responseSpec, loanProductID, "") ;
-        Assert.assertTrue(!(Boolean)loanProduct.get("allowVariableInstallments")) ;
+        Assertions.assertTrue(!(Boolean)loanProduct.get("allowVariableInstallments")) ;
     }
 
     @Test
@@ -106,12 +106,12 @@ public class VariableInstallmentsIntegrationTest {
 
     }
     private void assertAfterSubmit(ArrayList<Map> serverData, ArrayList<Map> expectedData) {
-        Assert.assertTrue(serverData.size() == expectedData.size()) ;
+        Assertions.assertTrue(serverData.size() == expectedData.size()) ;
         for(int i = 0 ; i < serverData.size(); i++) {
             Map<String, Object> serverMap = serverData.get(i) ;
             Map<String, Object> expectedMap = expectedData.get(i) ;
-            Assert.assertTrue(VariableInstallmentsDecliningBalanceHelper.formatDate((ArrayList)serverMap.get("dueDate")).equals(expectedMap.get("dueDate"))) ;
-            Assert.assertTrue(serverMap.get("totalOutstandingForPeriod").toString().equals(expectedMap.get("installmentAmount"))) ;
+            Assertions.assertTrue(VariableInstallmentsDecliningBalanceHelper.formatDate((ArrayList)serverMap.get("dueDate")).equals(expectedMap.get("dueDate"))) ;
+            Assertions.assertTrue(serverMap.get("totalOutstandingForPeriod").toString().equals(expectedMap.get("installmentAmount"))) ;
         }
     }
 

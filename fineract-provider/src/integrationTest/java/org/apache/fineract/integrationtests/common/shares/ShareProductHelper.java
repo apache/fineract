@@ -28,7 +28,7 @@ import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.joda.time.LocalDate;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,61 +134,61 @@ public class ShareProductHelper {
     @SuppressWarnings("unchecked")
     public void verifyShareProduct(Map<String, Object> shareProductData) {
         String productName = (String)shareProductData.get("name") ;
-        Assert.assertEquals(this.productName, productName);
+        Assertions.assertEquals(this.productName, productName);
         String shortName = (String)shareProductData.get("shortName") ;
-        Assert.assertEquals(this.shortName, shortName);
+        Assertions.assertEquals(this.shortName, shortName);
 
         String description = (String)shareProductData.get("description") ;
-        Assert.assertEquals(this.description, description);
+        Assertions.assertEquals(this.description, description);
 
         Map<String, String> currency = (Map<String,String>)shareProductData.get("currency") ;
         String currencyCode = currency.get("code") ;
-        Assert.assertEquals(this.currencyCode, currencyCode);
+        Assertions.assertEquals(this.currencyCode, currencyCode);
 
         String digitsAfterDecimal = String.valueOf(currency.get("decimalPlaces")) ;
-        Assert.assertEquals(DIGITS_AFTER_DECIMAL, digitsAfterDecimal);
+        Assertions.assertEquals(DIGITS_AFTER_DECIMAL, digitsAfterDecimal);
 
         String inMultiplesOf = String.valueOf(currency.get("inMultiplesOf")) ;
-        Assert.assertEquals(IN_MULTIPLES_OF, inMultiplesOf);
+        Assertions.assertEquals(IN_MULTIPLES_OF, inMultiplesOf);
 
         String totalShares = String.valueOf(shareProductData.get("totalShares")) ;
-        Assert.assertEquals(this.totalShares, totalShares);
+        Assertions.assertEquals(this.totalShares, totalShares);
 
         String sharesIssued = String.valueOf(shareProductData.get("totalSharesIssued")) ;
-        Assert.assertEquals(this.sharesIssued, sharesIssued);
+        Assertions.assertEquals(this.sharesIssued, sharesIssued);
 
         String unitPrice = String.valueOf(shareProductData.get("unitPrice")) ;
-        Assert.assertEquals(this.unitPrice, unitPrice);
+        Assertions.assertEquals(this.unitPrice, unitPrice);
 
         String minimumShares = String.valueOf(shareProductData.get("minimumShares")) ;
-        Assert.assertEquals(this.minimumShares, minimumShares);
+        Assertions.assertEquals(this.minimumShares, minimumShares);
 
         String nominalShares = String.valueOf(shareProductData.get("nominalShares")) ;
-        Assert.assertEquals(this.nominalShares, nominalShares);
+        Assertions.assertEquals(this.nominalShares, nominalShares);
 
         String maximumShares = String.valueOf(shareProductData.get("maximumShares")) ;
-        Assert.assertEquals(this.maximumShares, maximumShares);
+        Assertions.assertEquals(this.maximumShares, maximumShares);
 
         String allowDividendCalculationForInactiveClients = String.valueOf(shareProductData.get("allowDividendCalculationForInactiveClients")) ;
-        Assert.assertEquals(this.allowDividendCalculationForInactiveClients, allowDividendCalculationForInactiveClients);
+        Assertions.assertEquals(this.allowDividendCalculationForInactiveClients, allowDividendCalculationForInactiveClients);
 
         Map<String, Object> accountingRuleMap = (Map<String, Object>) shareProductData.get("accountingRule") ;
         String accountingRule = String.valueOf(accountingRuleMap.get("id")) ;
-        Assert.assertEquals(this.accountingRule, accountingRule);
+        Assertions.assertEquals(this.accountingRule, accountingRule);
 
         String minimumActivePeriodForDividends = String.valueOf(shareProductData.get("minimumActivePeriod")) ;
-        Assert.assertEquals(this.minimumActivePeriodForDividends, minimumActivePeriodForDividends);
+        Assertions.assertEquals(this.minimumActivePeriodForDividends, minimumActivePeriodForDividends);
 
         Map<String, Object> minimumActivePeriodType = (Map<String, Object>) shareProductData.get("minimumActivePeriodForDividendsTypeEnum") ;
         String minimumactiveperiodFrequencyType = String.valueOf(minimumActivePeriodType.get("id")) ;
-        Assert.assertEquals(this.minimumactiveperiodFrequencyType, minimumactiveperiodFrequencyType);
+        Assertions.assertEquals(this.minimumactiveperiodFrequencyType, minimumactiveperiodFrequencyType);
 
         String lockinPeriodFrequency = String.valueOf(shareProductData.get("lockinPeriod")) ;
-        Assert.assertEquals(this.lockinPeriodFrequency, lockinPeriodFrequency);
+        Assertions.assertEquals(this.lockinPeriodFrequency, lockinPeriodFrequency);
 
         Map<String, Object> lockinPeriodType = (Map<String, Object>) shareProductData.get("lockPeriodTypeEnum") ;
         String lockinPeriodFrequencyType = String.valueOf(lockinPeriodType.get("id")) ;
-        Assert.assertEquals(this.lockinPeriodFrequencyType, lockinPeriodFrequencyType);
+        Assertions.assertEquals(this.lockinPeriodFrequencyType, lockinPeriodFrequencyType);
 
         //ArrayList<Map<String, String>> charges = (ArrayList<Map<String, String>>)shareProductData.get("chargesSelected") ;
 

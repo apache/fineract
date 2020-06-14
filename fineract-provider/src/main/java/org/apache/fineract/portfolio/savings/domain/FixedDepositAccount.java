@@ -746,7 +746,7 @@ public class FixedDepositAccount extends SavingsAccount {
             BigDecimal applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(),
                     calculateMaturityDate(), this.client);
 
-            if (applicableInterestRate.equals(BigDecimal.ZERO)) {
+            if (applicableInterestRate.compareTo(BigDecimal.ZERO) == 0 ? Boolean.TRUE:Boolean.FALSE) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                         "no.applicable.interest.rate.is.found.based.on.amount.and.deposit.period");
             }

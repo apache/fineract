@@ -35,13 +35,15 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.template.service.TemplateMergeService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit.Callback;
 
 @Service
 public class TwilioHookProcessor implements HookProcessor {
-
+    private final static Logger LOG = LoggerFactory.getLogger(TwilioHookProcessor.class);
     private final HookConfigurationRepository hookConfigurationRepository;
     private final TemplateMergeService templateMergeService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
@@ -140,6 +142,7 @@ public class TwilioHookProcessor implements HookProcessor {
                 }
             }
         } catch (IOException e) {
+            LOG.error("Problem occurred in processUgdTemplate function",e);
         }
         return json;
     }

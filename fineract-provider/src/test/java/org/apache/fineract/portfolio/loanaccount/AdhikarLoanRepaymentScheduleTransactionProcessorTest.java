@@ -26,13 +26,13 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.joda.time.LocalDate;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("unused")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
 
     // class under test
@@ -43,7 +43,7 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
     private final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
     private List<LoanRepaymentScheduleInstallment> installments;
 
-    @Before
+    @BeforeEach
     public void setUpForEachTestCase() throws Exception {
 
         Field field = MoneyHelper.class.getDeclaredField("roundingMode");

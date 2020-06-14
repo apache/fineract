@@ -33,6 +33,7 @@ dependencies {
 
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
+            'org.springframework.boot:spring-boot-starter-cache',
 
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
@@ -65,7 +66,6 @@ dependencies {
             'org.drizzle.jdbc:drizzle-jdbc',
             'org.flywaydb:flyway-core',
 
-            'net.sf.ehcache:ehcache',
             'com.github.librepdf:openpdf',
             'com.github.spullara.mustache.java:compiler',
             'com.jayway.jsonpath:json-path',
@@ -73,6 +73,8 @@ dependencies {
              // JAX-B dependencies for JDK 9+
              'jakarta.xml.bind:jakarta.xml.bind-api',
              'org.dom4j:dom4j',
+
+             'javax.cache:cache-api',
 
              'com.github.spotbugs:spotbugs-annotations',
     )
@@ -98,6 +100,9 @@ dependencies {
     implementation ('org.mnode.ical4j:ical4j') {
 		exclude group: 'commons-logging'
     }
+    implementation ('org.ehcache:ehcache') {
+        exclude group: 'org.glassfish.jaxb', module: 'jaxb-runtime'
+    }
 
 	// runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
 	runtimeOnly(
@@ -112,9 +117,8 @@ dependencies {
 	// testCompile dependencies are ONLY used in src/test and/or src/integrationTest, not src/main.
 	// Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
 	//
-    testImplementation( 'junit:junit',
-            'org.junit.platform:junit-platform-runner', // FINERACT-943
-            'org.mockito:mockito-core',
+    testImplementation( 'org.mockito:mockito-core',
+            'org.mockito:mockito-junit-jupiter',
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
 	)
@@ -124,5 +128,6 @@ dependencies {
     }
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
 }

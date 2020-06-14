@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -56,10 +56,10 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.DateTime;
 import org.joda.time.Months;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +105,7 @@ public class FixedDepositTest {
     // digits. A proper solution would be to implement the exact interest calculation in this test,
     // and then to compare the exact results
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -160,7 +160,7 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
@@ -168,14 +168,14 @@ public class FixedDepositTest {
         final String accountingRule = CASH_BASED;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         /***
          * Apply for FD account with created product and verify status
          */
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -210,13 +210,13 @@ public class FixedDepositTest {
          * Update interest earned of FD account
          */
         fixedDepositAccountId = this.fixedDepositAccountHelper.calculateInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         /***
          * Post interest and verify the account summary
          */
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(transactionIdForPostInterest);
+        Assertions.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
@@ -234,7 +234,7 @@ public class FixedDepositTest {
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -296,7 +296,7 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
@@ -305,14 +305,14 @@ public class FixedDepositTest {
         final Integer taxGroupId = createTaxGroup("10", liabilityAccountForTax);
         Integer fixedDepositProductId = createFixedDepositProductWithWithHoldTax(VALID_FROM, VALID_TO, String.valueOf(taxGroupId),
                 accountingRule, assetAccount, liabilityAccount, incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         /***
          * Apply for FD account with created product and verify status
          */
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
                 SUBMITTED_ON_DATE, WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -347,17 +347,17 @@ public class FixedDepositTest {
          * Update interest earned of FD account
          */
         fixedDepositAccountId = this.fixedDepositAccountHelper.calculateInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         /***
          * Post interest and verify the account summary
          */
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(transactionIdForPostInterest);
+        Assertions.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
-        Assert.assertNull(accountSummary.get("totalWithholdTax"));
+        Assertions.assertNull(accountSummary.get("totalWithholdTax"));
 
         /***
          * Verify journal entries transactions for interest posting transaction
@@ -372,7 +372,7 @@ public class FixedDepositTest {
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -386,7 +386,7 @@ public class FixedDepositTest {
         Float maturityAmount = Float.valueOf(accountDetails.get("maturityAmount").toString());
 
         HashMap summary = (HashMap) accountDetails.get("summary");
-        Assert.assertNotNull(summary.get("totalWithholdTax"));
+        Assertions.assertNotNull(summary.get("totalWithholdTax"));
         Float withHoldTax = (Float) summary.get("totalWithholdTax");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, CLOSED_ON_DATE, new JournalEntry(maturityAmount,
@@ -441,7 +441,7 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(closedOn.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
@@ -450,14 +450,14 @@ public class FixedDepositTest {
         final Integer taxGroupId = createTaxGroup("10", liabilityAccountForTax);
         Integer fixedDepositProductId = createFixedDepositProductWithWithHoldTax(VALID_FROM, VALID_TO, String.valueOf(taxGroupId),
                 accountingRule, assetAccount, liabilityAccount, incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         /***
          * Apply for FD account with created product and verify status
          */
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(),
                 SUBMITTED_ON_DATE, WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -492,17 +492,17 @@ public class FixedDepositTest {
          * Update interest earned of FD account
          */
         fixedDepositAccountId = this.fixedDepositAccountHelper.calculateInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         /***
          * Post interest and verify the account summary
          */
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(transactionIdForPostInterest);
+        Assertions.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
         accountSummary.get("totalInterestPosted");
-        Assert.assertNull(accountSummary.get("totalWithholdTax"));
+        Assertions.assertNull(accountSummary.get("totalWithholdTax"));
 
         /***
          * FD account verify whether account is matured
@@ -516,7 +516,7 @@ public class FixedDepositTest {
                 fixedDepositAccountId);
 
         HashMap summary = (HashMap) accountDetails.get("summary");
-        Assert.assertNotNull(summary.get("totalWithholdTax"));
+        Assertions.assertNotNull(summary.get("totalWithholdTax"));
         Float withHoldTax = (Float) summary.get("totalWithholdTax");
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccountForTax, CLOSED_ON_DATE, new JournalEntry(withHoldTax,
                 JournalEntry.TransactionType.CREDIT));
@@ -651,21 +651,21 @@ public class FixedDepositTest {
         final String ACTIVATION_DATE = "01 March 2015";
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
          */
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, chartToUse);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         /***
          * Apply for FD account with created product and verify status
          */
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM, depositAmount, depositPeriod);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -685,7 +685,7 @@ public class FixedDepositTest {
 
         HashMap accountSummary = this.fixedDepositAccountHelper.getFixedDepositDetails(fixedDepositAccountId);
 
-        Assert.assertEquals(interestRate, accountSummary.get("nominalAnnualInterestRate"));
+        Assertions.assertEquals(interestRate, accountSummary.get("nominalAnnualInterestRate"));
     }
 
     /***
@@ -732,7 +732,7 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create Savings product with CashBased accounting enabled
@@ -740,10 +740,10 @@ public class FixedDepositTest {
         final String accountingRule = CASH_BASED;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, accountingRule,
                 assetAccount, liabilityAccount, incomeAccount, expenseAccount);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
@@ -759,11 +759,11 @@ public class FixedDepositTest {
          */
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -792,13 +792,13 @@ public class FixedDepositTest {
          * Update interest earned of FD account
          */
         fixedDepositAccountId = this.fixedDepositAccountHelper.calculateInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         /***
          * Post interest and verify the account summary
          */
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(transactionIdForPostInterest);
+        Assertions.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
@@ -827,7 +827,7 @@ public class FixedDepositTest {
          */
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_TRANSFER_TO_SAVINGS, savingsId, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -852,7 +852,7 @@ public class FixedDepositTest {
         Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
         Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", expectedSavingsBalance, balanceAfter);
+        Assertions.assertEquals(expectedSavingsBalance, balanceAfter, "Verifying Savings Account Balance after Premature Closure");
 
     }
 
@@ -903,7 +903,7 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
@@ -911,11 +911,11 @@ public class FixedDepositTest {
         final String accountingRule = CASH_BASED;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -941,10 +941,10 @@ public class FixedDepositTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
 
         fixedDepositAccountId = this.fixedDepositAccountHelper.calculateInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
-        Assert.assertNotNull(transactionIdForPostInterest);
+        Assertions.assertNotNull(transactionIdForPostInterest);
 
         accountSummary = this.fixedDepositAccountHelper.getFixedDepositSummary(fixedDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
@@ -988,11 +988,11 @@ public class FixedDepositTest {
         String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         this.fixedDepositProductHelper.retrieveAllFixedDepositProducts(this.requestSpec,
                 this.responseSpec);
@@ -1001,13 +1001,13 @@ public class FixedDepositTest {
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         todaysDate.add(Calendar.DATE, -1);
         SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateFixedDepositAccount(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO, WHOLE_TERM, SUBMITTED_ON_DATE);
-        Assert.assertTrue(modificationsHashMap.containsKey("submittedOnDate"));
+        Assertions.assertTrue(modificationsHashMap.containsKey("submittedOnDate"));
 
     }
 
@@ -1032,15 +1032,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1075,15 +1075,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1116,15 +1116,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1155,22 +1155,22 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
 
         fixedDepositAccountId = (Integer) this.fixedDepositAccountHelper.deleteFixedDepositApplication(fixedDepositAccountId, "resourceId");
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
     }
 
     @Test
@@ -1198,15 +1198,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1238,7 +1238,7 @@ public class FixedDepositTest {
         principal = (float) Math.floor(principal);
         maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
-        Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
+        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
     @Test
@@ -1266,15 +1266,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -1310,7 +1310,7 @@ public class FixedDepositTest {
         principal = (float) Math.floor(principal);
         maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
-        Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
+        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
     @Test
@@ -1342,15 +1342,15 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1399,7 +1399,7 @@ public class FixedDepositTest {
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1411,7 +1411,7 @@ public class FixedDepositTest {
         principal = (float) Math.floor(principal);
         Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
+        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1444,15 +1444,15 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -1505,7 +1505,7 @@ public class FixedDepositTest {
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1517,7 +1517,7 @@ public class FixedDepositTest {
         principal = (float) Math.floor(principal);
         Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", principal, maturityAmount);
+        Assertions.assertEquals(principal, maturityAmount, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1550,15 +1550,15 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 TILL_PREMATURE_WITHDRAWAL);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1616,7 +1616,7 @@ public class FixedDepositTest {
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1628,7 +1628,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1661,15 +1661,15 @@ public class FixedDepositTest {
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 TILL_PREMATURE_WITHDRAWAL);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -1731,7 +1731,7 @@ public class FixedDepositTest {
 
         Integer prematureClosureTransactionId = (Integer) this.fixedDepositAccountHelper.prematureCloseForFixedDeposit(
                 fixedDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_WITHDRAW_DEPOSIT, null, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(prematureClosureTransactionId);
+        Assertions.assertNotNull(prematureClosureTransactionId);
 
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -1743,7 +1743,7 @@ public class FixedDepositTest {
         Float expectedPrematureAmount = (float) Math.floor(principal);
         Float maturityAmount = (float) Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -1772,15 +1772,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
@@ -1817,7 +1817,7 @@ public class FixedDepositTest {
         principal = (float) Math.floor(principal);
         maturityAmount = (float) Math.floor(maturityAmount);
         LOG.info("{}",principal.toString());
-        Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
+        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
 
     }
 
@@ -1847,15 +1847,15 @@ public class FixedDepositTest {
 
         LOG.info("Submitted Date: {}" , SUBMITTED_ON_DATE);
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -1892,7 +1892,7 @@ public class FixedDepositTest {
         principal = new BigDecimal(principal).setScale(0, RoundingMode.FLOOR).floatValue();
         maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
         LOG.info("{}",principal.toString());
-        Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
+        Assertions.assertEquals(principal, maturityAmount, "Verifying Maturity amount for Fixed Deposit Account");
 
     }
 
@@ -1927,15 +1927,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
@@ -1975,7 +1975,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
 
     }
 
@@ -2010,15 +2010,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -2058,7 +2058,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Maturity amount");
 
     }
 
@@ -2094,15 +2094,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
@@ -2139,7 +2139,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2175,15 +2175,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -2220,7 +2220,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
 
     }
 
@@ -2256,15 +2256,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_365,
@@ -2301,7 +2301,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
     }
 
     @Test
@@ -2336,15 +2336,15 @@ public class FixedDepositTest {
         monthDayFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         final String accountingRule = NONE;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM);
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         this.fixedDepositAccountHelper.updateInterestCalculationConfigForFixedDeposit(clientId.toString(),
                 fixedDepositProductId.toString(), fixedDepositAccountId.toString(), SUBMITTED_ON_DATE, VALID_FROM, VALID_TO, DAYS_360,
@@ -2381,7 +2381,7 @@ public class FixedDepositTest {
         Double expectedPrematureAmount = Math.floor(principal);
         Double maturityAmount = Math.floor((Float) fixedDepositAccountData.get("maturityAmount"));
 
-        Assert.assertEquals("Verifying Pre-Closure maturity amount", expectedPrematureAmount, maturityAmount);
+        Assertions.assertEquals(expectedPrematureAmount, maturityAmount, "Verifying Pre-Closure maturity amount");
     }
 
     /***
@@ -2425,7 +2425,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
@@ -2433,7 +2433,7 @@ public class FixedDepositTest {
         final String accountingRule = CASH_BASED;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         /***
          * Set  maturityInstructionId as  re-invest principal+interest
@@ -2446,7 +2446,7 @@ public class FixedDepositTest {
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM, maturityInstructionId);
 
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -2507,7 +2507,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, numberOfDaysLeft);
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(clientId);
+        Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
@@ -2515,7 +2515,7 @@ public class FixedDepositTest {
         final String accountingRule = CASH_BASED;
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
                 incomeAccount, expenseAccount);
-        Assert.assertNotNull(fixedDepositProductId);
+        Assertions.assertNotNull(fixedDepositProductId);
 
         /***
          * Set  maturityInstructionId as  re-invest principal
@@ -2528,7 +2528,7 @@ public class FixedDepositTest {
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), SUBMITTED_ON_DATE,
                 WHOLE_TERM, maturityInstructionId);
 
-        Assert.assertNotNull(fixedDepositAccountId);
+        Assertions.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
@@ -2700,7 +2700,7 @@ public class FixedDepositTest {
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
                 LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping.getAccountID(), this.responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(financialActivityAccountId);
+        Assertions.assertNotNull(financialActivityAccountId);
         assertFinancialActivityAccountCreation(financialActivityAccountId, LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityAccountForMapping);
         return liabilityAccountForMapping;
     }
@@ -2708,8 +2708,8 @@ public class FixedDepositTest {
     private void assertFinancialActivityAccountCreation(Integer financialActivityAccountId, Integer financialActivityId, Account glAccount) {
         HashMap mappingDetails = this.financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId,
                 this.responseSpec);
-        Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
-        Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
+        Assertions.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
+        Assertions.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
     }
 
     private Integer createTaxGroup(final String percentage, final Account liabilityAccountForTax){
@@ -2721,15 +2721,15 @@ public class FixedDepositTest {
     /**
      * Delete the Liability transfer account
      */
-    @After
+    @AfterEach
     public void tearDown() {
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         for (HashMap financialActivity : financialActivities) {
             Integer financialActivityAccountId = (Integer) financialActivity.get("id");
             Integer deletedFinancialActivityAccountId = this.financialActivityAccountHelper.deleteFinancialActivityAccount(
                     financialActivityAccountId, this.responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
-            Assert.assertNotNull(deletedFinancialActivityAccountId);
-            Assert.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
+            Assertions.assertNotNull(deletedFinancialActivityAccountId);
+            Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
         }
     }
 }

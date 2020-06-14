@@ -27,10 +27,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
@@ -39,7 +39,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
     private RequestSpecification requestSpec;
     private GlobalConfigurationHelper globalConfigurationHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -47,7 +47,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
         GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
@@ -61,7 +61,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
      // Retrieving All Global Configuration details
         final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
                         .getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(globalConfig);
+        Assertions.assertNotNull(globalConfig);
 
         String configName = "interest-charged-from-date-same-as-disbursal-date";
         boolean newBooleanValue = true;
@@ -74,7 +74,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
                         Integer updateConfigId = this.globalConfigurationHelper
                                         .updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
                                                 configId.toString(), newBooleanValue);
-                        Assert.assertNotNull(updateConfigId);
+                        Assertions.assertNotNull(updateConfigId);
                         break;
                 }
         }

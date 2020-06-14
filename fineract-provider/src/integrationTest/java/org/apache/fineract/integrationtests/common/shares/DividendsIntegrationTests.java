@@ -35,9 +35,9 @@ import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 
 public class DividendsIntegrationTests {
@@ -48,7 +48,7 @@ public class DividendsIntegrationTests {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -67,16 +67,16 @@ public class DividendsIntegrationTests {
         for(int i = 0  ; i < 5; i++) {
             final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
             clients.add(clientId) ;
-            Assert.assertNotNull(clientId);
+            Assertions.assertNotNull(clientId);
             Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
             savingAccounts.add(savingsAccountId) ;
-            Assert.assertNotNull(savingsAccountId);
+            Assertions.assertNotNull(savingsAccountId);
             final Integer shareAccountId = createShareAccount(clientId, productId, savingsAccountId, dates[i], shares[i]);
             shareAccounts.add(shareAccountId) ;
-            Assert.assertNotNull(shareAccountId);
+            Assertions.assertNotNull(shareAccountId);
             Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                     .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-            Assert.assertNotNull(shareAccountData);
+            Assertions.assertNotNull(shareAccountData);
          // Approve share Account
             Map<String, Object> approveMap = new HashMap<>();
             approveMap.put("note", "Share Account Approval Note");
@@ -104,84 +104,84 @@ public class DividendsIntegrationTests {
         final Integer dividendId = ShareDividendsTransactionHelper.createShareProductDividends(productId, createDividendsJson, requestSpec, responseSpec) ;
 
         Map<String, Object> productdividends = ShareDividendsTransactionHelper.retrieveAllDividends(productId, requestSpec, responseSpec);
-        Assert.assertEquals("1", String.valueOf(productdividends.get("totalFilteredRecords")));
+        Assertions.assertEquals("1", String.valueOf(productdividends.get("totalFilteredRecords")));
         Map<String,Object> dividend = ((List<Map<String,Object>>)productdividends.get("pageItems")).get(0) ;
-        Assert.assertEquals("50000.0", String.valueOf(dividend.get("amount"))) ;
+        Assertions.assertEquals("50000.0", String.valueOf(dividend.get("amount"))) ;
         Map<String, Object> status = (Map<String, Object>)dividend.get("status") ;
-        Assert.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(status.get("code")));
+        Assertions.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(status.get("code")));
         List<Integer> startdateList = (List<Integer>) dividend.get("dividendPeriodStartDate");
         Calendar cal = Calendar.getInstance();
         cal.set(startdateList.get(0), startdateList.get(1) - 1, startdateList.get(2));
         Date startDate = cal.getTime();
-        Assert.assertEquals("01 Jan 2015", simple.format(startDate));
+        Assertions.assertEquals("01 Jan 2015", simple.format(startDate));
         List<Integer> enddateList = (List<Integer>) dividend.get("dividendPeriodEndDate");
         cal = Calendar.getInstance();
         cal.set(enddateList.get(0), enddateList.get(1) - 1, enddateList.get(2));
         Date endDate = cal.getTime();
-        Assert.assertEquals("01 Apr 2016", simple.format(endDate));
+        Assertions.assertEquals("01 Apr 2016", simple.format(endDate));
 
 
 
         Map<String, Object> dividenddetails = ShareDividendsTransactionHelper.retrieveDividendDetails(productId, dividendId, requestSpec, responseSpec) ;
-        Assert.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));
+        Assertions.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));
         List<Map<String, Object>> pageItems = (List<Map<String, Object>>)dividenddetails.get("pageItems") ;
         for(Map<String, Object> dividendData: pageItems) {
             Map<String, Object> accountData = (Map<String, Object>) dividendData.get("accountData") ;
             String accountId = String.valueOf(accountData.get("id")) ;
             if(String.valueOf(shareAccounts.get(0)).equals(accountId)) {
-                Assert.assertEquals("11320.755", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("11320.755", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(1)).equals(accountId)) {
-                Assert.assertEquals("18172.791", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("18172.791", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(2)).equals(accountId)) {
-                Assert.assertEquals("13629.593", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("13629.593", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(3)).equals(accountId)) {
-                Assert.assertEquals("3028.7983", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("3028.7983", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(4)).equals(accountId)) {
-                Assert.assertEquals("3848.0637", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("3848.0637", String.valueOf(dividendData.get("amount")));
             }
             Map<String, Object> statusMap = (Map<String, Object>) dividendData.get("status") ;
-            Assert.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(statusMap.get("code"))) ;
+            Assertions.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(statusMap.get("code"))) ;
         }
 
         String jsonString = "" ;
         ShareDividendsTransactionHelper.postCommand("approve", productId, dividendId, jsonString, requestSpec, responseSpec) ;
 
         productdividends = ShareDividendsTransactionHelper.retrieveAllDividends(productId, requestSpec, responseSpec);
-        Assert.assertEquals("1", String.valueOf(productdividends.get("totalFilteredRecords")));
+        Assertions.assertEquals("1", String.valueOf(productdividends.get("totalFilteredRecords")));
         dividend = ((List<Map<String,Object>>)productdividends.get("pageItems")).get(0) ;
-        Assert.assertEquals("50000.0", String.valueOf(dividend.get("amount"))) ;
+        Assertions.assertEquals("50000.0", String.valueOf(dividend.get("amount"))) ;
         status = (Map<String, Object>)dividend.get("status") ;
-        Assert.assertEquals("shareAccountDividendStatusType.approved", String.valueOf(status.get("code")));
+        Assertions.assertEquals("shareAccountDividendStatusType.approved", String.valueOf(status.get("code")));
         startdateList = (List<Integer>) dividend.get("dividendPeriodStartDate");
         cal = Calendar.getInstance();
         cal.set(startdateList.get(0), startdateList.get(1) - 1, startdateList.get(2));
         startDate = cal.getTime();
-        Assert.assertEquals("01 Jan 2015", simple.format(startDate));
+        Assertions.assertEquals("01 Jan 2015", simple.format(startDate));
         enddateList = (List<Integer>) dividend.get("dividendPeriodEndDate");
         cal = Calendar.getInstance();
         cal.set(enddateList.get(0), enddateList.get(1) - 1, enddateList.get(2));
         endDate = cal.getTime();
-        Assert.assertEquals("01 Apr 2016", simple.format(endDate));
+        Assertions.assertEquals("01 Apr 2016", simple.format(endDate));
 
         dividenddetails = ShareDividendsTransactionHelper.retrieveDividendDetails(productId, dividendId, requestSpec, responseSpec) ;
-        Assert.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));
+        Assertions.assertEquals("5", String.valueOf(dividenddetails.get("totalFilteredRecords")));
         pageItems = (List<Map<String, Object>>)dividenddetails.get("pageItems") ;
         for(Map<String, Object> dividendData: pageItems) {
             Map<String, Object> accountData = (Map<String, Object>) dividendData.get("accountData") ;
             String accountId = String.valueOf(accountData.get("id")) ;
             if(String.valueOf(shareAccounts.get(0)).equals(accountId)) {
-                Assert.assertEquals("11320.755", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("11320.755", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(1)).equals(accountId)) {
-                Assert.assertEquals("18172.791", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("18172.791", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(2)).equals(accountId)) {
-                Assert.assertEquals("13629.593", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("13629.593", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(3)).equals(accountId)) {
-                Assert.assertEquals("3028.7983", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("3028.7983", String.valueOf(dividendData.get("amount")));
             }else if(String.valueOf(shareAccounts.get(4)).equals(accountId)) {
-                Assert.assertEquals("3848.0637", String.valueOf(dividendData.get("amount")));
+                Assertions.assertEquals("3848.0637", String.valueOf(dividendData.get("amount")));
             }
             Map<String, Object> statusMap = (Map<String, Object>) dividendData.get("status") ;
-            Assert.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(statusMap.get("code"))) ;
+            Assertions.assertEquals("shareAccountDividendStatusType.initiated", String.valueOf(statusMap.get("code"))) ;
         }
 
     }

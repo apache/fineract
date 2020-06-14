@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.notification;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,15 +36,15 @@ import org.apache.fineract.notification.service.NotificationMapperWritePlatformS
 import org.apache.fineract.notification.service.NotificationWritePlatformServiceImpl;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.User;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StorageTest {
 
     private NotificationWritePlatformServiceImpl notificationWritePlatformServiceImpl;
@@ -61,7 +61,7 @@ public class StorageTest {
     @Mock
     private AppUserRepository appUserRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         notificationWritePlatformServiceImpl = new NotificationWritePlatformServiceImpl(
                 notificationGeneratorWritePlatformService,
@@ -71,7 +71,7 @@ public class StorageTest {
     }
 
     @Test
-    @Ignore // TODO FINERACT-828
+    @Disabled // TODO FINERACT-828
     public void testNotificationStorage() {
         Long userId = 1L;
         String objectType = "CLIENT";

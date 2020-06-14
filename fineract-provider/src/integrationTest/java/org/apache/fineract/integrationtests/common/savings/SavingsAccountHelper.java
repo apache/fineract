@@ -39,7 +39,7 @@ import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -674,12 +674,12 @@ public class SavingsAccountHelper {
     public static Integer openSavingsAccount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final String minimumOpeningBalance) {
         final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, minimumOpeningBalance);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
         final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
+        Assertions.assertNotNull(savingsProductID);
 
         HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
         SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);

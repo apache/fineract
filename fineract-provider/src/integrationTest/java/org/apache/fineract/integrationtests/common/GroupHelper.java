@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -193,7 +193,7 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
-        assertEquals("ERROR IN CREATING THE GROUP", generatedGroupID, responseGroupID);
+        assertEquals(generatedGroupID, responseGroupID, "ERROR IN CREATING THE GROUP");
     }
 
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -201,7 +201,7 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP DETAILS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
-        assertEquals("ERROR IN CREATING THE GROUP", expectedValue, responseValue);
+        assertEquals(expectedValue, responseValue, "ERROR IN CREATING THE GROUP");
     }
 
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -209,7 +209,7 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP STATUS------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
-        assertEquals("ERROR IN ACTIVATING THE GROUP", generatedGroupStatus, responseGroupStatus);
+        assertEquals(generatedGroupStatus, responseGroupStatus, "ERROR IN ACTIVATING THE GROUP");
     }
 
     public static void verifyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -220,7 +220,7 @@ public class GroupHelper {
                 + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         LOG.debug("the list of verifyEmptyGroupMembers : {} ", list);
-        assertTrue("ERROR IN GROUP MEMBER", list.toString().contains("id=" + groupMember.toString()));
+        assertTrue(list.toString().contains("id=" + groupMember.toString()), "ERROR IN GROUP MEMBER");
     }
 
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -231,7 +231,7 @@ public class GroupHelper {
                 + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         LOG.debug("the list of verifyEmptyGroupMembers : {} ", list);
-        assertEquals("GROUP MEMBER LIST NOT EMPTY", list, null);
+        assertEquals(list, null, "GROUP MEMBER LIST NOT EMPTY");
     }
 
     public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -240,7 +240,7 @@ public class GroupHelper {
         LOG.info("------------------------------CHECK GROUP DELETED------------------------------------\n");
         final String GROUP_URL = "/fineract-provider/api/v1/groups/?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");
-        assertFalse("GROUP NOT DELETED", list.toString().contains("id=" + generatedGroupID.toString()));
+        assertFalse(list.toString().contains("id=" + generatedGroupID.toString()), "GROUP NOT DELETED");
     }
 
     //Glim_Gsim_testing

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -67,7 +67,7 @@ public class PaymentTypeHelper {
                 + Utils.TENANT_IDENTIFIER;
         final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL,
                 "id");
-        assertEquals("ERROR IN CREATING THE PAYMENT TYPE", generatedPaymentTypeID, responsePaymentTypeID);
+        assertEquals(generatedPaymentTypeID, responsePaymentTypeID, "ERROR IN CREATING THE PAYMENT TYPE");
     }
 
     public static PaymentTypeDomain retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec,

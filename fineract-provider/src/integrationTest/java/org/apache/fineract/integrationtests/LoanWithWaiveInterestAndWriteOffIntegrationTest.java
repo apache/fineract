@@ -30,9 +30,9 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     private final String INTEREST_VALUE_AMOUNT = "40.00";
     private LoanTransactionHelper loanTransactionHelper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -170,22 +170,22 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         this.loanTransactionHelper.makeRepayment("1 January 2011", repayment_with_interest, loanID);
 
         HashMap toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-        Assert.assertTrue("Checking for Principal paid ",
-                Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0);
-        Assert.assertTrue("Checking for interestPaid paid ",
-                Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0);
-        Assert.assertTrue("Checking for total paid ",
-                Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0);
+        Assertions.assertTrue(Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0,
+                "Checking for Principal paid ");
+        Assertions.assertTrue(Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0,
+                "Checking for interestPaid paid ");
+        Assertions.assertTrue(Float.valueOf("680.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalRepayment")))) == 0,
+                "Checking for total paid ");
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
         LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("1 January 2011", loanID));
         toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-        Assert.assertTrue("Checking for Principal written off ",
-                Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0);
-        Assert.assertTrue("Checking for interestPaid written off ",
-                Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0);
-        Assert.assertTrue("Checking for total written off ",
-                Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0);
+        Assertions.assertTrue(Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0,
+                "Checking for Principal written off ");
+        Assertions.assertTrue(Float.valueOf("1440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestWrittenOff")))) == 0,
+                "Checking for interestPaid written off ");
+        Assertions.assertTrue(Float.valueOf("5440.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("totalWrittenOff")))) == 0,
+                "Checking for total written off ");
 
     }
 
