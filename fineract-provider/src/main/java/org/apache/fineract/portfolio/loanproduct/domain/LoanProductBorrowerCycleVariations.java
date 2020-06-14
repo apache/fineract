@@ -80,6 +80,9 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
 
     @Override
     public boolean equals(final Object obj) {
+        if (!(obj instanceof LoanProductBorrowerCycleVariations)) {
+            return false;
+        }
         final LoanProductBorrowerCycleVariations other = (LoanProductBorrowerCycleVariations) obj;
         return Objects.equals(loanProduct, other.loanProduct)
             && Objects.equals(borrowerCycleNumber, other.borrowerCycleNumber)
