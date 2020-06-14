@@ -88,7 +88,7 @@ public class HookHelper {
     public void verifyUpdateHook(final String updateURL, final Long hookId) {
         LOG.info("------------------------------CHECK UPDATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
-        ArrayList<HashMap<String, String>> map = Utils.<ArrayList<HashMap<String, String>>> performServerGet(this.requestSpec,
+        ArrayList<HashMap<String, String>> map = Utils.<ArrayList<HashMap<String, String>>>performServerGet(this.requestSpec,
                 this.responseSpec, GET_URL, "config");
         HashMap<String, String> hash = map.get(1);
         assertEquals(updateURL, hash.get("fieldValue"));
@@ -98,7 +98,7 @@ public class HookHelper {
         LOG.info("------------------------------CHECK DELETE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         ResponseSpecification responseSpec404 = new ResponseSpecBuilder().expectStatusCode(404).build();
-        ArrayList<HashMap<String, String>> array = Utils.<ArrayList<HashMap<String, String>>> performServerGet(this.requestSpec,
+        ArrayList<HashMap<String, String>> array = Utils.<ArrayList<HashMap<String, String>>>performServerGet(this.requestSpec,
                 responseSpec404, GET_URL, "errors");
         HashMap<String, String> map = array.get(0);
         assertEquals("error.msg.hook.identifier.not.found", map.get("userMessageGlobalisationCode"));

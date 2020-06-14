@@ -90,7 +90,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final static String CODE_VALUES_TABLE = "m_code_value";
 
     private final static Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
-    private final static ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String> builder().put("string", "VARCHAR")
+    private final static ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
             .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "DATETIME")
             .put("text", "TEXT").put("dropdown", "INT").build();
 
