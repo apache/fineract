@@ -54,10 +54,10 @@ public class LoanRescheduleRequestTest {
     private Integer loanProductId;
     private Integer loanId;
     private Integer loanRescheduleRequestId;
-    private String loanPrincipalAmount = "100000.00";
-    private String numberOfRepayments = "12";
-    private String interestRatePerPeriod = "18";
-    private String dateString = "4 September 2014";
+    private final String loanPrincipalAmount = "100000.00";
+    private final String numberOfRepayments = "12";
+    private final String interestRatePerPeriod = "18";
+    private final String dateString = "4 September 2014";
 
     @BeforeEach
     public void initialize() {
@@ -212,8 +212,8 @@ public class LoanRescheduleRequestTest {
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
-        assertEquals("NUMBER OF REPAYMENTS SHOULD BE 16, NOT 12", "12", numberOfRepayments.toString());
-        assertEquals("TOTAL EXPECTED REPAYMENT MUST BE EQUAL TO 118000.0", "118000.0", totalExpectedRepayment.toString());
+        assertEquals(12, numberOfRepayments, "NUMBER OF REPAYMENTS is NOK");
+        assertEquals(118000, totalExpectedRepayment, "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})" , this.loanRescheduleRequestId);
     }

@@ -119,6 +119,7 @@ dependencies {
 	//
     testImplementation( 'org.mockito:mockito-core',
             'org.mockito:mockito-junit-jupiter',
+            'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
             'io.github.classgraph:classgraph',
             'org.awaitility:awaitility'
 	)

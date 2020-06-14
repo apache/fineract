@@ -63,7 +63,7 @@ public class DatatableHelper {
         LOG.info("------------------------------CHECK DATATABLE DETAILS------------------------------------\n");
         final String responseRegisteredTableName = Utils.performServerGet(requestSpec, responseSpec, DATATABLE_URL + "/"
                 + generatedDatatableName + "?" + Utils.TENANT_IDENTIFIER, "registeredTableName");
-        assertEquals("ERROR IN CREATING THE DATATABLE", generatedDatatableName, responseRegisteredTableName);
+        assertEquals(generatedDatatableName, responseRegisteredTableName, "ERROR IN CREATING THE DATATABLE");
     }
 
     public static String getTestDatatableAsJSON(final String apptableName, final boolean multiRow) {

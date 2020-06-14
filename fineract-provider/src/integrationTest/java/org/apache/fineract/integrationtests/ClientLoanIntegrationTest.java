@@ -916,16 +916,16 @@ public class ClientLoanIntegrationTest {
                 Float.valueOf(twoDForm.format(Float.valueOf(String.valueOf(chargeDetail.get("amountWaived")))))) == 0);
     }
 
-    public void validateNumberForEqual(String val, String val2) {
+    private void validateNumberForEqual(String val, String val2) {
         Assertions.assertTrue(Float.valueOf(val).compareTo(Float.valueOf(val2)) == 0);
     }
 
-    public void validateNumberForEqualWithMsg(String msg, String val, String val2) {
+    private void validateNumberForEqualWithMsg(String msg, String val, String val2) {
         Assertions.assertTrue(Float.valueOf(val).compareTo(Float.valueOf(val2)) == 0,
                 msg + "expected " + val + " but was " + val2);
     }
 
-    public void validateNumberForEqualExcludePrecission(String val, String val2) {
+    private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#");
         Assertions.assertTrue(Float.valueOf(twoDForm.format(Float.valueOf(val)))
                 .compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0);
@@ -1266,8 +1266,7 @@ public class ClientLoanIntegrationTest {
         assertEquals(new ArrayList<>(Arrays.asList(2014, 7, 2)),
                 loanSchedule.get(1).get("dueDate"),
                 "Checking for Due Date for 1st Month");
-        validateNumberForEqualWithMsg(String.valueOf(loanSchedule.get(1).get("principalOriginalDue")),
-                "Checking for Principal Due for 1st Month", "0.0");
+        validateNumberForEqualWithMsg("Checking for Principal Due for 1st Month", String.valueOf(loanSchedule.get(1).get("principalOriginalDue")), "0.0");
         assertEquals(Float.valueOf("200000"),
                 loanSchedule.get(1).get("interestOriginalDue"),
                 "Checking for Interest Due for 1st Month");
@@ -1275,8 +1274,7 @@ public class ClientLoanIntegrationTest {
         assertEquals(new ArrayList<>(Arrays.asList(2014, 8, 2)),
                 loanSchedule.get(2).get("dueDate"),
                 "Checking for Due Date for 2nd Month");
-        validateNumberForEqualWithMsg("0.0", String.valueOf(loanSchedule.get(2).get("principalOriginalDue")),
-                "Checking for Principal Due for 2nd Month");
+        validateNumberForEqualWithMsg("Checking for Principal Due for 2nd Month", "0.0", String.valueOf(loanSchedule.get(2).get("principalOriginalDue")));
         assertEquals(Float.valueOf("200000"),
                 loanSchedule.get(2).get("interestOriginalDue"),
                 "Checking for Interest Due for 2nd Month");
@@ -1284,16 +1282,14 @@ public class ClientLoanIntegrationTest {
         assertEquals(new ArrayList<>(Arrays.asList(2014, 9, 2)),
                 loanSchedule.get(3).get("dueDate"),
                 "Checking for Due Date for 3rd Month");
-        validateNumberForEqualWithMsg("0.0", String.valueOf(loanSchedule.get(3).get("principalDue")),
-                "Checking for Principal Due for 3rd Month");
+        validateNumberForEqualWithMsg("Checking for Principal Due for 3rd Month", "0.0", String.valueOf(loanSchedule.get(3).get("principalDue")));
         assertEquals(Float.valueOf("200000"), loanSchedule.get(3).get("interestOriginalDue"),
                 "Checking for Interest Due for 3rd Month");
 
         assertEquals(new ArrayList<>(Arrays.asList(2014, 10, 2)),
                 loanSchedule.get(4).get("dueDate"),
                 "Checking for Due Date for 4th Month");
-        validateNumberForEqualWithMsg("0", String.valueOf(loanSchedule.get(4).get("principalDue")),
-                "Checking for Principal Due for 4th Month");
+        validateNumberForEqualWithMsg("Checking for Principal Due for 4th Month", "0", String.valueOf(loanSchedule.get(4).get("principalDue")));
         assertEquals(Float.valueOf("200000"),
                 loanSchedule.get(4).get("interestOriginalDue"),
                 "Checking for Interest Due for 4th Month");
@@ -1356,7 +1352,6 @@ public class ClientLoanIntegrationTest {
         assertEquals(Float.valueOf("10500"),
                 loanSchedule.get(24).get("interestOriginalDue"),
                 "Checking for Interest Due for 24th Month");
-
     }
 
     private void addCharges(List<HashMap> charges, Integer chargeId, String amount, String duedate) {

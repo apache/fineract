@@ -56,17 +56,12 @@ public class BatchApiTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 
-    public BatchApiTest() {
-        super();
-    }
-
     /**
      * Sets up the essential settings for the TEST like contentType,
      * expectedStatusCode. It uses the '@BeforeEach' annotation provided by jUnit.
      */
     @BeforeEach
     public void setup() {
-
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -189,8 +184,8 @@ public class BatchApiTest {
         final JsonObject changes = new FromJsonHelper().parse(response.get(1).getBody()).getAsJsonObject().get("changes").getAsJsonObject();
 
         // Asserts the client information is successfully updated
-        Assertions.assertEquals("Verify Firstname", "TestFirstName", changes.get("firstname").getAsString());
-        Assertions.assertEquals("Verify Lastname", "TestLastName", changes.get("lastname").getAsString());
+        Assertions.assertEquals("TestFirstName", changes.get("firstname").getAsString());
+        Assertions.assertEquals("TestLastName", changes.get("lastname").getAsString());
     }
 
     /**

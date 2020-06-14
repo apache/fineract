@@ -74,7 +74,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
 
         final Integer savingsId = createSavingsAccount(clientID, startDate);
 
-        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate,
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate,
                 CommonConstants.RESPONSE_RESOURCE_ID);
 
         /***
@@ -86,12 +86,12 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
         for (Entry<String, Object> entry : interestPostingTransaction.entrySet())
-            {LOG.info("{} - {}",entry.getKey(), entry.getValue().toString());}
+        {LOG.info("{} - {}",entry.getKey(), entry.getValue().toString());}
         // 1st Dec 13 to 31st March 14 - 365 days, daily compounding using daily
         // balance
         // 33.7016 obtained from formula in excel provided by Subramanya
-        assertEquals("Equality check for interest posted amount", "33.7016", interestPostingTransaction.get("amount").toString());
-        assertEquals("Date check for Interest Posting transaction", "[2014, 3, 31]", interestPostingTransaction.get("date").toString());
+        assertEquals("33.7016", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
+        assertEquals("[2014, 3, 31]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
 
     }
 
