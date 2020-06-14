@@ -465,7 +465,9 @@ public class FixedDepositAccountHelper {
     }
 
     private String getDepositAmount() {
-        if (this.newDepositAmount == null) { return DEPOSIT_AMOUNT; }
+        if (this.newDepositAmount == null) {
+            return DEPOSIT_AMOUNT;
+        }
         return this.newDepositAmount;
     }
 

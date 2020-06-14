@@ -932,7 +932,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 }
             }
 
-            if (changeColumns == null && addColumns == null && dropColumns == null) { return; }
+            if (changeColumns == null && addColumns == null && dropColumns == null) {
+                return;
+            }
 
             if (dropColumns != null) {
                 if (rowCount > 0) {
@@ -1058,7 +1060,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         try {
             this.context.authenticatedUser();
-            if (!isRegisteredDataTable(datatableName)) { throw new DatatableNotFoundException(datatableName); }
+            if (!isRegisteredDataTable(datatableName)) {
+                throw new DatatableNotFoundException(datatableName);
+            }
             validateDatatableName(datatableName);
             assertDataTableEmpty(datatableName);
             deregisterDatatable(datatableName);
@@ -1123,7 +1127,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final GenericResultsetData grs = retrieveDataTableGenericResultSetForUpdate(appTable, dataTableName, appTableId, datatableId);
 
-        if (grs.hasNoEntries()) { throw new DatatableNotFoundException(dataTableName, appTableId); }
+        if (grs.hasNoEntries()) {
+            throw new DatatableNotFoundException(dataTableName, appTableId);
+        }
 
         if (grs.hasMoreThanOneEntry()) {
             throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
@@ -1179,7 +1185,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String deleteOneToOneEntrySql = getDeleteEntriesSql(dataTableName, getFKField(appTable), appTableId);
 
         final int rowsDeleted = this.jdbcTemplate.update(deleteOneToOneEntrySql);
-        if (rowsDeleted < 1) { throw new DatatableNotFoundException(dataTableName, appTableId); }
+        if (rowsDeleted < 1) {
+            throw new DatatableNotFoundException(dataTableName, appTableId);
+        }
 
         return commandProcessingResult;
     }
@@ -1260,7 +1268,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         LOG.info("data scoped sql: {}", sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
+        if (!rs.next()) {
+            throw new DatatableNotFoundException(appTable, appTableId);
+        }
 
         final Long officeId = getLongSqlRowSet(rs, "officeId");
         final Long groupId = getLongSqlRowSet(rs, "groupId");
@@ -1269,7 +1279,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final Long LoanId = getLongSqlRowSet(rs, "loanId");
         final Long entityId = getLongSqlRowSet(rs, "entityId");
 
-        if (rs.next()) { throw new DatatableSystemErrorException("System Error: More than one row returned from data scoping query"); }
+        if (rs.next()) {
+            throw new DatatableSystemErrorException("System Error: More than one row returned from data scoping query");
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(officeId) //
@@ -1352,21 +1364,39 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private void validateAppTable(final String appTable) {
 
-        if (appTable.equalsIgnoreCase("m_loan")) { return; }
-        if (appTable.equalsIgnoreCase("m_savings_account")) { return; }
-        if (appTable.equalsIgnoreCase("m_client")) { return; }
-        if (appTable.equalsIgnoreCase("m_group")) { return; }
-        if (appTable.equalsIgnoreCase("m_center")) { return; }
-        if (appTable.equalsIgnoreCase("m_office")) { return; }
-        if (appTable.equalsIgnoreCase("m_product_loan")) { return; }
-        if (appTable.equalsIgnoreCase("m_savings_product")) { return; }
+        if (appTable.equalsIgnoreCase("m_loan")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_savings_account")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_client")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_group")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_center")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_office")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_product_loan")) {
+            return;
+        }
+        if (appTable.equalsIgnoreCase("m_savings_product")) {
+            return;
+        }
 
         throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable, "name",
                 appTable);
     }
 
     private String mapToActualAppTable(final String appTable) {
-        if (appTable.equalsIgnoreCase("m_center")) { return "m_group"; }
+        if (appTable.equalsIgnoreCase("m_center")) {
+            return "m_group";
+        }
         return appTable;
     }
 
@@ -1517,7 +1547,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         // completeness but its okay to take this risk with additional fields
         // data
 
-        if (changedColumns.size() == 0) { return null; }
+        if (changedColumns.size() == 0) {
+            return null;
+        }
 
         String pValue = null;
         String pValueWrite = "";
@@ -1581,7 +1613,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (key.equals(grs.getColumnHeaders().get(i).getColumnName())) {
                 columnValue = columnValues.get(i);
 
-                if (notTheSame(columnValue, keyValue, colType)) { return true; }
+                if (notTheSame(columnValue, keyValue, colType)) {
+                    return true;
+                }
                 return false;
             }
         }
@@ -1629,7 +1663,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     }
 
                 }
-                if (notFound) { throw new PlatformDataIntegrityException("error.msg.column.not.found", "Column: " + key + " Not Found"); }
+                if (notFound) {
+                    throw new PlatformDataIntegrityException("error.msg.column.not.found", "Column: " + key + " Not Found");
+                }
             }
         }
         return affectedColumns;
@@ -1765,11 +1801,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private boolean notTheSame(final String currValue, final String pValue, final String colType) {
-        if (StringUtils.isEmpty(currValue) && StringUtils.isEmpty(pValue)) { return false; }
+        if (StringUtils.isEmpty(currValue) && StringUtils.isEmpty(pValue)) {
+            return false;
+        }
 
-        if (StringUtils.isEmpty(currValue)) { return true; }
+        if (StringUtils.isEmpty(currValue)) {
+            return true;
+        }
 
-        if (StringUtils.isEmpty(pValue)) { return true; }
+        if (StringUtils.isEmpty(pValue)) {
+            return true;
+        }
 
         if ("DECIMAL".equalsIgnoreCase(colType)) {
             final BigDecimal currentDecimal = BigDecimal.valueOf(Double.valueOf(currValue));
@@ -1778,7 +1820,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             return currentDecimal.compareTo(newDecimal) != 0;
         }
 
-        if (currValue.equals(pValue)) { return false; }
+        if (currValue.equals(pValue)) {
+            return false;
+        }
 
         return true;
     }

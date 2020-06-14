@@ -97,7 +97,9 @@ public class ShareProductDataSerializer {
     }
 
     public ShareProduct validateAndCreate(JsonCommand jsonCommand) {
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), supportedParametersForCreate);
 
@@ -195,7 +197,9 @@ public class ShareProductDataSerializer {
         for (ShareProductMarketPrice data : marketPriceSet) {
             data.setShareProduct(product);
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         return product;
     }
 
@@ -265,7 +269,9 @@ public class ShareProductDataSerializer {
     public Map<String, Object> validateAndUpdate(JsonCommand jsonCommand, ShareProduct product) {
         Map<String, Object> actualChanges = new HashMap<>();
 
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), supportedParametersForCreate);
 
@@ -448,7 +454,9 @@ public class ShareProductDataSerializer {
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         BigDecimal shareCapitalValue;
         if (sharesIssued != null || unitPrice != null) {
@@ -467,7 +475,9 @@ public class ShareProductDataSerializer {
     }
 
     public void validateDividendDetails(JsonCommand jsonCommand) {
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), supportedParametersForDivident);
 
@@ -490,7 +500,9 @@ public class ShareProductDataSerializer {
                 .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.dividendAmountParamName, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.dividendAmountParamName).value(dividendAmount).notBlank()
                 .positiveAmount();
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
 }

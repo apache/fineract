@@ -243,17 +243,23 @@ public class LoanAssembler {
 
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(clientId);
+            }
         }
 
         if (groupId != null) {
             group = this.groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-            if (group.isNotActive()) { throw new GroupNotActiveException(groupId); }
+            if (group.isNotActive()) {
+                throw new GroupNotActiveException(groupId);
+            }
         }
 
         if (client != null && group != null) {
 
-            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(clientId, groupId);
+            }
 
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(), loanProduct,
                     fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
@@ -331,7 +337,9 @@ public class LoanAssembler {
         Staff staff = null;
         if (loanOfficerId != null) {
             staff = this.staffRepository.findById(loanOfficerId).orElseThrow(() -> new StaffNotFoundException(loanOfficerId));
-            if (staff.isNotLoanOfficer()) { throw new StaffRoleException(loanOfficerId, StaffRoleException.StaffRole.LOAN_OFFICER); }
+            if (staff.isNotLoanOfficer()) {
+                throw new StaffRoleException(loanOfficerId, StaffRoleException.StaffRole.LOAN_OFFICER);
+            }
         }
         return staff;
     }

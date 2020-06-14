@@ -47,7 +47,9 @@ public class TwoFactorConfigurationValidator {
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         boolean atLeastOneParameterPassedForUpdate = false;
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -88,7 +90,9 @@ public class TwoFactorConfigurationValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateBooleanParameter(final String name, final JsonElement element, final DataValidatorBuilder baseDataValidator) {

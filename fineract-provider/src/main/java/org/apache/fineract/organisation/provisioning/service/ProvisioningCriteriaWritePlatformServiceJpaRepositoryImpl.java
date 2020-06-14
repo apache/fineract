@@ -110,7 +110,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
             ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findById(criteriaId).orElse(null);
-            if (provisioningCriteria == null) { throw new ProvisioningCategoryNotFoundException(criteriaId); }
+            if (provisioningCriteria == null) {
+                throw new ProvisioningCategoryNotFoundException(criteriaId);
+            }
             List<LoanProduct> products = this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson());
             final Map<String, Object> changes = provisioningCriteria.update(command, products);
             if (!changes.isEmpty()) {

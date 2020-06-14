@@ -61,7 +61,9 @@ public final class TellerCommandFromApiJsonDeserializer {
     }
 
     public void validateForCreateAndUpdateTeller(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -90,7 +92,9 @@ public final class TellerCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("status").value(status).notBlank().notExceedingLengthOf(50);
 
         if (endDate != null) {
-            if (endDate.isBefore(startDate)) { throw new InvalidDateInputException(startDate.toString(), endDate.toString()); }
+            if (endDate.isBefore(startDate)) {
+                throw new InvalidDateInputException(startDate.toString(), endDate.toString());
+            }
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -103,7 +107,9 @@ public final class TellerCommandFromApiJsonDeserializer {
     }
 
     public void validateForAllocateCashier(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -144,7 +150,9 @@ public final class TellerCommandFromApiJsonDeserializer {
     }
 
     public void validateForCashTxnForCashier(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);

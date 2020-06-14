@@ -44,7 +44,9 @@ public class WorkingDaysRepositoryWrapper {
     public WorkingDays findOne() {
         final List<WorkingDays> workingDaysList = this.repository.findAll();
 
-        if (workingDaysList == null || workingDaysList.isEmpty()) { throw new WorkingDaysNotFoundException(); }
+        if (workingDaysList == null || workingDaysList.isEmpty()) {
+            throw new WorkingDaysNotFoundException();
+        }
         return workingDaysList.get(0);
     }
 

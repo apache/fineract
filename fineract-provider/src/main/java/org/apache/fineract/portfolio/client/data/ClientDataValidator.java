@@ -58,7 +58,9 @@ public final class ClientDataValidator {
 
     public void validateForCreate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -354,7 +356,9 @@ public final class ClientDataValidator {
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -590,7 +594,9 @@ public final class ClientDataValidator {
     public void validateActivation(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -617,7 +623,9 @@ public final class ClientDataValidator {
 
     public void validateForUnassignStaff(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -635,13 +643,17 @@ public final class ClientDataValidator {
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 
     public void validateForAssignStaff(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -659,7 +671,9 @@ public final class ClientDataValidator {
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 
@@ -667,7 +681,9 @@ public final class ClientDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -691,7 +707,9 @@ public final class ClientDataValidator {
 
     public void validateForSavingsAccount(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -709,7 +727,9 @@ public final class ClientDataValidator {
         final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParameterName, element);
         baseDataValidator.reset().parameter(savingsIdParameterName).value(savingsId).notNull().longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 
@@ -717,7 +737,9 @@ public final class ClientDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_REJECT_DATA_PARAMETERS);
@@ -743,7 +765,9 @@ public final class ClientDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_WITHDRAW_DATA_PARAMETERS);
@@ -769,7 +793,9 @@ public final class ClientDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -793,7 +819,9 @@ public final class ClientDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -817,7 +845,9 @@ public final class ClientDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,

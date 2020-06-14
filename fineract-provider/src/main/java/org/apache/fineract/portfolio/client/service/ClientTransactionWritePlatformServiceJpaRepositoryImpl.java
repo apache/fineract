@@ -62,7 +62,9 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
         final ClientTransaction clientTransaction = this.clientTransactionRepository.findOneWithNotFoundDetection(clientId, transactionId);
 
         // validate that transaction can be undone
-        if (clientTransaction.isReversed()) { throw new ClientTransactionCannotBeUndoneException(clientId, transactionId); }
+        if (clientTransaction.isReversed()) {
+            throw new ClientTransactionCannotBeUndoneException(clientId, transactionId);
+        }
 
         // mark transaction as reversed
         clientTransaction.reverse();

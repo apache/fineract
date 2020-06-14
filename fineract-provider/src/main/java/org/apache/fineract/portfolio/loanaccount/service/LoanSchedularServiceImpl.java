@@ -115,7 +115,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                     exceptions.add(e);
                 }
             }
-            if (!exceptions.isEmpty()) { throw new JobExecutionException(exceptions); }
+            if (!exceptions.isEmpty()) {
+                throw new JobExecutionException(exceptions);
+            }
         }
     }
 
@@ -166,7 +168,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                 }
                 LOG.info("recalculateInterest: Loans count {}", i);
             }
-            if (!errors.isEmpty()) { throw new JobExecutionException(errors); }
+            if (!errors.isEmpty()) {
+                throw new JobExecutionException(errors);
+            }
         }
 
     }
@@ -181,7 +185,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
         // gets the Office object
         final OfficeData office = this.officeReadPlatformService.retrieveOffice(officeIdLong);
-        if (office == null) { throw new OfficeNotFoundException(officeIdLong); }
+        if (office == null) {
+            throw new OfficeNotFoundException(officeIdLong);
+        }
         final int threadPoolSize = Integer.parseInt(jobParameters.get("thread-pool-size"));
         final int batchSize = Integer.parseInt(jobParameters.get("batch-size"));
 
@@ -226,7 +232,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         double toGetCeilValue = size / threadPoolSize;
         batchSize = (int) Math.ceil(toGetCeilValue);
 
-        if (batchSize == 0) { return; }
+        if (batchSize == 0) {
+            return;
+        }
 
         int toIndex = (batchSize > size - 1) ? size : batchSize;
         while (toIndex < size && loanIds.get(toIndex - 1).equals(loanIds.get(toIndex))) {
@@ -265,7 +273,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     // break the lists into sub lists
     private <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {
         int size = list.size();
-        if (fromIndex >= size || toIndex <= 0 || fromIndex >= toIndex) { return Collections.emptyList(); }
+        if (fromIndex >= size || toIndex <= 0 || fromIndex >= toIndex) {
+            return Collections.emptyList();
+        }
 
         fromIndex = Math.max(0, fromIndex);
         toIndex = Math.min(size, toIndex);

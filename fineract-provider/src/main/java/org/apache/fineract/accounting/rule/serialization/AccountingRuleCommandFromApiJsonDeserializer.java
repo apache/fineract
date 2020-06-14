@@ -53,7 +53,9 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
 
     public void validateForCreate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -141,7 +143,9 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateCreditOrDebitTagArray(final String[] creditOrDebitTagArray, final DataValidatorBuilder baseDataValidator,
@@ -155,7 +159,9 @@ public class AccountingRuleCommandFromApiJsonDeserializer {
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);

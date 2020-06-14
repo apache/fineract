@@ -103,7 +103,9 @@ public class DatatableCommandFromApiJsonDeserializer {
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParametersForCreate);
@@ -147,7 +149,9 @@ public class DatatableCommandFromApiJsonDeserializer {
     }
 
     public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         // Because all parameters are optional, a check to see if at least one
         // parameter
         // has been specified is necessary in order to avoid JSON requests with

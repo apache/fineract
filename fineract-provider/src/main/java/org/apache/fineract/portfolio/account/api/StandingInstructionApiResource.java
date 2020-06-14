@@ -169,7 +169,9 @@ public class StandingInstructionApiResource {
                     .build();
         }
 
-        if (commandRequest == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (commandRequest == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);

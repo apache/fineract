@@ -237,7 +237,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sql += " where " + extraCriteria;
         }
         sql = sql + " order by t.teller_name";
-        if (officeId != null) { return this.jdbcTemplate.query(sql, tm, new Object[] { officeId }); }
+        if (officeId != null) {
+            return this.jdbcTemplate.query(sql, tm, new Object[] { officeId });
+        }
         return this.jdbcTemplate.query(sql, tm, new Object[] {});
     }
 

@@ -48,7 +48,9 @@ public class SelfClientDataValidator {
             unsupportedParams.add("exclude");
         }
 
-        if (unsupportedParams.size() > 0) { throw new UnsupportedParameterException(unsupportedParams); }
+        if (unsupportedParams.size() > 0) {
+            throw new UnsupportedParameterException(unsupportedParams);
+        }
     }
 
     public void validateRetrieveOne(final UriInfo uriInfo) {
@@ -59,7 +61,9 @@ public class SelfClientDataValidator {
             unsupportedParams.add("template");
         }
 
-        if (unsupportedParams.size() > 0) { throw new UnsupportedParameterException(unsupportedParams); }
+        if (unsupportedParams.size() > 0) {
+            throw new UnsupportedParameterException(unsupportedParams);
+        }
 
     }
 

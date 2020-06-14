@@ -46,7 +46,9 @@ public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleExc
                 return "error.msg.nullDatePassed";
             } else if (name().toString().equalsIgnoreCase("ACTIVATION_DATE")) {
                 return "error.msg.before activation date";
-            } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) { return "error.msg.countInterest"; }
+            } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) {
+                return "error.msg.countInterest";
+            }
             return name().toString();
         }
     }

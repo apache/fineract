@@ -162,9 +162,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             final Boolean inheritDestinationGroupLoanOfficer, final Staff newLoanOfficer) {
 
         // next I shall validate that the client is present in this group
-        if (!sourceGroup.hasClientAsMember(client)) { throw new ClientNotInGroupException(client.getId(), sourceGroup.getId()); }
+        if (!sourceGroup.hasClientAsMember(client)) {
+            throw new ClientNotInGroupException(client.getId(), sourceGroup.getId());
+        }
         // Is client active?
-        if (client.isNotActive()) { throw new ClientHasBeenClosedException(client.getId()); }
+        if (client.isNotActive()) {
+            throw new ClientHasBeenClosedException(client.getId());
+        }
 
         /**
          * TODO: for now we need to ensure that only one collection sheet
@@ -456,7 +460,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     if (destinationGroup == null) {
                         throw new TransferNotSupportedException(TransferNotSupportedReason.CLIENT_DESTINATION_GROUP_NOT_SPECIFIED,
                                 client.getId());
-                    } else if (!destinationGroup.isActive()) { throw new GroupNotActiveException(destinationGroup.getId()); }
+                    } else if (!destinationGroup.isActive()) {
+                        throw new GroupNotActiveException(destinationGroup.getId());
+                    }
                     transferClientBetweenGroups(Iterables.get(client.getGroups(), 0), client, destinationGroup, true, staff);
                 } else if (client.getGroups().size() == 0 && destinationGroup != null) {
                     client.getGroups().add(destinationGroup);
@@ -516,7 +522,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     private void validateClientAwaitingTransferAcceptance(final Client client) {
-        if (!client.isTransferInProgress()) { throw new ClientNotAwaitingTransferApprovalException(client.getId()); }
+        if (!client.isTransferInProgress()) {
+            throw new ClientNotAwaitingTransferApprovalException(client.getId());
+        }
     }
 
     /**
@@ -526,7 +534,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      **/
 
     private void validateClientAwaitingTransferAcceptanceOnHold(final Client client) {
-        if (!client.isTransferInProgressOrOnHold()) { throw new ClientNotAwaitingTransferApprovalOrOnHoldException(client.getId()); }
+        if (!client.isTransferInProgressOrOnHold()) {
+            throw new ClientNotAwaitingTransferApprovalOrOnHoldException(client.getId());
+        }
     }
 
     /**

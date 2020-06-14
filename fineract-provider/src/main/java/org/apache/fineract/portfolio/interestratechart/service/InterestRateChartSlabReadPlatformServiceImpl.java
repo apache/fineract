@@ -79,7 +79,9 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
         final String sql = "select " + this.chartSlabExtractor.schema() + " where irc.id = ? order by ircd.id asc";
         Collection<InterestRateChartSlabData> chartDatas = this.jdbcTemplate.query(sql, this.chartSlabExtractor,
                 new Object[] { chartSlabId, chartId });
-        if (chartDatas == null || chartDatas.isEmpty()) { throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId); }
+        if (chartDatas == null || chartDatas.isEmpty()) {
+            throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+        }
 
         return chartDatas.iterator().next();
     }
@@ -152,7 +154,9 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "ircdId");
             // If there are not chart Slabs are associated then in
             // InterestRateChartExtractor the chart Slabs id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String description = rs.getString("ircdDescription");
             final Integer fromPeriod = JdbcSupport.getInteger(rs, "ircdFromPeriod");
@@ -228,7 +232,9 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final Long id = JdbcSupport.getLongDefaultToNullIfZero(rs, "iriId");
             // If there are not Incentive are associated then in
             // InterestRateChartExtractor the incentive id will be null.
-            if (id == null) { return null; }
+            if (id == null) {
+                return null;
+            }
 
             final String attributeValue = rs.getString("attributeValue");
             String attributeValueDesc = null;

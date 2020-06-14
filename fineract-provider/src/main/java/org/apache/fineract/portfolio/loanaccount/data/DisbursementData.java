@@ -101,7 +101,9 @@ public class DisbursementData implements Comparable<DisbursementData> {
 
     @Override
     public int compareTo(final DisbursementData obj) {
-        if (obj == null) { return -1; }
+        if (obj == null) {
+            return -1;
+        }
 
         return obj.expectedDisbursementDate.compareTo(this.expectedDisbursementDate);
     }
@@ -117,7 +119,9 @@ public class DisbursementData implements Comparable<DisbursementData> {
     }
 
     public BigDecimal getWaivedChargeAmount() {
-        if (this.waivedChargeAmount == null) { return BigDecimal.ZERO; }
+        if (this.waivedChargeAmount == null) {
+            return BigDecimal.ZERO;
+        }
         return this.waivedChargeAmount;
     }
 

@@ -56,7 +56,9 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
 
     @Override
     public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final PaymentDetail paymentDetail = this.paymentDetailAssembler.fetchPaymentDetail(element.getAsJsonObject());
@@ -65,7 +67,9 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
     }
 
     public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json, final PaymentDetail paymentDetail) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 

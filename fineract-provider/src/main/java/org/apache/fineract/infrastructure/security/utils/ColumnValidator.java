@@ -58,9 +58,13 @@ public class ColumnValidator {
                 Set<String> columns = entry.getValue();
                 resultSet = dbMetaData.getColumns(null, null, entry.getKey(), null);
                 Set<String> tableColumns = getTableColumns(resultSet);
-                if (columns.size() > 0 && tableColumns.size() == 0) { throw new SQLInjectionException(); }
+                if (columns.size() > 0 && tableColumns.size() == 0) {
+                    throw new SQLInjectionException();
+                }
                 for (String requestedColumn : columns) {
-                    if (!tableColumns.contains(requestedColumn)) { throw new SQLInjectionException(); }
+                    if (!tableColumns.contains(requestedColumn)) {
+                        throw new SQLInjectionException();
+                    }
                 }
             }
         } catch (SQLException e) {

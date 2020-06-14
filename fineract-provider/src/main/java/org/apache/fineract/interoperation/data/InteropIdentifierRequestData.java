@@ -69,7 +69,9 @@ public class InteropIdentifierRequestData {
     public static InteropIdentifierRequestData validateAndParse(final DataValidatorBuilder dataValidator,
             @NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType, JsonObject element,
             FromJsonHelper jsonHelper) {
-        if (element == null) { return null; }
+        if (element == null) {
+            return null;
+        }
 
         jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 

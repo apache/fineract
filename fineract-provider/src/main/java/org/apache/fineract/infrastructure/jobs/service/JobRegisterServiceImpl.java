@@ -242,7 +242,9 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Override
     public void executeJob(final Long jobId) {
         final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
-        if (scheduledJobDetail == null) { throw new JobNotFoundException(String.valueOf(jobId)); }
+        if (scheduledJobDetail == null) {
+            throw new JobNotFoundException(String.valueOf(jobId));
+        }
         executeJob(scheduledJobDetail, null);
     }
 

@@ -107,7 +107,9 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
             // object is becoming null. So further image source is becoming null
             // For Amazon S3. If file is not present, already
             // S3ContentRepository would have thrown this exception.
-            if (!result.available()) { throw new ImageNotFoundException(entityType, entityId); }
+            if (!result.available()) {
+                throw new ImageNotFoundException(entityType, entityId);
+            }
 
             return result;
         } catch (final EmptyResultDataAccessException e) {

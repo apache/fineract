@@ -160,7 +160,9 @@ public class SelfSavingsApiResource {
     private void validateAppuserSavingsAccountMapping(final Long accountId) {
         AppUser user = this.context.authenticatedUser();
         final boolean isMappedSavings = this.appuserSavingsMapperReadService.isSavingsMappedToUser(accountId, user.getId());
-        if (!isMappedSavings) { throw new SavingsAccountNotFoundException(accountId); }
+        if (!isMappedSavings) {
+            throw new SavingsAccountNotFoundException(accountId);
+        }
     }
 
     @GET
@@ -203,7 +205,9 @@ public class SelfSavingsApiResource {
     private void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();
         final boolean mappedClientId = this.appUserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-        if (!mappedClientId) { throw new ClientNotFoundException(clientId); }
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
     }
 
 }

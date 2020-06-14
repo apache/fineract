@@ -53,7 +53,9 @@ public enum DepositAccountOnClosureType {
 
     public static DepositAccountOnClosureType fromInt(final Integer closureTypeValue) {
 
-        if (closureTypeValue == null) { return DepositAccountOnClosureType.INVALID; }
+        if (closureTypeValue == null) {
+            return DepositAccountOnClosureType.INVALID;
+        }
 
         DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.INVALID;
         switch (closureTypeValue) {

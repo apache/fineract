@@ -43,7 +43,9 @@ public class AccountingRuleInvalidException extends AbstractPlatformDomainRuleEx
         public String errorCode() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
                 return "error.msg.glclosure.invalid.future.date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) { return "error.msg.glclosure.invalid.accounting.closed"; }
+            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) {
+                return "error.msg.glclosure.invalid.accounting.closed";
+            }
             return name().toString();
         }
     }

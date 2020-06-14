@@ -40,7 +40,9 @@ public class GlobalConfigurationRepositoryWrapper {
 
     public GlobalConfigurationProperty findOneByNameWithNotFoundDetection(final String propertyName) {
         final GlobalConfigurationProperty property = this.repository.findOneByName(propertyName);
-        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
+        if (property == null) {
+            throw new GlobalConfigurationPropertyNotFoundException(propertyName);
+        }
         return property;
     }
 

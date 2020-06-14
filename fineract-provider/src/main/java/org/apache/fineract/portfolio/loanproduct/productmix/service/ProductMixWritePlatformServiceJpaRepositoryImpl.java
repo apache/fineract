@@ -135,7 +135,9 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             final List<ProductMix> existedProductMixes = new ArrayList<>(this.productMixRepository.findByProductId(productId));
-            if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
+            if (CollectionUtils.isEmpty(existedProductMixes)) {
+                throw new ProductMixNotFoundException(productId);
+            }
             final Set<String> restrictedIds = new HashSet<>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
 
             // updating with empty array means deleting the existed records.
@@ -218,7 +220,9 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             final List<ProductMix> existedProductMixes = this.productMixRepository.findByProductId(productId);
-            if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
+            if (CollectionUtils.isEmpty(existedProductMixes)) {
+                throw new ProductMixNotFoundException(productId);
+            }
             this.productMixRepository.deleteAll(existedProductMixes);
             changes.put("removedProductsForMix", getProductIdsFromCollection(existedProductMixes));
             return new CommandProcessingResultBuilder().with(changes).withProductId(productId).build();

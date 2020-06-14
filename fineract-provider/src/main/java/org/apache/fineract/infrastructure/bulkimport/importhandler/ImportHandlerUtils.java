@@ -64,7 +64,9 @@ public class ImportHandlerUtils {
 
     public static Long readAsLong(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK) { return null; }
+        if (c == null || c.getCellType() == CellType.BLANK) {
+            return null;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
@@ -87,7 +89,9 @@ public class ImportHandlerUtils {
     public static String readAsString(int colIndex, Row row) {
 
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK) { return null; }
+        if (c == null || c.getCellType() == CellType.BLANK) {
+            return null;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
@@ -134,7 +138,9 @@ public class ImportHandlerUtils {
 
     public static LocalDate readAsDate(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK) { return null; }
+        if (c == null || c.getCellType() == CellType.BLANK) {
+            return null;
+        }
 
         LocalDate localDate = new LocalDate(c.getDateCellValue());
         return localDate;
@@ -142,7 +148,9 @@ public class ImportHandlerUtils {
 
     public static Boolean readAsBoolean(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK) { return false; }
+        if (c == null || c.getCellType() == CellType.BLANK) {
+            return false;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
@@ -169,7 +177,9 @@ public class ImportHandlerUtils {
 
     public static Integer readAsInt(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK) { return null; }
+        if (c == null || c.getCellType() == CellType.BLANK) {
+            return null;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {
@@ -191,7 +201,9 @@ public class ImportHandlerUtils {
 
     public static Double readAsDouble(int colIndex, Row row) {
         Cell c = row.getCell(colIndex);
-        if (c == null || c.getCellType() == CellType.BLANK) { return 0.0; }
+        if (c == null || c.getCellType() == CellType.BLANK) {
+            return 0.0;
+        }
         FormulaEvaluator eval = row.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
         if (c.getCellType() == CellType.FORMULA) {
             if (eval != null) {

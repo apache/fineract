@@ -50,7 +50,9 @@ public enum AttendanceType {
 
     public static AttendanceType fromInt(final Integer attendanceTypeId) {
 
-        if (attendanceTypeId == null) { return AttendanceType.INVALID; }
+        if (attendanceTypeId == null) {
+            return AttendanceType.INVALID;
+        }
 
         AttendanceType attendanceType = AttendanceType.INVALID;
         switch (attendanceTypeId) {

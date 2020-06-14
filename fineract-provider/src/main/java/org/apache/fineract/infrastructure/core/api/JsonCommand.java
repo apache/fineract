@@ -191,7 +191,9 @@ public final class JsonCommand {
     }
 
     public JsonElement jsonElement(final String paramName) {
-        if (this.parsedCommand.getAsJsonObject().has(paramName)) { return this.parsedCommand.getAsJsonObject().get(paramName); }
+        if (this.parsedCommand.getAsJsonObject().has(paramName)) {
+            return this.parsedCommand.getAsJsonObject().get(paramName);
+        }
         return null;
     }
 
@@ -412,7 +414,9 @@ public final class JsonCommand {
 
     public Date dateValueOfParameterNamed(final String parameterName) {
         final LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
-        if (localDate == null) { return null; }
+        if (localDate == null) {
+            return null;
+        }
         return localDate.toDateTimeAtStartOfDay().toDate();
     }
 

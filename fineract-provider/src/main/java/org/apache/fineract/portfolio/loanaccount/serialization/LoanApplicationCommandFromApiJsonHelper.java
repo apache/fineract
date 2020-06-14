@@ -101,7 +101,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans, final LoanProduct loanProduct) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -453,7 +455,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
                 throw new UnsupportedParameterException(unsupportedParameterList);
             }
-            if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("fixed.emi", "fixed emi"); }
+            if (isEqualAmortization) {
+                throw new EqualAmortizationUnsupportedFeatureException("fixed.emi", "fixed emi");
+            }
             final BigDecimal emiAnount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
                     element);
             baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAnount).ignoreIfNull().positiveAmount();
@@ -483,11 +487,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateForModify(final String json, final LoanProduct loanProduct, final Loan existingLoanApplication) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -897,7 +905,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
                 throw new UnsupportedParameterException(unsupportedParameterList);
             }
-            if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("fixed.emi", "fixed emi"); }
+            if (isEqualAmortization) {
+                throw new EqualAmortizationUnsupportedFeatureException("fixed.emi", "fixed emi");
+            }
             final BigDecimal emiAnount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
                     element);
             baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAnount).ignoreIfNull().positiveAmount();
@@ -932,7 +942,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateForUndo(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> undoSupportedParameters = new HashSet<>(Arrays.asList("note"));
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -948,7 +960,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter(note).value(noteText).notExceedingLengthOf(1000);
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public void validateMinMaxConstraintValues(final JsonElement element, final LoanProduct loanProduct) {
@@ -1137,7 +1151,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateLoanCharges(final Set<LoanCharge> charges, final List<ApiParameterError> dataValidationErrors) {
-        if (charges == null) { return; }
+        if (charges == null) {
+            return;
+        }
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         for (LoanCharge loanCharge : charges) {
             String errorcode = null;
@@ -1174,7 +1190,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         validateLoanCharges(loan.charges(), dataValidationErrors);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validatePartialPeriodSupport(final Integer interestCalculationPeriodType, final DataValidatorBuilder baseDataValidator,

@@ -80,9 +80,15 @@ public class ProvisioningCategory extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof ProvisioningCategory)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof ProvisioningCategory)) {
+            return false;
+        }
         ProvisioningCategory pc = (ProvisioningCategory) obj;
         return pc.getCategoryName().equals(this.categoryName);
     }

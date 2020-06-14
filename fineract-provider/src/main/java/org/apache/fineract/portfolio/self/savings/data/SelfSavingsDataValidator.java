@@ -80,7 +80,9 @@ public class SelfSavingsDataValidator {
     }
 
     private void throwExceptionIfReqd(final List<String> unsupportedParams) {
-        if (unsupportedParams.size() > 0) { throw new UnsupportedParameterException(unsupportedParams); }
+        if (unsupportedParams.size() > 0) {
+            throw new UnsupportedParameterException(unsupportedParams);
+        }
     }
 
     private void validateTemplate(final UriInfo uriInfo, List<String> unsupportedParams) {
@@ -91,7 +93,9 @@ public class SelfSavingsDataValidator {
     }
 
     public HashMap<String, Object> validateSavingsApplication(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -103,7 +107,9 @@ public class SelfSavingsDataValidator {
         baseDataValidator.reset().parameter(SelfSavingsAccountConstants.clientIdParameterName).value(clientId).notNull()
                 .longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         HashMap<String, Object> parameterMap = new HashMap<>();
         parameterMap.put(SelfSavingsAccountConstants.clientIdParameterName, clientId);

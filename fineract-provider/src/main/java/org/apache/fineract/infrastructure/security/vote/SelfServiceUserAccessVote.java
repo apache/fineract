@@ -51,7 +51,9 @@ public class SelfServiceUserAccessVote implements AccessDecisionVoter<FilterInvo
             boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
                     || (!isSelfServiceRequest && user.isSelfServiceUser()));
 
-            if (notAllowed) { return ACCESS_DENIED; }
+            if (notAllowed) {
+                return ACCESS_DENIED;
+            }
         }
         return ACCESS_GRANTED;
     }

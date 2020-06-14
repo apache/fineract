@@ -120,7 +120,9 @@ public class ShareAccountDataSerializer {
 
     public ShareAccount validateAndCreate(JsonCommand jsonCommand) {
 
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.supportedParameters);
 
@@ -177,7 +179,9 @@ public class ShareAccountDataSerializer {
         Integer lockinPeriod = this.fromApiJsonHelper.extractIntegerNamed(ShareAccountApiConstants.lockinperiod_paramname, element, locale);
         PeriodFrequencyType lockPeriodEnum = extractPeriodType(ShareAccountApiConstants.lockperiodfrequencytype_paramname, element);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         if (!this.savingsAccountReadPlatformService.isAccountBelongsToClient(clientId, savingsAccountId, DepositAccountType.SAVINGS_DEPOSIT,
@@ -256,7 +260,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndUpdate(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.supportedParameters);
 
@@ -439,14 +445,18 @@ public class ShareAccountDataSerializer {
         }
 
         createChargeTransaction(account);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         return actualChanges;
     }
 
     @SuppressWarnings("null")
     public Map<String, Object> validateAndApprove(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), approvalParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -471,7 +481,9 @@ public class ShareAccountDataSerializer {
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         AppUser approvedUser = this.platformSecurityContext.authenticatedUser();
         account.approve(approvedDate.toDate(), approvedUser);
@@ -524,7 +536,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndUndoApprove(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), activateParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -579,7 +593,9 @@ public class ShareAccountDataSerializer {
     @SuppressWarnings("null")
     public Map<String, Object> validateAndActivate(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), activateParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -597,7 +613,9 @@ public class ShareAccountDataSerializer {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.activatedate_paramname).value(submittalDateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.approved.date");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         AppUser approvedUser = this.platformSecurityContext.authenticatedUser();
         account.activate(activatedDate.toDate(), approvedUser);
         handlechargesOnActivation(account);
@@ -659,7 +677,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndApplyAddtionalShares(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -697,7 +717,9 @@ public class ShareAccountDataSerializer {
                     .failWithCodeNoParameterAddedToErrorCode("purchase.transaction.date.cannot.be.before.existing.transactions");
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         final BigDecimal unitPrice = shareProduct.deriveMarketPrice(requestedDate.toDate());
         ShareAccountTransaction purchaseTransaction = new ShareAccountTransaction(requestedDate.toDate(), sharesRequested, unitPrice);
         account.addAdditionalPurchasedShares(purchaseTransaction);
@@ -723,7 +745,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndApproveAddtionalShares(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -749,7 +773,9 @@ public class ShareAccountDataSerializer {
                 account.updateApprovedShares(Long.valueOf(totalShares));
             }
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, purchasedShares);
         return actualChanges;
     }
@@ -772,7 +798,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndRejectAddtionalShares(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         JsonElement element = jsonCommand.parsedJson();
@@ -817,7 +845,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndRedeemShares(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -843,7 +873,9 @@ public class ShareAccountDataSerializer {
             baseDataValidator.reset().parameter(ShareAccountApiConstants.requesteddate_paramname).value(requestedDate)
                     .failWithCodeNoParameterAddedToErrorCode("redeem.transaction.date.cannot.be.before.existing.transactions");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         BigDecimal unitPrice = account.getShareProduct().deriveMarketPrice(requestedDate.toDate());
         ShareAccountTransaction transaction = ShareAccountTransaction.createRedeemTransaction(requestedDate.toDate(), sharesRequested,
                 unitPrice);
@@ -863,12 +895,16 @@ public class ShareAccountDataSerializer {
                     .value(redeemTransaction.getTotalShares())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.redeemed.due.to.insufficient.shares");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         LocalDate redeemDate = new LocalDate(redeemTransaction.getPurchasedDate());
         final Integer lockinPeriod = account.getLockinPeriodFrequency();
         final PeriodFrequencyType periodType = account.getLockinPeriodFrequencyType();
-        if (lockinPeriod == null && periodType == null) { return; }
+        if (lockinPeriod == null && periodType == null) {
+            return;
+        }
         Long totalSharesCanBeRedeemed = Long.valueOf(0);
         Long totalSharesPurchasedBeforeRedeem = Long.valueOf(0);
         boolean isPurchaseTransactionExist = false;
@@ -908,7 +944,9 @@ public class ShareAccountDataSerializer {
                     .value(redeemTransaction.getTotalShares())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.redeemed.due.to.lockinperiod");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private LocalDate deriveLockinPeriodDuration(final Integer lockinPeriod, final PeriodFrequencyType periodType, LocalDate purchaseDate) {
@@ -962,7 +1000,9 @@ public class ShareAccountDataSerializer {
 
     public Map<String, Object> validateAndClose(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
-        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(jsonCommand.json())) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), closeParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -970,7 +1010,9 @@ public class ShareAccountDataSerializer {
         JsonElement element = jsonCommand.parsedJson();
         LocalDate closedDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareAccountApiConstants.closeddate_paramname, element);
         baseDataValidator.reset().parameter(ShareAccountApiConstants.approveddate_paramname).value(closedDate).notNull();
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         boolean isTransactionBeforeExistingTransactions = false;
         Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
         for (ShareAccountTransaction transaction : transactions) {
@@ -987,7 +1029,9 @@ public class ShareAccountDataSerializer {
                     .failWithCodeNoParameterAddedToErrorCode("share.account.cannot.be.closed.before.existing.transactions");
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         AppUser approvedUser = this.platformSecurityContext.authenticatedUser();
         final BigDecimal unitPrice = account.getShareProduct().deriveMarketPrice(DateUtils.getDateOfTenant());

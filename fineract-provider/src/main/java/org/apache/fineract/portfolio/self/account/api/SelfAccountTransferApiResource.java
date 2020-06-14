@@ -143,7 +143,9 @@ public class SelfAccountTransferApiResource {
         Long transferLimit = this.tptBeneficiaryReadPlatformService.getTransferLimit(user.getId(), toAccount.getAccountId(),
                 toAccount.getAccountType());
         if (transferLimit != null && transferLimit > 0) {
-            if (transactionAmount.compareTo(new BigDecimal(transferLimit)) > 0) { throw new BeneficiaryTransferLimitExceededException(); }
+            if (transactionAmount.compareTo(new BigDecimal(transferLimit)) > 0) {
+                throw new BeneficiaryTransferLimitExceededException();
+            }
         }
 
         if (this.configurationDomainService.isDailyTPTLimitEnabled()) {

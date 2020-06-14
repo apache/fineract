@@ -73,7 +73,9 @@ public class AdHocQueryDataValidator {
 
     public void validateAdHocQueryParameters(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS);
@@ -196,7 +198,9 @@ public class AdHocQueryDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public AdHocQuerySearchConditions retrieveSearchConditions(String json) {

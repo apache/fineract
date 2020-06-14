@@ -105,7 +105,9 @@ public class ImageData {
     }
 
     public byte[] getContentOfSize(Integer maxWidth, Integer maxHeight) {
-        if (maxWidth == null && maxHeight != null) { return getContent(); }
+        if (maxWidth == null && maxHeight != null) {
+            return getContent();
+        }
         byte[] out = null;
         if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
             try {

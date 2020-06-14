@@ -355,7 +355,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         Integer minClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
         Integer maxClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
         boolean isGroupClientCountValid = group.isGroupsClientCountWithinMinMaxRange(minClients, maxClients);
-        if (!isGroupClientCountValid) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients); }
+        if (!isGroupClientCountValid) {
+            throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients);
+        }
         entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(),
                 StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
     }
@@ -364,7 +366,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         Integer minClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
         Integer maxClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
         boolean isGroupClientCountValid = group.isGroupsClientCountWithinMaxRange(maxClients);
-        if (!isGroupClientCountValid) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients); }
+        if (!isGroupClientCountValid) {
+            throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients);
+        }
     }
 
     @Transactional
@@ -503,7 +507,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(grouptId);
         final Staff presentStaff = groupForUpdate.getStaff();
         Long presentStaffId = null;
-        if (presentStaff == null) { throw new GroupHasNoStaffException(grouptId); }
+        if (presentStaff == null) {
+            throw new GroupHasNoStaffException(grouptId);
+        }
         presentStaffId = presentStaff.getId();
         final String staffIdParamName = "staffId";
         if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
@@ -588,7 +594,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
-            if (groupForDelete.isNotPending()) { throw new GroupMustBePendingToBeDeletedException(groupId); }
+            if (groupForDelete.isNotPending()) {
+                throw new GroupMustBePendingToBeDeletedException(groupId);
+            }
 
             final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
             this.noteRepository.deleteInBatch(relatedNotes);

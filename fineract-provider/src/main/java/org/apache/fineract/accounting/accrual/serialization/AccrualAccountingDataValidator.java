@@ -61,7 +61,9 @@ public final class AccrualAccountingDataValidator {
     }
 
     public void validateLoanPeriodicAccrualData(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, LOAN_PERIODIC_REQUEST_DATA_PARAMETERS);
 
@@ -78,6 +80,8 @@ public final class AccrualAccountingDataValidator {
     }
 
     public void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

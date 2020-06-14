@@ -179,7 +179,9 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor,
                     new Object[] { accountingRuleId });
             final AccountingRuleData accountingRuleData = extractedData.get(accountingRuleId);
-            if (accountingRuleData == null) { throw new AccountingRuleNotFoundException(accountingRuleId); }
+            if (accountingRuleData == null) {
+                throw new AccountingRuleNotFoundException(accountingRuleId);
+            }
             return accountingRuleData;
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountingRuleNotFoundException(accountingRuleId);

@@ -51,7 +51,9 @@ public class AppuserClientMapperReadServiceImpl implements AppuserClientMapperRe
         AppUser user = this.context.authenticatedUser();
         if (clientId != null) {
             final boolean mappedClientId = isClientMappedToUser(clientId, user.getId());
-            if (!mappedClientId) { throw new ClientNotFoundException(clientId); }
+            if (!mappedClientId) {
+                throw new ClientNotFoundException(clientId);
+            }
         } else {
             throw new ClientNotFoundException(clientId);
         }

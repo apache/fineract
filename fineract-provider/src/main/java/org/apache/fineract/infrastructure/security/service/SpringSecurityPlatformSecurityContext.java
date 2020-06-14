@@ -69,9 +69,13 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
             }
         }
 
-        if (currentUser == null) { throw new UnAuthenticatedUserException(); }
+        if (currentUser == null) {
+            throw new UnAuthenticatedUserException();
+        }
 
-        if (this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId()); }
+        if (this.doesPasswordHasToBeRenewed(currentUser)) {
+            throw new ResetPasswordException(currentUser.getId());
+        }
 
         return currentUser;
     }
@@ -88,9 +92,13 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
             }
         }
 
-        if (currentUser == null) { return null; }
+        if (currentUser == null) {
+            return null;
+        }
 
-        if (this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId()); }
+        if (this.doesPasswordHasToBeRenewed(currentUser)) {
+            throw new ResetPasswordException(currentUser.getId());
+        }
 
         return currentUser;
     }
@@ -107,7 +115,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
             }
         }
 
-        if (currentUser == null) { throw new UnAuthenticatedUserException(); }
+        if (currentUser == null) {
+            throw new UnAuthenticatedUserException();
+        }
 
         if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) {
             throw new ResetPasswordException(currentUser.getId());
@@ -148,7 +158,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
             final Date passwordExpirationDate = c.getTime();
 
-            if (DateUtils.getDateOfTenant().after(passwordExpirationDate)) { return true; }
+            if (DateUtils.getDateOfTenant().after(passwordExpirationDate)) {
+                return true;
+            }
         }
         return false;
 

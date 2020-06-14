@@ -321,7 +321,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     public CommandProcessingResult deleteUser(final Long userId) {
 
         final AppUser user = this.appUserRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        if (user.isDeleted()) { throw new UserNotFoundException(userId); }
+        if (user.isDeleted()) {
+            throw new UserNotFoundException(userId);
+        }
 
         user.delete();
         this.topicDomainService.unsubcribeUserFromTopic(user);

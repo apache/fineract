@@ -55,8 +55,12 @@ public class PaymentDetailData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof PaymentDetailData)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PaymentDetailData)) {
+            return false;
+        }
         PaymentDetailData that = (PaymentDetailData) o;
         return Objects.equals(id, that.id) && Objects.equals(paymentType, that.paymentType)
                 && Objects.equals(accountNumber, that.accountNumber) && Objects.equals(checkNumber, that.checkNumber)

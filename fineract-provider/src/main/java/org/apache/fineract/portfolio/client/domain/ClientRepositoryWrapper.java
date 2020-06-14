@@ -80,14 +80,18 @@ public class ClientRepositoryWrapper {
 
     public Client getActiveClientInUserScope(Long clientId) {
         final Client client = this.findOneWithNotFoundDetection(clientId);
-        if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        if (client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
+        }
         this.context.validateAccessRights(client.getOffice().getHierarchy());
         return client;
     }
 
     public Client getClientByAccountNumber(String accountNumber) {
         Client client = this.repository.getClientByAccountNumber(accountNumber);
-        if (client == null) { throw new ClientNotFoundException(accountNumber); }
+        if (client == null) {
+            throw new ClientNotFoundException(accountNumber);
+        }
         return client;
     }
 }

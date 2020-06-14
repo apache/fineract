@@ -71,7 +71,9 @@ public class SelfUserApiResource {
             @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class) })
     @ApiResponses({ @ApiResponse(code = 200, message = "OK", response = SelfUserApiResourceSwagger.PutSelfUserResponse.class) })
     public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
-        if (StringUtils.isBlank(apiRequestBodyAsJson)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, this.supportedParameters);

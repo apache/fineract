@@ -379,7 +379,9 @@ public final class Client extends AbstractPersistableCustom {
         validateNameParts(dataValidationErrors);
         validateActivationDate(dataValidationErrors);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 
@@ -391,7 +393,9 @@ public final class Client extends AbstractPersistableCustom {
         // vice-cersa
         validateActivationDate(dataValidationErrors);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 
@@ -895,7 +899,9 @@ public final class Client extends AbstractPersistableCustom {
     public boolean isChildOfGroup(final Long groupId) {
         if (groupId != null && this.groups != null && !this.groups.isEmpty()) {
             for (final Group group : this.groups) {
-                if (group.getId().equals(groupId)) { return true; }
+                if (group.getId().equals(groupId)) {
+                    return true;
+                }
             }
         }
         return false;

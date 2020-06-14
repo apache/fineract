@@ -39,7 +39,9 @@ public class DateAdapter implements JsonSerializer<Date> {
     @Override
     @SuppressWarnings("unused")
     public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
-        if (src == null) { return null; }
+        if (src == null) {
+            return null;
+        }
         return new JsonPrimitive(formatter.format(src.toInstant()));
     }
 }

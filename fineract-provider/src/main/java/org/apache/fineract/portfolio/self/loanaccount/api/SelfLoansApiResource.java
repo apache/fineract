@@ -250,7 +250,9 @@ public class SelfLoansApiResource {
     public String stateTransitions(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
             @QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
-        if (!is(commandParam, "withdrawnByApplicant")) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (!is(commandParam, "withdrawnByApplicant")) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
         validateAppuserLoanMapping(loanId);
         return this.loansApiResource.stateTransitions(loanId, commandParam, apiRequestBodyAsJson);
     }
@@ -258,13 +260,17 @@ public class SelfLoansApiResource {
     private void validateAppuserLoanMapping(final Long loanId) {
         AppUser user = this.context.authenticatedUser();
         final boolean isLoanMappedToUser = this.appuserLoansMapperReadService.isLoanMappedToUser(loanId, user.getId());
-        if (!isLoanMappedToUser) { throw new LoanNotFoundException(loanId); }
+        if (!isLoanMappedToUser) {
+            throw new LoanNotFoundException(loanId);
+        }
     }
 
     private void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();
         final boolean mappedClientId = this.appUserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-        if (!mappedClientId) { throw new ClientNotFoundException(clientId); }
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
     }
 
     private boolean is(final String commandParam, final String commandValue) {

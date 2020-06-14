@@ -115,7 +115,9 @@ public class FloatingRate extends AbstractPersistableCustom {
     }
 
     private static List<FloatingRatePeriod> getRatePeriods(final AppUser currentUser, final JsonCommand command) {
-        if (!command.parameterExists("ratePeriods")) { return null; }
+        if (!command.parameterExists("ratePeriods")) {
+            return null;
+        }
         List<FloatingRatePeriod> ratePeriods = new ArrayList<>();
         JsonArray arrayOfParameterNamed = command.arrayOfParameterNamed("ratePeriods");
         for (final JsonElement ratePeriod : arrayOfParameterNamed) {

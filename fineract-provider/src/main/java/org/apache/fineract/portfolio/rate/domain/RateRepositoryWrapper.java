@@ -52,7 +52,9 @@ public class RateRepositoryWrapper {
                         break;
                     }
                 }
-                if (!found) { throw new RateNotFoundException(rateId); }
+                if (!found) {
+                    throw new RateNotFoundException(rateId);
+                }
             }
             rates.addAll(foundRates);
         }

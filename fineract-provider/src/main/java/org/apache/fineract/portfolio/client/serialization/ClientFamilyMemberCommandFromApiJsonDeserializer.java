@@ -55,7 +55,9 @@ public class ClientFamilyMemberCommandFromApiJsonDeserializer {
 
     public void validateForCreate(String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -77,7 +79,9 @@ public class ClientFamilyMemberCommandFromApiJsonDeserializer {
 
     public void validateForCreate(final long clientId, String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -166,7 +170,9 @@ public class ClientFamilyMemberCommandFromApiJsonDeserializer {
 
     public void validateForUpdate(final long familyMemberId, String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);

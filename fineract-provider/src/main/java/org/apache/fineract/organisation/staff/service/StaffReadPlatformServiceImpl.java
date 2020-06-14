@@ -219,7 +219,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             sql += " where " + extraCriteria;
         }
         sql = sql + " order by s.lastname";
-        if (officeId == null) { return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchy }); }
+        if (officeId == null) {
+            return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchy });
+        }
         return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, hierarchy });
     }
 

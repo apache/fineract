@@ -251,7 +251,9 @@ public final class Report extends AbstractPersistableCustom {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public String getReportName() {
@@ -259,7 +261,9 @@ public final class Report extends AbstractPersistableCustom {
     }
 
     public boolean update(final Set<ReportParameterUsage> newReportParameterUsages) {
-        if (newReportParameterUsages == null) { return false; }
+        if (newReportParameterUsages == null) {
+            return false;
+        }
 
         boolean updated = false;
 
@@ -273,7 +277,9 @@ public final class Report extends AbstractPersistableCustom {
 
     private boolean changeInReportParameters(final Set<ReportParameterUsage> newReportParameterUsages) {
 
-        if (!this.reportParameterUsages.equals(newReportParameterUsages)) { return true; }
+        if (!this.reportParameterUsages.equals(newReportParameterUsages)) {
+            return true;
+        }
 
         return false;
     }

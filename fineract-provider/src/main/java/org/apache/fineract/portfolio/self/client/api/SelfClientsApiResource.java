@@ -237,7 +237,9 @@ public class SelfClientsApiResource {
     private void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();
         final boolean mappedClientId = this.appUserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-        if (!mappedClientId) { throw new ClientNotFoundException(clientId); }
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
     }
 
     @POST

@@ -456,7 +456,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     public boolean hasNotPermissionForReport(final String reportName) {
 
-        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "REPORTING_SUPER_USER", "READ_" + reportName)) { return true; }
+        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", "REPORTING_SUPER_USER", "READ_" + reportName)) {
+            return true;
+        }
 
         return false;
     }
@@ -467,12 +469,16 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
         if (accessType.equalsIgnoreCase("READ")) {
 
-            if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) { return true; }
+            if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) {
+                return true;
+            }
 
             return false;
         }
 
-        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission)) { return true; }
+        if (hasNotPermissionForAnyOf("ALL_FUNCTIONS", matchPermission)) {
+            return true;
+        }
 
         return false;
     }
@@ -512,7 +518,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         final String authorizationMessage = "User has no authority to view " + resourceType.toLowerCase() + "s";
         final String matchPermission = "READ_" + resourceType.toUpperCase();
 
-        if (!hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) { return; }
+        if (!hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) {
+            return;
+        }
 
         throw new NoAuthorizationException(authorizationMessage);
     }

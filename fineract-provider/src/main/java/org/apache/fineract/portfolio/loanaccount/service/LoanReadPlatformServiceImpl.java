@@ -1468,7 +1468,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Collection<StaffData> retrieveAllowedLoanOfficers(final Long selectedOfficeId, final boolean staffInSelectedOfficeOnly) {
-        if (selectedOfficeId == null) { return null; }
+        if (selectedOfficeId == null) {
+            return null;
+        }
 
         Collection<StaffData> allowedLoanOfficers = null;
 
@@ -1498,7 +1500,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" and ls.recalculated_interest_component <> 1 ")
                 .append(" and mc.charge_time_enum = 9 and ml.loan_status_id = 300 ");
 
-        if (backdatePenalties) { return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { penaltyWaitPeriod }); }
+        if (backdatePenalties) {
+            return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { penaltyWaitPeriod });
+        }
         // Only apply for duedate = yesterday (so that we don't apply
         // penalties on the duedate itself)
         sqlBuilder.append(" and ls.duedate >= DATE_SUB(CURDATE(),INTERVAL (? + 1) DAY)");

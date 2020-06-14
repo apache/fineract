@@ -211,9 +211,13 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
+        if (this == o) {
+            return true;
+        }
 
-        if (!(o instanceof LoanProductConfigurableAttributes)) { return false; }
+        if (!(o instanceof LoanProductConfigurableAttributes)) {
+            return false;
+        }
 
         LoanProductConfigurableAttributes that = (LoanProductConfigurableAttributes) o;
 

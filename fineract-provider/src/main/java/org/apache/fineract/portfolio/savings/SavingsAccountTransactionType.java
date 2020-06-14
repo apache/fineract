@@ -61,7 +61,9 @@ public enum SavingsAccountTransactionType {
 
     public static SavingsAccountTransactionType fromInt(final Integer transactionType) {
 
-        if (transactionType == null) { return SavingsAccountTransactionType.INVALID; }
+        if (transactionType == null) {
+            return SavingsAccountTransactionType.INVALID;
+        }
 
         SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.INVALID;
         switch (transactionType) {

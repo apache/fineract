@@ -625,7 +625,9 @@ public class SavingsProduct extends AbstractPersistableCustom {
                     .inMinMaxRange(0, 3);
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public boolean isCashBasedAccountingEnabled() {
@@ -651,7 +653,9 @@ public class SavingsProduct extends AbstractPersistableCustom {
     }
 
     public boolean update(final Set<Charge> newSavingsProductCharges) {
-        if (newSavingsProductCharges == null) { return false; }
+        if (newSavingsProductCharges == null) {
+            return false;
+        }
 
         boolean updated = false;
         if (this.charges != null) {

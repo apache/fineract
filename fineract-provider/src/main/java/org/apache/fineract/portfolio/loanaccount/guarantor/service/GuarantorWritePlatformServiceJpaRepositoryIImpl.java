@@ -201,7 +201,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             validateLoanStatus(loan);
             final Guarantor guarantorForUpdate = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
-            if (guarantorForUpdate == null) { throw new GuarantorNotFoundException(loanId, guarantorId); }
+            if (guarantorForUpdate == null) {
+                throw new GuarantorNotFoundException(loanId, guarantorId);
+            }
 
             final Map<String, Object> changesOnly = guarantorForUpdate.update(command);
 
@@ -321,7 +323,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 } else if (guarantor.getClientRelationshipType() != null) {
                     errorCode = "guarantor.relation.should.be.empty.for.own";
                 }
-                if (errorCode != null) { throw new InvalidGuarantorException(guarantor.getEntityId(), guarantor.getLoanId(), errorCode); }
+                if (errorCode != null) {
+                    throw new InvalidGuarantorException(guarantor.getEntityId(), guarantor.getLoanId(), errorCode);
+                }
             }
 
         } else if (guarantor.isExistingEmployee()) {

@@ -545,7 +545,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
             if (clientId != null) {
                 final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-                if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+                if (client.isNotActive()) {
+                    throw new ClientNotActiveException(clientId);
+                }
                 account.update(client);
             } else {
                 final Client client = null;
@@ -558,7 +560,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             if (groupId != null) {
                 final Group group = this.groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
                 if (group.isNotActive()) {
-                    if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                    if (group.isCenter()) {
+                        throw new CenterNotActiveException(groupId);
+                    }
                     throw new GroupNotActiveException(groupId);
                 }
                 account.update(group);
@@ -613,7 +617,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             baseDataValidator.reset().parameter(DepositsApiConstants.activatedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final List<Note> relatedNotes = this.noteRepository.findBySavingsAccountId(savingsId);
@@ -773,12 +779,16 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private void checkClientOrGroupActive(final SavingsAccount account) {
         final Client client = account.getClient();
         if (client != null) {
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
         final Group group = account.group();
         if (group != null) {
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(group.getId()); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(group.getId());
+                }
                 throw new GroupNotActiveException(group.getId());
             }
         }

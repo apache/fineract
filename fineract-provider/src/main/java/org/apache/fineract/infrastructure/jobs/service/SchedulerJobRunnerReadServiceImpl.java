@@ -73,7 +73,9 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     @Override
     public Page<JobDetailHistoryData> retrieveJobHistory(final Long jobId, final SearchParameters searchParameters) {
-        if (!isJobExist(jobId)) { throw new JobNotFoundException(String.valueOf(jobId)); }
+        if (!isJobExist(jobId)) {
+            throw new JobNotFoundException(String.valueOf(jobId));
+        }
         final JobHistoryMapper jobHistoryMapper = new JobHistoryMapper();
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");

@@ -90,7 +90,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder andNotBlank(final String linkedParameterName, final String linkedValue) {
-        if (this.value == null && linkedValue == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && linkedValue == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (StringUtils.isBlank(linkedValue)) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
@@ -122,7 +124,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder equalToParameter(final String linkedParameterName, final Object linkedValue) {
-        if (this.value == null && linkedValue == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && linkedValue == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && !this.value.equals(linkedValue)) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
@@ -137,7 +141,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder notSameAsParameter(final String linkedParameterName, final Object linkedValue) {
-        if (this.value == null && linkedValue == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && linkedValue == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && this.value.equals(linkedValue)) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
@@ -210,7 +216,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder notBlank() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value == null || StringUtils.isBlank(this.value.toString())) {
             String realParameterName = this.parameter;
@@ -233,7 +241,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder notExceedingLengthOf(final Integer maxLength) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && this.value.toString().trim().length() > maxLength) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
@@ -248,7 +258,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder inMinMaxRange(final Integer min, final Integer max) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer number = Integer.valueOf(this.value.toString());
@@ -266,7 +278,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder isOneOfTheseValues(final Object... values) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         final List<Object> valuesList = Arrays.asList(values);
         final String valuesListStr = StringUtils.join(valuesList, ", ");
@@ -287,7 +301,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder isOneOfTheseStringValues(final Object... values) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         final List<Object> valuesList = Arrays.asList(values);
         final String valuesListStr = StringUtils.join(valuesList, ", ");
@@ -308,7 +324,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder isOneOfTheseStringValues(final List<String> valuesList) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         final String valuesListStr = StringUtils.join(valuesList, ", ");
 
@@ -328,7 +346,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder isNotOneOfTheseValues(final Object... values) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final List<Object> valuesList = Arrays.asList(values);
@@ -350,7 +370,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder positiveAmount() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final BigDecimal number = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
@@ -371,7 +393,9 @@ public class DataValidatorBuilder {
      * should be used with .notNull() before it
      */
     public DataValidatorBuilder zeroOrPositiveAmount() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final BigDecimal number = BigDecimal.valueOf(Double.valueOf(this.value.toString()));
@@ -392,7 +416,9 @@ public class DataValidatorBuilder {
      * should be used with .notNull() before it
      */
     public DataValidatorBuilder integerZeroOrGreater() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer number = Integer.valueOf(this.value.toString());
@@ -413,7 +439,9 @@ public class DataValidatorBuilder {
      * should be used with .notNull() before it
      */
     public DataValidatorBuilder integerGreaterThanZero() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer number = Integer.valueOf(this.value.toString());
@@ -431,7 +459,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder integerGreaterThanNumber(Integer number) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer intValue = Integer.valueOf(this.value.toString());
@@ -449,7 +479,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder integerEqualToOrGreaterThanNumber(Integer number) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer intValue = Integer.valueOf(this.value.toString());
@@ -467,7 +499,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder integerSameAsNumber(Integer number) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer intValue = Integer.valueOf(this.value.toString());
@@ -485,7 +519,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder integerInMultiplesOfNumber(Integer number) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Integer intValue = Integer.valueOf(this.value.toString());
@@ -506,7 +542,9 @@ public class DataValidatorBuilder {
      * should be used with .notNull() before it
      */
     public DataValidatorBuilder longGreaterThanZero() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Long number = Long.valueOf(this.value.toString());
@@ -527,7 +565,9 @@ public class DataValidatorBuilder {
      * should be used with .notNull() before it
      */
     public DataValidatorBuilder longZeroOrGreater() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Long number = Long.valueOf(this.value.toString());
@@ -545,7 +585,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder longGreaterThanNumber(Long number) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Long longValue = Long.valueOf(this.value.toString());
@@ -563,7 +605,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder longGreaterThanNumber(String paramName, Long number, int index) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null) {
             final Long longValue = Long.valueOf(this.value.toString());
@@ -581,7 +625,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder arrayNotEmpty() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         final Object[] array = (Object[]) this.value;
         if (ObjectUtils.isEmpty(array)) {
@@ -597,7 +643,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder jsonArrayNotEmpty() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         final JsonArray array = (JsonArray) this.value;
         if (this.value != null && !array.iterator().hasNext()) {
@@ -653,9 +701,13 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder mustBeBlankWhenParameterProvided(final String parameterName, final Object parameterValue) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
-        if (this.value == null && parameterValue != null) { return this; }
+        if (this.value == null && parameterValue != null) {
+            return this;
+        }
 
         if (this.value != null && StringUtils.isBlank(this.value.toString()) && parameterValue != null
                 && StringUtils.isNotBlank(parameterValue.toString())) {
@@ -673,9 +725,13 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder mustBeBlankWhenParameterProvidedIs(final String parameterName, final Object parameterValue) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
-        if (this.value == null && parameterValue != null) { return this; }
+        if (this.value == null && parameterValue != null) {
+            return this;
+        }
 
         if (this.value != null && StringUtils.isBlank(this.value.toString()) && parameterValue != null
                 && StringUtils.isNotBlank(parameterValue.toString())) {
@@ -694,7 +750,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder cantBeBlankWhenParameterProvidedIs(final String parameterName, final Object parameterValue) {
-        if (this.value != null && StringUtils.isNotBlank(this.value.toString())) { return this; }
+        if (this.value != null && StringUtils.isNotBlank(this.value.toString())) {
+            return this;
+        }
 
         final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                 .append(this.parameter).append(".must.be.provided.when.").append(parameterName).append(".is.").append(parameterValue);
@@ -811,7 +869,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder notLessThanMin(final Integer min) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && min != null) {
             final Integer number = Integer.valueOf(this.value.toString());
@@ -829,7 +889,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder notGreaterThanMax(final Integer max) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && max != null) {
             final Integer number = Integer.valueOf(this.value.toString());
@@ -847,7 +909,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder matchesRegularExpression(final String expression) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && !this.value.toString().matches(expression)) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
@@ -865,7 +929,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder matchesRegularExpression(final String expression, final String Message) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && !this.value.toString().matches(expression)) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
@@ -882,7 +948,9 @@ public class DataValidatorBuilder {
     }
 
     private DataValidatorBuilder validateStringFor(final String validInputs) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
         final String[] inputs = validInputs.split(VALID_INPUT_SEPERATOR);
         boolean validationErr = true;
         for (final String input : inputs) {
@@ -908,7 +976,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder validatePhoneNumber() {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
         boolean validationErr = true;
         /*
          * supports numbers, parentheses(), hyphens and may contain + sign in
@@ -947,7 +1017,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder validateDateAfter(final LocalDate date) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
@@ -965,7 +1037,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder validateDateBefore(final LocalDate date) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
@@ -983,7 +1057,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder validateDateBeforeOrEqual(final LocalDate date) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
@@ -1001,7 +1077,9 @@ public class DataValidatorBuilder {
     }
 
     public DataValidatorBuilder validateDateForEqual(final LocalDate date) {
-        if (this.value == null && this.ignoreNullValue) { return this; }
+        if (this.value == null && this.ignoreNullValue) {
+            return this;
+        }
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;

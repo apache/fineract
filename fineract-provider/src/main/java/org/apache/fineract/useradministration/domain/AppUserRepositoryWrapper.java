@@ -35,7 +35,9 @@ public class AppUserRepositoryWrapper {
     public AppUser fetchSystemUser() {
         String userName = "system";
         AppUser user = this.appUserRepository.findAppUserByName(userName);
-        if (user == null) { throw new UserNotFoundException(userName); }
+        if (user == null) {
+            throw new UserNotFoundException(userName);
+        }
         return user;
     }
 }

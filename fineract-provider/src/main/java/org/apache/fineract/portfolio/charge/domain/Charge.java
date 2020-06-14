@@ -190,7 +190,9 @@ public class Charge extends AbstractPersistableCustom {
             if (penalty && (chargeTime.isTimeOfDisbursement() || chargeTime.isTrancheDisbursement())) {
                 throw new ChargeDueAtDisbursementCannotBePenaltyException(name);
             }
-            if (!penalty && chargeTime.isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
+            if (!penalty && chargeTime.isOverdueInstallment()) {
+                throw new ChargeMustBePenaltyException(name);
+            }
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
             if (!isAllowedLoanChargeTime()) {
@@ -203,7 +205,9 @@ public class Charge extends AbstractPersistableCustom {
             this.maxCap = maxCap;
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public String getName() {
@@ -493,7 +497,9 @@ public class Charge extends AbstractPersistableCustom {
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         return actualChanges;
     }
@@ -605,8 +611,12 @@ public class Charge extends AbstractPersistableCustom {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof Charge)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Charge)) {
+            return false;
+        }
         Charge other = (Charge) o;
         return Objects.equals(name, other.name) && Objects.equals(amount, other.amount) && Objects.equals(currencyCode, other.currencyCode)
                 && Objects.equals(chargeAppliesTo, other.chargeAppliesTo) && Objects.equals(chargeTimeType, other.chargeTimeType)

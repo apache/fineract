@@ -124,7 +124,9 @@ public class Sender {
      * @see java.net.URLConnection#setConnectTimeout(int)
      */
     public final void setConnectTimeout(int connectTimeout) {
-        if (connectTimeout < 0) { throw new IllegalArgumentException("timeout can not be negative"); }
+        if (connectTimeout < 0) {
+            throw new IllegalArgumentException("timeout can not be negative");
+        }
         this.connectTimeout = connectTimeout;
     }
 
@@ -137,7 +139,9 @@ public class Sender {
      * @see java.net.URLConnection#setReadTimeout(int)
      */
     public final void setReadTimeout(int readTimeout) {
-        if (readTimeout < 0) { throw new IllegalArgumentException("timeout can not be negative"); }
+        if (readTimeout < 0) {
+            throw new IllegalArgumentException("timeout can not be negative");
+        }
         this.readTimeout = readTimeout;
     }
 
@@ -186,7 +190,9 @@ public class Sender {
                 }
             }
         } while (tryAgain);
-        if (result == null) { throw new IOException("Could not send message after " + attempt + " attempts"); }
+        if (result == null) {
+            throw new IOException("Could not send message after " + attempt + " attempts");
+        }
         return result;
     }
 
@@ -215,7 +221,9 @@ public class Sender {
         }
         int status = (int) responseMap.get("status");
         // responseBody
-        if (responseBody == null) { return null; }
+        if (responseBody == null) {
+            return null;
+        }
         JsonObject jsonResponse;
         try {
             jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
@@ -430,7 +438,9 @@ public class Sender {
      *             if there was a JSON parsing error
      */
     public MulticastResult sendNoRetry(Message message, List<String> registrationIds) throws IOException {
-        if (nonNull(registrationIds).isEmpty()) { throw new IllegalArgumentException("registrationIds cannot be empty"); }
+        if (nonNull(registrationIds).isEmpty()) {
+            throw new IllegalArgumentException("registrationIds cannot be empty");
+        }
         Map<Object, Object> jsonRequest = new HashMap<>();
         messageToMap(message, jsonRequest);
         jsonRequest.put(JSON_REGISTRATION_IDS, registrationIds);
@@ -439,7 +449,9 @@ public class Sender {
         if (responseMap.get("responseBody") != null) {
             responseBody = (String) responseMap.get("responseBody");
         }
-        if (responseBody == null) { return null; }
+        if (responseBody == null) {
+            return null;
+        }
 
         JsonObject jsonResponse;
         try {
@@ -516,7 +528,9 @@ public class Sender {
      *            Map populated by Message.
      */
     private void messageToMap(Message message, Map<Object, Object> mapRequest) {
-        if (message == null || mapRequest == null) { return; }
+        if (message == null || mapRequest == null) {
+            return;
+        }
         setJsonField(mapRequest, PARAM_PRIORITY, message.getPriority());
         setJsonField(mapRequest, PARAM_CONTENT_AVAILABLE, message.getContentAvailable());
         setJsonField(mapRequest, PARAM_TIME_TO_LIVE, message.getTimeToLive());
@@ -580,8 +594,12 @@ public class Sender {
 
     private Number getNumber(Map<?, ?> json, String field) {
         Object value = json.get(field);
-        if (value == null) { throw new CustomParserException("Missing field: " + field); }
-        if (!(value instanceof Number)) { throw new CustomParserException("Field " + field + " does not contain a number: " + value); }
+        if (value == null) {
+            throw new CustomParserException("Missing field: " + field);
+        }
+        if (!(value instanceof Number)) {
+            throw new CustomParserException("Field " + field + " does not contain a number: " + value);
+        }
         return (Number) value;
     }
 
@@ -622,7 +640,9 @@ public class Sender {
      *             propagated from underlying methods.
      */
     protected HttpURLConnection post(String url, String contentType, String body) throws IOException {
-        if (url == null || contentType == null || body == null) { throw new IllegalArgumentException("arguments cannot be null"); }
+        if (url == null || contentType == null || body == null) {
+            throw new IllegalArgumentException("arguments cannot be null");
+        }
         if (!url.startsWith("https://")) {
             LOG.warning("URL does not use https: " + url);
         }
@@ -699,7 +719,9 @@ public class Sender {
      * If the stream is {@literal null}, returns an empty string.
      */
     protected static String getString(InputStream stream) throws IOException {
-        if (stream == null) { return ""; }
+        if (stream == null) {
+            return "";
+        }
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         StringBuilder content = new StringBuilder();
         String newLine;
@@ -727,7 +749,9 @@ public class Sender {
     }
 
     static <T> T nonNull(T argument) {
-        if (argument == null) { throw new IllegalArgumentException("argument cannot be null"); }
+        if (argument == null) {
+            throw new IllegalArgumentException("argument cannot be null");
+        }
         return argument;
     }
 

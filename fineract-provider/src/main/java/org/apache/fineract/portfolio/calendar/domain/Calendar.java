@@ -115,7 +115,9 @@ public class Calendar extends AbstractAuditableCustom {
         if (calendarType.isCollection() && !repeating) {
             baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue())
                     .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         this.title = StringUtils.defaultIfEmpty(title, null);
@@ -350,7 +352,9 @@ public class Calendar extends AbstractAuditableCustom {
         if (calendarType.isCollection() && !this.repeating) {
             baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATING.getValue())
                     .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final String newRecurrence = Calendar.constructRecurrence(command, this);
@@ -508,39 +512,51 @@ public class Calendar extends AbstractAuditableCustom {
     }
 
     public boolean isStartDateBefore(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isBefore(compareDate)) { return true; }
+        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isBefore(compareDate)) {
+            return true;
+        }
         return false;
     }
 
     public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
         if (this.startDate != null && compareDate != null) {
-            if (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate)) { return true; }
+            if (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate)) {
+                return true;
+            }
         }
         return false;
     }
 
     public boolean isStartDateAfter(final LocalDate compareDate) {
-        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isAfter(compareDate)) { return true; }
+        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isAfter(compareDate)) {
+            return true;
+        }
         return false;
     }
 
     public boolean isStartDateAfterOrEqual(final LocalDate compareDate) {
         if (this.startDate != null && compareDate != null) {
-            if (getStartDateLocalDate().isAfter(compareDate) || getStartDateLocalDate().isEqual(compareDate)) { return true; }
+            if (getStartDateLocalDate().isAfter(compareDate) || getStartDateLocalDate().isEqual(compareDate)) {
+                return true;
+            }
         }
         return false;
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
         if (this.endDate != null && compareDate != null) {
-            if (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate)) { return true; }
+            if (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate)) {
+                return true;
+            }
         }
         return false;
     }
 
     public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
         if (isStartDateBeforeOrEqual(compareDate)) {
-            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)) { return true; }
+            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)) {
+                return true;
+            }
         }
         return false;
     }

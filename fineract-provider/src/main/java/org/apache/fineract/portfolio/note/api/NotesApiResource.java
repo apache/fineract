@@ -99,7 +99,9 @@ public class NotesApiResource {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
-        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        if (noteType == null) {
+            throw new NoteResourceNotSupportedException(resourceType);
+        }
 
         this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
 
@@ -127,7 +129,9 @@ public class NotesApiResource {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
-        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        if (noteType == null) {
+            throw new NoteResourceNotSupportedException(resourceType);
+        }
 
         this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
 
@@ -154,7 +158,9 @@ public class NotesApiResource {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
-        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        if (noteType == null) {
+            throw new NoteResourceNotSupportedException(resourceType);
+        }
 
         final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceDetails, resourceType, resourceId)
@@ -181,7 +187,9 @@ public class NotesApiResource {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
-        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        if (noteType == null) {
+            throw new NoteResourceNotSupportedException(resourceType);
+        }
 
         final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
 
@@ -206,7 +214,9 @@ public class NotesApiResource {
 
         final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
-        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        if (noteType == null) {
+            throw new NoteResourceNotSupportedException(resourceType);
+        }
 
         final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
 

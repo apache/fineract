@@ -41,7 +41,9 @@ public enum RecalculationFrequencyType {
     }
 
     public static RecalculationFrequencyType fromInt(final Integer ruleTypeValue) {
-        if (ruleTypeValue == null) { return RecalculationFrequencyType.INVALID; }
+        if (ruleTypeValue == null) {
+            return RecalculationFrequencyType.INVALID;
+        }
         final RecalculationFrequencyType type = intToEnumMap.get(ruleTypeValue);
         return type;
     }

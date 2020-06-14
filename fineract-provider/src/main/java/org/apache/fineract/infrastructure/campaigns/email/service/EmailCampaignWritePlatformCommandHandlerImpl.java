@@ -186,7 +186,9 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(resourceId)
                     .orElseThrow(() -> new EmailCampaignNotFound(resourceId));
 
-            if (emailCampaign.isActive()) { throw new EmailCampaignMustBeClosedToEditException(emailCampaign.getId()); }
+            if (emailCampaign.isActive()) {
+                throw new EmailCampaignMustBeClosedToEditException(emailCampaign.getId());
+            }
             final Map<String, Object> changes = emailCampaign.update(command);
 
             if (changes.containsKey(EmailCampaignValidator.businessRuleId)) {
@@ -218,7 +220,9 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(resourceId)
                 .orElseThrow(() -> new EmailCampaignNotFound(resourceId));
 
-        if (emailCampaign.isActive()) { throw new EmailCampaignMustBeClosedToBeDeletedException(emailCampaign.getId()); }
+        if (emailCampaign.isActive()) {
+            throw new EmailCampaignMustBeClosedToBeDeletedException(emailCampaign.getId());
+        }
 
         /*
          * Do not delete but set a boolean is_visible to zero

@@ -77,7 +77,9 @@ public class SelfLoansDataValidator {
     }
 
     public HashMap<String, Object> validateLoanApplication(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
@@ -92,7 +94,9 @@ public class SelfLoansDataValidator {
         final String clientId = this.fromApiJsonHelper.extractStringNamed(clientIdParameterName, element);
         baseDataValidator.reset().parameter(clientIdParameterName).value(clientId).notNull().longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         HashMap<String, Object> retAttr = new HashMap<>();
         retAttr.put("clientId", Long.parseLong(clientId));
@@ -119,7 +123,9 @@ public class SelfLoansDataValidator {
             baseDataValidator.reset().parameter(clientIdParameterName).value(clientId).notNull().longGreaterThanZero();
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         HashMap<String, Object> retAttr = new HashMap<>();
         if (clientId != null) {
@@ -130,7 +136,9 @@ public class SelfLoansDataValidator {
     }
 
     private void throwExceptionIfReqd(List<String> unsupportedParams) {
-        if (unsupportedParams.size() > 0) { throw new UnsupportedParameterException(unsupportedParams); }
+        if (unsupportedParams.size() > 0) {
+            throw new UnsupportedParameterException(unsupportedParams);
+        }
     }
 
     private void validateTemplate(final UriInfo uriInfo, List<String> unsupportedParams) {

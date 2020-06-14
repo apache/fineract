@@ -58,7 +58,9 @@ public class FileData {
 
     public InputStream file() {
         try {
-            if (this.inputStream == null) { return new FileInputStream(this.file); }
+            if (this.inputStream == null) {
+                return new FileInputStream(this.file);
+            }
             return this.inputStream;
         } catch (final FileNotFoundException e) {
             LOG.error("Error occured.", e);

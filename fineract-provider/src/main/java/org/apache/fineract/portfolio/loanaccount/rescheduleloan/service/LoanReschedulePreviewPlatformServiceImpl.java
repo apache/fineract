@@ -74,7 +74,9 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         final LoanRescheduleRequest loanRescheduleRequest = this.loanRescheduleRequestRepository.findOneWithNotFoundDetection(requestId,
                 true);
 
-        if (loanRescheduleRequest == null) { throw new LoanRescheduleRequestNotFoundException(requestId); }
+        if (loanRescheduleRequest == null) {
+            throw new LoanRescheduleRequestNotFoundException(requestId);
+        }
 
         Loan loan = loanRescheduleRequest.getLoan();
 

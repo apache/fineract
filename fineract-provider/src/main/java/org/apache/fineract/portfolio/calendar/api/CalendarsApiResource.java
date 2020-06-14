@@ -180,7 +180,9 @@ public class CalendarsApiResource {
             final String apiRequestBodyAsJson) {
 
         final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
-        if (calendarEntityType == null) { throw new CalendarEntityTypeNotSupportedException(entityType); }
+        if (calendarEntityType == null) {
+            throw new CalendarEntityTypeNotSupportedException(entityType);
+        }
 
         final CommandWrapper resourceDetails = getResourceDetails(calendarEntityType, entityId);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createCalendar(resourceDetails, entityType, entityId)

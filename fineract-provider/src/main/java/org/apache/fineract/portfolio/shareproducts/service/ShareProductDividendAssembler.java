@@ -59,7 +59,9 @@ public class ShareProductDividendAssembler {
                 product.getCurrency().currencyInMultiplesOf());
         Collection<ShareAccountData> shareAccountDatas = this.shareAccountReadPlatformService.retrieveAllShareAccountDataForDividends(
                 productId, product.getAllowDividendCalculationForInactiveClients(), dividendPeriodStartDate);
-        if (shareAccountDatas == null || shareAccountDatas.isEmpty()) { throw new ShareAccountsNotFoundException(product.getId()); }
+        if (shareAccountDatas == null || shareAccountDatas.isEmpty()) {
+            throw new ShareAccountsNotFoundException(product.getId());
+        }
 
         ShareProductDividendPayOutDetails productDividendPayOutDetails = null;
         int minimumActivePeriod = 0;

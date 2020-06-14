@@ -181,7 +181,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService
                     .retrieveAllProvisioningCriterias();
-            if (criteriaCollection == null || criteriaCollection.size() == 0) { throw new NoProvisioningCriteriaDefinitionFound(); }
+            if (criteriaCollection == null || criteriaCollection.size() == 0) {
+                throw new NoProvisioningCriteriaDefinitionFound();
+            }
             ProvisioningEntry requestedEntry = createProvsioningEntry(createdDate, addJournalEntries);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
         } catch (DataIntegrityViolationException dve) {

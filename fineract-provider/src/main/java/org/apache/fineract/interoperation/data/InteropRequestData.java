@@ -161,7 +161,9 @@ public class InteropRequestData {
 
     public static InteropRequestData validateAndParse(final DataValidatorBuilder dataValidator, JsonObject element,
             FromJsonHelper jsonHelper) {
-        if (element == null) { return null; }
+        if (element == null) {
+            return null;
+        }
 
         String transactionCode = jsonHelper.extractStringNamed(PARAM_TRANSACTION_CODE, element);
         DataValidatorBuilder dataValidatorCopy = dataValidator.reset().parameter(PARAM_TRANSACTION_CODE).value(transactionCode).notBlank();

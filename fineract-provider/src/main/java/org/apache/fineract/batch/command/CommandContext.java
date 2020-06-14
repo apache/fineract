@@ -78,7 +78,9 @@ public class CommandContext {
      * @return boolean
      */
     public boolean matcher(CommandContext other) {
-        if (this.resource.matches(other.resource) && this.method.equals(other.method)) { return true; }
+        if (this.resource.matches(other.resource) && this.method.equals(other.method)) {
+            return true;
+        }
         return false;
     }
 
@@ -93,16 +95,30 @@ public class CommandContext {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) { return true; }
-        if (obj == null) { return false; }
-        if (!(obj instanceof CommandContext)) { return false; }
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof CommandContext)) {
+            return false;
+        }
         CommandContext other = (CommandContext) obj;
         if (this.method == null) {
-            if (other.method != null) { return false; }
-        } else if (!this.method.equals(other.method)) { return false; }
+            if (other.method != null) {
+                return false;
+            }
+        } else if (!this.method.equals(other.method)) {
+            return false;
+        }
         if (this.resource == null) {
-            if (other.resource != null) { return false; }
-        } else if (!this.resource.equals(other.resource)) { return false; }
+            if (other.resource != null) {
+                return false;
+            }
+        } else if (!this.resource.equals(other.resource)) {
+            return false;
+        }
         return true;
     }
 

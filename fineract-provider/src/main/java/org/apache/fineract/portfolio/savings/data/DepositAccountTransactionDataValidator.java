@@ -88,7 +88,9 @@ public class DepositAccountTransactionDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
@@ -122,7 +124,9 @@ public class DepositAccountTransactionDataValidator {
     public void validateDepositAmountUpdate(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -148,7 +152,9 @@ public class DepositAccountTransactionDataValidator {
     public void validateActivation(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -168,7 +174,9 @@ public class DepositAccountTransactionDataValidator {
 
     public void validatePreMatureAmountCalculation(final String json, final DepositAccountType depositAccountType) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -189,7 +197,9 @@ public class DepositAccountTransactionDataValidator {
     public void validateClosing(final JsonCommand command, DepositAccountType depositAccountType, final boolean isPreMatureClose) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);

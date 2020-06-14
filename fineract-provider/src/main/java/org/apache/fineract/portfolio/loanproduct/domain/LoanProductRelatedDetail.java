@@ -550,7 +550,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                     .failWithCode("causes.principal.moratorium.for.last.installment");
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private Integer defaultToZeroIfNull(final Integer value) {

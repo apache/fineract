@@ -70,7 +70,9 @@ public enum EntityTables {
     }
 
     public static ImmutableList<Integer> getStatus(String name) {
-        if (lookup.get(name) != null) { return lookup.get(name).getCodes(); }
+        if (lookup.get(name) != null) {
+            return lookup.get(name).getCodes();
+        }
         return ImmutableList.of();
     }
 

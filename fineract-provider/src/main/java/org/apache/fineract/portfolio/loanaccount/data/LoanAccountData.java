@@ -1846,7 +1846,9 @@ public class LoanAccountData {
     }
 
     public Long getInterestRecalculationDetailId() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getId(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getId();
+        }
         return null;
     }
 
@@ -1859,7 +1861,9 @@ public class LoanAccountData {
     }
 
     public BigDecimal getTotalPaidFeeCharges() {
-        if (this.summary != null) { return this.summary.getTotalPaidFeeCharges(); }
+        if (this.summary != null) {
+            return this.summary.getTotalPaidFeeCharges();
+        }
         return BigDecimal.ZERO;
     }
 

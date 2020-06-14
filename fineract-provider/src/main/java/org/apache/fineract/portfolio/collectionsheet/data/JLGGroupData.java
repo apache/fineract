@@ -88,7 +88,9 @@ public class JLGGroupData {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof JLGGroupData)) { return false; }
+        if (!(obj instanceof JLGGroupData)) {
+            return false;
+        }
         final JLGGroupData groupData = (JLGGroupData) obj;
         return groupData.groupId.compareTo(this.groupId) == 0;
     }

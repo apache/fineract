@@ -54,7 +54,9 @@ public class MultiException extends Exception {
 
     public MultiException(List<Throwable> problems) {
         super("MultiException with " + problems.size() + " contained causes (details available)");
-        if (problems.isEmpty()) { throw new IllegalArgumentException("List of Throwables must not be empty"); }
+        if (problems.isEmpty()) {
+            throw new IllegalArgumentException("List of Throwables must not be empty");
+        }
         this.throwables = new ArrayList<>(problems);
     }
 

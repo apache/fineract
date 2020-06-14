@@ -57,7 +57,9 @@ public class EmailConfigurationValidator {
 
     public void validateUpdateConfiguration(String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailConfigurationValidator.supportedParams);
@@ -85,20 +87,26 @@ public class EmailConfigurationValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     public boolean isValidEmail(String email) {
         // this is the easiest check
         if (email == null) {
             return false;
-        } else if (email.endsWith(".")) { return false; }
+        } else if (email.endsWith(".")) {
+            return false;
+        }
 
         // Check the whole email address structure
         Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
 
         // check if the Matcher matches the email pattern
-        if (!emailMatcher.matches()) { return false; }
+        if (!emailMatcher.matches()) {
+            return false;
+        }
 
         return true;
     }

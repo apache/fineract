@@ -173,12 +173,16 @@ public class SelfShareAccountsApiResource {
     private void validateAppuserShareAccountMapping(final Long accountId) {
         AppUser user = this.context.authenticatedUser();
         final boolean isMapped = this.appUserShareAccountsMapperReadPlatformService.isShareAccountsMappedToUser(accountId, user.getId());
-        if (!isMapped) { throw new ShareAccountNotFoundException(accountId); }
+        if (!isMapped) {
+            throw new ShareAccountNotFoundException(accountId);
+        }
     }
 
     private void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();
         final boolean mappedClientId = this.appuserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-        if (!mappedClientId) { throw new ClientNotFoundException(clientId); }
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
     }
 }

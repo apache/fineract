@@ -130,7 +130,9 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
             if (changes.containsKey("documentTypeId")) {
                 documentType = this.codeValueRepository.findOneWithNotFoundDetection(documentTypeId);
-                if (documentType == null) { throw new CodeValueNotFoundException(documentTypeId); }
+                if (documentType == null) {
+                    throw new CodeValueNotFoundException(documentTypeId);
+                }
 
                 documentTypeId = documentType.getId();
                 documentTypeLabel = documentType.label();

@@ -64,20 +64,26 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     public XBRLData getXBRLResult(final Date startDate, final Date endDate, final String currency) {
 
         final HashMap<MixTaxonomyData, BigDecimal> config = retrieveTaxonomyConfig(startDate, endDate);
-        if (config == null || config.size() == 0) { throw new XBRLMappingInvalidException("Mapping is empty"); }
+        if (config == null || config.size() == 0) {
+            throw new XBRLMappingInvalidException("Mapping is empty");
+        }
         return new XBRLData(config, startDate, endDate, currency);
     }
 
     @SuppressWarnings("unchecked")
     private HashMap<MixTaxonomyData, BigDecimal> retrieveTaxonomyConfig(final Date startDate, final Date endDate) {
         final MixTaxonomyMappingData taxonomyMapping = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
-        if (taxonomyMapping == null) { return null; }
+        if (taxonomyMapping == null) {
+            return null;
+        }
         final String config = taxonomyMapping.getConfig();
         if (config != null) {
             // <taxonomyId, mapping>
             HashMap<String, String> configMap = new HashMap<>();
             configMap = new Gson().fromJson(config, configMap.getClass());
-            if (configMap == null) { return null; }
+            if (configMap == null) {
+                return null;
+            }
             // <taxonomyId, value>
             final HashMap<MixTaxonomyData, BigDecimal> resultMap = new HashMap<>();
             setupBalanceMap(getAccountSql(startDate, endDate));

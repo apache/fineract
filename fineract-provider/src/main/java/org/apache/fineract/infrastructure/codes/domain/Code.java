@@ -74,7 +74,9 @@ public class Code extends AbstractPersistableCustom {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        if (this.systemDefined) { throw new SystemDefinedCodeCannotBeChangedException(); }
+        if (this.systemDefined) {
+            throw new SystemDefinedCodeCannotBeChangedException();
+        }
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
 

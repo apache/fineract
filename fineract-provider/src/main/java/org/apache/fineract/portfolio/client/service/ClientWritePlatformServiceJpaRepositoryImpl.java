@@ -169,7 +169,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         try {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-            if (client.isNotPending()) { throw new ClientMustBePendingToBeDeletedException(clientId); }
+            if (client.isNotPending()) {
+                throw new ClientMustBePendingToBeDeletedException(clientId);
+            }
             final List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
             this.noteRepository.deleteInBatch(relatedNotes);
 
@@ -642,7 +644,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         final Staff presentStaff = clientForUpdate.getStaff();
         Long presentStaffId = null;
-        if (presentStaff == null) { throw new ClientHasNoStaffException(clientId); }
+        if (presentStaff == null) {
+            throw new ClientHasNoStaffException(clientId);
+        }
         presentStaffId = presentStaff.getId();
         final String staffIdParamName = ClientApiConstants.staffIdParamName;
         if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {

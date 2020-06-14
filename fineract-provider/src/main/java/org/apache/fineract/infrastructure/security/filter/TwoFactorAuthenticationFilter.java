@@ -85,7 +85,9 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
         if (authentication != null && authentication.isAuthenticated()) {
             AppUser user = (AppUser) authentication.getPrincipal();
 
-            if (user == null) { return; }
+            if (user == null) {
+                return;
+            }
 
             if (!user.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION)) {
                 // User can't bypass two-factor auth, check two-factor access

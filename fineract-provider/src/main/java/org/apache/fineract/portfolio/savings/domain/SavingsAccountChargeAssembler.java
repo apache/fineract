@@ -190,6 +190,8 @@ public class SavingsAccountChargeAssembler {
                 isOneAnnualPresent = true;
             }
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

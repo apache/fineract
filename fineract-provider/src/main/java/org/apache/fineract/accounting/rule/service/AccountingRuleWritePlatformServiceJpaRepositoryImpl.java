@@ -87,7 +87,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("accounting_rule_name_unique")) {
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
-        } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
+        } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) {
+            throw new AccountingRuleDuplicateException();
+        }
 
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",

@@ -65,7 +65,9 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
 
     public void validateForGenerateCollectionSheet(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
@@ -94,7 +96,9 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
 
     public void validateForGenerateCollectionSheetOfIndividuals(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS);

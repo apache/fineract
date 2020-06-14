@@ -201,7 +201,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         if (allPermissions != null) {
             for (final Permission permission : allPermissions) {
-                if (permission.hasCode(permissionCode)) { return permission; }
+                if (permission.hasCode(permissionCode)) {
+                    return permission;
+                }
             }
         }
         throw new PermissionNotFoundException(permissionCode);
@@ -224,7 +226,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              * Roles associated with users can't be deleted
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
-            if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId); }
+            if (count > 0) {
+                throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId);
+            }
 
             this.topicDomainService.deleteTopic(role);
 
@@ -253,7 +257,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              * Roles associated with users can't be disable
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
-            if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.disabled", roleId); }
+            if (count > 0) {
+                throw new RoleAssociatedException("error.msg.role.associated.with.users.disabled", roleId);
+            }
 
             /**
              * Disabling the role

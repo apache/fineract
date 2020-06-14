@@ -50,7 +50,9 @@ public class DatatableData implements Serializable {
 
         for (ResultsetColumnHeaderData c : this.columnHeaderData) {
 
-            if (c.getColumnName().equals(columnName)) { return true; }
+            if (c.getColumnName().equals(columnName)) {
+                return true;
+            }
         }
 
         return false;

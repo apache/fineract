@@ -80,7 +80,9 @@ public class FineractEntityDataValidator {
 
     public void validateForCreate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
@@ -173,7 +175,9 @@ public class FineractEntityDataValidator {
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);

@@ -368,8 +368,12 @@ public class GroupGeneralData implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof GroupGeneralData)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GroupGeneralData)) {
+            return false;
+        }
         GroupGeneralData that = (GroupGeneralData) o;
         return Objects.equals(id, that.id) && Objects.equals(accountNo, that.accountNo) && Objects.equals(name, that.name)
                 && Objects.equals(externalId, that.externalId) && Objects.equals(status, that.status) && Objects.equals(active, that.active)

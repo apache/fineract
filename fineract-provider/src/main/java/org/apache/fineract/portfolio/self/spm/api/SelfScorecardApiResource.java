@@ -87,7 +87,9 @@ public class SelfScorecardApiResource {
     private void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();
         final boolean mappedClientId = this.appuserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-        if (!mappedClientId) { throw new ClientNotFoundException(clientId); }
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
     }
 
 }

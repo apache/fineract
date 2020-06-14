@@ -191,7 +191,9 @@ public class CampaignsHelper {
 
         if (reports != null && !reports.isEmpty()) {
             for (ReportData reportData : reports) {
-                if (reportName.equals(reportData.getReportName())) { return reportData.getReportId(); }
+                if (reportName.equals(reportData.getReportName())) {
+                    return reportData.getReportId();
+                }
             }
         }
         Assert.notNull(null, "null");

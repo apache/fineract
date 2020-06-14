@@ -146,9 +146,13 @@ public class InteropServiceImpl implements InteropService {
         ZoneId zoneId = ZoneId.of(ThreadLocalContextUtil.getTenant().getTimezoneId());
         Predicate<SavingsAccountTransaction> transFilter = t -> {
             SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(t.getTypeOf());
-            if (debit != transactionType.isDebit() && credit != transactionType.isCredit()) { return false; }
+            if (debit != transactionType.isDebit() && credit != transactionType.isCredit()) {
+                return false;
+            }
 
-            if (transactionsFrom == null && transactionsTo == null) { return true; }
+            if (transactionsFrom == null && transactionsTo == null) {
+                return true;
+            }
 
             java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().toDateTimeAtStartOfDay().toDate().toInstant()
                     .atZone(zoneId).toLocalDateTime();
@@ -271,7 +275,9 @@ public class InteropServiceImpl implements InteropService {
         String transferCode = request.getTransferCode();
         LocalDateTime transactionDate = DateUtils.getLocalDateTimeOfTenant();
         if (MathUtil.isGreaterThanZero(total)) {
-            if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), total)) { throw new UnsupportedOperationException(); }
+            if (MathUtil.isLessThan(savingsAccount.getWithdrawableBalance(), total)) {
+                throw new UnsupportedOperationException();
+            }
             if (findTransaction(savingsAccount, transferCode, SavingsAccountTransactionType.AMOUNT_HOLD) != null) {
                 throw new UnsupportedOperationException("Transfer amount was already put on hold " + transferCode);
             }
@@ -360,7 +366,9 @@ public class InteropServiceImpl implements InteropService {
 
     private SavingsAccount validateAndGetSavingAccount(String accountId) {
         SavingsAccount savingsAccount = savingsAccountRepository.findByExternalId(accountId);
-        if (savingsAccount == null) { throw new SavingsAccountNotFoundException(accountId); }
+        if (savingsAccount == null) {
+            throw new SavingsAccountNotFoundException(accountId);
+        }
         return savingsAccount;
     }
 
@@ -370,7 +378,9 @@ public class InteropServiceImpl implements InteropService {
         savingsAccount.setHelpers(savingsAccountTransactionSummaryWrapper, savingsHelper);
 
         ApplicationCurrency currency = currencyRepository.findOneByCode(request.getAmount().getCurrency());
-        if (!savingsAccount.getCurrency().getCode().equals(currency.getCode())) { throw new UnsupportedOperationException(); }
+        if (!savingsAccount.getCurrency().getCode().equals(currency.getCode())) {
+            throw new UnsupportedOperationException();
+        }
 
         SavingsAccountTransactionType transactionType = request.getTransactionRole().getTransactionType();
         if (!savingsAccount.isTransactionAllowed(transactionType, request.getExpirationLocalDate())) {
@@ -392,13 +402,17 @@ public class InteropServiceImpl implements InteropService {
         BigDecimal total = transactionType.isDebit() ? amount : MathUtil.negate(amount);
         MoneyData fspFee = request.getFspFee();
         if (fspFee != null) {
-            if (!savingsAccount.getCurrency().getCode().equals(fspFee.getCurrency())) { throw new UnsupportedOperationException(); }
+            if (!savingsAccount.getCurrency().getCode().equals(fspFee.getCurrency())) {
+                throw new UnsupportedOperationException();
+            }
             // TODO: compare with calculated quote fee
             total = MathUtil.add(total, fspFee.getAmount());
         }
         MoneyData fspCommission = request.getFspCommission();
         if (fspCommission != null) {
-            if (!savingsAccount.getCurrency().getCode().equals(fspCommission.getCurrency())) { throw new UnsupportedOperationException(); }
+            if (!savingsAccount.getCurrency().getCode().equals(fspCommission.getCurrency())) {
+                throw new UnsupportedOperationException();
+            }
             // TODO: compare with calculated quote commission
             total = MathUtil.subtractToZero(total, fspCommission.getAmount());
         }

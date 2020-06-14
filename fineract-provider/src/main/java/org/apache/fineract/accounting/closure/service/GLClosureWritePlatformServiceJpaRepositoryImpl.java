@@ -75,7 +75,9 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             // ensure closure date is not in the future
             final Date todaysDate = new Date();
             final Date closureDate = command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
-            if (closureDate.after(todaysDate)) { throw new GLClosureInvalidException(GlClosureInvalidReason.FUTURE_DATE, closureDate); }
+            if (closureDate.after(todaysDate)) {
+                throw new GLClosureInvalidException(GlClosureInvalidReason.FUTURE_DATE, closureDate);
+            }
             // shouldn't be before an existing accounting closure
             final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
             if (latestGLClosure != null) {

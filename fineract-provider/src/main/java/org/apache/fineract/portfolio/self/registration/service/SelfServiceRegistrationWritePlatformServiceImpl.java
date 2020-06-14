@@ -222,10 +222,14 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
 
     private void throwExceptionIfValidationError(final List<ApiParameterError> dataValidationErrors, String accountNumber, String firstName,
             String lastName, String mobileNumber, boolean isEmailAuthenticationMode) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
         boolean isClientExist = this.selfServiceRegistrationReadPlatformService.isClientExist(accountNumber, firstName, lastName,
                 mobileNumber, isEmailAuthenticationMode);
-        if (!isClientExist) { throw new ClientNotFoundException(); }
+        if (!isClientExist) {
+            throw new ClientNotFoundException();
+        }
     }
 
     public static String randomAuthorizationTokenGeneration() {
@@ -254,11 +258,15 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
             baseDataValidator.reset().parameter(SelfServiceApiConstants.authenticationTokenParamName).value(authenticationToken).notBlank()
                     .notNull().notExceedingLengthOf(100);
 
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
 
             SelfServiceRegistration selfServiceRegistration = this.selfServiceRegistrationRepository
                     .getRequestByIdAndAuthenticationToken(id, authenticationToken);
-            if (selfServiceRegistration == null) { throw new SelfServiceRegistrationNotFoundException(id, authenticationToken); }
+            if (selfServiceRegistration == null) {
+                throw new SelfServiceRegistrationNotFoundException(id, authenticationToken);
+            }
             username = selfServiceRegistration.getUsername();
             Client client = selfServiceRegistration.getClient();
             final boolean passwordNeverExpire = true;

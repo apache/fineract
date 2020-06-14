@@ -51,7 +51,9 @@ public final class GLClosureCommandFromApiJsonDeserializer extends AbstractFromA
 
     @Override
     public GLClosureCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();

@@ -80,7 +80,9 @@ public class FromJsonHelper {
     }
 
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Collection<String> supportedParams) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Map<String, Object> requestMap = this.gsonConverter.fromJson(json, typeOfMap);
 
@@ -91,11 +93,15 @@ public class FromJsonHelper {
             }
         }
 
-        if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
+        if (!unsupportedParameterList.isEmpty()) {
+            throw new UnsupportedParameterException(unsupportedParameterList);
+        }
     }
 
     public void checkForUnsupportedParameters(final JsonObject object, final Collection<String> supportedParams) {
-        if (object == null) { throw new InvalidParameterException(); }
+        if (object == null) {
+            throw new InvalidParameterException();
+        }
 
         final Set<Entry<String, JsonElement>> entries = object.entrySet();
         final List<String> unsupportedParameterList = new ArrayList<>();
@@ -106,7 +112,9 @@ public class FromJsonHelper {
             }
         }
 
-        if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
+        if (!unsupportedParameterList.isEmpty()) {
+            throw new UnsupportedParameterException(unsupportedParameterList);
+        }
     }
 
     /**

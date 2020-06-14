@@ -174,7 +174,7 @@
         <setting id="org.eclipse.jdt.core.formatter.alignment_for_conditional_expression" value="80"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_closing_brace_in_array_initializer" value="do not insert"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_before_comma_in_constructor_declaration_parameters" value="do not insert"/>
-        <setting id="org.eclipse.jdt.core.formatter.format_guardian_clause_on_one_line" value="true"/>
+        <setting id="org.eclipse.jdt.core.formatter.format_guardian_clause_on_one_line" value="false"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_space_before_opening_paren_in_if" value="insert"/>
         <setting id="org.eclipse.jdt.core.formatter.align_assignment_statements_on_columns" value="false"/>
         <setting id="org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_type" value="insert"/>

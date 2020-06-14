@@ -235,7 +235,9 @@ public class LoanTransactionsApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (result == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
 
         return this.toApiJsonSerializer.serialize(result);
     }

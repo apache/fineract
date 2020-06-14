@@ -76,7 +76,9 @@ public class CommandHandlerProvider implements ApplicationContextAware {
         Preconditions.checkArgument(StringUtils.isNoneEmpty(action), "An action must be given!");
 
         final String key = entity + "|" + action;
-        if (!this.registeredHandlers.containsKey(key)) { throw new UnsupportedCommandException(key); }
+        if (!this.registeredHandlers.containsKey(key)) {
+            throw new UnsupportedCommandException(key);
+        }
         return (NewCommandSourceHandler) this.applicationContext.getBean(this.registeredHandlers.get(key));
     }
 

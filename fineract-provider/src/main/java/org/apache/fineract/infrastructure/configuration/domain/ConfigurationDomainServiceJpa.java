@@ -52,10 +52,14 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean isMakerCheckerEnabledForTask(final String taskPermissionCode) {
-        if (StringUtils.isBlank(taskPermissionCode)) { throw new PermissionNotFoundException(taskPermissionCode); }
+        if (StringUtils.isBlank(taskPermissionCode)) {
+            throw new PermissionNotFoundException(taskPermissionCode);
+        }
 
         final Permission thisTask = this.permissionRepository.findOneByCode(taskPermissionCode);
-        if (thisTask == null) { throw new PermissionNotFoundException(taskPermissionCode); }
+        if (thisTask == null) {
+            throw new PermissionNotFoundException(taskPermissionCode);
+        }
 
         final String makerCheckerConfigurationProperty = "maker-checker";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(makerCheckerConfigurationProperty);
@@ -168,7 +172,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public Integer retrieveFinancialYearBeginningMonth() {
         final String propertyName = "financial-year-beginning-month";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
-        if (property.isEnabled()) { return property.getValue().intValue(); }
+        if (property.isEnabled()) {
+            return property.getValue().intValue();
+        }
         return 1;
     }
 
@@ -176,7 +182,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public Integer retrieveMinAllowedClientsInGroup() {
         final String propertyName = "min-clients-in-group";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
-        if (property.isEnabled()) { return property.getValue().intValue(); }
+        if (property.isEnabled()) {
+            return property.getValue().intValue();
+        }
         return null;
     }
 
@@ -184,7 +192,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public Integer retrieveMaxAllowedClientsInGroup() {
         final String propertyName = "max-clients-in-group";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
-        if (property.isEnabled()) { return property.getValue().intValue(); }
+        if (property.isEnabled()) {
+            return property.getValue().intValue();
+        }
         return null;
     }
 
@@ -202,7 +212,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         if (property.isEnabled()) {
             int value = property.getValue().intValue();
-            if (value < 0 || value > 6) { return defaultValue; }
+            if (value < 0 || value > 6) {
+                return defaultValue;
+            }
             return value;
         }
         return defaultValue;
@@ -304,7 +316,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         int defaultValue = 6;
         int value = property.getValue().intValue();
-        if (value < 1) { return defaultValue; }
+        if (value < 1) {
+            return defaultValue;
+        }
         return value;
     }
 
@@ -314,7 +328,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         int defaultValue = 300;
         int value = property.getValue().intValue();
-        if (value < 1) { return defaultValue; }
+        if (value < 1) {
+            return defaultValue;
+        }
         return value;
     }
 

@@ -76,7 +76,9 @@ public class PasswordPreferencesWritePlatformServiceJpaRepositoryImpl implements
                 }
             }
 
-            if (!found) { throw new PasswordValidationPolicyNotFoundException(validationPolicyId); }
+            if (!found) {
+                throw new PasswordValidationPolicyNotFoundException(validationPolicyId);
+            }
 
             if (!changes.isEmpty()) {
                 this.validationRepository.saveAll(validationPolicies);

@@ -121,7 +121,9 @@ public class TenantDatabaseUpgradeService {
 
     private String getEnvVar(String name, String defaultValue) {
         String value = System.getenv(name);
-        if (value == null) { return defaultValue; }
+        if (value == null) {
+            return defaultValue;
+        }
         return value;
     }
 

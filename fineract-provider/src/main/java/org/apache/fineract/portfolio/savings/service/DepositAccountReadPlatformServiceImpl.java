@@ -165,7 +165,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         this.context.authenticatedUser();
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-        if (depositAccountMapper == null) { return null; }
+        if (depositAccountMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ");
@@ -185,7 +187,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 depositAccountType.resourceName());
 
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-        if (depositAccountMapper == null) { return null; }
+        if (depositAccountMapper == null) {
+            return null;
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -232,7 +236,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             this.context.authenticatedUser();
 
             final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-            if (depositAccountMapper == null) { return null; }
+            if (depositAccountMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");
@@ -253,7 +259,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             this.context.authenticatedUser();
 
             final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
-            if (depositAccountMapper == null) { return null; }
+            if (depositAccountMapper == null) {
+                return null;
+            }
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("select ");
@@ -953,7 +961,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private DepositAccountMapper getDepositAccountMapper(final DepositAccountType depositAccountType) {
         if (depositAccountType.isFixedDeposit()) {
             return this.fixedDepositAccountRowMapper;
-        } else if (depositAccountType.isRecurringDeposit()) { return this.recurringDepositAccountRowMapper; }
+        } else if (depositAccountType.isRecurringDeposit()) {
+            return this.recurringDepositAccountRowMapper;
+        }
         return null;
     }
 
@@ -1354,7 +1364,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             GroupGeneralData group) {
         if (depositAccountType.isFixedDeposit()) {
             return new FixedDepositAccountTemplateMapper(client, group);
-        } else if (depositAccountType.isRecurringDeposit()) { return new RecurringDepositAccountTemplateMapper(client, group); }
+        } else if (depositAccountType.isRecurringDeposit()) {
+            return new RecurringDepositAccountTemplateMapper(client, group);
+        }
         return null;
     }
 

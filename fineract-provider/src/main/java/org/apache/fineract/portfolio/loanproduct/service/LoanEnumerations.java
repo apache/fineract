@@ -75,7 +75,9 @@ public class LoanEnumerations {
             return AccountEnumerations.loanType(id);
         } else if (typeName.equals(INTEREST_RECALCULATION_COMPOUNDING_TYPE)) {
             return interestRecalculationCompoundingType(id);
-        } else if (typeName.equals(RESCHEDULE_STRATEGY_TYPE)) { return rescheduleStrategyType(id); }
+        } else if (typeName.equals(RESCHEDULE_STRATEGY_TYPE)) {
+            return rescheduleStrategyType(id);
+        }
         return null;
     }
 
@@ -148,7 +150,9 @@ public class LoanEnumerations {
     }
 
     public static EnumOptionData repaymentFrequencyNthDayType(final Integer id) {
-        if (id == null) { return null; }
+        if (id == null) {
+            return null;
+        }
         return repaymentFrequencyNthDayType(NthDayType.fromInt(id));
     }
 
@@ -184,7 +188,9 @@ public class LoanEnumerations {
     }
 
     public static EnumOptionData repaymentFrequencyDayOfWeekType(final Integer id) {
-        if (id == null) { return null; }
+        if (id == null) {
+            return null;
+        }
         return repaymentFrequencyDayOfWeekType(DayOfWeekType.fromInt(id));
     }
 
@@ -607,7 +613,9 @@ public class LoanEnumerations {
     }
 
     public static EnumOptionData interestRecalculationCompoundingNthDayType(final Integer id) {
-        if (id == null) { return null; }
+        if (id == null) {
+            return null;
+        }
         return interestRecalculationCompoundingNthDayType(NthDayType.fromInt(id));
     }
 
@@ -642,7 +650,9 @@ public class LoanEnumerations {
     }
 
     public static EnumOptionData interestRecalculationCompoundingDayOfWeekType(final Integer id) {
-        if (id == null) { return null; }
+        if (id == null) {
+            return null;
+        }
         return interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.fromInt(id));
     }
 

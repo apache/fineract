@@ -91,8 +91,12 @@ public class MathUtil {
      *            if true then null parameter is omitted, otherwise returns null
      */
     public static Long min(Long first, Long second, boolean notNull) {
-        if (first == null) { return notNull ? second : null; }
-        if (second == null) { return notNull ? first : null; }
+        if (first == null) {
+            return notNull ? second : null;
+        }
+        if (second == null) {
+            return notNull ? first : null;
+        }
         return Math.min(first, second);
     }
 

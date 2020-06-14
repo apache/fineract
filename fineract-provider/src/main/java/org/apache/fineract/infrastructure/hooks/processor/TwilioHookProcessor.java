@@ -92,7 +92,9 @@ public class TwilioHookProcessor implements HookProcessor {
                 entityName = "sms";
                 actionName = "send";
                 json = processUgdTemplate(payload, hook, authToken);
-                if (json == null) { return; }
+                if (json == null) {
+                    return;
+                }
             } else {
                 json = JsonParser.parseString(payload).getAsJsonObject();
             }

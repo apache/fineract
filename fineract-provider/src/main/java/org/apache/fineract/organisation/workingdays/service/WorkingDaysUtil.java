@@ -30,7 +30,9 @@ public class WorkingDaysUtil {
             final WorkingDays workingDays) {
 
         // If date is not a non working day then return date.
-        if (isWorkingDay(workingDays, date)) { return date; }
+        if (isWorkingDay(workingDays, date)) {
+            return date;
+        }
 
         final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
 

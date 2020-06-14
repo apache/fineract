@@ -220,12 +220,16 @@ public class ImagesApiResource {
     }
 
     private void validateEntityTypeforImage(final String entityName) {
-        if (!checkValidEntityType(entityName)) { throw new InvalidEntityTypeForImageManagementException(entityName); }
+        if (!checkValidEntityType(entityName)) {
+            throw new InvalidEntityTypeForImageManagementException(entityName);
+        }
     }
 
     private static boolean checkValidEntityType(final String entityType) {
         for (final EntityTypeForImages entities : EntityTypeForImages.values()) {
-            if (entities.name().equalsIgnoreCase(entityType)) { return true; }
+            if (entities.name().equalsIgnoreCase(entityType)) {
+                return true;
+            }
         }
         return false;
     }

@@ -133,7 +133,9 @@ public class SavingsAccountAssembler {
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
             accountType = AccountType.INDIVIDUAL;
-            if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(clientId);
+            }
         }
 
         final Long groupId = this.fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
@@ -141,13 +143,17 @@ public class SavingsAccountAssembler {
             group = this.groupRepository.findOneWithNotFoundDetection(groupId);
             accountType = AccountType.GROUP;
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(groupId);
+                }
                 throw new GroupNotActiveException(groupId);
             }
         }
 
         if (group != null && client != null) {
-            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(clientId, groupId);
+            }
             accountType = AccountType.JLG;
         }
 
@@ -324,19 +330,25 @@ public class SavingsAccountAssembler {
         AccountType accountType = AccountType.INVALID;
         if (client != null) {
             accountType = AccountType.INDIVIDUAL;
-            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+            if (client.isNotActive()) {
+                throw new ClientNotActiveException(client.getId());
+            }
         }
 
         if (group != null) {
             accountType = AccountType.GROUP;
             if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(group.getId()); }
+                if (group.isCenter()) {
+                    throw new CenterNotActiveException(group.getId());
+                }
                 throw new GroupNotActiveException(group.getId());
             }
         }
 
         if (group != null && client != null) {
-            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(client.getId(), group.getId()); }
+            if (!group.hasClientAsMember(client)) {
+                throw new ClientNotInGroupException(client.getId(), group.getId());
+            }
             accountType = AccountType.JLG;
         }
         final SavingsProduct product = this.savingProductRepository.findById(productId).get();

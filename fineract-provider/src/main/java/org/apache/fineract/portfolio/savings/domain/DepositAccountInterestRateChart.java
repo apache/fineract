@@ -96,7 +96,9 @@ public class DepositAccountInterestRateChart extends AbstractPersistableCustom {
         final Set<DepositAccountInterestRateChartSlabs> chartSlabs = setOfChartSlabs();
 
         for (DepositAccountInterestRateChartSlabs interestRateChartSlab : chartSlabs) {
-            if (interestRateChartSlab.getId().equals(chartSlabId)) { return interestRateChartSlab; }
+            if (interestRateChartSlab.getId().equals(chartSlabId)) {
+                return interestRateChartSlab;
+            }
         }
         return null;
     }

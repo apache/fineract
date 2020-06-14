@@ -88,7 +88,9 @@ public class InteropTransactionTypeData {
 
     public static InteropTransactionTypeData validateAndParse(DataValidatorBuilder dataValidator, JsonObject element,
             FromJsonHelper jsonHelper) {
-        if (element == null) { return null; }
+        if (element == null) {
+            return null;
+        }
 
         jsonHelper.checkForUnsupportedParameters(element, Arrays.asList(PARAMS));
 

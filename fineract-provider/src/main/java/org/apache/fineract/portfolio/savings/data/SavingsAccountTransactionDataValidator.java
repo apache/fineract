@@ -77,7 +77,9 @@ public class SavingsAccountTransactionDataValidator {
 
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -103,7 +105,9 @@ public class SavingsAccountTransactionDataValidator {
     public void validateActivation(final JsonCommand command) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -124,7 +128,9 @@ public class SavingsAccountTransactionDataValidator {
     public void validateClosing(final JsonCommand command, final SavingsAccount account) {
         final String json = command.json();
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
@@ -177,7 +183,9 @@ public class SavingsAccountTransactionDataValidator {
 
     public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account,
             final AppUser createdUser) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS);

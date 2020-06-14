@@ -135,7 +135,9 @@ public class Utils {
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
-        if (jsonAttributeToGetBack == null) { return (T) json; }
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
@@ -153,7 +155,9 @@ public class Utils {
             final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
                 .andReturn().asString();
-        if (jsonAttributeToGetBack == null) { return (T) json; }
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 

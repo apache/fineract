@@ -54,7 +54,9 @@ public class GlobalConfigurationDataValidator {
 
     public void validateForUpdate(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UPDATE_CONFIGURATION_DATA_PARAMETERS);
@@ -79,7 +81,9 @@ public class GlobalConfigurationDataValidator {
             baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.DATE_VALUE).value(dateValue).notNull();
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
     }
 }

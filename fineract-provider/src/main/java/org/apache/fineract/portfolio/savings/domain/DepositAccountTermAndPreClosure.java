@@ -249,7 +249,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom {
     }
 
     public boolean isPreClosurePenalApplicable() {
-        if (this.preClosureDetail != null) { return this.preClosureDetail.preClosurePenalApplicable(); }
+        if (this.preClosureDetail != null) {
+            return this.preClosureDetail.preClosurePenalApplicable();
+        }
         return false;
     }
 

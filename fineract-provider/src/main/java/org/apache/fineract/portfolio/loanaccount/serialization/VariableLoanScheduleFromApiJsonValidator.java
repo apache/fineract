@@ -65,7 +65,9 @@ public class VariableLoanScheduleFromApiJsonValidator {
     }
 
     public void validateSchedule(final String json, final Loan loan) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.variableSchedulesupportedParameters);
@@ -111,7 +113,9 @@ public class VariableLoanScheduleFromApiJsonValidator {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("variable.schedule.not.supported",
                     "Loan schedule modification not allowed");
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateLoanTermVariations(final Loan loan, final DataValidatorBuilder baseDataValidator, final String dateFormat,

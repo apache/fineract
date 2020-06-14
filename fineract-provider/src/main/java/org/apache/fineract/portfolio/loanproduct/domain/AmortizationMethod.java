@@ -42,7 +42,9 @@ public enum AmortizationMethod {
 
     public static AmortizationMethod fromInt(final Integer selectedMethod) {
 
-        if (selectedMethod == null) { return null; }
+        if (selectedMethod == null) {
+            return null;
+        }
 
         AmortizationMethod repaymentMethod = null;
         switch (selectedMethod) {

@@ -256,13 +256,19 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) { return true; }
+        if (obj == this) {
+            return true;
+        }
 
-        if (!(obj instanceof CenterDomain)) { return false; }
+        if (!(obj instanceof CenterDomain)) {
+            return false;
+        }
 
         CenterDomain cd = (CenterDomain) obj;
 
-        if (this.hashCode() == cd.hashCode()) { return true; }
+        if (this.hashCode() == cd.hashCode()) {
+            return true;
+        }
         return false;
     }
 

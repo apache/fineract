@@ -123,7 +123,9 @@ public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetails
         private int bindValueInMinMaxRange(final int value, int min, int max) {
             if (value < min) {
                 return min;
-            } else if (value > max) { return max; }
+            } else if (value > max) {
+                return max;
+            }
             return value;
         }
     }

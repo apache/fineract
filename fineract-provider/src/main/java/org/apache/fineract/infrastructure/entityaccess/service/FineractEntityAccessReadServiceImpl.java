@@ -81,7 +81,9 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         StringBuilder accessListCSVStrBuf = null;
         if ((accesslist != null) && (accesslist.size() > 0)) {
             for (FineractEntityToEntityMappingData accessData : accesslist) {
-                if (accessData == null) { throw new FineractEntityMappingConfigurationException(); }
+                if (accessData == null) {
+                    throw new FineractEntityMappingConfigurationException();
+                }
 
                 if (accessListCSVStrBuf == null) {
                     accessListCSVStrBuf = new StringBuilder();

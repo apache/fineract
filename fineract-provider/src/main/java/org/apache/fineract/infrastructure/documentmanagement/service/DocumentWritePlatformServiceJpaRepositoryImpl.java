@@ -168,7 +168,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     private static boolean checkValidEntityType(final String entityType) {
         for (final DocumentManagementEntity entities : DocumentManagementEntity.values()) {
-            if (entities.name().equalsIgnoreCase(entityType)) { return true; }
+            if (entities.name().equalsIgnoreCase(entityType)) {
+                return true;
+            }
         }
         return false;
     }

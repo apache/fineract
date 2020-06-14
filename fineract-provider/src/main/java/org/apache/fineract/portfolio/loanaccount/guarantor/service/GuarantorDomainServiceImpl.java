@@ -219,7 +219,9 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      */
     @Override
     public void transaferFundsFromGuarantor(final Loan loan) {
-        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) <= 0) { return; }
+        if (loan.getGuaranteeAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
         final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
         final boolean isRegularTransaction = true;
         final boolean isExceptionForBalanceCheck = true;

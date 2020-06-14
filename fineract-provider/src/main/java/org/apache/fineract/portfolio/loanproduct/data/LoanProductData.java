@@ -1029,7 +1029,9 @@ public class LoanProductData implements Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof LoanProductData)) { return false; }
+        if (!(obj instanceof LoanProductData)) {
+            return false;
+        }
         final LoanProductData loanProductData = (LoanProductData) obj;
         return loanProductData.id.equals(this.id);
     }
@@ -1109,62 +1111,86 @@ public class LoanProductData implements Serializable {
     }
 
     private EnumOptionData getRescheduleStrategyType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRescheduleStrategyType(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRescheduleStrategyType();
+        }
         return null;
     }
 
     private EnumOptionData getInterestRecalculationCompoundingType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getInterestRecalculationCompoundingType(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getInterestRecalculationCompoundingType();
+        }
         return null;
     }
 
     private EnumOptionData getInterestRecalculationCompoundingNthDayType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyNthDay(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationCompoundingFrequencyNthDay();
+        }
         return null;
     }
 
     private EnumOptionData getInterestRecalculationCompoundingWeekDayType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyWeekday(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationCompoundingFrequencyWeekday();
+        }
         return null;
     }
 
     private Integer getInterestRecalculationCompoundingOnDayType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyOnDay(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationCompoundingFrequencyOnDay();
+        }
         return null;
     }
 
     private EnumOptionData getRecalculationRestFrequencyType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyType(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationRestFrequencyType();
+        }
         return null;
     }
 
     private Integer getRecalculationRestFrequencyInterval() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyInterval(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationRestFrequencyInterval();
+        }
         return null;
     }
 
     private EnumOptionData getInterestRecalculationRestNthDayType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyNthDay(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationRestFrequencyNthDay();
+        }
         return null;
     }
 
     private EnumOptionData getInterestRecalculationRestWeekDayType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyWeekday(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationRestFrequencyWeekday();
+        }
         return null;
     }
 
     private Integer getInterestRecalculationRestOnDayType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyOnDay(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationRestFrequencyOnDay();
+        }
         return null;
     }
 
     private EnumOptionData getRecalculationCompoundingFrequencyType() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyType(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationCompoundingFrequencyType();
+        }
         return null;
     }
 
     private Integer getRecalculationCompoundingFrequencyInterval() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyInterval(); }
+        if (isInterestRecalculationEnabled()) {
+            return this.interestRecalculationData.getRecalculationCompoundingFrequencyInterval();
+        }
         return null;
     }
 

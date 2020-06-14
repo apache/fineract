@@ -127,7 +127,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                 baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate.toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
 
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
 
             validateDueDateOnWorkingDay(clientCharge, fmt);
@@ -282,7 +284,9 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
         if (clientCharge.isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (requiresTransactionDateValidation) {
@@ -304,17 +308,23 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         // validate charge is not already paid or waived
         if (clientCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         } else if (clientCharge.isPaid()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.paid");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (requiresTransactionAmountValidation) {
             final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
             if (!clientCharge.getAmountOutstanding().isGreaterThanOrEqualTo(chargePaid)) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
     }
@@ -408,14 +418,18 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             if (!this.configurationDomainService.allowTransactionsOnHolidayEnabled() && this.holidayRepository.isHoliday(officeId, date)) {
                 baseDataValidator.reset().parameter(jsonPropertyName).value(date.toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode(errorMessageFragmentForActivityOnHoliday);
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(date)) {
                 baseDataValidator.reset().parameter(jsonPropertyName).value(date.toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode(errorMessageFragmentForActivityOnNonWorkingDay);
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
     }

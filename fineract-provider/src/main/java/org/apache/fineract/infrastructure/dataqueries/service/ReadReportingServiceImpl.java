@@ -226,7 +226,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // the return statement contains the exact sql required
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
 
-        if (rs.next() && rs.getString("the_sql") != null) { return rs.getString("the_sql"); }
+        if (rs.next() && rs.getString("the_sql") != null) {
+            return rs.getString("the_sql");
+        }
         throw new ReportNotFoundException(name);
     }
 
@@ -242,7 +244,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object[] { isSelfServiceUserReport });
 
-        if (rs.next()) { return rs.getString("report_type"); }
+        if (rs.next()) {
+            return rs.getString("report_type");
+        }
         throw new ReportNotFoundException(reportName);
     }
 
@@ -337,7 +341,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm, new Object[] {});
 
         final Collection<ReportData> reportList = new ArrayList<>();
-        if (rpJoins == null || rpJoins.size() == 0) { return reportList; }
+        if (rpJoins == null || rpJoins.size() == 0) {
+            return reportList;
+        }
 
         Collection<ReportParameterData> reportParameters = null;
 
@@ -615,6 +621,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     private void validateReportName(final String name) {
 
-        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) { throw new SQLInjectionException(); }
+        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
+            throw new SQLInjectionException();
+        }
     }
 }

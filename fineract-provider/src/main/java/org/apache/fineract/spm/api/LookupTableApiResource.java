@@ -82,7 +82,9 @@ public class LookupTableApiResource {
 
         final List<LookupTable> lookupTables = this.lookupTableService.findBySurvey(survey);
 
-        if (lookupTables != null) { return LookupTableMapper.map(lookupTables); }
+        if (lookupTables != null) {
+            return LookupTableMapper.map(lookupTables);
+        }
 
         return Collections.emptyList();
     }
@@ -102,7 +104,9 @@ public class LookupTableApiResource {
 
         final List<LookupTable> lookupTables = this.lookupTableService.findByKey(key);
 
-        if (lookupTables == null || lookupTables.isEmpty()) { throw new LookupTableNotFoundException(key); }
+        if (lookupTables == null || lookupTables.isEmpty()) {
+            throw new LookupTableNotFoundException(key);
+        }
 
         return LookupTableMapper.map(lookupTables).get(0);
     }
@@ -125,7 +129,9 @@ public class LookupTableApiResource {
 
     private Survey findSurvey(final Long surveyId) {
         final Survey survey = this.spmService.findById(surveyId);
-        if (survey == null) { throw new SurveyNotFoundException(surveyId); }
+        if (survey == null) {
+            throw new SurveyNotFoundException(surveyId);
+        }
         return survey;
     }
 }

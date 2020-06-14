@@ -584,9 +584,15 @@ public class RecurringDepositAccountData extends DepositAccountData {
     @Override
     public boolean equals(final Object obj) {
 
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (!(obj instanceof RecurringDepositAccountData)) { return false; }
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof RecurringDepositAccountData)) {
+            return false;
+        }
         final RecurringDepositAccountData rhs = (RecurringDepositAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
     }

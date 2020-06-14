@@ -67,7 +67,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateDisbursement(final String json, boolean isAccountTransfer) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         Set<String> disbursementParameters = null;
 
@@ -124,7 +126,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateTransaction(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> transactionParameters = new HashSet<>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note",
                 "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
@@ -151,7 +155,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateNewRepaymentTransaction(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> transactionParameters = new HashSet<>(
                 Arrays.asList("transactionDate", "transactionAmount", "externalId", "note", "locale", "dateFormat", "paymentTypeId",
@@ -206,7 +212,9 @@ public final class LoanEventApiJsonValidator {
     }
 
     public void validateTransactionWithNoAmount(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(
                 Arrays.asList("transactionDate", "note", "locale", "dateFormat", "writeoffReasonId"));
@@ -228,7 +236,9 @@ public final class LoanEventApiJsonValidator {
     }
 
     public void validateAddLoanCharge(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("chargeId", "amount", "dueDate", "locale", "dateFormat"));
 
@@ -254,7 +264,9 @@ public final class LoanEventApiJsonValidator {
     }
 
     public void validateUpdateOfLoanCharge(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("amount", "dueDate", "locale", "dateFormat"));
 
@@ -277,7 +289,9 @@ public final class LoanEventApiJsonValidator {
     }
 
     public void validateUpdateOfLoanOfficer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(
                 Arrays.asList("assignmentDate", "fromLoanOfficerId", "toLoanOfficerId", "locale", "dateFormat"));
@@ -305,7 +319,9 @@ public final class LoanEventApiJsonValidator {
     }
 
     public void validateForBulkLoanReassignment(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> supportedParameters = new HashSet<>(
                 Arrays.asList("assignmentDate", "fromLoanOfficerId", "toLoanOfficerId", "loans", "locale", "dateFormat"));
@@ -332,7 +348,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateChargePaymentTransaction(final String json, final boolean isChargeIdIncluded) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         Set<String> transactionParameters = null;
         if (isChargeIdIncluded) {
             transactionParameters = new HashSet<>(
@@ -363,7 +381,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateInstallmentChargeTransaction(final String json) {
 
-        if (StringUtils.isBlank(json)) { return; }
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
         Set<String> transactionParameters = new HashSet<>(Arrays.asList("dueDate", "locale", "dateFormat", "installmentNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -382,7 +402,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateUpdateDisbursementDateAndAmount(final String json, LoanDisbursementDetails loanDisbursementDetails) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(
                 Arrays.asList("locale", "dateFormat", LoanApiConstants.disbursementDataParameterName,
@@ -419,7 +441,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateNewRefundTransaction(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> transactionParameters = new HashSet<>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note",
                 "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
@@ -446,7 +470,9 @@ public final class LoanEventApiJsonValidator {
 
     public void validateLoanForeclosure(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> foreclosureParameters = new HashSet<>(Arrays.asList("transactionDate", "note", "locale", "dateFormat"));
 

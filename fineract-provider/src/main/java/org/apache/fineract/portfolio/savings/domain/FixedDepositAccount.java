@@ -140,7 +140,9 @@ public class FixedDepositAccount extends SavingsAccount {
         actualChanges.putAll(termAndPreClosureChanges);
         validateDomainRules(baseDataValidator);
         super.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     @Override
@@ -249,7 +251,9 @@ public class FixedDepositAccount extends SavingsAccount {
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final LocalDate todayDate = DateUtils.getLocalDateOfTenant();
@@ -342,7 +346,9 @@ public class FixedDepositAccount extends SavingsAccount {
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final Locale locale = command.extractLocale();
@@ -352,25 +358,33 @@ public class FixedDepositAccount extends SavingsAccount {
         if (closedDate.isBefore(getActivationLocalDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.activation.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (isAccountLocked(closedDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.lockin.period");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (closedDate.isAfter(maturityDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.before.maturity.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         if (closedDate.isAfter(tenantsTodayDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("cannot.be.a.future.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
@@ -378,7 +392,9 @@ public class FixedDepositAccount extends SavingsAccount {
             if (accountTransaction.isAfter(closedDate)) {
                 baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                         .failWithCode("must.be.after.last.transaction.date");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
 
@@ -426,7 +442,9 @@ public class FixedDepositAccount extends SavingsAccount {
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.MATURED.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.matured.state");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final Locale locale = command.extractLocale();
@@ -436,17 +454,23 @@ public class FixedDepositAccount extends SavingsAccount {
         if (closedDate.isBefore(getActivationLocalDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.activation.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         if (closedDate.isBefore(maturityDate())) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("must.be.after.account.maturity.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
         if (closedDate.isAfter(tenantsTodayDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                     .failWithCode("cannot.be.a.future.date");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
@@ -455,7 +479,9 @@ public class FixedDepositAccount extends SavingsAccount {
             if (accountTransaction.isAfter(closedDate)) {
                 baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                         .failWithCode("must.be.after.last.transaction.date");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
             }
         }
 
@@ -698,7 +724,9 @@ public class FixedDepositAccount extends SavingsAccount {
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         validateDomainRules(baseDataValidator);
         super.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateDomainRules(final DataValidatorBuilder baseDataValidator) {

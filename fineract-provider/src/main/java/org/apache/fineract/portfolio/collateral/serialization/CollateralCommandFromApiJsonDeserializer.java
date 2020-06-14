@@ -52,7 +52,9 @@ public final class CollateralCommandFromApiJsonDeserializer extends AbstractFrom
 
     @Override
     public CollateralCommand commandFromApiJson(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Set<String> supportedParameters = CollateralJSONinputParams.getAllValues();

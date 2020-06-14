@@ -63,7 +63,9 @@ public class MeetingDataValidator {
 
     public void validateForCreate(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, MEETING_REQUEST_DATA_PARAMETERS);
@@ -90,7 +92,9 @@ public class MeetingDataValidator {
 
     public void validateForUpdate(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, MEETING_REQUEST_DATA_PARAMETERS);
@@ -121,7 +125,9 @@ public class MeetingDataValidator {
 
     public void validateForUpdateAttendance(final JsonCommand command) {
         final String json = command.json();
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, MEETING_REQUEST_DATA_PARAMETERS);
@@ -136,7 +142,9 @@ public class MeetingDataValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void validateAttendanceDetails(final JsonElement element, final DataValidatorBuilder baseDataValidator) {

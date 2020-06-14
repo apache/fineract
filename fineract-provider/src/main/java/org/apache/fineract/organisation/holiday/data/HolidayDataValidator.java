@@ -59,7 +59,9 @@ public class HolidayDataValidator {
 
     public void validateForCreate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, HOLIDAY_CREATE_OR_UPDATE_REQUEST_DATA_PARAMETERS);
@@ -114,7 +116,9 @@ public class HolidayDataValidator {
 
     public void validateForUpdate(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, HOLIDAY_CREATE_OR_UPDATE_REQUEST_DATA_PARAMETERS);

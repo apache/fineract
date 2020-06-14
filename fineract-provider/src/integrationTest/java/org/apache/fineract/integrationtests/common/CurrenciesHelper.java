@@ -58,7 +58,9 @@ public class CurrenciesHelper {
             final String code) {
         ArrayList<CurrencyDomain> currenciesList = getAllCurrencies(requestSpec, responseSpec);
         for (CurrencyDomain e : currenciesList) {
-            if (e.getCode().equals(code)) { return e; }
+            if (e.getCode().equals(code)) {
+                return e;
+            }
         }
         return null;
     }

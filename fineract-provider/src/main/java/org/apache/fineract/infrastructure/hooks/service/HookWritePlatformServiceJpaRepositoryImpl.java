@@ -212,7 +212,9 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
 
     private HookTemplate retrieveHookTemplateBy(final String templateName) {
         final HookTemplate template = this.hookTemplateRepository.findOne(templateName);
-        if (template == null) { throw new HookTemplateNotFoundException(templateName); }
+        if (template == null) {
+            throw new HookTemplateNotFoundException(templateName);
+        }
         return template;
     }
 
@@ -311,7 +313,9 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             }
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     private void handleHookDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {

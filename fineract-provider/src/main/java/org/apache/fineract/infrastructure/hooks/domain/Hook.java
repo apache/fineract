@@ -178,7 +178,9 @@ public class Hook extends AbstractAuditableCustom {
     }
 
     public boolean updateEvents(final Set<HookResource> newHookEvents) {
-        if (newHookEvents == null) { return false; }
+        if (newHookEvents == null) {
+            return false;
+        }
 
         if (this.events == null) {
             this.events = new HashSet<>();
@@ -189,7 +191,9 @@ public class Hook extends AbstractAuditableCustom {
     }
 
     public boolean updateConfig(final Set<HookConfiguration> newHookConfig) {
-        if (newHookConfig == null) { return false; }
+        if (newHookConfig == null) {
+            return false;
+        }
 
         if (this.config == null) {
             this.config = new HashSet<>();

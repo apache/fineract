@@ -58,7 +58,9 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
     public void validateApproval(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.loanIdTobeApproved,
                 LoanApiConstants.approvedLoanAmountParameterName, LoanApiConstants.approvedOnDateParameterName,
@@ -94,7 +96,9 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
     public void validateRejection(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.rejectedOnDateParameterName,
                 LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
@@ -118,7 +122,9 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
     public void validateApplicantWithdrawal(final String json) {
 
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.withdrawnOnDateParameterName,
                 LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));

@@ -342,7 +342,9 @@ public class Guarantor extends AbstractPersistableCustom {
     }
 
     public boolean hasGuarantor(Long savingsId) {
-        if (savingsId == null) { return false; }
+        if (savingsId == null) {
+            return false;
+        }
         boolean hasGuarantee = false;
         for (GuarantorFundingDetails guarantorFundingDetails : this.guarantorFundDetails) {
             if (guarantorFundingDetails.getStatus().isActive()
