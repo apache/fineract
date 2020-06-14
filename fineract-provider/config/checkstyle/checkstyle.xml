@@ -49,6 +49,10 @@
   -->
 
     <module name="TreeWalker">
+    <module name="SeparatorWrap">
+            <property name="tokens" value="DOT"/>
+            <property name="option" value="nl"/>
+    </module>
     <module name="SuppressWarningsHolder" />
     <module name="RegexpSinglelineJava">
             <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
@@ -201,11 +205,6 @@
 
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
-
-        <module name="SeparatorWrap">
-            <property name="tokens" value="DOT"/>
-            <property name="option" value="nl"/>
-        </module>
 
         <module name="MemberName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>
