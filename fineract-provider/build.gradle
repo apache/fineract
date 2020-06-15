@@ -673,6 +673,11 @@ springBoot {
 
 bootWar {
     mainClassName = 'org.apache.fineract.ServerApplication'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+bootJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // To generate an HTML report instead of XML
