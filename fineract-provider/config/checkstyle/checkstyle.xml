@@ -112,12 +112,13 @@
             <!-- No PACKAGE_DEF token, as we like our license header to be glue to "package" statement, to save 1 line screen space -->
             <property name="tokens" value="IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
         </module>
-          <module name="PackageName">
+        <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9_]*)*$"/>
             <message key="name.invalidPattern"
              value="Package name ''{0}'' must match pattern ''{1}''."/>
         </module>
-            <module name="AnnotationLocation">
+        <module name="OuterTypeFilename"/>
+        <module name="AnnotationLocation">
             <property name="tokens" value="VARIABLE_DEF"/>
             <property name="allowSamelineMultipleAnnotations" value="true"/>
         </module>
@@ -188,7 +189,6 @@
 
 
 
-        <module name="OuterTypeFilename"/>
 
 
 
