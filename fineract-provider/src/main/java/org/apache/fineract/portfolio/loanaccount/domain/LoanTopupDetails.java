@@ -43,7 +43,7 @@ public class LoanTopupDetails extends AbstractPersistableCustom {
     @Column(name = "topup_amount", nullable = true)
     private BigDecimal topupAmount;
 
-    protected LoanTopupDetails() {};
+    protected LoanTopupDetails() {}
 
     public LoanTopupDetails(final Loan loan, final Long loanIdToClose) {
         this.loan = loan;
