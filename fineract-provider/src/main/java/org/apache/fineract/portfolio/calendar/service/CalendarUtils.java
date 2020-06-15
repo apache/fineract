@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 public class CalendarUtils {
 
     private final static Logger LOG = LoggerFactory.getLogger(CalendarUtils.class);
+
     static {
         System.setProperty("net.fortuna.ical4j.timezone.date.floating", "true");
     }
