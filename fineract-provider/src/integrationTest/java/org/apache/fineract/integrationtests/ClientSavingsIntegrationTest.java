@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -2070,7 +2069,7 @@ public class ClientSavingsIntegrationTest {
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
-        Date today = DateUtils.getDateOfTenant();
+        Date today = Utils.getLocalDateOfTenant().toDate();
         String todayDate = today.toString();
         SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
         todayDate = dt1.format(today).toString();

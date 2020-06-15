@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
@@ -273,7 +272,7 @@ public class ShareAccountIntegrationTests {
             } else if (transactionType.equals("charge.payment")) {
                 Assertions.assertEquals("2.0", String.valueOf(transaction.get("amount")));
                 Assertions.assertEquals("0", String.valueOf(transaction.get("amountPaid")));
-                Date transactionDate = DateUtils.getDateOfTenant();
+                Date transactionDate = Utils.getLocalDateOfTenant().toDate();
                 Assertions.assertEquals(simple.format(transactionDate), simple.format(date));
             }
         }
