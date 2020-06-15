@@ -346,7 +346,6 @@ tasks.withType(JavaCompile) {
                 "UnusedNestedClass",
                 "UndefinedEquals",
                 "JdkObsolete",
-                "OperatorPrecedence",
                 "EmptyBlockTag",
                 "MissingSummary",
                 "MutablePublicArray",
@@ -412,7 +411,6 @@ tasks.withType(JavaCompile) {
                 "OperatorPrecedence",
                 "EqualsGetClass",
                 "EqualsUnsafeCast",
-                "JdkObsolete",
                 "DoubleBraceInitialization",
                 "InconsistentCapitalization",
                 "MissingOverride",
@@ -554,7 +552,7 @@ dependencies {
 }
 
 dependencies {
-    errorprone "com.google.errorprone:error_prone_core:2.3.4"
+    errorprone "com.google.errorprone:error_prone_core:2.4.0"
 }
 cargo {
   containerId "tomcat9x"
