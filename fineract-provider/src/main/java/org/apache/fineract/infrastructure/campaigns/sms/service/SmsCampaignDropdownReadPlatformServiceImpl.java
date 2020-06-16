@@ -61,11 +61,10 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
 
     @Override
     public Collection<EnumOptionData> retrieveCampaignTriggerTypes() {
-        final List<EnumOptionData> triggerTypeCodeValues = Arrays.asList( //
-                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.DIRECT), //
-                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.SCHEDULE), //
-                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.TRIGGERED) //
-        );
+        final List<EnumOptionData> triggerTypeCodeValues = Arrays.asList(
+                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.DIRECT),
+                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.SCHEDULE),
+                SmsCampaignEnumerations.smscampaignTriggerType(SmsCampaignTriggerType.TRIGGERED));
 
         return triggerTypeCodeValues;
     }
@@ -90,9 +89,7 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
 
     @Override
     public Collection<EnumOptionData> retrieveCampaignTypes() {
-        final List<EnumOptionData> campaignTypeCodeValues = Arrays.asList( //
-                SmsCampaignEnumerations.smscampaignType(CampaignType.SMS)//
-        );
+        final List<EnumOptionData> campaignTypeCodeValues = Arrays.asList(SmsCampaignEnumerations.smscampaignType(CampaignType.SMS));
         return campaignTypeCodeValues;
     }
 
