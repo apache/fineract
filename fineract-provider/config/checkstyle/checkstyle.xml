@@ -78,6 +78,10 @@
             <property name="option" value="NL"/>
             <property name="tokens" value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR, LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR "/>
         </module>
+        <module name="RightCurly">
+            <property name="option" value="ALONE_OR_SINGLELINE"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, STATIC_INIT, INSTANCE_INIT"/>
+        </module>
         <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">
             <property name="packageNameRegexp" value=".*" />
             <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
@@ -186,10 +190,7 @@
 
 
 
-        <module name="RightCurly">
-            <property name="option" value="alone"/>
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, STATIC_INIT, INSTANCE_INIT"/>
-        </module>
+
 
         <module name="ParenPad" />
 
