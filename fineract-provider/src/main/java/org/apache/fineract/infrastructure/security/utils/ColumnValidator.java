@@ -122,6 +122,7 @@ public class ColumnValidator {
         return tableColumnMap;
     }
 
+    @SuppressWarnings("StringSplitter")
     private static Map<String, Set<String>> getTableColumnAliasMap(Set<String> operands) {
         Map<String, Set<String>> tableColumnMap = new HashMap<>();
         for (String operand : operands) {

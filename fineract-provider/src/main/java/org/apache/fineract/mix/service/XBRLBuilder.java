@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.mix.service;
 
+import com.google.common.base.Splitter;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.fineract.mix.data.ContextData;
@@ -111,10 +113,10 @@ public class XBRLBuilder {
 
         ContextData context = null;
         if (dimension != null) {
-            final String[] dims = dimension.split(":");
+            final List<String> dims = Splitter.on(':').splitToList(dimension);
 
-            if (dims.length == 2) {
-                context = new ContextData(dims[0], dims[1], taxonomy.getType());
+            if (dims.size() == 2) {
+                context = new ContextData(dims.get(0), dims.get(1), taxonomy.getType());
             }
         }
 

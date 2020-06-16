@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -74,7 +75,7 @@ public class LoanChargeAssembler {
                     String chargeIds = jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName).getAsString();
                     if (chargeIds != null) {
                         if (chargeIds.indexOf(",") != -1) {
-                            String[] chargeId = chargeIds.split(",");
+                            Iterable<String> chargeId = Splitter.on(',').split(chargeIds);
                             for (String loanChargeId : chargeId) {
                                 disbursementChargeIds.add(Long.parseLong(loanChargeId));
                             }

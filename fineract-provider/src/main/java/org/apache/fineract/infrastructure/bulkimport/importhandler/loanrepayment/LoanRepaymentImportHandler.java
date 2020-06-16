@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.loanrepayment;
 
+import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
@@ -86,8 +87,8 @@ public class LoanRepaymentImportHandler implements ImportHandler {
     private LoanTransactionData readLoanRepayment(Row row, String locale, String dateFormat) {
         String loanaccountInfo = ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo != null) {
-            String[] loanAccountAr = loanaccountInfo.split("-");
-            loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr[0]);
+            List<String> loanAccountAr = Splitter.on('-').splitToList(loanaccountInfo);
+            loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr.get(0));
         }
         BigDecimal repaymentAmount = null;
         if (ImportHandlerUtils.readAsDouble(LoanRepaymentConstants.AMOUNT_COL, row) != null) {

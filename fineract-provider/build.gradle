@@ -336,7 +336,6 @@ tasks.withType(JavaCompile) {
         disable(
                 "UnusedVariable",
                 "SameNameButDifferent",
-                "StringSplitter",
                 "ImmutableEnumChecker",
                 "UnusedMethod",
                 "ModifiedButNotUsed",
@@ -388,6 +387,7 @@ tasks.withType(JavaCompile) {
                 "OrphanedFormatString",
                 "CatchAndPrintStackTrace",
                 "ObjectToString",
+                "StringSplitter",
                 "AssertThrowsMultipleStatements",
                 "BoxedPrimitiveConstructor",
                 "BoxedPrimitiveEquality",
@@ -422,7 +422,6 @@ tasks.withType(JavaCompile) {
 //                "ConstantField",
 //                "ConstructorInvokesOverridable",
 //                "InjectOnConstructorOfAbstractClass",
-//                "StringSplitter",
 //                "UnnecessaryDefaultInEnumSwitch",
 //                "FieldCanBeFinal"
         )
