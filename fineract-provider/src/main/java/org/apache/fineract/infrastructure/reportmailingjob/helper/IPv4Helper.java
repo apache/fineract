@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.helper;
 
+import com.google.common.base.Splitter;
 import java.net.InetAddress;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,16 +49,16 @@ public class IPv4Helper {
             throw new IllegalArgumentException("ip address cannot be null or empty");
         }
 
-        String[] octets = ipAddress.split(java.util.regex.Pattern.quote("."));
+        List<String> octets = Splitter.onPattern(java.util.regex.Pattern.quote(".")).splitToList(ipAddress);
 
-        if (octets.length != 4) {
+        if (octets.size() != 4) {
             throw new IllegalArgumentException("invalid ip address");
         }
 
         long ip = 0;
 
         for (int i = 3; i >= 0; i--) {
-            long octet = Long.parseLong(octets[3 - i]);
+            long octet = Long.parseLong(octets.get(3 - i));
 
             if (octet > 255 || octet < 0) {
                 throw new IllegalArgumentException("invalid ip address");

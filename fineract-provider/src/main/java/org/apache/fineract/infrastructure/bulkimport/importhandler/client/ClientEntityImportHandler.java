@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.client;
 
+import com.google.common.base.Splitter;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,17 +99,17 @@ public class ClientEntityImportHandler implements ImportHandler {
         String clientType = ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_TYPE_COL, row);
         Long clientTypeId = null;
         if (clientType != null) {
-            String[] clientTypeAr = clientType.split("-");
-            if (clientTypeAr[1] != null) {
-                clientTypeId = Long.parseLong(clientTypeAr[1]);
+            List<String> clientTypeAr = Splitter.on('-').splitToList(clientType);
+            if (clientTypeAr.get(1) != null) {
+                clientTypeId = Long.parseLong(clientTypeAr.get(1));
             }
         }
         String clientClassification = ImportHandlerUtils.readAsString(ClientEntityConstants.CLIENT_CLASSIFICATION_COL, row);
         Long clientClassicationId = null;
         if (clientClassification != null) {
-            String[] clientClassificationAr = clientClassification.split("-");
-            if (clientClassificationAr[1] != null) {
-                clientClassicationId = Long.parseLong(clientClassificationAr[1]);
+            List<String> clientClassificationAr = Splitter.on('-').splitToList(clientClassification);
+            if (clientClassificationAr.get(1) != null) {
+                clientClassicationId = Long.parseLong(clientClassificationAr.get(1));
             }
         }
         String incorporationNo = ImportHandlerUtils.readAsString(ClientEntityConstants.INCOPORATION_NUMBER_COL, row);
@@ -116,17 +117,18 @@ public class ClientEntityImportHandler implements ImportHandler {
         String mainBusinessLine = ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE, row);
         Long mainBusinessId = null;
         if (mainBusinessLine != null) {
-            String[] mainBusinessLineAr = ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE, row).split("-");
-            if (mainBusinessLineAr[1] != null) {
-                mainBusinessId = Long.parseLong(mainBusinessLineAr[1]);
+            List<String> mainBusinessLineAr = Splitter.on('-')
+                    .splitToList(ImportHandlerUtils.readAsString(ClientEntityConstants.MAIN_BUSINESS_LINE, row));
+            if (mainBusinessLineAr.get(1) != null) {
+                mainBusinessId = Long.parseLong(mainBusinessLineAr.get(1));
             }
         }
         String constitution = ImportHandlerUtils.readAsString(ClientEntityConstants.CONSTITUTION_COL, row);
         Long constitutionId = null;
         if (constitution != null) {
-            String[] constitutionAr = constitution.split("-");
-            if (constitutionAr[1] != null) {
-                constitutionId = Long.parseLong(constitutionAr[1]);
+            List<String> constitutionAr = Splitter.on('-').splitToList(constitution);
+            if (constitutionAr.get(1) != null) {
+                constitutionId = Long.parseLong(constitutionAr.get(1));
             }
         }
         String remarks = ImportHandlerUtils.readAsString(ClientEntityConstants.REMARKS_COL, row);
@@ -150,9 +152,9 @@ public class ClientEntityImportHandler implements ImportHandler {
             String addressType = ImportHandlerUtils.readAsString(ClientEntityConstants.ADDRESS_TYPE_COL, row);
             Long addressTypeId = null;
             if (addressType != null) {
-                String[] addressTypeAr = addressType.split("-");
-                if (addressTypeAr[1] != null) {
-                    addressTypeId = Long.parseLong(addressTypeAr[1]);
+                List<String> addressTypeAr = Splitter.on('-').splitToList(addressType);
+                if (addressTypeAr.get(1) != null) {
+                    addressTypeId = Long.parseLong(addressTypeAr.get(1));
                 }
             }
             String street = ImportHandlerUtils.readAsString(ClientEntityConstants.STREET_COL, row);
@@ -167,17 +169,17 @@ public class ClientEntityImportHandler implements ImportHandler {
             String stateProvince = ImportHandlerUtils.readAsString(ClientEntityConstants.STATE_PROVINCE_COL, row);
             Long stateProvinceId = null;
             if (stateProvince != null) {
-                String[] stateProvinceAr = stateProvince.split("-");
-                if (stateProvinceAr[1] != null) {
-                    stateProvinceId = Long.parseLong(stateProvinceAr[1]);
+                List<String> stateProvinceAr = Splitter.on('-').splitToList(stateProvince);
+                if (stateProvinceAr.get(1) != null) {
+                    stateProvinceId = Long.parseLong(stateProvinceAr.get(1));
                 }
             }
             String country = ImportHandlerUtils.readAsString(ClientEntityConstants.COUNTRY_COL, row);
             Long countryId = null;
             if (country != null) {
-                String[] countryAr = country.split("-");
-                if (countryAr[1] != null) {
-                    countryId = Long.parseLong(countryAr[1]);
+                List<String> countryAr = Splitter.on('-').splitToList(country);
+                if (countryAr.get(1) != null) {
+                    countryId = Long.parseLong(countryAr.get(1));
                 }
             }
             addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3, city, postalCode,

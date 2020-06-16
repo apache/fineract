@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command.internal;
 
+import com.google.common.base.Splitter;
+import java.util.List;
 import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -62,8 +64,8 @@ public class ActivateClientCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final String[] pathParameters = request.getRelativeUrl().split("/");
-        Long clientId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
+        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
+        Long clientId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
 
         // Try-catch blocks to map exceptions to appropriate status codes
         try {

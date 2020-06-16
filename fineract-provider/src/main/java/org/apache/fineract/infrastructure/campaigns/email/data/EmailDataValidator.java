@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -280,7 +281,7 @@ public final class EmailDataValidator {
         Set<String> emailRecipientsSet = new HashSet<>();
 
         if (emailRecipients != null) {
-            String[] split = emailRecipients.split(",");
+            Iterable<String> split = Splitter.on(',').split(emailRecipients);
 
             for (String emailAddress : split) {
                 emailAddress = emailAddress.trim();

@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
+import com.google.common.base.Splitter;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -224,8 +226,8 @@ public class Cashier extends AbstractPersistableCustom {
 
     public Long getHourFromStartTime() {
         if (this.startTime != null && !this.startTime.equalsIgnoreCase("")) {
-            String[] extractHourFromStartTime = this.startTime.split(":");
-            Long hour = Long.parseLong(extractHourFromStartTime[1]);
+            List<String> extractHourFromStartTime = Splitter.on(':').splitToList(this.startTime);
+            Long hour = Long.parseLong(extractHourFromStartTime.get(1));
             return hour;
         }
         return null;
@@ -233,8 +235,8 @@ public class Cashier extends AbstractPersistableCustom {
 
     public Long getMinFromStartTime() {
         if (this.startTime != null && !this.startTime.equalsIgnoreCase("")) {
-            String[] extractMinFromStartTime = this.startTime.split(":");
-            Long min = Long.parseLong(extractMinFromStartTime[1]);
+            List<String> extractMinFromStartTime = Splitter.on(':').splitToList(this.startTime);
+            Long min = Long.parseLong(extractMinFromStartTime.get(1));
             return min;
         }
         return null;
@@ -242,8 +244,8 @@ public class Cashier extends AbstractPersistableCustom {
 
     public Long getHourFromEndTime() {
         if (this.endTime != null && !this.endTime.equalsIgnoreCase("")) {
-            String[] extractHourFromEndTime = this.endTime.split(":");
-            Long hour = Long.parseLong(extractHourFromEndTime[0]);
+            List<String> extractHourFromEndTime = Splitter.on(':').splitToList(this.endTime);
+            Long hour = Long.parseLong(extractHourFromEndTime.get(0));
             return hour;
         }
         return null;
@@ -251,8 +253,8 @@ public class Cashier extends AbstractPersistableCustom {
 
     public Long getMinFromEndTime() {
         if (this.endTime != null && !this.endTime.equalsIgnoreCase("")) {
-            String[] extractMinFromEndTime = this.endTime.split(":");
-            Long min = Long.parseLong(extractMinFromEndTime[1]);
+            List<String> extractMinFromEndTime = Splitter.on(':').splitToList(this.endTime);
+            Long min = Long.parseLong(extractMinFromEndTime.get(1));
             return min;
         }
         return null;

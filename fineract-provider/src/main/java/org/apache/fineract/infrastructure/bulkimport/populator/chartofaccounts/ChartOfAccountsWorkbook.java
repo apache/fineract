@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator.chartofaccounts;
 
+import com.google.common.base.Splitter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,19 +180,19 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
             if (!accountNamesandTags.isEmpty()) {
                 for (String accountNameandTag : accountNamesandTags) {
                     if (chartOfAccountsSheet.getRow(rowIndex) != null) {
-                        String[] accountNameAndTagAr = accountNameandTag.split("-");
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr[0]);
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr[1]);
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr[2]);
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr[3]);
+                        List<String> accountNameAndTagAr = Splitter.on('-').splitToList(accountNameandTag);
+                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
+                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
+                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
+                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
                         rowIndex++;
                     } else {
                         row = chartOfAccountsSheet.createRow(rowIndex);
-                        String[] accountNameAndTagAr = accountNameandTag.split("-");
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr[0]);
-                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr[1]);
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr[2]);
-                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr[3]);
+                        List<String> accountNameAndTagAr = Splitter.on('-').splitToList(accountNameandTag);
+                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_NAME_COL, row, accountNameAndTagAr.get(0));
+                        writeString(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL, row, accountNameAndTagAr.get(1));
+                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_COL, row, accountNameAndTagAr.get(2));
+                        writeString(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL, row, accountNameAndTagAr.get(3));
                         rowIndex++;
                     }
                 }

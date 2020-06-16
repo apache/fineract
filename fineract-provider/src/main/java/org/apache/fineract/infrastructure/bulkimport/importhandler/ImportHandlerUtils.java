@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -130,7 +132,7 @@ public class ImportHandlerUtils {
 
     public static String trimEmptyDecimalPortion(String result) {
         if (result != null && result.endsWith(".0")) {
-            return result.split("\\.")[0];
+            return Iterables.get(Splitter.on("\\.").split(result), 0);
         } else {
             return result;
         }

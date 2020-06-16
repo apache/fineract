@@ -337,7 +337,6 @@ tasks.withType(JavaCompile) {
                 "UnusedVariable",
                 "ClassCanBeStatic",
                 "SameNameButDifferent",
-                "StringSplitter",
                 "ImmutableEnumChecker",
                 "BadImport",
                 "UnusedMethod",
@@ -372,6 +371,7 @@ tasks.withType(JavaCompile) {
                 "OrphanedFormatString",
                 "CatchAndPrintStackTrace",
                 "ObjectToString",
+                "StringSplitter",
                 "AssertThrowsMultipleStatements",
                 "BoxedPrimitiveConstructor",
                 "BoxedPrimitiveEquality",
@@ -406,7 +406,6 @@ tasks.withType(JavaCompile) {
 //                "UnnecessaryStaticImport",
 //                "ConstructorInvokesOverridable",
 //                "InjectOnConstructorOfAbstractClass",
-//                "StringSplitter",
 //                "UnnecessaryDefaultInEnumSwitch",
 //                "FieldCanBeFinal"
         )

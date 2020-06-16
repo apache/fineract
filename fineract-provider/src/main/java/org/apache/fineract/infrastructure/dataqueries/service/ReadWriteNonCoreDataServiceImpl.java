@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -325,16 +326,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public String getDataTableName(String url) {
 
-        String[] urlParts = url.split("/");
+        List<String> urlParts = Splitter.on('/').splitToList(url);
 
-        return urlParts[3];
+        return urlParts.get(3);
 
     }
 
     @Override
     public String getTableName(String url) {
-        String[] urlParts = url.split("/");
-        return urlParts[4];
+        List<String> urlParts = Splitter.on('/').splitToList(url);
+        return urlParts.get(4);
     }
 
     @Transactional

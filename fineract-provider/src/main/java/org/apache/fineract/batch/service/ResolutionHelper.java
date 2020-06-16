@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.service;
 
+import com.google.common.base.Splitter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -164,7 +165,7 @@ public class ResolutionHelper {
                 relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
             }
 
-            final String[] parameters = relativeUrl.split("/");
+            final Iterable<String> parameters = Splitter.on('/').split(relativeUrl);
 
             for (String parameter : parameters) {
                 if (parameter.contains("$.")) {
