@@ -26,8 +26,11 @@
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
 
-    <!-- Checks for whitespace                               -->
-    <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+    <!--
+        You can learn more about individual checkstyles at: https://checkstyle.sourceforge.io/
+        Checks related to LineLength and Indentation are only handled by Spotless
+    -->
+
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
@@ -40,13 +43,7 @@
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
     <module name="SuppressWarningsFilter"/>
-<!-- TODO Enable maximum line length check:
-    <module name="LineLength">
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-        <property name="fileExtensions" value="java"/>
-    </module>
-  -->
+
 
     <module name="TreeWalker">
     <module name="SuppressWarningsHolder" />
@@ -231,14 +228,7 @@
 
         <module name="ConstantName" />
         <module name="NoFinalizer"/>
-        <module name="Indentation">
-            <property name="basicOffset" value="4"/>
-            <property name="braceAdjustment" value="0"/>
-            <property name="caseIndent" value="4"/>
-            <property name="throwsIndent" value="4"/>
-            <property name="lineWrappingIndentation" value="4"/>
-            <property name="arrayInitIndent" value="4"/>
-        </module>
+
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
             <property name="allowedAbbreviationLength" value="4"/>
