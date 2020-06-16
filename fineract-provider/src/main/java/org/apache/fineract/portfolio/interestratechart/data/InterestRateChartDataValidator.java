@@ -121,7 +121,10 @@ public class InterestRateChartDataValidator {
             }
         }
 
-        // validate chart Slabs
+        // validate chart Slabs - mandatory when creating
+        final JsonArray array = this.fromApiJsonHelper.extractJsonArrayNamed(chartSlabs, element);
+        baseDataValidator.reset().parameter(chartSlabs).value(array).notNull().jsonArrayNotEmpty();
+
         validateChartSlabs(element, baseDataValidator, isPrimaryGroupingByAmount);
     }
 
