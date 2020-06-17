@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConcurrencyIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;

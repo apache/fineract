@@ -44,7 +44,7 @@ import retrofit.Callback;
 @Service
 public class TwilioHookProcessor implements HookProcessor {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TwilioHookProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TwilioHookProcessor.class);
     private final HookConfigurationRepository hookConfigurationRepository;
     private final TemplateMergeService templateMergeService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ChargesHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ChargesHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ChargesHelper.class);
     private static final String CHARGES_URL = "/fineract-provider/api/v1/charges";
     private static final String CREATE_CHARGES_URL = CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER;
 
@@ -72,12 +72,12 @@ public class ChargesHelper {
     private static final Integer CHARGE_FEE_FREQUENCY_MONTHS = 2;
     private static final Integer CHARGE_FEE_FREQUENCY_YEARS = 3;
 
-    private final static boolean ACTIVE = true;
-    private final static boolean PENALTY = true;
-    private final static String AMOUNT = "100";
-    private final static String CURRENCY_CODE = "USD";
-    public final static String FEE_ON_MONTH_DAY = "04 March";
-    private final static String MONTH_DAY_FORMAT = "dd MMM";
+    private static final boolean ACTIVE = true;
+    private static final boolean PENALTY = true;
+    private static final String AMOUNT = "100";
+    private static final String CURRENCY_CODE = "USD";
+    public static final String FEE_ON_MONTH_DAY = "04 March";
+    private static final String MONTH_DAY_FORMAT = "dd MMM";
 
     public static String getSavingsSpecifiedDueDateJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();

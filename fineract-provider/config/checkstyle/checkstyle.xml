@@ -169,6 +169,7 @@
              value="WhitespaceAround: ''{0}'' is not preceded with whitespace."/>
         </module>
         <module name="ParenPad" />
+        <module name="ModifierOrder"/>
 <!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="HiddenField">
@@ -202,7 +203,7 @@
         <module name="MissingSwitchDefault"/>
 
 
-        <module name="ModifierOrder"/>
+
         <module name="RedundantModifier"/>
 
         <module name="MemberName">

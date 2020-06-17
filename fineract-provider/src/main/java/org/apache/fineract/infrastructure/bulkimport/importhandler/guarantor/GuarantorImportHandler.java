@@ -48,7 +48,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GuarantorImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
     private Workbook workbook;
     private List<GuarantorData> guarantors;
     private Long loanAccountId;

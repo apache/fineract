@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class NotificationApiTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationApiTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
 

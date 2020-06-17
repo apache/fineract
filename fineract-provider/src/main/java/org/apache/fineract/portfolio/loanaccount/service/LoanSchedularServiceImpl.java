@@ -54,7 +54,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class LoanSchedularServiceImpl implements LoanSchedularService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoanSchedularServiceImpl.class);
 
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;

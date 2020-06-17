@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class VariableInstallmentsDecliningBalanceHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(VariableInstallmentsDecliningBalanceHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VariableInstallmentsDecliningBalanceHelper.class);
 
     public static String createLoanProductWithoutVaribleConfig(final boolean multiDisburseLoan, final String accountingRule,
             final Account... accounts) {

@@ -32,7 +32,7 @@ final class ClientChargesApiResourceSwagger {
     private ClientChargesApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsClientIdChargesResponse")
-    public final static class GetClientsClientIdChargesResponse {
+    public static final class GetClientsClientIdChargesResponse {
 
         private GetClientsClientIdChargesResponse() {}
 
@@ -121,7 +121,7 @@ final class ClientChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdChargesRequest")
-    public final static class PostClientsClientIdChargesRequest {
+    public static final class PostClientsClientIdChargesRequest {
 
         private PostClientsClientIdChargesRequest() {}
 
@@ -138,7 +138,7 @@ final class ClientChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdChargesResponse")
-    public final static class PostClientsClientIdChargesResponse {
+    public static final class PostClientsClientIdChargesResponse {
 
         private PostClientsClientIdChargesResponse() {}
 
@@ -151,7 +151,7 @@ final class ClientChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdChargesChargeIdRequest")
-    public final static class PostClientsClientIdChargesChargeIdRequest {
+    public static final class PostClientsClientIdChargesChargeIdRequest {
 
         private PostClientsClientIdChargesChargeIdRequest() {}
 
@@ -166,7 +166,7 @@ final class ClientChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdChargesChargeIdResponse")
-    public final static class PostClientsClientIdChargesChargeIdResponse {
+    public static final class PostClientsClientIdChargesChargeIdResponse {
 
         private PostClientsClientIdChargesChargeIdResponse() {}
 
@@ -181,7 +181,7 @@ final class ClientChargesApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteClientsClientIdChargesChargeIdResponse")
-    public final static class DeleteClientsClientIdChargesChargeIdResponse {
+    public static final class DeleteClientsClientIdChargesChargeIdResponse {
 
         private DeleteClientsClientIdChargesChargeIdResponse() {}
 

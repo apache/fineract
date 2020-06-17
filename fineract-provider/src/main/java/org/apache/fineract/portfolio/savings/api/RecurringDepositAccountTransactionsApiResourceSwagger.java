@@ -32,7 +32,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     private RecurringDepositAccountTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
+    public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTemplateResponse() {}
 
@@ -109,7 +109,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+    public static final class GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
         private GetRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 
@@ -202,7 +202,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest() {}
 
@@ -229,7 +229,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsResponse() {}
 
@@ -261,7 +261,7 @@ final class RecurringDepositAccountTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse")
-    public final static class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
+    public static final class PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse {
 
         private PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsTransactionIdResponse() {}
 

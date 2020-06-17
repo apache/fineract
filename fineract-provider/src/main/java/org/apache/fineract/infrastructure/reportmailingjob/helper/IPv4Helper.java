@@ -40,7 +40,7 @@ public class IPv4Helper {
      * @throws IllegalArgumentException
      *             if <code>ipAddress</code> is invalid
      */
-    private final static Logger LOG = LoggerFactory.getLogger(IPv4Helper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IPv4Helper.class);
 
     public static long ipAddressToLong(String ipAddress) {
         if (ipAddress == null || ipAddress.isEmpty()) {

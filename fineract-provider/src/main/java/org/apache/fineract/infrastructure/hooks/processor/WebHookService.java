@@ -32,11 +32,11 @@ import retrofit.http.POST;
 
 public interface WebHookService {
 
-    final static String ENTITY_HEADER = "X-Fineract-Entity";
-    final static String ACTION_HEADER = "X-Fineract-Action";
-    final static String TENANT_HEADER = "Fineract-Platform-TenantId";
-    final static String ENDPOINT_HEADER = "X-Fineract-Endpoint";
-    final static String API_KEY_HEADER = "X-Fineract-API-Key";
+    static final String ENTITY_HEADER = "X-Fineract-Entity";
+    static final String ACTION_HEADER = "X-Fineract-Action";
+    static final String TENANT_HEADER = "Fineract-Platform-TenantId";
+    static final String ENDPOINT_HEADER = "X-Fineract-Endpoint";
+    static final String API_KEY_HEADER = "X-Fineract-API-Key";
 
     // Ping
     @GET("/")

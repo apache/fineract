@@ -49,7 +49,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BulkImportEventListener implements ApplicationListener<BulkImportEvent> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(BulkImportEventListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BulkImportEventListener.class);
     private final TenantDetailsService tenantDetailsService;
     private final ApplicationContext applicationContext;
     private final ImportDocumentRepository importRepository;

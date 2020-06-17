@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class DatatableHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 

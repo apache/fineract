@@ -31,9 +31,9 @@ public class RatesHelper {
 
     private static final String RATES_URL = "/fineract-provider/api/v1/rates";
     private static final String CREATE_RATES_URL = RATES_URL + "?" + Utils.TENANT_IDENTIFIER;
-    private final static String PERCENTAGE = "10";
-    private final static Integer PRODUCT_APPLY_LOAN = 1;
-    private final static Boolean ACTIVE = true;
+    private static final String PERCENTAGE = "10";
+    private static final Integer PRODUCT_APPLY_LOAN = 1;
+    private static final Boolean ACTIVE = true;
 
     public static ArrayList<HashMap> getRates(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, RATES_URL + "?" + Utils.TENANT_IDENTIFIER, "");

@@ -31,7 +31,7 @@ final class CentersApiResourceSwagger {
     private CentersApiResourceSwagger() {}
 
     @ApiModel(value = "GetCentersTemplateResponse")
-    public final static class GetCentersTemplateResponse {
+    public static final class GetCentersTemplateResponse {
 
         private GetCentersTemplateResponse() {}
 
@@ -68,7 +68,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "GetCentersResponse")
-    public final static class GetCentersResponse {
+    public static final class GetCentersResponse {
 
         private GetCentersResponse() {}
 
@@ -109,7 +109,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "GetCentersCenterIdResponse")
-    public final static class GetCentersCenterIdResponse {
+    public static final class GetCentersCenterIdResponse {
 
         private GetCentersCenterIdResponse() {}
 
@@ -129,7 +129,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostCentersRequest")
-    public final static class PostCentersRequest {
+    public static final class PostCentersRequest {
 
         private PostCentersRequest() {}
 
@@ -142,7 +142,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostCentersResponse")
-    public final static class PostCentersResponse {
+    public static final class PostCentersResponse {
 
         private PostCentersResponse() {}
 
@@ -155,7 +155,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "PutCentersCenterIdRequest")
-    public final static class PutCentersCenterIdRequest {
+    public static final class PutCentersCenterIdRequest {
 
         private PutCentersCenterIdRequest() {}
 
@@ -164,7 +164,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "PutCentersCenterIdResponse")
-    public final static class PutCentersCenterIdResponse {
+    public static final class PutCentersCenterIdResponse {
 
         private PutCentersCenterIdResponse() {}
 
@@ -186,7 +186,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteCentersCenterIdResponse")
-    public final static class DeleteCentersCenterIdResponse {
+    public static final class DeleteCentersCenterIdResponse {
 
         private DeleteCentersCenterIdResponse() {}
 
@@ -201,7 +201,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostCentersCenterIdRequest")
-    public final static class PostCentersCenterIdRequest {
+    public static final class PostCentersCenterIdRequest {
 
         private PostCentersCenterIdRequest() {}
 
@@ -216,7 +216,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostCentersCenterIdResponse")
-    public final static class PostCentersCenterIdResponse {
+    public static final class PostCentersCenterIdResponse {
 
         private PostCentersCenterIdResponse() {}
 
@@ -225,7 +225,7 @@ final class CentersApiResourceSwagger {
     }
 
     @ApiModel(value = "GetCentersCenterIdAccountsResponse")
-    public final static class GetCentersCenterIdAccountsResponse {
+    public static final class GetCentersCenterIdAccountsResponse {
 
         private GetCentersCenterIdAccountsResponse() {}
 

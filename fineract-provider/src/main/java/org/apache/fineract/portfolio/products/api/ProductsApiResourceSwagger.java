@@ -30,7 +30,7 @@ final class ProductsApiResourceSwagger {
     private ProductsApiResourceSwagger() {}
 
     @ApiModel(value = "GetProductsTypeProductIdResponse")
-    public final static class GetProductsTypeProductIdResponse {
+    public static final class GetProductsTypeProductIdResponse {
 
         private GetProductsTypeProductIdResponse() {}
 
@@ -482,7 +482,7 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostProductsTypeRequest")
-    public final static class PostProductsTypeRequest {
+    public static final class PostProductsTypeRequest {
 
         private PostProductsTypeRequest() {}
 
@@ -551,7 +551,7 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostProductsTypeResponse")
-    public final static class PostProductsTypeResponse {
+    public static final class PostProductsTypeResponse {
 
         private PostProductsTypeResponse() {}
 
@@ -560,7 +560,7 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutProductsTypeProductIdRequest")
-    public final static class PutProductsTypeProductIdRequest {
+    public static final class PutProductsTypeProductIdRequest {
 
         private PutProductsTypeProductIdRequest() {}
 
@@ -573,7 +573,7 @@ final class ProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutProductsTypeProductIdResponse")
-    public final static class PutProductsTypeProductIdResponse {
+    public static final class PutProductsTypeProductIdResponse {
 
         private PutProductsTypeProductIdResponse() {}
 

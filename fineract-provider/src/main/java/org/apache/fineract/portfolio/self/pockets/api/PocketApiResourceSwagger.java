@@ -31,7 +31,7 @@ final class PocketApiResourceSwagger {
     private PocketApiResourceSwagger() {}
 
     @ApiModel(value = "PostLinkDelinkAccountsToFromPocketRequest")
-    public final static class PostLinkDelinkAccountsToFromPocketRequest {
+    public static final class PostLinkDelinkAccountsToFromPocketRequest {
 
         private PostLinkDelinkAccountsToFromPocketRequest() {}
 
@@ -49,7 +49,7 @@ final class PocketApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLinkDelinkAccountsToFromPocketResponse")
-    public final static class PostLinkDelinkAccountsToFromPocketResponse {
+    public static final class PostLinkDelinkAccountsToFromPocketResponse {
 
         private PostLinkDelinkAccountsToFromPocketResponse() {}
 
@@ -58,7 +58,7 @@ final class PocketApiResourceSwagger {
     }
 
     @ApiModel(value = "GetAccountsLinkedToPocketResponse")
-    public final static class GetAccountsLinkedToPocketResponse {
+    public static final class GetAccountsLinkedToPocketResponse {
 
         private GetAccountsLinkedToPocketResponse() {}
 

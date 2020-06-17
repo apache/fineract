@@ -30,7 +30,7 @@ import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class ProvisioningHelper {
 
-    public final static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
+    public static final Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
             Account expense) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("loanProducts", addLoanProducts(loanProducts));
@@ -44,7 +44,7 @@ public class ProvisioningHelper {
         return map;
     }
 
-    public final static String createProvisioningEntryJson() {
+    public static final String createProvisioningEntryJson() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.FALSE);
         map.put("locale", "en");
@@ -55,7 +55,7 @@ public class ProvisioningHelper {
         return provisioningEntryCreateJson;
     }
 
-    public final static String createProvisioningEntryJsonWithJournalsEnabled() {
+    public static final String createProvisioningEntryJsonWithJournalsEnabled() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.TRUE);
         map.put("locale", "en");

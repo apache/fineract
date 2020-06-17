@@ -31,7 +31,7 @@ final class SelfRunReportApiResourceSwagger {
     private SelfRunReportApiResourceSwagger() {}
 
     @ApiModel(value = "GetRunReportResponse")
-    public final static class GetRunReportResponse {
+    public static final class GetRunReportResponse {
 
         private GetRunReportResponse() {}
 

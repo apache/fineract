@@ -48,7 +48,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDropdownReadPlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SmsCampaignDropdownReadPlatformServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmsCampaignDropdownReadPlatformServiceImpl.class);
     private final RestTemplate restTemplate;
 
     private final SmsConfigUtils smsConfigUtils;

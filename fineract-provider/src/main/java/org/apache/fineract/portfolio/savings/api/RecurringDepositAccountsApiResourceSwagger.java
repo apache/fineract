@@ -31,7 +31,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     private RecurringDepositAccountsApiResourceSwagger() {}
 
     @ApiModel(value = "GetRecurringDepositAccountsTemplateResponse")
-    public final static class GetRecurringDepositAccountsTemplateResponse {
+    public static final class GetRecurringDepositAccountsTemplateResponse {
 
         private GetRecurringDepositAccountsTemplateResponse() {}
 
@@ -53,7 +53,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsResponse")
-    public final static class GetRecurringDepositAccountsResponse {
+    public static final class GetRecurringDepositAccountsResponse {
 
         private GetRecurringDepositAccountsResponse() {}
 
@@ -273,7 +273,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsRequest")
-    public final static class PostRecurringDepositAccountsRequest {
+    public static final class PostRecurringDepositAccountsRequest {
 
         private PostRecurringDepositAccountsRequest() {}
 
@@ -304,7 +304,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsResponse")
-    public final static class PostRecurringDepositAccountsResponse {
+    public static final class PostRecurringDepositAccountsResponse {
 
         private PostRecurringDepositAccountsResponse() {}
 
@@ -319,7 +319,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetRecurringDepositAccountsAccountIdResponse")
-    public final static class GetRecurringDepositAccountsAccountIdResponse {
+    public static final class GetRecurringDepositAccountsAccountIdResponse {
 
         private GetRecurringDepositAccountsAccountIdResponse() {}
 
@@ -443,7 +443,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositAccountsAccountIdRequest")
-    public final static class PutRecurringDepositAccountsAccountIdRequest {
+    public static final class PutRecurringDepositAccountsAccountIdRequest {
 
         private PutRecurringDepositAccountsAccountIdRequest() {}
 
@@ -454,7 +454,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutRecurringDepositAccountsAccountIdResponse")
-    public final static class PutRecurringDepositAccountsAccountIdResponse {
+    public static final class PutRecurringDepositAccountsAccountIdResponse {
 
         private PutRecurringDepositAccountsAccountIdResponse() {}
 
@@ -480,13 +480,13 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsAccountIdRequest")
-    public final static class PostRecurringDepositAccountsAccountIdRequest {
+    public static final class PostRecurringDepositAccountsAccountIdRequest {
 
         private PostRecurringDepositAccountsAccountIdRequest() {}
     }
 
     @ApiModel(value = "PostRecurringDepositAccountsAccountIdResponse")
-    public final static class PostRecurringDepositAccountsAccountIdResponse {
+    public static final class PostRecurringDepositAccountsAccountIdResponse {
 
         private PostRecurringDepositAccountsAccountIdResponse() {}
 
@@ -501,7 +501,7 @@ final class RecurringDepositAccountsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteRecurringDepositAccountsResponse")
-    public final static class DeleteRecurringDepositAccountsResponse {
+    public static final class DeleteRecurringDepositAccountsResponse {
 
         private DeleteRecurringDepositAccountsResponse() {}
 

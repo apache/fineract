@@ -67,7 +67,7 @@ import org.springframework.stereotype.Service;
 public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
     private static boolean firstRequestProcessed = false;
-    private final static Logger LOG = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
 
     private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;

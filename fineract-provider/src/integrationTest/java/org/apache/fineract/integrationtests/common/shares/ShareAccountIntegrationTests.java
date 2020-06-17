@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 public class ShareAccountIntegrationTests {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ShareAccountIntegrationTests.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ShareAccountIntegrationTests.class);
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private ShareProductHelper shareProductHelper;

@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class XBRLResultServiceImpl implements XBRLResultService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(XBRLResultServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XBRLResultServiceImpl.class);
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("JavaScript");
 
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;

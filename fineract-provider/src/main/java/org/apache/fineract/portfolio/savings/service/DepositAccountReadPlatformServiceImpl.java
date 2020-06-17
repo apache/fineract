@@ -124,7 +124,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     // allowed column names for sorting the query result
-    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr", "officeId", "officeName"));
+    private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr", "officeId", "officeName"));
 
     @Autowired
     public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -539,7 +539,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 formatter.print(DateUtils.getLocalDateOfTenant()));
     }
 
-    private static abstract class DepositAccountMapper implements RowMapper<DepositAccountData> {
+    private abstract static class DepositAccountMapper implements RowMapper<DepositAccountData> {
 
         private final String selectFieldsSql;
         private final String selectTablesSql;
@@ -1075,7 +1075,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         }
     }
 
-    private static abstract class DepositAccountTemplateMapper implements RowMapper<DepositAccountData> {
+    private abstract static class DepositAccountTemplateMapper implements RowMapper<DepositAccountData> {
 
         private final String selectFieldsSql;
         private final String selectTablesSql;

@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 /* used to show list of parameters used by a report and also for getting a list of parameters available (the reportParameterName is left null */
-final public class ReportParameterData {
+public final class ReportParameterData {
 
     @SuppressWarnings("unused")
     private final Long id;

@@ -31,7 +31,7 @@ final class StandingInstructionHistoryApiResourceSwagger {
     private StandingInstructionHistoryApiResourceSwagger() {}
 
     @ApiModel(value = "GetStandingInstructionRunHistoryResponse")
-    public final static class GetStandingInstructionRunHistoryResponse {
+    public static final class GetStandingInstructionRunHistoryResponse {
 
         private GetStandingInstructionRunHistoryResponse() {}
 

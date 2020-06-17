@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImageHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ImageHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageHelper.class);
     private static final String STAFF_IMAGE_URL = "/fineract-provider/api/v1/staff/";
     private static final String IMAGES_URI = "/images";
 

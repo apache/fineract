@@ -59,7 +59,7 @@ public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountCh
         return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { accountId });
     }
 
-    private final static class ShareAccountChargeMapper implements RowMapper<ShareAccountChargeData> {
+    private static final class ShareAccountChargeMapper implements RowMapper<ShareAccountChargeData> {
 
         private final String schema;
 

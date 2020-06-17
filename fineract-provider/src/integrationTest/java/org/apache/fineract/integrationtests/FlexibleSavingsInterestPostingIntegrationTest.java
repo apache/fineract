@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
 public class FlexibleSavingsInterestPostingIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlexibleSavingsInterestPostingIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
     private ResponseSpecification responseSpec;

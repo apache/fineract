@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class CalendarHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CalendarHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CalendarHelper.class);
     private static final String BASE_URL = "/fineract-provider/api/v1/";
     private static final String PARENT_ENTITY_NAME = "groups/";
     private static final String ENITY_NAME = "/calendars";

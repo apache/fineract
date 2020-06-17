@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BatchHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BatchHelper.class);
     private static final String BATCH_API_URL = "/fineract-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
 

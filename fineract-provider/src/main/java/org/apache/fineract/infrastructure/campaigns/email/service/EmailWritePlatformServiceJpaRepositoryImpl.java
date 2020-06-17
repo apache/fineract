@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
 
     private final EmailMessageAssembler assembler;
     private final EmailMessageRepository repository;

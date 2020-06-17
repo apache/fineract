@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ProvisioningIntegrationTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningIntegrationTest.class);
     private static final String NONE = "1";
-    private final static int LOANPRODUCTS_SIZE = 10;
+    private static final int LOANPRODUCTS_SIZE = 10;
 
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;

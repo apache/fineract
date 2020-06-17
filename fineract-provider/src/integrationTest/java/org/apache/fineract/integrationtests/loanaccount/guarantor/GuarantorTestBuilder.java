@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class GuarantorTestBuilder {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GuarantorTestBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GuarantorTestBuilder.class);
     private static final String GUARANTOR_TYPE_CUSTOMER = "1";
     @SuppressWarnings("unused")
     private static final String GUARANTOR_TYPE_STAFF = "2";

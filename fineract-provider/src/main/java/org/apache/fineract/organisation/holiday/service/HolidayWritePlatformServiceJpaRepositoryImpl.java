@@ -54,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
 
     private final HolidayDataValidator fromApiJsonDeserializer;
     private final HolidayRepositoryWrapper holidayRepository;

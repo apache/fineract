@@ -49,7 +49,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements PurchasedSharesRe
         return this.jdbcTemplate.query(sql, mapper, new Object[] { accountId });
     }
 
-    private final static class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
+    private static final class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
 
         private final String schema;
 

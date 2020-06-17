@@ -69,7 +69,7 @@ public class EntityDatatableChecksApiResource {
     private final EntityDatatableChecksReadService readEntityDatatableChecksService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksApiResource.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksApiResource.class);
 
     @Autowired
     public EntityDatatableChecksApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,

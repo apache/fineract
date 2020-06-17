@@ -31,7 +31,7 @@ final class AccountTransfersApiResourceSwagger {
     private AccountTransfersApiResourceSwagger() {}
 
     @ApiModel(value = "GetAccountTransfersTemplateResponse")
-    public final static class GetAccountTransfersTemplateResponse {
+    public static final class GetAccountTransfersTemplateResponse {
 
         private GetAccountTransfersTemplateResponse() {}
 
@@ -141,7 +141,7 @@ final class AccountTransfersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountTransfersRequest")
-    public final static class PostAccountTransfersRequest {
+    public static final class PostAccountTransfersRequest {
 
         private PostAccountTransfersRequest() {}
 
@@ -174,7 +174,7 @@ final class AccountTransfersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountTransfersResponse")
-    public final static class PostAccountTransfersResponse {
+    public static final class PostAccountTransfersResponse {
 
         private PostAccountTransfersResponse() {}
 
@@ -185,7 +185,7 @@ final class AccountTransfersApiResourceSwagger {
     }
 
     @ApiModel(value = "GetAccountTransfersResponse")
-    public final static class GetAccountTransfersResponse {
+    public static final class GetAccountTransfersResponse {
 
         private GetAccountTransfersResponse() {}
 
@@ -558,7 +558,7 @@ final class AccountTransfersApiResourceSwagger {
     }
 
     @ApiModel(value = "PostAccountTransfersRefundByTransferResponse")
-    public final static class PostAccountTransfersRefundByTransferResponse {
+    public static final class PostAccountTransfersRefundByTransferResponse {
 
         private PostAccountTransfersRefundByTransferResponse() {}
 

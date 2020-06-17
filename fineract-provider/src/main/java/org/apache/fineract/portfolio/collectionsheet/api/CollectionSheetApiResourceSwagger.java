@@ -30,7 +30,7 @@ final class CollectionSheetApiResourceSwagger {
     private CollectionSheetApiResourceSwagger() {}
 
     @ApiModel(value = "PostCollectionSheetRequest")
-    public final static class PostCollectionSheetRequest {
+    public static final class PostCollectionSheetRequest {
 
         private PostCollectionSheetRequest() {}
 
@@ -62,7 +62,7 @@ final class CollectionSheetApiResourceSwagger {
     }
 
     @ApiModel(value = "PostCollectionSheetResponse")
-    public final static class PostCollectionSheetResponse {
+    public static final class PostCollectionSheetResponse {
 
         private PostCollectionSheetResponse() {}
 

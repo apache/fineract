@@ -63,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TellerWritePlatformServiceJpaImpl.class);
 
     private final PlatformSecurityContext context;
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;

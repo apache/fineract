@@ -32,7 +32,7 @@ final class LoanProductsApiResourceSwagger {
     private LoanProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostLoanProductsRequest")
-    public final static class PostLoanProductsRequest {
+    public static final class PostLoanProductsRequest {
 
         private PostLoanProductsRequest() {}
 
@@ -99,7 +99,7 @@ final class LoanProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoanProductsResponse")
-    public final static class PostLoanProductsResponse {
+    public static final class PostLoanProductsResponse {
 
         private PostLoanProductsResponse() {}
 
@@ -108,7 +108,7 @@ final class LoanProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoanProductsResponse")
-    public final static class GetLoanProductsResponse {
+    public static final class GetLoanProductsResponse {
 
         private GetLoanProductsResponse() {}
 
@@ -354,7 +354,7 @@ final class LoanProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoanProductsTemplateResponse")
-    public final static class GetLoanProductsTemplateResponse {
+    public static final class GetLoanProductsTemplateResponse {
 
         private GetLoanProductsTemplateResponse() {}
 
@@ -807,7 +807,7 @@ final class LoanProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoanProductsProductIdResponse")
-    public final static class GetLoanProductsProductIdResponse {
+    public static final class GetLoanProductsProductIdResponse {
 
         private GetLoanProductsProductIdResponse() {}
 
@@ -1075,7 +1075,7 @@ final class LoanProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutLoanProductsProductIdRequest")
-    public final static class PutLoanProductsProductIdRequest {
+    public static final class PutLoanProductsProductIdRequest {
 
         private PutLoanProductsProductIdRequest() {}
 
@@ -1086,7 +1086,7 @@ final class LoanProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutLoanProductsProductIdResponse")
-    public final static class PutLoanProductsProductIdResponse {
+    public static final class PutLoanProductsProductIdResponse {
 
         private PutLoanProductsProductIdResponse() {}
 

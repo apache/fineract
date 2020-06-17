@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class EntityDatatableChecksHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EntityDatatableChecksHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 

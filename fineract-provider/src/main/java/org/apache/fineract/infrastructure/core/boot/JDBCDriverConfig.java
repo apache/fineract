@@ -27,9 +27,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class JDBCDriverConfig {
 
-    private final static String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
-    private final static String PROTOCOL_PROPERTYNAME = "PROTOCOL";
-    private final static String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
+    private static final String DRIVER_CLASS_PROPERTYNAME = "DRIVERCLASS_NAME";
+    private static final String PROTOCOL_PROPERTYNAME = "PROTOCOL";
+    private static final String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL";
 
     private String driverClassName;
     private String protocol;

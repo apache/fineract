@@ -66,7 +66,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmsCampaignDomainServiceImpl.class);
 
-    // private final static int POOL_SIZE = 5 ;
+    // private static final int POOL_SIZE = 5 ;
 
     private final SmsCampaignRepository smsCampaignRepository;
     private final SmsMessageRepository smsMessageRepository;

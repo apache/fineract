@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatformService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CodeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final CodeRepository codeRepository;

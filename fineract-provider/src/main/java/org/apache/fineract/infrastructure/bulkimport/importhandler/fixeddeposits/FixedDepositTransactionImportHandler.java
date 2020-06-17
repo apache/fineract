@@ -50,7 +50,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class FixedDepositTransactionImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositTransactionImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositTransactionImportHandler.class);
     private Workbook workbook;
     private List<SavingsAccountTransactionData> savingsTransactions;
     private String savingsAccountId = "";

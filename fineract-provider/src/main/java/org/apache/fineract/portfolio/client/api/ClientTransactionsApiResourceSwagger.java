@@ -32,7 +32,7 @@ final class ClientTransactionsApiResourceSwagger {
     private ClientTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetClientsClientIdTransactionsResponse")
-    public final static class GetClientsClientIdTransactionsResponse {
+    public static final class GetClientsClientIdTransactionsResponse {
 
         private GetClientsClientIdTransactionsResponse() {}
 
@@ -94,7 +94,7 @@ final class ClientTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetClientsClientIdTransactionsTransactionIdResponse")
-    public final static class GetClientsClientIdTransactionsTransactionIdResponse {
+    public static final class GetClientsClientIdTransactionsTransactionIdResponse {
 
         private GetClientsClientIdTransactionsTransactionIdResponse() {}
 
@@ -117,7 +117,7 @@ final class ClientTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostClientsClientIdTransactionsTransactionIdResponse")
-    public final static class PostClientsClientIdTransactionsTransactionIdResponse {
+    public static final class PostClientsClientIdTransactionsTransactionIdResponse {
 
         private PostClientsClientIdTransactionsTransactionIdResponse() {}
 

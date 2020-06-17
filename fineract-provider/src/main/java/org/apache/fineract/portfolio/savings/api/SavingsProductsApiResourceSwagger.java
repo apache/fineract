@@ -32,7 +32,7 @@ final class SavingsProductsApiResourceSwagger {
     private SavingsProductsApiResourceSwagger() {}
 
     @ApiModel(value = "PostSavingsProductsRequest")
-    public final static class PostSavingsProductsRequest {
+    public static final class PostSavingsProductsRequest {
 
         private PostSavingsProductsRequest() {}
 
@@ -74,7 +74,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSavingsProductsResponse")
-    public final static class PostSavingsProductsResponse {
+    public static final class PostSavingsProductsResponse {
 
         private PostSavingsProductsResponse() {}
 
@@ -83,7 +83,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsProductsProductIdRequest")
-    public final static class PutSavingsProductsProductIdRequest {
+    public static final class PutSavingsProductsProductIdRequest {
 
         private PutSavingsProductsProductIdRequest() {}
 
@@ -96,7 +96,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSavingsProductsProductIdResponse")
-    public final static class PutSavingsProductsProductIdResponse {
+    public static final class PutSavingsProductsProductIdResponse {
 
         private PutSavingsProductsProductIdResponse() {}
 
@@ -118,7 +118,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsProductsResponse")
-    public final static class GetSavingsProductsResponse {
+    public static final class GetSavingsProductsResponse {
 
         private GetSavingsProductsResponse() {}
 
@@ -221,7 +221,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsProductsProductIdResponse")
-    public final static class GetSavingsProductsProductIdResponse {
+    public static final class GetSavingsProductsProductIdResponse {
 
         private GetSavingsProductsProductIdResponse() {}
 
@@ -422,7 +422,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSavingsProductsTemplateResponse")
-    public final static class GetSavingsProductsTemplateResponse {
+    public static final class GetSavingsProductsTemplateResponse {
 
         private GetSavingsProductsTemplateResponse() {}
 
@@ -725,7 +725,7 @@ final class SavingsProductsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteSavingsProductsProductIdResponse")
-    public final static class DeleteSavingsProductsProductIdResponse {
+    public static final class DeleteSavingsProductsProductIdResponse {
 
         private DeleteSavingsProductsProductIdResponse() {}
 

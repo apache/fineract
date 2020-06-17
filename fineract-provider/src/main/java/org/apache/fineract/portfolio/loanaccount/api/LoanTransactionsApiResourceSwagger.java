@@ -30,7 +30,7 @@ final class LoanTransactionsApiResourceSwagger {
     private LoanTransactionsApiResourceSwagger() {}
 
     @ApiModel(value = "GetLoansLoanIdTransactionsTemplateResponse")
-    public final static class GetLoansLoanIdTransactionsTemplateResponse {
+    public static final class GetLoansLoanIdTransactionsTemplateResponse {
 
         private GetLoansLoanIdTransactionsTemplateResponse() {}
 
@@ -79,7 +79,7 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class GetLoansLoanIdTransactionsTransactionIdResponse {
+    public static final class GetLoansLoanIdTransactionsTransactionIdResponse {
 
         private GetLoansLoanIdTransactionsTransactionIdResponse() {}
 
@@ -144,13 +144,13 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsRequest")
-    public final static class PostLoansLoanIdTransactionsRequest {
+    public static final class PostLoansLoanIdTransactionsRequest {
 
         private PostLoansLoanIdTransactionsRequest() {}
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsResponse")
-    public final static class PostLoansLoanIdTransactionsResponse {
+    public static final class PostLoansLoanIdTransactionsResponse {
 
         private PostLoansLoanIdTransactionsResponse() {}
 
@@ -163,7 +163,7 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsTransactionIdRequest")
-    public final static class PostLoansLoanIdTransactionsTransactionIdRequest {
+    public static final class PostLoansLoanIdTransactionsTransactionIdRequest {
 
         private PostLoansLoanIdTransactionsTransactionIdRequest() {}
 
@@ -180,7 +180,7 @@ final class LoanTransactionsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostLoansLoanIdTransactionsTransactionIdResponse")
-    public final static class PostLoansLoanIdTransactionsTransactionIdResponse {
+    public static final class PostLoansLoanIdTransactionsTransactionIdResponse {
 
         private PostLoansLoanIdTransactionsTransactionIdResponse() {}
 

@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MultiException extends Exception {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MultiException.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MultiException.class);
     private final List<Throwable> throwables;
 
     public MultiException(List<Throwable> problems) {

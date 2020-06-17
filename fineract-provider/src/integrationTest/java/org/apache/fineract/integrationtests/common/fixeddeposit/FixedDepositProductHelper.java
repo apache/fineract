@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes" })
 public class FixedDepositProductHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(FixedDepositProductHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositProductHelper.class);
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 

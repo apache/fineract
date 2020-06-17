@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class CenterDomain implements Comparable<CenterDomain> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CenterDomain.class);
 
     public static class Builder {
 

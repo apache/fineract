@@ -50,7 +50,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChartOfAccountsImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ChartOfAccountsImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ChartOfAccountsImportHandler.class);
     private List<GLAccountData> glAccounts;
     private Workbook workbook;
 

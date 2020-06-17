@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ColumnValidator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ColumnValidator.class);
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired

@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
 public class RecurringDepositTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RecurringDepositTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private RecurringDepositProductHelper recurringDepositProductHelper;

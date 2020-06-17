@@ -28,7 +28,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 public class Listener implements SessionAwareMessageListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Listener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Listener.class);
 
     @Override
     public void onMessage(Message message, Session session) throws JMSException {

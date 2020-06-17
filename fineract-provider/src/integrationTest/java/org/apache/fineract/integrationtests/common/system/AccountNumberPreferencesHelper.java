@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class AccountNumberPreferencesHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountNumberPreferencesHelper.class);
     private final RequestSpecification requestSpec;
 
     private final ResponseSpecification responseSpec;

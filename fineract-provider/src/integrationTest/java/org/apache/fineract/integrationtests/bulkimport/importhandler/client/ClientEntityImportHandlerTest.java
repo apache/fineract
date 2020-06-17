@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClientEntityImportHandlerTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandlerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandlerTest.class);
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;

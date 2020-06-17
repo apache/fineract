@@ -29,7 +29,7 @@ final class SelfUserApiResourceSwagger {
     private SelfUserApiResourceSwagger() {}
 
     @ApiModel(value = "PutSelfUserRequest")
-    public final static class PutSelfUserRequest {
+    public static final class PutSelfUserRequest {
 
         private PutSelfUserRequest() {}
 
@@ -40,7 +40,7 @@ final class SelfUserApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfUserResponse")
-    public final static class PutSelfUserResponse {
+    public static final class PutSelfUserResponse {
 
         private PutSelfUserResponse() {}
 

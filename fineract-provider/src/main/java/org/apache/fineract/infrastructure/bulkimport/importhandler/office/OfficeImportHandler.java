@@ -46,7 +46,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OfficeImportHandler implements ImportHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
     private List<OfficeData> offices;
     private Workbook workbook;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;

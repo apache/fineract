@@ -20,7 +20,7 @@ package org.apache.fineract.integrationtests.common;
 
 public interface CommonConstants {
 
-    public final static String LOCALE = "en";
+    public static final String LOCALE = "en";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String RESPONSE_RESOURCE_ID = "resourceId";
     public static final String RESPONSE_CHANGES = "changes";

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class SavingsProductHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsProductHelper.class);
     private static final String SAVINGS_PRODUCT_URL = "/fineract-provider/api/v1/savingsproducts";
     private static final String CREATE_SAVINGS_PRODUCT_URL = SAVINGS_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
 

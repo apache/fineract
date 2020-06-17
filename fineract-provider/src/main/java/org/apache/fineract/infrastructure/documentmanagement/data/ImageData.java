@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public class ImageData {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ImageData.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageData.class);
 
     @SuppressWarnings("unused")
     private final Long imageId;

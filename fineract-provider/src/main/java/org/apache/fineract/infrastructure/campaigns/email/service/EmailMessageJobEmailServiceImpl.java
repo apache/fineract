@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailMessageJobEmailServiceImpl implements EmailMessageJobEmailService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EmailMessageJobEmailServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmailMessageJobEmailServiceImpl.class);
     private EmailConfigurationRepository emailConfigurationRepository;
 
     @Autowired

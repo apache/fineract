@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 public class GuarantorTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(GuarantorTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GuarantorTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;

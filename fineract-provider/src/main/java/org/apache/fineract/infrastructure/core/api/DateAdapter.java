@@ -34,7 +34,7 @@ import java.util.Date;
  */
 public class DateAdapter implements JsonSerializer<Date> {
 
-    private final static DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
 
     @Override
     @SuppressWarnings("unused")

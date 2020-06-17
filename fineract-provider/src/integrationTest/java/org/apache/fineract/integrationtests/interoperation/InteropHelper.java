@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes" })
 public class InteropHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(InteropHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InteropHelper.class);
 
     private static final String BASE_URL = "/fineract-provider/api/v1/interoperation";
     private static final String HEALTH_URL = BASE_URL + "/health";

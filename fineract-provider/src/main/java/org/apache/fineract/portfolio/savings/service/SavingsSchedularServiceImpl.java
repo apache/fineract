@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SavingsSchedularServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SavingsSchedularServiceImpl.class);
 
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;

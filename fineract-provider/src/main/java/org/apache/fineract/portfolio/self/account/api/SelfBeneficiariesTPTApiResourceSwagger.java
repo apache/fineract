@@ -30,7 +30,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     private SelfBeneficiariesTPTApiResourceSwagger() {}
 
     @ApiModel(value = "GetSelfBeneficiariesTPTTemplateResponse")
-    public final static class GetSelfBeneficiariesTPTTemplateResponse {
+    public static final class GetSelfBeneficiariesTPTTemplateResponse {
 
         private GetSelfBeneficiariesTPTTemplateResponse() {}
 
@@ -50,7 +50,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfBeneficiariesTPTRequest")
-    public final static class PostSelfBeneficiariesTPTRequest {
+    public static final class PostSelfBeneficiariesTPTRequest {
 
         private PostSelfBeneficiariesTPTRequest() {}
 
@@ -69,7 +69,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     }
 
     @ApiModel(value = "PostSelfBeneficiariesTPTResponse")
-    public final static class PostSelfBeneficiariesTPTResponse {
+    public static final class PostSelfBeneficiariesTPTResponse {
 
         private PostSelfBeneficiariesTPTResponse() {}
 
@@ -78,7 +78,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdRequest")
-    public final static class PutSelfBeneficiariesTPTBeneficiaryIdRequest {
+    public static final class PutSelfBeneficiariesTPTBeneficiaryIdRequest {
 
         private PutSelfBeneficiariesTPTBeneficiaryIdRequest() {}
 
@@ -89,7 +89,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     }
 
     @ApiModel(value = "PutSelfBeneficiariesTPTBeneficiaryIdResponse")
-    public final static class PutSelfBeneficiariesTPTBeneficiaryIdResponse {
+    public static final class PutSelfBeneficiariesTPTBeneficiaryIdResponse {
 
         private PutSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
@@ -109,7 +109,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteSelfBeneficiariesTPTBeneficiaryIdResponse")
-    public final static class DeleteSelfBeneficiariesTPTBeneficiaryIdResponse {
+    public static final class DeleteSelfBeneficiariesTPTBeneficiaryIdResponse {
 
         private DeleteSelfBeneficiariesTPTBeneficiaryIdResponse() {}
 
@@ -118,7 +118,7 @@ final class SelfBeneficiariesTPTApiResourceSwagger {
     }
 
     @ApiModel(value = "GetSelfBeneficiariesTPTResponse")
-    public final static class GetSelfBeneficiariesTPTResponse {
+    public static final class GetSelfBeneficiariesTPTResponse {
 
         private GetSelfBeneficiariesTPTResponse() {}
 

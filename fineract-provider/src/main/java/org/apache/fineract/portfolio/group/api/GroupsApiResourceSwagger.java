@@ -31,7 +31,7 @@ final class GroupsApiResourceSwagger {
     private GroupsApiResourceSwagger() {}
 
     @ApiModel(value = "GetGroupsTemplateResponse")
-    public final static class GetGroupsTemplateResponse {
+    public static final class GetGroupsTemplateResponse {
 
         private GetGroupsTemplateResponse() {}
 
@@ -156,7 +156,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetGroupsGroupIdResponse")
-    public final static class GetGroupsGroupIdResponse {
+    public static final class GetGroupsGroupIdResponse {
 
         private GetGroupsGroupIdResponse() {}
 
@@ -190,7 +190,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsRequest")
-    public final static class PostGroupsRequest {
+    public static final class PostGroupsRequest {
 
         private PostGroupsRequest() {}
 
@@ -203,7 +203,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsResponse")
-    public final static class PostGroupsResponse {
+    public static final class PostGroupsResponse {
 
         private PostGroupsResponse() {}
 
@@ -216,7 +216,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "DeleteGroupsGroupIdResponse")
-    public final static class DeleteGroupsGroupIdResponse {
+    public static final class DeleteGroupsGroupIdResponse {
 
         private DeleteGroupsGroupIdResponse() {}
 
@@ -229,7 +229,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdCommandUnassignStaffRequest")
-    public final static class PostGroupsGroupIdCommandUnassignStaffRequest {
+    public static final class PostGroupsGroupIdCommandUnassignStaffRequest {
 
         private PostGroupsGroupIdCommandUnassignStaffRequest() {}
 
@@ -238,7 +238,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdCommandUnassignStaffResponse")
-    public final static class PostGroupsGroupIdCommandUnassignStaffResponse {
+    public static final class PostGroupsGroupIdCommandUnassignStaffResponse {
 
         private PostGroupsGroupIdCommandUnassignStaffResponse() {}
 
@@ -257,7 +257,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutGroupsGroupIdRequest")
-    public final static class PutGroupsGroupIdRequest {
+    public static final class PutGroupsGroupIdRequest {
 
         private PutGroupsGroupIdRequest() {}
 
@@ -266,7 +266,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PutGroupsGroupIdResponse")
-    public final static class PutGroupsGroupIdResponse {
+    public static final class PutGroupsGroupIdResponse {
 
         private PutGroupsGroupIdResponse() {}
 
@@ -288,7 +288,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "GetGroupsGroupIdAccountsResponse")
-    public final static class GetGroupsGroupIdAccountsResponse {
+    public static final class GetGroupsGroupIdAccountsResponse {
 
         private GetGroupsGroupIdAccountsResponse() {}
 
@@ -499,7 +499,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdRequest")
-    public final static class PostGroupsGroupIdRequest {
+    public static final class PostGroupsGroupIdRequest {
 
         private PostGroupsGroupIdRequest() {}
 
@@ -517,7 +517,7 @@ final class GroupsApiResourceSwagger {
     }
 
     @ApiModel(value = "PostGroupsGroupIdResponse")
-    public final static class PostGroupsGroupIdResponse {
+    public static final class PostGroupsGroupIdResponse {
 
         private PostGroupsGroupIdResponse() {}
 

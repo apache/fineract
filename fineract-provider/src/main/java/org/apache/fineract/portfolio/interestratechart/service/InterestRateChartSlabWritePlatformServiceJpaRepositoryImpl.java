@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl implements InterestRateChartSlabWritePlatformService {
 
     @SuppressWarnings("unused")
-    private final static Logger LOG = LoggerFactory.getLogger(InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl.class);
     @SuppressWarnings("unused")
     private final PlatformSecurityContext context;
     private final InterestRateChartSlabDataValidator interestRateChartSlabDataValidator;

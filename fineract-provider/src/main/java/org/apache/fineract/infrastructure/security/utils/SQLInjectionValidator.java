@@ -24,15 +24,15 @@ import java.util.regex.Pattern;
 
 public class SQLInjectionValidator {
 
-    private final static String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };
+    private static final String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };
 
-    private final static String[] DML_COMMANDS = { "select", "insert", "update", "delete", "merge", "upsert", "call" };
+    private static final String[] DML_COMMANDS = { "select", "insert", "update", "delete", "merge", "upsert", "call" };
 
-    private final static String[] COMMENTS = { "--", "({", "/*", "#" };
+    private static final String[] COMMENTS = { "--", "({", "/*", "#" };
 
-    private final static String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
+    private static final String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
 
-    public final static void validateSQLInput(final String sqlSearch) {
+    public static final void validateSQLInput(final String sqlSearch) {
         String lowerCaseSQL = sqlSearch.toLowerCase();
         for (String ddl : DDL_COMMANDS) {
             if (lowerCaseSQL.contains(ddl)) {
@@ -117,7 +117,7 @@ public class SQLInjectionValidator {
         }
     }
 
-    public final static void validateAdhocQuery(final String sqlSearch) {
+    public static final void validateAdhocQuery(final String sqlSearch) {
         String lowerCaseSQL = sqlSearch.toLowerCase().trim();
         for (String ddl : DDL_COMMANDS) {
             if (lowerCaseSQL.startsWith(ddl)) {
