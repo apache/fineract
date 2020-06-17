@@ -174,7 +174,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             final String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? and tr.id= ?";
             return this.jdbcTemplate.queryForObject(sql, this.clientTransactionMapper, new Object[] { clientId, transactionId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientTransactionNotFoundException(clientId, transactionId);
+            throw new ClientTransactionNotFoundException(clientId, transactionId, e);
         }
     }
 

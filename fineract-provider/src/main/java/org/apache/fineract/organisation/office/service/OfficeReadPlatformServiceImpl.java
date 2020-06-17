@@ -200,7 +200,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
             return selectedOffice;
         } catch (final EmptyResultDataAccessException e) {
-            throw new OfficeNotFoundException(officeId);
+            throw new OfficeNotFoundException(officeId, e);
         }
     }
 

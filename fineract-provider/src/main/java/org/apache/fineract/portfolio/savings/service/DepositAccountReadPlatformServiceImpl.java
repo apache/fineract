@@ -249,7 +249,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     new Object[] { accountId, depositAccountType.getValue() });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountNotFoundException(depositAccountType, accountId);
+            throw new DepositAccountNotFoundException(depositAccountType, accountId, e);
         }
     }
 
@@ -286,7 +286,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return account;
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountNotFoundException(depositAccountType, accountId);
+            throw new DepositAccountNotFoundException(depositAccountType, accountId, e);
         }
     }
 
@@ -498,7 +498,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper,
                     new Object[] { accountId, accountId, DepositAccountType.RECURRING_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId);
+            throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId, e);
         }
     }
 

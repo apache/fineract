@@ -71,7 +71,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentData.storageType());
             return contentRepository.fetchFile(documentData);
         } catch (final EmptyResultDataAccessException e) {
-            throw new DocumentNotFoundException(entityType, entityId, documentId);
+            throw new DocumentNotFoundException(entityType, entityId, documentId, e);
         }
     }
 
@@ -81,7 +81,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             final DocumentMapper mapper = new DocumentMapper(true, true);
             return fetchDocumentDetails(entityType, entityId, documentId, mapper);
         } catch (final EmptyResultDataAccessException e) {
-            throw new DocumentNotFoundException(entityType, entityId, documentId);
+            throw new DocumentNotFoundException(entityType, entityId, documentId, e);
         }
     }
 

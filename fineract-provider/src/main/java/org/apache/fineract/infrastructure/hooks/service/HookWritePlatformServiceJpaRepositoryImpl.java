@@ -200,7 +200,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             this.hookRepository.delete(hook);
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
         return new CommandProcessingResultBuilder().withEntityId(hookId).build();
     }

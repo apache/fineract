@@ -391,7 +391,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
             return glJournalEntryData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new JournalEntriesNotFoundException(glJournalEntryId);
+            throw new JournalEntriesNotFoundException(glJournalEntryId, e);
         }
     }
 
@@ -534,7 +534,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             Object[] data = { transactionId, entityId, entityType };
             return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sql, data, rm);
         } catch (final EmptyResultDataAccessException e) {
-            throw new JournalEntriesNotFoundException(entityId);
+            throw new JournalEntriesNotFoundException(entityId, e);
         }
     }
 }

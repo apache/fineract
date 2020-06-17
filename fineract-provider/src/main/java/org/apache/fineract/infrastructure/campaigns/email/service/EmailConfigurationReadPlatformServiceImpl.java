@@ -91,7 +91,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
 
         catch (final EmptyResultDataAccessException e) {
 
-            throw new EmailConfigurationNotFoundException(name);
+            throw new EmailConfigurationNotFoundException(name, e);
         }
     }
 

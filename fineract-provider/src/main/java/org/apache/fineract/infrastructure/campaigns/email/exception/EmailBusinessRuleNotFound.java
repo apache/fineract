@@ -26,4 +26,9 @@ public class EmailBusinessRuleNotFound extends AbstractPlatformResourceNotFoundE
         super("error.msg.email.business.rule.not.found", "Email business rule with identifier `" + resourceId + "` does not exist",
                 resourceId);
     }
+
+    public EmailBusinessRuleNotFound(final Long resourceId, IndexOutOfBoundsException e) {
+        super("error.msg.email.business.rule.not.found", "Email business rule with identifier `" + resourceId + "` does not exist",
+                resourceId, e);
+    }
 }

@@ -108,7 +108,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
                     new Object[] { fixedDepositProductId, depositAccountType.getValue() });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new FixedDepositProductNotFoundException(fixedDepositProductId);
+            throw new FixedDepositProductNotFoundException(fixedDepositProductId, e);
         }
     }
 

@@ -67,7 +67,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
             return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), this.financialActivityAccountMapper,
                     new Object[] { financialActivityAccountId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new FinancialActivityAccountNotFoundException(financialActivityAccountId);
+            throw new FinancialActivityAccountNotFoundException(financialActivityAccountId, e);
         }
     }
 

@@ -128,7 +128,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new CalendarNotFoundException(calendarId);
+            throw new CalendarNotFoundException(calendarId, e);
         }
     }
 

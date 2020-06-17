@@ -177,7 +177,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+                    dataValidationErrors, e);
         }
     }
 

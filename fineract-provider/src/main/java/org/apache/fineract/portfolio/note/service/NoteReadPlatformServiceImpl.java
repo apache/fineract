@@ -98,7 +98,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray());
         } catch (final EmptyResultDataAccessException e) {
-            throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase());
+            throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase(), e);
         }
     }
 

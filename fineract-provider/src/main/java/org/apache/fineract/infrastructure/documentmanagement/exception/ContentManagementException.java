@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.exception;
 
+import com.amazonaws.AmazonClientException;
+import java.io.IOException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 public class ContentManagementException extends AbstractPlatformDomainRuleException {
@@ -30,6 +32,21 @@ public class ContentManagementException extends AbstractPlatformDomainRuleExcept
     public ContentManagementException(final String name, final Long fileSize, final int maxFileSize) {
         super("error.msg.document.file.too.big", "Unable to save the document with name" + name + " since its file Size of "
                 + fileSize / (1024 * 1024) + " MB exceeds the max permissable file size  of " + maxFileSize + " MB", name, fileSize);
+    }
+
+    public ContentManagementException(String filename, String message, IOException ioException) {
+        super("error.msg.document.save", "Error while manipulating file " + filename + " due to a File system / Amazon S3 issue " + message,
+                filename, message, ioException);
+    }
+
+    public ContentManagementException(String filename, String message, AmazonClientException ace) {
+        super("error.msg.document.save", "Error while manipulating file " + filename + " due to a File system / Amazon S3 issue " + message,
+                filename, message, ace);
+    }
+
+    public ContentManagementException(String filename, String message, ContentManagementException cme) {
+        super("error.msg.document.save", "Error while manipulating file " + filename + " due to a File system / Amazon S3 issue " + message,
+                filename, message, cme);
     }
 
 }

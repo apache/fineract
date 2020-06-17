@@ -302,7 +302,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.setParentGroups(clientData, parentGroups);
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientNotFoundException(clientId);
+            throw new ClientNotFoundException(clientId, e);
         }
     }
 
@@ -842,7 +842,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String sql = "SELECT cl.id FROM m_client cl WHERE cl.id =? ";
             this.jdbcTemplate.queryForObject(sql, Long.class, clientId);
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientNotFoundException(clientId);
+            throw new ClientNotFoundException(clientId, e);
         }
     }
 

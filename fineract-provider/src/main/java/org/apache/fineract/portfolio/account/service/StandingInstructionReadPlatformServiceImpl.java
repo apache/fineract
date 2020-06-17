@@ -347,7 +347,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
             return this.jdbcTemplate.queryForObject(sql, this.standingInstructionMapper, new Object[] { instructionId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountTransferNotFoundException(instructionId);
+            throw new AccountTransferNotFoundException(instructionId, e);
         }
     }
 

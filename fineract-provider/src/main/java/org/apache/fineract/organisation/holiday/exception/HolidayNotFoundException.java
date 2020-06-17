@@ -19,6 +19,7 @@
 package org.apache.fineract.organisation.holiday.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when holiday resources are not found.
@@ -27,5 +28,9 @@ public class HolidayNotFoundException extends AbstractPlatformResourceNotFoundEx
 
     public HolidayNotFoundException(final Long id) {
         super("error.msg.holiday.id.invalid", "Holiday with identifier " + id + " does not exist", id);
+    }
+
+    public HolidayNotFoundException(Long id, EmptyResultDataAccessException e) {
+        super("error.msg.holiday.id.invalid", "Holiday with identifier " + id + " does not exist", id, e);
     }
 }

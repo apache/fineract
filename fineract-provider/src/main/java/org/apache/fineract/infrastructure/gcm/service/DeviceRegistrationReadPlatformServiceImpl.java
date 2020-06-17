@@ -92,7 +92,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             String sql = "select " + drm.schema() + " where cdr.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { id });
         } catch (final EmptyResultDataAccessException e) {
-            throw new DeviceRegistrationNotFoundException(id);
+            throw new DeviceRegistrationNotFoundException(id, e);
         }
     }
 
@@ -104,7 +104,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             String sql = "select " + drm.schema() + " where c.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { clientId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new DeviceRegistrationNotFoundException(clientId, "client");
+            throw new DeviceRegistrationNotFoundException(clientId, "client", e);
         }
     }
 

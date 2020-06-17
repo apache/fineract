@@ -68,7 +68,7 @@ public class ColumnValidator {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLInjectionException();
+            throw new SQLInjectionException(e);
         } finally {
             if (connection != null) {
                 DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());

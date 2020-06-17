@@ -82,7 +82,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         } catch (final DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         }
     }
 
@@ -136,10 +136,10 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         } catch (final DataIntegrityViolationException dve) {
             LOG.error("Error occured.", dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
+                    "Unknown data integrity issue with resource.", dve);
         } catch (final ContentManagementException cme) {
             LOG.error("Error occured.", cme);
-            throw new ContentManagementException(documentCommand.getName(), cme.getMessage());
+            throw new ContentManagementException(documentCommand.getName(), cme.getMessage(), cme);
         }
     }
 

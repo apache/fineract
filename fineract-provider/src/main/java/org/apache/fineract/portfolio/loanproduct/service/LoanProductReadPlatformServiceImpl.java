@@ -85,7 +85,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanProductNotFoundException(loanProductId);
+            throw new LoanProductNotFoundException(loanProductId, e);
         }
     }
 
@@ -638,7 +638,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanProductNotFoundException(loanProductId);
+            throw new LoanProductNotFoundException(loanProductId, e);
         }
     }
 

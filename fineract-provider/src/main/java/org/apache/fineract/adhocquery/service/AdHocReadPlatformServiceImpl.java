@@ -66,7 +66,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, this.adHocRowMapper, new Object[] { id });
         } catch (final EmptyResultDataAccessException e) {
-            throw new AdHocNotFoundException(id);
+            throw new AdHocNotFoundException(id, e);
         }
     }
 
