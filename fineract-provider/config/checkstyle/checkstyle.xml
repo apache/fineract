@@ -62,6 +62,7 @@
             <property name="tokens" value="COMMA"/>
             <property name="option" value="EOL"/>
         </module>
+        <module name="NoFinalizer"/>
         <module name="FallThrough"/>
         <module name="IllegalThrows" />
         <module name="RedundantImport"/>
@@ -230,7 +231,7 @@
         </module>
 
         <module name="ConstantName" />
-        <module name="NoFinalizer"/>
+
 
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
