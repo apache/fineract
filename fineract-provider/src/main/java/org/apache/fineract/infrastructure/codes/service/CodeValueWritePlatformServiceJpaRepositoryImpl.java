@@ -161,10 +161,10 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             LOG.error("Error occured.", dve);
             final Throwable realCause = dve.getMostSpecificCause();
             if (realCause.getMessage().contains("code_value")) {
-                throw new PlatformDataIntegrityException("error.msg.codeValue.in.use", "This code value is in use", codeValueId);
+                throw new PlatformDataIntegrityException("error.msg.codeValue.in.use", "This code value is in use", codeValueId, dve);
             }
             throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
+                    "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage(), dve);
         }
     }
 }

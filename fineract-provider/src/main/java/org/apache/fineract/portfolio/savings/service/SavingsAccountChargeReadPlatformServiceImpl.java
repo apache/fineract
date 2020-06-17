@@ -180,7 +180,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountChargeNotFoundException(savingsAccountId);
+            throw new SavingsAccountChargeNotFoundException(savingsAccountId, e);
         }
     }
 

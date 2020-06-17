@@ -85,7 +85,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
             row.createCell(colIndex).setCellValue(dateWithoutTime);
             row.getCell(colIndex).setCellStyle(dateCellStyle);
         } catch (ParseException pe) {
-            throw new IllegalArgumentException("ParseException");
+            throw new IllegalArgumentException(pe);
         }
     }
 

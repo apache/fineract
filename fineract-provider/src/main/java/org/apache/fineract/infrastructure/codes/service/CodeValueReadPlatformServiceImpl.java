@@ -99,7 +99,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new CodeValueNotFoundException(codeValueId);
+            throw new CodeValueNotFoundException(codeValueId, e);
         }
 
     }

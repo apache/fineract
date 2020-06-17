@@ -227,7 +227,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             return this.jdbcTemplate.queryForObject(sql, this.savingAccountMapper, new Object[] { accountId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(accountId);
+            throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
 
@@ -738,7 +738,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper,
                     new Object[] { savingsId, depositAccountType.getValue() });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(savingsId);
+            throw new SavingsAccountNotFoundException(savingsId, e);
         }
     }
 
@@ -1203,7 +1203,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return this.jdbcTemplate.queryForObject(buff.toString(),
                     new Object[] { accountId, clientId, depositAccountType.getValue(), currencyCode }, Integer.class) > 0;
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(accountId);
+            throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
     /*
@@ -1235,7 +1235,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String sql = "select s.account_no from m_savings_account s where s.id = ?";
             return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsAccountNotFoundException(accountId);
+            throw new SavingsAccountNotFoundException(accountId, e);
         }
     }
 }

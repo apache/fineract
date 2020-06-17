@@ -139,7 +139,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
             return new CommandProcessingResultBuilder().withEntityId(adHocId).build();
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
     }
 
@@ -160,7 +160,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
 
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
     }
 
@@ -181,7 +181,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
 
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
     }
 }

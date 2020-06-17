@@ -82,7 +82,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new CodeNotFoundException(codeId);
+            throw new CodeNotFoundException(codeId, e);
         }
     }
 
@@ -96,7 +96,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeName });
         } catch (final EmptyResultDataAccessException e) {
-            throw new CodeNotFoundException(codeName);
+            throw new CodeNotFoundException(codeName, e);
         }
     }
 }

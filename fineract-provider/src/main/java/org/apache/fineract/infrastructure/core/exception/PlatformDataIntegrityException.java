@@ -30,18 +30,20 @@ public class PlatformDataIntegrityException extends RuntimeException {
 
     public PlatformDataIntegrityException(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
+        super(AbstractPlatformException.findThrowableCause(defaultUserMessageArgs));
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.parameterName = null;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
+        this.defaultUserMessageArgs = AbstractPlatformException.filterThrowableCause(defaultUserMessageArgs);
     }
 
     public PlatformDataIntegrityException(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
+        super(AbstractPlatformException.findThrowableCause(defaultUserMessageArgs));
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.parameterName = parameterName;
-        this.defaultUserMessageArgs = defaultUserMessageArgs;
+        this.defaultUserMessageArgs = AbstractPlatformException.filterThrowableCause(defaultUserMessageArgs);
     }
 
     public String getGlobalisationMessageCode() {

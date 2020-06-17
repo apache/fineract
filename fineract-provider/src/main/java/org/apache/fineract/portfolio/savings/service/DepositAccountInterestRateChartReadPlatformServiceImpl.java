@@ -82,7 +82,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final String sql = "select " + this.chartRowMapper.schema() + " where irc.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new DepositAccountInterestRateChartNotFoundException(chartId);
+            throw new DepositAccountInterestRateChartNotFoundException(chartId, e);
         }
     }
 

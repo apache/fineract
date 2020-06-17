@@ -43,6 +43,21 @@ public class PlatformApiDataValidationException extends RuntimeException {
         this.errors = errors;
     }
 
+    public PlatformApiDataValidationException(final String globalisationMessageCode, final String defaultUserMessage,
+            final List<ApiParameterError> errors, Throwable cause) {
+        super(cause);
+        this.globalisationMessageCode = globalisationMessageCode;
+        this.defaultUserMessage = defaultUserMessage;
+        this.errors = errors;
+    }
+
+    public PlatformApiDataValidationException(final List<ApiParameterError> errors, Throwable cause) {
+        super(cause);
+        this.globalisationMessageCode = "validation.msg.validation.errors.exist";
+        this.defaultUserMessage = "Validation errors exist.";
+        this.errors = errors;
+    }
+
     public String getGlobalisationMessageCode() {
         return this.globalisationMessageCode;
     }

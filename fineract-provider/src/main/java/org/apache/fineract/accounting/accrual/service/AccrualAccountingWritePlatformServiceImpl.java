@@ -61,7 +61,7 @@ public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccount
                     .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE,
                     e.getMessage());
-            throw new PlatformApiDataValidationException(dataValidationErrors);
+            throw new PlatformApiDataValidationException(dataValidationErrors, e);
         }
         return CommandProcessingResult.empty();
     }

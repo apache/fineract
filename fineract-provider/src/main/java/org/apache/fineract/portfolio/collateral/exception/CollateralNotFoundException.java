@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.collateral.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when guarantor resources are not found.
@@ -32,5 +33,10 @@ public class CollateralNotFoundException extends AbstractPlatformResourceNotFoun
 
     public CollateralNotFoundException(final Long id) {
         super("error.msg.loan.collateral.id.invalid", "Loan collateral with identifier " + id + " does not exist", id);
+    }
+
+    public CollateralNotFoundException(Long loanId, Long collateralId, EmptyResultDataAccessException e) {
+        super("error.msg.loan.collateral.", "Collateral with Id " + collateralId + " does not exist for loan with Id " + loanId, loanId,
+                collateralId, e);
     }
 }

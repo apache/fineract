@@ -214,7 +214,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm,
                     new Object[] { loanId, hierarchySearchString, hierarchySearchString });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(loanId);
+            throw new LoanNotFoundException(loanId, e);
         }
     }
 
@@ -260,7 +260,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(loanId);
+            throw new LoanNotFoundException(loanId, e);
         }
     }
 
@@ -549,7 +549,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String sql = "select " + rm.loanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, transactionId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanTransactionNotFoundException(transactionId);
+            throw new LoanTransactionNotFoundException(transactionId, e);
         }
     }
 
@@ -2246,7 +2246,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
             return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
         } catch (final EmptyResultDataAccessException e) {
-            throw new LoanNotFoundException(accountId);
+            throw new LoanNotFoundException(accountId, e);
         }
     }
 

@@ -100,7 +100,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper,
                     new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SavingsProductNotFoundException(savingProductId);
+            throw new SavingsProductNotFoundException(savingProductId, e);
         }
     }
 

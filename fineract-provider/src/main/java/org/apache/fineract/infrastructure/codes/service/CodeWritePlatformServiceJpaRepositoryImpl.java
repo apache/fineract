@@ -129,7 +129,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             this.codeRepository.flush();
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause(), e);
         }
         return new CommandProcessingResultBuilder().withEntityId(codeId).build();
     }

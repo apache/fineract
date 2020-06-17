@@ -1694,7 +1694,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }

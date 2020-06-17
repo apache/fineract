@@ -347,7 +347,7 @@ public class JsonParserHelper {
                         dataValidationErrors.add(error);
 
                         throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                                dataValidationErrors);
+                                dataValidationErrors, e);
                     }
                 }
             }
@@ -420,7 +420,7 @@ public class JsonParserHelper {
                             parameterName);
                     dataValidationErrors.add(error);
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                            dataValidationErrors);
+                            dataValidationErrors, e);
                 }
 
             }
@@ -474,7 +474,7 @@ public class JsonParserHelper {
                 dataValidationErrors.add(error);
 
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
 
@@ -568,7 +568,7 @@ public class JsonParserHelper {
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+                    dataValidationErrors, e);
         }
     }
 
@@ -592,7 +592,7 @@ public class JsonParserHelper {
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+                    dataValidationErrors, e);
         }
     }
 
@@ -648,7 +648,7 @@ public class JsonParserHelper {
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+                    dataValidationErrors, e);
         }
     }
 

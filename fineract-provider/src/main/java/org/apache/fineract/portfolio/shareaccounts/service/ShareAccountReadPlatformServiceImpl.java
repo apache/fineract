@@ -511,7 +511,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final String sql = "select s.account_no from m_share_account s where s.id = ?";
             return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
         } catch (final EmptyResultDataAccessException e) {
-            throw new ShareAccountNotFoundException(accountId);
+            throw new ShareAccountNotFoundException(accountId, e);
         }
     }
 }

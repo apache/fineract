@@ -199,7 +199,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId, hierarchy });
         } catch (final EmptyResultDataAccessException e) {
-            throw new StaffNotFoundException(staffId);
+            throw new StaffNotFoundException(staffId, e);
         }
     }
 

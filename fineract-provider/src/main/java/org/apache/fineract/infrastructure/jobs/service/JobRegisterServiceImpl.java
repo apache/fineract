@@ -164,7 +164,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         } catch (final Exception e) {
             final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
             LOG.error("{}", msg, e);
-            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId());
+            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId(), e);
         }
 
     }

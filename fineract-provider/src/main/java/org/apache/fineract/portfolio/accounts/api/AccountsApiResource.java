@@ -114,7 +114,7 @@ public class AccountsApiResource {
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());
         } catch (BeansException e) {
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException(e);
         }
     }
 
@@ -135,7 +135,7 @@ public class AccountsApiResource {
             AccountData data = service.retrieveOne(accountId, settings.isTemplate());
             return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         } catch (BeansException e) {
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException(e);
         }
     }
 
@@ -155,7 +155,7 @@ public class AccountsApiResource {
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         } catch (BeansException e) {
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException(e);
         }
     }
 

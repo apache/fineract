@@ -126,7 +126,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId, clientChargeId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new ClientChargeNotFoundException(clientChargeId, clientId);
+            throw new ClientChargeNotFoundException(clientChargeId, clientId, e);
         }
     }
 

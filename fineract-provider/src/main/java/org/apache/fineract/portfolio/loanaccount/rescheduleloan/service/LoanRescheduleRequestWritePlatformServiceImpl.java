@@ -516,7 +516,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                        dataValidationErrors);
+                        dataValidationErrors, e);
             }
         }
     }

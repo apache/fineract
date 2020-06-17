@@ -345,26 +345,25 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId",
-                    "Loan Product with externalId `" + externalId + "` already exists", "externalId", externalId);
+                    "Loan Product with externalId `" + externalId + "` already exists", "externalId", externalId, realCause);
         } else if (realCause.getMessage().contains("'unq_name'")) {
 
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name",
-                    "Loan product with name `" + name + "` already exists", "name", name);
+                    "Loan product with name `" + name + "` already exists", "name", name, realCause);
         } else if (realCause.getMessage().contains("'unq_short_name'")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name",
-                    "Loan product with short name `" + shortName + "` already exists", "shortName", shortName);
+                    "Loan product with short name `" + shortName + "` already exists", "shortName", shortName, realCause);
         } else if (realCause.getMessage().contains("Duplicate entry")) {
-            final Object[] args = null;
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.charge",
-                    "Loan product may only have one charge of each type.`", "charges", args);
+                    "Loan product may only have one charge of each type.`", "charges", realCause);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+                "Unknown data integrity issue with resource.", realCause);
     }
 
     private void validateInputDates(final JsonCommand command) {

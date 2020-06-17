@@ -101,7 +101,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
                     new Object[] { id });
             return accountNumberFormatData;
         } catch (final EmptyResultDataAccessException e) {
-            throw new AccountNumberFormatNotFoundException(id);
+            throw new AccountNumberFormatNotFoundException(id, e);
         }
     }
 

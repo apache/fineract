@@ -72,7 +72,7 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { meetingId, entityId, entityTypeId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new MeetingNotFoundException(meetingId);
+            throw new MeetingNotFoundException(meetingId, e);
         }
     }
 

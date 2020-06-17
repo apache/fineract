@@ -66,7 +66,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
             return productMixData.get(productId);
 
         } catch (final EmptyResultDataAccessException e) {
-            throw new ProductMixNotFoundException(productId);
+            throw new ProductMixNotFoundException(productId, e);
         }
     }
 

@@ -124,6 +124,7 @@ public class FromJsonHelper {
      * @param object
      * @param supportedParams
      */
+    @SuppressWarnings("AvoidHidingCauseException")
     public void checkForUnsupportedNestedParameters(final String parentPropertyName, final JsonObject object,
             final Set<String> supportedParams) {
         try {

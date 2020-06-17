@@ -79,7 +79,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             final String sql = "select " + this.smsCampaignMapper.schema + " where sc.id = ? and sc.is_visible = ?";
             return this.jdbcTemplate.queryForObject(sql, this.smsCampaignMapper, new Object[] { campaignId, isVisible });
         } catch (final EmptyResultDataAccessException e) {
-            throw new SmsCampaignNotFound(campaignId);
+            throw new SmsCampaignNotFound(campaignId, e);
         }
     }
 

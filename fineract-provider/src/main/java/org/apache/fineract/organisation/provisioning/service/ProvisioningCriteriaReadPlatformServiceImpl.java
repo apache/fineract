@@ -123,7 +123,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             List<ProvisioningCriteriaDefinitionData> definitions = retrieveProvisioningDefinitions(criteriaId);
             return ProvisioningCriteriaData.toLookup(criteriaId, criteriaName, loanProducts, definitions);
         } catch (EmptyResultDataAccessException e) {
-            throw new ProvisioningCriteriaNotFoundException(criteriaId);
+            throw new ProvisioningCriteriaNotFoundException(criteriaId, e);
         }
 
     }
