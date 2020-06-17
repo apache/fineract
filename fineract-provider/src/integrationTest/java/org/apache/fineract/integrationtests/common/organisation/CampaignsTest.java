@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests.common.organisation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -30,10 +32,16 @@ import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.junit.jupiter.MockServerExtension;
+import org.mockserver.junit.jupiter.MockServerSettings;
+import org.mockserver.model.MediaType;
 
-@Disabled
+@ExtendWith(MockServerExtension.class)
+@MockServerSettings(ports = { 9191 })
+
 public class CampaignsTest {
 
     private RequestSpecification requestSpec;
@@ -52,6 +60,25 @@ public class CampaignsTest {
     private static final String REACTIVATE_COMMAND = "reactivate";
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
+
+    private final ClientAndServer client;
+
+    public CampaignsTest(ClientAndServer client) {
+        this.client = client;
+
+        // Set up mock server for message-gateway
+        this.client.when(request().withMethod("GET").withPath("/smsbridges"))
+                .respond(response().withContentType(MediaType.APPLICATION_JSON).withBody("[\n" + //
+                        "    {\n" + //
+                        "        \"id\": 1,\n" + //
+                        "        \"tenantId\": 1,\n" + //
+                        "        \"phoneNo\": \"+1234567890\",\n" + //
+                        "        \"providerName\": \"Dummy SMS Provider - Testing\",\n" + //
+                        "        \"providerDescription\": \"Dummy, just for testing\"\n" + //
+                        "    }\n" + //
+                        "]") //
+                );
+    }
 
     @BeforeEach
     public void setup() {
@@ -177,11 +204,11 @@ public class CampaignsTest {
         this.campaignsHelper.verifyCampaignCreatedOnServer(this.requestSpec, this.responseSpec, campaignId);
 
         // activating campaign with failure
-        ArrayList<HashMap> campaignDateValidationData = (ArrayList<HashMap>) campaignsHelperWithError.performActionsOnCampaignWithFailure(
-                campaignId, ACTIVATE_COMMAND, Utils.getLocalDateOfTenant().plusDays(1).toString(DATE_FORMAT),
-                CommonConstants.RESPONSE_ERROR);
+        ArrayList<HashMap<String, Object>> campaignDateValidationData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
+                .performActionsOnCampaignWithFailure(campaignId, ACTIVATE_COMMAND,
+                        Utils.getLocalDateOfTenant().plusDays(1).toString(DATE_FORMAT), CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.campaign.activationDate.in.the.future",
-                ((HashMap<String, Object>) campaignDateValidationData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                campaignDateValidationData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         // activating campaign
         Integer activatedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
@@ -189,10 +216,10 @@ public class CampaignsTest {
         assertEquals(activatedCampaignId, campaignId);
 
         // activating campaign with failure
-        ArrayList<HashMap> campaignErrorData = (ArrayList<HashMap>) campaignsHelperWithError.performActionsOnCampaignWithFailure(
-                activatedCampaignId, ACTIVATE_COMMAND, Utils.getLocalDateOfTenant().toString(DATE_FORMAT), CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.campaign.already.active",
-                ((HashMap<String, Object>) campaignErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        ArrayList<HashMap<String, Object>> campaignErrorData = (ArrayList<HashMap<String, Object>>) campaignsHelperWithError
+                .performActionsOnCampaignWithFailure(activatedCampaignId, ACTIVATE_COMMAND,
+                        Utils.getLocalDateOfTenant().toString(DATE_FORMAT), CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.campaign.already.active", campaignErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         // closing campaign again for deletion
         Integer closedCampaignId = this.campaignsHelper.performActionsOnCampaign(this.requestSpec, this.responseSpec, campaignId,
